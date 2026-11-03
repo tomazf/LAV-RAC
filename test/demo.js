@@ -3,7 +3,7 @@ import { startMockOidc, TENANT } from './mock-oidc.js';
 
 const port = Number(process.env.DEMO_OIDC_PORT || 9400);
 Object.assign(process.env, {
-  PUBLIC_URL: process.env.PUBLIC_URL || 'http://localhost:3000',
+  PUBLIC_URL: process.env.PUBLIC_URL || 'http://localhost:4000',
   OIDC_TENANT_ID: TENANT,
   OIDC_CLIENT_ID: 'demo-client',
   OIDC_CLIENT_SECRET: 'demo-secret',

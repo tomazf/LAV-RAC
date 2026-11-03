@@ -10,7 +10,7 @@ if (sessionSecret.length < 32) { console.error('SESSION_SECRET mora imeti vsaj 3
 export const config = {
   publicUrl,
   secureCookies: publicUrl.startsWith('https://'),
-  port: Number(process.env.PORT || 3000),
+  port: Number(process.env.PORT || 4000),
   databaseUrl: need('DATABASE_URL'),
   sessionSecret,
   tenantId,

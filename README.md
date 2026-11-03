@@ -17,7 +17,7 @@ Portal za laboratorijske vaje iz digitalne elektronike. Poveže vaje 1.1 do 3.3,
 docker compose -f docker-compose.demo.yml up --build
 ```
 
-Odpri http://localhost:3000 in izberi preizkusnega uporabnika. Skrbnik je Sara Skrbnik. Podatki se izbrišejo z `docker compose -f docker-compose.demo.yml down`.
+Odpri http://localhost:4000 in izberi preizkusnega uporabnika. Skrbnik je Sara Skrbnik. Podatki se izbrišejo z `docker compose -f docker-compose.demo.yml down`.
 
 ## Postavitev
 
@@ -52,13 +52,13 @@ S samodejnim HTTPS (Caddy, vrati 80 in 443 morata biti prosta, domena mora kazat
 docker compose --profile https up -d --build
 ```
 
-Če že imaš obratni posredovalnik, ga usmeri na `127.0.0.1:3000`, nato:
+Če že imaš obratni posredovalnik, ga usmeri na `127.0.0.1:4000`, nato:
 
 ```bash
 docker compose up -d --build
 ```
 
-Posredovalnik mora poslati `X-Forwarded-Proto: https`. Preveri delovanje: `curl http://127.0.0.1:3000/healthz`.
+Posredovalnik mora poslati `X-Forwarded-Proto: https`. Preveri delovanje: `curl http://127.0.0.1:4000/healthz`.
 
 ### 4. Prvi koraki
 
