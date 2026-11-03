@@ -142,18 +142,6 @@ teacherRouter.get('/razredi/:id/vaje', loadClass, async (req, res, next) => {
     res.render('teacher/sections', { cls: req.cls, mods, plannedModules, exerciseCount: exercises.length, openCount: mods.flatMap((m) => m.exercises).filter((e) => e.visible).length });
   } catch (e) { next(e); }
 });
-teacherRouter.post('/razredi/:id/vaje/skupina', loadClass, checkCsrf, async (req, res, next) => {
-  try {
-    const mod = (await classGroups(req.cls.id)).find((m) => m.id === Number(req.body.module));
-    if (mod) {
-      await ensureClassRows(req.cls.id);
-      const open = req.body.action === 'open';
-      await q('UPDATE class_exercises SET visible=$3 WHERE class_id=$1 AND exercise_id = ANY($2)', [req.cls.id, mod.exercises.map((e) => e.id), open]);
-      await audit(req.user, open ? 'Odprl skupino vaj' : 'Zaprl skupino vaj', `${req.cls.name}: ${mod.id}`);
-    }
-    res.redirect(`/ucitelj/razredi/${req.cls.id}/vaje#skupina-${req.body.module}`);
-  } catch (e) { next(e); }
-});
 teacherRouter.post('/razredi/:id/vaje/:eid/vidnost', loadClass, checkCsrf, async (req, res, next) => {
   try {
     const ex = byId.get(req.params.eid);

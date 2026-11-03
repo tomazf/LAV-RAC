@@ -63,9 +63,7 @@ input[type=checkbox]{width:20px;height:20px;min-height:0;accent-color:var(--acc)
 .ex-table .c-vis{width:190px}
 .ex-table .c-order{width:150px}
 .ex-table tbody tr{scroll-margin-top:20px}
-.group{margin-top:28px;scroll-margin-top:20px}
-.group-head{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;margin-bottom:6px}
-.group-head h2{margin:0}
+.group{margin-top:40px;scroll-margin-top:20px}
 .group.planned h2{color:var(--mut)}
 .planned-row{max-width:none;margin:6px 0 0;border:2px dashed var(--line);border-radius:8px;padding:14px 16px;color:var(--mut)}
 .switch{display:inline-flex;gap:8px;align-items:center;cursor:pointer}

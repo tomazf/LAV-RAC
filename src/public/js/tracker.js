@@ -170,14 +170,21 @@
     });
     var right = document.createElement('span');
     right.className = 'lvs-right';
-    var exNote = document.createElement('div');
-    exNote.className = 'lvn-text lvs-exnote';
-    var exBtn = noteButton('Opomba k vaji ' + B.id, null, exNote, 'Moja opomba');
-    right.appendChild(status); right.appendChild(exBtn); right.appendChild(out);
+    right.appendChild(status);
+    var exNote = null, exBtn = null;
+    if (B.notes) {
+      exNote = document.createElement('div');
+      exNote.className = 'lvn-text lvs-exnote';
+      exBtn = noteButton('Opomba k vaji ' + B.id, null, exNote, 'Moja opomba');
+      right.appendChild(exBtn);
+    }
+    right.appendChild(out);
     el.appendChild(back); el.appendChild(right);
     document.body.insertBefore(el, document.body.firstChild);
-    el.parentNode.insertBefore(exNote, el.nextSibling);
-    LavelsNotes.show(exNote, B.notes.exercise, exBtn);
+    if (exNote) {
+      el.parentNode.insertBefore(exNote, el.nextSibling);
+      LavelsNotes.show(exNote, B.notes.exercise, exBtn);
+    }
   }
   // A letter icon opens the note; a saved note is shown next to what it belongs to.
   function noteButton(heading, task, box, label) {
@@ -197,6 +204,7 @@
     return btn;
   }
   function decorateTasks() {
+    if (!B.notes) return;
     document.querySelectorAll('.task').forEach(function (card) {
       if (card.querySelector('.lvn-btn')) return;
       var i = Number(card.id.replace(/^t/, ''));

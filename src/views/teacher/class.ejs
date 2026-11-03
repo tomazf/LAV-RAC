@@ -44,7 +44,7 @@
     <div class="row"><label class="sr" for="iskanje">Išči po imenu</label><input id="iskanje" type="search" data-filter="#cakajo" placeholder="Išči po imenu ali računu"><button class="btn">Dodaj izbrane</button></div>
     <ul class="checks" id="cakajo"><% unassigned.forEach((w) => { %><li><label><input type="checkbox" name="user" value="<%= w.id %>"> <%= w.name %> <span class="dim"><%= w.email || w.username %></span></label></li><% }) %></ul>
   </form>
-  <script src="/static/js/filter.js"></script>
+  <script src="<%= asset('js/filter.js') %>"></script>
   <% } %>
 </section>
 <section class="block">

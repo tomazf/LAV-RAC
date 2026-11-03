@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { asset } from './assets.js';
 import { many, q } from './db.js';
 
 const root = path.resolve(import.meta.dirname, '..');
@@ -18,7 +19,7 @@ export const totalTasks = exercises.reduce((a, e) => a + e.tasks.length, 0);
 
 export function renderExercise(ex, boot) {
   const json = JSON.stringify(boot).replace(/</g, '\\u003c');
-  return ex.html.replace(PLACEHOLDER, () => `<script>window.__LAVELS=${json}</script>\n<script src="/static/js/notes.js"></script>\n<script src="/static/js/tracker.js"></script>`);
+  return ex.html.replace(PLACEHOLDER, () => `<script>window.__LAVELS=${json}</script>\n<script src="${asset('js/notes.js')}"></script>\n<script src="${asset('js/tracker.js')}"></script>`);
 }
 // Groups that are planned but have no content yet; shown only to teachers and admins.
 export const plannedModules = [4, 5].filter((id) => !modules.some((m) => m.id === id));

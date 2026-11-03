@@ -111,10 +111,10 @@ async function adminMakesClass(a, name) {
   return Number((await sql('SELECT id FROM classes WHERE name=$1', [name]))[0].id);
 }
 async function openAll(t, id) {
-  await t.goto(`${APP}/ucitelj/razredi/${id}/vaje`);
-  for (let i = 0; i < 3; i++) {
-    await t.locator('button:text("Odpri vse")').nth(i).click();
-    await t.waitForLoadState();
+  for (const ex of catalog.exercises) {
+    await t.goto(`${APP}/ucitelj/razredi/${id}/vaje`);
+    await t.locator(`tr[id="vaja-${ex.id}"] input[name=visible]`).check();
+    await t.waitForURL(new RegExp(`#vaja-${ex.id.replace('.', '\\.')}$`));
   }
 }
 test('admin creates classes; a teacher joins, chooses exercises and adds students', async () => {
@@ -529,6 +529,28 @@ test('notes: general, exercise and task; private, kept after reset, shown as tex
   await t.context().close();
   await s.context().close();
 });
+test('the admin view has no notes', async () => {
+  const a = await login('Sara Skrbnik');
+  await a.goto(`${APP}/vaje`);
+  assert.equal(await a.locator('.rail li').count(), 9);
+  assert.equal(await a.locator('.lvn-btn, .my-note, .lvn-text').count(), 0);
+  await a.goto(`${APP}/vaje/1.1`);
+  await a.waitForSelector('.lvs-bar');
+  assert.equal(await a.locator('.lvn-btn, .lvn-text').count(), 0);
+  const csrf = await a.evaluate(() => window.__LAVELS.csrf);
+  assert.equal((await a.request.post(`${APP}/api/notes`, { data: { csrf, body: 'x' } })).status(), 403);
+  await a.context().close();
+});
+test('browsers load new static files right after an update', async () => {
+  const ctx = await browser.newContext();
+  const p = await ctx.newPage();
+  await p.goto(APP);
+  const href = await p.locator('link[href*="css/app.css"]').getAttribute('href');
+  assert.match(href, /\?v=[0-9a-f]{12}$/);
+  assert.match((await p.request.get(APP + href)).headers()['cache-control'], /immutable/);
+  assert.equal((await p.request.get(`${APP}/static/css/app.css`)).headers()['cache-control'], 'no-cache');
+  await ctx.close();
+});
 test('exercise groups line up on the admin overview and class page; empty groups only for staff', async () => {
   const a = await login('Sara Skrbnik');
   const measure = () => a.evaluate(() => [...document.querySelectorAll('.ex-table')].map((t) => [...t.querySelectorAll('thead th')].map((c) => Math.round(c.getBoundingClientRect().left))));
@@ -543,6 +565,8 @@ test('exercise groups line up on the admin overview and class page; empty groups
   rows = await measure();
   assert.ok(same(rows), JSON.stringify(rows));
   assert.equal(await a.locator('.group.planned').count(), 2);
+  assert.equal(await a.locator('button:text("Odpri vse"), button:text("Zapri vse")').count(), 0);
+  assert.equal(await a.evaluate(() => getComputedStyle(document.querySelector('.group')).marginTop), '40px');
   const s = await login('Ana Kovač');
   await s.goto(`${APP}/vaje`);
   assert.doesNotMatch(await s.textContent('main'), /V pripravi/);
@@ -564,7 +588,7 @@ test('admin deletes students and teachers with all their data', async () => {
   assert.equal((await sql(`SELECT count(*)::int n FROM classes WHERE id=$1`, [classId]))[0].n, 1); // the class stays
   await a.goto(`${APP}/admin/dnevnik`);
   assert.match(await a.textContent('table'), /Izbrisal uporabnika/);
-  assert.match(await a.textContent('table'), /Odprl skupino vaj/);
+  assert.match(await a.textContent('table'), /Odprl vajo/);
   await a.context().close();
 });
 test('nothing is loaded from other sites, and there were no page errors', async () => {

@@ -39,12 +39,12 @@ exerciseRouter.get('/vaje/:id', requireAccess, async (req, res, next) => {
     const ex = byId.get(req.params.id);
     if (!(await canOpen(req.user, ex))) return res.status(404).render('error', { title: 'Vaja ni na voljo', message: 'Učitelj te vaje še ni odprl za tvoj razred.' });
     const p = await openAttempt(req.user, ex);
-    const noteRows = await many('SELECT task_index, body FROM student_notes WHERE user_id=$1 AND exercise_id=$2', [req.user.id, ex.id]);
+    const noteRows = req.user.isAdmin ? [] : await many('SELECT task_index, body FROM student_notes WHERE user_id=$1 AND exercise_id=$2', [req.user.id, ex.id]);
     const tasks = {};
     for (const n of noteRows) if (n.task_index >= 0) tasks[n.task_index] = n.body;
     res.type('html').send(renderExercise(ex, {
       id: ex.id, title: ex.title, key: ex.key, attempt: p.attempt, uid: req.user.id, name: req.user.name, state: p.state, csrf: req.session.csrf,
-      notes: { exercise: noteRows.find((n) => n.task_index === -1)?.body ?? '', tasks },
+      notes: req.user.isAdmin ? null : { exercise: noteRows.find((n) => n.task_index === -1)?.body ?? '', tasks },
     }));
   } catch (e) { next(e); }
 });
@@ -113,6 +113,7 @@ exerciseRouter.post('/api/notes', async (req, res, next) => {
   try {
     if (!req.user || req.user.isWaiting) return res.status(401).json({ ok: false, code: 'login' });
     if (!csrfValid(req)) return res.status(403).json({ ok: false, code: 'csrf' });
+    if (req.user.isAdmin) return res.status(403).json({ ok: false, code: 'admin' });
     let exerciseId = '';
     let task = -1;
     if (req.body.exercise) {

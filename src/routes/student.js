@@ -27,7 +27,7 @@ studentRouter.get('/vaje', requireAccess, async (req, res, next) => {
     const unfinished = list.filter((e) => rows.get(e.id).done < e.tasks.length);
     const inProgress = unfinished.filter((e) => rows.get(e.id).started).sort((a, b) => (rows.get(b.id).last ?? 0) - (rows.get(a.id).last ?? 0));
     const next_ = inProgress[0] ?? unfinished[0] ?? null;
-    const notes = await many('SELECT exercise_id, task_index, body FROM student_notes WHERE user_id=$1', [req.user.id]);
+    const notes = req.user.isAdmin ? [] : await many('SELECT exercise_id, task_index, body FROM student_notes WHERE user_id=$1', [req.user.id]);
     const generalNote = notes.find((n) => n.exercise_id === '')?.body ?? '';
     const exerciseNote = new Map(notes.filter((n) => n.exercise_id && n.task_index === -1).map((n) => [n.exercise_id, n.body]));
     const taskNotes = new Map();

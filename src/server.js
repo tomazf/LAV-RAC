@@ -5,6 +5,7 @@ import pgSession from 'connect-pg-simple';
 import helmet from 'helmet';
 import { config } from './config.js';
 import { migrate, pool } from './db.js';
+import { asset } from './assets.js';
 import * as fmt from './format.js';
 import { authRouter, loadUser } from './auth.js';
 import { exerciseRouter } from './routes/exercises.js';
@@ -18,6 +19,7 @@ app.set('trust proxy', 1);
 app.set('view engine', 'ejs');
 app.set('views', path.join(import.meta.dirname, 'views'));
 app.locals.fmt = fmt;
+app.locals.asset = asset;
 app.locals.path = '/';
 app.locals.user = null;
 app.locals.csrf = '';
@@ -25,7 +27,12 @@ app.locals.csrf = '';
 app.get('/healthz', async (req, res) => {
   try { await pool.query('SELECT 1'); res.json({ ok: true }); } catch { res.status(503).json({ ok: false }); }
 });
-app.use('/static', express.static(path.join(import.meta.dirname, 'public'), { maxAge: '1h' }));
+// Versioned links can be kept for a long time; anything else is checked with the server first.
+app.use('/static', express.static(path.join(import.meta.dirname, 'public'), {
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', res.req.query.v ? 'public, max-age=31536000, immutable' : 'no-cache');
+  },
+}));
 
 const portalCsp = helmet.contentSecurityPolicy({
   directives: {
