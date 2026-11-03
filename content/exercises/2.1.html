@@ -1,0 +1,1500 @@
+<!doctype html>
+<html lang="sl"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!--LAVELS:BOOT-->
+<title>Številski sistemi</title>
+<link href="/static/fonts/fonts.css" rel="stylesheet">
+<style>
+/* Shema kot pri LAV-ELS 3.1 do 3.3: temno modra glava z napredkom, desni meni s tremi poglavji (Teorija, Simulacija, Naloge),
+   stran za stranjo z gumboma Nazaj/Naprej. Signal (logična 1) = oranžna. Vrata so pravokotni IEC simboli. */
+:root{
+  --bg:#f2f5f9;--card:#fff;--ink:#14213d;--mut:#586377;--acc:#0b6e8a;--onacc:#fff;--sig:#e8590c;--sigbg:#fff0e3;
+  --ok:#2b8a3e;--bad:#c92a2a;--line:#d3dae5;--tile:#e6edf5;--okbg:#e3f5e8;--badbg:#fde8e8;--wire:#a9b4c4;--hdr:#14213d;--amb:#e9a23b;
+  --fb:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;--fm:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  /* aliasi za risbe v SVG */
+  --on:var(--sig);--off:var(--wire);--panel:var(--card);--fg:var(--ink);--muted:var(--mut);--accent:var(--acc);--accent-ink:var(--onacc);
+  --code:var(--tile);--on-ink:#1b1206;--warn:var(--amb);--okc:var(--ok);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1626;--card:#172238;--ink:#e8edf6;--mut:#9aa7bd;--acc:#4cc2e0;--onacc:#0e1626;--sig:#ff9f43;--sigbg:#3a2a18;
+  --ok:#6fd48a;--bad:#ff8080;--line:#2b3a57;--tile:#22304c;--okbg:#17352a;--badbg:#3d2230;--wire:#4a5a76;--hdr:#0a1020;--amb:#f1b95a;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1626;--card:#172238;--ink:#e8edf6;--mut:#9aa7bd;--acc:#4cc2e0;--onacc:#0e1626;--sig:#ff9f43;--sigbg:#3a2a18;
+  --ok:#6fd48a;--bad:#ff8080;--line:#2b3a57;--tile:#22304c;--okbg:#17352a;--badbg:#3d2230;--wire:#4a5a76;--hdr:#0a1020;--amb:#f1b95a;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 var(--fb)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--hdr)}
+button,input{font:inherit}
+button:focus-visible,input:focus-visible{outline:3px solid var(--amb);outline-offset:2px}
+[hidden]{display:none!important}
+header{background:var(--hdr);color:#fff;padding-block:14px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.hin{max-width:1180px;margin:auto;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.hin .ttl{flex:1;min-width:200px}
+.hin h1{font-size:1.25rem;margin:0;line-height:1.25}
+.hin small{display:block;opacity:.8;font-size:.84rem}
+.sc{min-width:220px;font-size:.95rem}.sc b{font-size:1.25rem}
+.hbar{height:8px;background:#ffffff33;border-radius:5px;overflow:hidden;margin-top:5px}.hbar i{display:block;height:100%;background:var(--amb);width:0;transition:width .4s}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:20px;max-width:1180px;margin:auto;padding-block:16px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{min-width:0}
+aside{position:sticky;top:calc(12px + env(safe-area-inset-top,0px));align-self:start}
+.navc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px}
+.chap{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:2px solid transparent;background:none;color:var(--ink);border-radius:10px;padding:8px 10px;margin-top:4px;font-weight:700;cursor:pointer}
+.chap:first-child{margin-top:0}
+.chap:hover{background:var(--tile)}
+.chap.on{border-color:var(--acc);background:var(--tile)}
+.chap.done .sn{background:var(--ok);border-color:var(--ok);color:#fff}
+.subnav{margin:2px 0 6px 18px;border-left:3px solid var(--line);padding-left:6px}
+.sb{display:block;width:100%;text-align:left;border:2px solid transparent;background:none;color:var(--ink);border-radius:10px;padding:6px 8px;margin-top:2px;cursor:pointer;font-size:.95rem}
+.sb:hover{background:var(--tile)}
+.sb.on{border-color:var(--acc);background:var(--tile)}
+.sn{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--tile);color:var(--acc);font-weight:700;font-size:.85rem;border:2px solid var(--line)}
+.chap.on .sn{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
+main .page{display:none}
+main .page.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 26px;margin-bottom:14px;scroll-margin-top:12px;min-width:0}
+.crumb{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px;color:var(--mut);font-size:.92rem}
+.pager{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:6px 0 4px}
+h1,h2,h3,h4{line-height:1.2;text-wrap:balance}
+h2{margin:.1em 0 .45em;font-size:1.55rem}
+h3{margin:1.3em 0 .4em;font-size:1.1rem;color:var(--acc)}
+h4{margin:1.2em 0 .3em;font-size:1rem}
+p{margin:.45em 0;max-width:72ch}
+ul,ol{max-width:72ch;padding-left:22px}li{margin:4px 0}
+.lead{font-size:1.08rem}
+.label{font:600 .74rem var(--fm);text-transform:uppercase;letter-spacing:.08em;color:var(--mut)}
+.mut{color:var(--mut)}.sm{font-size:.88rem}
+.m{font-family:var(--fm)}
+.note{font-size:.92rem;color:var(--mut)}
+.btn{border:0;border-radius:8px;padding:10px 18px;cursor:pointer;background:var(--acc);color:var(--onacc);min-height:44px}
+.btn.g2{background:var(--tile);color:var(--ink)}
+.btn.sm{min-height:36px;padding:6px 12px;font-size:.9rem}
+.btn.danger{background:var(--bad);color:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+.eqb{font:500 .98rem var(--fm);background:var(--tile);border-radius:8px;padding:9px 12px;overflow-x:auto;white-space:nowrap;margin:8px 0}
+.ex{font-size:.95rem;background:var(--tile);border-radius:10px;padding:10px 12px;margin:8px 0}
+.ex strong{display:block;margin-bottom:2px}
+.ex .acts{margin-top:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid2>*{min-width:0}
+@media (max-width:640px){.grid2{grid-template-columns:1fr}}
+.idea{background:var(--tile);border-left:5px solid var(--acc);padding:10px 14px;border-radius:8px;margin:12px 0;max-width:76ch}
+.scroll{overflow-x:auto;max-width:100%}
+.fig{display:flex;justify-content:center;background:var(--tile);border-radius:10px;padding:10px;margin:10px 0;overflow-x:auto}
+.fig svg{display:block;width:100%;height:auto;max-width:100%}
+.fig.wide{justify-content:flex-start}.fig.wide svg{min-width:560px}
+.fig.wider{justify-content:flex-start}.fig.wider svg{min-width:760px}
+svg text{fill:var(--ink);font-family:var(--fm);font-size:13px}
+svg .gate{fill:var(--card);stroke:var(--ink);stroke-width:2}
+svg .net{fill:var(--acc);font-weight:600}
+svg .lbl{fill:var(--mut);font-size:11px}
+svg .sym{font-weight:700;font-size:13px}
+svg .selband{fill:color-mix(in srgb,var(--acc) 13%,transparent)}
+svg .blk{fill:var(--card);stroke:var(--acc);stroke-width:2}
+svg .blkt{fill:var(--acc);font-weight:700;font-size:12px}
+svg .blks{fill:var(--mut);font-size:11px}
+svg .pin{fill:var(--mut);font-size:11px}
+svg .pin.sel{fill:var(--accent);font-weight:700}
+svg .dash{fill:none;stroke:var(--mut);stroke-width:1.2;stroke-dasharray:5 4}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:.94rem}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--tile);font-weight:600}
+td.l,th.l{text-align:left}
+tr.hl td,tr.cur td{background:var(--sigbg);font-weight:700}
+th.o,td.o{background:color-mix(in srgb,var(--acc) 9%,transparent)}
+td.mid,th.mid{color:var(--mut)}
+td.m,th.m{font-family:var(--fm)}
+/* simulacija */
+.toggles{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.tg{min-width:56px;min-height:44px;padding:8px 10px;border-radius:8px;border:2px solid var(--ink);background:var(--card);color:var(--ink);font:700 1rem var(--fm);cursor:pointer}
+.tg[aria-pressed="true"]{background:var(--sig);border-color:var(--sig);color:#1b1206}
+.tg.sq{min-width:44px;padding:8px 6px}
+.pill{font:600 .9rem var(--fm);padding:6px 13px;border-radius:99px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;min-height:36px}
+.pill[aria-pressed="true"]{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px;align-items:center}
+.lamps{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.lamp{min-width:78px;text-align:center;padding:8px 6px;border-radius:10px;border:2px solid var(--line);background:var(--card)}
+.lamp .b{font:700 1.5rem/1.2 var(--fm);color:var(--mut)}
+.lamp.on{background:var(--sig);border-color:var(--sig)}
+.lamp.on .b,.lamp.on .label{color:#1b1206}
+.lamp.txt .b{font-size:1.1rem}
+.readout{font-size:.95rem;margin:8px 0;padding:10px 12px;border-radius:10px;background:var(--tile)}
+.status{font-size:.95rem;margin-top:6px;min-height:1.4em}
+.status.ok{color:var(--ok)}.status.bad{color:var(--bad)}
+.izziv{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+.izziv p{margin:0}
+.hintbox{margin-top:8px;padding:10px 12px;border-radius:8px;background:var(--tile);border-left:5px solid var(--amb);font-size:.94rem}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.sec{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.sec>h3:first-child{margin-top:0}
+.inp{font:600 1.05rem var(--fm);padding:8px 12px;border:2px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);min-width:0;width:100%;max-width:320px;min-height:44px}
+.inp.right{border-color:var(--ok);background:var(--okbg)}
+.inp.wrong{border-color:var(--bad);background:var(--badbg)}
+.inp:disabled{opacity:.9}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
+.tile{background:var(--tile);border-radius:10px;padding:10px 12px;min-width:0}
+.tile .v{font:700 1.2rem var(--fm);overflow-wrap:anywhere}
+.tile.on{background:var(--sigbg)}
+.stp{font:500 .9rem/1.6 var(--fm);background:var(--tile);border-radius:10px;padding:10px 12px;margin:8px 0;max-height:300px;overflow:auto}
+.stp div{white-space:nowrap}
+.stp .hd{font:600 .74rem var(--fm);text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin-top:8px;white-space:normal}
+.stp .hd:first-child{margin-top:0}
+.stp .res{font-weight:700;color:var(--acc)}
+table.cs{width:auto;border-collapse:collapse;font:700 1.25rem var(--fm);margin:8px 0}
+table.cs td,table.cs th{border:0;padding:3px 9px;min-width:34px;background:none}
+table.cs td.cr{color:var(--sig);font-size:.95rem}
+table.cs tr.ln td{border-top:3px solid var(--ink)}
+table.cs td.rl{text-align:left;font:600 .8rem var(--fb);color:var(--mut);min-width:90px}
+table.cs td.one{color:var(--sig)}
+table.cs td.ov{color:var(--bad)}
+table.cs td.hi,table.cs th.hi{background:var(--sigbg)}
+table.cs th{font:600 .72rem var(--fm);color:var(--mut)}
+.wt td,.wt th{font-family:var(--fm);padding:4px 7px}
+.wt td.neg,.wt th.neg{color:var(--bad)}
+.ser{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.fnrow{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+.fnrow>*{min-width:0}
+/* cilji in sklopi (uvod) */
+.goals label{display:flex;gap:10px;align-items:flex-start;padding:5px 0;cursor:pointer;max-width:72ch}
+.goals input{width:20px;height:20px;margin-top:3px;accent-color:var(--acc);flex:none}
+.mods{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:10px 0}
+.mods>div{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.mods .n{font:700 1.6rem var(--fm);color:var(--acc);line-height:1}
+.mods p{margin:0;font-size:.93rem}
+.mods .btn{margin-top:auto;align-self:flex-start}
+/* naloge */
+.sticky{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:8px 0 10px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.progress{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.bar{flex:1;min-width:120px;height:8px;background:var(--tile);border-radius:999px;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.nums{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.nums button{width:36px;height:36px;border-radius:50%;border:2px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;cursor:pointer}
+.nums button.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.nums button.zero{background:var(--mut);border-color:var(--mut);color:var(--card)}
+.lv{font-size:.88rem;color:var(--mut);display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.lvt{font:700 .74rem var(--fm);text-transform:uppercase;letter-spacing:.06em;padding:2px 9px;border-radius:99px;color:#fff}
+.lvt.l1{background:var(--ok)}.lvt.l2{background:#b7791f}.lvt.l3{background:var(--bad)}
+.qt{font-size:1.13rem;margin:10px 0 14px;max-width:72ch}
+.opts{display:flex;flex-direction:column;gap:6px;max-width:620px}
+.opt{display:flex;gap:10px;align-items:center;padding:9px 12px;border:2px solid var(--line);border-radius:10px;cursor:pointer;min-height:46px}
+.opt:has(input:checked){border-color:var(--acc);background:var(--tile)}
+.opt input{width:18px;height:18px;accent-color:var(--acc);flex:none}
+.opt.mono span{font-family:var(--fm)}
+.fld{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:8px 0}
+.fld .fl{min-width:140px;font-size:.95rem;color:var(--mut)}
+.fld .u{font:600 1.25rem var(--fm);color:var(--mut)}
+.cell{width:46px;height:36px;border:2px solid var(--amb);border-radius:6px;background:var(--card);color:var(--ink);font:700 1rem var(--fm);cursor:pointer}
+.cell.un{color:var(--mut);border-style:dashed}
+.cell.one{background:var(--sig);border-color:var(--sig);color:#1b1206}
+.cell.bad{outline:3px solid var(--bad)}
+.cell:disabled{cursor:default}
+.ttask td.o{padding:3px 6px}
+.fb{margin-top:12px;padding:10px 14px;border-radius:8px;min-height:1px}
+.fb:empty{display:none}
+.fb.ok{background:var(--okbg);color:var(--ok)}.fb.bad{background:var(--badbg);color:var(--bad)}
+.hn,.slb{margin-top:10px;padding:10px 14px;border-radius:8px;background:var(--tile)}
+.hn{border-left:5px solid var(--amb)}
+.slb{border-left:5px solid var(--acc)}
+.hn::before{content:"Namig: ";font-weight:700;color:var(--amb)}
+.slb::before{content:"Rešitev: ";font-weight:700;color:var(--acc)}
+.slb .stp{max-height:none}
+.task{scroll-margin-top:150px}
+.confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+@media (max-width:900px){
+  .wrap{grid-template-columns:minmax(0,1fr)}
+  aside{order:-1;position:static}
+  .subnav{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 6px;border-left:0;padding-left:0}
+  .subnav .sb{width:auto;flex:1 1 auto;margin:0;border:1px solid var(--line);text-align:center}
+  .card{padding:16px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* vrste bitov s težami */
+.bcol{display:flex;flex-direction:column;align-items:center;gap:3px}
+.bcol .label{font-size:.68rem;letter-spacing:0}
+.nib{display:flex;gap:8px;margin-right:10px}
+.nib:last-child{margin-right:0}
+.toggles.tight .nib{gap:4px}
+.toggles.tight .tg.sq{min-width:36px;padding:8px 2px}
+@media (max-width:480px){
+  .toggles{gap:4px}
+  .tg.sq{min-width:34px;padding:8px 2px}
+  .nib{gap:4px;margin-right:6px}
+  .toggles.tight .tg.sq{min-width:32px}
+}
+
+/* tabela ASCII */
+.asg{width:auto;border-collapse:separate;border-spacing:3px;font-size:.85rem}
+.asg th{background:none;border:0;padding:2px 4px;font:600 .72rem var(--fm);color:var(--mut)}
+.asg td{border:0;padding:0;background:none}
+.asg button{width:38px;height:34px;border:2px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);font:600 .95rem var(--fm);cursor:pointer;padding:0}
+.asg button.c0{color:var(--mut);font-size:.62rem;background:var(--tile)}
+.asg button.c1{border-color:var(--acc)}
+.asg button.c2{background:var(--tile)}
+.asg button.c3{background:var(--sigbg)}
+.asg button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--onacc)}
+.seg{display:inline-block}
+
+</style>
+<header><div class="hin">
+  <div class="ttl"><small>LAV-ELS · laboratorijska vaja 2.1</small><h1>Številski sistemi in računanje</h1></div>
+  <div class="sc"><b id="sc">0</b> / <span id="mx"></span> točk · <span id="pc"></span><div class="hbar"><i id="bf"></i></div></div>
+</div></header>
+
+<div class="wrap">
+<main id="main">
+  <!-- ===================== TEORIJA ===================== -->
+  <div class="card page" id="uvod" data-grp="Teorija">
+    <h2>Uvod in cilji</h2>
+    <p class="lead">Računalnik pozna samo dve stanji, 0 in 1, zato so v njem vsa števila zapisana dvojiško. Mi računamo desetiško. Inženir mora zato znati število zapisati v obeh jezikih in med njima prevajati. <strong>Osmiški</strong> in <strong>šestnajstiški</strong> zapis sta le krajša načina za pisanje dolgih dvojiških števil.</p>
+    <div class="scroll"><table>
+      <tr><th class="l">Isto število v štirih sistemih</th><th>desetiško</th><th>dvojiško</th><th>osmiško</th><th>šestnajstiško</th></tr>
+      <tr><td class="l">kratek zapis</td><td class="m">43<sub>10</sub></td><td class="m">101011<sub>2</sub></td><td class="m">53<sub>8</sub></td><td class="m">2B<sub>16</sub></td></tr>
+    </table></div>
+    <p class="note">Majhno število ob številu je baza sistema. 2B<sub>16</sub> beri: »dve be v šestnajstiškem sistemu«.</p>
+    <h3>Cilji</h3>
+    <div class="goals" id="goals"></div>
+    <h3>Sklopi</h3>
+    <div class="mods" id="mods"></div>
+    <h3>Kako poteka vaja</h3>
+    <ol>
+      <li>Preberi teorijo in takoj preizkusi v simulaciji. Stikala vklapljaš s klikom: oranžna pomeni 1, siva 0.</li>
+      <li>Pretvarjanje je veščina, ki jo pridobiš z vajo. Zato je v simulacijah <strong>Vadnica pretvorb</strong>, ki ti naključno postavlja naloge in pokaže postopek.</li>
+      <li>Ko razumeš vse sklope, reši naloge. Nekatere so izbira odgovora, pri drugih odgovor vpišeš ali dopolniš tabelo.</li>
+    </ol>
+    <h3>Točkovanje</h3>
+    <ul>
+      <li><strong>Lahka</strong> naloga je vredna 1 točko, <strong>srednja</strong> 2 točki, <strong>težka</strong> 3 točke.</li>
+      <li>Namig odbije 50 % točk naloge. Ogled rešitve prinese 0 točk.</li>
+      <li>Ko pritisneš »Preveri«, se odgovor zaklene in popravkov ni. Pravilen odgovor da polne točke, napačen 0.</li>
+      <li>Pri vpisu odgovora vodilne ničle ne štejejo, razen če naloga zahteva določeno število mest. Za decimalke uporabi vejico ali piko.</li>
+    </ul>
+  </div>
+
+  <div class="card page" id="sistemi" data-grp="Teorija">
+    <h2>Pozicijski številski sistemi</h2>
+    <p class="lead">V pozicijskem sistemu je vrednost števke odvisna od <strong>mesta</strong>, kjer stoji. Vsako mesto ima <strong>utež</strong>, to je potenca baze. V desetiškem sistemu so uteži 1, 10, 100, … zato število 253 pomeni 2·100 + 5·10 + 3·1.</p>
+    <div class="scroll"><table>
+      <tr><th class="l">Sistem</th><th>baza</th><th class="l">števke</th><th>primer</th></tr>
+      <tr><td class="l">desetiški (DEC)</td><td>10</td><td class="l">0 do 9</td><td class="m">253<sub>10</sub></td></tr>
+      <tr><td class="l">dvojiški (BIN)</td><td>2</td><td class="l">0, 1</td><td class="m">1011<sub>2</sub></td></tr>
+      <tr><td class="l">osmiški (OKT)</td><td>8</td><td class="l">0 do 7</td><td class="m">375<sub>8</sub></td></tr>
+      <tr><td class="l">šestnajstiški (HEX)</td><td>16</td><td class="l">0 do 9 in A do F (A = 10, B = 11, C = 12, D = 13, E = 14, F = 15)</td><td class="m">2B<sub>16</sub></td></tr>
+    </table></div>
+    <div class="eqb">N = c<sub>n</sub>·b<sup>n</sup> + … + c<sub>1</sub>·b<sup>1</sup> + c<sub>0</sub>·b<sup>0</sup> &nbsp; (c = števka, b = baza)</div>
+
+    <h3>Iz dvojiškega v desetiški: seštej uteži</h3>
+    <p>Uteži dvojiškega sistema so potence števila 2. Nauči se jih na pamet, saj jih boš potreboval vedno znova.</p>
+    <div class="scroll"><table class="wt">
+      <tr><th>utež</th><th>1024</th><th>512</th><th>256</th><th>128</th><th>64</th><th>32</th><th>16</th><th>8</th><th>4</th><th>2</th><th>1</th></tr>
+      <tr><th>potenca</th><th>2¹⁰</th><th>2⁹</th><th>2⁸</th><th>2⁷</th><th>2⁶</th><th>2⁵</th><th>2⁴</th><th>2³</th><th>2²</th><th>2¹</th><th>2⁰</th></tr>
+    </table></div>
+    <div class="ex"><strong>Primer: 101011₂</strong>Uteži 32 16 8 4 2 1 in števke 1 0 1 0 1 1. Seštejemo uteži tam, kjer je enica: 32 + 8 + 2 + 1 = <strong class="m">43</strong>.</div>
+    <p>Desno od vejice so uteži ulomki: 0,5, 0,25, 0,125, … Primer: 1101,011₂ = 8 + 4 + 1 + 0,25 + 0,125 = <span class="m">13,375</span>.</p>
+
+    <h3>Iz desetiškega v dvojiški: deli z 2</h3>
+    <p>Število deli z 2 in si zapisuj <strong>ostanke</strong>. Deli, dokler ne dobiš 0. Ostanke prebereš od <strong>spodaj navzgor</strong>.</p>
+    <div class="stp">
+      <div class="hd">43 v dvojiški sistem</div>
+      <div>43 : 2 = 21, ostanek 1</div><div>21 : 2 = 10, ostanek 1</div><div>10 : 2 = 5, ostanek 0</div>
+      <div>5 : 2 = 2, ostanek 1</div><div>2 : 2 = 1, ostanek 0</div><div>1 : 2 = 0, ostanek 1</div>
+      <div class="res">43₁₀ = 101011₂</div>
+    </div>
+    <div class="idea"><strong>Zakaj gre to?</strong> Ostanek pri deljenju z 2 pove, ali je število sodo ali liho, to je najnižji bit. Z deljenjem število »odrežemo« zadnji bit in dobimo naslednjega. Zato bite dobimo od zadnjega proti prvemu in jih beremo od spodaj navzgor.</div>
+    <p>Enak postopek velja za vsako bazo. Za šestnajstiški sistem delimo s 16, ostanke od 10 do 15 pa zapišemo kot A do F. Primer: 500 : 16 = 31, ostanek 4. 31 : 16 = 1, ostanek 15 (F). 1 : 16 = 0, ostanek 1. Torej 500₁₀ = <span class="m">1F4₁₆</span>.</p>
+    <p><strong>Ulomek</strong> (desno od vejice) pretvarjamo obratno: množimo z bazo in beremo cele dele od zgoraj navzdol. Primer: 0,625 · 2 = 1,25 (1), 0,25 · 2 = 0,5 (0), 0,5 · 2 = 1,0 (1). Torej 0,625₁₀ = <span class="m">0,101₂</span>. Nekatere ulomke (npr. 0,1) se ne konča nikoli, zato jih zaokrožimo.</p>
+    <div class="acts"><button class="btn g2" data-sim="s-sistemi">Pretvornik v simulaciji ›</button><button class="btn g2" data-sim="s-vadnica">Vadnica pretvorb ›</button></div>
+  </div>
+
+  <div class="card page" id="skupine" data-grp="Teorija">
+    <h2>Hitra pretvorba med 2, 8 in 16</h2>
+    <p class="lead">Osem je 2³, šestnajst pa 2⁴. Zato ena osmiška števka natanko ustreza <strong>trem bitom</strong>, ena šestnajstiška pa <strong>štirim bitom</strong>. Računati ni treba: bite samo razdeliš v skupine.</p>
+    <div class="scroll"><table>
+      <tr><th>DEC</th><th>BIN (4 biti)</th><th>OKT</th><th>HEX</th></tr>
+      <tr><td>0</td><td class="m">0000</td><td>0</td><td>0</td></tr><tr><td>1</td><td class="m">0001</td><td>1</td><td>1</td></tr>
+      <tr><td>2</td><td class="m">0010</td><td>2</td><td>2</td></tr><tr><td>3</td><td class="m">0011</td><td>3</td><td>3</td></tr>
+      <tr><td>4</td><td class="m">0100</td><td>4</td><td>4</td></tr><tr><td>5</td><td class="m">0101</td><td>5</td><td>5</td></tr>
+      <tr><td>6</td><td class="m">0110</td><td>6</td><td>6</td></tr><tr><td>7</td><td class="m">0111</td><td>7</td><td>7</td></tr>
+      <tr><td>8</td><td class="m">1000</td><td>10</td><td>8</td></tr><tr><td>9</td><td class="m">1001</td><td>11</td><td>9</td></tr>
+      <tr><td>10</td><td class="m">1010</td><td>12</td><td>A</td></tr><tr><td>11</td><td class="m">1011</td><td>13</td><td>B</td></tr>
+      <tr><td>12</td><td class="m">1100</td><td>14</td><td>C</td></tr><tr><td>13</td><td class="m">1101</td><td>15</td><td>D</td></tr>
+      <tr><td>14</td><td class="m">1110</td><td>16</td><td>E</td></tr><tr><td>15</td><td class="m">1111</td><td>17</td><td>F</td></tr>
+    </table></div>
+    <h3>Dvojiško v osmiško ali šestnajstiško</h3>
+    <ol>
+      <li>Bite razdeli v skupine po 3 (osmiško) ali po 4 (šestnajstiško), <strong>od desne</strong>.</li>
+      <li>Če na levi zmanjka bitov, dopolni z ničlami.</li>
+      <li>Vsako skupino zapiši z eno števko.</li>
+    </ol>
+    <div class="ex"><strong>Primer: 10110111₂</strong>
+      Po 4: <span class="m">1011 0111</span> → B 7 → <strong class="m">B7₁₆</strong>.<br>
+      Po 3 (od desne): <span class="m">10 110 111</span>, levo dopolnimo <span class="m">010 110 111</span> → 2 6 7 → <strong class="m">267₈</strong>.<br>
+      Preizkus: 183 = 11·16 + 7 = 2·64 + 6·8 + 7.</div>
+    <h3>Šestnajstiško ali osmiško v dvojiško</h3>
+    <p>Postopek je obraten: vsako števko zapiši s tremi (osmiško) ali štirimi (šestnajstiško) biti. Primer: 3F₁₆ → 0011 1111 → <span class="m">111111₂</span>. Med osmiškim in šestnajstiškim zapisom ni bližnjice, zato gremo čez dvojiški zapis.</p>
+    <div class="idea"><strong>Primer iz vsakdana, pravice datotek (chmod 755):</strong> osmiška števka je ena skupina treh bitov. 7 5 5 = 111 101 101 = rwx r-x r-x. Vsak bit je ena pravica: r (branje), w (pisanje), x (izvajanje). Lastnik sme vse, ostali samo berejo in izvajajo.</div>
+    <div class="acts"><button class="btn g2" data-sim="s-skupine">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <div class="card page" id="sestevanje" data-grp="Teorija">
+    <h2>Seštevanje binarnih števil</h2>
+    <p class="lead">Dvojiška števila seštevamo kot desetiška: od desne proti levi, stolpec za stolpcem. Ker sta v dvojiškem sistemu samo števki 0 in 1, nastane <strong>prenos</strong> že pri 1 + 1.</p>
+    <div class="scroll"><table>
+      <tr><th class="l">v stolpcu (z morebitnim prenosom)</th><th>vsota</th><th>zapišem</th><th>prenos v naslednji stolpec</th></tr>
+      <tr><td class="l">0 + 0</td><td class="m">0</td><td class="m">0</td><td class="m">0</td></tr>
+      <tr><td class="l">0 + 1 ali 1 + 0</td><td class="m">1</td><td class="m">1</td><td class="m">0</td></tr>
+      <tr class="hl"><td class="l">1 + 1</td><td class="m">10</td><td class="m">0</td><td class="m">1</td></tr>
+      <tr class="hl"><td class="l">1 + 1 + 1 (dva bita in prenos)</td><td class="m">11</td><td class="m">1</td><td class="m">1</td></tr>
+    </table></div>
+    <div class="ex"><strong>Primer: 1011₂ + 0110₂ (torej 11 + 6)</strong>
+      <table class="cs">
+        <tr><td class="rl">prenos</td><td class="cr">1</td><td class="cr">1</td><td class="cr">1</td><td class="cr">0</td><td></td></tr>
+        <tr><td class="rl">A</td><td></td><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+        <tr><td class="rl">B</td><td></td><td>0</td><td>1</td><td>1</td><td>0</td></tr>
+        <tr class="ln"><td class="rl">vsota</td><td class="one">1</td><td>0</td><td>0</td><td>0</td><td class="one">1</td></tr>
+      </table>
+      Rezultat je 10001₂ = 16 + 1 = <strong>17</strong>. Preverimo: 11 + 6 = 17.</div>
+    <h3>Register ima omejeno število mest</h3>
+    <p>V računalniku je število shranjeno v registru z določenim številom bitov. 8-bitni register zmore števila od 0 do 255. Če je rezultat večji, se najvišji prenos <strong>izgubi</strong>, kar imenujemo <strong>preliv</strong>. Primer: 255 + 1 = 11111111 + 00000001 = 1 00000000. V registru ostane 00000000, prenos ven (Cout) je 1.</p>
+    <div class="idea"><strong>Vezje:</strong> seštevanje opravi veriga polnih seštevalnikov iz vaje 3.1. Vsak bit ima svoj polni seštevalnik (FA), prenos potuje od nižjega bita proti višjemu. Verigi pravimo seštevalnik s potujočim prenosom.</div>
+    <div class="acts"><button class="btn g2" data-sim="s-sest">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <div class="card page" id="komplement" data-grp="Teorija">
+    <h2>Dvojiški komplement in predznačena števila</h2>
+    <p class="lead">Kako zapišemo −5, če imamo samo bite? Računalnik nima znaka »minus«. Najbolj razširjen zapis negativnih števil je <strong>dvojiški komplement</strong>. Najvišji bit je predznak: 0 pomeni pozitivno število, 1 negativno.</p>
+    <h3>Kako dobimo −N</h3>
+    <ol>
+      <li>Določi število mest (npr. 8 bitov).</li>
+      <li>Zapiši N brez predznaka: 5 = <span class="m">00000101</span>.</li>
+      <li><strong>Obrni</strong> vse bite (0 ↔ 1): <span class="m">11111010</span>.</li>
+      <li><strong>Prištej 1</strong>: <span class="m">11111011</span>. To je −5.</li>
+    </ol>
+    <div class="eqb">−N = ¬N + 1</div>
+    <h3>Kako preberemo negativno število</h3>
+    <p>Najvišji bit ima <strong>negativno utež</strong> (pri 8 bitih −128), ostali imajo običajne uteži. Seštejemo uteži tam, kjer je enica.</p>
+    <div class="scroll"><table class="wt">
+      <tr><th>utež</th><th class="neg">−128</th><th>64</th><th>32</th><th>16</th><th>8</th><th>4</th><th>2</th><th>1</th></tr>
+      <tr><td>bit</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+    </table></div>
+    <p class="m">−128 + 64 + 32 + 16 + 8 + 2 + 1 = −5</p>
+    <h3>Območje števil</h3>
+    <p>Z n biti zapišemo števila od −2<sup>n−1</sup> do 2<sup>n−1</sup> − 1.</p>
+    <div class="scroll"><table>
+      <tr><th>število bitov</th><th>brez predznaka</th><th>z dvojiškim komplementom</th></tr>
+      <tr><td>4</td><td>0 do 15</td><td>−8 do 7</td></tr>
+      <tr><td>8</td><td>0 do 255</td><td>−128 do 127</td></tr>
+      <tr><td>16</td><td>0 do 65 535</td><td>−32 768 do 32 767</td></tr>
+    </table></div>
+    <div class="scroll"><table>
+      <tr><th class="l">8-bitna vzorca</th><th>0000 0000</th><th>0000 0001</th><th>0111 1111</th><th>1000 0000</th><th>1111 1111</th></tr>
+      <tr><td class="l">vrednost</td><td>0</td><td>1</td><td>127</td><td>−128</td><td>−1</td></tr>
+    </table></div>
+    <div class="idea"><strong>Pozor:</strong> isti biti 11111011 pomenijo 251 (brez predznaka) ali −5 (z dvojiškim komplementom). Pomen določi program, ne biti.</div>
+    <p>Zakaj ravno komplement? Ima eno samo ničlo (00000000) in omogoča odštevanje s seštevalnikom (naslednji razdelek). Število −128 nima pozitivnega para: v 8 bitih ni zapisa za +128.</p>
+    <div class="acts"><button class="btn g2" data-sim="s-komp">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <div class="card page" id="odstevanje" data-grp="Teorija">
+    <h2>Odštevanje z dvojiškim komplementom</h2>
+    <p class="lead">Računalnik nima posebnega vezja za odštevanje. Razliko izračuna kot vsoto z negativnim številom: A − B = A + (−B), −B pa je dvojiški komplement števila B.</p>
+    <div class="eqb">A − B = A + ¬B + 1</div>
+    <div class="ex"><strong>Primer: 13 − 6 v 8 bitih</strong>
+      <span class="m">13 = 00001101</span>, <span class="m">6 = 00000110</span><br>
+      Obrnemo B: <span class="m">¬6 = 11111001</span>, prištejemo 1: <span class="m">−6 = 11111010</span>.<br>
+      <span class="m">00001101 + 11111010 = 1 00000111</span><br>
+      Prenos ven (deveti bit) zavržemo. Ostane <span class="m">00000111 = 7</span>.</div>
+    <div class="ex"><strong>Primer z negativnim rezultatom: 6 − 13</strong>
+      <span class="m">−13 = 11110011</span>, torej <span class="m">00000110 + 11110011 = 11111001</span>. Najvišji bit je 1, rezultat je negativen: <span class="m">11111001 = −128 + 121 = −7</span>.</div>
+    <h3>Seštevalnik in odštevalnik v enem vezju</h3>
+    <p>Pri vsakem bitu B postavimo vrata <strong>XOR</strong> z vodom M. Pri M = 0 gre B skozi nespremenjen (seštevanje). Pri M = 1 se B obrne v ¬B. Isti M peljemo tudi na vhod prenosa Cin, kar je tisti »+1«.</p>
+    <div class="scroll"><table>
+      <tr><th>M</th><th>XOR pri B</th><th>Cin</th><th>vezje računa</th></tr>
+      <tr><td>0</td><td>B</td><td>0</td><td class="m">A + B</td></tr>
+      <tr class="hl"><td>1</td><td>¬B</td><td>1</td><td class="m">A + ¬B + 1 = A − B</td></tr>
+    </table></div>
+    <h3>Preliv pri predznačenih številih</h3>
+    <p>Če seštejemo dve pozitivni števili in dobimo negativno (ali obratno), rezultat ne gre v n bitov. Primer v 8 bitih: 100 + 50 = 150, največje število pa je 127.</p>
+    <div class="eqb">01100100 + 00110010 = 10010110 = −106 &nbsp; (preliv!)</div>
+    <p>Preliv V prepoznamo tako: <strong>prenos v najvišji bit se razlikuje od prenosa iz najvišjega bita</strong>, V = c<sub>n−1</sub> ⊕ c<sub>n</sub>. Pri odštevanju brez predznaka prenos ven Cout = 1 pomeni, da je A ≥ B.</p>
+    <div class="acts"><button class="btn g2" data-sim="s-odst">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <div class="card page" id="primeri" data-grp="Teorija">
+    <h2>Primeri iz resničnega sveta</h2>
+    <div class="grid2">
+      <div class="ex"><strong>IP naslov</strong>Naslov 192.168.1.10 so štirje bajti. Vsak je število od 0 do 255 v 8 bitih: 192 = 11000000. Maska 255.255.255.0 je 24 enic in 8 ničel.<div class="acts"><button class="btn g2 sm" data-sim="s-vadnica">Vadnica ›</button></div></div>
+      <div class="ex"><strong>Barve v HTML in CSS</strong>Barva #FF8800 so tri šestnajstiške dvojice: FF = 255 rdeča, 88 = 136 zelena, 00 = 0 modra. Vsaka je en bajt.<div class="acts"><button class="btn g2 sm" data-sim="s-skupine">Skupine bitov ›</button></div></div>
+      <div class="ex"><strong>Pravice datotek (chmod 755)</strong>Tri osmiške števke so tri skupine po tri bite. 755 = 111 101 101 = rwxr-xr-x.<div class="acts"><button class="btn g2 sm" data-sim="s-skupine">Skupine bitov ›</button></div></div>
+      <div class="ex"><strong>Števec, ki se obrne</strong>8-bitni števec po 255 skoči nazaj na 0. Nastane preliv. Tako se obrne tudi števec na starih napravah.<div class="acts"><button class="btn g2 sm" data-sim="s-sest">Seštevalnik ›</button></div></div>
+      <div class="ex"><strong>Senzor temperature</strong>Senzor v avtu javlja temperaturo kot 8-bitno predznačeno število. −40 °C pošlje kot 11011000, saj mora zapisati tudi negativne vrednosti.<div class="acts"><button class="btn g2 sm" data-sim="s-komp">Komplement ›</button></div></div>
+      <div class="ex"><strong>Kalkulator in procesor</strong>Procesor nima vezja za odštevanje. Obrne bite števila B, prišteje 1 in uporabi isti seštevalnik kot pri seštevanju.<div class="acts"><button class="btn g2 sm" data-sim="s-odst">Odštevalnik ›</button></div></div>
+    </div>
+    <p class="note">Vsi primeri imajo svojo nalogo. Če ti kaj ni jasno, se vrni k simulaciji.</p>
+  </div>
+
+  <!-- ===================== SIMULACIJA ===================== -->
+  <div class="card sim page" id="s-sistemi" data-grp="Simulacija">
+    <h2>Simulacija: pretvornik števil</h2>
+    <h3>Stikala in uteži</h3>
+    <p class="note">Vsako stikalo ima utež. Vrednost števila je vsota uteži vklopljenih stikal. Poskusi sestaviti svoje število.</p>
+    <div class="toggles" id="swD"></div>
+    <div class="lamps" id="swOut"></div>
+    <div class="readout" id="swRo"></div>
+    <div class="izziv"><p><strong>Izziv:</strong> nastavi stikala na 200. Katera so vklopljena in kakšen je šestnajstiški zapis?</p><button class="btn g2 sm" data-hint="swHint">Namig</button></div>
+    <p class="hintbox" id="swHint" hidden>200 = 128 + 64 + 8, torej so vklopljena stikala 128, 64 in 8. Bite 1100 1000 zapišeš kot C8.</p>
+
+    <div class="sec">
+      <h3>Pretvornik s postopkom</h3>
+      <p class="note">Vpiši število in izberi njegovo bazo. Pretvornik pokaže število v vseh sistemih in postopek za izbrano ciljno bazo. Dovoljeni so decimalke (vejica ali pika).</p>
+      <div class="pills" id="cvBase"><span class="label">Vneseno v</span>
+        <button class="pill" data-b="10" aria-pressed="true">desetiško</button><button class="pill" data-b="2" aria-pressed="false">dvojiško</button>
+        <button class="pill" data-b="8" aria-pressed="false">osmiško</button><button class="pill" data-b="16" aria-pressed="false">šestnajstiško</button></div>
+      <input class="inp" id="cvIn" type="text" value="43" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Število za pretvorbo">
+      <p class="status" id="cvMsg"></p>
+      <div class="tiles" id="cvTiles"></div>
+      <div class="pills" id="cvTo"><span class="label">Postopek za</span>
+        <button class="pill" data-t="2" aria-pressed="true">dvojiško</button><button class="pill" data-t="8" aria-pressed="false">osmiško</button>
+        <button class="pill" data-t="16" aria-pressed="false">šestnajstiško</button><button class="pill" data-t="10" aria-pressed="false">desetiško</button></div>
+      <div id="cvSteps"></div>
+    </div>
+  </div>
+
+  <div class="card sim page" id="s-skupine" data-grp="Simulacija">
+    <h2>Simulacija: skupine bitov</h2>
+    <p class="note">Klikni bite. Pod njimi se vidijo skupine po 3 (osmiška števka) in po 4 (šestnajstiška števka). Gumbi za primere nastavijo bite za vsakdanje zglede.</p>
+    <div class="pills" id="grpPre"><span class="label">Primeri</span>
+      <button class="pill" data-p="chmod" aria-pressed="false">chmod 755</button>
+      <button class="pill" data-p="ip" aria-pressed="false">IP bajt 192</button>
+      <button class="pill" data-p="barva" aria-pressed="false">barva: 88</button>
+      <button class="pill" data-p="nic" aria-pressed="false">počisti</button></div>
+    <div class="toggles" id="grpD"></div>
+    <div class="fig wide" id="fig-grp"></div>
+    <div class="tiles" id="grpOut"></div>
+    <div class="readout" id="grpRo"></div>
+    <div class="izziv"><p><strong>Izziv:</strong> nastavi bite tako, da bo šestnajstiško 2F. Kakšen je osmiški zapis?</p><button class="btn g2 sm" data-hint="grpHint">Namig</button></div>
+    <p class="hintbox" id="grpHint" hidden>2 = 0010 in F = 1111, zato 0010 1111. Od desne po tri: 101 111 pomeni 5 in 7, torej 57₈.</p>
+  </div>
+
+  <div class="card sim page" id="s-vadnica" data-grp="Simulacija">
+    <h2>Simulacija: vadnica pretvorb</h2>
+    <p class="note">Naključne naloge za utrjevanje. Izberi vrsto pretvorbe in težavnost, vpiši rezultat in pritisni »Preveri«. Po odgovoru se pokaže postopek. Točke se tu ne štejejo.</p>
+    <div class="pills" id="vdPair"><span class="label">Pretvorba</span></div>
+    <div class="pills" id="vdLvl"><span class="label">Težavnost</span>
+      <button class="pill" data-l="1" aria-pressed="false">lahko (do 15)</button><button class="pill" data-l="2" aria-pressed="true">srednje (do 255)</button><button class="pill" data-l="3" aria-pressed="false">težko (do 4095)</button></div>
+    <div class="readout" id="vdQ" style="font-size:1.15rem"></div>
+    <div class="row"><input class="inp" id="vdIn" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Tvoj odgovor"><span class="m" id="vdU"></span></div>
+    <div class="acts"><button class="btn" id="vdCheck">Preveri</button><button class="btn g2" id="vdNew">Nova naloga</button></div>
+    <p class="status" id="vdFb"></p>
+    <div id="vdSol"></div>
+    <div class="readout" id="vdStat"></div>
+    <div class="izziv"><p><strong>Izziv:</strong> reši 5 nalog zapored brez napake.</p><button class="btn g2 sm" data-hint="vdHint">Namig</button></div>
+    <p class="hintbox" id="vdHint" hidden>Desetiško v drugo bazo: deli z bazo in beri ostanke od spodaj navzgor. Iz druge baze v desetiško: seštej števke krat uteži. Dvojiško ↔ osmiško ali šestnajstiško: skupine po 3 ali 4 bite.</p>
+  </div>
+
+  <div class="card sim page" id="s-sest" data-grp="Simulacija">
+    <h2>Simulacija: binarni seštevalnik</h2>
+    <p class="note">Nastavi A in B. Pod njima se vidi seštevanje po stolpcih s prenosi, spodaj pa veriga polnih seštevalnikov. Oranžna žica nosi 1. Izberi bit, da vidiš vrata znotraj njegovega polnega seštevalnika.</p>
+    <div class="pills"><span class="label">Širina</span><span id="sumMode"><button class="pill" data-n="4" aria-pressed="false">4 biti</button> <button class="pill" data-n="8" aria-pressed="true">8 bitov</button></span></div>
+    <div class="pills" id="sumPre"><span class="label">Primeri</span>
+      <button class="pill" data-p="a" aria-pressed="false">11 + 6</button>
+      <button class="pill" data-p="b" aria-pressed="false">255 + 1 (preliv)</button>
+      <button class="pill" data-p="c" aria-pressed="false">200 + 100 (preliv)</button></div>
+    <div class="label">A</div><div class="toggles" id="sumA"></div>
+    <div class="label">B</div><div class="toggles" id="sumB"></div>
+    <div class="scroll" id="sumCols"></div>
+    <div class="readout" id="sumRo"></div>
+    <div class="fig wide" id="fig-sum"></div>
+    <div class="pills" id="faSel"><span class="label">Vrata znotraj bita</span></div>
+    <div class="fig wide" id="fig-fa"></div>
+    <p class="note">Žici, ki se križata brez pike, nista povezani. Pika pomeni spoj. Polni seštevalnik sestavljata dva XOR (vsota S) ter dva AND in en OR (prenos Cout).</p>
+    <div class="izziv"><p><strong>Izziv:</strong> v 8-bitnem načinu nastavi A in B tako, da bo vsota v registru 00000000, prenos ven pa 1.</p><button class="btn g2 sm" data-hint="sumHint">Namig</button></div>
+    <p class="hintbox" id="sumHint" hidden>Potrebuješ 256, v 8 bitih pa je največ 255. Poskusi 255 + 1: A = 11111111 in B = 00000001.</p>
+  </div>
+
+  <div class="card sim page" id="s-komp" data-grp="Simulacija">
+    <h2>Simulacija: dvojiški komplement</h2>
+    <h3>8-bitno število</h3>
+    <p class="note">Klikni bite. Vrednost vidiš dvakrat: brez predznaka in z dvojiškim komplementom. Gumba +1 in −1 pokažeta, kaj se zgodi na robu območja.</p>
+    <div class="toggles" id="kcD"></div>
+    <div class="scroll" id="kcTab"></div>
+    <div class="lamps" id="kcOut"></div>
+    <div class="acts"><button class="btn g2 sm" id="kcInc">+1</button><button class="btn g2 sm" id="kcDec">−1</button><button class="btn g2 sm" id="kcClr">Počisti</button></div>
+    <div class="readout" id="kcRo"></div>
+    <div class="izziv"><p><strong>Izziv:</strong> nastavi −1. Nato pritisni +1. Kaj dobiš?</p><button class="btn g2 sm" data-hint="kcHint">Namig</button></div>
+    <p class="hintbox" id="kcHint" hidden>−1 so sami enice (11111111). Ko prištejemo 1, prenos steče skozi vse bite in ven, ostanejo same ničle: 0.</p>
+
+    <div class="sec">
+      <h3>Negator: iz A naredi −A (4 biti)</h3>
+      <p class="note">Vezje obrne vse bite (vrata NE) in prišteje 1. Nastavi A in poglej izhod −A.</p>
+      <div class="toggles" id="ngD"></div>
+      <div class="fig" id="fig-ng"></div>
+      <div class="lamps" id="ngOut"></div>
+      <div class="readout" id="ngRo"></div>
+      <div class="izziv"><p><strong>Izziv:</strong> nastavi A = 1000 (−8). Kaj dobiš na izhodu in zakaj?</p><button class="btn g2 sm" data-hint="ngHint">Namig</button></div>
+      <p class="hintbox" id="ngHint" hidden>−(−8) bi moralo biti +8, v 4 bitih pa je največ 7. Izhod je spet 1000 = −8: to je preliv.</p>
+    </div>
+  </div>
+
+  <div class="card sim page" id="s-odst" data-grp="Simulacija">
+    <h2>Simulacija: odštevalnik z dvojiškim komplementom</h2>
+    <p class="note">Štiribitni seštevalnik z vrati XOR pri vhodu B. Stikalo M izbere: M = 0 seštevaj, M = 1 odštevaj. Rezultat je predznačen (−8 do 7).</p>
+    <div class="pills" id="odPre"><span class="label">Primeri</span>
+      <button class="pill" data-p="a" aria-pressed="false">7 − 3</button>
+      <button class="pill" data-p="b" aria-pressed="false">3 − 7</button>
+      <button class="pill" data-p="c" aria-pressed="false">5 + 3 (preliv)</button>
+      <button class="pill" data-p="d" aria-pressed="false">−8 − 1 (preliv)</button></div>
+    <div class="label">A</div><div class="toggles" id="odA"></div>
+    <div class="label">B</div><div class="toggles" id="odB"></div>
+    <div class="label">Način M</div><div class="toggles" id="odM"></div>
+    <div class="fig wide" id="fig-od"></div>
+    <div class="lamps" id="odOut"></div>
+    <div class="readout" id="odRo"></div>
+    <div class="izziv"><p><strong>Izziv:</strong> nastavi A = 0101 (5), B = 0111 (7) in M = 1. Kakšen je rezultat in kaj pokaže Cout?</p><button class="btn g2 sm" data-hint="odHint">Namig</button></div>
+    <p class="hintbox" id="odHint" hidden>5 − 7 = −2, kar je 1110. Cout = 0 pomeni, da je A manjši od B (rezultat je negativen).</p>
+  </div>
+
+
+  <!-- ===================== NALOGE ===================== -->
+  <div class="page" id="naloge" data-grp="Naloge">
+    <div class="sticky">
+      <div class="progress">
+        <span class="label">Napredek</span>
+        <div class="bar"><i id="bar"></i></div>
+        <span id="score" class="m">0 / 0 t</span>
+      </div>
+      <div class="nums" id="nums" aria-label="Številke nalog"></div>
+    </div>
+    <div id="tasks"></div>
+    <div class="card">
+      <p class="note">Napredek se shranjuje v tvojem računu. Če želiš začeti znova, vse naloge in cilje počistiš tukaj.</p>
+      <div id="resetBox"><button class="btn danger sm" id="resetBtn">Ponastavi napredek</button></div>
+    </div>
+  </div>
+
+</main>
+
+<aside id="nav" aria-label="Navigacija po vaji"></aside>
+</div>
+<script>
+/* Skupne pomožne funkcije za vaji 2.1 in 2.2: pretvorbe, rešitve po korakih, preverjanje vnosa. */
+const LIB=(function(){
+  const SUBS={2:'₂',8:'₈',10:'₁₀',16:'₁₆'};
+  const SUPD='⁰¹²³⁴⁵⁶⁷⁸⁹';
+  const sup=n=>String(n).split('').map(c=>SUPD[+c]).join('');
+  const dcm=x=>String(Math.round(x*1e9)/1e9).replace('.',',');
+  const toB=(n,b,w)=>{ const s=Math.floor(Math.abs(n)).toString(b).toUpperCase(); return w?s.padStart(w,'0'):s; };
+
+  // niz v bazi b (z morebitnim ulomkom) -> število; NaN pri napačnem vnosu
+  const parse=(s,b)=>{
+    s=String(s).trim().toUpperCase().replace(',','.'); if(s==='') return NaN;
+    const ok={2:/^[01]*(\.[01]*)?$/,8:/^[0-7]*(\.[0-7]*)?$/,10:/^\d*(\.\d*)?$/,16:/^[0-9A-F]*(\.[0-9A-F]*)?$/}[b];
+    if(!ok.test(s)||s==='.') return NaN;
+    const parts=s.split('.'), i=parts[0], f=parts[1]||'';
+    let v=i?parseInt(i,b):0;
+    for(let k=0;k<f.length;k++) v+=parseInt(f[k],b)/Math.pow(b,k+1);
+    return v;
+  };
+  // ulomek v bazi b z največ max števkami
+  const fracStr=(x,b,max)=>{ max=max||8; let f=x-Math.floor(x),d='',n=0;
+    while(f>1e-9&&n<max){ f*=b; const k=Math.floor(f+1e-9); d+=k.toString(b).toUpperCase(); f-=k; n++; }
+    return {d:d,exact:f<=1e-9}; };
+  const fromNum=(x,b,max)=>{ const i=toB(x,b), fr=fracStr(x,b,max); return {s:i+(fr.d?'.'+fr.d:''),exact:fr.exact}; };
+
+  // ---- rešitve po korakih (HTML) ----
+  const divSteps=(n,b)=>{
+    let h='<div class="stp"><div class="hd">Deljenje z '+b+' (ostanke beri od spodaj navzgor)</div>';
+    let q=n; if(q===0) h+='<div>0 : '+b+' = 0, ostanek 0</div>';
+    while(q>0){ const r=q%b, nq=Math.floor(q/b);
+      h+='<div>'+q+' : '+b+' = '+nq+', ostanek '+r+(r>9?' ('+r.toString(16).toUpperCase()+')':'')+'</div>'; q=nq; }
+    return h+'<div class="res">'+n+SUBS[10]+' = '+toB(n,b)+SUBS[b]+'</div></div>';
+  };
+  const mulSteps=(x,b,max)=>{
+    max=max||8; let f=x-Math.floor(x), n=0;
+    let h='<div class="stp"><div class="hd">Ulomek: množi z '+b+' in beri cele dele od zgoraj navzdol</div>';
+    while(f>1e-9&&n<max){ const v=f*b, k=Math.floor(v+1e-9);
+      h+='<div>'+dcm(f)+' · '+b+' = '+dcm(Math.round(v*1e6)/1e6)+' → '+k.toString(b).toUpperCase()+'</div>'; f=v-k; n++; }
+    return h+'</div>';
+  };
+  const weightSum=(s,b)=>{
+    s=String(s).toUpperCase().replace(',','.'); const p=s.split('.'), i=p[0], f=p[1]||'';
+    const terms=[]; let tot=0;
+    for(let k=0;k<i.length;k++){ const e=i.length-1-k, d=parseInt(i[k],b), w=Math.pow(b,e); tot+=d*w; terms.push(d+'·'+w); }
+    for(let k=0;k<f.length;k++){ const d=parseInt(f[k],b), w=Math.pow(b,-(k+1)); tot+=d*w; terms.push(d+'·'+dcm(w)); }
+    return '<div class="stp"><div class="hd">Vsaka števka krat utež njenega mesta</div><div>'+terms.join(' + ')+'</div><div class="res">= '+dcm(tot)+SUBS[10]+'</div></div>';
+  };
+  const grpBits=(s,k)=>{ const p=s.padStart(Math.ceil(s.length/k)*k,'0'); return p.match(new RegExp('.{'+k+'}','g')); };
+  const bin2x=(s,b)=>{ const k=Math.log2(b), g=grpBits(s,k);
+    return '<div class="stp"><div class="hd">Bite razdeli v skupine po '+k+' (od desne)</div><div>'+g.join(' ')+'</div><div>'+g.map(x=>parseInt(x,2).toString(b).toUpperCase()).join(' ')+'</div><div class="res">'+s+SUBS[2]+' = '+toB(parseInt(s,2),b)+SUBS[b]+'</div></div>'; };
+  const x2bin=(s,b)=>{ const k=Math.log2(b), d=s.toUpperCase().split('');
+    return '<div class="stp"><div class="hd">Vsako števko zapiši s '+k+' biti</div><div>'+d.map(c=>c+' = '+parseInt(c,b).toString(2).padStart(k,'0')).join(', ')+'</div><div class="res">'+s.toUpperCase()+SUBS[b]+' = '+toB(parseInt(s,b),2)+SUBS[2]+'</div></div>'; };
+  // splošna rešitev za pretvorbo niza s iz baze f v bazo t
+  const solFor=(s,f,t)=>{
+    s=String(s).toUpperCase();
+    if(f===t) return '';
+    if(f===10){ const x=parse(s,10); let h=divSteps(Math.floor(x),t); if(x%1) h+=mulSteps(x,t); return h; }
+    if(t===10) return weightSum(s,f);
+    if(f===2) return bin2x(s,t);
+    if(t===2) return x2bin(s,f);
+    return x2bin(s,f)+bin2x(toB(parseInt(s,f),2),t);
+  };
+
+  // ---- dvojiški komplement ----
+  const tc=(n,w)=>toB(((n%(1<<w))+(1<<w))%(1<<w),2,w);
+  const sv=bits=>{ const w=bits.length, v=parseInt(bits,2); return bits[0]==='1'?v-(1<<w):v; };
+  const inv=bits=>bits.split('').map(c=>c==='1'?'0':'1').join('');
+  // ---- Grayeva koda ----
+  const gray=n=>n^(n>>1);
+  const ungray=g=>{ let b=0; for(let x=g;x;x>>=1) b^=x; return b; };
+  // ---- pariteta ----
+  const ones=s=>String(s).split('').filter(c=>c==='1').length;
+  const pbit=(bits,mode)=>{ const o=ones(bits)%2; return mode==='liho'?1-o:o; };
+  // ---- ASCII ----
+  const ac=c=>c.charCodeAt(0);
+  const hexBytes=t=>t.split('').map(c=>toB(ac(c),16,2)).join(' ');
+
+  // ---- naloge: izbira odgovora s pravilnim odgovorom na mestu pos ----
+  const mc=(correct,wrong,pos)=>{
+    const c=String(correct), w=[...new Set(wrong.map(String))].filter(x=>x!==c).slice(0,3);
+    const o=w.slice(); o.splice(pos,0,c); return {opts:o,ans:pos};
+  };
+
+  // ---- preverjanje vnosa ----
+  // fmt: bin | oct | dec | hex | txt; w: natančna dolžina (vodilne ničle štejejo)
+  const canon=(s,fmt,w)=>{
+    if(s==null) return null;
+    let t=String(s).trim().toUpperCase().replace(/[\s_]/g,'').replace(/[−–]/g,'-').replace(',','.');
+    if(fmt==='txt') return t;
+    if(fmt==='hex') t=t.replace(/^0X/,''); else if(fmt==='bin') t=t.replace(/^0B/,'');
+    const neg=t[0]==='-'; if(neg) t=t.slice(1);
+    if(t[0]==='.') t='0'+t;
+    const re={bin:/^[01]+(\.[01]+)?$/,oct:/^[0-7]+(\.[0-7]+)?$/,dec:/^\d+(\.\d+)?$/,hex:/^[0-9A-F]+(\.[0-9A-F]+)?$/}[fmt];
+    if(!re||!re.test(t)) return null;
+    if(w){ return t.length===w?(neg?'-':'')+t:null; }
+    const p=t.split('.'); let i=p[0].replace(/^0+(?=.)/,''), f=p[1];
+    if(f!==undefined) f=f.replace(/0+$/,'');
+    let r=i+(f?'.'+f:''); if(neg&&r!=='0') r='-'+r; return r;
+  };
+  const same=(given,fld)=>{ const a=canon(given,fld.f,fld.w), b=canon(fld.a,fld.f,fld.w); return a!==null&&a===b; };
+
+  return {SUBS,sup,dcm,toB,parse,fracStr,fromNum,divSteps,mulSteps,weightSum,grpBits,bin2x,x2bin,solFor,tc,sv,inv,gray,ungray,ones,pbit,ac,hexBytes,mc,canon,same};
+})();
+if(typeof module!=='undefined') module.exports=LIB;
+
+const CFG={
+  key:'scnm_lavele_2_1_v1',
+  th:['uvod','sistemi','skupine','sestevanje','komplement','odstevanje','primeri'],
+  sim:['s-sistemi','s-skupine','s-vadnica','s-sest','s-komp','s-odst'],
+  LAB:{
+    uvod:'Uvod in cilji', sistemi:'Številski sistemi', skupine:'Hitra pretvorba 2·8·16', sestevanje:'Seštevanje', komplement:'Dvojiški komplement',
+    odstevanje:'Odštevanje', primeri:'Primeri v praksi',
+    's-sistemi':'Pretvornik števil', 's-skupine':'Skupine bitov', 's-vadnica':'Vadnica pretvorb', 's-sest':'Binarni seštevalnik',
+    's-komp':'Komplement', 's-odst':'Odštevalnik', naloge:'Naloge'},
+  GOALS:[
+    'Znam zapisati poljubno število v dvojiškem, osmiškem in šestnajstiškem zapisu.',
+    'Znam pretvarjati med desetiškim, dvojiškim, osmiškim in šestnajstiškim sistemom.',
+    'Poznam dvojiški komplement in predznačena števila.',
+    'Znam izračunati vsoto in razliko dveh binarnih števil.',
+    'Znam z uporabo simulacije preveriti svoj račun.'
+  ],
+  MODS:[
+    {id:'pre', n:'01', t:'Pretvorbe',  d:'Desetiški, dvojiški, osmiški in šestnajstiški zapis ter hitra pretvorba med njimi. Tu je največ vaje.', first:'sistemi', th:2, sim:3},
+    {id:'ses', n:'02', t:'Seštevanje', d:'Seštevanje z prenosom, 8-bitni register in preliv.', first:'sestevanje', th:1, sim:1},
+    {id:'kom', n:'03', t:'Komplement', d:'Negativna števila v dvojiškem komplementu, območje 8-bitnega števila.', first:'komplement', th:1, sim:1},
+    {id:'ods', n:'04', t:'Odštevanje', d:'Odštevanje kot seštevanje komplementa in preliv pri predznačenih številih.', first:'odstevanje', th:1, sim:1}
+  ],
+  MODN:{pre:'Pretvorbe',ses:'Seštevanje',kom:'Komplement',ods:'Odštevanje'}
+};
+</script>
+<script>
+// Naloge vaje 2.1: odgovori se izračunajo s funkcijami LIB, verify.js pa jih primerja z ročno izračunanimi vrednostmi.
+const nb=(s,b)=>'<span class="m">'+s+'</span><sub>'+b+'</sub>';
+const mm=s=>'<span class="m">'+s+'</span>';
+let _pi=0; const POS=[2,0,3,1,1,3,0,2]; const P=()=>POS[_pi++%POS.length];
+const mcq=(lvl,mod,q,correct,wrong,hint,sol,mono)=>Object.assign({lvl,mod,q,hint,sol,mono:!!mono},LIB.mc(correct,wrong,P()));
+const inq=(lvl,mod,q,fields,hint,sol)=>({lvl,mod,type:'in',q,fields,hint,sol});
+const F=(l,a,f,o)=>Object.assign({l,a:String(a),f},o||{});
+const ans=(t,v)=>'<p>'+t+' <strong class="m">'+v+'</strong></p>';
+const stp=(hd,lines,res)=>'<div class="stp"><div class="hd">'+hd+'</div>'+lines.map(l=>'<div>'+l+'</div>').join('')+(res?'<div class="res">'+res+'</div>':'')+'</div>';
+const B2=(n,w)=>LIB.toB(n,2,w);
+// rešitve računanja
+const addSol=(a,b,w)=>{ const m=(1<<w)-1, s=a+b, r=s&m, c=s>>w;
+  return stp('Seštevanje po stolpcih od desne',['A = '+B2(a,w)+' ('+a+')','B = '+B2(b,w)+' ('+b+')','A + B = '+a+' + '+b+' = '+s+' = '+B2(s,w+1)],'v '+w+' bitih: '+B2(r,w)+', prenos ven Cout = '+c); };
+const tcSol=(n,w)=>{ const m=B2(n,w), iv=LIB.inv(m);
+  return stp('Dvojiški komplement števila −'+n+' v '+w+' bitih',[n+' = '+m,'obrnemo bite: '+iv,'prištejemo 1: '+iv+' + 1 = '+LIB.tc(-n,w)],'−'+n+' = '+LIB.tc(-n,w)); };
+const subSol=(a,b,w)=>{ const m=(1<<w)-1, bb=B2(b,w), nbb=LIB.inv(bb), s=a+((~b)&m)+1, r=s&m, c=s>>w;
+  return stp('Odštevanje: A − B = A + ¬B + 1 ('+w+' bitov)',['A = '+B2(a,w),'B = '+bb+', obrnjeno ¬B = '+nbb,B2(a,w)+' + '+nbb+' + 1 = '+B2(s,w+1)],'rezultat '+B2(r,w)+', prenos Cout = '+c); };
+const sw=(bits)=>'<p>Najvišji bit ima utež −'+(1<<(bits.length-1))+', ostali običajne uteži. Vrednost: '+String(LIB.sv(bits)).replace('-','−')+'</p>';
+
+const TASKS=[
+// ===================== PRETVORBE =====================
+mcq('lahka','pre','Koliko je '+nb('1010',2)+' v desetiškem sistemu?','10',['12','5','20'],
+  'Uteži od desne so 1, 2, 4, 8. Seštej uteži tam, kjer je enica.',LIB.weightSum('1010',2)+ans('Odgovor:','10')),
+inq('lahka','pre','Pretvori '+nb('1011',2)+' v desetiški sistem.',[F('Desetiško','11','dec',{u:'₁₀'})],
+  'Uteži so 8, 4, 2, 1. Enice so pri 8, 2 in 1.',LIB.weightSum('1011',2)),
+inq('lahka','pre','Pretvori '+nb('12',10)+' v dvojiški sistem.',[F('Dvojiško','1100','bin',{u:'₂'})],
+  'Deli z 2 in zapisuj ostanke. Beri od spodaj navzgor.',LIB.divSteps(12,2)),
+mcq('lahka','pre','Katera šestnajstiška števka ustreza desetiškemu številu 14?','E',['D','F','A'],
+  'Po vrsti: A = 10, B = 11, C = 12, D = 13, E = 14, F = 15.',ans('Odgovor:','E')+'<p>A = 10, B = 11, C = 12, D = 13, <strong>E = 14</strong>, F = 15.</p>',true),
+inq('srednja','pre','Pretvori '+nb('45',10)+' v dvojiški sistem.',[F('Dvojiško','101101','bin',{u:'₂'})],
+  'Največja utež, ki gre v 45, je 32. Ostane 13, nato 8, 4 in 1. Ali deli z 2.',LIB.divSteps(45,2)),
+inq('srednja','pre','Pretvori '+nb('11010110',2)+' v desetiški sistem.',[F('Desetiško','214','dec',{u:'₁₀'})],
+  'Enice so pri utežeh 128, 64, 16, 4 in 2.',LIB.weightSum('11010110',2)),
+inq('srednja','pre','Pretvori '+nb('173',10)+' v šestnajstiški sistem.',[F('Šestnajstiško','AD','hex',{u:'₁₆'})],
+  'Deli s 16. Ostanek 13 je črka D.',LIB.divSteps(173,16)),
+inq('srednja','pre','Zapiši '+nb('3A',16)+' kot 8-bitno dvojiško število (z vodilnimi ničlami).',[F('Dvojiško, 8 mest','00111010','bin',{w:8,u:'₂',ph:'8 števk'})],
+  'Vsako šestnajstiško števko zapiši s štirimi biti. 3 = 0011, A = 1010.',LIB.x2bin('3A',16)+'<p>Z vodilnimi ničlami do 8 mest: <strong class="m">00111010</strong></p>'),
+inq('srednja','pre','Pretvori '+nb('10110111',2)+' v šestnajstiški in v osmiški sistem.',[F('Šestnajstiško','B7','hex',{u:'₁₆'}),F('Osmiško','267','oct',{u:'₈'})],
+  'Za šestnajstiško skupine po 4 biti, za osmiško po 3 bite, vedno od desne.',LIB.bin2x('10110111',16)+LIB.bin2x('10110111',8)),
+inq('srednja','pre','Pretvori '+nb('175',8)+' v desetiški sistem.',[F('Desetiško','125','dec',{u:'₁₀'})],
+  'Uteži osmiškega sistema so 1, 8, 64. Števke so 1, 7 in 5.',LIB.weightSum('175',8)),
+inq('srednja','pre','Pretvori '+nb('100',10)+' v osmiški sistem.',[F('Osmiško','144','oct',{u:'₈'})],
+  'Deli z 8 in beri ostanke od spodaj navzgor. Preizkus: 1·64 + 4·8 + 4 = 100.',LIB.divSteps(100,8)),
+mcq('srednja','pre','Barva v HTML je #FF8800. Zapis 88 je šestnajstiški. Koliko je to desetiško? (zelena komponenta, en bajt)','136',['88','8','128'],
+  'Šestnajstiška števka 8 ima utež 16, druga 8 ima utež 1.',LIB.weightSum('88',16)+ans('Odgovor:','136')),
+inq('srednja','pre','Drugi bajt IP naslova 192.168.1.10 je 168. Zapiši ga v dvojiškem sistemu z 8 mesti.',[F('Dvojiško, 8 mest','10101000','bin',{w:8,u:'₂',ph:'8 števk'})],
+  '168 = 128 + 32 + 8. Enice so pri teh utežeh.',LIB.divSteps(168,2)+'<p>Zapis z 8 mesti: <strong class="m">10101000</strong></p>'),
+mcq('srednja','pre','Datoteka ima pravice rw-r----- (r = 4, w = 2, x = 1 po skupinah). Katera osmiška koda chmod ji ustreza?','640',['620','644','460'],
+  'Vsaka skupina je ena osmiška števka: rw- = 4+2, r-- = 4, --- = 0.',stp('Pravice po skupinah',['rw- = 110 = 6','r-- = 100 = 4','--- = 000 = 0'],'chmod 640')),
+inq('težka','pre','Pretvori '+nb('1010,1',2)+' v desetiški sistem (z decimalko).',[F('Desetiško','10.5','dec',{u:'₁₀',ph:'npr. 10,5'})],
+  'Desno od vejice so uteži 0,5, 0,25, 0,125. Celi del 1010 = 10.',LIB.weightSum('1010.1',2)),
+inq('težka','pre','Pretvori '+nb('0,375',10)+' v dvojiški sistem.',[F('Dvojiško','0.011','bin',{u:'₂',ph:'npr. 0,101'})],
+  'Ulomek množi z 2 in beri celi del od zgoraj navzdol. Konča se po treh korakih.',LIB.mulSteps(0.375,2)+'<p>Rezultat: <strong class="m">0,011</strong></p>'),
+inq('težka','pre','Pretvori '+nb('1F4',16)+' v osmiški sistem.',[F('Osmiško','764','oct',{u:'₈'})],
+  'Med šestnajstiškim in osmiškim sistemom ni bližnjice. Pojdi čez dvojiški zapis: 1F4 = 0001 1111 0100.',LIB.x2bin('1F4',16)+LIB.bin2x('111110100',8)),
+inq('težka','pre','Pretvori '+nb('750',10)+' v šestnajstiški in v dvojiški sistem.',[F('Šestnajstiško','2EE','hex',{u:'₁₆'}),F('Dvojiško','1011101110','bin',{u:'₂'})],
+  'Najprej deli s 16 (ostanek 14 je E). Dvojiški zapis dobiš z deljenjem z 2 ali iz šestnajstiškega zapisa po štirih bitih.',LIB.divSteps(750,16)+LIB.x2bin('2EE',16)),
+
+// ===================== SEŠTEVANJE =====================
+inq('lahka','ses','Seštej 4-bitni števili '+nb('0101',2)+' in '+nb('0011',2)+'. Rezultat zapiši s 4 mesti.',[F('Vsota, 4 mesta','1000','bin',{w:4,u:'₂',ph:'4 števke'})],
+  'Od desne: 1 + 1 = 10 (zapiši 0, prenos 1). Prenos potuje naprej.',addSol(5,3,4)),
+mcq('lahka','ses','Koliko je 1 + 1 v dvojiškem sistemu?','10',['2','11','0'],
+  'V dvojiškem sistemu ni števke 2. Pri 1 + 1 zapišemo 0 in prenesemo 1.',ans('Odgovor:','10')+'<p>1 + 1 = 2, kar je v dvojiškem sistemu 10 (zapišemo 0, prenos 1).</p>',true),
+inq('srednja','ses','Seštej 8-bitni števili '+nb('11001000',2)+' (200) in '+nb('01100100',2)+' (100). Zapiši, kaj ostane v 8-bitnem registru, in prenos ven (Cout).',
+  [F('Register, 8 mest','00101100','bin',{w:8,u:'₂',ph:'8 števk'}),F('Cout','1','dec',{ph:'0 ali 1'})],
+  '200 + 100 = 300, največje 8-bitno število pa je 255. Odvečni deveti bit je prenos ven.',addSol(200,100,8)),
+mcq('srednja','ses','8-bitni števec kaže 255 (11111111). Prištejemo 1. Kaj se zgodi?','Register pokaže 00000000, prenos ven je 1',['Register pokaže 100000000','Register pokaže 11111111, prenos ven je 0','Register pokaže 00000001'],
+  'Register ima samo 8 mest. Deveti bit se izgubi.',addSol(255,1,8)),
+inq('težka','ses','Seštej '+nb('10110101',2)+' (181) in '+nb('01101011',2)+' (107) v 8 bitih. Zapiši vsoto v registru in prenos ven.',
+  [F('Register, 8 mest','00100000','bin',{w:8,u:'₂',ph:'8 števk'}),F('Cout','1','dec',{ph:'0 ali 1'})],
+  '181 + 107 = 288. Odštej 256, pa dobiš vrednost v registru. Deveti bit je prenos.',addSol(181,107,8)),
+mcq('težka','ses','V polnem seštevalniku sta A = 1 in B = 1, vhodni prenos pa je Cin = 1. Kakšna sta izhoda S in Cout?','S = 1, Cout = 1',['S = 0, Cout = 1','S = 1, Cout = 0','S = 0, Cout = 0'],
+  'Seštej vse tri bite: 1 + 1 + 1 = 3 = 11 v dvojiškem sistemu. Desni bit je S, levi je Cout.',ans('Odgovor:','S = 1, Cout = 1')+'<p>1 + 1 + 1 = 3 = <span class="m">11</span><sub>2</sub>: desna števka je S = 1, leva je Cout = 1.</p>'),
+
+// ===================== KOMPLEMENT =====================
+mcq('lahka','kom','Kakšno je območje števil, ki jih zapišemo v 8 bitih z dvojiškim komplementom?','od −128 do 127',['od −127 do 127','od 0 do 255','od −256 do 255'],
+  'Najvišji bit ima utež −128. Največje število je 01111111.',ans('Odgovor:','od −128 do 127')+'<p>Z n biti zapišemo od −2<sup>n−1</sup> do 2<sup>n−1</sup> − 1. Pri n = 8 je to od −128 do 127.</p>'),
+inq('srednja','kom','Zapiši število −5 kot 8-bitno število v dvojiškem komplementu.',[F('Dvojiško, 8 mest','11111011','bin',{w:8,u:'₂',ph:'8 števk'})],
+  'Zapiši 5 v 8 bitih, obrni vse bite in prištej 1.',tcSol(5,8)),
+inq('srednja','kom','8-bitni vzorec '+nb('11111101',2)+' je zapisan v dvojiškem komplementu. Katero desetiško število predstavlja?',[F('Desetiško','-3','dec',{u:'₁₀',ph:'npr. −7'})],
+  'Najvišji bit je 1, torej je število negativno. Uteži: −128 in običajne.',sw('11111101')+tcSol(3,8)),
+inq('srednja','kom','Zapiši število −20 kot 8-bitno število v dvojiškem komplementu.',[F('Dvojiško, 8 mest','11101100','bin',{w:8,u:'₂',ph:'8 števk'})],
+  '20 = 00010100. Obrni bite in prištej 1.',tcSol(20,8)),
+mcq('srednja','kom','Senzor v avtu pošilja temperaturo kot 8-bitno predznačeno število (dvojiški komplement). Kateri vzorec ustreza −40 °C?','11011000',['00101000','11010111','10101000'],
+  '40 = 00101000. Obrni bite in prištej 1.',tcSol(40,8),true),
+inq('težka','kom','8-bitni vzorec '+nb('10000001',2)+' je zapisan v dvojiškem komplementu. Katero desetiško število predstavlja?',[F('Desetiško','-127','dec',{u:'₁₀',ph:'npr. −7'})],
+  'Utež najvišjega bita je −128, ostali biti prispevajo 1.',sw('10000001')),
+mcq('težka','kom','V 8-bitnem registru s predznakom je število 127 (01111111). Prištejemo 1. Kaj dobimo?','10000000, torej −128',['10000000, torej +128','00000000, torej 0','11111111, torej −1'],
+  'Pomisli, kakšno vrednost ima vzorec 10000000, če je najvišji bit predznak.',ans('Odgovor:','10000000, torej −128')+'<p>Vzorec 10000000 ima utež −128. Pozitivnega para −128 ni, zato 127 + 1 prelije v −128.</p>'),
+
+// ===================== ODŠTEVANJE =====================
+mcq('lahka','ods','Kako računalnik izračuna razliko A − B?','A + ¬B + 1',['A + ¬B','¬A + B + 1','A + B + 1'],
+  'Odštevanje je prištevanje komplementa. Komplement je obrnjeni B plus 1.',ans('Odgovor:','A + ¬B + 1')+'<p>−B = ¬B + 1, zato A − B = A + ¬B + 1.</p>',true),
+inq('srednja','ods','Izračunaj 20 − 7 v 8 bitih z dvojiškim komplementom. Zapiši rezultat z 8 mesti.',[F('Rezultat, 8 mest','00001101','bin',{w:8,u:'₂',ph:'8 števk'})],
+  '20 = 00010100, 7 = 00000111. Obrni 7, prištej 1, nato seštej in zavrzi deveti bit.',subSol(20,7,8)),
+inq('srednja','ods','Izračunaj 5 − 14 v 8 bitih. Zapiši rezultat v dvojiškem komplementu in njegovo desetiško vrednost.',
+  [F('Rezultat, 8 mest','11110111','bin',{w:8,u:'₂',ph:'8 števk'}),F('Vrednost','-9','dec',{ph:'npr. −4'})],
+  'Rezultat je negativen, zato bo najvišji bit 1. Vrednost preberi z utežmi, kjer ima najvišji bit utež −128.',subSol(5,14,8)+sw('11110111')),
+inq('srednja','ods','Štiribitni odštevalnik ima A = 0101 (5), B = 0111 (7) in M = 1. Zapiši rezultat v 4 bitih in vrednost izhoda Cout.',
+  [F('Rezultat, 4 mesta','1110','bin',{w:4,u:'₂',ph:'4 števke'}),F('Cout','0','dec',{ph:'0 ali 1'})],
+  'M = 1 obrne B v 1000 in doda Cin = 1. Nato seštej 0101 + 1000 + 1.',subSol(5,7,4)+'<p>Cout = 0 pomeni, da je A manjši od B.</p>'),
+mcq('srednja','ods','Kdaj pride pri seštevanju predznačenih števil v dvojiškem komplementu do preliva?','Ko seštejemo dve pozitivni števili in dobimo negativen rezultat (ali obratno)',['Kadar je kateri koli prenos enak 1','Kadar je vsota enaka nič','Kadar je eden od seštevancev negativen'],
+  'Preliv pomeni, da pravilni rezultat ne gre v območje števil.',ans('Odgovor:','predznak rezultata je napačen')+'<p>Primer: 100 + 50 = 150 je več od 127, v 8 bitih pa dobimo −106.</p>'),
+inq('težka','ods','Seštej 100 in 50 kot 8-bitni števili s predznakom. Zapiši rezultat v registru in njegovo vrednost, če ga beremo kot število s predznakom.',
+  [F('Register, 8 mest','10010110','bin',{w:8,u:'₂',ph:'8 števk'}),F('Vrednost','-106','dec',{ph:'npr. −4'})],
+  '100 = 01100100, 50 = 00110010. Rezultat ima najvišji bit 1, čeprav sta oba seštevanca pozitivna.',addSol(100,50,8)+sw('10010110')+'<p>Preliv: pravilni rezultat je 150, v registru pa je −106.</p>'),
+inq('težka','ods','Izračunaj 200 − 100 kot 8-bitni števili brez predznaka (A + ¬B + 1). Zapiši rezultat in prenos ven Cout.',
+  [F('Rezultat, 8 mest','01100100','bin',{w:8,u:'₂',ph:'8 števk'}),F('Cout','1','dec',{ph:'0 ali 1'})],
+  '200 = 11001000, 100 = 01100100. Obrni 100, prištej 1 in seštej. Če je Cout = 1, je A ≥ B.',subSol(200,100,8)+'<p>Cout = 1 pomeni, da je A večji ali enak B.</p>')
+];
+
+</script>
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const KEY = CFG.key;
+
+  // ---------- shranjen napredek (po potrebi brez localStorage) ----------
+  let S = {t:{}, g:[]};
+  try { const raw = localStorage.getItem(KEY); if(raw){ const o = JSON.parse(raw); if(o && typeof o==='object') S = {t:o.t||{}, g:Array.isArray(o.g)?o.g:[]}; } } catch(e){}
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+
+  // ---------- navigacija: stran za stranjo ----------
+  const PAGES = [...CFG.th, ...CFG.sim, 'naloge'];
+  const LAB = CFG.LAB;
+  const CHAPTERS = [
+    {name:'Teorija', ids:CFG.th},
+    {name:'Simulacija', ids:CFG.sim},
+    {name:'Naloge', ids:['naloge']}
+  ];
+  let chapEls=[], subEls=[], curPage=null;
+  function markNav(id){
+    const gi = CHAPTERS.findIndex(c=>c.ids.includes(id));
+    chapEls.forEach((b,i)=>b.classList.toggle('on', i===gi));
+    subEls.forEach((s,i)=>{ if(s) s.hidden = i!==gi; });
+    document.querySelectorAll('#nav .sb').forEach(b=>b.classList.toggle('on', b.dataset.page===id));
+  }
+  function showPage(id, smooth){
+    if(!PAGES.includes(id)) return;
+    curPage = id;
+    PAGES.forEach(p=>{ const el=$(p); if(el) el.classList.toggle('on', p===id); });
+    markNav(id);
+    try { history.replaceState(null,'','#'+id); } catch(e){}
+    window.scrollTo({top:0, behavior: smooth ? 'smooth' : 'auto'});
+  }
+  PAGES.forEach((id,k)=>{
+    const el=$(id); if(!el) return;
+    const grp = el.dataset.grp || 'Naloge';
+    const crumb=document.createElement('div'); crumb.className='crumb';
+    crumb.innerHTML=`<span>${grp} · ${LAB[id]}</span><span>${k+1} / ${PAGES.length}</span>`;
+    el.prepend(crumb);
+    const pg=document.createElement('div'); pg.className='pager';
+    const prev = k>0 ? `<button class="btn g2" data-go="${PAGES[k-1]}">‹ ${LAB[PAGES[k-1]]}</button>` : '<span></span>';
+    const next = k<PAGES.length-1 ? `<button class="btn" data-go="${PAGES[k+1]}">${LAB[PAGES[k+1]]} ›</button>` : '<span></span>';
+    pg.innerHTML = prev+next;
+    el.appendChild(pg);
+  });
+  document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.go,true)));
+  document.querySelectorAll('[data-sim]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.sim,true)));
+  document.querySelectorAll('[data-hint]').forEach(b=>b.addEventListener('click',()=>{ $(b.dataset.hint).hidden=false; }));
+
+  const navc=document.createElement('div'); navc.className='navc'; $('nav').appendChild(navc);
+  CHAPTERS.forEach((c,ci)=>{
+    const cb=document.createElement('button'); cb.className='chap'; cb.dataset.page=c.ids[0];
+    cb.innerHTML=`<span class="sn">${ci+1}</span><span>${c.name}</span>`;
+    cb.addEventListener('click',()=>showPage(c.ids[0],true));
+    navc.appendChild(cb); chapEls.push(cb);
+    if(c.ids.length>1){
+      const sub=document.createElement('div'); sub.className='subnav'; sub.hidden=true;
+      c.ids.forEach(id=>{
+        const b=document.createElement('button'); b.className='sb'; b.dataset.page=id; b.textContent=LAB[id];
+        b.addEventListener('click',()=>showPage(id,true));
+        sub.appendChild(b);
+      });
+      navc.appendChild(sub); subEls.push(sub);
+    } else subEls.push(null);
+  });
+  window.addEventListener('hashchange',()=>{ const h=location.hash.slice(1); if(PAGES.includes(h) && h!==curPage) showPage(h,false); });
+
+  // ---------- SVG gradniki ----------
+  const ON='var(--on)', OFF='var(--muted)';
+  const W=(pts,v)=>`<polyline points="${pts.map(p=>p[0]+','+p[1]).join(' ')}" fill="none" stroke="${v?ON:OFF}" stroke-width="${v?2.8:1.4}" stroke-linejoin="round" stroke-linecap="round"/>`;
+  const CH=(x,y,t,v,w=34)=>`<rect x="${x}" y="${y}" width="${w}" height="18" rx="9" fill="${v?ON:'var(--card)'}" stroke="${v?ON:OFF}" stroke-width="1.2"/><text x="${x+w/2}" y="${y+13}" text-anchor="middle" style="fill:${v?'var(--on-ink)':'var(--ink)'};font-size:12px;font-weight:700">${t}</text>`;
+  const DOTV=(x,y,v)=>`<circle cx="${x}" cy="${y}" r="3.5" fill="${v?ON:OFF}"/>`;
+  const TX=(x,y,t,a='start',cls='net')=>`<text class="${cls}" x="${x}" y="${y}" text-anchor="${a}">${t}</text>`;
+  const svgWrap=(vb,body,label)=>`<svg viewBox="${vb}" role="img" aria-label="${label}" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
+  // pravokotna IEC vrata; NOT in XNOR imata na izhodu krogec
+  function G(type,x,y,n){
+    const w=56, h = n===1?30:16*n+12;
+    const sym={AND:'&',OR:'≥1',XOR:'=1',XNOR:'=1',NOT:'1'}[type];
+    const bub = type==='NOT'||type==='XNOR';
+    const pins=[]; for(let i=0;i<n;i++) pins.push([x, y+h*(i+0.5)/n]);
+    const circ = bub ? `<circle class="gate" cx="${x+w+4}" cy="${y+h/2}" r="4"/>` : '';
+    const out=[x+w+(bub?8:0), y+h/2];
+    const s=`<rect class="gate" x="${x}" y="${y}" width="${w}" height="${h}" rx="4"/><text class="sym" x="${x+w/2}" y="${y+h/2+5}" text-anchor="middle">${sym}</text>${circ}`;
+    return {s,pins,out,h};
+  }
+  // blok z nožicami L (levo), R (desno), B (spodaj)
+  function BLK(o){
+    const {x,y,w,h,t,sub} = o, L=o.L||[], R=o.R||[], B=o.B||[];
+    let s=`<rect class="blk" x="${x}" y="${y}" width="${w}" height="${h}" rx="6"/>`;
+    if(o.top) s+=`<text class="blkt" x="${x+w/2}" y="${y+16}" text-anchor="middle">${t}${sub?' '+sub:''}</text>`;
+    else {
+      s+=`<text class="blkt" x="${x+w/2}" y="${y+h/2-(sub?2:-4)}" text-anchor="middle">${t}</text>`;
+      if(sub) s+=`<text class="blks" x="${x+w/2}" y="${y+h/2+13}" text-anchor="middle">${sub}</text>`;
+    }
+    const pins={L:[],R:[],B:[]};
+    L.forEach((l,i)=>{ const py=o.Ly?o.Ly[i]:y+h*(i+0.5)/L.length; pins.L.push([x,py]); s+=`<text class="pin${o.selL===i?' sel':''}" x="${x+6}" y="${py+4}">${l}</text>`; });
+    R.forEach((l,i)=>{ const py=o.Ry?o.Ry[i]:y+h*(i+0.5)/R.length; pins.R.push([x+w,py]); s+=`<text class="pin" x="${x+w-6}" y="${py+4}" text-anchor="end">${l}</text>`; });
+    B.forEach((l,i)=>{ const px=o.Bx?o.Bx[i]:x+w*(i+1)/(B.length+1); pins.B.push([px,y+h]); s+=`<text class="pin" x="${px}" y="${y+h-6}" text-anchor="middle">${l}</text>`; });
+    return {s,pins};
+  }
+  const bit=(v,i)=>(v>>i)&1;
+  function mkToggle(parent,label,onChange,on=false,cls=''){
+    const b=document.createElement('button'); b.className='tg'+(cls?' '+cls:''); b.textContent=label; b.setAttribute('aria-pressed',on?'true':'false');
+    b.addEventListener('click',()=>onChange(b)); parent.appendChild(b); return b;
+  }
+  const setP=(b,v)=>b.setAttribute('aria-pressed',v?'true':'false');
+  function pillGroup(container,onPick){
+    const bs=[...container.querySelectorAll('.pill')];
+    bs.forEach(b=>b.addEventListener('click',()=>{ bs.forEach(x=>setP(x,x===b)); onPick(b); }));
+    return bs;
+  }
+  const lamp=(label,v,txt,cls)=>`<div class="lamp ${v?'on':''} ${cls||''}"><div class="label">${label}</div><div class="b">${txt===undefined?v:txt}</div></div>`;
+  const tile=(label,val,on)=>`<div class="tile ${on?'on':''}"><div class="label">${label}</div><div class="v">${val}</div></div>`;
+  const dcm=LIB.dcm;
+  // drevo vrat XOR (za paritetni bit): labels in vals so ista dolžina
+  function xorTreeLive(labels,vals,pitch){
+    pitch=pitch||22;
+    let s='';
+    let nodes=labels.map((l,i)=>({x:48,y:20+i*pitch,v:vals[i]}));
+    nodes.forEach((nd,i)=>{ s+=CH(14,nd.y-9,labels[i],nd.v); });
+    let gx=120;
+    while(nodes.length>1){
+      const next=[];
+      for(let i=0;i+1<nodes.length;i+=2){
+        const a=nodes[i], b=nodes[i+1];
+        const yc=(a.y+b.y)/2; const g=G('XOR',gx,yc-22,2);
+        const v=a.v^b.v;
+        s+=g.s;
+        s+=W([[a.x,a.y],[gx-14,a.y],[gx-14,g.pins[0][1]],[gx,g.pins[0][1]]],a.v);
+        s+=W([[b.x,b.y],[gx-14,b.y],[gx-14,g.pins[1][1]],[gx,g.pins[1][1]]],b.v);
+        next.push({x:g.out[0],y:g.out[1],v});
+      }
+      if(nodes.length%2===1) next.push(nodes[nodes.length-1]);
+      nodes=next; gx+=90;
+    }
+    return {svg:s,out:nodes[0],h:20+labels.length*pitch,w:gx};
+  }
+  // vrsta stikal za bite (od najvišjega proti najnižjemu), pod vsakim stikalom je utež
+  function bitRow(parent,n,getV,setV,lab){
+    parent.innerHTML=''; parent.classList.toggle('tight',n>12); const btns=[]; let nib=null;
+    for(let i=n-1;i>=0;i--){
+      if(n>4&&(i%4===3||!nib)){ nib=document.createElement('div'); nib.className='nib'; parent.appendChild(nib); }
+      const col=document.createElement('div'); col.className='bcol';
+      const lb=document.createElement('div'); lb.className='label'; lb.textContent=lab(i); col.appendChild(lb);
+      btns[i]=mkToggle(col,String(bit(getV(),i)),()=>setV(getV()^(1<<i)),bit(getV(),i)===1,'sq');
+      (n>4?nib:parent).appendChild(col);
+    }
+    return {sync(){ for(let i=0;i<n;i++){ const v=bit(getV(),i); btns[i].textContent=v; setP(btns[i],v); } }};
+  }
+
+
+  // =================== SIMULACIJE VAJE 2.1 ===================
+  const FMT={2:'bin',8:'oct',10:'dec',16:'hex'};
+  const BNAME={2:'dvojiško',8:'osmiško',10:'desetiško',16:'šestnajstiško'};
+  const BSUB={2:'₂',8:'₈',10:'₁₀',16:'₁₆'};
+  const bin=(v,w)=>LIB.toB(v,2,w);
+  const sgn=(v,w)=>v>=(1<<(w-1))?v-(1<<w):v;
+  const minus=s=>String(s).replace('-','−');
+
+  // ---------- 1) pretvornik števil ----------
+  (function(){
+    const sw={v:0}, W8=[128,64,32,16,8,4,2,1];
+    const row=bitRow($('swD'),8,()=>sw.v,v=>{ sw.v=v; draw(); },i=>1<<i);
+    function draw(){
+      row.sync(); const v=sw.v;
+      $('swOut').innerHTML=lamp('DEC',v>0,v)+lamp('BIN',v>0,bin(v,8),'txt')+lamp('OKT',v>0,LIB.toB(v,8),'txt')+lamp('HEX',v>0,LIB.toB(v,16),'txt');
+      const terms=W8.filter((w,k)=>bit(v,7-k)).join(' + ');
+      $('swRo').innerHTML=v?`<span class="m">${terms} = ${v}</span>`:'Vsa stikala so izklopljena, vrednost je 0.';
+    }
+    draw();
+
+    const st={b:10,t:2}, inp=$('cvIn');
+    function msg(t,bad){ const m=$('cvMsg'); m.textContent=t; m.className='status'+(bad?' bad':''); }
+    function cvDraw(){
+      const raw=inp.value.trim();
+      if(raw===''){ msg('Vpiši število.',true); $('cvTiles').innerHTML=''; $('cvSteps').innerHTML=''; return; }
+      const cs=LIB.canon(raw,FMT[st.b]);
+      if(cs===null||cs[0]==='-'){ msg('Neveljaven vnos za '+BNAME[st.b]+' sistem. '+({2:'Dovoljeni sta števki 0 in 1.',8:'Dovoljene so števke 0 do 7.',10:'Dovoljene so števke 0 do 9.',16:'Dovoljene so števke 0 do 9 in črke A do F.'})[st.b],true); $('cvTiles').innerHTML=''; $('cvSteps').innerHTML=''; return; }
+      const x=LIB.parse(cs,st.b);
+      if(!(x<1e12)){ msg('Število je preveliko (največ 999 999 999 999).',true); $('cvTiles').innerHTML=''; $('cvSteps').innerHTML=''; return; }
+      msg('');
+      $('cvTiles').innerHTML=[10,2,8,16].map(b=>{ const r=LIB.fromNum(x,b,8); const s=(b===10?r.s.replace('.',','):r.s)+(r.exact?'':' …'); return tile(BNAME[b][0].toUpperCase()+BNAME[b].slice(1),s+'<sub>'+b+'</sub>',b===st.b); }).join('');
+      let h;
+      if(st.b===st.t) h='<p class="note">Vneseni in ciljni sistem sta enaka. Izberi drug ciljni sistem.</p>';
+      else if(cs.includes('.')&&st.b!==10){
+        h=LIB.weightSum(cs,st.b);
+        if(st.t!==10) h+=LIB.solFor(String(Math.round(x*1e9)/1e9),10,st.t);
+      } else h=LIB.solFor(cs,st.b,st.t);
+      $('cvSteps').innerHTML=h;
+    }
+    inp.addEventListener('input',cvDraw);
+    pillGroup($('cvBase'),b=>{
+      const nb=+b.dataset.b, raw=inp.value.trim(), cs=LIB.canon(raw,FMT[st.b]);
+      if(cs!==null&&cs[0]!=='-'){ const x=LIB.parse(cs,st.b); if(x<1e12){ const r=LIB.fromNum(x,nb,8); inp.value=nb===10?r.s.replace('.',','):r.s; } }
+      st.b=nb; cvDraw();
+    });
+    pillGroup($('cvTo'),b=>{ st.t=+b.dataset.t; cvDraw(); });
+    cvDraw();
+  })();
+
+  // ---------- 2) skupine bitov ----------
+  (function(){
+    const N=12, g={v:0}, PRE={chmod:0x1ED,ip:192,barva:0x88,nic:0};
+    const clearPre=()=>$('grpPre').querySelectorAll('.pill').forEach(p=>setP(p,false));
+    const row=bitRow($('grpD'),N,()=>g.v,v=>{ g.v=v; clearPre(); draw(); },i=>i);
+    pillGroup($('grpPre'),b=>{ g.v=PRE[b.dataset.p]; draw(); });
+    function draw(){
+      row.sync(); const v=g.v;
+      const bx=i=>64+i*40;
+      let s=TX(4,40,'HEX','start','lbl')+TX(4,93,'BIT','start','lbl')+TX(4,150,'OKT','start','lbl');
+      for(let k=0;k<3;k++){
+        const x0=bx(k*4), x1=bx(k*4+3)+36, d=(v>>(4*(2-k)))&15;
+        s+=`<polyline points="${x0},64 ${x0},58 ${x1},58 ${x1},64" fill="none" stroke="var(--acc)" stroke-width="2"/><text x="${(x0+x1)/2}" y="44" text-anchor="middle" style="fill:var(--acc);font-weight:700;font-size:22px">${d.toString(16).toUpperCase()}</text>`;
+      }
+      for(let i=0;i<N;i++){
+        const on=bit(v,N-1-i);
+        s+=`<rect x="${bx(i)}" y="70" width="36" height="36" rx="6" style="fill:${on?'var(--on)':'var(--card)'};stroke:${on?'var(--on)':'var(--ink)'};stroke-width:2"/><text x="${bx(i)+18}" y="94" text-anchor="middle" style="fill:${on?'var(--on-ink)':'var(--ink)'};font-weight:700;font-size:16px">${on}</text>`;
+      }
+      for(let k=0;k<4;k++){
+        const x0=bx(k*3), x1=bx(k*3+2)+36, d=(v>>(3*(3-k)))&7;
+        s+=`<polyline points="${x0},112 ${x0},118 ${x1},118 ${x1},112" fill="none" stroke="var(--ok)" stroke-width="2"/><text x="${(x0+x1)/2}" y="148" text-anchor="middle" style="fill:var(--ok);font-weight:700;font-size:22px">${d}</text>`;
+      }
+      $('fig-grp').innerHTML=svgWrap('0 0 560 162',s,'Dvanajst bitov razdeljenih v skupine po štiri in po tri');
+      $('grpOut').innerHTML=tile('Desetiško',v,false)+tile('Dvojiško',bin(v,12).match(/.{4}/g).join(' '),false)+tile('Osmiško',LIB.toB(v,8,4)+'<sub>8</sub>',false)+tile('Šestnajstiško',LIB.toB(v,16,3)+'<sub>16</sub>',false);
+      const perm='rwxrwxrwx'.split('').map((c,i)=>bit(v,8-i)?c:'-').join('');
+      $('grpRo').innerHTML=`Spodnjih 9 bitov kot pravice datotek: <b class="m">${perm}</b> (chmod <span class="m">${(v>>6)&7}${(v>>3)&7}${v&7}</span>).<br>Spodnjih 8 bitov kot bajt: <b class="m">${v&255}</b> (en del IP naslova ali ena barvna komponenta).`;
+    }
+    draw();
+  })();
+
+  // ---------- 3) vadnica pretvorb ----------
+  (function(){
+    const NAME={2:'dvojiški',8:'osmiški',10:'desetiški',16:'šestnajstiški'}, SH={2:'BIN',8:'OKT',10:'DEC',16:'HEX'};
+    const PAIRS=[[10,2],[2,10],[10,16],[16,10],[2,16],[16,2],[2,8],[8,2],[10,8],[8,10]];
+    const MAXN={1:15,2:255,3:4095}, MINN={1:2,2:16,3:256};
+    const cfg={pair:-1,lvl:2}, cur={f:10,t:2,n:0,done:false}, stat={ok:0,all:0,run:0,best:0};
+    const pc=$('vdPair');
+    const mk=(i,txt)=>{ const b=document.createElement('button'); b.className='pill'; b.dataset.i=i; b.textContent=txt; setP(b,i===-1); pc.appendChild(b); };
+    mk(-1,'naključno'); PAIRS.forEach((p,i)=>mk(i,SH[p[0]]+' → '+SH[p[1]]));
+    pillGroup(pc,b=>{ cfg.pair=+b.dataset.i; newQ(); });
+    pillGroup($('vdLvl'),b=>{ cfg.lvl=+b.dataset.l; newQ(); });
+    const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+    function newQ(){
+      const p=cfg.pair<0?PAIRS[rnd(0,PAIRS.length-1)]:PAIRS[cfg.pair];
+      cur.f=p[0]; cur.t=p[1]; cur.n=rnd(MINN[cfg.lvl],MAXN[cfg.lvl]); cur.done=false;
+      const src=LIB.toB(cur.n,cur.f);
+      $('vdQ').innerHTML=`Pretvori <b class="m">${src}</b><sub>${cur.f}</sub> v ${NAME[cur.t]} sistem.`;
+      const inp=$('vdIn'); inp.value=''; inp.disabled=false; inp.className='inp'; inp.placeholder=SH[cur.t];
+      $('vdU').textContent=BSUB[cur.t]; $('vdFb').textContent=''; $('vdFb').className='status'; $('vdSol').innerHTML='';
+      $('vdCheck').disabled=false; inp.focus({preventScroll:true});
+    }
+    function stats(){
+      $('vdStat').innerHTML=`Rešeno prav: <b>${stat.ok}</b> od ${stat.all} · zaporedoma brez napake: <b>${stat.run}</b> (najboljše: ${stat.best})`+(stat.best>=5?' · <b style="color:var(--ok)">Izziv opravljen!</b>':'');
+    }
+    function check(){
+      if(cur.done){ newQ(); return; }
+      const inp=$('vdIn'), fb=$('vdFb'), fmt=FMT[cur.t];
+      if(inp.value.trim()===''){ fb.className='status bad'; fb.textContent='Najprej vpiši odgovor.'; return; }
+      const c=LIB.canon(inp.value,fmt);
+      if(c===null){ fb.className='status bad'; fb.textContent='Odgovor ni v pravilni obliki za '+BNAME[cur.t]+' sistem.'; return; }
+      const right=LIB.toB(cur.n,cur.t), ok=c===LIB.canon(right,fmt);
+      cur.done=true; stat.all++; if(ok){ stat.ok++; stat.run++; stat.best=Math.max(stat.best,stat.run); } else stat.run=0;
+      inp.disabled=true; inp.classList.add(ok?'right':'wrong'); $('vdCheck').disabled=true;
+      fb.className='status '+(ok?'ok':'bad');
+      fb.textContent=ok?'Pravilno!':'Ni pravilno. Pravilni odgovor je '+right+BSUB[cur.t]+'.';
+      $('vdSol').innerHTML=LIB.solFor(LIB.toB(cur.n,cur.f),cur.f,cur.t);
+      stats();
+    }
+    $('vdCheck').addEventListener('click',check);
+    $('vdNew').addEventListener('click',newQ);
+    $('vdIn').addEventListener('keydown',e=>{ if(e.key==='Enter') check(); });
+    stats(); newQ();
+  })();
+
+  // ---------- 4) binarni seštevalnik ----------
+  (function(){
+    const st={w:8,a:11,b:6,sel:0};
+    let rowA,rowB;
+    const mask=()=>(1<<st.w)-1;
+    function calc(){
+      const w=st.w, c=[0], s=[];
+      for(let i=0;i<w;i++){ const t=bit(st.a,i)+bit(st.b,i)+c[i]; s[i]=t&1; c[i+1]=t>>1; }
+      return {c,s,sum:st.a+st.b,reg:(st.a+st.b)&mask(),cout:c[w]};
+    }
+    function build(){
+      st.a&=mask(); st.b&=mask(); if(st.sel>=st.w) st.sel=0;
+      rowA=bitRow($('sumA'),st.w,()=>st.a,v=>{ st.a=v; draw(); },i=>1<<i);
+      rowB=bitRow($('sumB'),st.w,()=>st.b,v=>{ st.b=v; draw(); },i=>1<<i);
+      const sel=$('faSel'); sel.querySelectorAll('.pill').forEach(p=>p.remove());
+      for(let i=0;i<st.w;i++){ const b=document.createElement('button'); b.className='pill'; b.dataset.i=i; b.textContent='bit '+i; sel.appendChild(b); }
+      pillGroup(sel,b=>{ st.sel=+b.dataset.i; draw(); });
+      draw();
+    }
+    pillGroup($('sumMode'),b=>{ st.w=+b.dataset.n; $('sumPre').querySelectorAll('.pill').forEach(p=>setP(p,false)); build(); });
+    const PRE={a:[11,6],b:[255,1],c:[200,100]};
+    pillGroup($('sumPre'),b=>{
+      const p=PRE[b.dataset.p];
+      if(Math.max(p[0],p[1])>mask()){ st.w=8; $('sumMode').querySelectorAll('.pill').forEach(x=>setP(x,x.dataset.n==='8')); }
+      st.a=p[0]; st.b=p[1]; build(); setP(b,true);
+    });
+    const clr=()=>$('sumPre').querySelectorAll('.pill').forEach(p=>setP(p,false));
+    function table(r){
+      const w=st.w, pos=[]; for(let i=w;i>=0;i--) pos.push(i);
+      const hi=i=>i===st.sel?' hi':'';
+      let h='<table class="cs"><tr><th></th>'+pos.map(i=>`<th class="${i===st.sel?'hi':''}">${1<<i}</th>`).join('')+'</tr>';
+      h+='<tr><td class="rl">prenos</td>'+pos.map(i=>i===0?'<td></td>':`<td class="cr${hi(i)}" style="${r.c[i]?'':'opacity:.35'}">${r.c[i]}</td>`).join('')+'</tr>';
+      h+='<tr><td class="rl">A</td>'+pos.map(i=>i===w?'<td></td>':`<td class="${hi(i).trim()}">${bit(st.a,i)}</td>`).join('')+'</tr>';
+      h+='<tr><td class="rl">B</td>'+pos.map(i=>i===w?'<td></td>':`<td class="${hi(i).trim()}">${bit(st.b,i)}</td>`).join('')+'</tr>';
+      h+='<tr class="ln"><td class="rl">vsota</td>'+pos.map(i=>{ const v=i===w?r.c[w]:r.s[i]; return `<td class="${v?(i===w?'ov':'one'):''}${hi(i)}">${v}</td>`; }).join('')+'</tr></table>';
+      return h;
+    }
+    function chain(r){
+      const w=st.w, Wd=772, ox=56, step=(Wd-ox-66)/w, bw=Math.min(64,step-20), hb=bw/2;
+      const cxs=j=>ox+j*step+step/2, i_=j=>w-1-j;
+      let s='';
+      for(let j=0;j<w;j++){
+        const i=i_(j), cx=cxs(j), ai=bit(st.a,i), bi=bit(st.b,i);
+        s+=`<g data-bit="${i}" style="cursor:pointer">`;
+        if(i===st.sel) s+=`<rect class="selband" x="${cx-step/2+2}" y="0" width="${step-4}" height="196" rx="6"/>`;
+        s+=`<rect x="${cx-step/2+2}" y="0" width="${step-4}" height="196" fill="transparent"/>`;
+        s+=W([[cx-14,22],[cx-14,80]],ai)+W([[cx+14,44],[cx+14,80]],bi);
+        s+=CH(cx-36,4,'A'+i+'='+ai,ai,44)+CH(cx-8,26,'B'+i+'='+bi,bi,44);
+        s+=`<rect class="blk" x="${cx-hb}" y="80" width="${bw}" height="60" rx="6"/><text class="blkt" x="${cx}" y="106" text-anchor="middle">FA</text><text class="blks" x="${cx}" y="124" text-anchor="middle">bit ${i}</text>`;
+        s+=W([[cx,140],[cx,170]],r.s[i])+CH(cx-22,172,'S'+i+'='+r.s[i],r.s[i],44);
+        s+='</g>';
+        if(j>=1){ const xp=cxs(j-1); s+=W([[cx-hb,120],[xp+hb,120]],r.c[i+1])+TX((cx-hb+xp+hb)/2,113,'c'+(i+1),'middle','lbl'); }
+      }
+      const c0=cxs(0), cl=cxs(w-1);
+      s+=W([[c0-hb,120],[54,120]],r.c[w])+CH(2,111,'Cout='+r.c[w],r.c[w],52);
+      s+=W([[cl+hb,120],[Wd-56,120]],0)+CH(Wd-54,111,'Cin=0',0,52);
+      return svgWrap('0 0 '+Wd+' 196',s,'Veriga polnih seštevalnikov');
+    }
+    function fa(){
+      const i=st.sel, r=calc(), a=bit(st.a,i), b=bit(st.b,i), ci=r.c[i], p=a^b, sS=p^ci, g1=a&b, g2=p&ci, co=g1|g2;
+      const x1=G('XOR',130,26,2), a1=G('AND',130,128,2), x2=G('XOR',330,26,2), a2=G('AND',330,86,2), o=G('OR',470,117,2);
+      let s=x1.s+a1.s+x2.s+a2.s+o.s;
+      // vhodi
+      s+=CH(6,28,'A'+i,a,44)+CH(6,50,'B'+i,b,44)+CH(6,181,'C'+i,ci,44);
+      s+=W([[50,37],[130,37]],a)+W([[70,37],[70,161],[130,161]],a)+DOTV(70,37,a);
+      s+=W([[50,59],[130,59]],b)+W([[92,59],[92,139],[130,139]],b)+DOTV(92,59,b);
+      // p = A xor B
+      s+=W([[186,48],[260,48]],p)+W([[260,48],[260,37],[330,37]],p)+W([[260,48],[260,97],[330,97]],p)+DOTV(260,48,p);
+      // prenos iz nižjega bita
+      s+=W([[50,190],[296,190],[296,59],[330,59]],ci)+W([[296,119],[330,119]],ci)+DOTV(296,119,ci);
+      // izhodi
+      s+=W([[386,48],[552,48]],sS)+CH(552,39,'S'+i,sS,44);
+      s+=W([[386,108],[430,108],[430,128],[470,128]],g2)+W([[186,150],[470,150]],g1);
+      s+=W([[526,139],[552,139]],co)+CH(552,130,'C'+(i+1),co,44);
+      s+=TX(194,43,'p','start','lbl')+TX(194,144,'A·B','start','lbl')+TX(392,103,'p·C'+i,'start','lbl');
+      return svgWrap('0 0 604 214',s,'Polni seštevalnik iz vrat, bit '+i);
+    }
+    function draw(){
+      rowA.sync(); rowB.sync();
+      const r=calc(), w=st.w;
+      $('sumCols').innerHTML=table(r);
+      const ov=r.cout===1;
+      $('sumRo').innerHTML=`A = <b class="m">${bin(st.a,w)}</b> = ${st.a}, B = <b class="m">${bin(st.b,w)}</b> = ${st.b}<br>Vsota = ${st.a} + ${st.b} = <b>${r.sum}</b><br>V ${w}-bitnem registru: <b class="m">${bin(r.reg,w)}</b> = <b>${r.reg}</b>, prenos ven Cout = <b>${r.cout}</b>`+(ov?`<br><b style="color:var(--bad)">Preliv:</b> ${r.sum} ne gre v ${w} bitov (največ ${mask()}), zato register pokaže ${r.reg}.`:`<br><span class="mut">Brez preliva: rezultat gre v ${w} bitov.</span>`);
+      $('fig-sum').innerHTML=chain(r);
+      $('fig-sum').querySelectorAll('g[data-bit]').forEach(g=>g.addEventListener('click',()=>{ st.sel=+g.dataset.bit; draw(); }));
+      $('faSel').querySelectorAll('.pill').forEach(p=>setP(p,+p.dataset.i===st.sel));
+      $('fig-fa').innerHTML=fa();
+    }
+    // spremembe stikal odstranijo izbran primer
+    $('sumA').addEventListener('click',clr); $('sumB').addEventListener('click',clr);
+    build();
+  })();
+
+  // ---------- 5) dvojiški komplement ----------
+  (function(){
+    const k={v:0,msg:''};
+    const row=bitRow($('kcD'),8,()=>k.v,v=>{ k.v=v; k.msg=''; draw(); },i=>i===7?'−128':(1<<i));
+    $('kcInc').addEventListener('click',()=>{ const p=k.v; k.v=(k.v+1)&255; k.msg=p===255?'Brez predznaka: 255 + 1 = 256 ne gre v 8 bitov, ostane 0 (preliv).':p===127?'Z dvojiškim komplementom: 127 + 1 skoči na −128 (preliv).':''; draw(); });
+    $('kcDec').addEventListener('click',()=>{ const p=k.v; k.v=(k.v-1)&255; k.msg=p===0?'Brez predznaka: 0 − 1 skoči na 255.':p===128?'Z dvojiškim komplementom: −128 − 1 skoči na 127 (preliv).':''; draw(); });
+    $('kcClr').addEventListener('click',()=>{ k.v=0; k.msg=''; draw(); });
+    function draw(){
+      row.sync(); const v=k.v, s=sgn(v,8);
+      let t='<table class="wt"><tr><th class="l">utež brez predznaka</th>'+[7,6,5,4,3,2,1,0].map(i=>`<th>${1<<i}</th>`).join('')+'</tr>';
+      t+='<tr><th class="l">utež komplement</th>'+[7,6,5,4,3,2,1,0].map(i=>`<th class="${i===7?'neg':''}">${i===7?'−128':(1<<i)}</th>`).join('')+'</tr>';
+      t+='<tr><td class="l">bit</td>'+[7,6,5,4,3,2,1,0].map(i=>`<td>${bit(v,i)}</td>`).join('')+'</tr>';
+      t+='<tr class="hl"><td class="l">prispevek</td>'+[7,6,5,4,3,2,1,0].map(i=>`<td class="${i===7&&bit(v,7)?'neg':''}">${bit(v,i)?(i===7?'−128':(1<<i)):0}</td>`).join('')+'</tr></table>';
+      $('kcTab').innerHTML=t;
+      $('kcOut').innerHTML=lamp('BIN',v>0,bin(v,8),'txt')+lamp('brez predznaka',v>0,v)+lamp('s predznakom (komplement)',s<0,minus(s))+lamp('predznak',s<0,s<0?'−':'+');
+      const parts=[7,6,5,4,3,2,1,0].filter(i=>bit(v,i)).map(i=>i===7?'−128':String(1<<i));
+      $('kcRo').innerHTML=(parts.length?`<span class="m">${parts.join(' + ')} = ${minus(s)}</span>`:'Vsi biti so 0, vrednost je 0.')+(k.msg?`<br><b style="color:var(--bad)">${k.msg}</b>`:'');
+    }
+    draw();
+
+    // negator
+    const n={a:0};
+    const row2=bitRow($('ngD'),4,()=>n.a,v=>{ n.a=v; ngDraw(); },i=>i===3?'−8':(1<<i));
+    function ngDraw(){
+      row2.sync();
+      const a=n.a, iv=(~a)&15, y=(iv+1)&15, ys=[32,76,120,164];
+      let s=TX(26,10,'A','middle','lbl')+TX(122,10,'obrni bite','middle','lbl')+TX(290,10,'prištej 1','middle','lbl')+TX(400,10,'−A','middle','lbl');
+      const bl=BLK({x:240,y:14,w:100,h:176,t:'+1',L:['¬A3','¬A2','¬A1','¬A0'],R:['Y3','Y2','Y1','Y0'],Ly:ys,Ry:ys});
+      s+=bl.s;
+      for(let q=0;q<4;q++){
+        const i=3-q, v=bit(a,i), nv=1-v, yy=bit(y,i), py=ys[q];
+        const g=G('NOT',90,py-15,1);
+        s+=g.s+CH(6,py-9,'A'+i,v,40)+W([[46,py],[90,py]],v)+W([[g.out[0],py],[240,py]],nv)+W([[340,py],[380,py]],yy)+CH(380,py-9,'Y'+i,yy,40);
+      }
+      $('fig-ng').innerHTML=svgWrap('0 0 440 200',s,'Negator: obrni bite in prištej 1');
+      $('ngOut').innerHTML=lamp('A',false,minus(sgn(a,4)))+lamp('¬A',false,bin(iv,4),'txt')+lamp('¬A + 1',y>0,bin(y,4),'txt')+lamp('−A',sgn(y,4)<0,minus(sgn(y,4)));
+      $('ngRo').innerHTML=`A = <b class="m">${bin(a,4)}</b> = ${minus(sgn(a,4))}. Obrnjeno: <span class="m">${bin(iv,4)}</span>. Plus 1: <b class="m">${bin(y,4)}</b> = <b>${minus(sgn(y,4))}</b>.`+(a===8?'<br><b style="color:var(--bad)">Preliv:</b> +8 se ne zapiše v 4 bitih (največ 7), zato izhod ostane −8.':'');
+    }
+    ngDraw();
+  })();
+
+  // ---------- 6) odštevalnik ----------
+  (function(){
+    const o={a:7,b:3,m:1};
+    const clr=()=>$('odPre').querySelectorAll('.pill').forEach(p=>setP(p,false));
+    const ra=bitRow($('odA'),4,()=>o.a,v=>{ o.a=v; clr(); draw(); },i=>i===3?'−8':(1<<i));
+    const rb=bitRow($('odB'),4,()=>o.b,v=>{ o.b=v; clr(); draw(); },i=>i===3?'−8':(1<<i));
+    const tm=mkToggle($('odM'),'M = 1',()=>{ o.m=1-o.m; clr(); draw(); },true);
+    const PRE={a:[7,3,1],b:[3,7,1],c:[5,3,0],d:[8,1,1]};
+    pillGroup($('odPre'),b=>{ const p=PRE[b.dataset.p]; o.a=p[0]; o.b=p[1]; o.m=p[2]; draw(); });
+    function calc(){
+      const bx=o.m?(~o.b)&15:o.b, c=[o.m], s=[];
+      for(let i=0;i<4;i++){ const t=bit(o.a,i)+bit(bx,i)+c[i]; s[i]=t&1; c[i+1]=t>>1; }
+      const r=s[0]|(s[1]<<1)|(s[2]<<2)|(s[3]<<3);
+      return {bx,c,s,r,cout:c[4],V:c[3]^c[4]};
+    }
+    function fig(R){
+      const colx=j=>100+j*150, Fy=120, Cy=170, busEnd=colx(3)+118;
+      let s=CH(2,1,'M='+o.m,o.m,48)+W([[50,10],[busEnd,10]],o.m);
+      for(let j=0;j<4;j++){
+        const i=3-j, cx=colx(j), ai=bit(o.a,i), bi=bit(o.b,i), xb=bit(R.bx,i);
+        const g=G('XOR',cx+36,40,2);
+        s+=g.s+DOTV(cx+29,10,o.m);
+        s+=CH(cx-37,28,'A'+i,ai,34)+W([[cx-20,46],[cx-20,Fy]],ai);
+        s+=CH(cx-12,64,'B'+i,bi,34)+W([[cx+22,73],[cx+36,73]],bi);
+        s+=W([[cx+29,10],[cx+29,51],[cx+36,51]],o.m);
+        s+=W([[cx+92,62],[cx+102,62],[cx+102,Fy-16],[cx+20,Fy-16],[cx+20,Fy]],xb);
+        s+=`<rect class="blk" x="${cx-36}" y="${Fy}" width="72" height="70" rx="6"/><text class="blkt" x="${cx}" y="${Fy+30}" text-anchor="middle">FA</text><text class="blks" x="${cx}" y="${Fy+48}" text-anchor="middle">bit ${i}</text>`;
+        s+=W([[cx,Fy+70],[cx,Fy+84]],R.s[i])+CH(cx-17,Fy+84,'S'+i,R.s[i],34);
+        if(j>=1){ const xp=colx(j-1); s+=W([[cx-36,Cy],[xp+36,Cy]],R.c[i+1])+TX((cx-36+xp+36)/2,Cy-6,'c'+(i+1),'middle','lbl'); }
+      }
+      s+=W([[colx(0)-36,Cy],[52,Cy]],R.cout)+CH(2,Cy-9,'Cout='+R.cout,R.cout,48);
+      s+=W([[busEnd,10],[busEnd,Cy],[colx(3)+36,Cy]],o.m)+TX(colx(3)+42,Cy-6,'Cin=M','start','lbl');
+      return svgWrap('0 0 700 232',s,'Štiribitni seštevalnik z vrati XOR pri vhodu B');
+    }
+    function draw(){
+      ra.sync(); rb.sync(); setP(tm,o.m); tm.textContent='M = '+o.m;
+      const R=calc(), sa=sgn(o.a,4), sb=sgn(o.b,4), res=sgn(R.r,4), exp=o.m?sa-sb:sa+sb;
+      $('fig-od').innerHTML=fig(R);
+      $('odOut').innerHTML=lamp('rezultat',false,bin(R.r,4),'txt')+lamp('vrednost',res<0,minus(res))+lamp('Cout',R.cout,R.cout)+lamp('preliv V',R.V,R.V);
+      const op=o.m?'−':'+';
+      let t=`${minus(sa)} ${op} ${minus(sb)} = <b>${minus(exp)}</b>.<br>`;
+      if(o.m) t+=`B = <span class="m">${bin(o.b,4)}</span> obrnemo v <span class="m">${bin(R.bx,4)}</span>, Cin = 1: <span class="m">${bin(o.a,4)} + ${bin(R.bx,4)} + 1 = ${R.cout}${bin(R.r,4)}</span>.`;
+      else t+=`<span class="m">${bin(o.a,4)} + ${bin(o.b,4)} = ${R.cout}${bin(R.r,4)}</span>.`;
+      t+=`<br>Rezultat v 4 bitih: <b class="m">${bin(R.r,4)}</b> = <b>${minus(res)}</b>. `;
+      t+=R.V?'<b style="color:var(--bad)">Preliv: pravilni rezultat '+minus(exp)+' ne gre v območje od −8 do 7.</b>':'Brez preliva.';
+      if(o.m) t+=` Cout = ${R.cout} ${R.cout?'(A ≥ B, če ju beremo brez predznaka)':'(A < B, če ju beremo brez predznaka)'}.`;
+      $('odRo').innerHTML=t;
+    }
+    draw();
+  })();
+
+
+  // ---------- cilji in kartice sklopov ----------
+  const pl=(n,f)=>n+' '+(n===1?f[0]:n===2?f[1]:(n===3||n===4)?f[2]:f[3]);
+  const goalsEl=$('goals');
+  CFG.GOALS.forEach((g,i)=>{
+    const lb=document.createElement('label');
+    lb.innerHTML=`<input type="checkbox"> <span>${g}</span>`;
+    const cb=lb.querySelector('input'); cb.checked=!!S.g[i];
+    cb.addEventListener('change',()=>{ S.g[i]=cb.checked; save(); });
+    goalsEl.appendChild(lb);
+  });
+  const taskCount=mod=>TASKS.filter(t=>t.mod===mod).length;
+  const modsEl=$('mods');
+  CFG.MODS.forEach(m=>{
+    const n=taskCount(m.id);
+    const d=document.createElement('div');
+    d.innerHTML=`<div class="n">${m.n}</div><h4 style="margin:0">${m.t}</h4><p>${m.d}</p>
+      <p class="mut sm">${pl(m.th,['stran','strani','strani','strani'])} teorije · ${pl(m.sim,['simulacija','simulaciji','simulacije','simulacij'])} · ${pl(n,['naloga','nalogi','naloge','nalog'])}</p>
+      <p class="m sm" id="mp-${m.id}"></p>
+      <button class="btn g2 sm" data-first="${m.first}">Odpri sklop ›</button>`;
+    d.querySelector('button').addEventListener('click',()=>showPage(m.first,true));
+    modsEl.appendChild(d);
+  });
+
+  // ---------- naloge ----------
+  const LEVEL_PTS={lahka:1,srednja:2,'težka':3};
+  const LVL_CLASS={lahka:'l1',srednja:'l2','težka':'l3'};
+  const fmtPts=x=>String(Math.round(x*10)/10).replace('.',',');
+  const maxScore=TASKS.reduce((a,t)=>a+LEVEL_PTS[t.lvl],0);
+  const list=$('tasks'), nums=$('nums');
+  const MODN=CFG.MODN;
+  const tstate=i=>S.t[i]||(S.t[i]={d:false,p:0,h:false,sol:false,sel:null,c:null,a:null});
+  const FMTMSG={bin:'v dvojiškem zapisu so samo števki 0 in 1',oct:'v osmiškem zapisu so števke od 0 do 7',dec:'v desetiškem zapisu so števke od 0 do 9 (decimalna vejica je dovoljena)',hex:'v šestnajstiškem zapisu so števke 0 do 9 in črke A do F',txt:''};
+  function ttRows(t){ const n=t.ins.length, rows=[]; for(let r=0;r<(1<<n);r++){ const ins=[]; for(let b=n-1;b>=0;b--) ins.push((r>>b)&1); rows.push(ins); } return rows; }
+  function ttHtml(t){
+    const rows=ttRows(t);
+    let h='<div class="scroll"><table class="ttask"><tr>'+t.ins.map(n=>`<th>${n}</th>`).join('')+t.outs.map(n=>`<th class="o">${n}</th>`).join('')+'</tr>';
+    rows.forEach((ins,r)=>{
+      h+='<tr>'+ins.map(v=>`<td>${v}</td>`).join('')+t.outs.map((n,j)=>`<td class="o"><button class="cell un" data-r="${r}" data-j="${j}" aria-label="${n} v vrstici ${r+1}">?</button></td>`).join('')+'</tr>';
+    });
+    return h+'</table></div>';
+  }
+  function inHtml(t,i){
+    return '<div class="flds">'+t.fields.map((f,j)=>`<label class="fld"><span class="fl">${f.l}</span><input class="inp" type="text" id="t${i}f${j}" data-j="${j}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${f.ph||''}">${f.u?`<span class="u">${f.u}</span>`:''}</label>`).join('')+'</div>';
+  }
+  function cellSet(btn,v){
+    btn.classList.toggle('un',v===null); btn.classList.toggle('one',v===1);
+    btn.textContent=v===null?'?':v;
+  }
+  function buildTasks(){
+    list.innerHTML=''; nums.innerHTML='';
+    TASKS.forEach((t,i)=>{
+      const nb=document.createElement('button'); nb.textContent=i+1; nb.setAttribute('aria-label','Naloga '+(i+1));
+      nb.addEventListener('click',()=>{ $('t'+i).scrollIntoView({behavior:'smooth',block:'start'}); });
+      nums.appendChild(nb);
+      const card=document.createElement('div'); card.className='card task'; card.id='t'+i;
+      const pts=LEVEL_PTS[t.lvl], isTT=t.type==='tt', isIN=t.type==='in';
+      card.innerHTML=`
+        <div class="crumb"><span>Naloga ${i+1} od ${TASKS.length} · ${MODN[t.mod]}</span><span class="lv"><span class="lvt ${LVL_CLASS[t.lvl]}">${t.lvl} · ${pts} t</span></span></div>
+        <p class="qt">${t.q}</p>
+        ${isTT?ttHtml(t):isIN?inHtml(t,i):`<div class="opts">${t.opts.map((o,j)=>`<label class="opt ${t.mono?'mono':''}"><input type="radio" name="t${i}" value="${j}"> <span>${o}</span></label>`).join('')}</div>`}
+        <div class="acts">
+          <button class="btn" data-act="check">Preveri</button>
+          <button class="btn g2" data-act="hint">Namig (−50 % točk)</button>
+          <button class="btn g2" data-act="sol">Rešitev (0 t, zaklene)</button>
+        </div>
+        <div class="fb" aria-live="polite"></div>
+        <div class="hn" hidden>${t.hint}</div>
+        <div class="slb" hidden>${t.sol}</div>`;
+      list.appendChild(card);
+      restoreCard(card,i);
+    });
+  }
+  function lockCard(card){
+    card.querySelectorAll('input[type=radio]').forEach(r=>r.disabled=true);
+    card.querySelectorAll('input.inp').forEach(r=>r.disabled=true);
+    card.querySelectorAll('.cell').forEach(c=>c.disabled=true);
+    card.querySelector('[data-act="check"]').disabled=true;
+    card.querySelector('[data-act="hint"]').disabled=true;
+  }
+  function markIn(card,t,vals){
+    card.querySelectorAll('input.inp').forEach((inp,j)=>{ const ok=LIB.same(vals[j],t.fields[j]); inp.classList.toggle('right',ok); inp.classList.toggle('wrong',!ok); });
+  }
+  function restoreCard(card,i){
+    const t=TASKS[i], st=S.t[i]; if(!st) return;
+    const pts=LEVEL_PTS[t.lvl], fb=card.querySelector('.fb');
+    if(t.type==='tt'){
+      const rows=ttRows(t);
+      if(st.c) card.querySelectorAll('.cell').forEach(c=>{ const v=st.c[+c.dataset.r*t.outs.length+ +c.dataset.j]; cellSet(c,v===undefined?null:v); });
+      if(st.d && !st.sol) card.querySelectorAll('.cell').forEach(c=>{ const exp=t.fn(rows[+c.dataset.r])[+c.dataset.j]; if(+c.textContent!==exp) c.classList.add('bad'); });
+      if(st.sol) card.querySelectorAll('.cell').forEach(c=>{ cellSet(c,t.fn(rows[+c.dataset.r])[+c.dataset.j]); });
+    } else if(t.type==='in'){
+      const inps=card.querySelectorAll('input.inp');
+      if(st.a) inps.forEach((inp,j)=>{ inp.value=st.a[j]||''; });
+      if(st.d && !st.sol && st.a) markIn(card,t,st.a);
+    } else if(st.sel!==null && st.sel!==undefined){
+      const r=card.querySelector(`input[value="${st.sel}"]`); if(r) r.checked=true;
+    }
+    if(st.h){ card.querySelector('.hn').hidden=false; card.querySelector('[data-act="hint"]').disabled=true; }
+    if(st.sol||st.v) card.querySelector('.slb').hidden=false;
+    if(st.d){
+      lockCard(card);
+      if(st.sol){ fb.className='fb bad'; fb.textContent='Rešitev prikazana: 0 točk. Naloga je zaklenjena.'; }
+      else { const ok=st.p>0; fb.className='fb '+(ok?'ok':'bad'); fb.textContent=(ok?'Pravilno':'Ni pravilno')+': dobiš '+fmtPts(st.p)+' od '+pts+' t. Odgovor je zaklenjen.'; }
+    } else if(st.h){ fb.className='fb'; fb.textContent='Namig je odbil 50 % točk te naloge.'; }
+  }
+  // vpisani odgovori se sproti shranjujejo
+  list.addEventListener('input',e=>{
+    const inp=e.target.closest('input.inp'); if(!inp) return;
+    const card=inp.closest('.task'), i=+card.id.slice(1), st=tstate(i);
+    if(st.d) return;
+    st.a=[...card.querySelectorAll('input.inp')].map(x=>x.value); save();
+  });
+  list.addEventListener('keydown',e=>{
+    if(e.key==='Enter' && e.target.matches('input.inp')){ const card=e.target.closest('.task'); const b=card.querySelector('[data-act="check"]'); if(b && !b.disabled) b.click(); }
+  });
+  list.addEventListener('click',e=>{
+    // klik na celico tabele
+    const cell=e.target.closest('.cell');
+    if(cell && !cell.disabled){
+      const card=cell.closest('.task'), i=+card.id.slice(1), t=TASKS[i], st=tstate(i);
+      if(st.d) return;
+      const cur=cell.classList.contains('un')?null:+cell.textContent;
+      const nv=cur===null?0:1-cur; cellSet(cell,nv);
+      st.c=st.c||Array(ttRows(t).length*t.outs.length).fill(null);
+      st.c[+cell.dataset.r*t.outs.length+ +cell.dataset.j]=nv; save();
+      return;
+    }
+    const btn=e.target.closest('button[data-act]'); if(!btn) return;
+    const card=btn.closest('.task'); const i=+card.id.slice(1); const t=TASKS[i]; const st=tstate(i);
+    const fb=card.querySelector('.fb'), pts=LEVEL_PTS[t.lvl], isTT=t.type==='tt', isIN=t.type==='in';
+    if(btn.dataset.act==='sol'){
+      if(st.d){ card.querySelector('.slb').hidden=false; st.v=true; save(); return; }
+      card.querySelector('.slb').hidden=false;
+      if(isTT){ const rows=ttRows(t); card.querySelectorAll('.cell').forEach(c=>cellSet(c,t.fn(rows[+c.dataset.r])[+c.dataset.j])); }
+      st.d=true; st.p=0; st.sol=true; lockCard(card);
+      fb.className='fb bad'; fb.textContent='Rešitev prikazana: 0 točk. Naloga je zaklenjena.';
+      save(); refresh(); return;
+    }
+    if(st.d) return;
+    if(btn.dataset.act==='hint'){
+      st.h=true; card.querySelector('.hn').hidden=false; btn.disabled=true;
+      fb.className='fb'; fb.textContent='Namig je odbil 50 % točk te naloge.'; save(); refresh(); return;
+    }
+    if(btn.dataset.act==='check'){
+      let ok;
+      if(isTT){
+        const rows=ttRows(t), cells=[...card.querySelectorAll('.cell')];
+        if(cells.some(c=>c.classList.contains('un'))){ fb.className='fb bad'; fb.textContent='Najprej dopolni vse celice izhodov.'; return; }
+        ok=true;
+        cells.forEach(c=>{ const exp=t.fn(rows[+c.dataset.r])[+c.dataset.j]; if(+c.textContent!==exp){ ok=false; c.classList.add('bad'); } });
+      } else if(isIN){
+        const vals=[...card.querySelectorAll('input.inp')].map(x=>x.value);
+        if(vals.some(v=>v.trim()==='')){ fb.className='fb bad'; fb.textContent='Najprej vpiši odgovor.'; return; }
+        for(let j=0;j<t.fields.length;j++){
+          const f=t.fields[j];
+          if(LIB.canon(vals[j],f.f,f.w)===null){
+            fb.className='fb bad';
+            fb.textContent = f.w ? 'Odgovor mora imeti natanko '+f.w+' števk'+(FMTMSG[f.f]?' ('+FMTMSG[f.f]+')':'')+'.' : 'Odgovor ni v pravilni obliki: '+(FMTMSG[f.f]||'preveri vnos')+'.';
+            return;
+          }
+        }
+        ok=t.fields.every((f,j)=>LIB.same(vals[j],f));
+        st.a=vals; markIn(card,t,vals);
+      } else {
+        const sel=card.querySelector('input:checked');
+        if(!sel){ fb.className='fb bad'; fb.textContent='Najprej izberi odgovor.'; return; }
+        st.sel=+sel.value; ok=st.sel===t.ans;
+      }
+      st.p = ok ? (st.h ? pts/2 : pts) : 0;
+      st.d=true; lockCard(card);
+      fb.className='fb '+(ok?'ok':'bad');
+      fb.textContent=(ok?'Pravilno':'Ni pravilno')+': dobiš '+fmtPts(st.p)+' od '+pts+' t. Odgovor je zaklenjen.';
+      save(); refresh();
+    }
+  });
+  function refresh(){
+    const doneCount=TASKS.reduce((a,t,i)=>a+((S.t[i]&&S.t[i].d)?1:0),0);
+    const got=TASKS.reduce((a,t,i)=>a+((S.t[i]&&S.t[i].d)?S.t[i].p:0),0);
+    const pct=doneCount/TASKS.length*100;
+    $('bar').style.width=pct+'%';
+    $('score').textContent=fmtPts(got)+' / '+maxScore+' t · '+doneCount+'/'+TASKS.length;
+    $('sc').textContent=fmtPts(got); $('mx').textContent=maxScore; $('pc').textContent=doneCount+'/'+TASKS.length+' nalog';
+    $('bf').style.width=pct+'%';
+    [...nums.children].forEach((b,i)=>{ const st=S.t[i]; b.classList.toggle('done',!!(st&&st.d&&st.p>0)); b.classList.toggle('zero',!!(st&&st.d&&st.p===0)); });
+    const chN=document.querySelector('#nav .chap[data-page="naloge"]');
+    if(chN) chN.classList.toggle('done', doneCount===TASKS.length);
+    CFG.MODS.forEach(m=>{
+      const ids=TASKS.map((t,i)=>t.mod===m.id?i:-1).filter(i=>i>=0);
+      const dn=ids.filter(i=>S.t[i]&&S.t[i].d).length;
+      const el=$('mp-'+m.id); if(el) el.textContent='Rešeno: '+dn+' / '+ids.length+' nalog';
+    });
+  }
+  // ponastavitev z vgrajenim potrjevanjem (brez confirm())
+  function resetUI(step){
+    const box=$('resetBox');
+    if(step===1){
+      box.innerHTML='<div class="confirm"><span>Res izbrišem vse odgovore in cilje? Učitelj bo videl ponastavitev in prejšnji rezultat.</span><button class="btn danger sm" id="resetYes">Da, ponastavi</button><button class="btn g2 sm" id="resetNo">Prekliči</button></div>';
+      $('resetYes').addEventListener('click',()=>{
+        S={t:{},g:[]}; save();
+        goalsEl.querySelectorAll('input').forEach(c=>c.checked=false);
+        buildTasks(); refresh(); resetUI(0);
+      });
+      $('resetNo').addEventListener('click',()=>resetUI(0));
+    } else {
+      box.innerHTML='<button class="btn danger sm" id="resetBtn">Ponastavi napredek</button>';
+      $('resetBtn').addEventListener('click',()=>resetUI(1));
+    }
+  }
+  resetUI(0);
+  buildTasks(); refresh();
+
+  const h0=location.hash.slice(1);
+  showPage(PAGES.includes(h0)?h0:CFG.th[0],false);
+})();
+
+</script>
+
+</html>

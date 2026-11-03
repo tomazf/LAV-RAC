@@ -1,0 +1,2049 @@
+<!doctype html>
+<html lang="sl"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!--LAVELS:BOOT-->
+<title>Booleova algebra in minimizacija</title>
+<link href="/static/fonts/fonts.css" rel="stylesheet">
+<style>
+/* Shema kot pri LAV-ELS 3.1 do 3.3: temno modra glava z napredkom, desni meni s tremi poglavji (Teorija, Simulacija, Naloge),
+   stran za stranjo z gumboma Nazaj/Naprej. Signal (logična 1) = oranžna. Vrata so pravokotni IEC simboli. */
+:root{
+  --bg:#f2f5f9;--card:#fff;--ink:#14213d;--mut:#586377;--acc:#0b6e8a;--onacc:#fff;--sig:#e8590c;--sigbg:#fff0e3;
+  --ok:#2b8a3e;--bad:#c92a2a;--line:#d3dae5;--tile:#e6edf5;--okbg:#e3f5e8;--badbg:#fde8e8;--wire:#a9b4c4;--hdr:#14213d;--amb:#e9a23b;
+  --fb:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;--fm:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  /* aliasi za risbe v SVG */
+  --on:var(--sig);--off:var(--wire);--panel:var(--card);--fg:var(--ink);--muted:var(--mut);--accent:var(--acc);--accent-ink:var(--onacc);
+  --code:var(--tile);--on-ink:#1b1206;--warn:var(--amb);--okc:var(--ok);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1626;--card:#172238;--ink:#e8edf6;--mut:#9aa7bd;--acc:#4cc2e0;--onacc:#0e1626;--sig:#ff9f43;--sigbg:#3a2a18;
+  --ok:#6fd48a;--bad:#ff8080;--line:#2b3a57;--tile:#22304c;--okbg:#17352a;--badbg:#3d2230;--wire:#4a5a76;--hdr:#0a1020;--amb:#f1b95a;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1626;--card:#172238;--ink:#e8edf6;--mut:#9aa7bd;--acc:#4cc2e0;--onacc:#0e1626;--sig:#ff9f43;--sigbg:#3a2a18;
+  --ok:#6fd48a;--bad:#ff8080;--line:#2b3a57;--tile:#22304c;--okbg:#17352a;--badbg:#3d2230;--wire:#4a5a76;--hdr:#0a1020;--amb:#f1b95a;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 var(--fb)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--hdr)}
+button,input{font:inherit}
+button:focus-visible,input:focus-visible{outline:3px solid var(--amb);outline-offset:2px}
+[hidden]{display:none!important}
+header{background:var(--hdr);color:#fff;padding-block:14px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.hin{max-width:1180px;margin:auto;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.hin .ttl{flex:1;min-width:200px}
+.hin h1{font-size:1.25rem;margin:0;line-height:1.25}
+.hin small{display:block;opacity:.8;font-size:.84rem}
+.sc{min-width:220px;font-size:.95rem}.sc b{font-size:1.25rem}
+.hbar{height:8px;background:#ffffff33;border-radius:5px;overflow:hidden;margin-top:5px}.hbar i{display:block;height:100%;background:var(--amb);width:0;transition:width .4s}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:20px;max-width:1180px;margin:auto;padding-block:16px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{min-width:0}
+aside{position:sticky;top:calc(12px + env(safe-area-inset-top,0px));align-self:start}
+.navc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px}
+.chap{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:2px solid transparent;background:none;color:var(--ink);border-radius:10px;padding:8px 10px;margin-top:4px;font-weight:700;cursor:pointer}
+.chap:first-child{margin-top:0}
+.chap:hover{background:var(--tile)}
+.chap.on{border-color:var(--acc);background:var(--tile)}
+.chap.done .sn{background:var(--ok);border-color:var(--ok);color:#fff}
+.subnav{margin:2px 0 6px 18px;border-left:3px solid var(--line);padding-left:6px}
+.sb{display:block;width:100%;text-align:left;border:2px solid transparent;background:none;color:var(--ink);border-radius:10px;padding:6px 8px;margin-top:2px;cursor:pointer;font-size:.95rem}
+.sb:hover{background:var(--tile)}
+.sb.on{border-color:var(--acc);background:var(--tile)}
+.sn{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--tile);color:var(--acc);font-weight:700;font-size:.85rem;border:2px solid var(--line)}
+.chap.on .sn{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
+main .page{display:none}
+main .page.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 26px;margin-bottom:14px;scroll-margin-top:12px;min-width:0}
+.crumb{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px;color:var(--mut);font-size:.92rem}
+.pager{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:6px 0 4px}
+h1,h2,h3,h4{line-height:1.2;text-wrap:balance}
+h2{margin:.1em 0 .45em;font-size:1.55rem}
+h3{margin:1.3em 0 .4em;font-size:1.1rem;color:var(--acc)}
+h4{margin:1.2em 0 .3em;font-size:1rem}
+p{margin:.45em 0;max-width:72ch}
+ul,ol{max-width:72ch;padding-left:22px}li{margin:4px 0}
+.lead{font-size:1.08rem}
+.label{font:600 .74rem var(--fm);text-transform:uppercase;letter-spacing:.08em;color:var(--mut)}
+.mut{color:var(--mut)}.sm{font-size:.88rem}
+.m{font-family:var(--fm)}
+.note{font-size:.92rem;color:var(--mut)}
+.btn{border:0;border-radius:8px;padding:10px 18px;cursor:pointer;background:var(--acc);color:var(--onacc);min-height:44px}
+.btn.g2{background:var(--tile);color:var(--ink)}
+.btn.sm{min-height:36px;padding:6px 12px;font-size:.9rem}
+.btn.danger{background:var(--bad);color:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+.eqb{font:500 .98rem var(--fm);background:var(--tile);border-radius:8px;padding:9px 12px;overflow-x:auto;white-space:nowrap;margin:8px 0}
+.ex{font-size:.95rem;background:var(--tile);border-radius:10px;padding:10px 12px;margin:8px 0}
+.ex strong{display:block;margin-bottom:2px}
+.ex .acts{margin-top:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid2>*{min-width:0}
+@media (max-width:640px){.grid2{grid-template-columns:1fr}}
+.idea{background:var(--tile);border-left:5px solid var(--acc);padding:10px 14px;border-radius:8px;margin:12px 0;max-width:76ch}
+.scroll{overflow-x:auto;max-width:100%}
+.fig{display:flex;justify-content:center;background:var(--tile);border-radius:10px;padding:10px;margin:10px 0;overflow-x:auto}
+.fig svg{display:block;width:100%;height:auto;max-width:100%}
+.fig.wide{justify-content:flex-start}.fig.wide svg{min-width:560px}
+.fig.wider{justify-content:flex-start}.fig.wider svg{min-width:760px}
+svg text{fill:var(--ink);font-family:var(--fm);font-size:13px}
+svg .gate{fill:var(--card);stroke:var(--ink);stroke-width:2}
+svg .net{fill:var(--acc);font-weight:600}
+svg .lbl{fill:var(--mut);font-size:11px}
+svg .sym{font-weight:700;font-size:13px}
+svg .selband{fill:color-mix(in srgb,var(--acc) 13%,transparent)}
+svg .blk{fill:var(--card);stroke:var(--acc);stroke-width:2}
+svg .blkt{fill:var(--acc);font-weight:700;font-size:12px}
+svg .blks{fill:var(--mut);font-size:11px}
+svg .pin{fill:var(--mut);font-size:11px}
+svg .pin.sel{fill:var(--accent);font-weight:700}
+svg .dash{fill:none;stroke:var(--mut);stroke-width:1.2;stroke-dasharray:5 4}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:.94rem}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--tile);font-weight:600}
+td.l,th.l{text-align:left}
+tr.hl td,tr.cur td{background:var(--sigbg);font-weight:700}
+th.o,td.o{background:color-mix(in srgb,var(--acc) 9%,transparent)}
+td.mid,th.mid{color:var(--mut)}
+td.m,th.m{font-family:var(--fm)}
+/* simulacija */
+.toggles{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.tg{min-width:56px;min-height:44px;padding:8px 10px;border-radius:8px;border:2px solid var(--ink);background:var(--card);color:var(--ink);font:700 1rem var(--fm);cursor:pointer}
+.tg[aria-pressed="true"]{background:var(--sig);border-color:var(--sig);color:#1b1206}
+.tg.sq{min-width:44px;padding:8px 6px}
+.pill{font:600 .9rem var(--fm);padding:6px 13px;border-radius:99px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;min-height:36px}
+.pill[aria-pressed="true"]{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px;align-items:center}
+.lamps{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.lamp{min-width:78px;text-align:center;padding:8px 6px;border-radius:10px;border:2px solid var(--line);background:var(--card)}
+.lamp .b{font:700 1.5rem/1.2 var(--fm);color:var(--mut)}
+.lamp.on{background:var(--sig);border-color:var(--sig)}
+.lamp.on .b,.lamp.on .label{color:#1b1206}
+.lamp.txt .b{font-size:1.1rem}
+.readout{font-size:.95rem;margin:8px 0;padding:10px 12px;border-radius:10px;background:var(--tile)}
+.status{font-size:.95rem;margin-top:6px;min-height:1.4em}
+.status.ok{color:var(--ok)}.status.bad{color:var(--bad)}
+.izziv{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+.izziv p{margin:0}
+.hintbox{margin-top:8px;padding:10px 12px;border-radius:8px;background:var(--tile);border-left:5px solid var(--amb);font-size:.94rem}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.sec{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.sec>h3:first-child{margin-top:0}
+.inp{font:600 1.05rem var(--fm);padding:8px 12px;border:2px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);min-width:0;width:100%;max-width:320px;min-height:44px}
+.inp.right{border-color:var(--ok);background:var(--okbg)}
+.inp.wrong{border-color:var(--bad);background:var(--badbg)}
+.inp:disabled{opacity:.9}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
+.tile{background:var(--tile);border-radius:10px;padding:10px 12px;min-width:0}
+.tile .v{font:700 1.2rem var(--fm);overflow-wrap:anywhere}
+.tile.on{background:var(--sigbg)}
+.stp{font:500 .9rem/1.6 var(--fm);background:var(--tile);border-radius:10px;padding:10px 12px;margin:8px 0;max-height:300px;overflow:auto}
+.stp div{white-space:nowrap}
+.stp .hd{font:600 .74rem var(--fm);text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin-top:8px;white-space:normal}
+.stp .hd:first-child{margin-top:0}
+.stp .res{font-weight:700;color:var(--acc)}
+table.cs{width:auto;border-collapse:collapse;font:700 1.25rem var(--fm);margin:8px 0}
+table.cs td,table.cs th{border:0;padding:3px 9px;min-width:34px;background:none}
+table.cs td.cr{color:var(--sig);font-size:.95rem}
+table.cs tr.ln td{border-top:3px solid var(--ink)}
+table.cs td.rl{text-align:left;font:600 .8rem var(--fb);color:var(--mut);min-width:90px}
+table.cs td.one{color:var(--sig)}
+table.cs td.ov{color:var(--bad)}
+table.cs td.hi,table.cs th.hi{background:var(--sigbg)}
+table.cs th{font:600 .72rem var(--fm);color:var(--mut)}
+.wt td,.wt th{font-family:var(--fm);padding:4px 7px}
+.wt td.neg,.wt th.neg{color:var(--bad)}
+.ser{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.fnrow{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+.fnrow>*{min-width:0}
+/* cilji in sklopi (uvod) */
+.goals label{display:flex;gap:10px;align-items:flex-start;padding:5px 0;cursor:pointer;max-width:72ch}
+.goals input{width:20px;height:20px;margin-top:3px;accent-color:var(--acc);flex:none}
+.mods{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:10px 0}
+.mods>div{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.mods .n{font:700 1.6rem var(--fm);color:var(--acc);line-height:1}
+.mods p{margin:0;font-size:.93rem}
+.mods .btn{margin-top:auto;align-self:flex-start}
+/* naloge */
+.sticky{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:8px 0 10px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.progress{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.bar{flex:1;min-width:120px;height:8px;background:var(--tile);border-radius:999px;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.nums{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.nums button{width:36px;height:36px;border-radius:50%;border:2px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;cursor:pointer}
+.nums button.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.nums button.zero{background:var(--mut);border-color:var(--mut);color:var(--card)}
+.lv{font-size:.88rem;color:var(--mut);display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.lvt{font:700 .74rem var(--fm);text-transform:uppercase;letter-spacing:.06em;padding:2px 9px;border-radius:99px;color:#fff}
+.lvt.l1{background:var(--ok)}.lvt.l2{background:#b7791f}.lvt.l3{background:var(--bad)}
+.qt{font-size:1.13rem;margin:10px 0 14px;max-width:72ch}
+.opts{display:flex;flex-direction:column;gap:6px;max-width:620px}
+.opt{display:flex;gap:10px;align-items:center;padding:9px 12px;border:2px solid var(--line);border-radius:10px;cursor:pointer;min-height:46px}
+.opt:has(input:checked){border-color:var(--acc);background:var(--tile)}
+.opt input{width:18px;height:18px;accent-color:var(--acc);flex:none}
+.opt.mono span{font-family:var(--fm)}
+.fld{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:8px 0}
+.fld .fl{min-width:140px;font-size:.95rem;color:var(--mut)}
+.fld .u{font:600 1.25rem var(--fm);color:var(--mut)}
+.cell{width:46px;height:36px;border:2px solid var(--amb);border-radius:6px;background:var(--card);color:var(--ink);font:700 1rem var(--fm);cursor:pointer}
+.cell.un{color:var(--mut);border-style:dashed}
+.cell.one{background:var(--sig);border-color:var(--sig);color:#1b1206}
+.cell.bad{outline:3px solid var(--bad)}
+.cell:disabled{cursor:default}
+.ttask td.o{padding:3px 6px}
+.fb{margin-top:12px;padding:10px 14px;border-radius:8px;min-height:1px}
+.fb:empty{display:none}
+.fb.ok{background:var(--okbg);color:var(--ok)}.fb.bad{background:var(--badbg);color:var(--bad)}
+.hn,.slb{margin-top:10px;padding:10px 14px;border-radius:8px;background:var(--tile)}
+.hn{border-left:5px solid var(--amb)}
+.slb{border-left:5px solid var(--acc)}
+.hn::before{content:"Namig: ";font-weight:700;color:var(--amb)}
+.slb::before{content:"Rešitev: ";font-weight:700;color:var(--acc)}
+.slb .stp{max-height:none}
+.task{scroll-margin-top:150px}
+.confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+@media (max-width:900px){
+  .wrap{grid-template-columns:minmax(0,1fr)}
+  aside{order:-1;position:static}
+  .subnav{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 6px;border-left:0;padding-left:0}
+  .subnav .sb{width:auto;flex:1 1 auto;margin:0;border:1px solid var(--line);text-align:center}
+  .card{padding:16px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* vrste bitov s težami */
+.bcol{display:flex;flex-direction:column;align-items:center;gap:3px}
+.bcol .label{font-size:.68rem;letter-spacing:0}
+.nib{display:flex;gap:8px;margin-right:10px}
+.nib:last-child{margin-right:0}
+.toggles.tight .nib{gap:4px}
+.toggles.tight .tg.sq{min-width:36px;padding:8px 2px}
+@media (max-width:480px){
+  .toggles{gap:4px}
+  .tg.sq{min-width:34px;padding:8px 2px}
+  .nib{gap:4px;margin-right:6px}
+  .toggles.tight .tg.sq{min-width:32px}
+}
+
+/* tabela ASCII */
+.asg{width:auto;border-collapse:separate;border-spacing:3px;font-size:.85rem}
+.asg th{background:none;border:0;padding:2px 4px;font:600 .72rem var(--fm);color:var(--mut)}
+.asg td{border:0;padding:0;background:none}
+.asg button{width:38px;height:34px;border:2px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);font:600 .95rem var(--fm);cursor:pointer;padding:0}
+.asg button.c0{color:var(--mut);font-size:.62rem;background:var(--tile)}
+.asg button.c1{border-color:var(--acc)}
+.asg button.c2{background:var(--tile)}
+.asg button.c3{background:var(--sigbg)}
+.asg button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--onacc)}
+.seg{display:inline-block}
+
+
+/* ===== dodatki za tematiko 1 (logična vrata in Booleova algebra) ===== */
+/* negacija s črto nad spremenljivko ali skupino; gnezdene črte so ena nad drugo */
+.ng{display:inline-block;border-top:1.6px solid currentColor;padding-top:1px;line-height:1.1}
+.symsel{margin:4px 0 8px}
+table.tt{width:auto;min-width:0}
+table.tt td,table.tt th{font-family:var(--fm);min-width:2.4rem;padding:4px 10px}
+table.tt td.one{color:var(--sig);font-weight:700}
+table.tt tr.cur td{background:var(--sigbg)}
+table.tt tr[data-m]:hover td{background:var(--tile)}
+.eqbig{font:600 1.15rem var(--fm);background:var(--tile);border-radius:8px;padding:10px 14px;margin:8px 0;overflow-x:auto;white-space:nowrap}
+.eqbig .ng,.eqb .ng{border-top-width:2px}
+.simrow{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+@media (min-width:980px){.simrow.two{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}}
+.simrow>*{min-width:0}
+.desc{background:var(--tile);border-left:5px solid var(--acc);border-radius:8px;padding:10px 14px;margin:8px 0;max-width:76ch}
+.volt{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center;margin:8px 0}
+.volt input[type=range]{flex:1 1 260px;max-width:460px;accent-color:var(--sig);min-height:36px}
+.volt .vv{font:700 1.6rem var(--fm);min-width:5.5ch}
+.zone{display:inline-block;padding:2px 10px;border-radius:99px;font:700 .85rem var(--fb)}
+.zone.z0{background:var(--tile);color:var(--ink);border:2px solid var(--mut)}
+.zone.z1{background:var(--sig);color:#1b1206}
+.zone.zx{background:var(--amb);color:#1b1206}
+.lamp.mid{background:var(--amb);border-color:var(--amb)}
+.lamp.mid .b,.lamp.mid .label{color:#1b1206}
+.qtab{width:auto;min-width:0;margin:6px 0}
+.qtab td,.qtab th{font-family:var(--fm);padding:3px 10px}
+.cmp td,.cmp th{text-align:left}
+.cmp td.m,.cmp th.m{text-align:center}
+.cellrow .cell{width:42px}
+/* barve skupin v Veitchevem diagramu */
+:root{--g1:#1c7ed6;--g2:#d6336c;--g3:#2b8a3e;--g4:#9c36b5;--g5:#e67700;--g6:#0c8599}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--g1:#74c0fc;--g2:#f783ac;--g3:#8ce99a;--g4:#e599f7;--g5:#ffc078;--g6:#66d9e8}}
+:root[data-theme="dark"]{--g1:#74c0fc;--g2:#f783ac;--g3:#8ce99a;--g4:#e599f7;--g5:#ffc078;--g6:#66d9e8}
+.gchips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.gchip{font:600 1rem var(--fm);border:3px solid;border-radius:99px;padding:2px 12px;background:var(--card)}
+.kp{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.kp .kb{min-width:42px;min-height:40px;border:2px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:700 1rem var(--fm);cursor:pointer}
+.kp .kb:hover{border-color:var(--acc)}
+.kp .kb:disabled{opacity:.45;cursor:default}
+.exf .inp{max-width:520px;font-size:1.1rem}
+.expv{font-size:1rem;margin-top:4px}
+.steps{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.step{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,auto);gap:4px 14px;align-items:baseline;background:var(--tile);border-radius:8px;padding:8px 12px}
+.step .ex2{font:600 1.05rem var(--fm);overflow-x:auto;white-space:nowrap}
+.step .rule{font-size:.88rem;color:var(--mut)}
+.step.new{outline:2px solid var(--acc)}
+@media (max-width:640px){.step{grid-template-columns:minmax(0,1fr)}}
+.verd{font-weight:700}.verd.ok{color:var(--ok)}.verd.bad{color:var(--bad)}
+.law td,.law th{text-align:left}
+.law td.m{font-family:var(--fm);white-space:nowrap}
+.gchips{align-items:center;align-self:center}
+.fig.kmex,.kmsol .fig{flex-direction:column;align-items:center}
+
+
+</style>
+<header><div class="hin">
+  <div class="ttl"><small>LAV-ELS · laboratorijska vaja 1.3</small><h1>Booleova algebra in minimizacija</h1></div>
+  <div class="sc"><b id="sc">0</b> / <span id="mx"></span> točk · <span id="pc"></span><div class="hbar"><i id="bf"></i></div></div>
+</div></header>
+
+<div class="wrap">
+<main id="main">
+  <!-- ===================== TEORIJA ===================== -->
+  <div class="card page" id="uvod" data-grp="Teorija">
+    <h2>Uvod in cilji</h2>
+    <p class="lead">Isto logično funkcijo lahko zapišemo na veliko načinov. Nekateri zapisi potrebujejo veliko vrat, drugi malo. <strong>Minimizacija</strong> (poenostavljanje) poišče najkrajši zapis: manj vrat pomeni cenejše, hitrejše in zanesljivejše vezje z manjšo porabo. Za poenostavljanje imamo dve orodji: <strong>Booleovo algebro</strong> (računanje s pravili) in <strong>Veitchev diagram</strong> (grafično iskanje skupin).</p>
+    <div class="ex"><strong>Primer: glasovanje »večina od treh«</strong>
+      Iz tabele dobimo Y = <span class="ng">A</span>·B·C + A·<span class="ng">B</span>·C + A·B·<span class="ng">C</span> + A·B·C: 4 vrata IN s tremi vhodi, 3 negatorji, vrata ALI s štirimi vhodi in 12 literalov.<br>
+      Po poenostavitvi: Y = A·B + A·C + B·C: 3 vrata IN z dvema vhodoma in ena vrata ALI, 6 literalov. Tabela je enaka.</div>
+    <h3>Cilji</h3>
+    <div class="goals" id="goals"></div>
+    <h3>Sklopi</h3>
+    <div class="mods" id="mods"></div>
+    <h3>Kako poteka vaja</h3>
+    <ol>
+      <li>Preberi teorijo in jo preizkusi v simulaciji. Pri vsakem pravilu lahko enakost preveriš s tabelo.</li>
+      <li>Pri nalogah z vpisom izraza piši: negacija ¬A ali A', IN · ali skupaj (AB), ALI +, NAND ↑, NOR ↓. Pod poljem so tipke za vse znake.</li>
+      <li>Če naloga zahteva <strong>najkrajši</strong> zapis, mora biti izraz pravilen in mora imeti najmanj literalov (spremenljivk v zapisu).</li>
+    </ol>
+    <h3>Točkovanje</h3>
+    <ul>
+      <li><strong>Lahka</strong> naloga je vredna 1 točko, <strong>srednja</strong> 2 točki, <strong>težka</strong> 3 točke.</li>
+      <li>Namig odbije 50 % točk naloge. Ogled rešitve prinese 0 točk.</li>
+      <li>Ko pritisneš »Preveri«, se odgovor zaklene. Izjema: če izraza ni mogoče prebrati (npr. manjka zaklepaj), te opozorimo in ga lahko popraviš.</li>
+    </ul>
+  </div>
+
+  <div class="card page" id="postulati" data-grp="Teorija">
+    <h2>Postulati Booleove algebre</h2>
+    <p class="lead"><strong>Postulati</strong> so osnovna pravila, ki jih ne dokazujemo, ampak jih vzamemo kot dogovor. Iz njih izpeljemo vse ostalo. Booleova algebra pozna samo vrednosti 0 in 1 ter operacije · (IN), + (ALI) in negacijo.</p>
+    <div class="scroll"><table class="cmp law">
+      <tr><th>Postulat</th><th>Oblika z ALI</th><th>Oblika z IN</th></tr>
+      <tr><td>P1 zaprtost</td><td colspan="2">rezultat operacije je spet 0 ali 1</td></tr>
+      <tr><td>P2 nevtralni element</td><td class="m">A + 0 = A</td><td class="m">A·1 = A</td></tr>
+      <tr><td>P3 komutativnost (zamenjava)</td><td class="m">A + B = B + A</td><td class="m">A·B = B·A</td></tr>
+      <tr><td>P4 distributivnost</td><td class="m">A + B·C = (A + B)·(A + C)</td><td class="m">A·(B + C) = A·B + A·C</td></tr>
+      <tr><td>P5 komplement</td><td class="m">A + <span class="ng">A</span> = 1</td><td class="m">A·<span class="ng">A</span> = 0</td></tr>
+    </table></div>
+    <h3>Načelo dualnosti</h3>
+    <p>Vsako pravilo ima <strong>dualno</strong> obliko: zamenjamo + in · ter 0 in 1. Če velja eno, velja tudi drugo. Zato so v tabeli postulati v parih.</p>
+    <div class="eqb">A + 0 = A &nbsp;⟷&nbsp; A·1 = A &nbsp;&nbsp;&nbsp; A·(B + C) = A·B + A·C &nbsp;⟷&nbsp; A + B·C = (A + B)·(A + C)</div>
+    <div class="idea"><strong>Pozor, ni kot v matematiki:</strong> druga oblika distributivnosti, A + B·C = (A + B)·(A + C), pri navadnih številih ne velja (2 + 3·4 ≠ 5·6). V Booleovi algebri velja, kar lahko preveriš s tabelo v simulaciji.</div>
+    <div class="acts"><button class="btn g2" data-sim="s-zakoni">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <div class="card page" id="teoremi" data-grp="Teorija">
+    <h2>Teoremi Booleove algebre</h2>
+    <p class="lead"><strong>Teoremi</strong> so pravila, ki jih dokažemo s postulati ali s pravilnostno tabelo. To so orodja, s katerimi krajšamo izraze.</p>
+    <div class="scroll"><table class="cmp law">
+      <tr><th>Teorem</th><th>Oblika z ALI</th><th>Oblika z IN</th></tr>
+      <tr><td>T1 idempotenca</td><td class="m">A + A = A</td><td class="m">A·A = A</td></tr>
+      <tr><td>T2 dominanca</td><td class="m">A + 1 = 1</td><td class="m">A·0 = 0</td></tr>
+      <tr><td>T3 dvojna negacija</td><td class="m" colspan="2"><span class="ng"><span class="ng">A</span></span> = A</td></tr>
+      <tr><td>T4 absorpcija</td><td class="m">A + A·B = A</td><td class="m">A·(A + B) = A</td></tr>
+      <tr><td>T5 absorpcija negacije</td><td class="m">A + <span class="ng">A</span>·B = A + B</td><td class="m">A·(<span class="ng">A</span> + B) = A·B</td></tr>
+      <tr><td>T6 asociativnost</td><td class="m">(A + B) + C = A + (B + C)</td><td class="m">(A·B)·C = A·(B·C)</td></tr>
+      <tr><td>T7 združevanje sosedov</td><td class="m">A·B + A·<span class="ng">B</span> = A</td><td class="m">(A + B)·(A + <span class="ng">B</span>) = A</td></tr>
+      <tr><td>T8 konsenz</td><td class="m" colspan="2">A·B + <span class="ng">A</span>·C + B·C = A·B + <span class="ng">A</span>·C</td></tr>
+      <tr><td>T9 De Morgan</td><td class="m"><span class="ng">A + B</span> = <span class="ng">A</span>·<span class="ng">B</span></td><td class="m"><span class="ng">A·B</span> = <span class="ng">A</span> + <span class="ng">B</span></td></tr>
+    </table></div>
+    <h3>Dokaz s postulati</h3>
+    <div class="ex"><strong>T4 absorpcija: A + A·B = A</strong>
+      A + A·B = A·1 + A·B (P2) = A·(1 + B) (P4) = A·1 (T2) = A (P2).</div>
+    <div class="ex"><strong>T7 združevanje sosedov: A·B + A·<span class="ng">B</span> = A</strong>
+      A·B + A·<span class="ng">B</span> = A·(B + <span class="ng">B</span>) (P4) = A·1 (P5) = A (P2). To pravilo je temelj Veitchevega diagrama.</div>
+    <h3>Dokaz s tabelo</h3>
+    <p>Dva izraza sta enaka, če imata v <strong>vseh</strong> vrsticah tabele enak izhod. To je vedno mogoče preveriti, pri treh spremenljivkah je vrstic samo osem.</p>
+    <div id="tabAbs"></div>
+    <div class="acts"><button class="btn g2" data-sim="s-zakoni">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <div class="card page" id="demorgan" data-grp="Teorija">
+    <h2>De Morganova izreka</h2>
+    <p class="lead">De Morganova izreka povesta, kako negacija »preide« skozi oklepaj: <strong>negacija zamenja IN z ALI (in obratno) in negira vsako spremenljivko</strong>.</p>
+    <div class="eqbig"><span class="ng">A·B</span> = <span class="ng">A</span> + <span class="ng">B</span> &nbsp;&nbsp;&nbsp; <span class="ng">A + B</span> = <span class="ng">A</span>·<span class="ng">B</span></div>
+    <p>Izreka veljata za poljubno število spremenljivk: <span class="m"><span class="ng">A·B·C</span> = <span class="ng">A</span> + <span class="ng">B</span> + <span class="ng">C</span></span>.</p>
+    <div id="tabDM"></div>
+    <h3>Pomen za vezja</h3>
+    <ul>
+      <li>Vrata <strong>NAND</strong> so enaka vratom <strong>ALI z negiranimi vhodi</strong>.</li>
+      <li>Vrata <strong>NOR</strong> so enaka vratom <strong>IN z negiranimi vhodi</strong>.</li>
+    </ul>
+    <p>Zato lahko krogce »premikamo« z izhoda na vhode in obratno. Na tem temelji realizacija z vrati NAND in NOR.</p>
+    <h3>Negacija dolgega izraza</h3>
+    <div class="ex"><strong>Primer</strong>
+      <span class="ng">A·<span class="ng">B</span> + C</span> = <span class="ng">A·<span class="ng">B</span></span>·<span class="ng">C</span> (De Morgan za +) = (<span class="ng">A</span> + <span class="ng"><span class="ng">B</span></span>)·<span class="ng">C</span> (De Morgan za ·) = (<span class="ng">A</span> + B)·<span class="ng">C</span> (dvojna negacija).</div>
+    <div class="idea"><strong>Primer iz vsakdana, alarm »vse v redu«:</strong> lučka OK sveti, ko <em>ni</em> odprto nobeno okno: OK = <span class="ng">O1 + O2 + O3</span>. Po De Morganu je to <span class="ng">O1</span>·<span class="ng">O2</span>·<span class="ng">O3</span>: vsa okna so zaprta. Oba zapisa opisujeta isto, vezje pa je lahko eno samo vrata NOR.</div>
+    <div class="acts"><button class="btn g2" data-sim="s-demorgan">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <div class="card page" id="krajsanje" data-grp="Teorija">
+    <h2>Algebrsko poenostavljanje</h2>
+    <p class="lead">Pri algebrskem poenostavljanju izraz korak za korakom preoblikujemo s postulati in teoremi, dokler ga ne moremo več skrajšati. Vsak korak mora ohraniti tabelo.</p>
+    <h3>Postopek</h3>
+    <ol>
+      <li>Če je nad oklepajem črta, jo razreši z De Morganom.</li>
+      <li>Poišči člene, ki imajo skupne faktorje, in jih izpostavi (P4).</li>
+      <li>V oklepaju poišči X + <span class="ng">X</span> = 1 ali 1 + X = 1.</li>
+      <li>Uporabi absorpcijo: člen, ki že vsebuje krajši člen, odpade (A + A·B = A).</li>
+      <li>Člen lahko tudi podvojiš (A = A + A), če ga potrebuješ v dveh skupinah.</li>
+    </ol>
+    <div class="ex"><strong>Primer 1</strong>
+      <span class="ng">A</span>·B·C + A·B·C = B·C·(<span class="ng">A</span> + A) = B·C·1 = <b>B·C</b></div>
+    <div class="ex"><strong>Primer 2</strong>
+      A·B + A·B·C + A·<span class="ng">B</span> = A·B·(1 + C) + A·<span class="ng">B</span> = A·B + A·<span class="ng">B</span> = A·(B + <span class="ng">B</span>) = <b>A</b></div>
+    <div class="ex"><strong>Primer 3: večina od treh (podvajanje člena)</strong>
+      <span class="ng">A</span>BC + A<span class="ng">B</span>C + AB<span class="ng">C</span> + ABC. Člen ABC trikrat zapišemo (T1) in ga združimo z vsakim od ostalih:<br>
+      (<span class="ng">A</span>BC + ABC) + (A<span class="ng">B</span>C + ABC) + (AB<span class="ng">C</span> + ABC) = BC + AC + AB</div>
+    <div class="ex"><strong>Primer 4: z De Morganom</strong>
+      <span class="ng"><span class="ng">A</span>·B</span>·B = (A + <span class="ng">B</span>)·B = A·B + <span class="ng">B</span>·B = A·B + 0 = <b>A·B</b></div>
+    <p>Algebrska pot je pri večjih izrazih težavna, ker ni vedno jasno, katero pravilo uporabiti. Zato uporabljamo Veitchev diagram, ki skupne člene pokaže grafično.</p>
+    <div class="acts"><button class="btn g2" data-sim="s-krajsanje">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <div class="card page" id="veitch" data-grp="Teorija">
+    <h2>Veitchev diagram</h2>
+    <p class="lead"><strong>Veitchev diagram</strong> je pravilnostna tabela, preurejena v pravokotnik. Vsaka celica je ena vrstica tabele. Ob robu so <strong>črte spremenljivk</strong>: pod črto je spremenljivka 1, kjer črte ni, je 0. Celice so razvrščene tako, da se <strong>sosednji celici razlikujeta natanko v eni spremenljivki</strong>.</p>
+    <div class="grid3">
+      <div><p class="label">2 spremenljivki: 4 celice</p><div class="fig kmex" data-n="2" data-on=""></div></div>
+      <div><p class="label">3 spremenljivke: 8 celic</p><div class="fig kmex" data-n="3" data-on=""></div></div>
+      <div><p class="label">4 spremenljivke: 16 celic</p><div class="fig kmex" data-n="4" data-on=""></div></div>
+    </div>
+    <p>Številka v kotu celice je številka vrstice tabele (v zvezek je ni treba pisati).</p>
+    <h3>Kako diagram narišeš v zvezek</h3>
+    <ol>
+      <li>Nariši pravokotnik: 2 × 2 celici za dve spremenljivki, 2 × 4 za tri, 4 × 4 za štiri.</li>
+      <li><strong>A</strong>: črta <strong>zgoraj</strong> nad levo polovico stolpcev.</li>
+      <li><strong>B</strong>: črta <strong>levo</strong> ob zgornji polovici vrstic.</li>
+      <li><strong>C</strong> (tri ali štiri spremenljivke): črta <strong>spodaj</strong> pod srednjima stolpcema.</li>
+      <li><strong>D</strong> (štiri spremenljivke): črta <strong>desno</strong> ob srednjih dveh vrsticah.</li>
+      <li>V celico vpišeš vrednost iz tiste vrstice tabele, pri kateri so pod črto ravno spremenljivke z vrednostjo 1. Primer: celica pod črtama A in C, levo od nje ni črte B, desno je črta D, je A = 1, B = 0, C = 1, D = 1, torej vrstica 1011 = 11.</li>
+    </ol>
+    <h3>Sosednost</h3>
+    <ul>
+      <li>Sosednji sta celici levo in desno ter zgoraj in spodaj, ne pa diagonalno.</li>
+      <li><strong>Levi in desni rob sta sosednja</strong>, prav tako zgornji in spodnji. Diagram si predstavljaj, kot da je zvit v valj.</li>
+      <li>Štiri vogalne celice pri štirih spremenljivkah so vse med sabo sosednje: v vseh je C = 0 in D = 0.</li>
+    </ul>
+    <h3>Zakaj deluje</h3>
+    <p>Dve sosednji enici se razlikujeta v eni spremenljivki, zato po pravilu T7 (X·Y + X·<span class="ng">Y</span> = X) ta spremenljivka izpade. Skupina dveh celic izloči eno spremenljivko, skupina štirih dve, skupina osmih tri.</p>
+    <div class="grid2">
+      <div><p class="label">Večina od treh: Y = A·B + A·C + B·C</p><div class="fig kmex" data-n="3" data-on="3,5,6,7" data-g="1"></div></div>
+      <div><p class="label">Vogali: Y = <span class="ng">C</span>·<span class="ng">D</span></p><div class="fig kmex" data-n="4" data-on="0,4,8,12" data-g="1"></div></div>
+    </div>
+    <div class="acts"><button class="btn g2" data-sim="s-veitch">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <div class="card page" id="postopek" data-grp="Teorija">
+    <h2>Minimizacija z Veitchevim diagramom</h2>
+    <p class="lead">Postopek vodi do najkrajše vsote produktov. Imenujemo jo tudi minimalna PDNO (popolna disjunktivna normalna oblika, ki jo skrajšamo).</p>
+    <h3>Postopek po korakih</h3>
+    <ol>
+      <li>Iz tabele ali enačbe vpiši enice v ustrezne celice (številka v kotu pove vrstico).</li>
+      <li>Enice združi v <strong>skupine po 1, 2, 4, 8 ali 16</strong> celic (vedno potenca števila 2). Skupina je pravokotnik sosednjih celic, lahko gre čez rob.</li>
+      <li>Skupine naj bodo <strong>čim večje</strong>. Vsaka enica mora biti v vsaj eni skupini, skupine se smejo prekrivati.</li>
+      <li>Uporabi <strong>čim manj skupin</strong>: skupina, katere vse enice so že pokrite z drugimi, je odveč.</li>
+      <li>Iz vsake skupine zapiši produkt spremenljivk, ki se v skupini <strong>ne spreminjajo</strong>: pri vrednosti 1 spremenljivko zapišeš, pri 0 jo negiraš.</li>
+      <li>Produkte seštej.</li>
+    </ol>
+    <div class="ex"><strong>Primer: Y = 1 v vrsticah 0, 2, 5, 7, 8, 10, 13, 15</strong>
+      <div class="fig kmex" data-n="4" data-on="0,2,5,7,8,10,13,15" data-g="1"></div>
+      Spodnja vrstica (0, 2, 8, 10): B = 0 in D = 0 se ne spreminjata → <span class="ng">B</span>·<span class="ng">D</span>. Druga vrstica (5, 7, 13, 15): B = 1 in D = 1 → B·D. Y = <span class="ng">B</span>·<span class="ng">D</span> + B·D. To je EXNOR spremenljivk B in D.</div>
+    <h3>Pogoste napake</h3>
+    <ul>
+      <li>Skupina treh ali šestih celic ni dovoljena.</li>
+      <li>Diagonalni celici nista sosednji.</li>
+      <li>Pozabljena skupina čez rob: celici v prvem in zadnjem stolpcu sta sosednji.</li>
+    </ul>
+    <h3>Nepomembna stanja (X)</h3>
+    <p>Včasih nekaterih kombinacij vhodov nikoli ne bo. Pri števki v kodi BCD vzorci 1010 do 1111 ne obstajajo. V diagram vpišemo X in jih po potrebi štejemo kot enice, če s tem dobimo večjo skupino.</p>
+    <div class="ex"><strong>Primer: lučka »števka je 5 ali več« za kodo BCD (ABCD)</strong>
+      <div class="fig kmex" data-n="4" data-on="5,6,7,8,9" data-dc="10,11,12,13,14,15" data-g="1"></div>
+      Z X dobimo Y = A + B·D + B·C. Brez X bi bil izraz precej daljši.</div>
+    <h3>Skupine ničel</h3>
+    <p>Enako lahko združujemo <strong>ničle</strong>. Iz skupine ničel zapišemo <strong>vsoto</strong>: spremenljivko z vrednostjo 0 zapišemo, z 1 jo negiramo. Vsote zmnožimo in dobimo minimalni produkt vsot. Kadar je ničel malo, je ta zapis krajši.</p>
+    <div class="acts"><button class="btn g2" data-sim="s-trening">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <div class="card page" id="realizacija" data-grp="Teorija">
+    <h2>Realizacija z vrati NAND in NOR</h2>
+    <p class="lead">Minimalni izraz najprej narišemo z vrati IN in ALI (dve ravni). Nato ga z dvojno negacijo in De Morganom pretvorimo v vezje <strong>samo iz vrat NAND</strong>. Tako potrebujemo samo eno vrsto čipov, na primer 7400.</p>
+    <h3>Vsota produktov → NAND-NAND</h3>
+    <ol>
+      <li>Zapiši minimalno vsoto produktov: Y = A·B + C·D.</li>
+      <li>Celoten izraz dvakrat negiraj: Y = <span class="ng"><span class="ng">A·B + C·D</span></span>.</li>
+      <li>Spodnjo negacijo razreši z De Morganom: Y = <span class="ng"><span class="ng">A·B</span>·<span class="ng">C·D</span></span>.</li>
+      <li>Vsak <span class="ng">X·Y</span> je ena vrata NAND: Y = (A ↑ B) ↑ (C ↑ D).</li>
+    </ol>
+    <p>Pravilo na kratko: <strong>vsa vrata IN in ALI zamenjaš z vrati NAND</strong>. Spremenljivka, ki gre sama v vrata ALI, se mora negirati (ena vrata NAND kot negator).</p>
+    <h3>Produkt vsot → NOR-NOR</h3>
+    <p>Dualno velja za produkt vsot: Y = (A + B)·(C + D) = <span class="ng"><span class="ng">A + B</span> + <span class="ng">C + D</span></span> = (A ↓ B) ↓ (C ↓ D). Vsa vrata ALI in IN zamenjaš z vrati NOR.</p>
+    <div class="ex"><strong>Primer: večina od treh z vrati NAND</strong>
+      Y = A·B + A·C + B·C = (A ↑ B) ↑ (A ↑ C) ↑ (B ↑ C), kjer so zadnja vrata NAND s tremi vhodi. Skupaj štiri vrata NAND, en čip 7400 in en 7410 (3 × NAND s tremi vhodi).</div>
+    <div class="idea"><strong>Primer iz vsakdana, krmilje stiskalnice:</strong> pri gradnji krmilja na prototipni ploščici imaš v predalu samo čipe 7400. Z vrati NAND zgradiš vsako funkcijo in ti ni treba čakati na naročilo drugih čipov.</div>
+    <div class="acts"><button class="btn g2" data-sim="s-realizacija">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <!-- ===================== SIMULACIJA ===================== -->
+  <div class="card sim page" id="s-zakoni" data-grp="Simulacija">
+    <h2>Simulacija: preveri pravilo s tabelo</h2>
+    <p class="note">Izberi pravilo ali vpiši svoja izraza. Tabela izračuna obe strani v vseh vrsticah. Če sta stolpca povsod enaka, pravilo velja.</p>
+    <div class="pills" id="zkSel"><span class="label">Pravilo</span></div>
+    <div class="fld exf"><span class="fl">Leva stran</span><input class="inp" id="zkL" type="text" autocomplete="off" spellcheck="false"></div>
+    <div class="fld exf"><span class="fl">Desna stran</span><input class="inp" id="zkR" type="text" autocomplete="off" spellcheck="false"></div>
+    <div class="kp" id="zkKeys"></div>
+    <div class="eqbig" id="zkEq"></div>
+    <div class="simrow two"><div id="zkTab"></div><div class="readout" id="zkRo"></div></div>
+    <div class="pills symsel"></div>
+    <div class="simrow two"><div class="fig" id="fig-zkL"></div><div class="fig" id="fig-zkR"></div></div>
+    <div class="izziv"><p><strong>Izziv:</strong> preveri, ali velja A + B·C = (A + B)·(A + C). Nato vpiši 2 + 3·4 v mislih kot števila. Zakaj v Booleovi algebri pravilo velja, v aritmetiki pa ne?</p><button class="btn g2 sm" data-hint="zkHint">Namig</button></div>
+    <p class="hintbox" id="zkHint" hidden>Tabela pokaže enake stolpce. Razlog: v Booleovi algebri velja A + A = A in A·A = A, zato se pri množenju (A + B)·(A + C) = A + A·C + A·B + B·C vsi členi z A »vpijejo« v A.</p>
+  </div>
+
+  <div class="card sim page" id="s-demorgan" data-grp="Simulacija">
+    <h2>Simulacija: De Morganova izreka v vezju</h2>
+    <p class="note">Levo so vrata NAND (ali NOR), desno vrata ALI (ali IN) z negiranimi vhodi. Preklapljaj vhode: izhoda sta vedno enaka.</p>
+    <div class="pills" id="dmSel"><span class="label">Izrek</span>
+      <button class="pill" data-k="nand" aria-pressed="true">NAND = ALI z negiranimi vhodi</button><button class="pill" data-k="nor" aria-pressed="false">NOR = IN z negiranimi vhodi</button></div>
+    <div class="pills" id="dmN"><span class="label">Vhodov</span>
+      <button class="pill" data-n="2" aria-pressed="true">2</button><button class="pill" data-n="3" aria-pressed="false">3</button></div>
+    <div class="toggles" id="dmIn"></div>
+    <div class="pills symsel"></div>
+    <div class="simrow two"><div class="fig" id="fig-dmL"></div><div class="fig" id="fig-dmR"></div></div>
+    <div class="eqbig" id="dmEq"></div>
+    <div id="dmTab"></div>
+    <div class="izziv"><p><strong>Izziv:</strong> pri NAND s tremi vhodi poišči edino kombinacijo, pri kateri sta oba izhoda 0. Zakaj je samo ena?</p><button class="btn g2 sm" data-hint="dmHint">Namig</button></div>
+    <p class="hintbox" id="dmHint" hidden>Samo pri 111. Leva stran: NAND je 0 samo, ko so vsi vhodi 1. Desna stran: ALI negiranih vhodov je 0 samo, ko so vsi negirani vhodi 0, torej vsi vhodi 1.</p>
+  </div>
+
+  <div class="card sim page" id="s-krajsanje" data-grp="Simulacija">
+    <h2>Simulacija: poenostavljanje po korakih</h2>
+    <p class="note">Izberi primer in s tipko »Naslednji korak« odkrivaj korake. Pri vsakem koraku je zapisano pravilo, preverjeno pa je tudi, da se tabela ni spremenila.</p>
+    <div class="pills" id="krSel"><span class="label">Primer</span></div>
+    <div class="steps" id="krSteps"></div>
+    <div class="acts"><button class="btn sm" id="krNext">Naslednji korak ›</button><button class="btn g2 sm" id="krAll">Pokaži vse</button><button class="btn g2 sm" id="krReset">Od začetka</button></div>
+    <div class="pills symsel"></div>
+    <div class="simrow two"><div><p class="label">Pred poenostavljanjem</p><div class="fig" id="fig-kr0"></div></div><div><p class="label">Po poenostavljanju</p><div class="fig" id="fig-kr1"></div></div></div>
+    <div class="readout" id="krRo"></div>
+    <div class="sec">
+      <h3>Tvoj izraz</h3>
+      <p class="note">Vpiši poljuben izraz s spremenljivkami A do D. Pokažemo najkrajšo vsoto produktov in koliko literalov ter vrat prihraniš.</p>
+      <div class="fld exf"><span class="fl">Y =</span><input class="inp" id="krIn" type="text" value="A·B + A·B·C + ¬A·B" autocomplete="off" spellcheck="false"></div>
+      <div class="readout" id="krOwn"></div>
+    </div>
+    <div class="izziv"><p><strong>Izziv:</strong> pri primeru »večina od treh« preštej literale pred in po poenostavljanju. Koliko vrat prihraniš?</p><button class="btn g2 sm" data-hint="krHint">Namig</button></div>
+    <p class="hintbox" id="krHint" hidden>Pred: 12 literalov (4 produkti po 3). Po: 6 literalov (3 produkti po 2). Število vrat je izpisano pod vezjema.</p>
+  </div>
+
+  <div class="card sim page" id="s-veitch" data-grp="Simulacija">
+    <h2>Simulacija: Veitchev diagram</h2>
+    <p class="note">Klikaj celice: 0 → 1 → X (nepomembno) → 0. Skupine se narišejo samodejno in iz njih se izpiše najkrajši izraz. Vezje in tabela se sproti posodabljata.</p>
+    <div class="pills" id="vkN"><span class="label">Spremenljivk</span>
+      <button class="pill" data-n="2" aria-pressed="false">2</button><button class="pill" data-n="3" aria-pressed="false">3</button><button class="pill" data-n="4" aria-pressed="true">4</button></div>
+    <div class="pills" id="vkMode"><span class="label">Združujem</span>
+      <button class="pill" data-p="0" aria-pressed="true">enice (vsota produktov)</button><button class="pill" data-p="1" aria-pressed="false">ničle (produkt vsot)</button></div>
+    <div class="pills" id="vkPre"><span class="label">Primer</span></div>
+    <div class="simrow two">
+      <div class="fig" id="fig-vk"></div>
+      <div><div id="vkChips"></div><div class="eqbig" id="vkEq"></div><div class="readout" id="vkRo"></div></div>
+    </div>
+    <div class="pills symsel"></div>
+    <div class="fig" id="fig-vkc"></div>
+    <div class="izziv"><p><strong>Izziv:</strong> pri štirih spremenljivkah nariši funkcijo, ki ima samo enice v štirih vogalih. Kakšen je izraz? Nato dodaj še enico v celici 15. Kaj se zgodi?</p><button class="btn g2 sm" data-hint="vkHint">Namig</button></div>
+    <p class="hintbox" id="vkHint" hidden>Vogali so ena skupina štirih celic: <span class="ng">C</span>·<span class="ng">D</span>. Celica 15 nima sosednje enice, zato ostane sama in prinese cel produkt A·B·C·D.</p>
+  </div>
+
+  <div class="card sim page" id="s-trening" data-grp="Simulacija">
+    <h2>Simulacija: trening minimizacije</h2>
+    <p class="note">Program izbere naključno funkcijo. Poišči skupine in vpiši najkrajšo vsoto produktov. Preverjanje pove, ali je izraz pravilen in ali je res najkrajši. Ta trening se ne točkuje.</p>
+    <div class="pills" id="trN"><span class="label">Spremenljivk</span>
+      <button class="pill" data-n="3" aria-pressed="true">3</button><button class="pill" data-n="4" aria-pressed="false">4</button></div>
+    <div class="pills" id="trMode"><span class="label">Način</span>
+      <button class="pill" data-m="0" aria-pressed="true">samo vpiši izraz</button><button class="pill" data-m="1" aria-pressed="false">najprej sam označi skupine</button></div>
+    <div class="fig" id="fig-tr"></div>
+    <div id="trGrp" hidden>
+      <div class="acts" style="margin-top:4px"><button class="btn sm" id="trAdd">Dodaj skupino</button><button class="btn g2 sm" id="trClr">Počisti izbiro</button><button class="btn g2 sm" id="trGchk">Preveri skupine</button></div>
+      <div class="gchips" id="trGl"></div>
+      <p class="sm mut">Povleci z miško ali prstom čez celice ene skupine (ali jih klikaj posamično), nato pritisni »Dodaj skupino«. Skupina sme segati čez rob. Skupino odstraniš s klikom na ×.</p>
+    </div>
+    <div class="fld exf"><span class="fl">Y =</span><input class="inp" id="trIn" type="text" autocomplete="off" spellcheck="false" placeholder="npr. A·¬C + B"></div>
+    <div class="kp" id="trKeys"></div>
+    <div class="acts"><button class="btn sm" id="trChk">Preveri</button><button class="btn g2 sm" id="trShow">Pokaži skupine</button><button class="btn g2 sm" id="trNew">Nova funkcija</button></div>
+    <p class="status" id="trMsg"></p>
+    <div id="trSol"></div>
+    <div class="readout" id="trRo"></div>
+    <div class="izziv"><p><strong>Izziv:</strong> reši pet funkcij s štirimi spremenljivkami zapored, ne da bi pogledal skupine.</p><button class="btn g2 sm" data-hint="trHint">Namig</button></div>
+    <p class="hintbox" id="trHint" hidden>Najprej poišči enice, ki imajo samo eno možno skupino (na primer osamljeno enico v kotu). Te skupine so obvezne. Nato pokrij ostale enice s čim večjimi skupinami.</p>
+  </div>
+
+  <div class="card sim page" id="s-realizacija" data-grp="Simulacija">
+    <h2>Simulacija: IN-ALI, NAND-NAND in NOR-NOR</h2>
+    <p class="note">Izberi funkcijo. Levo je vezje iz vrat IN in ALI, desno isto vezje samo iz vrat NAND (ali NOR). Preklapljaj vhode in primerjaj izhoda.</p>
+    <div class="pills" id="reSel"><span class="label">Funkcija</span></div>
+    <div class="pills" id="reMode"><span class="label">Gradimo z</span>
+      <button class="pill" data-m="nand" aria-pressed="true">NAND (iz vsote produktov)</button><button class="pill" data-m="nor" aria-pressed="false">NOR (iz produkta vsot)</button></div>
+    <div class="toggles" id="reIn"></div>
+    <div class="pills symsel"></div>
+    <div class="simrow two"><div><p class="label" id="reL"></p><div class="fig" id="fig-re0"></div></div><div><p class="label" id="reR"></p><div class="fig" id="fig-re1"></div></div></div>
+    <div class="readout" id="reRo"></div>
+    <div class="izziv"><p><strong>Izziv:</strong> pri funkciji Y = A + B·C (NAND) poišči, zakaj se je pojavil negator pri spremenljivki A.</p><button class="btn g2 sm" data-hint="reHint">Namig</button></div>
+    <p class="hintbox" id="reHint" hidden>A je člen z enim samim literalom. V NAND-NAND vezju gredo v zadnja vrata negirani produkti. Negacija člena A je <span class="ng">A</span>, zato potrebujemo vrata NAND kot negator (A ↑ A).</p>
+  </div>
+
+  <!-- ===================== NALOGE ===================== -->
+  <div class="page" id="naloge" data-grp="Naloge">
+    <div class="sticky">
+      <div class="progress">
+        <span class="label">Napredek</span>
+        <div class="bar"><i id="bar"></i></div>
+        <span id="score" class="m">0 / 0 t</span>
+      </div>
+      <div class="nums" id="nums" aria-label="Številke nalog"></div>
+    </div>
+    <div id="tasks"></div>
+    <div class="card">
+      <p class="note">Napredek se shranjuje v tvojem računu. Če želiš začeti znova, vse naloge in cilje počistiš tukaj.</p>
+      <div id="resetBox"><button class="btn danger sm" id="resetBtn">Ponastavi napredek</button></div>
+    </div>
+  </div>
+
+
+</main>
+
+<aside id="nav" aria-label="Navigacija po vaji"></aside>
+</div>
+<script>
+/* Skupne pomožne funkcije za vaji 2.1 in 2.2: pretvorbe, rešitve po korakih, preverjanje vnosa. */
+const LIB=(function(){
+  const SUBS={2:'₂',8:'₈',10:'₁₀',16:'₁₆'};
+  const SUPD='⁰¹²³⁴⁵⁶⁷⁸⁹';
+  const sup=n=>String(n).split('').map(c=>SUPD[+c]).join('');
+  const dcm=x=>String(Math.round(x*1e9)/1e9).replace('.',',');
+  const toB=(n,b,w)=>{ const s=Math.floor(Math.abs(n)).toString(b).toUpperCase(); return w?s.padStart(w,'0'):s; };
+
+  // niz v bazi b (z morebitnim ulomkom) -> število; NaN pri napačnem vnosu
+  const parse=(s,b)=>{
+    s=String(s).trim().toUpperCase().replace(',','.'); if(s==='') return NaN;
+    const ok={2:/^[01]*(\.[01]*)?$/,8:/^[0-7]*(\.[0-7]*)?$/,10:/^\d*(\.\d*)?$/,16:/^[0-9A-F]*(\.[0-9A-F]*)?$/}[b];
+    if(!ok.test(s)||s==='.') return NaN;
+    const parts=s.split('.'), i=parts[0], f=parts[1]||'';
+    let v=i?parseInt(i,b):0;
+    for(let k=0;k<f.length;k++) v+=parseInt(f[k],b)/Math.pow(b,k+1);
+    return v;
+  };
+  // ulomek v bazi b z največ max števkami
+  const fracStr=(x,b,max)=>{ max=max||8; let f=x-Math.floor(x),d='',n=0;
+    while(f>1e-9&&n<max){ f*=b; const k=Math.floor(f+1e-9); d+=k.toString(b).toUpperCase(); f-=k; n++; }
+    return {d:d,exact:f<=1e-9}; };
+  const fromNum=(x,b,max)=>{ const i=toB(x,b), fr=fracStr(x,b,max); return {s:i+(fr.d?'.'+fr.d:''),exact:fr.exact}; };
+
+  // ---- rešitve po korakih (HTML) ----
+  const divSteps=(n,b)=>{
+    let h='<div class="stp"><div class="hd">Deljenje z '+b+' (ostanke beri od spodaj navzgor)</div>';
+    let q=n; if(q===0) h+='<div>0 : '+b+' = 0, ostanek 0</div>';
+    while(q>0){ const r=q%b, nq=Math.floor(q/b);
+      h+='<div>'+q+' : '+b+' = '+nq+', ostanek '+r+(r>9?' ('+r.toString(16).toUpperCase()+')':'')+'</div>'; q=nq; }
+    return h+'<div class="res">'+n+SUBS[10]+' = '+toB(n,b)+SUBS[b]+'</div></div>';
+  };
+  const mulSteps=(x,b,max)=>{
+    max=max||8; let f=x-Math.floor(x), n=0;
+    let h='<div class="stp"><div class="hd">Ulomek: množi z '+b+' in beri cele dele od zgoraj navzdol</div>';
+    while(f>1e-9&&n<max){ const v=f*b, k=Math.floor(v+1e-9);
+      h+='<div>'+dcm(f)+' · '+b+' = '+dcm(Math.round(v*1e6)/1e6)+' → '+k.toString(b).toUpperCase()+'</div>'; f=v-k; n++; }
+    return h+'</div>';
+  };
+  const weightSum=(s,b)=>{
+    s=String(s).toUpperCase().replace(',','.'); const p=s.split('.'), i=p[0], f=p[1]||'';
+    const terms=[]; let tot=0;
+    for(let k=0;k<i.length;k++){ const e=i.length-1-k, d=parseInt(i[k],b), w=Math.pow(b,e); tot+=d*w; terms.push(d+'·'+w); }
+    for(let k=0;k<f.length;k++){ const d=parseInt(f[k],b), w=Math.pow(b,-(k+1)); tot+=d*w; terms.push(d+'·'+dcm(w)); }
+    return '<div class="stp"><div class="hd">Vsaka števka krat utež njenega mesta</div><div>'+terms.join(' + ')+'</div><div class="res">= '+dcm(tot)+SUBS[10]+'</div></div>';
+  };
+  const grpBits=(s,k)=>{ const p=s.padStart(Math.ceil(s.length/k)*k,'0'); return p.match(new RegExp('.{'+k+'}','g')); };
+  const bin2x=(s,b)=>{ const k=Math.log2(b), g=grpBits(s,k);
+    return '<div class="stp"><div class="hd">Bite razdeli v skupine po '+k+' (od desne)</div><div>'+g.join(' ')+'</div><div>'+g.map(x=>parseInt(x,2).toString(b).toUpperCase()).join(' ')+'</div><div class="res">'+s+SUBS[2]+' = '+toB(parseInt(s,2),b)+SUBS[b]+'</div></div>'; };
+  const x2bin=(s,b)=>{ const k=Math.log2(b), d=s.toUpperCase().split('');
+    return '<div class="stp"><div class="hd">Vsako števko zapiši s '+k+' biti</div><div>'+d.map(c=>c+' = '+parseInt(c,b).toString(2).padStart(k,'0')).join(', ')+'</div><div class="res">'+s.toUpperCase()+SUBS[b]+' = '+toB(parseInt(s,b),2)+SUBS[2]+'</div></div>'; };
+  // splošna rešitev za pretvorbo niza s iz baze f v bazo t
+  const solFor=(s,f,t)=>{
+    s=String(s).toUpperCase();
+    if(f===t) return '';
+    if(f===10){ const x=parse(s,10); let h=divSteps(Math.floor(x),t); if(x%1) h+=mulSteps(x,t); return h; }
+    if(t===10) return weightSum(s,f);
+    if(f===2) return bin2x(s,t);
+    if(t===2) return x2bin(s,f);
+    return x2bin(s,f)+bin2x(toB(parseInt(s,f),2),t);
+  };
+
+  // ---- dvojiški komplement ----
+  const tc=(n,w)=>toB(((n%(1<<w))+(1<<w))%(1<<w),2,w);
+  const sv=bits=>{ const w=bits.length, v=parseInt(bits,2); return bits[0]==='1'?v-(1<<w):v; };
+  const inv=bits=>bits.split('').map(c=>c==='1'?'0':'1').join('');
+  // ---- Grayeva koda ----
+  const gray=n=>n^(n>>1);
+  const ungray=g=>{ let b=0; for(let x=g;x;x>>=1) b^=x; return b; };
+  // ---- pariteta ----
+  const ones=s=>String(s).split('').filter(c=>c==='1').length;
+  const pbit=(bits,mode)=>{ const o=ones(bits)%2; return mode==='liho'?1-o:o; };
+  // ---- ASCII ----
+  const ac=c=>c.charCodeAt(0);
+  const hexBytes=t=>t.split('').map(c=>toB(ac(c),16,2)).join(' ');
+
+  // ---- naloge: izbira odgovora s pravilnim odgovorom na mestu pos ----
+  const mc=(correct,wrong,pos)=>{
+    const c=String(correct), w=[...new Set(wrong.map(String))].filter(x=>x!==c).slice(0,3);
+    const o=w.slice(); o.splice(pos,0,c); return {opts:o,ans:pos};
+  };
+
+  // ---- preverjanje vnosa ----
+  // fmt: bin | oct | dec | hex | txt; w: natančna dolžina (vodilne ničle štejejo)
+  const canon=(s,fmt,w)=>{
+    if(s==null) return null;
+    let t=String(s).trim().toUpperCase().replace(/[\s_]/g,'').replace(/[−–]/g,'-').replace(',','.');
+    if(fmt==='txt') return t;
+    if(fmt==='hex') t=t.replace(/^0X/,''); else if(fmt==='bin') t=t.replace(/^0B/,'');
+    const neg=t[0]==='-'; if(neg) t=t.slice(1);
+    if(t[0]==='.') t='0'+t;
+    const re={bin:/^[01]+(\.[01]+)?$/,oct:/^[0-7]+(\.[0-7]+)?$/,dec:/^\d+(\.\d+)?$/,hex:/^[0-9A-F]+(\.[0-9A-F]+)?$/}[fmt];
+    if(!re||!re.test(t)) return null;
+    if(w){ return t.length===w?(neg?'-':'')+t:null; }
+    const p=t.split('.'); let i=p[0].replace(/^0+(?=.)/,''), f=p[1];
+    if(f!==undefined) f=f.replace(/0+$/,'');
+    let r=i+(f?'.'+f:''); if(neg&&r!=='0') r='-'+r; return r;
+  };
+  const same=(given,fld)=>{ const a=canon(given,fld.f,fld.w), b=canon(fld.a,fld.f,fld.w); return a!==null&&a===b; };
+
+  return {SUBS,sup,dcm,toB,parse,fracStr,fromNum,divSteps,mulSteps,weightSum,grpBits,bin2x,x2bin,solFor,tc,sv,inv,gray,ungray,ones,pbit,ac,hexBytes,mc,canon,same};
+})();
+if(typeof module!=='undefined') module.exports=LIB;
+
+
+</script>
+<script>
+/* BOOL: logični izrazi za vaje LAV-ELS 1.x
+   - parse(niz): drevo izraza. Negacija: ¬A, !A, /A, ~A ali A'. IN: · * & ali zapis skupaj (AB). ALI: + |. XOR: ⊕ ^. NAND: ↑. NOR: ↓.
+   - ev(drevo, okolje): vrednost 0 ali 1
+   - html(drevo): zapis s črto nad negacijo
+   - vars, table, minterms, qm (minimalna vsota produktov), lits (število literalov) */
+const BOOL=(function(){
+  const PREC={or:1,nor:1,xor:2,xnor:2,and:3,nand:3,not:4,var:5,const:5};
+  function tokenize(src){
+    const s=String(src).replace(/^\s*[A-Za-z]\s*=/,'').toUpperCase();
+    const out=[];
+    for(let i=0;i<s.length;i++){
+      const c=s[i];
+      if(/\s/.test(c)) continue;
+      if(/[A-Z]/.test(c)) out.push({k:'v',v:c});
+      else if(c==='0'||c==='1') out.push({k:'c',v:+c});
+      else if('¬!/~'.includes(c)) out.push({k:'not'});
+      else if(c==="'"||c==='’'||c==='´') out.push({k:'post'});
+      else if('·*&∙•'.includes(c)) out.push({k:'and'});
+      else if('+|∨'.includes(c)) out.push({k:'or'});
+      else if('⊕^'.includes(c)) out.push({k:'xor'});
+      else if(c==='↑') out.push({k:'nand'});
+      else if(c==='↓') out.push({k:'nor'});
+      else if(c==='(') out.push({k:'('});
+      else if(c===')') out.push({k:')'});
+      else throw new Error('Neznan znak »'+src[i]+'«');
+    }
+    return out;
+  }
+  function parse(src){
+    const T=tokenize(src); let p=0;
+    const peek=()=>T[p], eat=k=>{ if(!T[p]||T[p].k!==k) throw new Error(k===')'?'Manjka zaklepaj':'Napaka v izrazu'); return T[p++]; };
+    function orE(){
+      let a=xorE(), list=[a];
+      while(peek()&&(peek().k==='or'||peek().k==='nor')){
+        const k=T[p++].k, b=xorE();
+        if(k==='or'){ list.push(b); }
+        else { const left=list.length>1?{t:'or',args:list}:list[0]; list=[{t:'nor',args:[left,b]}]; }
+      }
+      return list.length>1?{t:'or',args:list}:list[0];
+    }
+    function xorE(){
+      let list=[andE()];
+      while(peek()&&peek().k==='xor'){ p++; list.push(andE()); }
+      return list.length>1?{t:'xor',args:list}:list[0];
+    }
+    const startsUnary=t=>t&&(t.k==='v'||t.k==='c'||t.k==='('||t.k==='not');
+    function andE(){
+      let list=[unE()];
+      for(;;){
+        const t=peek();
+        if(t&&t.k==='and'){ p++; list.push(unE()); }
+        else if(t&&t.k==='nand'){ p++; const b=unE(); const left=list.length>1?{t:'and',args:list}:list[0]; list=[{t:'nand',args:[left,b]}]; }
+        else if(startsUnary(t)) list.push(unE());
+        else break;
+      }
+      return list.length>1?{t:'and',args:list}:list[0];
+    }
+    function unE(){
+      const t=peek();
+      if(t&&t.k==='not'){ p++; return {t:'not',a:unE()}; }
+      let n=prim();
+      while(peek()&&peek().k==='post'){ p++; n={t:'not',a:n}; }
+      return n;
+    }
+    function prim(){
+      const t=peek();
+      if(!t) throw new Error('Izraz je nepopoln');
+      if(t.k==='v'){ p++; return {t:'var',n:t.v}; }
+      if(t.k==='c'){ p++; return {t:'const',v:t.v}; }
+      if(t.k==='('){ p++; const e=orE(); eat(')'); return {t:'par',a:e}; }
+      throw new Error('Napaka v izrazu');
+    }
+    if(!T.length) throw new Error('Izraz je prazen');
+    const r=orE();
+    if(p<T.length) throw new Error(T[p].k===')'?'Preveč zaklepajev':'Napaka v izrazu');
+    return strip(r);
+  }
+  // oklepaji so samo v razčlenjevanju; v drevesu jih ne hranimo
+  function strip(n){
+    if(n.t==='par') return strip(n.a);
+    if(n.t==='not') return {t:'not',a:strip(n.a)};
+    if(n.args) return {t:n.t,args:n.args.map(strip)};
+    return n;
+  }
+  const kids=n=>n.t==='not'?[n.a]:(n.args||[]);
+  function ev(n,env){
+    switch(n.t){
+      case 'var': return env[n.n]?1:0;
+      case 'const': return n.v;
+      case 'not': return 1-ev(n.a,env);
+      case 'and': return n.args.every(a=>ev(a,env))?1:0;
+      case 'or': return n.args.some(a=>ev(a,env))?1:0;
+      case 'xor': return n.args.reduce((s,a)=>s^ev(a,env),0);
+      case 'xnor': return 1-n.args.reduce((s,a)=>s^ev(a,env),0);
+      case 'nand': return n.args.every(a=>ev(a,env))?0:1;
+      case 'nor': return n.args.some(a=>ev(a,env))?0:1;
+    }
+    throw new Error('Neznano vozlišče');
+  }
+  function vars(n,set){ set=set||new Set(); if(n.t==='var') set.add(n.n); kids(n).forEach(k=>vars(k,set)); return set; }
+  // oklepaj: nižja prednost; NAND in NOR vedno v oklepaju, pod NAND ali NOR vsaka dvomestna operacija
+  const NN=t=>t==='nand'||t==='nor';
+  const needP=(t,par)=>!!par&&(PREC[t]<PREC[par]||NN(t)||(NN(par)&&PREC[t]<4));
+  const SYMB={and:'·',or:' + ',xor:' ⊕ ',nand:' ↑ ',nor:' ↓ ',xnor:' ⊙ '};
+  function html(n,par){
+    let s;
+    if(n.t==='var') return n.n;
+    if(n.t==='const') return String(n.v);
+    if(n.t==='not') return '<span class="ng">'+html(n.a,null)+'</span>';
+    s=n.args.map(a=>html(a,n.t)).join(SYMB[n.t]);
+    if(needP(n.t,par)) s='('+s+')';
+    return s;
+  }
+  function text(n,par){
+    let s;
+    if(n.t==='var') return n.n;
+    if(n.t==='const') return String(n.v);
+    if(n.t==='not') return '¬'+(n.a.t==='var'||n.a.t==='const'||n.a.t==='not'?text(n.a,'not'):'('+text(n.a,null)+')');
+    s=n.args.map(a=>text(a,n.t)).join(SYMB[n.t]);
+    if(needP(n.t,par)) s='('+s+')';
+    return s;
+  }
+  // vrstice tabele: prva spremenljivka je najvišji bit
+  const envOf=(vs,m)=>{ const e={}; vs.forEach((v,i)=>{ e[v]=(m>>(vs.length-1-i))&1; }); return e; };
+  const table=(n,vs)=>Array.from({length:1<<vs.length},(_,m)=>ev(n,envOf(vs,m)));
+  const minterms=(n,vs)=>table(n,vs).map((v,m)=>v?m:-1).filter(m=>m>=0);
+  const H=s=>html(parse(s));
+  // Quine-McCluskey: implikanti kot [vrednost, maska]; maska ima 1 tam, kjer spremenljivka izpade
+  function qm(on,nv,dc){
+    dc=dc||[];
+    const all=[...new Set([...on,...dc])];
+    if(!on.length) return [];
+    let cur=all.map(m=>({v:m,m:0,used:false})), primes=[];
+    const pc=x=>{ let c=0; while(x){ c+=x&1; x>>=1; } return c; };
+    while(cur.length){
+      const nxt=[], seen=new Set();
+      for(let i=0;i<cur.length;i++) for(let j=i+1;j<cur.length;j++){
+        const a=cur[i], b=cur[j];
+        if(a.m!==b.m) continue;
+        const d=a.v^b.v;
+        if(pc(d)===1){ a.used=b.used=true; const v=a.v&~d, m=a.m|d, k=v+':'+m; if(!seen.has(k)){ seen.add(k); nxt.push({v,m,used:false}); } }
+      }
+      cur.forEach(c=>{ if(!c.used) primes.push(c); });
+      cur=nxt;
+    }
+    const covers=(p,x)=>(x&~p.m)===p.v;
+    // najmanjše pokritje: najprej najmanj implikantov, nato najmanj literalov (izčrpno pri do 4 spremenljivkah)
+    const cost=p=>nv-pc(p.m);
+    let best=null;
+    const P=primes.filter(p=>on.some(x=>covers(p,x)));
+    const n=P.length;
+    if(n<=20){
+      for(let mask=1;mask<(1<<n);mask++){
+        const pick=P.filter((_,i)=>mask>>i&1);
+        if(!on.every(x=>pick.some(p=>covers(p,x)))) continue;
+        const sc=[pick.length,pick.reduce((s,p)=>s+cost(p),0)];
+        if(!best||sc[0]<best.sc[0]||(sc[0]===best.sc[0]&&sc[1]<best.sc[1])) best={pick,sc};
+      }
+      return best.pick;
+    }
+    return P;
+  }
+  // implikant v izraz (vsota produktov ali produkt vsot)
+  function impSOP(p,vs){ const nv=vs.length, l=[]; vs.forEach((v,i)=>{ const b=1<<(nv-1-i); if(!(p.m&b)) l.push((p.v&b)?v:'¬'+v); }); return l.length?l.join('·'):'1'; }
+  function impPOS(p,vs){ const nv=vs.length, l=[]; vs.forEach((v,i)=>{ const b=1<<(nv-1-i); if(!(p.m&b)) l.push((p.v&b)?'¬'+v:v); }); return l.length>1?'('+l.join(' + ')+')':(l[0]||'0'); }
+  const sop=(on,vs,dc)=>{ if(!on.length) return '0'; if(on.length+(dc||[]).length===(1<<vs.length)&&!qm(on,vs.length,dc).some(p=>p.m!==(1<<vs.length)-1)) return '1'; const ps=qm(on,vs.length,dc); return ps.some(p=>p.m===(1<<vs.length)-1)?'1':ps.map(p=>impSOP(p,vs)).join(' + '); };
+  const pos=(on,vs,dc)=>{ const N=1<<vs.length, off=[]; for(let m=0;m<N;m++) if(!on.includes(m)&&!(dc||[]).includes(m)) off.push(m); if(!off.length) return '1'; const ps=qm(off,vs.length,dc); return ps.some(p=>p.m===N-1)?'0':ps.map(p=>impPOS(p,vs)).join('·'); };
+  // število literalov in vrat (za preverjanje, ali je izraz res okrajšan)
+  function lits(n){ if(n.t==='var') return 1; if(n.t==='const') return 0; return kids(n).reduce((s,k)=>s+lits(k),0); }
+  function gates(n){ if(n.t==='var'||n.t==='const') return 0; if(n.t==='not'&&n.a.t==='var') return 1; return 1+kids(n).reduce((s,k)=>s+gates(k),0); }
+  function onlyOps(n,ok){ if(n.t==='var'||n.t==='const') return true; if(!ok.includes(n.t)) return false; return kids(n).every(k=>onlyOps(k,ok)); }
+  return {parse,ev,vars,html,text,H,envOf,table,minterms,qm,sop,pos,lits,gates,onlyOps,kids,impSOP,impPOS};
+})();
+if(typeof module!=='undefined') module.exports=BOOL;
+
+</script>
+<script>
+const CFG={
+  key:'scnm_lavele_1_3_v1',
+  th:['uvod','postulati','teoremi','demorgan','krajsanje','veitch','postopek','realizacija'],
+  sim:['s-zakoni','s-demorgan','s-krajsanje','s-veitch','s-trening','s-realizacija'],
+  LAB:{
+    uvod:'Uvod in cilji', postulati:'Postulati', teoremi:'Teoremi', demorgan:'De Morganova izreka', krajsanje:'Algebrsko poenostavljanje', veitch:'Veitchev diagram', postopek:'Minimizacija z diagramom', realizacija:'Realizacija z NAND in NOR',
+    's-zakoni':'Preveri pravilo', 's-demorgan':'De Morgan v vezju', 's-krajsanje':'Poenostavljanje po korakih', 's-veitch':'Veitchev diagram', 's-trening':'Trening minimizacije', 's-realizacija':'NAND-NAND in NOR-NOR', naloge:'Naloge'},
+  GOALS:[
+    'Poznam postulate Booleove algebre in načelo dualnosti.',
+    'Znam dokazati teorem s postulati ali s pravilnostno tabelo.',
+    'Razumem oba De Morganova izreka in ju znam uporabiti.',
+    'Znam algebrsko poenostaviti logično funkcijo.',
+    'Znam poenostaviti funkcijo dveh, treh ali štirih spremenljivk z Veitchevim diagramom.',
+    'Znam minimalno funkcijo realizirati samo z vrati NAND ali samo z NOR.'
+  ],
+  MODS:[
+    {id:'zak', n:'01', t:'Postulati in teoremi', d:'Pravila Booleove algebre, dualnost, dokaz s tabelo.', first:'postulati', th:2, sim:1},
+    {id:'dm', n:'02', t:'De Morganova izreka', d:'Negacija skozi oklepaj, NAND in NOR z negiranimi vhodi.', first:'demorgan', th:1, sim:1},
+    {id:'kr', n:'03', t:'Algebrsko poenostavljanje', d:'Izpostavljanje, X + X̄ = 1, absorpcija, korak za korakom.', first:'krajsanje', th:1, sim:1},
+    {id:'vk', n:'04', t:'Veitchev diagram', d:'Grafična minimizacija za 2, 3 in 4 spremenljivke, nepomembna stanja.', first:'veitch', th:2, sim:2},
+    {id:'re', n:'05', t:'Realizacija z NAND in NOR', d:'Iz minimalnega izraza v vezje iz ene vrste vrat.', first:'realizacija', th:1, sim:1}
+  ],
+  MODN:{zak:'Postulati in teoremi',dm:'De Morganova izreka',kr:'Algebrsko poenostavljanje',vk:'Veitchev diagram',re:'Realizacija z NAND in NOR'}
+};
+
+</script>
+<script>
+// Skupne pomožne funkcije za naloge tematike 1 (izbira, vpis, tabela, rešitve s tabelo).
+const mm=s=>'<span class="m">'+s+'</span>';
+const NG=s=>'<span class="ng">'+s+'</span>';
+let _pi=0; const POS=[1,3,0,2,2,0,3,1]; const P=()=>POS[_pi++%POS.length];
+const mcq=(lvl,mod,q,correct,wrong,hint,sol,mono)=>Object.assign({lvl,mod,q,hint,sol,mono:!!mono},LIB.mc(correct,wrong,P()));
+const inq=(lvl,mod,q,fields,hint,sol)=>({lvl,mod,type:'in',q,fields,hint,sol});
+const F=(l,a,f,o)=>Object.assign({l,a:String(a),f},o||{});
+const ans=(t,v)=>'<p>'+t+' <strong class="m">'+v+'</strong></p>';
+const stp=(hd,lines,res)=>'<div class="stp"><div class="hd">'+hd+'</div>'+lines.map(l=>'<div>'+l+'</div>').join('')+(res?'<div class="res">'+res+'</div>':'')+'</div>';
+// tabela z vmesnimi stolpci za rešitve: cols = [[ime, izraz], ...]
+function solTab(ins,cols){
+  const C=cols.map(c=>({n:c[0],a:BOOL.parse(c[1])}));
+  let h='<div class="scroll"><table class="qtab"><tr>'+ins.map(v=>'<th>'+v+'</th>').join('')+C.map(c=>'<th>'+c.n+'</th>').join('')+'</tr>';
+  for(let m=0;m<(1<<ins.length);m++){ const e=BOOL.envOf(ins,m);
+    h+='<tr>'+ins.map(v=>'<td>'+e[v]+'</td>').join('')+C.map((c,j)=>{ const y=BOOL.ev(c.a,e); return '<td'+(j===C.length-1&&y?' style="color:var(--sig);font-weight:700"':'')+'>'+y+'</td>'; }).join('')+'</tr>'; }
+  return h+'</table></div>';
+}
+// naloga »izpolni tabelo«: outs = {ime: izraz}
+function ttq(lvl,mod,q,ins,outs,hint,sol){
+  const names=Object.keys(outs), asts=names.map(n=>BOOL.parse(outs[n]));
+  return {lvl,mod,type:'tt',q,ins,outs:names,fn:row=>{ const e={}; ins.forEach((v,i)=>e[v]=row[i]); return asts.map(a=>BOOL.ev(a,e)); },hint,sol,_ex:outs};
+}
+const qtab=(ins,ys)=>'<table class="qtab"><tr>'+ins.map(v=>'<th>'+v+'</th>').join('')+'<th>Y</th></tr>'+ys.map((y,m)=>'<tr>'+ins.map((v,i)=>'<td>'+((m>>(ins.length-1-i))&1)+'</td>').join('')+'<td>'+y+'</td></tr>').join('')+'</table>';
+
+// vpis izraza: o = {vars, target ali on/dc, min, nv, ops, pos, lab, ph}
+const exq=(lvl,mod,q,o,hint,sol)=>Object.assign({lvl,mod,type:'ex',q,hint,sol},o);
+// izpolni Veitchev diagram: o = {vars, target ali on}
+const kmq=(lvl,mod,q,o,hint,sol)=>Object.assign({lvl,mod,type:'km',q,hint,sol},o);
+const KMS='<div class="kmsol"></div>';
+const EQ=(s,lab)=>'<div class="eqbig">'+(lab===undefined?'Y = ':lab)+BOOL.H(s)+'</div>';
+// sam označi skupine v diagramu in zapiši minimalno PDNO
+const grq=(lvl,mod,q,o,hint,sol,extra)=>Object.assign({lvl,mod,type:'grp',q,hint,sol},o,extra||{});
+
+// Naloge vaje 1.3. Pri vpisu izraza se pravilnost preveri s tabelo, najkrajši zapis pa s številom literalov (Quine-McCluskey v BOOL).
+const H=s=>BOOL.H(s);
+const V3=['A','B','C'], V4=['A','B','C','D'];
+const DCB=[10,11,12,13,14,15];
+const TASKS=[
+// ===================== POSTULATI IN TEOREMI =====================
+mcq('lahka','zak','Koliko je A + 1?','1',['A','0',NG('A')],
+  'ALI da 1, če je vsaj en vhod 1.',ans('Odgovor:','A + 1 = 1')+'<p>Teorem T2 (dominanca).</p>',true),
+mcq('lahka','zak','Koliko je A·'+NG('A')+'?','0',['1','A',NG('A')],
+  'A in '+NG('A')+' nista nikoli hkrati 1.',ans('Odgovor:','0')+'<p>Postulat P5 (komplement).</p>',true),
+mcq('srednja','zak','Čemu je enako A + A·B?','A',['A·B','B','A + B'],
+  'Izpostavi A: A·(1 + B).',ans('Odgovor:','A')+'<p>A + A·B = A·(1 + B) = A·1 = A (absorpcija T4).</p>',true),
+mcq('srednja','zak','Katero pravilo je dualno pravilu A·(B + C) = A·B + A·C?','A + B·C = (A + B)·(A + C)',['A·(B·C) = (A·B)·C','A + (B + C) = (A + B) + C',H('¬(A·B)')+' = '+H('¬A+¬B')],
+  'Pri dualnosti zamenjaš + in · (ter 0 in 1).',ans('Odgovor:','A + B·C = (A + B)·(A + C)')+'<p>Druga oblika distributivnosti, ki pri navadnih številih ne velja.</p>'),
+exq('srednja','zak','Poenostavi Y = A + '+NG('A')+'·B. Vpiši najkrajši izraz.',{x:'A+B',vars:['A','B'],target:'A+¬A·B',min:true},
+  'Uporabi teorem T5 ali nariši tabelo: kdaj je Y = 1?',EQ('A+B')+'<p>T5: A + '+NG('A')+'·B = A + B. Preverba: Y = 0 samo pri A = 0 in B = 0.</p>'),
+mcq('težka','zak','Čemu je enako Y = A·B + '+NG('A')+'·C + B·C?','A·B + '+NG('A')+'·C',['A·B + B·C','A + C','A·B·C'],
+  'Člen B·C je »konsenz« prvih dveh. Ali ga potrebujemo?',ans('Odgovor:','')+EQ('A·B+¬A·C')+'<p>Teorem T8 (konsenz): kadar je B·C = 1, je ali A = 1 (pokrije A·B) ali A = 0 (pokrije '+NG('A')+'·C). Člen B·C je odveč.</p>'),
+
+// ===================== DE MORGAN =====================
+mcq('lahka','dm','Čemu je enako '+H('¬(A+B)')+'?',H('¬A·¬B'),[H('¬A+¬B'),'A·B',H('¬(A·B)')],
+  'Negacija zamenja + z · in negira vsako spremenljivko.',ans('Odgovor:','')+EQ('¬A·¬B','')+'<p>Drugi De Morganov izrek.</p>'),
+exq('srednja','dm','Zapiši '+H('¬(A·B·C)')+' brez črte nad oklepajem (črta sme biti samo nad posamezno spremenljivko).',{x:'¬A+¬B+¬C',vars:V3,target:'¬(A·B·C)',nv:true},
+  'De Morgan velja za poljubno število spremenljivk.',EQ('¬A+¬B+¬C')),
+exq('srednja','dm','Razreši negacijo: Y = '+H('¬(A·¬B+C)')+'. Črta sme ostati samo nad posameznimi spremenljivkami.',{x:'(¬A+B)·¬C',vars:V3,target:'¬(A·¬B+C)',nv:true},
+  'Najprej De Morgan za +, nato za ·, na koncu dvojna negacija.',stp('Po korakih',[H('¬(A·¬B+C)')+' = '+H('¬(A·¬B)')+'·'+NG('C'),'= ('+H('¬A')+' + '+H('¬¬B')+')·'+NG('C'),'= ('+NG('A')+' + B)·'+NG('C')],'Y = ('+NG('A')+' + B)·'+NG('C')+' = '+NG('A')+'·'+NG('C')+' + B·'+NG('C'))),
+exq('težka','dm','Poenostavi Y = '+H('¬(¬(A·B)·¬C)')+' v najkrajšo vsoto produktov.',{x:'A·B+C',vars:V3,target:'¬(¬(A·B)·¬C)',min:true},
+  'Zunanja črta in De Morgan: '+H('¬(X·Y)')+' = '+H('¬X+¬Y')+'. Nato dvojna negacija.',stp('Po korakih',[H('¬(¬(A·B)·¬C)')+' = '+H('¬¬(A·B)')+' + '+H('¬¬C'),'= A·B + C'],'Y = A·B + C')+'<p>To je vezje NAND-NAND za A·B + C: ena vrata NAND za A·B, negator za C in še ena vrata NAND.</p>'),
+
+// ===================== ALGEBRSKO POENOSTAVLJANJE =====================
+exq('lahka','kr','Poenostavi Y = A·B + A·'+NG('B')+'.',{x:'A',vars:['A','B'],target:'A·B+A·¬B',min:true},
+  'Izpostavi A.',stp('Izpostavljanje',['A·B + A·'+NG('B')+' = A·(B + '+NG('B')+')','= A·1'],'Y = A')),
+exq('srednja','kr','Poenostavi Y = '+NG('A')+'·B·C + A·B·C.',{x:'B·C',vars:V3,target:'¬A·B·C+A·B·C',min:true},
+  'Oba člena vsebujeta B·C.',stp('Izpostavljanje',['B·C·('+NG('A')+' + A)','= B·C·1'],'Y = B·C')),
+exq('srednja','kr','Poenostavi Y = A·B + A·B·C + A·'+NG('B')+'.',{x:'A',vars:V3,target:'A·B+A·B·C+A·¬B',min:true},
+  'Najprej absorpcija (A·B + A·B·C), nato izpostavi A.',stp('Po korakih',['A·B·(1 + C) + A·'+NG('B')+' = A·B + A·'+NG('B'),'= A·(B + '+NG('B')+')'],'Y = A')),
+inq('srednja','kr','Funkcija »večina od treh« iz tabele je Y = '+NG('A')+'BC + A'+NG('B')+'C + AB'+NG('C')+' + ABC. Koliko literalov ima ta zapis in koliko najkrajši zapis Y = AB + AC + BC?',[F('pred','12','dec',{u:'literalov'}),F('po','6','dec',{u:'literalov'})],
+  'Literal je vsaka spremenljivka (negirana ali ne) v zapisu.',stp('Štetje',['pred: 4 produkti po 3 literale','po: 3 produkti po 2 literala'],'12 in 6')),
+exq('težka','kr','Poenostavi Y = (A + B)·(A + '+NG('B')+').',{x:'A',vars:['A','B'],target:'(A+B)·(A+¬B)',min:true},
+  'Uporabi drugo obliko distributivnosti: (A + X)·(A + Y) = A + X·Y.',stp('Po korakih',['(A + B)·(A + '+NG('B')+') = A + B·'+NG('B'),'= A + 0'],'Y = A')),
+exq('težka','kr','Poenostavi Y = A·'+NG('B')+'·C + A·B·C + '+NG('A')+'·B·C + A·B·'+NG('C')+' v najkrajšo vsoto produktov.',{x:'A·B+A·C+B·C',vars:V3,target:'A·¬B·C+A·B·C+¬A·B·C+A·B·¬C',min:true},
+  'Člen A·B·C združi z vsakim od ostalih treh (zapiši ga trikrat).',stp('Podvajanje člena A·B·C',['(A'+NG('B')+'C + ABC) = AC','('+NG('A')+'BC + ABC) = BC','(AB'+NG('C')+' + ABC) = AB'],'Y = A·B + A·C + B·C')+'<p>To je funkcija »večina od treh«.</p>'),
+
+// ===================== VEITCHEV DIAGRAM =====================
+mcq('lahka','vk','Zakaj so črte spremenljivk v Veitchevem diagramu razporejene tako, kot so (A zgoraj levo, C spodaj v sredini …)?','Sosednji celici se razlikujeta samo v eni spremenljivki',['Celice si sledijo po številkah vrstic tabele','Tako je diagram simetričen','Da so enice vedno skupaj'],
+  'Primerjaj dve sosednji celici: pod koliko črtami se razlikujeta?',ans('Odgovor:','sosednji celici se razlikujeta v eni spremenljivki')+'<p>Samo tako lahko sosednje enice združimo s pravilom X·Y + X·'+NG('Y')+' = X. Celice si zato <em>ne</em> sledijo po številkah vrstic tabele.</p>'),
+mcq('lahka','vk','Katera velikost skupine v Veitchevem diagramu je dovoljena?','4',['3','5','6'],
+  'Velikost skupine je vedno potenca števila 2.',ans('Odgovor:','4')+'<p>Dovoljene so skupine 1, 2, 4, 8 in 16 celic.</p>',true),
+kmq('srednja','vk','Vpiši funkcijo Y = A·B + C v Veitchev diagram treh spremenljivk.',{vars:V3,target:'A·B+C'},
+  'C = 1 sta srednja stolpca (črta C spodaj). A·B sta celici pod črto A in ob črti B.','<p>Enice so v vrsticah 1, 3, 5, 7 (C = 1) in 6, 7 (A·B).</p>'),
+Object.assign(exq('srednja','vk','V diagramu so enice v vrsticah 1, 3, 5 in 7. Zapiši najkrajši izraz.',{x:'C',vars:V3,on:[1,3,5,7],min:true},
+  'Vse štiri enice so v stolpcih, kjer je C = 1.',KMS),{qkm:{names:V3,on:[1,3,5,7]},solKm:{names:V3,on:[1,3,5,7]}}),
+Object.assign(exq('srednja','vk','Poišči najkrajši izraz za diagram na sliki (enice v vseh štirih vogalih).',{x:'¬C·¬D',vars:V4,on:[0,4,8,12],min:true},
+  'Vogalne celice so med seboj sosednje. Kateri spremenljivki sta v vseh vogalih 0?',KMS+'<p>Ena skupina štirih celic: C = 0 in D = 0 → '+H('¬C·¬D')+'.</p>'),{qkm:{names:V4,on:[0,4,8,12]},solKm:{names:V4,on:[0,4,8,12]}}),
+inq('srednja','vk','V diagramu štirih spremenljivk je skupina osmih celic. Koliko spremenljivk izpade in koliko literalov ima ustrezni produkt?',[F('izpade','3','dec',{u:'spremenljivke'}),F('ostane','1','dec',{u:'literal'})],
+  'Skupina 2<sup>k</sup> celic izloči k spremenljivk.',stp('Velikost skupine',['8 = 2³ → izpadejo 3 spremenljivke','4 − 3 = 1'],'3 in 1')),
+Object.assign(exq('težka','vk','Segment e sedemsegmentnega prikazovalnika sveti pri števkah 0, 2, 6 in 8 (vhod je koda BCD ABCD). Vzorci 10 do 15 so nepomembni (X). Zapiši najkrajši izraz.',{x:'¬B·¬D+C·¬D',vars:V4,on:[0,2,6,8],dc:DCB,min:true},
+  'X smeš šteti kot 1, če dobiš večjo skupino. Pomagaj si s celicami 10 in 14.',KMS+'<p>Spodnja vrstica (0, 2, 8, 10) da '+H('¬B·¬D')+', skupina 2, 6, 10, 14 (srednja stolpca, prek zgornjega in spodnjega roba) da '+H('C·¬D')+'.</p>'),{qkm:{names:V4,on:[0,2,6,8],dc:DCB},solKm:{names:V4,on:[0,2,6,8],dc:DCB}}),
+kmq('težka','vk','Vpiši funkcijo Y = '+NG('B')+'·'+NG('D')+' + A·C v diagram štirih spremenljivk.',{vars:V4,target:'¬B·¬D+A·C'},
+  NG('B')+'·'+NG('D')+' je spodnja vrstica (B = 0, D = 0). A·C je stolpec pod črtama A in C.','<p>Enice: 0, 2, 8, 10 (spodnja vrstica) in 10, 11, 14, 15 (A·C).</p>'),
+Object.assign(exq('težka','vk','Funkcija štirih spremenljivk ima ničle samo v vrsticah 3, 7, 11 in 15, povsod drugje so enice. Zapiši najkrajši izraz (vsoto ali produkt).',{x:'¬C+¬D',vars:V4,on:[0,1,2,4,5,6,8,9,10,12,13,14],min:true,pos:true},
+  'Združi ničle. Vse ničle imajo C = 1 in D = 1.',KMS+'<p>Ena skupina štirih ničel: C = 1 in D = 1. Vsota je ('+NG('C')+' + '+NG('D')+'), kar je po De Morganu '+H('¬(C·D)')+'.</p>'),{solKm:{names:V4,on:[0,1,2,4,5,6,8,9,10,12,13,14],pos:true}}),
+Object.assign(exq('srednja','vk','Lučka sveti, ko je števka v kodi BCD (ABCD) 5 ali več. Vzorci 10 do 15 so nepomembni. Zapiši najkrajši izraz.',{x:'A+B·D+B·C',vars:V4,on:[5,6,7,8,9],dc:DCB,min:true},
+  'Z nepomembnimi stanji dobiš skupino osmih celic (A = 1) in dve skupini štirih.',KMS),{solKm:{names:V4,on:[5,6,7,8,9],dc:DCB}}),
+
+// ročno označevanje skupin (iz artefakta »Logične funkcije«, naloge d11 in d13 do d15)
+grq('srednja','vk','Krmilnik črpalke ima vhode A, B in C. Funkcija Q (Q = 1: črpalka teče) je vpisana v Veitchev diagram. Označi skupine enic in zapiši minimalno PDNO.',{x:'¬B+A·¬C',vars:V3,on:[0,1,4,5,6]},
+  'Spodnja vrstica (B = 0) ima same enice. Celica 6 se združi s sosednjo celico 4 v levem stolpcu.',KMS+'<p>Štiri enice v spodnji vrstici dajo '+NG('B')+'. Celici 4 in 6 v levem stolpcu (A = 1, C = 0) dasta A·'+NG('C')+'. Q = '+NG('B')+' + A·'+NG('C')+'.</p>',{solKm:{names:V3,on:[0,1,4,5,6]}}),
+grq('težka','vk','Prezračevanje strojnice: ventilator Q1 = (A + B)·'+NG('D')+' je vpisan v diagram (A, B, C, D). Označi skupine enic in zapiši minimalno PDNO.',{x:'A·¬D+B·¬D',vars:V4,target:'(A+B)·¬D'},
+  'Obe skupini imata po štiri celice in obe vsebujeta D = 0. Ena je zgornja vrstica, druga gre prek zgornjega in spodnjega roba.',KMS+'<p>B·'+NG('D')+' je zgornja vrstica (B = 1, D = 0). A·'+NG('D')+' sta levi polovici zgornje in spodnje vrstice, ki se stikata prek roba. Skupini imata dve skupni celici, kar je dovoljeno. Q1 = A·'+NG('D')+' + B·'+NG('D')+'.</p>',{solKm:{names:V4,on:[4,6,8,10,12,14]}}),
+grq('težka','vk','Sirena v strojnici: Q2 = B·(A + C) je vpisana v diagram. Označi skupine enic in zapiši minimalno PDNO (vsoto produktov).',{x:'A·B+B·C',vars:V4,target:'B·(A+C)'},
+  'Vse enice so v zgornji polovici (B = 1). Iščeš dva kvadrata 2 × 2.',KMS+'<p>A·B je kvadrat zgoraj levo (pod črtama A in B), B·C kvadrat zgoraj v sredini (pod črtama B in C). Skupni sta celici 14 in 15. Q2 = A·B + B·C.</p>',{solKm:{names:V4,on:[6,7,12,13,14,15]}}),
+grq('težka','vk','Signalna lučka L sveti v vrsticah 0, 2, 5, 7, 8 in 10 pravilnostne tabele (vhodi A, B, C, D). Funkcija je vpisana v diagram. Označi skupine enic in zapiši minimalno PDNO.',{x:'¬B·¬D+¬A·B·D',vars:V4,on:[0,2,5,7,8,10]},
+  'Spodnja vrstica ima same enice. Celici 5 in 7 sta sosednji v drugi vrstici.',KMS+'<p>Spodnja vrstica (B = 0, D = 0) da '+NG('B')+'·'+NG('D')+'. Celici 5 in 7 (A = 0, B = 1, D = 1) dasta '+NG('A')+'·B·D. L = '+NG('B')+'·'+NG('D')+' + '+NG('A')+'·B·D.</p>',{solKm:{names:V4,on:[0,2,5,7,8,10]}}),
+
+// ===================== REALIZACIJA Z NAND IN NOR =====================
+mcq('srednja','re','Imamo dvoravninsko vezje IN-ALI za vsoto produktov. Kako dobimo enakovredno vezje samo z vrati NAND?','Vsa vrata IN in ALI zamenjamo z vrati NAND',['Vsa vrata zamenjamo z NOR','Samo vrata ALI zamenjamo z NAND','Na vsak vhod dodamo negator'],
+  'Uporabi dvojno negacijo in De Morgana: vsota produktov = negacija produkta negiranih produktov.',ans('Odgovor:','vsa vrata zamenjamo z NAND')+'<p>Y = A·B + C·D = (A ↑ B) ↑ (C ↑ D).</p>'),
+// iz artefakta »Logične funkcije« (naloge e05 do e09)
+exq('srednja','re','Zapiši A·B samo z operatorjem NAND (↑).',{x:'(A↑B)↑(A↑B)',vars:['A','B'],target:'A·B',ops:['nand']},
+  'IN je negiran NAND. Negacijo dobiš z X ↑ X.',EQ('(A↑B)↑(A↑B)')+'<p>A·B = '+H('¬¬(A·B)')+' = '+H('¬(A↑B)')+'. Potrebuješ dvoje vrat NAND.</p>'),
+mcq('srednja','re','Kako z vrati NAND dobiš ALI (A + B)?','(A ↑ A) ↑ (B ↑ B)',['(A ↑ B) ↑ (A ↑ B)','A ↑ B','(A ↑ B) ↑ A'],
+  'A + B = '+H('¬(¬A·¬B)')+'. Negacijo dobiš z A ↑ A.',ans('Odgovor:','(A ↑ A) ↑ (B ↑ B)')+'<p>(A ↑ A) ↑ (B ↑ B) = '+H('¬(¬A·¬B)')+' = A + B (De Morgan). Potrebuješ tri vrata NAND.</p>',true),
+exq('srednja','re','Zapiši A + B samo z operatorjem NOR (↓).',{x:'(A↓B)↓(A↓B)',vars:['A','B'],target:'A+B',ops:['nor']},
+  'ALI je negiran NOR. Negacijo dobiš z X ↓ X.',EQ('(A↓B)↓(A↓B)')+'<p>A + B = '+H('¬(A↓B)')+'. Potrebuješ dvoje vrat NOR.</p>'),
+exq('srednja','re','Zapiši A·B samo z operatorjem NOR (↓).',{x:'(A↓A)↓(B↓B)',vars:['A','B'],target:'A·B',ops:['nor']},
+  'A·B = '+H('¬(¬A+¬B)')+'. Najprej negiraj A in B z A ↓ A in B ↓ B.',EQ('(A↓A)↓(B↓B)')+'<p>(A ↓ A) ↓ (B ↓ B) = '+H('¬(¬A+¬B)')+' = A·B (De Morgan). Potrebuješ tri vrata NOR.</p>'),
+inq('srednja','re','Koliko vrat NOR potrebuješ za vrata ALI (A + B) in koliko za vrata IN (A·B)?',[F('za ALI','2','dec',{u:'vrat'}),F('za IN','3','dec',{u:'vrat'})],
+  'ALI = (A ↓ B) ↓ (A ↓ B), IN = (A ↓ A) ↓ (B ↓ B). Preštej vrata.',stp('Gradnja iz NOR',['ALI: NOR in še en NOR kot negator = 2','IN: dva negatorja iz NOR in končni NOR = 3'],'2 in 3')+'<p>Pri NAND je ravno obratno: IN 2 vrata, ALI 3 vrata.</p>'),
+exq('srednja','re','Zapiši Y = A·B + C·D samo z operatorjem NAND (↑).',{x:'(A↑B)↑(C↑D)',vars:V4,target:'A·B+C·D',ops:['nand']},
+  'Vsak produkt je ena vrata NAND, zadnja vrata NAND ju združijo.',EQ('(A↑B)↑(C↑D)')),
+exq('težka','re','Zapiši Y = A + B·C samo z operatorjem NAND (↑).',{x:'(A↑A)↑(B↑C)',vars:V3,target:'A+B·C',ops:['nand']},
+  'Člen A ima en sam literal, zato v zadnja vrata pride '+NG('A')+' = A ↑ A.',EQ('(A↑A)↑(B↑C)')+'<p>'+H('¬(¬A·¬(B·C))')+' = A + B·C.</p>'),
+exq('težka','re','Zapiši Y = (A + B)·C samo z operatorjem NOR (↓).',{x:'(A↓B)↓(C↓C)',vars:V3,target:'(A+B)·C',ops:['nor']},
+  'Produkt vsot pretvoriš v NOR-NOR. Člen C ima en sam literal, zato potrebuje negacijo C ↓ C.',EQ('(A↓B)↓(C↓C)')+'<p>'+H('¬(¬(A+B)+¬C)')+' = (A + B)·C.</p>'),
+inq('težka','re','Večino od treh Y = A·B + A·C + B·C realiziraš samo z vrati NAND. Koliko vrat potrebuješ in koliko vhodov imajo zadnja vrata?',[F('vrat','4','dec',{u:'vrat'}),F('vhodov zadnjih vrat','3','dec')],
+  'Vsak produkt je ena vrata NAND, zadnja vrata NAND pa združijo vse produkte.','<div class="eqbig">Y = (A ↑ B) ↑ (A ↑ C) ↑ (B ↑ C)</div>'+'<p>Tri vrata z dvema vhodoma in ena vrata s tremi vhodi: skupaj 4.</p>')
+];
+
+</script>
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const KEY = CFG.key;
+
+  // ---------- shranjen napredek (po potrebi brez localStorage) ----------
+  let S = {t:{}, g:[]};
+  try { const raw = localStorage.getItem(KEY); if(raw){ const o = JSON.parse(raw); if(o && typeof o==='object') S = {t:o.t||{}, g:Array.isArray(o.g)?o.g:[]}; } } catch(e){}
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+
+  // ---------- navigacija: stran za stranjo ----------
+  const PAGES = [...CFG.th, ...CFG.sim, 'naloge'];
+  const LAB = CFG.LAB;
+  const CHAPTERS = [
+    {name:'Teorija', ids:CFG.th},
+    {name:'Simulacija', ids:CFG.sim},
+    {name:'Naloge', ids:['naloge']}
+  ];
+  let chapEls=[], subEls=[], curPage=null;
+  function markNav(id){
+    const gi = CHAPTERS.findIndex(c=>c.ids.includes(id));
+    chapEls.forEach((b,i)=>b.classList.toggle('on', i===gi));
+    subEls.forEach((s,i)=>{ if(s) s.hidden = i!==gi; });
+    document.querySelectorAll('#nav .sb').forEach(b=>b.classList.toggle('on', b.dataset.page===id));
+  }
+  function showPage(id, smooth){
+    if(!PAGES.includes(id)) return;
+    curPage = id;
+    PAGES.forEach(p=>{ const el=$(p); if(el) el.classList.toggle('on', p===id); });
+    markNav(id);
+    try { history.replaceState(null,'','#'+id); } catch(e){}
+    window.scrollTo({top:0, behavior: smooth ? 'smooth' : 'auto'});
+  }
+  PAGES.forEach((id,k)=>{
+    const el=$(id); if(!el) return;
+    const grp = el.dataset.grp || 'Naloge';
+    const crumb=document.createElement('div'); crumb.className='crumb';
+    crumb.innerHTML=`<span>${grp} · ${LAB[id]}</span><span>${k+1} / ${PAGES.length}</span>`;
+    el.prepend(crumb);
+    const pg=document.createElement('div'); pg.className='pager';
+    const prev = k>0 ? `<button class="btn g2" data-go="${PAGES[k-1]}">‹ ${LAB[PAGES[k-1]]}</button>` : '<span></span>';
+    const next = k<PAGES.length-1 ? `<button class="btn" data-go="${PAGES[k+1]}">${LAB[PAGES[k+1]]} ›</button>` : '<span></span>';
+    pg.innerHTML = prev+next;
+    el.appendChild(pg);
+  });
+  document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.go,true)));
+  document.querySelectorAll('[data-sim]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.sim,true)));
+  document.querySelectorAll('[data-hint]').forEach(b=>b.addEventListener('click',()=>{ $(b.dataset.hint).hidden=false; }));
+
+  const navc=document.createElement('div'); navc.className='navc'; $('nav').appendChild(navc);
+  CHAPTERS.forEach((c,ci)=>{
+    const cb=document.createElement('button'); cb.className='chap'; cb.dataset.page=c.ids[0];
+    cb.innerHTML=`<span class="sn">${ci+1}</span><span>${c.name}</span>`;
+    cb.addEventListener('click',()=>showPage(c.ids[0],true));
+    navc.appendChild(cb); chapEls.push(cb);
+    if(c.ids.length>1){
+      const sub=document.createElement('div'); sub.className='subnav'; sub.hidden=true;
+      c.ids.forEach(id=>{
+        const b=document.createElement('button'); b.className='sb'; b.dataset.page=id; b.textContent=LAB[id];
+        b.addEventListener('click',()=>showPage(id,true));
+        sub.appendChild(b);
+      });
+      navc.appendChild(sub); subEls.push(sub);
+    } else subEls.push(null);
+  });
+  window.addEventListener('hashchange',()=>{ const h=location.hash.slice(1); if(PAGES.includes(h) && h!==curPage) showPage(h,false); });
+
+  // ---------- SVG gradniki ----------
+  const ON='var(--on)', OFF='var(--muted)';
+  const W=(pts,v)=>`<polyline points="${pts.map(p=>p[0]+','+p[1]).join(' ')}" fill="none" stroke="${v?ON:OFF}" stroke-width="${v?2.8:1.4}" stroke-linejoin="round" stroke-linecap="round"/>`;
+  const CH=(x,y,t,v,w=34)=>`<rect x="${x}" y="${y}" width="${w}" height="18" rx="9" fill="${v?ON:'var(--card)'}" stroke="${v?ON:OFF}" stroke-width="1.2"/><text x="${x+w/2}" y="${y+13}" text-anchor="middle" style="fill:${v?'var(--on-ink)':'var(--ink)'};font-size:12px;font-weight:700">${t}</text>`;
+  const DOTV=(x,y,v)=>`<circle cx="${x}" cy="${y}" r="3.5" fill="${v?ON:OFF}"/>`;
+  const TX=(x,y,t,a='start',cls='net')=>`<text class="${cls}" x="${x}" y="${y}" text-anchor="${a}">${t}</text>`;
+  // naravna velikost risbe (malo povečana), da se majhna vezja ne raztegnejo čez vso širino
+  const sized=(svg,w)=>svg.replace('<svg ','<svg style="width:'+Math.round(w)+'px;max-width:100%" ');
+  const svgWrap=(vb,body,label)=>`<svg viewBox="${vb}" role="img" aria-label="${label}" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
+  // logična vrata: IEC (pravokotnik z znakom) ali ANSI (oblikovana vrata); izbira velja za vse vaje LAV-ELS
+  let SYM='IEC'; try{ const s=localStorage.getItem('scnm_lavele_sym'); if(s==='ANSI'||s==='IEC') SYM=s; }catch(e){}
+  const REDRAW=[];
+  // dodatne vrste nalog: XT[vrsta] = {html, restore, check, lock, showSol, click}
+  const XT={};
+  function G(type,x,y,n,sty){
+    const S=sty||SYM;
+    const w=56, h = n===1?30:16*n+12;
+    const bub = /^(NOT|NAND|NOR|XNOR)$/.test(type);
+    const pins=[]; for(let i=0;i<n;i++) pins.push([x, y+h*(i+0.5)/n]);
+    const circ = bub ? `<circle class="gate" cx="${x+w+4}" cy="${y+h/2}" r="4"/>` : '';
+    const out=[x+w+(bub?8:0), y+h/2];
+    let s;
+    if(S==='IEC'){
+      const sym={AND:'&',NAND:'&',OR:'≥1',NOR:'≥1',XOR:'=1',XNOR:'=1',NOT:'1',BUF:'1'}[type];
+      s=`<rect class="gate" x="${x}" y="${y}" width="${w}" height="${h}" rx="4"/><text class="sym" x="${x+w/2}" y="${y+h/2+5}" text-anchor="middle">${sym}</text>`;
+    } else {
+      const base=type.replace(/^N(?=AND|OR)/,'').replace(/^XN/,'X');
+      if(base==='AND'){
+        const r=h/2, xs=x+w-r;
+        s=`<path class="gate" d="M${x},${y} H${xs} A${r},${r} 0 0 1 ${xs},${y+h} H${x} Z"/>`;
+      } else if(base==='OR'||base==='XOR'){
+        const ox = base==='XOR'?8:0, bx=x+ox, k=0.32*w;
+        s=`<path class="gate" d="M${bx},${y} Q${bx+0.62*(w-ox)},${y} ${x+w},${y+h/2} Q${bx+0.62*(w-ox)},${y+h} ${bx},${y+h} Q${bx+k},${y+h/2} ${bx},${y} Z"/>`;
+        if(ox) s+=`<path class="gate" style="fill:none" d="M${x},${y} Q${x+k},${y+h/2} ${x},${y+h}"/>`;
+        // kratke žice od roba do ukrivljene zadnje stranice
+        pins.forEach(p=>{ const t=(p[1]-y)/h, cx=bx+2*t*(1-t)*k; s+=`<line x1="${x}" y1="${p[1]}" x2="${cx}" y2="${p[1]}" style="stroke:var(--ink);stroke-width:1.4"/>`; });
+      } else { // NOT, BUF: trikotnik
+        s=`<path class="gate" d="M${x+4},${y-2} L${x+w},${y+h/2} L${x+4},${y+h+2} Z"/>`;
+        pins.forEach(p=>{ s+=`<line x1="${x}" y1="${p[1]}" x2="${x+4}" y2="${p[1]}" style="stroke:var(--ink);stroke-width:1.4"/>`; });
+      }
+    }
+    return {s:s+circ,pins,out,h};
+  }
+  // izbirnik simbolov: vsak element z razredom .symsel dobi gumba IEC in ANSI
+  function symPickers(){
+    document.querySelectorAll('.symsel').forEach(box=>{
+      box.innerHTML='<span class="label">Simboli</span><button class="pill" data-s="IEC">IEC</button><button class="pill" data-s="ANSI">ANSI</button>';
+      box.querySelectorAll('.pill').forEach(b=>b.addEventListener('click',()=>{ SYM=b.dataset.s; try{localStorage.setItem('scnm_lavele_sym',SYM);}catch(e){} syncSym(); REDRAW.forEach(f=>f()); }));
+    });
+    syncSym();
+  }
+  // vezje iz drevesa izraza: vsak list dobi svojo vrstico in čip z imenom, vrata stojijo po nivojih
+  const GT={and:'AND',or:'OR',xor:'XOR',xnor:'XNOR',nand:'NAND',nor:'NOR',not:'NOT'};
+  function treeSVG(ast,env,o){
+    o=o||{};
+    const P=o.pitch||32, colW=o.colW||104, X0=50;
+    const kids=n=>n.t==='not'?[n.a]:(n.args||[]);
+    const leaf=n=>n.t==='var'||n.t==='const';
+    const lev=n=>leaf(n)?(n.lv=0):(n.lv=1+Math.max(...kids(n).map(lev)));
+    // kopija drevesa, da ne spreminjamo izvirnika
+    const cp=n=>n.t==='not'?{t:'not',a:cp(n.a)}:n.args?{t:n.t,args:n.args.map(cp)}:{...n};
+    const root=cp(ast); lev(root);
+    let slot=0;
+    const place=n=>{ if(leaf(n)){ n.y=18+slot*P; slot++; return n.y; } const ys=kids(n).map(place); n.y=(Math.min(...ys)+Math.max(...ys))/2; return n.y; };
+    place(root);
+    const H=18+slot*P-P+18+(o.extraH||0);
+    let s=''; const val=n=>o.static?0:BOOL.ev(n,env);
+    function draw(n){
+      const v=val(n);
+      if(leaf(n)){ s+=CH(6,n.y-9,n.t==='var'?n.n:String(n.v),v,32); return [38,n.y]; }
+      const ks=kids(n), outs=ks.map(draw);
+      const gx=X0+(n.lv-1)*colW+28, gh=ks.length===1?30:16*ks.length+12;
+      const gg=G(GT[n.t],gx,n.y-gh/2,ks.length);
+      s+=gg.s;
+      ks.forEach((k,i)=>{
+        const [ox,oy]=outs[i], py=gg.pins[i][1], kv=val(k);
+        if(Math.abs(oy-py)<0.5) s+=W([[ox,oy],[gx,py]],kv);
+        else { const jx=Math.max(ox+6,gx-12-7*Math.min(i,ks.length-1-i)); s+=W([[ox,oy],[jx,oy],[jx,py],[gx,py]],kv); }
+      });
+      return gg.out;
+    }
+    const ro=draw(root), rv=val(root), lab=o.out||'Y';
+    const ex=ro[0]+26;
+    s+=W([ro,[ex,ro[1]]],rv)+CH(ex,ro[1]-9,lab,rv,Math.max(32,lab.length*9+14));
+    const Wd=ex+Math.max(32,lab.length*9+14)+8;
+    return {svg:sized(svgWrap('0 0 '+Wd+' '+Math.max(H,40),s,o.label||'Logično vezje'),Wd*(o.scale||1.25)),w:Wd,h:H};
+  }
+  // vezje iz seznama vrat (signal lahko napaja več vrat): N={ins:[{n,y}], g:[{id,t,in:[...],x,y,j:[...]}], out:[{n,src}]}
+  const GEV={AND:a=>a.every(x=>x)?1:0,OR:a=>a.some(x=>x)?1:0,NOT:a=>1-a[0],BUF:a=>a[0],NAND:a=>a.every(x=>x)?0:1,NOR:a=>a.some(x=>x)?0:1,XOR:a=>a.reduce((p,x)=>p^x,0),XNOR:a=>1-a.reduce((p,x)=>p^x,0)};
+  function netSVG(N,env,o){
+    o=o||{}; const colW=o.colW||104, X0=N.x0||o.x0||64;
+    const val={}, pts={}, uses={}; let s='', body='';
+    N.ins.forEach(i=>{ val[i.n]=o.static?0:(env[i.n]||0); pts[i.n]=[38,i.y]; s+=CH(6,i.y-9,i.n,val[i.n],32); });
+    N.g.forEach(g=>g.in.forEach(k=>{ uses[k]=(uses[k]||0)+1; }));
+    let maxX=0, maxY=0;
+    N.g.forEach(g=>{
+      const n=g.in.length, gh=n===1?30:16*n+12, gx=X0+g.x*colW;
+      g._g=G(g.t,gx,g.y-gh/2,n,o.sty);
+      val[g.id]=o.static?0:GEV[g.t](g.in.map(k=>val[k]));
+      pts[g.id]=g._g.out; maxX=Math.max(maxX,g._g.out[0]); maxY=Math.max(maxY,g.y+gh/2);
+    });
+    N.g.forEach(g=>{
+      body+=g._g.s;
+      if(o.labels&&g.id!==(N.out&&N.out[0]&&N.out[0].src)) body+=`<text x="${g._g.out[0]+4}" y="${g._g.out[1]-7}" class="lbl" style="font-weight:700;fill:var(--acc)">${g.id}</text>`;
+      g.in.forEach((k,i)=>{
+        const [sx,sy]=pts[k], [px,py]=g._g.pins[i], v=val[k];
+        if(Math.abs(sy-py)<0.5&&!(g.j&&g.j[i]!=null)){ s+=W([[sx,sy],[px,py]],v); return; }
+        const jx=(g.j&&g.j[i]!=null)?g.j[i]:Math.max(sx+8,px-12-7*i);
+        s+=W([[sx,sy],[jx,sy],[jx,py],[px,py]],v);
+        if(uses[k]>1) s+=DOTV(jx,sy,v);
+      });
+    });
+    let xe=maxX+30;
+    (N.out||[]).forEach(q=>{ const [sx,sy]=pts[q.src], v=val[q.src], w=Math.max(32,q.n.length*9+14); s+=W([[sx,sy],[xe,sy]],v)+CH(xe,sy-9,q.n,v,w); });
+    const Wd=xe+60, Hd=Math.max(maxY,...N.ins.map(i=>i.y+9))+12;
+    return {svg:sized(svgWrap('0 0 '+Wd+' '+Hd,s+body,o.label||'Logično vezje'),Wd*(o.scale||1.2)),val};
+  }
+  // pravilnostna tabela z označeno vrstico (cur) in poljubnimi izhodnimi stolpci [{n:'Y',ast}]
+  function truthHTML(vs,cols,cur,o){
+    o=o||{};
+    let h='<div class="scroll"><table class="tt"><tr>'+(o.idx?'<th class="mid">vrstica</th>':'')+vs.map(v=>'<th>'+v+'</th>').join('')+cols.map(c=>'<th class="o">'+c.n+'</th>').join('')+'</tr>';
+    for(let m=0;m<(1<<vs.length);m++){
+      const e=BOOL.envOf(vs,m);
+      h+='<tr class="'+(m===cur?'cur':'')+'"'+(o.click?' data-m="'+m+'" style="cursor:pointer"':'')+'>'+(o.idx?'<td class="mid">'+m+'</td>':'')+vs.map(v=>'<td>'+e[v]+'</td>').join('')+cols.map(c=>{ const y=BOOL.ev(c.ast,e); return '<td class="o'+(y?' one':'')+'">'+y+'</td>'; }).join('')+'</tr>';
+    }
+    return h+'</table></div>';
+  }
+  function syncSym(){ document.querySelectorAll('.symsel .pill').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===SYM?'true':'false')); }
+  // blok z nožicami L (levo), R (desno), B (spodaj)
+  function BLK(o){
+    const {x,y,w,h,t,sub} = o, L=o.L||[], R=o.R||[], B=o.B||[];
+    let s=`<rect class="blk" x="${x}" y="${y}" width="${w}" height="${h}" rx="6"/>`;
+    if(o.top) s+=`<text class="blkt" x="${x+w/2}" y="${y+16}" text-anchor="middle">${t}${sub?' '+sub:''}</text>`;
+    else {
+      s+=`<text class="blkt" x="${x+w/2}" y="${y+h/2-(sub?2:-4)}" text-anchor="middle">${t}</text>`;
+      if(sub) s+=`<text class="blks" x="${x+w/2}" y="${y+h/2+13}" text-anchor="middle">${sub}</text>`;
+    }
+    const pins={L:[],R:[],B:[]};
+    L.forEach((l,i)=>{ const py=o.Ly?o.Ly[i]:y+h*(i+0.5)/L.length; pins.L.push([x,py]); s+=`<text class="pin${o.selL===i?' sel':''}" x="${x+6}" y="${py+4}">${l}</text>`; });
+    R.forEach((l,i)=>{ const py=o.Ry?o.Ry[i]:y+h*(i+0.5)/R.length; pins.R.push([x+w,py]); s+=`<text class="pin" x="${x+w-6}" y="${py+4}" text-anchor="end">${l}</text>`; });
+    B.forEach((l,i)=>{ const px=o.Bx?o.Bx[i]:x+w*(i+1)/(B.length+1); pins.B.push([px,y+h]); s+=`<text class="pin" x="${px}" y="${y+h-6}" text-anchor="middle">${l}</text>`; });
+    return {s,pins};
+  }
+  const bit=(v,i)=>(v>>i)&1;
+  function mkToggle(parent,label,onChange,on=false,cls=''){
+    const b=document.createElement('button'); b.className='tg'+(cls?' '+cls:''); b.textContent=label; b.setAttribute('aria-pressed',on?'true':'false');
+    b.addEventListener('click',()=>onChange(b)); parent.appendChild(b); return b;
+  }
+  const setP=(b,v)=>b.setAttribute('aria-pressed',v?'true':'false');
+  function pillGroup(container,onPick){
+    const bs=[...container.querySelectorAll('.pill')];
+    bs.forEach(b=>b.addEventListener('click',()=>{ bs.forEach(x=>setP(x,x===b)); onPick(b); }));
+    return bs;
+  }
+  const lamp=(label,v,txt,cls)=>`<div class="lamp ${v?'on':''} ${cls||''}"><div class="label">${label}</div><div class="b">${txt===undefined?v:txt}</div></div>`;
+  const tile=(label,val,on)=>`<div class="tile ${on?'on':''}"><div class="label">${label}</div><div class="v">${val}</div></div>`;
+  const dcm=LIB.dcm;
+  // drevo vrat XOR (za paritetni bit): labels in vals so ista dolžina
+  function xorTreeLive(labels,vals,pitch){
+    pitch=pitch||22;
+    let s='';
+    let nodes=labels.map((l,i)=>({x:48,y:20+i*pitch,v:vals[i]}));
+    nodes.forEach((nd,i)=>{ s+=CH(14,nd.y-9,labels[i],nd.v); });
+    let gx=120;
+    while(nodes.length>1){
+      const next=[];
+      for(let i=0;i+1<nodes.length;i+=2){
+        const a=nodes[i], b=nodes[i+1];
+        const yc=(a.y+b.y)/2; const g=G('XOR',gx,yc-22,2);
+        const v=a.v^b.v;
+        s+=g.s;
+        s+=W([[a.x,a.y],[gx-14,a.y],[gx-14,g.pins[0][1]],[gx,g.pins[0][1]]],a.v);
+        s+=W([[b.x,b.y],[gx-14,b.y],[gx-14,g.pins[1][1]],[gx,g.pins[1][1]]],b.v);
+        next.push({x:g.out[0],y:g.out[1],v});
+      }
+      if(nodes.length%2===1) next.push(nodes[nodes.length-1]);
+      nodes=next; gx+=90;
+    }
+    return {svg:s,out:nodes[0],h:20+labels.length*pitch,w:gx};
+  }
+  // vrsta stikal za bite (od najvišjega proti najnižjemu), pod vsakim stikalom je utež
+  function bitRow(parent,n,getV,setV,lab){
+    parent.innerHTML=''; parent.classList.toggle('tight',n>12); const btns=[]; let nib=null;
+    for(let i=n-1;i>=0;i--){
+      if(n>4&&(i%4===3||!nib)){ nib=document.createElement('div'); nib.className='nib'; parent.appendChild(nib); }
+      const col=document.createElement('div'); col.className='bcol';
+      const lb=document.createElement('div'); lb.className='label'; lb.textContent=lab(i); col.appendChild(lb);
+      btns[i]=mkToggle(col,String(bit(getV(),i)),()=>setV(getV()^(1<<i)),bit(getV(),i)===1,'sq');
+      (n>4?nib:parent).appendChild(col);
+    }
+    return {sync(){ for(let i=0;i<n;i++){ const v=bit(getV(),i); btns[i].textContent=v; setP(btns[i],v); } }};
+  }
+
+
+
+
+  // =================== VEITCHEV DIAGRAM IN NALOGE Z IZRAZI (tematika 1) ===================
+  /* RAZPOREDITEV VEITCHEVEGA DIAGRAMA (kot v skripti DIT in na gradivu šole; spremeni samo tukaj)
+     2 spremenljivki: stolpca A = 1 | A = 0, vrstici B = 1 | B = 0
+     3 spremenljivke: stolpci (A,C) = 10, 11, 01, 00, vrstici B = 1 | B = 0
+     4 spremenljivke: stolpci (A,C) = 10, 11, 01, 00, vrstice (B,D) = 10, 11, 01, 00
+     črte: A zgoraj (levi polovici), C spodaj (srednja stolpca), B levo (zgornji polovici), D desno (srednji vrstici) */
+  const SEQ1=[1,0], SEQ2=[[1,0],[1,1],[0,1],[0,0]];
+  function KL(n){
+    const ax=(v1,v2)=>v2===undefined?SEQ1.map(a=>({[v1]:a})):SEQ2.map(([a,b])=>({[v1]:a,[v2]:b}));
+    if(n===2) return {cols:ax(0),rows:ax(1),bars:[{v:0,side:'top'},{v:1,side:'left'}]};
+    if(n===3) return {cols:ax(0,2),rows:ax(1),bars:[{v:0,side:'top'},{v:2,side:'bottom'},{v:1,side:'left'}]};
+    return {cols:ax(0,2),rows:ax(1,3),bars:[{v:0,side:'top'},{v:2,side:'bottom'},{v:1,side:'left'},{v:3,side:'right'}]};
+  }
+  // številka vrstice tabele (prva spremenljivka je najvišji bit) za celico (vrstica r, stolpec c)
+  const kmM=(n,r,c)=>{ const e=Object.assign({},r,c); let m=0; for(let i=0;i<n;i++) m=m*2+(e[i]||0); return m; };
+  // implikant {v,m} vsebuje celico, če se ujema v vseh neizpadlih spremenljivkah osi
+  const axisHit=(n,p,o)=>Object.keys(o).every(i=>{ const b=1<<(n-1-i); return (p.m&b)||(((p.v&b)?1:0)===o[i]); });
+  /* zaporedni odseki v krožnem zaporedju: [od, do, odprtZačetek, odprtKonec]
+     skupina čez rob se razdeli na dva kosa, ki sta na robu diagrama odprta */
+  function runs(idx,len){
+    if(idx.length===len) return [[0,len-1,false,false]];
+    const s=new Set(idx), out=[];
+    let start=-1;
+    for(let i=0;i<len;i++){ if(s.has(i)&&start<0) start=i; if(!s.has(i)&&start>=0){ out.push([start,i-1,false,false]); start=-1; } }
+    if(start>=0) out.push([start,len-1,false,false]);
+    if(out.length===2&&out[0][0]===0&&out[1][1]===len-1){ out[0][2]=true; out[1][3]=true; }
+    return out;
+  }
+  // zaobljen okvir; odprta stranica sega čez rob diagrama (kot v zvezku)
+  function loopPath(x0,y0,x1,y1,oL,oR,oT,oB,r,ext){
+    if(oL) x0-=ext; if(oR) x1+=ext; if(oT) y0-=ext; if(oB) y1+=ext;
+    r=Math.min(r,(x1-x0)/2,(y1-y0)/2);
+    const tl=!oT&&!oL, tr=!oT&&!oR, br=!oB&&!oR, bl=!oB&&!oL; let d='';
+    if(!oT) d+=`M${x0+(tl?r:0)},${y0}H${x1-(tr?r:0)}`;
+    if(tr) d+=`Q${x1},${y0} ${x1},${y0+r}`;
+    if(!oR) d+=`M${x1},${y0+(tr?r:0)}V${y1-(br?r:0)}`;
+    if(br) d+=`Q${x1},${y1} ${x1-r},${y1}`;
+    if(!oB) d+=`M${x1-(br?r:0)},${y1}H${x0+(bl?r:0)}`;
+    if(bl) d+=`Q${x0},${y1} ${x0},${y1-r}`;
+    if(!oL) d+=`M${x0},${y1-(bl?r:0)}V${y0+(tl?r:0)}`;
+    if(tl) d+=`Q${x0},${y0} ${x0+r},${y0}`;
+    return d;
+  }
+  /* kmapSVG(n, vrednosti[0|1|'X'|null], o)
+     o.names: imena spremenljivk, o.groups: implikanti {v,m}, o.zero: skupine ničel (črtkane), o.click: celice klikljive,
+     o.bad: napačne celice, o.pick: izbrane celice (ročno označevanje), o.cells: seznami celic (ročno narisane skupine) */
+  function kmapSVG(n,vals,o){
+    o=o||{};
+    const names=(o.names||['A','B','C','D']).slice(0,n), K=KL(n), cs=o.cs||54;
+    const NR=K.rows.length, NC=K.cols.length;
+    const padL=n===2||n===3||n===4?40:20, x0=padL+14, y0=40, W0=x0+NC*cs, H0=y0+NR*cs;
+    let s='';
+    // črte spremenljivk: kjer je spremenljivka 1
+    K.bars.forEach(b=>{
+      const v=names[b.v];
+      if(b.side==='top'||b.side==='bottom'){
+        const idx=K.cols.map((c,j)=>c[b.v]===1?j:-1).filter(j=>j>=0), a=idx[0], z=idx[idx.length-1], yy=b.side==='top'?y0-12:H0+12;
+        s+=`<line x1="${x0+a*cs+3}" y1="${yy}" x2="${x0+(z+1)*cs-3}" y2="${yy}" style="stroke:var(--acc);stroke-width:3.5;stroke-linecap:round"/>`+TX(x0+(a+z+1)*cs/2,b.side==='top'?yy-7:yy+17,v,'middle','net');
+      } else {
+        const idx=K.rows.map((r,i)=>r[b.v]===1?i:-1).filter(i=>i>=0), a=idx[0], z=idx[idx.length-1], xx=b.side==='left'?x0-12:W0+12;
+        s+=`<line x1="${xx}" y1="${y0+a*cs+3}" x2="${xx}" y2="${y0+(z+1)*cs-3}" style="stroke:var(--acc);stroke-width:3.5;stroke-linecap:round"/>`+TX(b.side==='left'?xx-8:xx+8,y0+(a+z+1)*cs/2+5,v,b.side==='left'?'end':'start','net');
+      }
+    });
+    // celice
+    K.rows.forEach((r,i)=>K.cols.forEach((c,j)=>{
+      const m=kmM(n,r,c), v=vals[m], x=x0+j*cs, y=y0+i*cs;
+      const bad=o.bad&&o.bad.includes(m), pk=o.pick&&o.pick.includes(m);
+      const fill=pk?'var(--tile)':v===1?'var(--sigbg)':'var(--card)';
+      s+=`<rect x="${x}" y="${y}" width="${cs}" height="${cs}" style="fill:${fill};stroke:${bad?'var(--bad)':pk?'var(--acc)':'var(--line)'};stroke-width:${bad||pk?3:1}"/>`;
+      if(o.num!==false) s+=`<text x="${x+4}" y="${y+12}" class="lbl" style="font-size:9.5px">${m}</text>`;
+      s+=`<text x="${x+cs/2}" y="${y+cs/2+8}" text-anchor="middle" style="font-size:20px;font-weight:700;fill:${v===1?'var(--sig)':v==='X'?'var(--amb)':'var(--mut)'}">${v===null||v===undefined?'?':v}</text>`;
+    }));
+    s+=`<rect x="${x0}" y="${y0}" width="${NC*cs}" height="${NR*cs}" style="fill:none;stroke:var(--ink);stroke-width:2"/>`;
+    // obrobe skupin
+    const cellsOfImp=p=>{ const rows=K.rows.map((r,i)=>axisHit(n,p,r)?i:-1).filter(i=>i>=0), cols=K.cols.map((c,j)=>axisHit(n,p,c)?j:-1).filter(j=>j>=0); return {rows,cols}; };
+    const cellsOfList=L=>{ const rows=new Set(), cols=new Set(); K.rows.forEach((r,i)=>K.cols.forEach((c,j)=>{ if(L.includes(kmM(n,r,c))){ rows.add(i); cols.add(j); } })); return {rows:[...rows],cols:[...cols]}; };
+    const drawGroups=(gs,dash,list)=>gs.forEach((g,gi)=>{
+      const {rows,cols}=list?cellsOfList(g):cellsOfImp(g);
+      const pad=5+(gi%4)*4, col=`var(--g${gi%6+1})`;
+      runs(rows,NR).forEach(([r0,r1,oT,oB])=>runs(cols,NC).forEach(([c0,c1,oL,oR])=>{
+        const d=loopPath(x0+c0*cs+pad,y0+r0*cs+pad,x0+(c1+1)*cs-pad,y0+(r1+1)*cs-pad,oL,oR,oT,oB,cs/3,pad+10);
+        s+=`<path d="${d}" style="fill:none;stroke:${col};stroke-width:3;stroke-linecap:round;${dash?'stroke-dasharray:7 4':''}"/>`;
+      }));
+    });
+    if(o.groups) drawGroups(o.groups,false);
+    if(o.zero) drawGroups(o.zero,true);
+    if(o.cells) drawGroups(o.cells,false,true);
+    // klikljive celice (prozorni pravokotniki na vrhu)
+    if(o.click) K.rows.forEach((r,i)=>K.cols.forEach((c,j)=>{ const m=kmM(n,r,c); s+=`<rect data-m="${m}" x="${x0+j*cs}" y="${y0+i*cs}" width="${cs}" height="${cs}" style="fill:transparent;cursor:pointer;touch-action:none" role="button" aria-label="Celica ${m}"/>`; }));
+    const Wd=W0+(n===4?34:16), Hd=H0+(n>=3?34:14);
+    return sized(svgWrap('0 0 '+Wd+' '+Hd,s,'Veitchev diagram za '+n+' spremenljivke'),Wd*(o.scale||1.15));
+  }
+  // implikant v izraz s črto nad negacijo
+  function impHTML(p,names,pos){ return BOOL.html(BOOL.parse(pos?BOOL.impPOS(p,names):BOOL.impSOP(p,names))); }
+  const groupChips=(gs,names,pos)=>'<div class="gchips">'+gs.map((p,i)=>`<span class="gchip" style="border-color:var(--g${i%6+1})">${impHTML(p,names,pos)}</span>`).join('')+'</div>';
+  const offSet=(on,n,dc)=>{ const r=[]; for(let m=0;m<(1<<n);m++) if(!on.includes(m)&&!(dc||[]).includes(m)) r.push(m); return r; };
+  const valsOf=(on,n,dc)=>Array.from({length:1<<n},(_,m)=>on.includes(m)?1:(dc||[]).includes(m)?'X':0);
+  // minimalna vsota produktov (ali produkt vsot) kot HTML
+  function minHTML(on,names,dc,pos){ const s=pos?BOOL.pos(on,names,dc):BOOL.sop(on,names,dc); return BOOL.html(BOOL.parse(s)); }
+
+  // ---------- naloga: vpis izraza ----------
+  const negVarsOnly=n=>n.t==='not'?n.a.t==='var':BOOL.kids(n).every(negVarsOnly);
+  const litW=n=>n+' '+(n===1?'literal':n===2?'literala':n<5?'literali':'literalov');
+  const KEYS=['¬','·','+','(',')','↑','↓','⊕'];
+  function exTarget(t){ // vrne {names, on, dc}
+    const names=t.vars;
+    if(t.on) return {names,on:t.on,dc:t.dc||[]};
+    return {names,on:BOOL.minterms(BOOL.parse(t.target),names),dc:[]};
+  }
+  XT.ex={
+    html(t,i){
+      const keys=(t.keys||KEYS).concat(t.vars);
+      return `<div class="fld exf"><span class="fl">${t.lab||'Y ='}</span><input class="inp xin" type="text" id="x${i}" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="${t.ph||'npr. A·¬B + C'}"></div>`+
+        `<div class="kp" aria-label="Znaki za vnos">${keys.map(k=>`<button type="button" class="kb" data-ins="${k}">${k}</button>`).join('')}<button type="button" class="kb" data-ins="⌫" aria-label="Briši">⌫</button></div>`+
+        `<p class="sm mut">Negacija: ¬A ali A'. IN: · ali zapis skupaj (AB). ALI: +.${t.ops?' Dovoljeni operatorji: '+t.ops.map(o=>({nand:'↑ (NAND)',nor:'↓ (NOR)',not:'¬',and:'·',or:'+'})[o]).join(', ')+'.':''}</p><div class="expv"></div>`;
+    },
+    click(e,card,t,st){
+      const b=e.target.closest('.kb'); if(!b) return false;
+      const inp=card.querySelector('input.xin'); if(inp.disabled) return true;
+      const k=b.dataset.ins;
+      if(k==='⌫'){ const a=inp.selectionStart??inp.value.length; if(a>0){ inp.setRangeText('',a-1,a,'end'); } }
+      else { const a=inp.selectionStart??inp.value.length, z=inp.selectionEnd??a; inp.setRangeText(k,a,z,'end'); }
+      inp.focus(); st.x=inp.value; return true;
+    },
+    restore(card,t,st){ const inp=card.querySelector('input.xin'); if(st.x) inp.value=st.x; if(st.d&&!st.sol&&st.x) this.mark(card,t,st); },
+    lock(card){ card.querySelectorAll('input.xin,.kb').forEach(x=>x.disabled=true); },
+    mark(card,t,st){ const inp=card.querySelector('input.xin'); inp.classList.toggle('right',st.p>0); inp.classList.toggle('wrong',!(st.p>0)); try{ card.querySelector('.expv').innerHTML='Tvoj izraz: <span class="m">'+BOOL.html(BOOL.parse(st.x))+'</span>'; }catch(e){} },
+    check(card,t,st){
+      const inp=card.querySelector('input.xin'), src=inp.value.trim(); st.x=inp.value;
+      if(!src) return {err:'Najprej vpiši izraz.'};
+      let a; try{ a=BOOL.parse(src); }catch(e){ return {err:'Izraza ni mogoče prebrati: '+e.message+'. Popravi ga in preveri znova.'}; }
+      const T=exTarget(t), extra=[...BOOL.vars(a)].filter(v=>!T.names.includes(v));
+      if(extra.length) return {err:'Izraz vsebuje spremenljivko '+extra.join(', ')+', ki je v nalogi ni. Uporabi samo '+T.names.join(', ')+'.'};
+      card.querySelector('.expv').innerHTML='Tvoj izraz: <span class="m">'+BOOL.html(a)+'</span>';
+      const tab=BOOL.table(a,T.names), eq=tab.every((y,m)=>T.dc.includes(m)||y===(T.on.includes(m)?1:0));
+      let ok=eq, msg='';
+      if(eq&&t.ops&&!BOOL.onlyOps(a,t.ops)){ ok=false; msg='Izraz da pravo tabelo, vendar uporablja nedovoljene operatorje.'; }
+      else if(eq&&t.nv&&!negVarsOnly(a)){ ok=false; msg='Tabela je prava, vendar ima izraz še črto nad oklepajem. Razreši jo z De Morganom.'; }
+      else if(eq&&t.min){ const best=BOOL.lits(BOOL.parse(t.pos?BOOL.pos(T.on,T.names,T.dc):BOOL.sop(T.on,T.names,T.dc))); if(BOOL.lits(a)>best){ ok=false; msg='Izraz je pravilen, vendar ni najkrajši (najkrajši zapis: '+litW(best)+', tvoj: '+litW(BOOL.lits(a))+').'; } }
+      else if(!eq) msg='Tabela tvojega izraza se ne ujema z zahtevano.';
+      inp.classList.toggle('right',ok); inp.classList.toggle('wrong',!ok);
+      return {ok,msg};
+    }
+  };
+
+  // ---------- naloga: izpolni Veitchev diagram ----------
+  XT.km={
+    tv(t){ const T=exTarget(t); return valsOf(T.on,t.vars.length,T.dc); },
+    html(t,i){ return `<div class="fig kmh" data-i="${i}"></div><p class="sm mut">Klikni celico, da zamenjaš 0 in 1. Majhna številka v kotu je številka vrstice tabele.</p>`; },
+    draw(card,t,st,o){ const n=t.vars.length, k=st.k||Array(1<<n).fill(0); card.querySelector('.kmh').innerHTML=kmapSVG(n,k,Object.assign({names:t.vars,click:!st.d},o||{})); },
+    click(e,card,t,st){ const r=e.target.closest('[data-m]'); if(!r||!card.querySelector('.kmh').contains(r)) return false; const n=t.vars.length; st.k=st.k||Array(1<<n).fill(0); const m=+r.dataset.m; st.k[m]=st.k[m]?0:1; this.draw(card,t,st); return true; },
+    restore(card,t,st){ if(st.sol) this.showSol(card,t); else this.draw(card,t,st,st.d?{bad:this.bad(t,st)}:{}); },
+    bad(t,st){ const tv=this.tv(t), k=st.k||[]; return tv.map((v,m)=>v==='X'?-1:(k[m]||0)!==v?m:-1).filter(m=>m>=0); },
+    lock(card,t){ /* risba se zaklene ob ponovnem izrisu */ },
+    showSol(card,t){ const T=exTarget(t), n=t.vars.length; card.querySelector('.kmh').innerHTML=kmapSVG(n,valsOf(T.on,n,T.dc),{names:t.vars,groups:T.on.length?BOOL.qm(T.on,n,T.dc):[]}); },
+    check(card,t,st){ const bad=this.bad(t,st); this.draw(card,Object.assign({},t),Object.assign({},st,{d:true}),{bad}); return {ok:!bad.length,msg:bad.length?'Napačnih celic: '+bad.length+' (rdeča obroba).':''}; }
+  };
+  // rešitve in slike z diagramom v nalogah: t.qkm (diagram v vprašanju), t.solKm (diagram s skupinami na začetku rešitve)
+  function kmTaskFigs(){
+    TASKS.forEach((t,i)=>{
+      const card=$('t'+i); if(!card) return;
+      if(t.qkm){ const el=card.querySelector('.tfig'); if(el){ const q=t.qkm, n=q.names.length; el.innerHTML=kmapSVG(n,valsOf(q.on,n,q.dc),{names:q.names}); } }
+      if(t.solKm){ const el=card.querySelector('.kmsol'); if(el){ const q=t.solKm, n=q.names.length, gs=q.pos?BOOL.qm(offSet(q.on,n,q.dc),n,q.dc):BOOL.qm(q.on,n,q.dc);
+        el.innerHTML='<div class="fig">'+kmapSVG(n,valsOf(q.on,n,q.dc),{names:q.names,groups:q.pos?null:gs,zero:q.pos?gs:null})+'</div>'+groupChips(gs,q.names,q.pos); } }
+      if(t.type==='km'){ const st=S.t[i]; if(!st) XT.km.draw(card,t,{}); }
+    });
+  }
+
+  // ---------- naloga: sam označi skupine in zapiši minimalno PDNO ----------
+  const pcount=x=>{ let c=0; while(x){ c+=x&1; x>>=1; } return c; };
+  function cubeOf(cells){
+    if(!cells.length) return null;
+    const a=cells.reduce((x,y)=>x&y), o=cells.reduce((x,y)=>x|y), mk=a^o, v=a&~mk;
+    if(new Set(cells).size!==cells.length||cells.length!==(1<<pcount(mk))) return null;
+    return cells.every(m=>(m&~mk)===v)?{m:mk,v}:null;
+  }
+  function grpCheck(t,gs){
+    const T=exTarget(t), n=t.vars.length, ok1=m=>T.on.includes(m)||T.dc.includes(m);
+    if(!gs.length) return 'Najprej označi skupine enic.';
+    const cu=gs.map(cubeOf);
+    for(let i=0;i<gs.length;i++){
+      if(!cu[i]) return 'Skupina '+(i+1)+' ni veljavna: biti mora pravokotnik iz 1, 2, 4, 8 ali 16 sosednjih celic.';
+      if(gs[i].some(m=>!ok1(m))) return 'Skupina '+(i+1)+' vsebuje ničlo.';
+    }
+    const cov=new Set(); gs.forEach(g=>g.forEach(m=>cov.add(m)));
+    const miss=T.on.filter(m=>!cov.has(m));
+    if(miss.length) return miss.length===1?'Ena enica ni v nobeni skupini.':miss.length+' enic ni v nobeni skupini.';
+    for(let i=0;i<gs.length;i++) for(let b=0;b<n;b++){ if((cu[i].m>>b)&1) continue; if(gs[i].every(m=>ok1(m^(1<<b)))) return 'Skupina '+(i+1)+' ni največja možna: lahko jo podvojiš.'; }
+    for(let i=0;i<gs.length;i++){ const other=new Set(); gs.forEach((g,j)=>{ if(j!==i) g.forEach(m=>other.add(m)); }); if(gs[i].filter(m=>T.on.includes(m)).every(m=>other.has(m))) return 'Skupina '+(i+1)+' je odveč: vse njene enice so že v drugih skupinah.'; }
+    const L=cu.reduce((a,c)=>a+n-pcount(c.m),0), best=BOOL.lits(BOOL.parse(BOOL.sop(T.on,t.vars,T.dc)));
+    if(gs.length>BOOL.qm(T.on,n,T.dc).length||L>best) return 'Skupine so veljavne, vendar jih je mogoče izbrati bolj ugodno.';
+    return '';
+  }
+  XT.grp={
+    html(t,i){ return `<div class="fig kmh kmg" data-i="${i}"></div>
+      <div class="acts" style="margin-top:4px"><button type="button" class="btn sm gadd">Dodaj skupino</button><button type="button" class="btn g2 sm gclr">Počisti izbiro</button><span class="sm mut gsel" aria-live="polite"></span></div>
+      <div class="gl gchips"></div>
+      <p class="sm mut">Povleci z miško ali prstom čez celice ene skupine (ali jih klikaj posamično). Skupina sme segati čez rob diagrama. Nato pritisni »Dodaj skupino«. Skupino odstraniš s klikom na ×.</p>`+XT.ex.html(Object.assign({},t,{lab:'Minimalna PDNO: Y ='}),i); },
+    vals(t){ const T=exTarget(t); return valsOf(T.on,t.vars.length,T.dc); },
+    draw(card,t,st){
+      const n=t.vars.length;
+      card.querySelector('.kmh').innerHTML=kmapSVG(n,this.vals(t),{names:t.vars,click:!st.d,pick:st.pick||[],cells:st.g||[],scale:1.3});
+      card.querySelector('.gsel').textContent=(st.pick&&st.pick.length)?'Izbranih celic: '+st.pick.length:'';
+      card.querySelector('.gl').innerHTML=(st.g||[]).map((g,k)=>{ const c=cubeOf(g); return `<span class="gchip" style="border-color:var(--g${k%6+1})">${c?impHTML(c,t.vars):'neveljavna'}${st.d?'':` <button type="button" class="kb gdel" data-k="${k}" aria-label="Odstrani skupino ${k+1}" style="min-width:26px;min-height:26px;padding:0">×</button>`}</span>`; }).join('');
+    },
+    mount(card,t,st){
+      const host=card.querySelector('.kmh'); let drag=false, mode=1;
+      const cellAt=e=>{ const el=document.elementFromPoint(e.clientX,e.clientY); const r=el&&el.closest&&el.closest('[data-m]'); return r&&host.contains(r)?+r.dataset.m:null; };
+      const apply=m=>{ if(m===null||st.d) return; st.pick=st.pick||[]; const has=st.pick.includes(m); if(mode&&!has) st.pick.push(m); if(!mode&&has) st.pick=st.pick.filter(x=>x!==m); this.draw(card,t,st); };
+      host.addEventListener('pointerdown',e=>{ const r=e.target.closest('[data-m]'); if(!r||st.d) return; e.preventDefault(); const m=+r.dataset.m; mode=(st.pick||[]).includes(m)?0:1; drag=true; apply(m); });
+      host.addEventListener('pointermove',e=>{ if(drag) apply(cellAt(e)); });
+      window.addEventListener('pointerup',()=>{ if(drag){ drag=false; save(); } });
+      this.draw(card,t,st);
+    },
+    click(e,card,t,st){
+      if(e.target.closest('.kb')&&!e.target.closest('.gdel')) return XT.ex.click(e,card,t,st);
+      const del=e.target.closest('.gdel'); if(del){ st.g.splice(+del.dataset.k,1); this.draw(card,t,st); return true; }
+      if(e.target.closest('.gclr')){ st.pick=[]; this.draw(card,t,st); return true; }
+      if(e.target.closest('.gadd')){ if(st.pick&&st.pick.length){ st.g=st.g||[]; st.g.push(st.pick.slice().sort((a,b)=>a-b)); st.pick=[]; this.draw(card,t,st); } return true; }
+      return false;
+    },
+    restore(card,t,st){ const inp=card.querySelector('input.xin'); if(st.x) inp.value=st.x; if(st.sol) this.showSol(card,t); else this.draw(card,t,st); },
+    lock(card,t){ card.querySelectorAll('input.xin,.kb,.gadd,.gclr').forEach(x=>x.disabled=true); },
+    showSol(card,t){ const T=exTarget(t), n=t.vars.length, gs=BOOL.qm(T.on,n,T.dc); card.querySelector('.kmh').innerHTML=kmapSVG(n,valsOf(T.on,n,T.dc),{names:t.vars,groups:gs,scale:1.3}); card.querySelector('.gl').innerHTML=groupChips(gs,t.vars).replace(/^<div class="gchips">|<\/div>$/g,''); },
+    check(card,t,st){
+      const gm=grpCheck(t,st.g||[]);
+      const inp=card.querySelector('input.xin');
+      if(!inp.value.trim()) return {err:gm?'Skupine: '+gm+' Vpiši še minimalno PDNO.':'Skupine so dobre. Vpiši še minimalno PDNO.'};
+      if(inp.value.includes('(')) return {err:'Zapiši minimalno PDNO: vsoto produktov brez oklepajev.'};
+      const r=XT.ex.check(card,Object.assign({},t,{min:true}),st);
+      if(r.err) return r;
+      const ok=!gm&&r.ok;
+      this.draw(card,t,Object.assign({},st,{d:true}));
+      return {ok,msg:(gm?'Skupine: '+gm+' ':'Skupine so pravilne. ')+(r.ok?'Izraz je pravilen.':r.msg)};
+    }
+  };
+
+
+  // =================== SIMULACIJE VAJE 1.3 ===================
+  const V4=['A','B','C','D'];
+  const parseOr=s=>{ try{ return BOOL.parse(s); }catch(e){ return null; } };
+  const nGates=n=>(n.t==='var'||n.t==='const')?0:1+BOOL.kids(n).reduce((s,k)=>s+nGates(k),0);
+  const plV=(n,f)=>n+' '+(n===1?f[0]:n===2?f[1]:(n===3||n===4)?f[2]:f[3]);
+  const VR=['vrata','vrati','vrata','vrat'];
+  const LT=['literal','literala','literali','literalov'];
+  // tipkovnica z znaki, ki jih vstavi v zadnje izbrano polje
+  function keypad(box,inputs,extra){
+    let last=inputs[0];
+    inputs.forEach(i=>i.addEventListener('focus',()=>{ last=i; }));
+    ['¬','·','+','(',')','⊕','↑','↓'].concat(extra||V4).forEach(k=>{ const b=document.createElement('button'); b.type='button'; b.className='kb'; b.textContent=k; b.addEventListener('mousedown',e=>e.preventDefault()); b.addEventListener('click',()=>{ const a=last.selectionStart??last.value.length, z=last.selectionEnd??a; last.setRangeText(k,a,z,'end'); last.focus(); last.dispatchEvent(new Event('input',{bubbles:true})); }); box.appendChild(b); });
+  }
+
+  // ---------- slike v teoriji ----------
+  function theoryFigs(){
+    document.querySelectorAll('.kmex').forEach(el=>{
+      const n=+el.dataset.n, on=el.dataset.on?el.dataset.on.split(',').map(Number):[], dc=el.dataset.dc?el.dataset.dc.split(',').map(Number):[];
+      const vals=Array.from({length:1<<n},(_,m)=>on.includes(m)?1:dc.includes(m)?'X':(on.length||dc.length?0:null));
+      if(!on.length&&!dc.length) for(let m=0;m<(1<<n);m++) vals[m]=' ';
+      const gs=el.dataset.g&&on.length?BOOL.qm(on,n,dc):null;
+      el.innerHTML=kmapSVG(n,vals,{names:V4,groups:gs})+(gs?groupChips(gs,V4.slice(0,n)):'');
+    });
+    $('tabAbs').innerHTML=truthHTML(['A','B'],[{n:'A + A·B',ast:BOOL.parse('A+A·B')},{n:'A',ast:BOOL.parse('A')}],-1);
+    $('tabDM').innerHTML=truthHTML(['A','B'],['¬(A·B)','¬A+¬B','¬(A+B)','¬A·¬B'].map(x=>({n:BOOL.H(x),ast:BOOL.parse(x)})),-1);
+  }
+  theoryFigs();
+
+  // ---------- 1) preveri pravilo ----------
+  (function(){
+    const LAWS=[
+      ['P4 distributivnost','A+B·C','(A+B)·(A+C)'],['P5 komplement','A+¬A','1'],['T4 absorpcija','A+A·B','A'],
+      ['T5','A+¬A·B','A+B'],['T7 sosedi','A·B+A·¬B','A'],['T8 konsenz','A·B+¬A·C+B·C','A·B+¬A·C'],
+      ['De Morgan','¬(A·B·C)','¬A+¬B+¬C'],['Napačno!','¬(A·B)','¬A·¬B']
+    ];
+    const L=$('zkL'), R=$('zkR'), sel=$('zkSel');
+    LAWS.forEach((x,i)=>{ const b=document.createElement('button'); b.className='pill'; b.textContent=x[0]; b.dataset.i=i; b.setAttribute('aria-pressed',i===0?'true':'false'); sel.appendChild(b); });
+    pillGroup(sel,b=>{ const x=LAWS[+b.dataset.i]; L.value=BOOL.text(BOOL.parse(x[1])); R.value=BOOL.text(BOOL.parse(x[2])); draw(); });
+    keypad($('zkKeys'),[L,R]);
+    [L,R].forEach(i=>i.addEventListener('input',()=>{ sel.querySelectorAll('.pill').forEach(p=>setP(p,false)); draw(); }));
+    L.value=BOOL.text(BOOL.parse(LAWS[0][1])); R.value=BOOL.text(BOOL.parse(LAWS[0][2]));
+    function draw(){
+      const a=parseOr(L.value), b=parseOr(R.value), ro=$('zkRo');
+      if(!a||!b){ ro.innerHTML='<span class="verd bad">'+(!a?'Leve':'Desne')+' strani ni mogoče prebrati. Preveri oklepaje in znake.</span>'; $('zkTab').innerHTML=''; $('zkEq').innerHTML=''; $('fig-zkL').innerHTML=''; $('fig-zkR').innerHTML=''; return; }
+      const vs=[...new Set([...BOOL.vars(a),...BOOL.vars(b)])].sort();
+      if(vs.length>4){ ro.innerHTML='<span class="verd bad">Uporabi največ štiri spremenljivke.</span>'; return; }
+      $('zkEq').innerHTML=BOOL.html(a)+' &nbsp;=?&nbsp; '+BOOL.html(b);
+      const ta=BOOL.table(a,vs), tb=BOOL.table(b,vs), diff=ta.map((y,m)=>y!==tb[m]?m:-1).filter(m=>m>=0);
+      let h='<div class="scroll"><table class="tt"><tr>'+vs.map(v=>'<th>'+v+'</th>').join('')+'<th class="o">leva</th><th class="o">desna</th><th>enako</th></tr>';
+      ta.forEach((y,m)=>{ const e=BOOL.envOf(vs,m); h+='<tr class="'+(y!==tb[m]?'cur':'')+'">'+vs.map(v=>'<td>'+e[v]+'</td>').join('')+'<td class="o'+(y?' one':'')+'">'+y+'</td><td class="o'+(tb[m]?' one':'')+'">'+tb[m]+'</td><td>'+(y===tb[m]?'✓':'✗')+'</td></tr>'; });
+      $('zkTab').innerHTML=h+'</table></div>';
+      ro.innerHTML=diff.length?`<span class="verd bad">Pravilo NE velja.</span> Stolpca se razlikujeta v ${plV(diff.length,['vrstici','vrsticah','vrsticah','vrsticah'])} ${diff.join(', ')} (obarvano).`:`<span class="verd ok">Pravilo velja.</span> Stolpca sta enaka v vseh ${ta.length} vrsticah.<br>Leva stran: ${plV(nGates(a),VR)}, desna: ${plV(nGates(b),VR)}.`;
+      $('fig-zkL').innerHTML=treeSVG(a,{},{out:'L',static:true}).svg; $('fig-zkR').innerHTML=treeSVG(b,{},{out:'D',static:true}).svg;
+    }
+    REDRAW.push(draw); draw();
+  })();
+
+  // ---------- 2) De Morgan v vezju ----------
+  (function(){
+    const st={k:'nand',n:2,env:{A:0,B:0,C:0}};
+    pillGroup($('dmSel'),b=>{ st.k=b.dataset.k; draw(); });
+    pillGroup($('dmN'),b=>{ st.n=+b.dataset.n; draw(); });
+    const tg={}; ['A','B','C'].forEach(v=>{ tg[v]=mkToggle($('dmIn'),v,()=>{ st.env[v]^=1; draw(); }); });
+    function draw(){
+      const vs=['A','B','C'].slice(0,st.n);
+      ['A','B','C'].forEach((v,i)=>{ tg[v].hidden=i>=st.n; setP(tg[v],st.env[v]); tg[v].textContent=v+' = '+st.env[v]; });
+      const nand=st.k==='nand', ys=vs.map((v,i)=>22+i*40), cy=(ys[0]+ys[ys.length-1])/2;
+      const NL={ins:vs.map((v,i)=>({n:v,y:ys[i]})),g:[{id:'g',t:nand?'NAND':'NOR',in:vs,x:0,y:cy}],out:[{n:'Y',src:'g'}]};
+      const NR={ins:vs.map((v,i)=>({n:v,y:ys[i]})),g:vs.map((v,i)=>({id:'n'+v,t:'NOT',in:[v],x:0,y:ys[i]})).concat([{id:'g',t:nand?'OR':'AND',in:vs.map(v=>'n'+v),x:1,y:cy}]),out:[{n:'Y',src:'g'}]};
+      $('fig-dmL').innerHTML=netSVG(NL,st.env,{label:'Leva stran'}).svg; $('fig-dmR').innerHTML=netSVG(NR,st.env,{label:'Desna stran'}).svg;
+      const le=nand?'¬('+vs.join('·')+')':'¬('+vs.join('+')+')', ri=vs.map(v=>'¬'+v).join(nand?'+':'·');
+      const a=BOOL.parse(le), b=BOOL.parse(ri), ya=BOOL.ev(a,st.env);
+      $('dmEq').innerHTML=BOOL.html(a)+' = '+BOOL.html(b)+' = '+ya;
+      const cur=vs.reduce((s,v)=>s*2+st.env[v],0);
+      $('dmTab').innerHTML=truthHTML(vs,[{n:'leva',ast:a},{n:'desna',ast:b}],cur);
+    }
+    REDRAW.push(draw); draw();
+  })();
+
+  // ---------- 3) poenostavljanje po korakih ----------
+  (function(){
+    const EX=[
+      {t:'Primer 1',s:[['¬A·B·C+A·B·C','izhodišče'],['B·C·(¬A+A)','izpostavimo B·C (P4)'],['B·C·1','¬A + A = 1 (P5)'],['B·C','X·1 = X (P2)']]},
+      {t:'Primer 2',s:[['A·B+A·B·C+A·¬B','izhodišče'],['A·B·(1+C)+A·¬B','izpostavimo A·B (P4)'],['A·B+A·¬B','1 + C = 1 (T2)'],['A·(B+¬B)','izpostavimo A (P4)'],['A','B + ¬B = 1 (P5)']]},
+      {t:'Večina od treh',s:[['¬A·B·C+A·¬B·C+A·B·¬C+A·B·C','izhodišče (iz tabele)'],['¬A·B·C+A·B·C+A·¬B·C+A·B·C+A·B·¬C+A·B·C','ABC zapišemo trikrat (T1)'],['B·C·(¬A+A)+A·C·(¬B+B)+A·B·(¬C+C)','izpostavljanje v parih (P4)'],['B·C+A·C+A·B','¬X + X = 1 (P5)']]},
+      {t:'Z De Morganom',s:[['¬(¬A·B)·B','izhodišče'],['(A+¬B)·B','De Morgan in dvojna negacija'],['A·B+¬B·B','razširimo (P4)'],['A·B+0','¬B·B = 0 (P5)'],['A·B','X + 0 = X (P2)']]},
+      {t:'Konsenz',s:[['A·B+¬A·C+B·C','izhodišče'],['A·B+¬A·C+B·C·(A+¬A)','B·C pomnožimo z 1 = A + ¬A'],['A·B+¬A·C+A·B·C+¬A·B·C','razširimo (P4)'],['A·B·(1+C)+¬A·C·(1+B)','izpostavimo'],['A·B+¬A·C','1 + X = 1 (T2)']]}
+    ];
+    const st={i:0,k:1};
+    const sel=$('krSel');
+    EX.forEach((x,i)=>{ const b=document.createElement('button'); b.className='pill'; b.textContent=x.t; b.dataset.i=i; b.setAttribute('aria-pressed',i===0?'true':'false'); sel.appendChild(b); });
+    pillGroup(sel,b=>{ st.i=+b.dataset.i; st.k=1; draw(); });
+    $('krNext').addEventListener('click',()=>{ st.k=Math.min(st.k+1,EX[st.i].s.length); draw(); });
+    $('krAll').addEventListener('click',()=>{ st.k=EX[st.i].s.length; draw(); });
+    $('krReset').addEventListener('click',()=>{ st.k=1; draw(); });
+    function draw(){
+      const X=EX[st.i], a0=BOOL.parse(X.s[0][0]), vs=[...BOOL.vars(a0)].sort(), t0=BOOL.table(a0,vs);
+      $('krSteps').innerHTML=X.s.slice(0,st.k).map((s,j)=>{ const a=BOOL.parse(s[0]), ok=BOOL.table(a,vs).every((y,m)=>y===t0[m]);
+        return `<div class="step${j===st.k-1&&j>0?' new':''}"><div class="ex2">${j?'= ':'Y = '}${BOOL.html(a)}</div><div class="rule">${s[1]} ${j?(ok?'<span class="verd ok">✓ tabela enaka</span>':'<span class="verd bad">✗</span>'):''}</div></div>`; }).join('');
+      $('krNext').disabled=st.k>=X.s.length;
+      const aEnd=BOOL.parse(X.s[X.s.length-1][0]);
+      $('fig-kr0').innerHTML=treeSVG(a0,{},{static:true}).svg; $('fig-kr1').innerHTML=treeSVG(aEnd,{},{static:true}).svg;
+      $('krRo').innerHTML=`Pred: ${plV(BOOL.lits(a0),LT)}, ${plV(nGates(a0),VR)}. Po: ${plV(BOOL.lits(aEnd),LT)}, ${plV(nGates(aEnd),VR)}.`+(st.k<X.s.length?' <span class="mut">Odkrij vse korake.</span>':'');
+      own();
+    }
+    function own(){
+      const a=parseOr($('krIn').value), ro=$('krOwn');
+      if(!a){ ro.innerHTML='<span class="verd bad">Izraza ni mogoče prebrati.</span>'; return; }
+      const vs=[...BOOL.vars(a)].sort(); if(vs.length>4){ ro.innerHTML='<span class="verd bad">Največ štiri spremenljivke.</span>'; return; }
+      const on=BOOL.minterms(a,vs), m=BOOL.parse(BOOL.sop(on,vs));
+      ro.innerHTML=`Tvoj izraz: <span class="m">${BOOL.html(a)}</span> (${plV(BOOL.lits(a),LT)}, ${plV(nGates(a),VR)})<br>Najkrajša vsota produktov: <b class="m">${BOOL.html(m)}</b> (${plV(BOOL.lits(m),LT)}, ${plV(nGates(m),VR)})<br><span class="mut">Enice v vrsticah: ${on.join(', ')||'nobena'}.</span>`;
+    }
+    $('krIn').addEventListener('input',own);
+    REDRAW.push(draw); draw();
+  })();
+
+  // ---------- 4) Veitchev diagram ----------
+  (function(){
+    const PRE=[
+      {t:'večina',n:3,on:[3,5,6,7]},{t:'vogali',n:4,on:[0,4,8,12]},{t:'B̄D̄ + BD',n:4,on:[0,2,5,7,8,10,13,15]},
+      {t:'BCD ≥ 5',n:4,on:[5,6,7,8,9],dc:[10,11,12,13,14,15]},{t:'segment e',n:4,on:[0,2,6,8],dc:[10,11,12,13,14,15]},{t:'EXOR',n:2,on:[1,2]},{t:'počisti',n:0}
+    ];
+    const st={n:4,v:Array.from({length:16},(_,m)=>[0,2,5,7,8,10,13,15].includes(m)?1:0),pos:0};
+    const nbs=pillGroup($('vkN'),b=>{ st.n=+b.dataset.n; st.v=Array(1<<st.n).fill(0); draw(); });
+    pillGroup($('vkMode'),b=>{ st.pos=+b.dataset.p; draw(); });
+    const pre=$('vkPre');
+    PRE.forEach((p,i)=>{ const b=document.createElement('button'); b.className='pill'; b.textContent=p.t; b.dataset.i=i; b.setAttribute('aria-pressed','false'); pre.appendChild(b); });
+    pillGroup(pre,b=>{ const p=PRE[+b.dataset.i]; if(p.n){ st.n=p.n; nbs.forEach(x=>setP(x,+x.dataset.n===p.n)); } st.v=Array(1<<st.n).fill(0); (p.on||[]).forEach(m=>st.v[m]=1); (p.dc||[]).forEach(m=>st.v[m]='X'); draw(); });
+    $('fig-vk').addEventListener('click',e=>{ const r=e.target.closest('[data-m]'); if(!r) return; const m=+r.dataset.m, c=st.v[m]; st.v[m]=c===0?1:c===1?'X':0; pre.querySelectorAll('.pill').forEach(x=>setP(x,false)); draw(); });
+    function draw(){
+      const n=st.n, names=V4.slice(0,n), on=[], dc=[];
+      st.v.forEach((x,m)=>{ if(x===1) on.push(m); else if(x==='X') dc.push(m); });
+      const off=offSet(on,n,dc);
+      const gs=st.pos?(off.length?BOOL.qm(off,n,dc):[]):(on.length?BOOL.qm(on,n,dc):[]);
+      $('fig-vk').innerHTML=kmapSVG(n,st.v,{names,click:true,groups:st.pos?null:gs,zero:st.pos?gs:null,scale:1.3});
+      $('vkChips').innerHTML=gs.length?'<p class="label">'+(st.pos?'Skupine ničel (vsote)':'Skupine enic (produkti)')+'</p>'+groupChips(gs,names,!!st.pos):'';
+      const ex=st.pos?BOOL.pos(on,names,dc):BOOL.sop(on,names,dc), a=BOOL.parse(ex);
+      $('vkEq').innerHTML='Y = '+BOOL.html(a);
+      const sizes=gs.map(p=>{ let c=0,x=p.m; while(x){ c+=x&1; x>>=1; } return 1<<c; });
+      $('vkRo').innerHTML=(on.length?`Enice v vrsticah: ${on.join(', ')}. `:'Ni enic. ')+(dc.length?`Nepomembna stanja: ${dc.join(', ')}. `:'')+(gs.length?`<br>${plV(gs.length,['skupina','skupini','skupine','skupin'])} (velikosti ${sizes.join(', ')}), skupaj ${plV(BOOL.lits(a),LT)}.`:'');
+      $('fig-vkc').innerHTML=(a.t==='const')?'<p class="mut">Funkcija je konstanta '+a.v+', vezje ni potrebno.</p>':treeSVG(a,{},{static:true,label:'Vezje minimalne funkcije'}).svg;
+    }
+    REDRAW.push(draw); draw();
+  })();
+
+  // ---------- 5) trening minimizacije ----------
+  (function(){
+    const st={n:3,on:[],show:false,ok:0,all:0,streak:0,checked:false,mode:0,g:[],pick:[]};
+    pillGroup($('trMode'),b=>{ st.mode=+b.dataset.m; $('trGrp').hidden=!st.mode; draw(); });
+    // ročno označevanje: poteg čez celice
+    { const host=$('fig-tr'); let drag=false, add=1;
+      const cellAt=e=>{ const el=document.elementFromPoint(e.clientX,e.clientY); const r=el&&el.closest&&el.closest('[data-m]'); return r&&host.contains(r)?+r.dataset.m:null; };
+      const apply=m=>{ if(m===null) return; const has=st.pick.includes(m); if(add&&!has) st.pick.push(m); if(!add&&has) st.pick=st.pick.filter(x=>x!==m); draw(); };
+      host.addEventListener('pointerdown',e=>{ if(!st.mode) return; const r=e.target.closest('[data-m]'); if(!r) return; e.preventDefault(); const m=+r.dataset.m; add=st.pick.includes(m)?0:1; drag=true; apply(m); });
+      host.addEventListener('pointermove',e=>{ if(drag) apply(cellAt(e)); });
+      window.addEventListener('pointerup',()=>{ drag=false; });
+    }
+    $('trAdd').addEventListener('click',()=>{ if(st.pick.length){ st.g.push(st.pick.slice().sort((a,b)=>a-b)); st.pick=[]; draw(); } });
+    $('trClr').addEventListener('click',()=>{ st.pick=[]; draw(); });
+    $('trGl').addEventListener('click',e=>{ const b=e.target.closest('[data-k]'); if(b){ st.g.splice(+b.dataset.k,1); draw(); } });
+    $('trGchk').addEventListener('click',()=>{ const m=grpCheck({vars:V4.slice(0,st.n),on:st.on},st.g), msg=$('trMsg'); msg.textContent=m||'Skupine so pravilne. Zdaj iz vsake skupine zapiši produkt in vpiši izraz.'; msg.className='status '+(m?'bad':'ok'); });
+    pillGroup($('trN'),b=>{ st.n=+b.dataset.n; gen(); });
+    const inp=$('trIn');
+    keypad($('trKeys'),[inp],V4);
+    function gen(){
+      const N=1<<st.n; let on;
+      do{ const k=2+Math.floor(Math.random()*(N/2+1)); const s=new Set(); while(s.size<k) s.add(Math.floor(Math.random()*N)); on=[...s].sort((a,b)=>a-b); }
+      while(BOOL.qm(on,st.n).length<2&&Math.random()<0.8);
+      st.on=on; st.show=false; st.checked=false; st.g=[]; st.pick=[]; inp.value=''; $('trMsg').textContent=''; $('trMsg').className='status'; inp.classList.remove('right','wrong'); draw();
+    }
+    function draw(){
+      const n=st.n, names=V4.slice(0,n), gs=BOOL.qm(st.on,n);
+      $('fig-tr').innerHTML=kmapSVG(n,valsOf(st.on,n,[]),{names,groups:st.show?gs:null,cells:st.mode&&!st.show?st.g:null,pick:st.mode?st.pick:null,click:!!st.mode,scale:1.3});
+      $('trGl').innerHTML=st.g.map((g,k)=>{ const c=cubeOf(g); return `<span class="gchip" style="border-color:var(--g${k%6+1})">${c?impHTML(c,names):'neveljavna'} <button type="button" class="kb" data-k="${k}" aria-label="Odstrani skupino" style="min-width:26px;min-height:26px;padding:0">×</button></span>`; }).join('');
+      $('trSol').innerHTML=st.show?groupChips(gs,names)+'<div class="eqbig">Y = '+minHTML(st.on,names)+'</div>':'';
+      $('trRo').innerHTML=`Rešenih: <b>${st.ok}</b> od ${st.all} · zaporedno brez ogleda skupin: <b>${st.streak}</b>${st.streak>=5?' · izziv opravljen!':''}`;
+    }
+    $('trShow').addEventListener('click',()=>{ st.show=true; st.streak=0; draw(); });
+    $('trNew').addEventListener('click',gen);
+    inp.addEventListener('keydown',e=>{ if(e.key==='Enter') $('trChk').click(); });
+    $('trChk').addEventListener('click',()=>{
+      const msg=$('trMsg'), names=V4.slice(0,st.n);
+      let a; try{ a=BOOL.parse(inp.value); }catch(e){ msg.textContent='Izraza ni mogoče prebrati: '+e.message+'.'; msg.className='status bad'; return; }
+      if([...BOOL.vars(a)].some(v=>!names.includes(v))){ msg.textContent='Uporabi samo spremenljivke '+names.join(', ')+'.'; msg.className='status bad'; return; }
+      const eq=BOOL.table(a,names).every((y,m)=>y===(st.on.includes(m)?1:0)), best=BOOL.lits(BOOL.parse(BOOL.sop(st.on,names)));
+      const first=!st.checked; st.checked=true;
+      if(!eq){ msg.textContent='Izraz ne da enakih enic kot diagram. Poskusi znova.'; msg.className='status bad'; inp.classList.add('wrong'); if(first){ st.all++; st.streak=0; } }
+      else if(BOOL.lits(a)>best){ msg.textContent='Izraz je pravilen, vendar ni najkrajši ('+BOOL.lits(a)+' literalov, mogoče je '+best+'). Poišči večje skupine.'; msg.className='status bad'; if(first){ st.all++; st.streak=0; } }
+      else { msg.textContent='Odlično, izraz je pravilen in najkrajši.'; msg.className='status ok'; inp.classList.remove('wrong'); inp.classList.add('right'); if(first){ st.all++; st.ok++; if(!st.show) st.streak++; } }
+      draw();
+    });
+    gen();
+  })();
+
+  // ---------- 6) NAND-NAND in NOR-NOR ----------
+  (function(){
+    const FN=[
+      {t:'A·B + C·D',e:'A·B+C·D'},{t:'večina od treh',e:'A·B+A·C+B·C'},{t:'A + B·C',e:'A+B·C'},
+      {t:'hodnik (EXOR)',e:'A·¬B+¬A·B'},{t:'(A + B)·C',e:'(A+B)·C'},{t:'segment e',on:[0,2,6,8],dc:[10,11,12,13,14,15],v:V4}
+    ];
+    const st={i:0,m:'nand',env:{A:0,B:0,C:0,D:0}};
+    const sel=$('reSel');
+    FN.forEach((f,i)=>{ const b=document.createElement('button'); b.className='pill'; b.textContent=f.t; b.dataset.i=i; b.setAttribute('aria-pressed',i===0?'true':'false'); sel.appendChild(b); });
+    pillGroup(sel,b=>{ st.i=+b.dataset.i; draw(); });
+    pillGroup($('reMode'),b=>{ st.m=b.dataset.m; draw(); });
+    const tg={}; V4.forEach(v=>{ tg[v]=mkToggle($('reIn'),v,()=>{ st.env[v]^=1; draw(); }); });
+    const V=n=>({t:'var',n}), NN=(t,args)=>({t,args});
+    // implikant → seznam literalov [ime, negiran]
+    function lits(p,names,pos){ const out=[], n=names.length; names.forEach((v,i)=>{ const b=1<<(n-1-i); if(!(p.m&b)) out.push([v,pos?!!(p.v&b):!(p.v&b)]); }); return out; }
+    function build(f){
+      const names=f.v||[...BOOL.vars(BOOL.parse(f.e))].sort(), n=names.length;
+      const on=f.on||BOOL.minterms(BOOL.parse(f.e),names), dc=f.dc||[];
+      const nand=st.m==='nand', ops=nand?'nand':'nor';
+      const gs=nand?BOOL.qm(on,n,dc):BOOL.qm(offSet(on,n,dc),n,dc);
+      const two=BOOL.parse(nand?BOOL.sop(on,names,dc):BOOL.pos(on,names,dc));
+      const lit=([v,neg])=>neg?NN(ops,[V(v),V(v)]):V(v);          // negiran literal: vrata NAND (NOR) kot negator
+      const inv=([v,neg])=>neg?V(v):NN(ops,[V(v),V(v)]);          // negacija literala za zadnja vrata
+      const terms=gs.map(p=>{ const L=lits(p,names,!nand); return L.length===1?inv(L[0]):NN(ops,L.map(lit)); });
+      const one=terms.length===1?NN(ops,[terms[0],terms[0]]):NN(ops,terms);
+      return {names,two,one,on,dc};
+    }
+    function draw(){
+      const f=FN[st.i], B=build(f), e=st.env;
+      V4.forEach(v=>{ tg[v].hidden=!B.names.includes(v); setP(tg[v],e[v]); tg[v].textContent=v+' = '+e[v]; });
+      const nand=st.m==='nand';
+      $('reL').textContent=(nand?'IN-ALI: ':'ALI-IN: ')+'najkrajša '+(nand?'vsota produktov':'produkt vsot');
+      $('reR').textContent='samo vrata '+(nand?'NAND':'NOR');
+      $('fig-re0').innerHTML=treeSVG(B.two,e,{label:'Dvoravninsko vezje'}).svg;
+      $('fig-re1').innerHTML=treeSVG(B.one,e,{label:'Vezje samo iz vrat '+(nand?'NAND':'NOR')}).svg;
+      const y0=BOOL.ev(B.two,e), y1=BOOL.ev(B.one,e), m=B.names.reduce((s,v)=>s*2+e[v],0), isDc=B.dc.includes(m);
+      $('reRo').innerHTML=`Y = ${BOOL.html(B.two)} = ${BOOL.html(B.one)}<br>Izhoda: ${y0} in ${y1}${isDc?' (ta kombinacija je nepomembno stanje, zato se izhoda smeta razlikovati)':y0===y1?' (enaka)':''}. Vrat: ${nGates(B.two)} (IN, ALI, NE) proti ${nGates(B.one)} (samo ${nand?'NAND':'NOR'}).`;
+    }
+    REDRAW.push(draw); draw();
+  })();
+
+  // ---------- cilji in kartice sklopov ----------
+  const pl=(n,f)=>n+' '+(n===1?f[0]:n===2?f[1]:(n===3||n===4)?f[2]:f[3]);
+  const goalsEl=$('goals');
+  CFG.GOALS.forEach((g,i)=>{
+    const lb=document.createElement('label');
+    lb.innerHTML=`<input type="checkbox"> <span>${g}</span>`;
+    const cb=lb.querySelector('input'); cb.checked=!!S.g[i];
+    cb.addEventListener('change',()=>{ S.g[i]=cb.checked; save(); });
+    goalsEl.appendChild(lb);
+  });
+  const taskCount=mod=>TASKS.filter(t=>t.mod===mod).length;
+  const modsEl=$('mods');
+  CFG.MODS.forEach(m=>{
+    const n=taskCount(m.id);
+    const d=document.createElement('div');
+    d.innerHTML=`<div class="n">${m.n}</div><h4 style="margin:0">${m.t}</h4><p>${m.d}</p>
+      <p class="mut sm">${pl(m.th,['stran','strani','strani','strani'])} teorije · ${pl(m.sim,['simulacija','simulaciji','simulacije','simulacij'])} · ${pl(n,['naloga','nalogi','naloge','nalog'])}</p>
+      <p class="m sm" id="mp-${m.id}"></p>
+      <button class="btn g2 sm" data-first="${m.first}">Odpri sklop ›</button>`;
+    d.querySelector('button').addEventListener('click',()=>showPage(m.first,true));
+    modsEl.appendChild(d);
+  });
+
+  // ---------- naloge ----------
+  const LEVEL_PTS={lahka:1,srednja:2,'težka':3};
+  const LVL_CLASS={lahka:'l1',srednja:'l2','težka':'l3'};
+  const fmtPts=x=>String(Math.round(x*10)/10).replace('.',',');
+  const maxScore=TASKS.reduce((a,t)=>a+LEVEL_PTS[t.lvl],0);
+  const list=$('tasks'), nums=$('nums');
+  const MODN=CFG.MODN;
+  const tstate=i=>S.t[i]||(S.t[i]={d:false,p:0,h:false,sol:false,sel:null,c:null,a:null});
+  const FMTMSG={bin:'v dvojiškem zapisu so samo števki 0 in 1',oct:'v osmiškem zapisu so števke od 0 do 7',dec:'v desetiškem zapisu so števke od 0 do 9 (decimalna vejica je dovoljena)',hex:'v šestnajstiškem zapisu so števke 0 do 9 in črke A do F',txt:''};
+  function ttRows(t){ const n=t.ins.length, rows=[]; for(let r=0;r<(1<<n);r++){ const ins=[]; for(let b=n-1;b>=0;b--) ins.push((r>>b)&1); rows.push(ins); } return rows; }
+  function ttHtml(t){
+    const rows=ttRows(t);
+    let h='<div class="scroll"><table class="ttask"><tr>'+t.ins.map(n=>`<th>${n}</th>`).join('')+t.outs.map(n=>`<th class="o">${n}</th>`).join('')+'</tr>';
+    rows.forEach((ins,r)=>{
+      h+='<tr>'+ins.map(v=>`<td>${v}</td>`).join('')+t.outs.map((n,j)=>`<td class="o"><button class="cell un" data-r="${r}" data-j="${j}" aria-label="${n} v vrstici ${r+1}">?</button></td>`).join('')+'</tr>';
+    });
+    return h+'</table></div>';
+  }
+  function inHtml(t,i){
+    return '<div class="flds">'+t.fields.map((f,j)=>`<label class="fld"><span class="fl">${f.l}</span><input class="inp" type="text" id="t${i}f${j}" data-j="${j}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${f.ph||''}">${f.u?`<span class="u">${f.u}</span>`:''}</label>`).join('')+'</div>';
+  }
+  function cellSet(btn,v){
+    btn.classList.toggle('un',v===null); btn.classList.toggle('one',v===1);
+    btn.textContent=v===null?'?':v;
+  }
+  function buildTasks(){
+    list.innerHTML=''; nums.innerHTML='';
+    TASKS.forEach((t,i)=>{
+      const nb=document.createElement('button'); nb.textContent=i+1; nb.setAttribute('aria-label','Naloga '+(i+1));
+      nb.addEventListener('click',()=>{ $('t'+i).scrollIntoView({behavior:'smooth',block:'start'}); });
+      nums.appendChild(nb);
+      const card=document.createElement('div'); card.className='card task'; card.id='t'+i;
+      const pts=LEVEL_PTS[t.lvl], isTT=t.type==='tt', isIN=t.type==='in';
+      card.innerHTML=`
+        <div class="crumb"><span>Naloga ${i+1} od ${TASKS.length} · ${MODN[t.mod]}</span><span class="lv"><span class="lvt ${LVL_CLASS[t.lvl]}">${t.lvl} · ${pts} t</span></span></div>
+        <p class="qt">${t.q}</p>
+        ${(t.fig||t.gfig||t.nfig||t.qkm)?`<div class="fig tfig" data-i="${i}"></div>`:''}
+        ${isTT?ttHtml(t):isIN?inHtml(t,i):XT[t.type]?XT[t.type].html(t,i):`<div class="opts">${t.opts.map((o,j)=>`<label class="opt ${t.mono?'mono':''}"><input type="radio" name="t${i}" value="${j}"> <span>${o}</span></label>`).join('')}</div>`}
+        <div class="acts">
+          <button class="btn" data-act="check">Preveri</button>
+          <button class="btn g2" data-act="hint">Namig (−50 % točk)</button>
+          <button class="btn g2" data-act="sol">Rešitev (0 t, zaklene)</button>
+        </div>
+        <div class="fb" aria-live="polite"></div>
+        <div class="hn" hidden>${t.hint}</div>
+        <div class="slb" hidden>${t.sol}</div>`;
+      list.appendChild(card);
+      restoreCard(card,i);
+      if(XT[t.type]&&XT[t.type].mount) XT[t.type].mount(card,t,tstate(i));
+    });
+  }
+  function lockCard(card,t){
+    if(t&&XT[t.type]&&XT[t.type].lock) XT[t.type].lock(card,t);
+    card.querySelectorAll('input[type=radio]').forEach(r=>r.disabled=true);
+    card.querySelectorAll('input.inp').forEach(r=>r.disabled=true);
+    card.querySelectorAll('.cell').forEach(c=>c.disabled=true);
+    card.querySelector('[data-act="check"]').disabled=true;
+    card.querySelector('[data-act="hint"]').disabled=true;
+  }
+  function markIn(card,t,vals){
+    card.querySelectorAll('input.inp').forEach((inp,j)=>{ const ok=LIB.same(vals[j],t.fields[j]); inp.classList.toggle('right',ok); inp.classList.toggle('wrong',!ok); });
+  }
+  function restoreCard(card,i){
+    const t=TASKS[i], st=S.t[i]; if(!st) return;
+    const pts=LEVEL_PTS[t.lvl], fb=card.querySelector('.fb');
+    if(t.type==='tt'){
+      const rows=ttRows(t);
+      if(st.c) card.querySelectorAll('.cell').forEach(c=>{ const v=st.c[+c.dataset.r*t.outs.length+ +c.dataset.j]; cellSet(c,v===undefined?null:v); });
+      if(st.d && !st.sol) card.querySelectorAll('.cell').forEach(c=>{ const exp=t.fn(rows[+c.dataset.r])[+c.dataset.j]; if(+c.textContent!==exp) c.classList.add('bad'); });
+      if(st.sol) card.querySelectorAll('.cell').forEach(c=>{ cellSet(c,t.fn(rows[+c.dataset.r])[+c.dataset.j]); });
+    } else if(t.type==='in'){
+      const inps=card.querySelectorAll('input.inp');
+      if(st.a) inps.forEach((inp,j)=>{ inp.value=st.a[j]||''; });
+      if(st.d && !st.sol && st.a) markIn(card,t,st.a);
+    } else if(XT[t.type]){ XT[t.type].restore(card,t,st);
+    } else if(st.sel!==null && st.sel!==undefined){
+      const r=card.querySelector(`input[value="${st.sel}"]`); if(r) r.checked=true;
+    }
+    if(st.h){ card.querySelector('.hn').hidden=false; card.querySelector('[data-act="hint"]').disabled=true; }
+    if(st.sol||st.v) card.querySelector('.slb').hidden=false;
+    if(st.d){
+      lockCard(card,t);
+      if(st.sol){ fb.className='fb bad'; fb.textContent='Rešitev prikazana: 0 točk. Naloga je zaklenjena.'; }
+      else { const ok=st.p>0; fb.className='fb '+(ok?'ok':'bad'); fb.textContent=(st.m?st.m+' ':'')+(ok?'Pravilno':'Ni pravilno')+': dobiš '+fmtPts(st.p)+' od '+pts+' t. Odgovor je zaklenjen.'; }
+    } else if(st.h){ fb.className='fb'; fb.textContent='Namig je odbil 50 % točk te naloge.'; }
+  }
+  // vpisani odgovori se sproti shranjujejo
+  list.addEventListener('input',e=>{
+    const xi=e.target.closest('input.xin'); if(xi){ const card=xi.closest('.task'), i=+card.id.slice(1), st=tstate(i); if(!st.d){ st.x=xi.value; save(); } return; }
+    const inp=e.target.closest('input.inp'); if(!inp) return;
+    const card=inp.closest('.task'), i=+card.id.slice(1), st=tstate(i);
+    if(st.d) return;
+    st.a=[...card.querySelectorAll('input.inp')].map(x=>x.value); save();
+  });
+  list.addEventListener('keydown',e=>{
+    if(e.key==='Enter' && e.target.matches('input.inp,input.xin')){ const card=e.target.closest('.task'); const b=card.querySelector('[data-act="check"]'); if(b && !b.disabled) b.click(); }
+  });
+  list.addEventListener('click',e=>{
+    // vrste nalog z lastnim klikom (Veitchev diagram, tipke za vpis izraza)
+    { const card=e.target.closest('.task'); if(card){ const i=+card.id.slice(1), t=TASKS[i]; if(XT[t.type]&&XT[t.type].click&&!(e.target.closest('button[data-act]'))){ const st=tstate(i); if(!st.d&&XT[t.type].click(e,card,t,st)){ save(); return; } } } }
+    // klik na celico tabele
+    const cell=e.target.closest('.cell');
+    if(cell && !cell.disabled){
+      const card=cell.closest('.task'), i=+card.id.slice(1), t=TASKS[i], st=tstate(i);
+      if(st.d) return;
+      const cur=cell.classList.contains('un')?null:+cell.textContent;
+      const nv=cur===null?0:1-cur; cellSet(cell,nv);
+      st.c=st.c||Array(ttRows(t).length*t.outs.length).fill(null);
+      st.c[+cell.dataset.r*t.outs.length+ +cell.dataset.j]=nv; save();
+      return;
+    }
+    const btn=e.target.closest('button[data-act]'); if(!btn) return;
+    const card=btn.closest('.task'); const i=+card.id.slice(1); const t=TASKS[i]; const st=tstate(i);
+    const fb=card.querySelector('.fb'), pts=LEVEL_PTS[t.lvl], isTT=t.type==='tt', isIN=t.type==='in';
+    if(btn.dataset.act==='sol'){
+      if(st.d){ card.querySelector('.slb').hidden=false; st.v=true; save(); return; }
+      card.querySelector('.slb').hidden=false;
+      if(isTT){ const rows=ttRows(t); card.querySelectorAll('.cell').forEach(c=>cellSet(c,t.fn(rows[+c.dataset.r])[+c.dataset.j])); }
+      st.d=true; st.p=0; st.sol=true; lockCard(card,t);
+      if(XT[t.type]&&XT[t.type].showSol) XT[t.type].showSol(card,t);
+      fb.className='fb bad'; fb.textContent='Rešitev prikazana: 0 točk. Naloga je zaklenjena.';
+      save(); refresh(); return;
+    }
+    if(st.d) return;
+    if(btn.dataset.act==='hint'){
+      st.h=true; card.querySelector('.hn').hidden=false; btn.disabled=true;
+      fb.className='fb'; fb.textContent='Namig je odbil 50 % točk te naloge.'; save(); refresh(); return;
+    }
+    if(btn.dataset.act==='check'){
+      let ok, extra='';
+      if(isTT){
+        const rows=ttRows(t), cells=[...card.querySelectorAll('.cell')];
+        if(cells.some(c=>c.classList.contains('un'))){ fb.className='fb bad'; fb.textContent='Najprej dopolni vse celice izhodov.'; return; }
+        ok=true;
+        cells.forEach(c=>{ const exp=t.fn(rows[+c.dataset.r])[+c.dataset.j]; if(+c.textContent!==exp){ ok=false; c.classList.add('bad'); } });
+      } else if(isIN){
+        const vals=[...card.querySelectorAll('input.inp')].map(x=>x.value);
+        if(vals.some(v=>v.trim()==='')){ fb.className='fb bad'; fb.textContent='Najprej vpiši odgovor.'; return; }
+        for(let j=0;j<t.fields.length;j++){
+          const f=t.fields[j];
+          if(LIB.canon(vals[j],f.f,f.w)===null){
+            fb.className='fb bad';
+            fb.textContent = f.w ? 'Odgovor mora imeti natanko '+f.w+' števk'+(FMTMSG[f.f]?' ('+FMTMSG[f.f]+')':'')+'.' : 'Odgovor ni v pravilni obliki: '+(FMTMSG[f.f]||'preveri vnos')+'.';
+            return;
+          }
+        }
+        ok=t.fields.every((f,j)=>LIB.same(vals[j],f));
+        st.a=vals; markIn(card,t,vals);
+      } else if(XT[t.type]){
+        const r=XT[t.type].check(card,t,st);
+        if(r.err){ fb.className='fb bad'; fb.textContent=r.err; save(); return; }
+        ok=r.ok; extra=r.msg||'';
+      } else {
+        const sel=card.querySelector('input:checked');
+        if(!sel){ fb.className='fb bad'; fb.textContent='Najprej izberi odgovor.'; return; }
+        st.sel=+sel.value; ok=st.sel===t.ans;
+      }
+      st.p = ok ? (st.h ? pts/2 : pts) : 0;
+      st.d=true; st.m=extra; lockCard(card,t);
+      fb.className='fb '+(ok?'ok':'bad');
+      fb.textContent=(extra?extra+' ':'')+(ok?'Pravilno':'Ni pravilno')+': dobiš '+fmtPts(st.p)+' od '+pts+' t. Odgovor je zaklenjen.';
+      save(); refresh();
+    }
+  });
+  function refresh(){
+    const doneCount=TASKS.reduce((a,t,i)=>a+((S.t[i]&&S.t[i].d)?1:0),0);
+    const got=TASKS.reduce((a,t,i)=>a+((S.t[i]&&S.t[i].d)?S.t[i].p:0),0);
+    const pct=doneCount/TASKS.length*100;
+    $('bar').style.width=pct+'%';
+    $('score').textContent=fmtPts(got)+' / '+maxScore+' t · '+doneCount+'/'+TASKS.length;
+    $('sc').textContent=fmtPts(got); $('mx').textContent=maxScore; $('pc').textContent=doneCount+'/'+TASKS.length+' nalog';
+    $('bf').style.width=pct+'%';
+    [...nums.children].forEach((b,i)=>{ const st=S.t[i]; b.classList.toggle('done',!!(st&&st.d&&st.p>0)); b.classList.toggle('zero',!!(st&&st.d&&st.p===0)); });
+    const chN=document.querySelector('#nav .chap[data-page="naloge"]');
+    if(chN) chN.classList.toggle('done', doneCount===TASKS.length);
+    CFG.MODS.forEach(m=>{
+      const ids=TASKS.map((t,i)=>t.mod===m.id?i:-1).filter(i=>i>=0);
+      const dn=ids.filter(i=>S.t[i]&&S.t[i].d).length;
+      const el=$('mp-'+m.id); if(el) el.textContent='Rešeno: '+dn+' / '+ids.length+' nalog';
+    });
+  }
+  // ponastavitev z vgrajenim potrjevanjem (brez confirm())
+  function resetUI(step){
+    const box=$('resetBox');
+    if(step===1){
+      box.innerHTML='<div class="confirm"><span>Res izbrišem vse odgovore in cilje? Učitelj bo videl ponastavitev in prejšnji rezultat.</span><button class="btn danger sm" id="resetYes">Da, ponastavi</button><button class="btn g2 sm" id="resetNo">Prekliči</button></div>';
+      $('resetYes').addEventListener('click',()=>{
+        S={t:{},g:[]}; save();
+        goalsEl.querySelectorAll('input').forEach(c=>c.checked=false);
+        buildTasks(); refresh(); renderFigs(); resetUI(0);
+      });
+      $('resetNo').addEventListener('click',()=>resetUI(0));
+    } else {
+      box.innerHTML='<button class="btn danger sm" id="resetBtn">Ponastavi napredek</button>';
+      $('resetBtn').addEventListener('click',()=>resetUI(1));
+    }
+  }
+  // slike vezij v nalogah (sledijo izbranim simbolom, razen kjer naloga sama določi slog)
+  function renderFigs(){
+    document.querySelectorAll('.tfig').forEach(el=>{
+      const t=TASKS[+el.dataset.i];
+      if(t.fig) el.innerHTML=treeSVG(BOOL.parse(t.fig),{},{out:t.figOut||'Y',static:true}).svg;
+      else if(t.nfig) el.innerHTML=netSVG(t.nfig,{},{static:true,labels:true}).svg;
+      else if(t.qkm){ /* Veitchev diagram nariše kmTaskFigs */ }
+      else if(t.gfig){ const n=t.gfig.n, gh=n===1?30:16*n+12, g=G(t.gfig.t,40,10,n,t.gfig.s); let b=g.s; g.pins.forEach(p=>{ b+=W([[8,p[1]],[40,p[1]]],0); }); b+=W([g.out,[g.out[0]+30,g.out[1]]],0); el.innerHTML=sized(svgWrap('0 0 '+(g.out[0]+40)+' '+(gh+20),b,'Simbol vrat'),(g.out[0]+40)*1.6); }
+    });
+    kmTaskFigs();
+  }
+  REDRAW.push(renderFigs);
+  resetUI(0);
+  buildTasks(); refresh(); renderFigs();
+
+  symPickers();
+  const h0=location.hash.slice(1);
+  showPage(PAGES.includes(h0)?h0:CFG.th[0],false);
+})();
+
+
+</script>
+
+</html>

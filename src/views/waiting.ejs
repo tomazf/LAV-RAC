@@ -1,0 +1,8 @@
+<%- include('partials/head', { pageTitle: 'Čakaš na razred', mainClass: 'stage' }) %>
+<section class="stage-in">
+  <h1>Čakaš, da te učitelj doda v razred</h1>
+  <%- include('partials/gate', { a: true, b: false }) %>
+  <p class="lead">Prijavljen račun: <strong><%= user.email || user.username %></strong>. Ko te učitelj doda v razred, se vaje odprejo. Povej mu, da tvoj račun čaka na seznamu.</p>
+  <a class="btn big ghost" href="/">Preveri znova</a>
+</section>
+<%- include('partials/foot') %>

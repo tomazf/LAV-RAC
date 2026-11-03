@@ -1,0 +1,24 @@
+<%- include('../partials/head', { pageTitle: 'Razredi' }) %>
+<% const f = fmt; %>
+<div class="title-row"><h1>Razredi</h1>
+  <form class="inline" method="post" action="/ucitelj/razredi"><input type="hidden" name="_csrf" value="<%= csrf %>">
+    <label class="sr" for="novi">Ime novega razreda</label><input id="novi" name="name" required maxlength="80" placeholder="npr. E4A 26/27"><button class="btn">Ustvari razred</button></form>
+</div>
+<% if (!classes.length) { %><p class="empty">Še nimaš razreda. Vpiši ime zgoraj, nato vanj dodaj dijake, ki čakajo.</p><% } else { %>
+<div class="scroll"><table class="data">
+  <thead><tr><th class="l">Razred</th><th>Dijaki</th><th>Povprečje točk</th><th>Aktivni v 7 dneh</th><% if (user.isAdmin) { %><th class="l">Učitelj</th><% } %></tr></thead>
+  <tbody><% classes.forEach((c) => { %><tr>
+    <td class="l"><a href="/ucitelj/razredi/<%= c.id %>"><strong><%= c.name %></strong></a></td>
+    <td><%= c.students %></td><td><%= c.avg %> %</td><td><%= c.activeWeek %></td><% if (user.isAdmin) { %><td class="l"><%= c.owner_name || 'ni določen' %></td><% } %>
+  </tr><% }) %></tbody>
+</table></div>
+<% } %>
+<section class="block">
+  <h2>Čakajo na razred (<%= waiting.length %>)</h2>
+  <% if (!waiting.length) { %><p class="empty">Nihče ne čaka. Dijak se pojavi tukaj po prvi prijavi.</p><% } else { %>
+  <p>Odpri razred in jih dodaj s seznama.</p>
+  <ul class="names"><% waiting.slice(0, 40).forEach((w) => { %><li><%= w.name %> <span class="dim"><%= w.email || w.username %></span></li><% }) %></ul>
+  <% if (waiting.length > 40) { %><p class="dim">in še <%= waiting.length - 40 %></p><% } %>
+  <% } %>
+</section>
+<%- include('../partials/foot') %>

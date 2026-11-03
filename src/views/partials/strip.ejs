@@ -1,0 +1,3 @@
+<div class="strip" role="img" aria-label="<%= items.filter(x => x.status !== 'open').length %> od <%= items.length %> nalog rešenih">
+  <% items.forEach((t) => { %><i class="s-<%= t.status %>" title="<%= t.label %>"></i><% }) %>
+</div>

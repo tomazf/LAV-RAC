@@ -1,0 +1,29 @@
+<%- include('../partials/head', { pageTitle: ex.title, mainClass: 'wide' }) %>
+<% const f = fmt; %>
+<p class="crumbs"><a href="/ucitelj">Razredi</a> / <a href="/ucitelj/razredi/<%= cls.id %>"><%= cls.name %></a></p>
+<div class="title-row"><h1><%= ex.id %> <%= ex.title %></h1><a class="btn ghost" href="/vaje/<%= ex.id %>">Odpri vajo</a></div>
+<section class="block">
+  <h2>Dijaki</h2>
+  <div class="scroll"><table class="data">
+    <thead><tr><th class="l">Dijak</th><th class="l">Naloge</th><th>Točke</th><th>Namigi</th><th>Rešitve</th><th>Teorija</th><th>Simulacija</th><th>Naloge</th><th>Ponastavitve</th><th class="l">Zadnja aktivnost</th></tr></thead>
+    <tbody><% students.forEach((s) => { %><tr>
+      <td class="l"><a href="/ucitelj/razredi/<%= cls.id %>/dijaki/<%= s.id %>"><%= s.name %></a></td>
+      <td class="l strip-cell"><%- include('../partials/strip', { items: s.strip }) %></td>
+      <td class="nw"><%= f.num(s.c.score) %> / <%= ex.maxPoints %></td><td><%= s.c.hints %></td><td><%= s.c.solutions %></td>
+      <td class="nw"><%= f.duration(s.c.time.Teorija) %></td><td class="nw"><%= f.duration(s.c.time.Simulacija) %></td><td class="nw"><%= f.duration(s.c.time.Naloge) %></td>
+      <td><%= s.c.resets %></td><td class="l nw"><%= f.ago(s.c.updatedAt || s.c.lastSeen) %></td>
+    </tr><% }) %></tbody>
+  </table></div>
+  <%- include('../partials/legend') %>
+</section>
+<section class="block">
+  <h2>Naloge</h2>
+  <div class="scroll"><table class="data">
+    <thead><tr><th>Št.</th><th class="l">Naloga</th><th class="l">Stopnja</th><th>Odgovorili</th><th>Pravilno</th><th>Namigi</th><th>Rešitve</th></tr></thead>
+    <tbody><% tasks.forEach((t) => { const p = t.answered ? f.pct(t.right, t.answered) : null; %><tr>
+      <td><%= t.n %></td><td class="l q-cell"><%= t.q %></td><td class="l"><%= t.level %></td><td><%= t.answered %></td>
+      <td class="<%= p !== null && p < 50 ? 'weak' : '' %>"><%= p === null ? '–' : p + ' %' %></td><td><%= t.hints %></td><td><%= t.solutions %></td>
+    </tr><% }) %></tbody>
+  </table></div>
+</section>
+<%- include('../partials/foot') %>

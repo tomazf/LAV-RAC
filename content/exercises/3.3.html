@@ -1,0 +1,1221 @@
+<!doctype html>
+<html lang="sl"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!--LAVELS:BOOT-->
+<title>MUX, DEMUX in primerjalnik</title>
+<link href="/static/fonts/fonts.css" rel="stylesheet">
+<style>
+/* Shema kot pri LAV-ELS 3.1 in 3.2: temno modra glava z napredkom, desni meni s tremi poglavji (Teorija, Simulacija, Naloge),
+   stran za stranjo z gumboma Nazaj/Naprej. Signal (logična 1) = oranžna. Vrata so pravokotni IEC simboli. */
+:root{
+  --bg:#f2f5f9;--card:#fff;--ink:#14213d;--mut:#586377;--acc:#0b6e8a;--onacc:#fff;--sig:#e8590c;--sigbg:#fff0e3;
+  --ok:#2b8a3e;--bad:#c92a2a;--line:#d3dae5;--tile:#e6edf5;--okbg:#e3f5e8;--badbg:#fde8e8;--wire:#a9b4c4;--hdr:#14213d;--amb:#e9a23b;
+  --fb:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;--fm:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  /* aliasi za risbe v SVG */
+  --on:var(--sig);--off:var(--wire);--panel:var(--card);--fg:var(--ink);--muted:var(--mut);--accent:var(--acc);--accent-ink:var(--onacc);
+  --code:var(--tile);--on-ink:#1b1206;--warn:var(--amb);--okc:var(--ok);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1626;--card:#172238;--ink:#e8edf6;--mut:#9aa7bd;--acc:#4cc2e0;--onacc:#0e1626;--sig:#ff9f43;--sigbg:#3a2a18;
+  --ok:#6fd48a;--bad:#ff8080;--line:#2b3a57;--tile:#22304c;--okbg:#17352a;--badbg:#3d2230;--wire:#4a5a76;--hdr:#0a1020;--amb:#f1b95a;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1626;--card:#172238;--ink:#e8edf6;--mut:#9aa7bd;--acc:#4cc2e0;--onacc:#0e1626;--sig:#ff9f43;--sigbg:#3a2a18;
+  --ok:#6fd48a;--bad:#ff8080;--line:#2b3a57;--tile:#22304c;--okbg:#17352a;--badbg:#3d2230;--wire:#4a5a76;--hdr:#0a1020;--amb:#f1b95a;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 var(--fb)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--hdr)}
+button,input{font:inherit}
+button:focus-visible,input:focus-visible{outline:3px solid var(--amb);outline-offset:2px}
+[hidden]{display:none!important}
+header{background:var(--hdr);color:#fff;padding-block:14px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.hin{max-width:1180px;margin:auto;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.hin .ttl{flex:1;min-width:200px}
+.hin h1{font-size:1.25rem;margin:0;line-height:1.25}
+.hin small{display:block;opacity:.8;font-size:.84rem}
+.sc{min-width:220px;font-size:.95rem}.sc b{font-size:1.25rem}
+.hbar{height:8px;background:#ffffff33;border-radius:5px;overflow:hidden;margin-top:5px}.hbar i{display:block;height:100%;background:var(--amb);width:0;transition:width .4s}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:20px;max-width:1180px;margin:auto;padding-block:16px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{min-width:0}
+aside{position:sticky;top:calc(12px + env(safe-area-inset-top,0px));align-self:start}
+.navc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px}
+.chap{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:2px solid transparent;background:none;color:var(--ink);border-radius:10px;padding:8px 10px;margin-top:4px;font-weight:700;cursor:pointer}
+.chap:first-child{margin-top:0}
+.chap:hover{background:var(--tile)}
+.chap.on{border-color:var(--acc);background:var(--tile)}
+.chap.done .sn{background:var(--ok);border-color:var(--ok);color:#fff}
+.subnav{margin:2px 0 6px 18px;border-left:3px solid var(--line);padding-left:6px}
+.sb{display:block;width:100%;text-align:left;border:2px solid transparent;background:none;color:var(--ink);border-radius:10px;padding:6px 8px;margin-top:2px;cursor:pointer;font-size:.95rem}
+.sb:hover{background:var(--tile)}
+.sb.on{border-color:var(--acc);background:var(--tile)}
+.sn{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--tile);color:var(--acc);font-weight:700;font-size:.85rem;border:2px solid var(--line)}
+.chap.on .sn{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
+main .page{display:none}
+main .page.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 26px;margin-bottom:14px;scroll-margin-top:12px}
+.crumb{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px;color:var(--mut);font-size:.92rem}
+.pager{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:6px 0 4px}
+h1,h2,h3,h4{line-height:1.2;text-wrap:balance}
+h2{margin:.1em 0 .45em;font-size:1.55rem}
+h3{margin:1.3em 0 .4em;font-size:1.1rem;color:var(--acc)}
+p{margin:.45em 0;max-width:72ch}
+ul,ol{max-width:72ch;padding-left:22px}li{margin:4px 0}
+.lead{font-size:1.08rem}
+.label{font:600 .74rem var(--fm);text-transform:uppercase;letter-spacing:.08em;color:var(--mut)}
+.mut{color:var(--mut)}.sm{font-size:.88rem}
+.m{font-family:var(--fm)}
+.note{font-size:.92rem;color:var(--mut)}
+.btn{border:0;border-radius:8px;padding:10px 18px;cursor:pointer;background:var(--acc);color:var(--onacc);min-height:44px}
+.btn.g2{background:var(--tile);color:var(--ink)}
+.btn.sm{min-height:36px;padding:6px 12px;font-size:.9rem}
+.btn.danger{background:var(--bad);color:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+.eqb{font:500 .98rem var(--fm);background:var(--tile);border-radius:8px;padding:9px 12px;overflow-x:auto;white-space:nowrap;margin:8px 0}
+.ex{font-size:.95rem;background:var(--tile);border-radius:10px;padding:10px 12px;margin:8px 0}
+.ex strong{display:block;margin-bottom:2px}
+.ex .acts{margin-top:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid2>*{min-width:0}
+@media (max-width:640px){.grid2{grid-template-columns:1fr}}
+.idea{background:var(--tile);border-left:5px solid var(--acc);padding:10px 14px;border-radius:8px;margin:12px 0;max-width:76ch}
+.scroll{overflow-x:auto;max-width:100%}
+.fig{display:flex;justify-content:center;background:var(--tile);border-radius:10px;padding:10px;margin:10px 0;overflow-x:auto}
+.fig svg{display:block;width:100%;height:auto;max-width:100%}
+.fig.wide{justify-content:flex-start}.fig.wide svg{min-width:560px}
+svg text{fill:var(--ink);font-family:var(--fm);font-size:13px}
+svg .gate{fill:var(--card);stroke:var(--ink);stroke-width:2}
+svg .net{fill:var(--acc);font-weight:600}
+svg .lbl{fill:var(--mut);font-size:11px}
+svg .sym{font-weight:700;font-size:13px}
+svg .selband{fill:color-mix(in srgb,var(--acc) 13%,transparent)}
+svg .blk{fill:var(--card);stroke:var(--acc);stroke-width:2}
+svg .blkt{fill:var(--acc);font-weight:700;font-size:12px}
+svg .blks{fill:var(--mut);font-size:11px}
+svg .pin{fill:var(--mut);font-size:11px}
+svg .pin.sel{fill:var(--accent);font-weight:700}
+svg .dash{fill:none;stroke:var(--mut);stroke-width:1.2;stroke-dasharray:5 4}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:.94rem}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--tile);font-weight:600}
+td.l,th.l{text-align:left}
+tr.hl td,tr.cur td{background:var(--sigbg);font-weight:700}
+th.o,td.o{background:color-mix(in srgb,var(--acc) 9%,transparent)}
+td.mid,th.mid{color:var(--mut)}
+/* simulacija */
+.toggles{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.tg{min-width:56px;min-height:44px;padding:8px 10px;border-radius:8px;border:2px solid var(--ink);background:var(--card);color:var(--ink);font:700 1rem var(--fm);cursor:pointer}
+.tg[aria-pressed="true"]{background:var(--sig);border-color:var(--sig);color:#1b1206}
+.pill{font:600 .9rem var(--fm);padding:6px 13px;border-radius:99px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;min-height:36px}
+.pill[aria-pressed="true"]{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px;align-items:center}
+.lamps{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.lamp{min-width:78px;text-align:center;padding:8px 6px;border-radius:10px;border:2px solid var(--line);background:var(--card)}
+.lamp .b{font:700 1.5rem/1.2 var(--fm);color:var(--mut)}
+.lamp.on{background:var(--sig);border-color:var(--sig)}
+.lamp.on .b,.lamp.on .label{color:#1b1206}
+.readout{font-size:.95rem;margin:8px 0;padding:10px 12px;border-radius:10px;background:var(--tile)}
+.status{font-size:.95rem;margin-top:6px;min-height:1.4em}
+.status.ok{color:var(--ok)}.status.bad{color:var(--bad)}
+.izziv{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+.izziv p{margin:0}
+.hintbox{margin-top:8px;padding:10px 12px;border-radius:8px;background:var(--tile);border-left:5px solid var(--amb);font-size:.94rem}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.ser{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.ser div{min-width:46px;text-align:center;border:2px solid var(--line);border-radius:8px;padding:2px 6px;background:var(--card)}
+.ser div b{display:block;font:700 1.2rem var(--fm);color:var(--mut)}
+.ser div span{font:500 .7rem var(--fm);color:var(--mut)}
+.ser div.on{background:var(--sig);border-color:var(--sig)}
+.ser div.on b,.ser div.on span{color:#1b1206}
+.ser div.cur{outline:3px solid var(--amb);outline-offset:1px}
+.fnrow{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+.fnrow>*{min-width:0}
+/* cilji in sklopi (uvod) */
+.goals label{display:flex;gap:10px;align-items:flex-start;padding:5px 0;cursor:pointer;max-width:72ch}
+.goals input{width:20px;height:20px;margin-top:3px;accent-color:var(--acc);flex:none}
+.mods{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:10px 0}
+.mods>div{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.mods .n{font:700 1.6rem var(--fm);color:var(--acc);line-height:1}
+.mods p{margin:0;font-size:.93rem}
+.mods .btn{margin-top:auto;align-self:flex-start}
+/* naloge */
+.sticky{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:8px 0 10px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.progress{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.bar{flex:1;min-width:120px;height:8px;background:var(--tile);border-radius:999px;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.nums{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.nums button{width:36px;height:36px;border-radius:50%;border:2px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;cursor:pointer}
+.nums button.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.nums button.zero{background:var(--mut);border-color:var(--mut);color:var(--card)}
+.lv{font-size:.88rem;color:var(--mut);display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.lvt{font:700 .74rem var(--fm);text-transform:uppercase;letter-spacing:.06em;padding:2px 9px;border-radius:99px;color:#fff}
+.lvt.l1{background:var(--ok)}.lvt.l2{background:#b7791f}.lvt.l3{background:var(--bad)}
+.qt{font-size:1.13rem;margin:10px 0 14px;max-width:72ch}
+.opts{display:flex;flex-direction:column;gap:6px;max-width:620px}
+.opt{display:flex;gap:10px;align-items:center;padding:9px 12px;border:2px solid var(--line);border-radius:10px;cursor:pointer;min-height:46px}
+.opt:has(input:checked){border-color:var(--acc);background:var(--tile)}
+.opt input{width:18px;height:18px;accent-color:var(--acc);flex:none}
+.cell{width:46px;height:36px;border:2px solid var(--amb);border-radius:6px;background:var(--card);color:var(--ink);font:700 1rem var(--fm);cursor:pointer}
+.cell.un{color:var(--mut);border-style:dashed}
+.cell.one{background:var(--sig);border-color:var(--sig);color:#1b1206}
+.cell.bad{outline:3px solid var(--bad)}
+.cell:disabled{cursor:default}
+.ttask td.o{padding:3px 6px}
+.fb{margin-top:12px;padding:10px 14px;border-radius:8px;min-height:1px}
+.fb:empty{display:none}
+.fb.ok{background:var(--okbg);color:var(--ok)}.fb.bad{background:var(--badbg);color:var(--bad)}
+.hn,.slb{margin-top:10px;padding:10px 14px;border-radius:8px;background:var(--tile)}
+.hn{border-left:5px solid var(--amb)}
+.slb{border-left:5px solid var(--acc)}
+.hn::before{content:"Namig: ";font-weight:700;color:var(--amb)}
+.slb::before{content:"Rešitev: ";font-weight:700;color:var(--acc)}
+.task{scroll-margin-top:150px}
+.confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+@media (max-width:900px){
+  .wrap{grid-template-columns:minmax(0,1fr)}
+  aside{order:-1;position:static}
+  .subnav{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 6px;border-left:0;padding-left:0}
+  .subnav .sb{width:auto;flex:1 1 auto;margin:0;border:1px solid var(--line);text-align:center}
+  .card{padding:16px}
+}
+@media (max-width:700px){.mods{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header><div class="hin">
+  <div class="ttl"><small>LAV-ELS · laboratorijska vaja 3.3</small><h1>Multiplekserji, demultiplekserji in primerjalniki</h1></div>
+  <div class="sc"><b id="sc">0</b> / <span id="mx"></span> točk · <span id="pc"></span><div class="hbar"><i id="bf"></i></div></div>
+</div></header>
+
+<div class="wrap">
+<main id="main">
+
+  <!-- ===================== TEORIJA ===================== -->
+  <div class="card page" id="uvod" data-grp="Teorija">
+    <h2>Uvod in cilji</h2>
+    <p class="lead">Kodirnik in dekodirnik iz prejšnje vaje sta pokazala, kako vezje iz številke izbere eno linijo. Zdaj spoznaš tri vezja, ki jih najdeš v vsakem računalniku. <strong>Multiplekser</strong> izbere en podatek izmed več. <strong>Demultiplekser</strong> en podatek pošlje na izbrani izhod. <strong>Primerjalnik</strong> pove, katero od dveh števil je večje.</p>
+    <div class="fig" id="fig-uvod"></div>
+    <p class="note">Izbirni vhodi S so dvojiška številka: pri MUX povedo, kateri vhod gre na izhod, pri DEMUX pa, na kateri izhod gre podatek.</p>
+    <h3>Cilji</h3>
+    <div class="goals" id="goals"></div>
+    <h3>Sklopi</h3>
+    <div class="mods" id="mods"></div>
+    <h3>Kako poteka vaja</h3>
+    <ol>
+      <li>Preberi teorijo in takoj preizkusi vezje v simulaciji. Klikaj stikala in opazuj žice: oranžna debela žica nosi logično 1, siva tanka logično 0.</li>
+      <li>Ko razumeš vse sklope, reši naloge. Nekatere so izbira odgovora, nekatere dopolnjevanje pravilnostne tabele.</li>
+      <li>Točke vidiš zgoraj desno. Napredek se shranjuje v tvojem brskalniku.</li>
+    </ol>
+    <h3>Točkovanje</h3>
+    <ul>
+      <li><strong>Lahka</strong> naloga je vredna 1 točko, <strong>srednja</strong> 2 točki, <strong>težka</strong> 3 točke.</li>
+      <li>Namig odbije 50 % točk naloge. Ogled rešitve prinese 0 točk.</li>
+      <li>Ko pritisneš »Preveri«, se odgovor zaklene in popravkov ni. Pravilen odgovor da polne točke, napačen 0.</li>
+    </ul>
+  </div>
+
+  <div class="card page" id="mux" data-grp="Teorija">
+    <h2>Multiplekser (MUX)</h2>
+    <p class="lead">Multiplekser je <strong>elektronsko izbirno stikalo</strong>. Ima več podatkovnih vhodov (I0, I1, …), nekaj izbirnih vhodov (S) in en izhod Y. Dvojiška številka na izbirnih vhodih pove, kateri podatkovni vhod se poveže z izhodom. Pri n izbirnih vhodih ima multiplekser 2ⁿ podatkovnih vhodov.</p>
+    <div class="idea"><strong>Primer iz vsakdanjika:</strong> televizor ima štiri vire: HDMI 1, HDMI 2, AV in anteno. Gumb »vir« nastavi izbirna vhoda. Na zaslon pride samo izbrani signal. Ostali so še vedno priključeni, a jih zaslon ne vidi.</div>
+    <h3>Najprej najpreprostejši: MUX 2→1</h3>
+    <p>Ima en izbirni vhod S. Pri S = 0 pride na izhod I0, pri S = 1 pa I1.</p>
+    <div class="scroll"><table>
+      <tr><th>S</th><th>I0</th><th>I1</th><th class="o">Y</th></tr>
+      <tr><td>0</td><td>0</td><td>0</td><td class="o">0</td></tr>
+      <tr><td>0</td><td>0</td><td>1</td><td class="o">0</td></tr>
+      <tr class="hl"><td>0</td><td>1</td><td>0</td><td class="o">1</td></tr>
+      <tr class="hl"><td>0</td><td>1</td><td>1</td><td class="o">1</td></tr>
+      <tr><td>1</td><td>0</td><td>0</td><td class="o">0</td></tr>
+      <tr class="hl"><td>1</td><td>0</td><td>1</td><td class="o">1</td></tr>
+      <tr><td>1</td><td>1</td><td>0</td><td class="o">0</td></tr>
+      <tr class="hl"><td>1</td><td>1</td><td>1</td><td class="o">1</td></tr>
+    </table></div>
+    <div class="eqb">Y = ¬S·I0 + S·I1</div>
+    <p class="note">Izhod Y je vedno enak vhodu, ki ga izbere S. Vrstice z Y = 1 so označene.</p>
+    <h3>MUX 4→1</h3>
+    <p>Dva izbirna vhoda, S1 (višji bit) in S0 (nižji bit), izbirata med štirimi vhodi. Kombinacija S1S0 je kar številka vhoda.</p>
+    <div class="scroll"><table>
+      <tr><th>S1</th><th>S0</th><th class="l">izbrani vhod</th><th class="o">Y</th></tr>
+      <tr><td>0</td><td>0</td><td class="l">I0</td><td class="o">I0</td></tr>
+      <tr><td>0</td><td>1</td><td class="l">I1</td><td class="o">I1</td></tr>
+      <tr><td>1</td><td>0</td><td class="l">I2</td><td class="o">I2</td></tr>
+      <tr><td>1</td><td>1</td><td class="l">I3</td><td class="o">I3</td></tr>
+    </table></div>
+    <div class="eqb">Y = ¬S1·¬S0·I0 + ¬S1·S0·I1 + S1·¬S0·I2 + S1·S0·I3</div>
+    <div class="idea"><strong>Kako deluje:</strong> izbirni del je dekodirnik 2→4 iz prejšnje vaje. Vsak njegov izhod je 1 samo pri svoji kombinaciji S1S0. Vsakega pomnožimo (vrata IN) s svojim podatkovnim vhodom, štiri produkte pa seštejemo (vrata ALI). Tako gre skozi samo izbrani vhod.</div>
+    <p class="note">Multiplekser 8→1 ima tri izbirne vhode (S2, S1, S0), multiplekser 16→1 štiri. V katalogu: 74153 vsebuje dva MUX 4→1, 74151 je MUX 8→1.</p>
+    <div class="acts"><button class="btn g2" data-sim="s-mux">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <div class="card page" id="muxfn" data-grp="Teorija">
+    <h2>MUX kot logična vrata in funkcija</h2>
+    <p class="lead">Multiplekser lahko nadomesti cel kup vrat. Če podatkovne vhode priključimo na 0, na 1 ali na spremenljivko, dobimo poljubno logično funkcijo. Funkcije ne gradimo z vrati, ampak jo »vpišemo« v vhode multiplekserja.</p>
+    <h3>Osnovna vrata iz MUX 2→1</h3>
+    <p>Spremenljivko A priključimo na izbirni vhod S, spremenljivko B pa na podatkovna vhoda (ali jima damo 0 oziroma 1). Za vsako funkcijo se vprašamo: kakšen mora biti izhod, ko je A = 0, in kakšen, ko je A = 1?</p>
+    <div class="scroll"><table>
+      <tr><th class="l">funkcija</th><th>A = 0 (izhod)</th><th>A = 1 (izhod)</th><th class="o">I0</th><th class="o">I1</th></tr>
+      <tr><td class="l">IN (A·B)</td><td>0</td><td>B</td><td class="o">0</td><td class="o">B</td></tr>
+      <tr><td class="l">ALI (A+B)</td><td>B</td><td>1</td><td class="o">B</td><td class="o">1</td></tr>
+      <tr><td class="l">XOR (A⊕B)</td><td>B</td><td>¬B</td><td class="o">B</td><td class="o">¬B</td></tr>
+      <tr><td class="l">NAND</td><td>1</td><td>¬B</td><td class="o">1</td><td class="o">¬B</td></tr>
+      <tr><td class="l">NOR</td><td>¬B</td><td>0</td><td class="o">¬B</td><td class="o">0</td></tr>
+      <tr><td class="l">XNOR</td><td>¬B</td><td>B</td><td class="o">¬B</td><td class="o">B</td></tr>
+      <tr><td class="l">NE (¬A)</td><td>1</td><td>0</td><td class="o">1</td><td class="o">0</td></tr>
+    </table></div>
+    <div class="idea"><strong>Primer, IN:</strong> pri A = 0 mora biti Y vedno 0, zato na I0 priključimo 0. Pri A = 1 mora Y slediti B, zato na I1 priključimo B.</div>
+    <h3>Poljubna funkcija treh spremenljivk s MUX 4→1</h3>
+    <p>Spremenljivki A in B priključimo na izbirna vhoda (A na S1, B na S0). Za vsak par AB so v pravilnostni tabeli dve vrstici, ena s C = 0 in ena s C = 1. Glede na ti dve vrednosti funkcije izberemo, kaj gre na podatkovni vhod:</p>
+    <div class="scroll"><table>
+      <tr><th>f pri C = 0</th><th>f pri C = 1</th><th class="o">na vhod priključimo</th></tr>
+      <tr><td>0</td><td>0</td><td class="o">0</td></tr>
+      <tr><td>1</td><td>1</td><td class="o">1</td></tr>
+      <tr><td>0</td><td>1</td><td class="o">C</td></tr>
+      <tr><td>1</td><td>0</td><td class="o">¬C</td></tr>
+    </table></div>
+    <h4>Primer: večina (Y = 1, če sta vsaj dva od A, B, C enaka 1)</h4>
+    <div class="scroll"><table>
+      <tr><th>A</th><th>B</th><th>C</th><th class="o">f</th><th class="l">par (C = 0, C = 1)</th><th class="o">vhod</th></tr>
+      <tr><td>0</td><td>0</td><td>0</td><td class="o">0</td><td class="l" rowspan="2">(0, 0)</td><td class="o" rowspan="2">I0 = 0</td></tr>
+      <tr><td>0</td><td>0</td><td>1</td><td class="o">0</td></tr>
+      <tr><td>0</td><td>1</td><td>0</td><td class="o">0</td><td class="l" rowspan="2">(0, 1)</td><td class="o" rowspan="2">I1 = C</td></tr>
+      <tr><td>0</td><td>1</td><td>1</td><td class="o">1</td></tr>
+      <tr><td>1</td><td>0</td><td>0</td><td class="o">0</td><td class="l" rowspan="2">(0, 1)</td><td class="o" rowspan="2">I2 = C</td></tr>
+      <tr><td>1</td><td>0</td><td>1</td><td class="o">1</td></tr>
+      <tr><td>1</td><td>1</td><td>0</td><td class="o">1</td><td class="l" rowspan="2">(1, 1)</td><td class="o" rowspan="2">I3 = 1</td></tr>
+      <tr><td>1</td><td>1</td><td>1</td><td class="o">1</td></tr>
+    </table></div>
+    <div class="idea"><strong>Zakaj je to koristno:</strong> v programirljivih čipih (FPGA) so osnovni gradniki tabele LUT. To je multiplekser, ki ima v pomnilniških celicah vpisano pravilnostno tabelo. Z drugačnim vpisom dobimo drugo funkcijo, vezja pa ne spreminjamo.</div>
+    <div class="acts"><button class="btn g2" data-sim="s-muxfn">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <div class="card page" id="muxvec" data-grp="Teorija">
+    <h2>Večji multiplekser iz manjših</h2>
+    <p class="lead">Če nimamo multiplekserja 8→1, ga sestavimo iz manjših. Izbirne vhode razdelimo po pomembnosti: nižja (S1, S0) pripeljemo na prvo stopnjo, najvišjega (S2) pa na zadnjo, ki izbere med rezultati prve stopnje.</p>
+    <div class="fig wide" id="fig-muxvec"></div>
+    <p class="note">Primer na sliki: S2S1S0 = 101. Oba multiplekserja 4→1 imata S1S0 = 01 in prepustita svoj vhod 1 (I1 oziroma I5). Multiplekser 2→1 z S2 = 1 izbere spodnji rezultat, zato na izhod pride I5.</p>
+    <div class="eqb">Y = ¬S2·Ya + S2·Yb</div>
+    <p>Pri tem je Ya izhod zgornjega multiplekserja (I0 do I3), Yb pa spodnjega (I4 do I7).</p>
+    <div class="scroll"><table>
+      <tr><th class="l">želeni MUX</th><th class="l">iz česa ga sestavimo</th><th>izbirni vhodi</th></tr>
+      <tr><td class="l">4→1</td><td class="l">3 × MUX 2→1 (dva na S0, eden na S1)</td><td>2</td></tr>
+      <tr><td class="l">8→1</td><td class="l">2 × MUX 4→1 in 1 × MUX 2→1</td><td>3</td></tr>
+      <tr><td class="l">16→1</td><td class="l">4 × MUX 4→1 in 1 × MUX 4→1</td><td>4</td></tr>
+    </table></div>
+    <div class="idea"><strong>Pozor:</strong> S1 in S0 pripelješ na <em>oba</em> multiplekserja prve stopnje. S2 gre samo na zadnjo stopnjo.</div>
+    <p>Če izbirne vhode vrtimo s števcem (000, 001, 010, … 111), se na izhodu zvrstijo vsi vhodi drug za drugim. Tako iz osmih vzporednih bitov dobimo <strong>serijski niz</strong> po eni sami žici.</p>
+    <div class="acts"><button class="btn g2" data-sim="s-muxvec">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <div class="card page" id="demux" data-grp="Teorija">
+    <h2>Demultiplekser (DEMUX) 1→4</h2>
+    <p class="lead">Demultiplekser je obratno vezje od multiplekserja. Ima en podatkovni vhod D in več izhodov (Y0 do Y3). Izbirna vhoda S1 in S0 določita, na kateri izhod pride podatek. Vsi ostali izhodi so 0.</p>
+    <div class="idea"><strong>Primer iz vsakdanjika:</strong> pošta ima eno pošiljko (D) in štiri naslove (Y0 do Y3). Številka na paketu (S1S0) pove, na kateri naslov gre. Ostali trije naslovi ne dobijo ničesar.</div>
+    <div class="scroll"><table>
+      <tr><th>D</th><th>S1</th><th>S0</th><th class="o">Y3</th><th class="o">Y2</th><th class="o">Y1</th><th class="o">Y0</th></tr>
+      <tr><td>0</td><td>x</td><td>x</td><td class="o">0</td><td class="o">0</td><td class="o">0</td><td class="o">0</td></tr>
+      <tr class="hl"><td>1</td><td>0</td><td>0</td><td class="o">0</td><td class="o">0</td><td class="o">0</td><td class="o">1</td></tr>
+      <tr class="hl"><td>1</td><td>0</td><td>1</td><td class="o">0</td><td class="o">0</td><td class="o">1</td><td class="o">0</td></tr>
+      <tr class="hl"><td>1</td><td>1</td><td>0</td><td class="o">0</td><td class="o">1</td><td class="o">0</td><td class="o">0</td></tr>
+      <tr class="hl"><td>1</td><td>1</td><td>1</td><td class="o">1</td><td class="o">0</td><td class="o">0</td><td class="o">0</td></tr>
+    </table></div>
+    <p class="note">x pomeni »vseeno«. Pri D = 0 ni česa poslati, zato so vsi izhodi 0.</p>
+    <div class="eqb">Y0 = D·¬S1·¬S0 &nbsp; Y1 = D·¬S1·S0 &nbsp; Y2 = D·S1·¬S0 &nbsp; Y3 = D·S1·S0</div>
+    <div class="idea"><strong>DEMUX je dekodirnik z vhodom E:</strong> primerjaj enačbe z dekodirnikom 2→4 iz prejšnje vaje. Vezji sta enaki. Če vhod E uporabimo kot podatek D, dobimo demultiplekser. Zato so v katalogu čipi »dekodirnik/demultiplekser« (74139 ima dva 2→4, 74138 en 3→8).</div>
+    <p><strong>MUX in DEMUX skupaj:</strong> na oddajni strani multiplekser izbere eno od štirih informacij, na sprejemni demultiplekser to informacijo razporedi na pravi izhod. Če imata enake izbirne vhode, gre več signalov po eni sami žici, drug za drugim.</p>
+    <div class="acts"><button class="btn g2" data-sim="s-demux">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <div class="card page" id="komp1" data-grp="Teorija">
+    <h2>Primerjalnik: 1 bit</h2>
+    <p class="lead">Primerjalnik (komparator) primerja dve števili in pove, ali je A večje, enako ali manjše od B. Pri 1-bitnem primerjalniku primerjamo dva bita. Ima tri izhode: <strong>A&gt;B</strong>, <strong>A=B</strong> in <strong>A&lt;B</strong>. Vedno je aktiven natanko eden.</p>
+    <div class="scroll"><table>
+      <tr><th>A</th><th>B</th><th class="o">A&gt;B</th><th class="o">A=B</th><th class="o">A&lt;B</th></tr>
+      <tr><td>0</td><td>0</td><td class="o">0</td><td class="o">1</td><td class="o">0</td></tr>
+      <tr><td>0</td><td>1</td><td class="o">0</td><td class="o">0</td><td class="o">1</td></tr>
+      <tr><td>1</td><td>0</td><td class="o">1</td><td class="o">0</td><td class="o">0</td></tr>
+      <tr><td>1</td><td>1</td><td class="o">0</td><td class="o">1</td><td class="o">0</td></tr>
+    </table></div>
+    <div class="eqb">A&gt;B = A·¬B &nbsp;&nbsp; A=B = ¬(A⊕B) &nbsp;&nbsp; A&lt;B = ¬A·B</div>
+    <p>A je večji od B samo takrat, ko je A = 1 in B = 0. Obratno velja za A&lt;B. Enakost pomeni, da sta bita enaka (00 ali 11). To naredijo vrata <strong>XNOR</strong> (EXNOR): simbol =1 s krožcem na izhodu.</p>
+    <div class="idea"><strong>Ne zamenjaj:</strong> digitalni primerjalnik primerja števila (bite). Analogni primerjalnik, ki je v A/D pretvorniku narejen z operacijskim ojačevalnikom, primerja napetosti. Obe vezji odgovorita na vprašanje »kateri je večji?«, a na različnih signalih.</div>
+    <div class="acts"><button class="btn g2" data-sim="s-komp1">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <div class="card page" id="komp2" data-grp="Teorija">
+    <h2>Primerjalnik: 2 bita</h2>
+    <p class="lead">Dve dvobitni števili, A = A1A0 in B = B1B0, primerjamo tako kot dve dvomestni decimalni števili. Pri 73 in 78 najprej pogledamo desetice (7 = 7), nato enice (3 &lt; 8). Pri dvojiških številih najprej primerjamo <strong>višji bit</strong>, nižji pa odloči samo, če sta višja enaka.</p>
+    <div class="eqb">A=B = (A1=B1)·(A0=B0)</div>
+    <div class="eqb">A&gt;B = (A1&gt;B1) + (A1=B1)·(A0&gt;B0)</div>
+    <div class="eqb">A&lt;B = (A1&lt;B1) + (A1=B1)·(A0&lt;B0)</div>
+    <div class="scroll" id="k2tab"></div>
+    <p class="note">Označene so vrstice z A = B. Pri vsaki od 16 kombinacij je aktiven natanko en izhod.</p>
+    <div class="idea"><strong>Gradimo iz manjšega:</strong> vezje za 2 bita sestavimo iz dveh 1-bitnih primerjalnikov (za višji in nižji bit) in petih dodatnih vrat. Enak postopek vodi do primerjalnika za 4, 8 ali 16 bitov. Čip 7485 primerja 4 bite in ima kaskadne vhode za povezavo več čipov.</div>
+    <div class="acts"><button class="btn g2" data-sim="s-komp2">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <div class="card page" id="primeri" data-grp="Teorija">
+    <h2>Primeri iz resničnega sveta</h2>
+    <div class="grid2">
+      <div class="ex"><strong>Izbira vhoda na televizorju</strong>Gumb »vir« nastavi izbirna vhoda multiplekserja 4→1. Skozi gre samo en signal, drugi so še priključeni.<div class="acts"><button class="btn g2 sm" data-sim="s-mux">Simulacija MUX ›</button></div></div>
+      <div class="ex"><strong>Paralelno v serijsko (UART, SPI)</strong>Osem bitov je hkrati v registru, po kablu pa gredo drug za drugim. Števec vrti izbirne vhode multiplekserja 8→1.<div class="acts"><button class="btn g2 sm" data-sim="s-muxvec">Simulacija pošiljanja ›</button></div></div>
+      <div class="ex"><strong>Vpis v pomnilnik (RAM)</strong>Podatek Din mora priti samo v celico, ki jo izbere naslov. To je demultiplekser, ki podatek usmeri na pravi izhod.<div class="acts"><button class="btn g2 sm" data-sim="s-demux">Simulacija DEMUX ›</button></div></div>
+      <div class="ex"><strong>Tabela LUT v čipu FPGA</strong>Programirljivi čip vsebuje na tisoče multiplekserjev z vpisano pravilnostno tabelo. Z drugačnim vpisom dobi drugo funkcijo.<div class="acts"><button class="btn g2 sm" data-sim="s-muxfn">Simulacija funkcij ›</button></div></div>
+      <div class="ex"><strong>Termostat</strong>Izmerjeno temperaturo (A) primerjamo z nastavljeno (B). Pri A &lt; B vklopimo ogrevanje, pri A &gt; B hlajenje, pri A = B ne naredimo nič.<div class="acts"><button class="btn g2 sm" data-sim="s-komp2">Simulacija primerjalnika ›</button></div></div>
+      <div class="ex"><strong>Kodna ključavnica</strong>Primerjalnik primerja vtipkano kodo s shranjeno. Vrata se odprejo samo pri A = B, zato je pomemben izhod A=B.<div class="acts"><button class="btn g2 sm" data-sim="s-komp2">Simulacija ključavnice ›</button></div></div>
+    </div>
+    <p class="note">Vsi primeri imajo svojo nalogo. Če ti kaj ni jasno, se vrni k simulaciji.</p>
+  </div>
+
+  <!-- ===================== SIMULACIJA ===================== -->
+  <div class="card sim page" id="s-mux" data-grp="Simulacija">
+    <h2>Simulacija: multiplekser 4→1</h2>
+    <p class="note">Nastavi podatkovne vhode I0 do I3 in izbirna vhoda S1, S0. Ozadje označuje izbrano vrstico vezja. Samo ta vrstica lahko pošlje 1 na izhod Y.</p>
+    <div class="pills" id="muxMode"><span class="label">Prikaz</span>
+      <button class="pill" data-m="gen" aria-pressed="true">Splošno</button>
+      <button class="pill" data-m="tv" aria-pressed="false">Televizor</button>
+    </div>
+    <div class="label">Podatkovni vhodi</div>
+    <div class="toggles" id="muxD"></div>
+    <div class="label">Izbirna vhoda</div>
+    <div class="toggles" id="muxS"></div>
+    <div class="fig wide" id="fig-mux"></div>
+    <div class="lamps" id="muxOut"></div>
+    <div class="readout" id="muxRo"></div>
+    <div class="izziv"><p><strong>Izziv:</strong> nastavi I0 = 0, I1 = 1, I2 = 0, I3 = 1. Pri katerih kombinacijah S1S0 je Y = 1?</p><button class="btn g2 sm" data-hint="muxHint">Namig</button></div>
+    <p class="hintbox" id="muxHint" hidden>Y je vedno enak vhodu, ki ga izbere S1S0. Preizkusi vse štiri kombinacije in poglej, pri katerih je izbrani vhod 1.</p>
+  </div>
+
+  <div class="card sim page" id="s-muxfn" data-grp="Simulacija">
+    <h2>Simulacija: MUX kot vrata in funkcija</h2>
+    <div class="pills"><span class="label">Način</span>
+      <button class="pill" data-fm="vrata" aria-pressed="true">Vrata iz MUX 2→1</button>
+      <button class="pill" data-fm="fn" aria-pressed="false">Funkcija 3 spremenljivk (MUX 4→1)</button>
+    </div>
+
+    <div id="fn1">
+      <p class="note">Izberi vrata. Vhodoma multiplekserja se priključi 0, 1, B ali ¬B, izbirni vhod S pa je spremenljivka A. Spreminjaj A in B in preveri, ali multiplekser res dela kot izbrana vrata.</p>
+      <div class="pills" id="fnGate"></div>
+      <div class="toggles" id="fnAB"></div>
+      <div class="fig" id="fig-fn1"></div>
+      <div class="lamps" id="fnOut1"></div>
+      <div class="scroll" id="fnTab1"></div>
+      <div class="izziv"><p><strong>Izziv:</strong> izberi NAND. Kaj je priključeno na I0 in kaj na I1?</p><button class="btn g2 sm" data-hint="fnHint1">Namig</button></div>
+      <p class="hintbox" id="fnHint1" hidden>Pri A = 0 je NAND vedno 1, pri A = 1 pa je enak ¬B.</p>
+    </div>
+
+    <div id="fn2" hidden>
+      <p class="note">Klikni vrednosti funkcije f v tabeli (0 ali 1). Za vsak par AB vezje samo ugotovi, kaj priključiti na vhod multiplekserja: 0, 1, C ali ¬C. Spremeni vhode A, B, C in opazuj izbrano vrstico.</p>
+      <div class="pills" id="fnPre"><span class="label">Primeri</span></div>
+      <div class="toggles" id="fnABC"></div>
+      <div class="fnrow">
+        <div class="scroll" id="fnTab2" style="flex:1 1 300px"></div>
+        <div class="fig" id="fig-fn2" style="flex:1.3 1 340px"></div>
+      </div>
+      <div class="lamps" id="fnOut2"></div>
+      <div class="readout" id="fnRo2"></div>
+      <div class="izziv"><p><strong>Izziv:</strong> izberi primer »XOR treh«. Kaj priključimo na I0 in na I1?</p><button class="btn g2 sm" data-hint="fnHint2">Namig</button></div>
+      <p class="hintbox" id="fnHint2" hidden>Pri AB = 00 je f = C (0, 1). Pri AB = 01 je f = ¬C (1, 0). Glej zadnji stolpec tabele.</p>
+    </div>
+  </div>
+
+  <div class="card sim page" id="s-muxvec" data-grp="Simulacija">
+    <h2>Simulacija: MUX 8→1 iz manjših in serijski prenos</h2>
+    <p class="note">Dva MUX 4→1 in en MUX 2→1 tvorijo MUX 8→1. S1 in S0 vodita oba MUX 4→1, S2 pa izbere zgornjega ali spodnjega. Pritisk na »Takt« pošlje trenutni bit v serijski niz in poveča S za ena.</p>
+    <div class="label">Podatki (vzporedno, I7 do I0)</div>
+    <div class="toggles" id="mvD"></div>
+    <div class="label">Izbirni vhodi S2 S1 S0</div>
+    <div class="toggles" id="mvS"></div>
+    <div class="fig wide" id="fig-muxvec-sim"></div>
+    <div class="label">Serijski niz (prvi poslan je levo)</div>
+    <div class="ser" id="mvSer"></div>
+    <div class="acts">
+      <button class="btn" id="mvTakt">Takt: pošlji bit</button>
+      <button class="btn g2" id="mvAll">Pošlji vseh 8 bitov</button>
+      <button class="btn g2" id="mvClr">Počisti niz</button>
+    </div>
+    <div class="readout" id="mvRo"></div>
+    <div class="izziv"><p><strong>Izziv:</strong> nastavi I7 do I0 = 0 0 1 1 0 1 0 1 in pošlji vseh 8 bitov. Kakšen je serijski niz?</p><button class="btn g2 sm" data-hint="mvHint">Namig</button></div>
+    <p class="hintbox" id="mvHint" hidden>Prvi se pošlje I0, zadnji I7. Podatke torej preberi od desne proti levi: I0 = 0, I1 = 1, I2 = 0, …</p>
+  </div>
+
+  <div class="card sim page" id="s-demux" data-grp="Simulacija">
+    <h2>Simulacija: demultiplekser 1→4</h2>
+    <p class="note">Podatek D gre samo na izbrani izhod. Ostali izhodi so 0.</p>
+    <div class="pills" id="dmMode"><span class="label">Prikaz</span>
+      <button class="pill" data-m="gen" aria-pressed="true">Splošno</button>
+      <button class="pill" data-m="dek" aria-pressed="false">Kot dekodirnik (E)</button>
+      <button class="pill" data-m="ram" aria-pressed="false">Pomnilnik (RAM)</button>
+    </div>
+    <div class="toggles" id="dmIn"></div>
+    <div class="fig" id="fig-demux"></div>
+    <div class="lamps" id="dmOut"></div>
+    <div class="readout" id="dmRo"></div>
+    <div class="izziv"><p><strong>Izziv:</strong> nastavi D = 1 in S1S0 = 10. Kateri izhod sveti? Nato nastavi D = 0. Kaj se zgodi?</p><button class="btn g2 sm" data-hint="dmHint">Namig</button></div>
+    <p class="hintbox" id="dmHint" hidden>S1S0 = 10 je številka 2, zato D gre na Y2. Pri D = 0 ni česa poslati, zato so vsi izhodi 0.</p>
+  </div>
+
+  <div class="card sim page" id="s-komp1" data-grp="Simulacija">
+    <h2>Simulacija: 1-bitni primerjalnik</h2>
+    <p class="note">Nastavi bita A in B. Ozadje označi vrstico vezja, katere izhod je 1. Vedno je aktivna natanko ena vrstica.</p>
+    <div class="toggles" id="k1In"></div>
+    <div class="fig" id="fig-komp1"></div>
+    <div class="lamps" id="k1Out"></div>
+    <div class="izziv"><p><strong>Izziv:</strong> nastavi A in B tako, da bo aktiven izhod A&lt;B.</p><button class="btn g2 sm" data-hint="k1Hint">Namig</button></div>
+    <p class="hintbox" id="k1Hint" hidden>A&lt;B = ¬A·B. Potrebuješ A = 0 in B = 1.</p>
+  </div>
+
+  <div class="card sim page" id="s-komp2" data-grp="Simulacija">
+    <h2>Simulacija: 2-bitni primerjalnik</h2>
+    <p class="note">Primerjata se A = A1A0 in B = B1B0. Dva 1-bitna primerjalnika dasta G (večje), E (enako) in L (manjše) za vsak bit, pet vrat pa iz njih sestavi rezultat. Signali z isto oznako (npr. E1) so povezani.</p>
+    <div class="pills" id="k2Mode"><span class="label">Prikaz</span>
+      <button class="pill" data-m="gen" aria-pressed="true">Splošno</button>
+      <button class="pill" data-m="term" aria-pressed="false">Termostat</button>
+      <button class="pill" data-m="lock" aria-pressed="false">Kodna ključavnica</button>
+    </div>
+    <div class="toggles" id="k2In"></div>
+    <div class="fig wide" id="fig-komp2"></div>
+    <div class="lamps" id="k2Out"></div>
+    <div class="readout" id="k2Ro"></div>
+    <div class="izziv"><p><strong>Izziv:</strong> nastavi A = 01 in B = 00. Kateri izhod sveti in kateri 1-bitni primerjalnik to odloči?</p><button class="btn g2 sm" data-hint="k2Hint">Namig</button></div>
+    <p class="hintbox" id="k2Hint" hidden>Višja bita (A1 = 0, B1 = 0) sta enaka, zato E1 = 1 in odloča nižji bit: A0 = 1, B0 = 0 daje G0 = 1. Zato je A&gt;B.</p>
+  </div>
+
+  <!-- ===================== NALOGE ===================== -->
+  <div class="page" id="naloge" data-grp="Naloge">
+    <div class="sticky">
+      <div class="progress">
+        <span class="label">Napredek</span>
+        <div class="bar"><i id="bar"></i></div>
+        <span id="score" class="m">0 / 0 t</span>
+      </div>
+      <div class="nums" id="nums" aria-label="Številke nalog"></div>
+    </div>
+    <div id="tasks"></div>
+    <div class="card">
+      <p class="note">Napredek se shranjuje v tvojem računu. Če želiš začeti znova, vse naloge in cilje počistiš tukaj.</p>
+      <div id="resetBox"><button class="btn danger sm" id="resetBtn">Ponastavi napredek</button></div>
+    </div>
+  </div>
+
+</main>
+
+<aside id="nav" aria-label="Navigacija po vaji"></aside>
+</div>
+<script>
+/* Naloge 3.3: 18 nalog = 5 lahkih (1 t) + 8 srednjih (2 t) + 5 težkih (3 t) = 36 t.
+   mod: mux | demux | komp   type: mc (izbira odgovora, privzeto) | tt (dopolni tabelo) */
+const TASKS=[
+  /* ---------- lahke ---------- */
+  {lvl:'lahka',mod:'mux',q:'Televizor ima multiplekser 4→1 za izbiro vira: I0 = HDMI 1, I1 = HDMI 2, I2 = AV, I3 = antena. Kakšna naj bo kombinacija S1S0, da na zaslon pride AV?',
+   opts:['00','01','10','11'],ans:2,
+   hint:'AV je vhod I2. Številko 2 zapiši dvojiško.',
+   sol:'AV je vhod I2. Številka 2 je dvojiško 10, zato je S1 = 1 in S0 = 0.'},
+  {lvl:'lahka',mod:'mux',q:'Koliko izbirnih vhodov potrebuje multiplekser 8→1?',
+   opts:['2','3','4','8'],ans:1,
+   hint:'Z n izbirnimi vhodi lahko izbiramo med 2ⁿ vhodi.',
+   sol:'2³ = 8, zato potrebujemo 3 izbirne vhode (S2, S1, S0).'},
+  {lvl:'lahka',mod:'demux',q:'Pri pisanju v pomnilnik RAM mora podatek Din priti samo v eno celico, ki jo izbere naslov. Katero vezje to naredi?',
+   opts:['Multiplekser','Demultiplekser','Primerjalnik','Prioritetni koder'],ans:1,
+   hint:'Podatek z enega vhoda je treba usmeriti na enega od več izhodov.',
+   sol:'En podatkovni vhod, več izhodov in izbirni vhodi (naslov) pomenijo demultiplekser.'},
+  {lvl:'lahka',mod:'komp',q:'1-bitni primerjalnik dobi A = 1 in B = 0. Kateri izhod je aktiven?',
+   opts:['A&gt;B','A=B','A&lt;B','Noben'],ans:0,
+   hint:'Preveri, kateri bit je večji.',
+   sol:'A = 1 je večji od B = 0, zato je aktiven izhod A&gt;B.'},
+  {lvl:'lahka',mod:'komp',q:'Katera logična vrata dajo 1, kadar sta bita A in B enaka?',
+   opts:['IN','ALI','XOR','XNOR'],ans:3,
+   hint:'Iščemo vrata, ki dajo 1 pri 00 in pri 11.',
+   sol:'XNOR (negirani XOR) da 1, kadar sta vhoda enaka. Zato jih uporabimo za izhod A=B.'},
+
+  /* ---------- srednje ---------- */
+  {lvl:'srednja',mod:'mux',q:'Multiplekser 4→1 ima na vhodih I3 I2 I1 I0 = 0110. Pri katerih kombinacijah S1S0 je Y = 1?',
+   opts:['01 in 10','00 in 11','Samo 01','Samo 10'],ans:0,
+   hint:'Zapiši vhode po vrsti: I0 = 0, I1 = 1, I2 = 1, I3 = 0.',
+   sol:'I1 = 1 in I2 = 1. I1 izbere S1S0 = 01, I2 pa S1S0 = 10. Pri 00 in 11 so izbrani vhodi 0.'},
+  {lvl:'srednja',mod:'mux',type:'tt',q:'Dopolni pravilnostno tabelo multiplekserja 2→1 (pri S = 0 je Y = I0, pri S = 1 je Y = I1). Klikaj celice izhoda Y.',
+   ins:['S','I0','I1'],outs:['Y'],fn:r=>[r[0]?r[2]:r[1]],
+   hint:'Pri S = 0 prepiši stolpec I0, pri S = 1 prepiši stolpec I1.',
+   sol:'Y = ¬S·I0 + S·I1. Izhod je 0 0 1 1 0 1 0 1 (od zgornje vrstice navzdol).'},
+  {lvl:'srednja',mod:'mux',q:'Z multiplekserjem 2→1 naredimo vrata IN (Y = A·B). Spremenljivka A je na izbirnem vhodu S, spremenljivka B na vhodu I1. Kaj priključimo na I0?',
+   opts:['0','1','B','¬B'],ans:0,
+   hint:'Pri A = 0 mora biti rezultat vrat IN vedno 0.',
+   sol:'Pri A = 0 je A·B = 0 ne glede na B, zato I0 = 0. Pri A = 1 je A·B = B, zato I1 = B.'},
+  {lvl:'srednja',mod:'demux',q:'Demultiplekser 1→4 ima D = 0 in S1S0 = 10. Kateri izhod je 1?',
+   opts:['Y0','Y1','Y2','Noben'],ans:3,
+   hint:'Kaj demultiplekser pošlje na izbrani izhod, če je podatek D enak 0?',
+   sol:'Izbran je Y2, vanj pride D = 0. Vsi ostali izhodi so tudi 0, zato ni nobenega izhoda z vrednostjo 1.'},
+  {lvl:'srednja',mod:'komp',type:'tt',q:'Dopolni pravilnostno tabelo 1-bitnega primerjalnika. Klikaj celice izhodov.',
+   ins:['A','B'],outs:['A&gt;B','A=B','A&lt;B'],fn:r=>[+(r[0]>r[1]),+(r[0]===r[1]),+(r[0]<r[1])],
+   hint:'V vsaki vrstici je 1 natanko v enem izhodu. Primerjaj A in B.',
+   sol:'A&gt;B = A·¬B, A=B = ¬(A⊕B), A&lt;B = ¬A·B. Pri AB = 00 in 11 je aktiven A=B.'},
+  {lvl:'srednja',mod:'mux',q:'Tabela LUT v čipu FPGA je multiplekser 8→1 z osmimi pomnilniškimi celicami (po ena za vsako vrstico pravilnostne tabele treh spremenljivk). Koliko različnih funkcij treh spremenljivk lahko vpišemo vanjo?',
+   opts:['8','16','64','256'],ans:3,
+   hint:'Vsaka od osmih celic je lahko 0 ali 1. Koliko je vseh kombinacij?',
+   sol:'Osem celic, vsaka 0 ali 1: 2⁸ = 256 različnih funkcij.'},
+  {lvl:'srednja',mod:'komp',q:'Termostat primerja izmerjeno temperaturo A = 10 (stopnja 2) z nastavljeno B = 11 (stopnja 3). Ogrevanje se vklopi, ko je A manjši od B. Kaj velja?',
+   opts:['A&lt;B, ogrevanje je vklopljeno','A&gt;B, ogrevanje je vklopljeno','A=B, ogrevanje je vklopljeno','A&lt;B, ogrevanje je izklopljeno'],ans:0,
+   hint:'Najprej primerjaj višja bita (1 in 1), nato nižja.',
+   sol:'Višja bita sta enaka (1 = 1), zato odloča nižji: A0 = 0 je manjši od B0 = 1. Torej A&lt;B in ogrevanje je vklopljeno.'},
+  {lvl:'srednja',mod:'komp',q:'Kodna ključavnica ima shranjeno kodo B = 10. Vrata se odprejo, ko je izhod A=B enak 1. Pri koliko od štirih možnih vtipkanih kod A (od 00 do 11) se vrata odprejo?',
+   opts:['0','1','2','4'],ans:1,
+   hint:'Izhod A=B je 1 samo, ko sta števili popolnoma enaki.',
+   sol:'A=B je 1 samo pri A = 10. Vrata se torej odprejo pri eni kodi od štirih.'},
+
+  /* ---------- težke ---------- */
+  {lvl:'težka',mod:'mux',q:'Funkcijo f = A ⊕ B ⊕ C realiziramo z multiplekserjem 4→1, kjer je A na S1 in B na S0. Kaj priključimo na vhode I0, I1, I2, I3 (po vrsti)?',
+   opts:['¬C, C, C, ¬C','C, C, ¬C, ¬C','C, ¬C, ¬C, C','0, 1, 1, 0'],ans:2,
+   hint:'Za vsak par AB poglej, kako se f spreminja s C. Za AB = 00 je f = C.',
+   sol:'AB = 00: f = C. AB = 01: f = ¬C. AB = 10: f = ¬C. AB = 11: f = C. Torej I0 = C, I1 = ¬C, I2 = ¬C, I3 = C.'},
+  {lvl:'težka',mod:'mux',q:'MUX 8→1 sestavimo iz dveh MUX 4→1 (zgornji I0 do I3, spodnji I4 do I7) in enega MUX 2→1, ki ga vodi S2. Pri S2S1S0 = 110: kateri MUX 4→1 prispeva signal in kateri vhod pride na izhod Y?',
+   opts:['Zgornji MUX, vhod I2','Spodnji MUX, vhod I6','Spodnji MUX, vhod I4','Spodnji MUX, vhod I5'],ans:1,
+   hint:'S2 = 1 izbere spodnji MUX. Znotraj njega S1S0 = 10 izbere tretji vhod.',
+   sol:'S2 = 1 izbere spodnji MUX 4→1 (vhodi I4 do I7). V njem S1S0 = 10 izbere tretji vhod, to je I6. Cela kombinacija 110 je dvojiško 6, zato Y = I6.'},
+  {lvl:'težka',mod:'mux',q:'Osem bitov I7 … I0 = 10110010 pošiljamo serijsko prek MUX 8→1. Števec S2S1S0 šteje od 000 do 111, na izhodu se najprej pojavi I0. Kakšen je serijski niz (prvi poslan bit je levo)?',
+   opts:['10110010','00101011','01101001','01001101'],ans:3,
+   hint:'Prvi se pošlje I0, zadnji I7. Podatke preberi od desne proti levi.',
+   sol:'I0 = 0, I1 = 1, I2 = 0, I3 = 0, I4 = 1, I5 = 1, I6 = 0, I7 = 1. Niz je 01001101, torej obrnjen podatek.'},
+  {lvl:'težka',mod:'demux',type:'tt',q:'Dopolni pravilnostno tabelo demultiplekserja 1→4 (podatek D, izbirna vhoda S1 S0, izhodi Y3 Y2 Y1 Y0). Klikaj celice izhodov.',
+   ins:['D','S1','S0'],outs:['Y3','Y2','Y1','Y0'],
+   fn:r=>{const k=r[1]*2+r[2];return [3,2,1,0].map(j=>(r[0]&&j===k)?1:0);},
+   hint:'Pri D = 0 so vsi izhodi 0. Pri D = 1 je 1 samo izhod, katerega številka je S1S0.',
+   sol:'D = 0: vsi izhodi 0. D = 1: S1S0 = 00 → Y0, 01 → Y1, 10 → Y2, 11 → Y3.'},
+  {lvl:'težka',mod:'komp',q:'Katera enačba pravilno opisuje izhod A&gt;B dvobitnega primerjalnika (A = A1A0, B = B1B0)?',
+   opts:['A&gt;B = A1·¬B1 + A0·¬B0','A&gt;B = (A1 = B1)·(A0 = B0)','A&gt;B = A1·¬B1 + (A1 = B1)·A0·¬B0','A&gt;B = A1·A0·¬B1·¬B0'],ans:2,
+   hint:'Najprej odloča višji bit. Nižji bit odloča samo, če sta višja bita enaka.',
+   sol:'A je večji, če je večji višji bit (A1·¬B1) ali če sta višja bita enaka in je večji nižji bit ((A1 = B1)·A0·¬B0). Prva možnost ne preveri enakosti, zato bi pri A = 01 in B = 10 napačno dala A&gt;B.'}
+];
+if(typeof module!=='undefined') module.exports=TASKS;
+</script>
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const KEY = 'scnm_lavele_3_3_v1';
+
+  // ---------- shranjen napredek (po potrebi brez localStorage) ----------
+  let S = {t:{}, g:[]};
+  try { const raw = localStorage.getItem(KEY); if(raw){ const o = JSON.parse(raw); if(o && typeof o==='object') S = {t:o.t||{}, g:Array.isArray(o.g)?o.g:[]}; } } catch(e){}
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+
+  // ---------- navigacija: stran za stranjo ----------
+  const PAGES = ['uvod','mux','muxfn','muxvec','demux','komp1','komp2','primeri',
+                 's-mux','s-muxfn','s-muxvec','s-demux','s-komp1','s-komp2','naloge'];
+  const LAB = {
+    uvod:'Uvod in cilji', mux:'Multiplekser', muxfn:'MUX kot vrata', muxvec:'Večji MUX', demux:'Demultiplekser',
+    komp1:'Primerjalnik 1 bit', komp2:'Primerjalnik 2 bita', primeri:'Primeri v praksi',
+    's-mux':'MUX 4→1', 's-muxfn':'MUX kot funkcija', 's-muxvec':'MUX 8→1 in serijski', 's-demux':'DEMUX 1→4',
+    's-komp1':'Primerjalnik 1 bit', 's-komp2':'Primerjalnik 2 bita', naloge:'Naloge'};
+  const CHAPTERS = [
+    {name:'Teorija', ids:PAGES.slice(0,8)},
+    {name:'Simulacija', ids:PAGES.slice(8,14)},
+    {name:'Naloge', ids:['naloge']}
+  ];
+  let chapEls=[], subEls=[], curPage=null;
+  function markNav(id){
+    const gi = CHAPTERS.findIndex(c=>c.ids.includes(id));
+    chapEls.forEach((b,i)=>b.classList.toggle('on', i===gi));
+    subEls.forEach((s,i)=>{ if(s) s.hidden = i!==gi; });
+    document.querySelectorAll('#nav .sb').forEach(b=>b.classList.toggle('on', b.dataset.page===id));
+  }
+  function showPage(id, smooth){
+    if(!PAGES.includes(id)) return;
+    curPage = id;
+    PAGES.forEach(p=>{ const el=$(p); if(el) el.classList.toggle('on', p===id); });
+    markNav(id);
+    try { history.replaceState(null,'','#'+id); } catch(e){}
+    window.scrollTo({top:0, behavior: smooth ? 'smooth' : 'auto'});
+  }
+  PAGES.forEach((id,k)=>{
+    const el=$(id); if(!el) return;
+    const grp = el.dataset.grp || 'Naloge';
+    const crumb=document.createElement('div'); crumb.className='crumb';
+    crumb.innerHTML=`<span>${grp} · ${LAB[id]}</span><span>${k+1} / ${PAGES.length}</span>`;
+    el.prepend(crumb);
+    const pg=document.createElement('div'); pg.className='pager';
+    const prev = k>0 ? `<button class="btn g2" data-go="${PAGES[k-1]}">‹ ${LAB[PAGES[k-1]]}</button>` : '<span></span>';
+    const next = k<PAGES.length-1 ? `<button class="btn" data-go="${PAGES[k+1]}">${LAB[PAGES[k+1]]} ›</button>` : '<span></span>';
+    pg.innerHTML = prev+next;
+    el.appendChild(pg);
+  });
+  document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.go,true)));
+  document.querySelectorAll('[data-sim]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.sim,true)));
+  document.querySelectorAll('[data-hint]').forEach(b=>b.addEventListener('click',()=>{ $(b.dataset.hint).hidden=false; }));
+
+  const navc=document.createElement('div'); navc.className='navc'; $('nav').appendChild(navc);
+  CHAPTERS.forEach((c,ci)=>{
+    const cb=document.createElement('button'); cb.className='chap'; cb.dataset.page=c.ids[0];
+    cb.innerHTML=`<span class="sn">${ci+1}</span><span>${c.name}</span>`;
+    cb.addEventListener('click',()=>showPage(c.ids[0],true));
+    navc.appendChild(cb); chapEls.push(cb);
+    if(c.ids.length>1){
+      const sub=document.createElement('div'); sub.className='subnav'; sub.hidden=true;
+      c.ids.forEach(id=>{
+        const b=document.createElement('button'); b.className='sb'; b.dataset.page=id; b.textContent=LAB[id];
+        b.addEventListener('click',()=>showPage(id,true));
+        sub.appendChild(b);
+      });
+      navc.appendChild(sub); subEls.push(sub);
+    } else subEls.push(null);
+  });
+  window.addEventListener('hashchange',()=>{ const h=location.hash.slice(1); if(PAGES.includes(h) && h!==curPage) showPage(h,false); });
+
+  // ---------- SVG gradniki ----------
+  const ON='var(--on)', OFF='var(--muted)';
+  const W=(pts,v)=>`<polyline points="${pts.map(p=>p[0]+','+p[1]).join(' ')}" fill="none" stroke="${v?ON:OFF}" stroke-width="${v?2.8:1.4}" stroke-linejoin="round" stroke-linecap="round"/>`;
+  const WA=(pts)=>`<polyline points="${pts.map(p=>p[0]+','+p[1]).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>`;
+  const CH=(x,y,t,v,w=34)=>`<rect x="${x}" y="${y}" width="${w}" height="18" rx="9" fill="${v?ON:'var(--card)'}" stroke="${v?ON:OFF}" stroke-width="1.2"/><text x="${x+w/2}" y="${y+13}" text-anchor="middle" style="fill:${v?'var(--on-ink)':'var(--ink)'};font-size:12px;font-weight:700">${t}</text>`;
+  const DOTV=(x,y,v)=>`<circle cx="${x}" cy="${y}" r="3.5" fill="${v?ON:OFF}"/>`;
+  const TX=(x,y,t,a='start',cls='net')=>`<text class="${cls}" x="${x}" y="${y}" text-anchor="${a}">${t}</text>`;
+  const svgWrap=(vb,body,label)=>`<svg viewBox="${vb}" role="img" aria-label="${label}" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
+  // pravokotna IEC vrata; XNOR ima na izhodu krogec kot NOT
+  function G(type,x,y,n){
+    const w=56, h = n===1?30:16*n+12;
+    const sym={AND:'&',OR:'≥1',XOR:'=1',XNOR:'=1',NOT:'1'}[type];
+    const bub = type==='NOT'||type==='XNOR';
+    const pins=[]; for(let i=0;i<n;i++) pins.push([x, y+h*(i+0.5)/n]);
+    const circ = bub ? `<circle class="gate" cx="${x+w+4}" cy="${y+h/2}" r="4"/>` : '';
+    const out=[x+w+(bub?8:0), y+h/2];
+    const s=`<rect class="gate" x="${x}" y="${y}" width="${w}" height="${h}" rx="4"/><text class="sym" x="${x+w/2}" y="${y+h/2+5}" text-anchor="middle">${sym}</text>${circ}`;
+    return {s,pins,out,h};
+  }
+  // blok (MUX, DEMUX, primerjalnik): L/R/B so oznake nožic; Ly/Bx neobvezno določijo položaj
+  function BLK(o){
+    const {x,y,w,h,t,sub} = o, L=o.L||[], R=o.R||[], B=o.B||[];
+    let s=`<rect class="blk" x="${x}" y="${y}" width="${w}" height="${h}" rx="6"/>`;
+    if(o.top) s+=`<text class="blkt" x="${x+w/2}" y="${y+16}" text-anchor="middle">${t}${sub?' '+sub:''}</text>`;
+    else {
+      s+=`<text class="blkt" x="${x+w/2}" y="${y+h/2-(sub?2:-4)}" text-anchor="middle">${t}</text>`;
+      if(sub) s+=`<text class="blks" x="${x+w/2}" y="${y+h/2+13}" text-anchor="middle">${sub}</text>`;
+    }
+    const pins={L:[],R:[],B:[]};
+    L.forEach((l,i)=>{ const py=o.Ly?o.Ly[i]:y+h*(i+0.5)/L.length; pins.L.push([x,py]); s+=`<text class="pin${o.selL===i?' sel':''}" x="${x+6}" y="${py+4}">${l}</text>`; });
+    R.forEach((l,i)=>{ const py=o.Ry?o.Ry[i]:y+h*(i+0.5)/R.length; pins.R.push([x+w,py]); s+=`<text class="pin" x="${x+w-6}" y="${py+4}" text-anchor="end">${l}</text>`; });
+    B.forEach((l,i)=>{ const px=o.Bx?o.Bx[i]:x+w*(i+1)/(B.length+1); pins.B.push([px,y+h]); s+=`<text class="pin" x="${px}" y="${y+h-6}" text-anchor="middle">${l}</text>`; });
+    return {s,pins};
+  }
+  const bit=(v,i)=>(v>>i)&1;
+  function mkToggle(parent,label,onChange,on=false){
+    const b=document.createElement('button'); b.className='tg'; b.textContent=label; b.setAttribute('aria-pressed',on?'true':'false');
+    b.addEventListener('click',()=>onChange(b)); parent.appendChild(b); return b;
+  }
+  const setP=(b,v)=>b.setAttribute('aria-pressed',v?'true':'false');
+  function pillGroup(container,onPick){
+    const bs=[...container.querySelectorAll('.pill')];
+    bs.forEach(b=>b.addEventListener('click',()=>{ bs.forEach(x=>setP(x,x===b)); onPick(b); }));
+    return bs;
+  }
+  const lamp=(label,v,txt)=>`<div class="lamp ${v?'on':''}"><div class="label">${label}</div><div class="b">${txt===undefined?v:txt}</div></div>`;
+
+  // ---------- uvodna slika (tri bloki) ----------
+  (function(){
+    const stub=(pts)=>W(pts,0);
+    const mux=BLK({x:70,y:20,w:100,h:130,t:'MUX',sub:'4 → 1',L:['I0','I1','I2','I3'],R:['Y'],B:['S1','S0']});
+    const dmx=BLK({x:310,y:20,w:100,h:130,t:'DEMUX',sub:'1 → 4',L:['D'],R:['Y0','Y1','Y2','Y3'],B:['S1','S0']});
+    const cmp=BLK({x:550,y:20,w:120,h:130,t:'KOMP',sub:'A ? B',L:['A','B'],R:['A&gt;B','A=B','A&lt;B']});
+    let s=mux.s+dmx.s+cmp.s;
+    [[mux,70,170],[dmx,310,410],[cmp,550,670]].forEach(([b,x0,x1])=>{
+      b.pins.L.forEach(p=>{ s+=stub([[p[0]-28,p[1]],[p[0],p[1]]]); });
+      b.pins.R.forEach(p=>{ s+=stub([[p[0],p[1]],[p[0]+28,p[1]]]); });
+      b.pins.B.forEach(p=>{ s+=stub([[p[0],p[1]],[p[0],p[1]+22]]); });
+    });
+    s+=TX(120,186,'izbere en vhod','middle','lbl')+TX(360,186,'pošlje na en izhod','middle','lbl')+TX(610,186,'primerja števili','middle','lbl');
+    $('fig-uvod').innerHTML=svgWrap('0 0 730 196',s,'Trije sklopi: multiplekser, demultiplekser in primerjalnik');
+  })();
+
+  // ---------- cilji in kartice sklopov ----------
+  const GOALS=[
+    'Poznam princip delovanja multiplekserja, demultiplekserja in primerjalnika.',
+    'Znam sestaviti pravilnostne tabele zanje.',
+    'Znam sestaviti večji multiplekser iz manjših.',
+    'Znam z multiplekserjem realizirati osnovna vrata ali poljubno logično funkcijo.',
+    'Vem, kaj je primerjalnik logičnih vrednosti, in znam primerjati 1-bitni in 2-bitni števili.',
+    'Znam z uporabo simulacije preveriti delovanje vezja.'
+  ];
+  const MODS=[
+    {id:'mux',   n:'01', t:'Multiplekser',      d:'Izbere en vhod izmed več, uporabimo ga tudi kot vrata in za serijski prenos.', first:'mux',   th:3, sim:3},
+    {id:'demux', n:'02', t:'Demultiplekser',    d:'Podatek pošlje na izbrani izhod. Je isto vezje kot dekodirnik z vhodom E.',     first:'demux', th:1, sim:1},
+    {id:'komp',  n:'03', t:'Primerjalnik',      d:'Pove, ali je A večji, enak ali manjši od B. Gradimo ga iz 1-bitnih členov.',    first:'komp1', th:2, sim:2}
+  ];
+  const goalsEl=$('goals');
+  GOALS.forEach((g,i)=>{
+    const lb=document.createElement('label');
+    lb.innerHTML=`<input type="checkbox"> <span>${g}</span>`;
+    const cb=lb.querySelector('input'); cb.checked=!!S.g[i];
+    cb.addEventListener('change',()=>{ S.g[i]=cb.checked; save(); });
+    goalsEl.appendChild(lb);
+  });
+  function taskCount(mod){ return TASKS.filter(t=>t.mod===mod).length; }
+  const modsEl=$('mods');
+  MODS.forEach(m=>{
+    const n=taskCount(m.id);
+    const d=document.createElement('div');
+    d.innerHTML=`<div class="n">${m.n}</div><h4 style="margin:0">${m.t}</h4><p>${m.d}</p>
+      <p class="mut sm">${m.th} ${m.th===1?'stran':(m.th<5?'strani':'strani')} teorije · ${m.sim} ${m.sim===1?'simulacija':(m.sim===2?'simulaciji':'simulacije')} · ${n} nalog</p>
+      <p class="m sm" id="mp-${m.id}"></p>
+      <button class="btn g2 sm" data-first="${m.first}">Odpri sklop ›</button>`;
+    d.querySelector('button').addEventListener('click',()=>showPage(m.first,true));
+    modsEl.appendChild(d);
+  });
+
+  // ---------- teorija: slika večjega multiplekserja ----------
+  function muxVecSVG(d,sv){
+    // d: 8 podatkovnih bitov (I0..I7), sv: [S2,S1,S0]
+    const [S2,S1,S0]=sv, k4=S1*2+S0;
+    const Ya=d[k4], Yb=d[4+k4], Y=S2?Yb:Ya;
+    let s='';
+    const blocks=[{y0:16,off:0,nm:'MUX 4→1',half:'zgornji'},{y0:206,off:4,nm:'MUX 4→1',half:'spodnji'}];
+    const outs=[];
+    blocks.forEach((b,bi)=>{
+      const py=[0,1,2,3].map(i=>b.y0+22+28*i);
+      const bl=BLK({x:130,y:b.y0,w:90,h:140,selL:k4,top:true,t:'MUX',sub:'4→1',L:['I'+b.off,'I'+(b.off+1),'I'+(b.off+2),'I'+(b.off+3)],Ly:py,R:[],B:['S1','S0'],Bx:[155,195]});
+      s+=bl.s;
+      for(let i=0;i<4;i++){
+        const v=d[b.off+i];
+        s+=W([[48,py[i]],[130,py[i]]],v)+CH(14,py[i]-9,'I'+(b.off+i),v);
+      }
+      const yo=b.y0+70, yv=bi===0?Ya:Yb;
+      // izbrana pot v bloku
+      s+=WA([[154,py[k4]],[176,py[k4]],[176,yo],[220,yo]]);
+      s+=DOTV(130,py[k4],1).replace('fill="var(--on)"','fill="var(--accent)"');
+      outs.push({x:220,y:yo,v:yv});
+      // izbirni vhodi pod blokom
+      const cy=b.y0+150;
+      s+=W([[155,b.y0+140],[155,cy]],S1)+CH(138,cy,'S1',S1)+W([[195,b.y0+140],[195,cy]],S0)+CH(178,cy,'S0',S0);
+    });
+    // MUX 2→1
+    const m2=BLK({x:400,y:111,w:70,h:140,selL:S2,top:true,t:'MUX',sub:'2→1',L:['I0','I1'],Ly:[151,191],R:[],B:['S'],Bx:[435]});
+    s+=m2.s;
+    s+=W([[220,outs[0].y],[320,outs[0].y],[320,151],[400,151]],Ya)+CH(244,outs[0].y-9,'Ya',Ya);
+    s+=W([[220,outs[1].y],[320,outs[1].y],[320,191],[400,191]],Yb)+CH(244,outs[1].y-9,'Yb',Yb);
+    s+=WA([[424,S2?191:151],[435,S2?191:151],[435,181],[470,181]]);
+    s+=W([[470,181],[540,181]],Y)+CH(540,172,'Y',Y);
+    s+=W([[435,251],[435,261]],S2)+CH(418,261,'S2',S2);
+    return {svg:svgWrap('0 0 590 392',s,'Multiplekser 8 na 1 iz dveh multiplekserjev 4 na 1 in enega 2 na 1'),Y,Ya,Yb,k4};
+  }
+  $('fig-muxvec').innerHTML = muxVecSVG([0,1,0,0,0,1,1,0],[1,0,1]).svg;
+
+  // ---------- teorija: tabela 2-bitnega primerjalnika ----------
+  (function(){
+    let h='<table><tr><th>A1</th><th>A0</th><th>B1</th><th>B0</th><th>A</th><th>B</th><th class="o">A&gt;B</th><th class="o">A=B</th><th class="o">A&lt;B</th></tr>';
+    for(let a=0;a<4;a++) for(let b=0;b<4;b++){
+      h+=`<tr class="${a===b?'hl':''}"><td>${bit(a,1)}</td><td>${bit(a,0)}</td><td>${bit(b,1)}</td><td>${bit(b,0)}</td><td>${a}</td><td>${b}</td><td class="o">${+(a>b)}</td><td class="o">${+(a===b)}</td><td class="o">${+(a<b)}</td></tr>`;
+    }
+    $('k2tab').innerHTML=h+'</table>';
+  })();
+
+  // ---------- simulacija: MUX 4→1 ----------
+  const mx={d:[0,0,0,0], s:[0,0], mode:'gen'};
+  const TVN=['HDMI 1','HDMI 2','AV','antena'];
+  [0,1,2,3].forEach(i=>mkToggle($('muxD'),'I'+i,b=>{ mx.d[i]^=1; setP(b,mx.d[i]); drawMux(); }));
+  ['S1','S0'].forEach((n,i)=>mkToggle($('muxS'),n,b=>{ mx.s[i]^=1; setP(b,mx.s[i]); drawMux(); }));
+  pillGroup($('muxMode'),b=>{ mx.mode=b.dataset.m; drawMux(); });
+  function drawMux(){
+    const [S1,S0]=mx.s, d=mx.d, k=S1*2+S0, Y=d[k], nS1=1-S1, nS0=1-S0;
+    let s='';
+    const n1=G('NOT',80,14,1), n2=G('NOT',80,64,1);
+    s+=CH(14,20,'S1',S1)+W([[48,29],[80,29]],S1)+n1.s+W([[n1.out[0],29],[150,29]],nS1)+CH(150,20,'¬S1',nS1,36);
+    s+=CH(14,70,'S0',S0)+W([[48,79],[80,79]],S0)+n2.s+W([[n2.out[0],79],[150,79]],nS0)+CH(150,70,'¬S0',nS0,36);
+    s+=TX(14,112,'dekodirnik izbire','start','lbl');
+    const gs=[];
+    for(let j=0;j<4;j++){
+      const y=20+80*j;
+      if(j===k) s+=`<rect class="selband" x="244" y="${y-6}" width="122" height="72" rx="8"/>`;
+      gs.push(y);
+    }
+    const chX=[404,392,392,404];
+    const orG=G('OR',430,132,4);
+    for(let j=0;j<4;j++){
+      const y=gs[j], g=G('AND',300,y,3); s+=g.s;
+      const labs=['I'+j, (j&2)?'S1':'¬S1', (j&1)?'S0':'¬S0'];
+      const vals=[d[j], (j&2)?S1:nS1, (j&1)?S0:nS0];
+      g.pins.forEach((p,i)=>{ s+=CH(250,p[1]-9,labs[i],vals[i])+W([[284,p[1]],[300,p[1]]],vals[i]); });
+      const t=vals[0]&vals[1]&vals[2], py=orG.pins[j][1];
+      s+=W([[g.out[0],g.out[1]],[chX[j],g.out[1]],[chX[j],py],[430,py]],t);
+    }
+    s+=orG.s+W([[orG.out[0],orG.out[1]],[530,orG.out[1]]],Y)+CH(530,orG.out[1]-9,'Y',Y);
+    $('fig-mux').innerHTML=svgWrap('0 0 580 330',s,'Vezje multiplekserja 4 na 1');
+    $('muxOut').innerHTML=lamp('Y',Y)+lamp('izbran vhod',d[k],'I'+k);
+    if(mx.mode==='tv'){
+      $('muxRo').innerHTML=`Gumb »vir« nastavi S1S0 = <span class="m">${S1}${S0}</span> in izbere vir <strong>${TVN[k]}</strong> (vhod I${k}). Vhodi: ${TVN.map((n,i)=>`I${i} = ${n}`).join(', ')}. ${d[k]?'Izbrani vir ima signal, slika se prikaže (Y = 1).':'Izbrani vir nima signala, zaslon ostane črn (Y = 0).'} Ostali viri so še vedno priključeni, a jih zaslon ne vidi.`;
+    } else {
+      $('muxRo').innerHTML=`S1S0 = <span class="m">${S1}${S0}</span> je številka ${k}, zato multiplekser izbere vhod I${k}. Y = I${k} = <strong>${Y}</strong>.`;
+    }
+  }
+  drawMux();
+
+  // ---------- simulacija: MUX kot vrata in funkcija ----------
+  const GATES=[
+    {n:'IN',   i0:'0', i1:'B',  f:(a,b)=>a&b},
+    {n:'ALI',  i0:'B', i1:'1',  f:(a,b)=>a|b},
+    {n:'XOR',  i0:'B', i1:'¬B', f:(a,b)=>a^b},
+    {n:'NAND', i0:'1', i1:'¬B', f:(a,b)=>1-(a&b)},
+    {n:'NOR',  i0:'¬B',i1:'0',  f:(a,b)=>1-(a|b)},
+    {n:'XNOR', i0:'¬B',i1:'B',  f:(a,b)=>1-(a^b)},
+    {n:'NE A', i0:'1', i1:'0',  f:(a,b)=>1-a}
+  ];
+  const srcVal=(sx,B)=> sx==='0'?0 : sx==='1'?1 : sx==='B'?B : 1-B;
+  const f1={g:0,A:0,B:0};
+  GATES.forEach((g,i)=>{ const b=document.createElement('button'); b.className='pill'; b.textContent=g.n; setP(b,i===0); b.addEventListener('click',()=>{ f1.g=i; [...$('fnGate').children].forEach((c,j)=>setP(c,j===i)); drawFn1(); }); $('fnGate').appendChild(b); });
+  mkToggle($('fnAB'),'A',b=>{ f1.A^=1; setP(b,f1.A); drawFn1(); });
+  mkToggle($('fnAB'),'B',b=>{ f1.B^=1; setP(b,f1.B); drawFn1(); });
+  function drawFn1(){
+    const g=GATES[f1.g], {A,B}=f1;
+    const v0=srcVal(g.i0,B), v1=srcVal(g.i1,B), Y=A?v1:v0, ref=g.f(A,B);
+    const bl=BLK({x:230,y:30,w:100,h:130,selL:A,top:true,t:'MUX',sub:'2→1',L:['I0','I1'],R:[],B:['S']});
+    let s=bl.s;
+    const pl=bl.pins.L;
+    s+=W([[160,pl[0][1]],[230,pl[0][1]]],v0)+CH(112,pl[0][1]-9,g.i0,v0,48)+TX(14,pl[0][1]+4,'priključimo','start','lbl');
+    s+=W([[160,pl[1][1]],[230,pl[1][1]]],v1)+CH(112,pl[1][1]-9,g.i1,v1,48);
+    const sb=bl.pins.B[0];
+    s+=W([[sb[0],sb[1]],[sb[0],190]],A)+CH(sb[0]-17,190,'A',A)+TX(sb[0]+24,203,'= izbirni vhod S','start','lbl');
+    // izbrana pot
+    const sy=A?pl[1][1]:pl[0][1];
+    s+=WA([[254,sy],[282,sy],[282,95],[330,95]]);
+    s+=W([[330,95],[400,95]],Y)+CH(400,86,'Y',Y);
+    $('fig-fn1').innerHTML=svgWrap('0 0 460 220',s,'Multiplekser 2 na 1 kot logična vrata '+g.n);
+    $('fnOut1').innerHTML=lamp('Y (MUX)',Y)+lamp('vrata '+g.n,ref);
+    let h='<table><tr><th>A</th><th>B</th><th class="o">Y</th><th>izbran vhod</th></tr>';
+    for(let a=0;a<2;a++) for(let b=0;b<2;b++){
+      const y=g.f(a,b), sel=a?g.i1:g.i0;
+      h+=`<tr class="${a===A&&b===B?'cur':''}"><td>${a}</td><td>${b}</td><td class="o">${y}</td><td>I${a} = ${sel}</td></tr>`;
+    }
+    $('fnTab1').innerHTML=h+'</table>';
+    $('fnTab1').insertAdjacentHTML('beforeend',`<p class="note">Y = ¬A·I0 + A·I1 = ¬A·${g.i0} + A·${g.i1}. ${Y===ref?'Multiplekser da enak rezultat kot vrata '+g.n+'.':''}</p>`);
+  }
+  drawFn1();
+
+  const PRE={'Večina':[0,0,0,1,0,1,1,1],'XOR treh':[0,1,1,0,1,0,0,1],'A·B + C':[0,1,0,1,0,1,1,1],'Izprazni':[0,0,0,0,0,0,0,0]};
+  const f2={f:PRE['Večina'].slice(),A:0,B:0,C:0};
+  Object.keys(PRE).forEach(k=>{ const b=document.createElement('button'); b.className='pill'; b.textContent=k; b.setAttribute('aria-pressed','false'); b.addEventListener('click',()=>{ f2.f=PRE[k].slice(); drawFn2(); }); $('fnPre').appendChild(b); });
+  ['A','B','C'].forEach(n=>mkToggle($('fnABC'),n,b=>{ f2[n]^=1; setP(b,f2[n]); drawFn2(); }));
+  const pairSrc=(f,p)=>{ const a=f[p*2], b=f[p*2+1]; return a===b ? String(a) : (a===0?'C':'¬C'); };
+  function drawFn2(){
+    const {A,B,C}=f2, idx=A*4+B*2+C, cp=A*2+B;
+    const src=[0,1,2,3].map(p=>pairSrc(f2.f,p));
+    const sv=sx=> sx==='0'?0 : sx==='1'?1 : sx==='C'?C : 1-C;
+    const Y=sv(src[cp]);
+    // tabela
+    let h='<table><tr><th>A</th><th>B</th><th>C</th><th class="o">f</th><th>vhod</th></tr>';
+    for(let r=0;r<8;r++){
+      const p=r>>1;
+      h+=`<tr class="${r===idx?'cur':''}"><td>${bit(r,2)}</td><td>${bit(r,1)}</td><td>${bit(r,0)}</td><td class="o"><button class="cell ${f2.f[r]?'one':''}" data-r="${r}" aria-label="f pri vrstici ${r}">${f2.f[r]}</button></td>`;
+      if(r%2===0) h+=`<td rowspan="2" style="${p===cp?'background:var(--sigbg);font-weight:700':''}">I${p} = ${src[p]}</td>`;
+      h+='</tr>';
+    }
+    $('fnTab2').innerHTML=h+'</table>';
+    $('fnTab2').querySelectorAll('.cell').forEach(c=>c.addEventListener('click',()=>{ const r=+c.dataset.r; f2.f[r]^=1; drawFn2(); }));
+    // slika
+    const bl=BLK({x:170,y:20,w:110,h:170,selL:cp,top:true,t:'MUX',sub:'4→1',L:['I0','I1','I2','I3'],R:[],B:['S1','S0'],Bx:[200,250]});
+    let s=bl.s;
+    bl.pins.L.forEach((p,i)=>{ const v=sv(src[i]); s+=W([[134,p[1]],[170,p[1]]],v)+CH(98,p[1]-9,src[i],v,36); });
+    const py=bl.pins.L[cp][1];
+    s+=WA([[194,py],[225,py],[225,105],[280,105]]);
+    s+=W([[280,105],[340,105]],Y)+CH(340,96,'Y',Y);
+    s+=W([[200,190],[200,214]],A)+CH(183,214,'A',A)+W([[250,190],[250,214]],B)+CH(233,214,'B',B);
+    s+=TX(14,py+4,'priključimo','start','lbl');
+    $('fig-fn2').innerHTML=svgWrap('0 0 390 250',s,'Multiplekser 4 na 1, ki realizira funkcijo treh spremenljivk');
+    $('fnOut2').innerHTML=lamp('Y (MUX)',Y)+lamp('f iz tabele',f2.f[idx]);
+    $('fnRo2').innerHTML=`ABC = <span class="m">${A}${B}${C}</span>. AB = ${A}${B} izbere vhod I${cp} (priključen je ${src[cp]}), zato je Y = <strong>${Y}</strong>. ${Y===f2.f[idx]?'Enako kot v tabeli.':'Ne ujema se s tabelo.'}`;
+    [...$('fnPre').querySelectorAll('.pill')].forEach(b=>setP(b, PRE[b.textContent] && PRE[b.textContent].join('')===f2.f.join('')));
+  }
+  drawFn2();
+  const fm=$('fn1').parentElement.querySelectorAll('[data-fm]');
+  fm.forEach(b=>b.addEventListener('click',()=>{ fm.forEach(x=>setP(x,x===b)); $('fn1').hidden=b.dataset.fm!=='vrata'; $('fn2').hidden=b.dataset.fm!=='fn'; }));
+
+  // ---------- simulacija: MUX 8→1 in serijski prenos ----------
+  const mv={d:[0,0,0,0,0,0,0,0], s:[0,0,0], ser:[null,null,null,null,null,null,null,null]};
+  const mvDbt=[], mvSbt=[];
+  for(let i=7;i>=0;i--) mvDbt[i]=mkToggle($('mvD'),'I'+i,b=>{ mv.d[i]^=1; setP(b,mv.d[i]); drawMv(); });
+  ['S2','S1','S0'].forEach((n,i)=>{ mvSbt[i]=mkToggle($('mvS'),n,b=>{ mv.s[i]^=1; setP(b,mv.s[i]); drawMv(); }); });
+  const sIdx=()=>mv.s[0]*4+mv.s[1]*2+mv.s[2];
+  function setS(k){ mv.s=[bit(k,2),bit(k,1),bit(k,0)]; mv.s.forEach((v,i)=>setP(mvSbt[i],v)); }
+  function drawMv(){
+    const r=muxVecSVG(mv.d,mv.s), k=sIdx();
+    $('fig-muxvec-sim').innerHTML=r.svg;
+    $('mvSer').innerHTML=mv.ser.map((v,i)=>`<div class="${v===1?'on':''} ${i===k?'cur':''}"><b>${v===null?'–':v}</b><span>t${i}</span></div>`).join('');
+    $('mvRo').innerHTML=`S2S1S0 = <span class="m">${mv.s.join('')}</span> je številka ${k}. MUX 4→1 prepustita vhod ${k%4} (Ya = I${k%4} = ${r.Ya}, Yb = I${4+k%4} = ${r.Yb}), S2 = ${mv.s[0]} izbere ${mv.s[0]?'spodnjega':'zgornjega'}, zato je Y = I${k} = <strong>${r.Y}</strong>. Serijski niz: <span class="m">${mv.ser.map(v=>v===null?'·':v).join('')}</span>`;
+  }
+  $('mvTakt').addEventListener('click',()=>{ const k=sIdx(); mv.ser[k]=mv.d[k]; setS((k+1)%8); drawMv(); });
+  $('mvAll').addEventListener('click',()=>{ mv.ser=mv.d.slice(); setS(0); drawMv(); });
+  $('mvClr').addEventListener('click',()=>{ mv.ser=[null,null,null,null,null,null,null,null]; setS(0); drawMv(); });
+  drawMv();
+
+  // ---------- simulacija: DEMUX 1→4 ----------
+  const dm={D:0, s:[0,0], mode:'gen'};
+  const DMODE={gen:{d:'D',y:['Y0','Y1','Y2','Y3']}, dek:{d:'E',y:['Y0','Y1','Y2','Y3']}, ram:{d:'Din',y:['c0','c1','c2','c3']}};
+  const dmDbt=mkToggle($('dmIn'),'D',b=>{ dm.D^=1; setP(b,dm.D); drawDm(); });
+  ['S1','S0'].forEach((n,i)=>mkToggle($('dmIn'),n,b=>{ dm.s[i]^=1; setP(b,dm.s[i]); drawDm(); }));
+  pillGroup($('dmMode'),b=>{ dm.mode=b.dataset.m; dmDbt.textContent=DMODE[dm.mode].d; drawDm(); });
+  function drawDm(){
+    const {D}=dm, [S1,S0]=dm.s, k=S1*2+S0, nS1=1-S1, nS0=1-S0, M=DMODE[dm.mode];
+    const n1=G('NOT',100,110,1), n2=G('NOT',100,190,1);
+    let s='';
+    s+=CH(14,40,M.d,D,M.d.length>1?40:34)+TX(64,52,'podatek','start','lbl');
+    s+=CH(14,116,'S1',S1)+W([[48,125],[100,125]],S1)+n1.s+W([[n1.out[0],125],[170,125]],nS1)+CH(170,116,'¬S1',nS1,36);
+    s+=CH(14,196,'S0',S0)+W([[48,205],[100,205]],S0)+n2.s+W([[n2.out[0],205],[170,205]],nS0)+CH(170,196,'¬S0',nS0,36);
+    const outs=[];
+    for(let j=0;j<4;j++){
+      const y=20+80*j;
+      if(j===k) s+=`<rect class="selband" x="244" y="${y-6}" width="170" height="72" rx="8"/>`;
+      const g=G('AND',300,y,3); s+=g.s;
+      const labs=[M.d,(j&2)?'S1':'¬S1',(j&1)?'S0':'¬S0'];
+      const vals=[D,(j&2)?S1:nS1,(j&1)?S0:nS0];
+      g.pins.forEach((p,i)=>{ const w=(i===0&&M.d.length>2)?40:34; s+=CH(284-w,p[1]-9,labs[i],vals[i],w)+W([[284,p[1]],[300,p[1]]],vals[i]); });
+      const t=vals[0]&vals[1]&vals[2]; outs.push(t);
+      s+=W([[g.out[0],g.out[1]],[366,g.out[1]]],t)+CH(366,g.out[1]-9,M.y[j],t);
+    }
+    $('fig-demux').innerHTML=svgWrap('0 0 430 340',s,'Vezje demultiplekserja 1 na 4');
+    $('dmOut').innerHTML=outs.map((v,j)=>lamp(M.y[j],v)).join('');
+    let msg=`S1S0 = <span class="m">${S1}${S0}</span> izbere izhod ${M.y[k]}. ${D?`Podatek ${M.d} = 1 pride na ${M.y[k]}, ostali izhodi so 0.`:`Podatek ${M.d} = 0, zato so vsi izhodi 0.`}`;
+    if(dm.mode==='dek') msg+=' Če podatek imenujemo E (enable), je to dekodirnik 2→4 iz prejšnje vaje: aktiven je izhod, katerega številka je enaka AB, pri E = 0 pa noben.';
+    if(dm.mode==='ram') msg+=' V pomnilniku demultiplekser usmeri bit za vpis samo v izbrano celico (naslov S1S0). Ostale celice podatka ne dobijo.';
+    $('dmRo').innerHTML=msg;
+  }
+  drawDm();
+
+  // ---------- simulacija: 1-bitni primerjalnik ----------
+  const k1={A:0,B:0};
+  ['A','B'].forEach(n=>mkToggle($('k1In'),n,b=>{ k1[n]^=1; setP(b,k1[n]); drawK1(); }));
+  function drawK1(){
+    const {A,B}=k1, nA=1-A, nB=1-B;
+    const gt=A&nB, eq=1-(A^B), lt=nA&B;
+    const n1=G('NOT',90,34,1), n2=G('NOT',90,105,1);
+    let s='';
+    s+=CH(14,40,'A',A)+W([[48,49],[90,49]],A)+n1.s+W([[n1.out[0],49],[162,49]],nA)+CH(162,40,'¬A',nA,36);
+    s+=CH(14,111,'B',B)+W([[48,120],[90,120]],B)+n2.s+W([[n2.out[0],120],[162,120]],nB)+CH(162,111,'¬B',nB,36);
+    const rows=[{y:20,t:'AND',l:['A','¬B'],v:[A,nB],o:gt,n:'A&gt;B'},{y:90,t:'XNOR',l:['A','B'],v:[A,B],o:eq,n:'A=B'},{y:160,t:'AND',l:['¬A','B'],v:[nA,B],o:lt,n:'A&lt;B'}];
+    rows.forEach(r=>{
+      if(r.o) s+=`<rect class="selband" x="244" y="${r.y-6}" width="212" height="56" rx="8"/>`;
+      const g=G(r.t,300,r.y,2); s+=g.s;
+      g.pins.forEach((p,i)=>{ s+=CH(250,p[1]-9,r.l[i],r.v[i])+W([[284,p[1]],[300,p[1]]],r.v[i]); });
+      s+=W([[g.out[0],g.out[1]],[390,g.out[1]]],r.o)+CH(390,g.out[1]-9,r.n,r.o,54);
+    });
+    $('fig-komp1').innerHTML=svgWrap('0 0 460 222',s,'Vezje 1-bitnega primerjalnika');
+    $('k1Out').innerHTML=lamp('A&gt;B',gt)+lamp('A=B',eq)+lamp('A&lt;B',lt);
+  }
+  drawK1();
+
+  // ---------- simulacija: 2-bitni primerjalnik ----------
+  const k2={a:[0,0], b:[0,0], mode:'gen'};
+  [['A1','a',0],['A0','a',1],['B1','b',0],['B0','b',1]].forEach(([n,w,i])=>mkToggle($('k2In'),n,btn=>{ k2[w][i]^=1; setP(btn,k2[w][i]); drawK2(); }));
+  pillGroup($('k2Mode'),b=>{ k2.mode=b.dataset.m; drawK2(); });
+  function drawK2(){
+    const [A1,A0]=k2.a, [B1,B0]=k2.b;
+    const c1={G:A1&(1-B1), E:1-(A1^B1), L:(1-A1)&B1};
+    const c0={G:A0&(1-B0), E:1-(A0^B0), L:(1-A0)&B0};
+    const t1=c1.E&c0.G, gt=c1.G|t1;
+    const eq=c1.E&c0.E;
+    const t3=c1.E&c0.L, lt=c1.L|t3;
+    let s='';
+    const bH=BLK({x:90,y:16,w:104,h:96,t:'KOMP 1b',sub:'višji bit',L:['A','B'],R:['G','E','L']});
+    const bL=BLK({x:90,y:140,w:104,h:96,t:'KOMP 1b',sub:'nižji bit',L:['A','B'],R:['G','E','L']});
+    s+=bH.s+bL.s;
+    s+=CH(14,bH.pins.L[0][1]-9,'A1',A1)+W([[48,bH.pins.L[0][1]],[90,bH.pins.L[0][1]]],A1);
+    s+=CH(14,bH.pins.L[1][1]-9,'B1',B1)+W([[48,bH.pins.L[1][1]],[90,bH.pins.L[1][1]]],B1);
+    s+=CH(14,bL.pins.L[0][1]-9,'A0',A0)+W([[48,bL.pins.L[0][1]],[90,bL.pins.L[0][1]]],A0);
+    s+=CH(14,bL.pins.L[1][1]-9,'B0',B0)+W([[48,bL.pins.L[1][1]],[90,bL.pins.L[1][1]]],B0);
+    [[bH,c1,'1'],[bL,c0,'0']].forEach(([b,c,n])=>{
+      ['G','E','L'].forEach((nm,i)=>{ const p=b.pins.R[i]; s+=W([[p[0],p[1]],[204,p[1]]],c[nm])+CH(204,p[1]-9,nm+n,c[nm]); });
+    });
+    // izbrana vrstica
+    const res=[gt,eq,lt], tops=[8,106,188];
+    res.forEach((v,i)=>{ if(v) s+=`<rect class="selband" x="284" y="${tops[i]}" width="322" height="64" rx="8"/>`; });
+    // GT: G1 + E1·G0
+    const aG=G('AND',340,22,2), oG=G('OR',440,11,2);
+    s+=aG.s+oG.s;
+    s+=CH(290,aG.pins[0][1]-9,'E1',c1.E)+W([[324,aG.pins[0][1]],[340,aG.pins[0][1]]],c1.E);
+    s+=CH(290,aG.pins[1][1]-9,'G0',c0.G)+W([[324,aG.pins[1][1]],[340,aG.pins[1][1]]],c0.G);
+    s+=W([[aG.out[0],aG.out[1]],[440,oG.pins[1][1]]],t1);
+    s+=CH(398,oG.pins[0][1]-9,'G1',c1.G)+W([[432,oG.pins[0][1]],[440,oG.pins[0][1]]],c1.G);
+    s+=W([[oG.out[0],oG.out[1]],[540,oG.out[1]]],gt)+CH(540,oG.out[1]-9,'A&gt;B',gt,60);
+    // EQ: E1·E0
+    const aE=G('AND',340,112,2); s+=aE.s;
+    s+=CH(290,aE.pins[0][1]-9,'E1',c1.E)+W([[324,aE.pins[0][1]],[340,aE.pins[0][1]]],c1.E);
+    s+=CH(290,aE.pins[1][1]-9,'E0',c0.E)+W([[324,aE.pins[1][1]],[340,aE.pins[1][1]]],c0.E);
+    s+=W([[aE.out[0],aE.out[1]],[540,aE.out[1]]],eq)+CH(540,aE.out[1]-9,'A=B',eq,60);
+    // LT: L1 + E1·L0
+    const aL=G('AND',340,202,2), oL=G('OR',440,191,2);
+    s+=aL.s+oL.s;
+    s+=CH(290,aL.pins[0][1]-9,'E1',c1.E)+W([[324,aL.pins[0][1]],[340,aL.pins[0][1]]],c1.E);
+    s+=CH(290,aL.pins[1][1]-9,'L0',c0.L)+W([[324,aL.pins[1][1]],[340,aL.pins[1][1]]],c0.L);
+    s+=W([[aL.out[0],aL.out[1]],[440,oL.pins[1][1]]],t3);
+    s+=CH(398,oL.pins[0][1]-9,'L1',c1.L)+W([[432,oL.pins[0][1]],[440,oL.pins[0][1]]],c1.L);
+    s+=W([[oL.out[0],oL.out[1]],[540,oL.out[1]]],lt)+CH(540,oL.out[1]-9,'A&lt;B',lt,60);
+    $('fig-komp2').innerHTML=svgWrap('0 0 640 262',s,'Vezje 2-bitnega primerjalnika iz dveh 1-bitnih');
+    const a=A1*2+A0, b=B1*2+B0;
+    let lamps, ro;
+    if(k2.mode==='term'){
+      lamps=lamp('ogrevanje',lt)+lamp('hlajenje',gt)+lamp('miruje',eq);
+      ro=`Izmerjena stopnja A = <strong>${a}</strong>, nastavljena stopnja B = <strong>${b}</strong>. ${lt?'A&lt;B: ogrevanje je vklopljeno.':(gt?'A&gt;B: vklopi se hlajenje.':'A=B: temperatura je ustrezna, termostat miruje.')}`;
+    } else if(k2.mode==='lock'){
+      lamps=lamp('odprto',eq)+lamp('zaklenjeno',1-eq);
+      ro=`Vtipkana koda A = <span class="m">${A1}${A0}</span>, shranjena koda B = <span class="m">${B1}${B0}</span>. ${eq?'A=B: ključavnica se odpre.':'Kodi se ne ujemata, ključavnica ostane zaklenjena.'}`;
+    } else {
+      lamps=lamp('A&gt;B',gt)+lamp('A=B',eq)+lamp('A&lt;B',lt);
+      const why = c1.E ? `Višja bita sta enaka (E1 = 1), zato odloča nižji bit.` : `Višja bita se razlikujeta, zato nižji bit ni pomemben.`;
+      ro=`A = ${a}, B = ${b}. ${why}`;
+    }
+    $('k2Out').innerHTML=lamps; $('k2Ro').innerHTML=ro;
+  }
+  drawK2();
+
+  // ---------- naloge ----------
+  const LEVEL_PTS={lahka:1,srednja:2,'težka':3};
+  const LVL_CLASS={lahka:'l1',srednja:'l2','težka':'l3'};
+  const fmtPts=x=>String(Math.round(x*10)/10).replace('.',',');
+  const maxScore=TASKS.reduce((a,t)=>a+LEVEL_PTS[t.lvl],0);
+  const list=$('tasks'), nums=$('nums');
+  const MODN={mux:'Multiplekser',demux:'Demultiplekser',komp:'Primerjalnik'};
+  const tstate=i=>S.t[i]||(S.t[i]={d:false,p:0,h:false,sol:false,sel:null,c:null});
+  function ttRows(t){ const n=t.ins.length, rows=[]; for(let r=0;r<(1<<n);r++){ const ins=[]; for(let b=n-1;b>=0;b--) ins.push((r>>b)&1); rows.push(ins); } return rows; }
+  function ttHtml(t,i){
+    const rows=ttRows(t);
+    let h='<div class="scroll"><table class="ttask"><tr>'+t.ins.map(n=>`<th>${n}</th>`).join('')+t.outs.map(n=>`<th class="o">${n}</th>`).join('')+'</tr>';
+    rows.forEach((ins,r)=>{
+      h+='<tr>'+ins.map(v=>`<td>${v}</td>`).join('')+t.outs.map((n,j)=>`<td class="o"><button class="cell un" data-r="${r}" data-j="${j}" aria-label="${n} v vrstici ${r+1}">?</button></td>`).join('')+'</tr>';
+    });
+    return h+'</table></div>';
+  }
+  function cellSet(btn,v){
+    btn.classList.toggle('un',v===null); btn.classList.toggle('one',v===1);
+    btn.textContent=v===null?'?':v;
+  }
+  function buildTasks(){
+    list.innerHTML=''; nums.innerHTML='';
+    TASKS.forEach((t,i)=>{
+      const nb=document.createElement('button'); nb.textContent=i+1; nb.setAttribute('aria-label','Naloga '+(i+1));
+      nb.addEventListener('click',()=>{ $('t'+i).scrollIntoView({behavior:'smooth',block:'start'}); });
+      nums.appendChild(nb);
+      const card=document.createElement('div'); card.className='card task'; card.id='t'+i;
+      const pts=LEVEL_PTS[t.lvl], isTT=t.type==='tt';
+      card.innerHTML=`
+        <div class="crumb"><span>Naloga ${i+1} od ${TASKS.length} · ${MODN[t.mod]}</span><span class="lv"><span class="lvt ${LVL_CLASS[t.lvl]}">${t.lvl} · ${pts} t</span></span></div>
+        <p class="qt">${t.q}</p>
+        ${isTT?ttHtml(t,i):`<div class="opts">${t.opts.map((o,j)=>`<label class="opt"><input type="radio" name="t${i}" value="${j}"> <span>${o}</span></label>`).join('')}</div>`}
+        <div class="acts">
+          <button class="btn" data-act="check">Preveri</button>
+          <button class="btn g2" data-act="hint">Namig (−50 % točk)</button>
+          <button class="btn g2" data-act="sol">Rešitev (0 t, zaklene)</button>
+        </div>
+        <div class="fb" aria-live="polite"></div>
+        <div class="hn" hidden>${t.hint}</div>
+        <div class="slb" hidden>${t.sol}</div>`;
+      list.appendChild(card);
+      restoreCard(card,i);
+    });
+  }
+  function lockCard(card){
+    card.querySelectorAll('input[type=radio]').forEach(r=>r.disabled=true);
+    card.querySelectorAll('.cell').forEach(c=>c.disabled=true);
+    card.querySelector('[data-act="check"]').disabled=true;
+    card.querySelector('[data-act="hint"]').disabled=true;
+  }
+  function restoreCard(card,i){
+    const t=TASKS[i], st=S.t[i]; if(!st) return;
+    const pts=LEVEL_PTS[t.lvl], fb=card.querySelector('.fb');
+    if(t.type==='tt'){
+      const rows=ttRows(t);
+      if(st.c) card.querySelectorAll('.cell').forEach(c=>{ const v=st.c[+c.dataset.r*t.outs.length+ +c.dataset.j]; cellSet(c,v===undefined?null:v); });
+      if(st.d && !st.sol) card.querySelectorAll('.cell').forEach(c=>{ const exp=t.fn(rows[+c.dataset.r])[+c.dataset.j]; if(+c.textContent!==exp) c.classList.add('bad'); });
+      if(st.sol) card.querySelectorAll('.cell').forEach(c=>{ cellSet(c,t.fn(rows[+c.dataset.r])[+c.dataset.j]); });
+    } else if(st.sel!==null && st.sel!==undefined){
+      const r=card.querySelector(`input[value="${st.sel}"]`); if(r) r.checked=true;
+    }
+    if(st.h){ card.querySelector('.hn').hidden=false; card.querySelector('[data-act="hint"]').disabled=true; }
+    if(st.sol||st.v) card.querySelector('.slb').hidden=false;
+    if(st.d){
+      lockCard(card);
+      if(st.sol){ fb.className='fb bad'; fb.textContent='Rešitev prikazana: 0 točk. Naloga je zaklenjena.'; }
+      else { const ok=st.p>0; fb.className='fb '+(ok?'ok':'bad'); fb.textContent=(ok?'Pravilno':'Ni pravilno')+': dobiš '+fmtPts(st.p)+' od '+pts+' t. Odgovor je zaklenjen.'; }
+    } else if(st.h){ fb.className='fb'; fb.textContent='Namig je odbil 50 % točk te naloge.'; }
+  }
+  list.addEventListener('click',e=>{
+    // klik na celico tabele
+    const cell=e.target.closest('.cell');
+    if(cell && !cell.disabled){
+      const card=cell.closest('.task'), i=+card.id.slice(1), t=TASKS[i], st=tstate(i);
+      if(st.d) return;
+      const cur=cell.classList.contains('un')?null:+cell.textContent;
+      const nv=cur===null?0:1-cur; cellSet(cell,nv);
+      st.c=st.c||Array(ttRows(t).length*t.outs.length).fill(null);
+      st.c[+cell.dataset.r*t.outs.length+ +cell.dataset.j]=nv; save();
+      return;
+    }
+    const btn=e.target.closest('button[data-act]'); if(!btn) return;
+    const card=btn.closest('.task'); const i=+card.id.slice(1); const t=TASKS[i]; const st=tstate(i);
+    const fb=card.querySelector('.fb'), pts=LEVEL_PTS[t.lvl], isTT=t.type==='tt';
+    if(btn.dataset.act==='sol'){
+      if(st.d){ card.querySelector('.slb').hidden=false; st.v=true; save(); return; }
+      card.querySelector('.slb').hidden=false;
+      if(isTT){ const rows=ttRows(t); card.querySelectorAll('.cell').forEach(c=>cellSet(c,t.fn(rows[+c.dataset.r])[+c.dataset.j])); }
+      st.d=true; st.p=0; st.sol=true; lockCard(card);
+      fb.className='fb bad'; fb.textContent='Rešitev prikazana: 0 točk. Naloga je zaklenjena.';
+      save(); refresh(); return;
+    }
+    if(st.d) return;
+    if(btn.dataset.act==='hint'){
+      st.h=true; card.querySelector('.hn').hidden=false; btn.disabled=true;
+      fb.className='fb'; fb.textContent='Namig je odbil 50 % točk te naloge.'; save(); refresh(); return;
+    }
+    if(btn.dataset.act==='check'){
+      let ok;
+      if(isTT){
+        const rows=ttRows(t), cells=[...card.querySelectorAll('.cell')];
+        if(cells.some(c=>c.classList.contains('un'))){ fb.className='fb bad'; fb.textContent='Najprej dopolni vse celice izhodov.'; return; }
+        ok=true;
+        cells.forEach(c=>{ const exp=t.fn(rows[+c.dataset.r])[+c.dataset.j]; if(+c.textContent!==exp){ ok=false; c.classList.add('bad'); } });
+      } else {
+        const sel=card.querySelector('input:checked');
+        if(!sel){ fb.className='fb bad'; fb.textContent='Najprej izberi odgovor.'; return; }
+        st.sel=+sel.value; ok=st.sel===t.ans;
+      }
+      st.p = ok ? (st.h ? pts/2 : pts) : 0;
+      st.d=true; lockCard(card);
+      fb.className='fb '+(ok?'ok':'bad');
+      fb.textContent=(ok?'Pravilno':'Ni pravilno')+': dobiš '+fmtPts(st.p)+' od '+pts+' t. Odgovor je zaklenjen.';
+      save(); refresh();
+    }
+  });
+  function refresh(){
+    const doneCount=TASKS.reduce((a,t,i)=>a+((S.t[i]&&S.t[i].d)?1:0),0);
+    const got=TASKS.reduce((a,t,i)=>a+((S.t[i]&&S.t[i].d)?S.t[i].p:0),0);
+    const pct=doneCount/TASKS.length*100;
+    $('bar').style.width=pct+'%';
+    $('score').textContent=fmtPts(got)+' / '+maxScore+' t · '+doneCount+'/'+TASKS.length;
+    $('sc').textContent=fmtPts(got); $('mx').textContent=maxScore; $('pc').textContent=doneCount+'/'+TASKS.length+' nalog';
+    $('bf').style.width=pct+'%';
+    [...nums.children].forEach((b,i)=>{ const st=S.t[i]; b.classList.toggle('done',!!(st&&st.d&&st.p>0)); b.classList.toggle('zero',!!(st&&st.d&&st.p===0)); });
+    const chN=document.querySelector('#nav .chap[data-page="naloge"]');
+    if(chN) chN.classList.toggle('done', doneCount===TASKS.length);
+    MODS.forEach(m=>{
+      const ids=TASKS.map((t,i)=>t.mod===m.id?i:-1).filter(i=>i>=0);
+      const dn=ids.filter(i=>S.t[i]&&S.t[i].d).length;
+      const el=$('mp-'+m.id); if(el) el.textContent='Rešeno: '+dn+' / '+ids.length+' nalog';
+    });
+  }
+  // ponastavitev z vgrajenim potrjevanjem (brez confirm())
+  function resetUI(step){
+    const box=$('resetBox');
+    if(step===1){
+      box.innerHTML='<div class="confirm"><span>Res izbrišem vse odgovore in cilje? Učitelj bo videl ponastavitev in prejšnji rezultat.</span><button class="btn danger sm" id="resetYes">Da, ponastavi</button><button class="btn g2 sm" id="resetNo">Prekliči</button></div>';
+      $('resetYes').addEventListener('click',()=>{
+        S={t:{},g:[]}; save();
+        goalsEl.querySelectorAll('input').forEach(c=>c.checked=false);
+        buildTasks(); refresh(); resetUI(0);
+      });
+      $('resetNo').addEventListener('click',()=>resetUI(0));
+    } else {
+      box.innerHTML='<button class="btn danger sm" id="resetBtn">Ponastavi napredek</button>';
+      $('resetBtn').addEventListener('click',()=>resetUI(1));
+    }
+  }
+  resetUI(0);
+  buildTasks(); refresh();
+
+  const h0=location.hash.slice(1);
+  showPage(PAGES.includes(h0)?h0:'uvod',false);
+})();
+</script>
+
+</html>

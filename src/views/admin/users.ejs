@@ -1,0 +1,28 @@
+<%- include('../partials/head', { pageTitle: 'Uporabniki', mainClass: 'wide' }) %>
+<% const f = fmt; %>
+<%- include('../partials/adminnav') %>
+<form class="inline" method="get" action="/admin"><label class="sr" for="q">Išči</label><input id="q" type="search" name="q" value="<%= search %>" placeholder="Ime ali račun"><button class="btn ghost">Išči</button></form>
+<div class="scroll"><table class="data">
+  <thead><tr><th class="l">Uporabnik</th><th class="l">Vloga</th><th class="l">Razredi</th><th class="l">Zadnja prijava</th><th class="l">Dejanja</th></tr></thead>
+  <tbody><% users.forEach((u) => { %><tr>
+    <td class="l"><strong><%= u.name %></strong><br><span class="dim"><%= u.username %></span></td>
+    <td class="l nw"><span class="tag t-<%= u.kind %>"><%= ROLES[u.kind] %></span></td>
+    <td class="l"><%= u.class_names || '' %></td>
+    <td class="l nw"><%= f.ago(u.last_login_at) %></td>
+    <td class="l"><div class="row">
+      <% if (u.kind !== 'admin') { %>
+      <form method="post" action="/admin/uporabniki/<%= u.id %>/vloga"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="role" value="<%= u.role === 'teacher' ? 'user' : 'teacher' %>"><button class="btn ghost small"><%= u.role === 'teacher' ? 'Odvzemi vlogo učitelja' : 'Določi za učitelja' %></button></form>
+      <details class="danger-zone"><summary>Izbriši</summary><p>Izbrisani bodo račun, napredek in zgodovina.</p><form method="post" action="/admin/uporabniki/<%= u.id %>/izbrisi"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn danger small">Da, izbriši <%= u.name %></button></form></details>
+      <% } else { %><span class="dim">Določen v nastavitvah strežnika</span><% } %>
+    </div></td>
+  </tr><% }) %></tbody>
+</table></div>
+<section class="block">
+  <h2>Izbriši neaktivne dijake</h2>
+  <p>Izbriše račune in vse podatke uporabnikov, ki se dolgo niso prijavili. Učitelji in skrbniki ostanejo.</p>
+  <form class="inline" method="post" action="/admin/ciscenje"><input type="hidden" name="_csrf" value="<%= csrf %>">
+    <label for="days">Brez prijave dni</label><input id="days" type="number" name="days" min="30" value="365" required>
+    <label><input type="checkbox" name="confirm" value="da" required> Razumem, da brisanja ni mogoče razveljaviti</label>
+    <button class="btn danger">Izbriši neaktivne</button></form>
+</section>
+<%- include('../partials/foot') %>

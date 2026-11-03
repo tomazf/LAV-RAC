@@ -1,0 +1,8 @@
+<%- include('../partials/head', { pageTitle: 'Dnevnik', mainClass: 'wide' }) %>
+<% const f = fmt; %>
+<%- include('../partials/adminnav') %>
+<% if (!log.length) { %><p class="empty">V dnevniku še ni zapisov. Tu se zabeležijo spremembe vlog, razredov in brisanja.</p><% } else { %>
+<div class="scroll"><table class="data"><thead><tr><th class="l">Čas</th><th class="l">Kdo</th><th class="l">Dejanje</th><th class="l">Podrobnost</th></tr></thead><tbody>
+<% log.forEach((l) => { %><tr><td class="l nw"><%= f.dateTime(l.created_at) %></td><td class="l"><%= l.actor_name %></td><td class="l"><%= l.action %></td><td class="l"><%= l.detail %></td></tr><% }) %>
+</tbody></table></div><% } %>
+<%- include('../partials/foot') %>
