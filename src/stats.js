@@ -51,10 +51,12 @@ export async function progressFor(userIds) {
 }
 export const cell = (map, exId) => map?.get(exId) ?? blank();
 export const latest = (a, b) => (!a ? b : !b ? a : a > b ? a : b);
-export function rollup(map) {
+// Points and tasks count only the given exercises (the ones open to the class); time and resets count everything.
+export function rollup(map, onlyIds) {
   const r = { score: 0, done: 0, seconds: 0, resets: 0, last: null, time: { Teorija: 0, Simulacija: 0, Naloge: 0 } };
-  for (const c of map?.values() ?? []) {
-    r.score += c.score; r.done += c.done; r.seconds += c.seconds; r.resets += c.resets;
+  for (const [id, c] of map?.entries() ?? []) {
+    if (!onlyIds || onlyIds.has(id)) { r.score += c.score; r.done += c.done; }
+    r.seconds += c.seconds; r.resets += c.resets;
     r.last = latest(r.last, latest(c.updatedAt, c.lastSeen));
     for (const ch of CHAPTERS) r.time[ch] += c.time[ch] || 0;
   }

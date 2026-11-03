@@ -1,9 +1,18 @@
 <%- include('../partials/head', { pageTitle: 'Razredi', mainClass: 'wide' }) %>
 <%- include('../partials/adminnav') %>
-<% if (!classes.length) { %><p class="empty">Še ni razredov. Ustvari jih učitelj na strani Razredi.</p><% } else { %>
-<div class="scroll"><table class="data"><thead><tr><th class="l">Razred</th><th>Dijaki</th><th class="l">Učitelj</th></tr></thead><tbody>
-<% classes.forEach((c) => { %><tr><td class="l"><a href="/ucitelj/razredi/<%= c.id %>"><strong><%= c.name %></strong></a></td><td><%= c.students %></td>
-  <td class="l"><form class="inline tight" method="post" action="/admin/razredi/<%= c.id %>/lastnik"><input type="hidden" name="_csrf" value="<%= csrf %>">
-    <label class="sr" for="own<%= c.id %>">Učitelj razreda <%= c.name %></label><select id="own<%= c.id %>" name="owner"><option value="">ni določen</option><% teachers.forEach((t) => { %><option value="<%= t.id %>" <%= t.id === c.owner_id ? 'selected' : '' %>><%= t.name %></option><% }) %></select><button class="btn ghost small">Shrani</button></form></td></tr><% }) %>
-</tbody></table></div><% } %>
+<form class="inline" method="post" action="/admin/razredi"><input type="hidden" name="_csrf" value="<%= csrf %>">
+  <label class="sr" for="novi">Ime novega razreda</label><input id="novi" name="name" required maxlength="80" placeholder="npr. E4A 26/27"><button class="btn">Ustvari razred</button></form>
+<% if (!classes.length) { %><p class="empty">Še ni razredov. Vpiši ime zgoraj. Učitelji se nato sami pridružijo ali jih dodaš ti.</p><% } else { %>
+<div class="scroll block"><table class="data"><thead><tr><th class="l">Razred</th><th>Dijaki</th><th class="l">Učitelji</th><th class="l">Dodaj učitelja</th><th class="l">Urejanje</th></tr></thead><tbody>
+<% classes.forEach((c) => { const free = teachers.filter((t) => !c.teachers.some((x) => x.id === t.id)); %><tr>
+  <td class="l"><a href="/ucitelj/razredi/<%= c.id %>"><strong><%= c.name %></strong></a></td><td><%= c.students %></td>
+  <td class="l"><% if (!c.teachers.length) { %><span class="dim">še brez učitelja</span><% } %><% c.teachers.forEach((t) => { %>
+    <form class="teacher-chip" method="post" action="/admin/razredi/<%= c.id %>/ucitelji/<%= t.id %>/odstrani"><input type="hidden" name="_csrf" value="<%= csrf %>"><span><%= t.name %></span><button aria-label="Odstrani učitelja <%= t.name %> iz razreda <%= c.name %>" title="Odstrani iz razreda">×</button></form><% }) %></td>
+  <td class="l"><% if (free.length) { %><form class="inline tight" method="post" action="/admin/razredi/<%= c.id %>/ucitelji"><input type="hidden" name="_csrf" value="<%= csrf %>">
+    <label class="sr" for="u<%= c.id %>">Učitelj za razred <%= c.name %></label><select id="u<%= c.id %>" name="user"><% free.forEach((t) => { %><option value="<%= t.id %>"><%= t.name %></option><% }) %></select><button class="btn ghost small">Dodaj</button></form><% } else { %><span class="dim">ni drugih učiteljev</span><% } %></td>
+  <td class="l"><details class="danger-zone inline-details"><summary>Preimenuj ali izbriši</summary>
+    <form class="inline tight" method="post" action="/admin/razredi/<%= c.id %>/preimenuj"><input type="hidden" name="_csrf" value="<%= csrf %>"><label class="sr" for="n<%= c.id %>">Novo ime</label><input id="n<%= c.id %>" name="name" value="<%= c.name %>" required maxlength="80"><button class="btn ghost small">Preimenuj</button></form>
+    <p>Če izbrišeš razred, dijaki obdržijo napredek, a nimajo dostopa, dokler jih učitelj ne doda v drug razred.</p>
+    <form method="post" action="/admin/razredi/<%= c.id %>/izbrisi"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn danger small">Da, izbriši razred <%= c.name %></button></form></details></td>
+</tr><% }) %></tbody></table></div><% } %>
 <%- include('../partials/foot') %>

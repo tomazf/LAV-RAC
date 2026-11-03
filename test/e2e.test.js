@@ -103,20 +103,53 @@ test('admin comes from configuration, regardless of letter case, and chooses tea
   await a.context().close();
   await t.context().close();
 });
-test('a teacher creates a class and adds waiting students', async () => {
+async function adminMakesClass(a, name) {
+  await a.goto(`${APP}/admin/razredi`);
+  await a.fill('#novi', name);
+  await a.click('text=Ustvari razred');
+  await a.waitForLoadState();
+  return Number((await sql('SELECT id FROM classes WHERE name=$1', [name]))[0].id);
+}
+async function openAll(t, id) {
+  await t.goto(`${APP}/ucitelj/razredi/${id}/vaje`);
+  for (let i = 0; i < 3; i++) {
+    await t.locator('button:text("Odpri vse")').nth(i).click();
+    await t.waitForLoadState();
+  }
+}
+test('admin creates classes; a teacher joins, chooses exercises and adds students', async () => {
   for (const n of ['Bor Novak', 'Cene Zupan']) await (await login(n)).context().close();
+  const a = await login('Sara Skrbnik');
+  classId = await adminMakesClass(a, 'E4A <b>test</b>');
   const t = await login('Tomaž Učitelj');
-  await t.fill('#novi', 'E4A <b>test</b>');
-  await t.click('text=Ustvari razred');
+  // only the admin creates classes
+  assert.equal((await t.goto(`${APP}/admin/razredi`)).status(), 403);
+  await t.goto(`${APP}/ucitelj`);
+  assert.equal(await t.locator('#novi').count(), 0);
+  assert.equal((await t.goto(`${APP}/ucitelj/razredi/${classId}`)).status(), 404); // not joined yet
+  await t.goto(`${APP}/ucitelj`);
+  assert.match(await t.textContent('body'), /Dijaki brez razreda \(3\)/);
+  await t.locator('tr', { hasText: 'E4A' }).locator('button:text("Pridruži se")').click();
   await t.waitForURL(/razredi\/\d+/);
-  classId = Number(t.url().match(/razredi\/(\d+)/)[1]);
   assert.match(await t.textContent('h1'), /E4A <b>test<\/b>/); // shown as text, not HTML
+  assert.match(await t.textContent('.notice-warn'), /še ne vidijo nobene vaje/);
   for (const n of ['Ana Kovač', 'Bor Novak']) await t.locator('#cakajo label', { hasText: n }).locator('input').check();
   await t.click('text=Dodaj izbrane');
   await t.waitForLoadState();
   assert.equal(await t.locator('.matrix tbody tr').count(), 2);
   assert.equal(await t.locator('#cakajo li').count(), 1);
+  // a new class shows students nothing
+  const s = await login('Ana Kovač');
+  await s.goto(`${APP}/vaje`);
+  assert.match(await s.textContent('main'), /Učitelj še ni odprl nobene vaje/);
+  assert.equal(await s.locator('.rail').count(), 0);
+  assert.equal((await s.goto(`${APP}/vaje/1.1`)).status(), 404);
+  await openAll(t, classId);
+  await s.goto(`${APP}/vaje`);
+  assert.equal(await s.locator('.rail li').count(), 9);
+  await s.context().close();
   await t.context().close();
+  await a.context().close();
 });
 test('all 9 exercises: tracked score matches the page, survives reload and another computer', async () => {
   assert.equal(catalog.exercises.length, 9);
@@ -328,6 +361,7 @@ test('teachers only see their own classes; CSV export is safe', async () => {
   const other = await login('Cene Zupan');
   assert.equal((await other.goto(`${APP}/ucitelj/razredi/${classId}`)).status(), 404);
   assert.equal((await other.goto(`${APP}/ucitelj/razredi/${classId}/izvoz.csv`)).status(), 404);
+  assert.equal((await other.goto(`${APP}/ucitelj/razredi/${classId}/vaje`)).status(), 404);
   await other.context().close();
   await db.query(`UPDATE users SET name='=HYPERLINK("x")' WHERE oid='u-bor'`);
   const t = await login('Tomaž Učitelj');
@@ -336,12 +370,12 @@ test('teachers only see their own classes; CSV export is safe', async () => {
   assert.match(csv, /"'=HYPERLINK/);
   assert.match(csv, /Ana Kovač;ana\.kovac@sola\.test/);
   await db.query(`UPDATE users SET name='Bor Novak' WHERE oid='u-bor'`);
-  await t.goto(`${APP}/ucitelj/razredi/${classId}/vaje/1.1`);
+  await t.goto(`${APP}/ucitelj/razredi/${classId}/rezultati/1.1`);
   assert.equal(await t.locator('tbody .strip').count(), 2);
   await t.context().close();
   await a.context().close();
 });
-test('removing a student returns them to waiting and keeps progress', async () => {
+test('removing a student returns them to waiting; progress comes back when they return', async () => {
   const t = await login('Tomaž Učitelj');
   await t.goto(`${APP}/ucitelj/razredi/${classId}`);
   await t.locator('.matrix a', { hasText: 'Bor Novak' }).click();
@@ -352,34 +386,185 @@ test('removing a student returns them to waiting and keeps progress', async () =
   const s = await login('Bor Novak');
   assert.match(await s.textContent('h1'), /Čakaš/);
   assert.ok((await sql(`SELECT count(*)::int n FROM progress WHERE user_id=(SELECT id FROM users WHERE oid='u-bor')`))[0].n > 0);
+  await t.goto(`${APP}/ucitelj/razredi/${classId}`);
+  await t.locator('#cakajo label', { hasText: 'Bor Novak' }).locator('input').check();
+  await t.click('text=Dodaj izbrane');
+  await t.waitForLoadState();
+  await s.goto(`${APP}/vaje`);
+  assert.equal(await s.locator('.rail li').count(), 9);
   await s.context().close();
   await t.context().close();
 });
-test('admin hides and reorders exercises and deletes a user with all data', async () => {
+test('several teachers per class and classes per teacher; a teacher can leave; removing the role ends it', async () => {
   const a = await login('Sara Skrbnik');
-  await a.goto(`${APP}/admin/vaje`);
-  const row = a.locator('tr', { hasText: 'Kodiranje in pariteta' });
-  await row.locator('input[name=visible]').uncheck();
-  await row.locator('button:text("Shrani")').click();
+  const second = await adminMakesClass(a, 'R3B');
+  await a.goto(`${APP}/admin/razredi`);
+  const row = a.locator('tr', { hasText: 'E4A' });
+  await row.locator('select[name=user]').selectOption({ label: 'Cene Zupan' });
+  await row.locator('button:text("Dodaj")').click();
   await a.waitForLoadState();
-  await a.locator('tr', { hasText: 'Binarni seštevalniki' }).locator('button:text("Dol")').click();
+  const c = await login('Cene Zupan');
+  await c.goto(`${APP}/ucitelj/razredi/${classId}`); // assigned by the admin
+  assert.match(await c.textContent('.team'), /Cene Zupan.*Tomaž Učitelj/);
+  await c.goto(`${APP}/ucitelj`);
+  await c.locator('tr', { hasText: 'R3B' }).locator('button:text("Pridruži se")').click();
+  await c.waitForURL(/razredi\/\d+/);
+  await c.goto(`${APP}/ucitelj`);
+  assert.equal(await c.locator('section', { hasText: 'Moji razredi' }).locator('tbody tr').count(), 2);
+  await c.goto(`${APP}/ucitelj/razredi/${second}`);
+  await c.click('summary:text("Zapusti razred")');
+  await c.click('text=Da, zapusti razred');
+  await c.waitForURL(`${APP}/ucitelj`);
+  assert.equal((await c.goto(`${APP}/ucitelj/razredi/${second}`)).status(), 404);
+  // the admin can open any class without joining
+  assert.equal((await a.goto(`${APP}/ucitelj/razredi/${second}`)).status(), 200);
+  // removing the teacher role removes the person from all classes and sends them back to waiting
+  await a.goto(`${APP}/admin`);
+  await a.locator('tr', { hasText: 'cene.zupan@sola.test' }).locator('button:text("Odvzemi vlogo učitelja")').click();
   await a.waitForLoadState();
+  assert.equal((await sql(`SELECT count(*)::int n FROM class_teachers t JOIN users u ON u.id=t.user_id WHERE u.oid='u-cene'`))[0].n, 0);
+  await c.goto(APP);
+  assert.match(await c.textContent('h1'), /Čakaš/);
+  await c.context().close();
+  await a.context().close();
+});
+test('a student can be in one class only and cannot be taken from another', async () => {
+  const a = await login('Sara Skrbnik');
+  const second = (await sql(`SELECT id FROM classes WHERE name='R3B'`))[0].id;
+  await a.goto(`${APP}/ucitelj/razredi/${second}`);
+  const token = await a.locator('#dodaj input[name=_csrf]').inputValue();
+  const ana = (await sql(`SELECT id FROM users WHERE oid='u-ana'`))[0].id;
+  const r = await a.request.post(`${APP}/ucitelj/razredi/${second}/dodaj`, { form: { _csrf: token, user: String(ana) } });
+  assert.equal(r.status(), 200);
+  const rows = await sql('SELECT class_id FROM class_members WHERE user_id=$1', [ana]);
+  assert.deepEqual(rows.map((x) => Number(x.class_id)), [classId]);
+  await a.context().close();
+});
+test('each class has its own open exercises and order; closed exercises stay in the results', async () => {
+  const t = await login('Tomaž Učitelj');
+  await t.goto(`${APP}/ucitelj/razredi/${classId}/vaje`);
+  await t.locator('tr', { hasText: 'Kodiranje in pariteta' }).locator('input[name=visible]').uncheck();
+  await t.waitForLoadState();
+  await t.locator('tr', { hasText: 'Binarni seštevalniki' }).locator('button:text("Dol")').click();
+  await t.waitForLoadState();
+  assert.match(await t.locator('tr', { hasText: 'Kodiranje in pariteta' }).textContent(), /zaprta/);
   const s = await login('Ana Kovač');
   await s.goto(`${APP}/vaje`);
   const titles = await s.locator('.rail h3').allTextContents();
   assert.ok(!titles.some((x) => x.includes('Kodiranje')));
   assert.ok(titles.findIndex((x) => x.includes('Kodirnik')) < titles.findIndex((x) => x.includes('Binarni')));
   assert.equal((await s.goto(`${APP}/vaje/2.2`)).status(), 404);
+  // an open tab cannot keep saving after the exercise closes
+  await s.goto(`${APP}/vaje/1.2`);
+  const boot = await s.evaluate(() => ({ csrf: window.__LAVELS.csrf, attempt: window.__LAVELS.attempt }));
+  const closed = await s.request.post(`${APP}/api/progress/2.2`, { data: { csrf: boot.csrf, attempt: 1, state: { t: {} } } });
+  assert.deepEqual([closed.status(), (await closed.json()).code], [403, 'closed']);
+  // progress stays visible to the teacher
+  await t.goto(`${APP}/ucitelj/razredi/${classId}`);
+  assert.equal(await t.locator('.matrix th.closed').count(), 1);
+  // another class is not affected
+  const other = (await sql(`SELECT count(*)::int n FROM class_exercises x JOIN classes c ON c.id=x.class_id WHERE c.name='R3B' AND x.visible`))[0].n;
+  assert.equal(other, 0);
   await s.context().close();
-  await a.goto(`${APP}/admin`);
-  const u = a.locator('tr', { hasText: 'bor.novak@sola.test' });
-  await u.locator('summary:text("Izbriši")').click();
-  await u.locator('button:text("Da, izbriši")').click();
-  await a.waitForURL(/admin/);
-  assert.equal((await sql(`SELECT count(*)::int n FROM users WHERE oid='u-bor'`))[0].n, 0);
+  await t.context().close();
+});
+test('notes: general, exercise and task; private, kept after reset, shown as text', async () => {
+  const s = await login('Ana Kovač');
+  await s.goto(`${APP}/vaje`);
+  await s.locator('.my-note .lvn-btn').click();
+  await s.fill('.lvn-dialog textarea', 'Splošno <b>x</b>');
+  await s.click('.lvn-save');
+  await s.waitForSelector('#note-general:not([hidden])');
+  assert.equal(await s.textContent('#note-general'), 'Splošno <b>x</b>');
+  await s.reload();
+  assert.equal(await s.textContent('#note-general'), 'Splošno <b>x</b>');
+  await openTasks(s, '1.1');
+  const card = s.locator('.task').nth(4);
+  await card.locator('.lvn-btn').click();
+  await s.fill('.lvn-dialog textarea', 'Pri tej nalogi pazi na predznak');
+  await s.click('.lvn-save');
+  await card.locator('.lvn-text:not([hidden])').waitFor();
+  await s.locator('.lvs-bar .lvn-btn').click();
+  await s.fill('.lvn-dialog textarea', 'Ponovi teorijo');
+  await s.click('.lvn-save');
+  await s.locator('.lvs-exnote:not([hidden])').waitFor();
+  await s.reload();
+  assert.equal(await s.locator('.task').nth(4).locator('.lvn-text').textContent(), 'Pri tej nalogi pazi na predznak');
+  assert.equal(await s.textContent('.lvs-exnote'), 'Ponovi teorijo');
+  // the reset rebuilds the tasks; notes stay and the icons come back
+  await s.evaluate(() => { [...document.querySelectorAll('#nav .chap')].find((c) => /Naloge/.test(c.textContent)).click(); document.querySelectorAll('.task')[0].querySelector('[data-act=sol]').click(); });
+  await synced(s);
+  await s.click('#resetBtn');
+  await s.click('#resetYes');
+  await synced(s);
+  await s.waitForFunction(() => document.querySelectorAll('.task .lvn-btn').length === document.querySelectorAll('.task').length);
+  assert.equal(await s.locator('.task').nth(4).locator('.lvn-text').textContent(), 'Pri tej nalogi pazi na predznak');
+  // deleting a note, then a dashboard exercise note
+  await s.goto(`${APP}/vaje`);
+  assert.match(await s.textContent('#note-1\\.1'), /Ponovi teorijo/);
+  assert.match(await s.locator('.node', { hasText: '1.1' }).textContent(), /opombe pri nalogah: 1/);
+  await s.locator('.node', { hasText: '1.1' }).locator('.lvn-btn').click();
+  await s.click('.lvn-del');
+  await s.waitForSelector('#note-1\\.1', { state: 'hidden' });
+  // limits and tampering
+  const csrf = await s.locator('[data-note-slot]').first().getAttribute('data-csrf');
+  const send = (data) => s.request.post(`${APP}/api/notes`, { data: { csrf, ...data } });
+  assert.equal((await send({ body: 'x'.repeat(5001) })).status(), 400);
+  assert.equal((await send({ exercise: '1.1', task: 9999, body: 'x' })).status(), 400);
+  assert.equal((await send({ exercise: '2.2', body: 'x' })).status(), 404); // closed for this class
+  assert.equal((await s.request.post(`${APP}/api/notes`, { data: { body: 'x' } })).status(), 403);
+  // another student sees nothing; the teacher pages do not include notes
+  const t = await login('Tomaž Učitelj');
+  await t.goto(`${APP}/ucitelj/razredi/${classId}`);
+  await t.locator('.matrix a', { hasText: 'Ana Kovač' }).click();
+  await t.waitForURL(/dijaki/);
+  const html = await t.content();
+  assert.ok(!html.includes('pazi na predznak') && !html.includes('Splošno'));
+  const b = await login('Bor Novak');
+  await b.goto(`${APP}/vaje`);
+  assert.equal(await b.locator('#note-general').isHidden(), true);
+  await b.goto(`${APP}/vaje/1.1`);
+  assert.equal(await b.locator('.task .lvn-text:not([hidden])').count(), 0);
+  await b.context().close();
+  await t.context().close();
+  await s.context().close();
+});
+test('exercise groups line up on the admin overview and class page; empty groups only for staff', async () => {
+  const a = await login('Sara Skrbnik');
+  const measure = () => a.evaluate(() => [...document.querySelectorAll('.ex-table')].map((t) => [...t.querySelectorAll('thead th')].map((c) => Math.round(c.getBoundingClientRect().left))));
+  const same = (rows) => rows.every((r) => JSON.stringify(r) === JSON.stringify(rows[0]));
+  await a.goto(`${APP}/admin/vaje`);
+  let rows = await measure();
+  assert.equal(rows.length, 3);
+  assert.ok(same(rows), JSON.stringify(rows));
+  assert.equal(await a.locator('input[type=checkbox], button:text("Gor")').count(), 0); // read-only
+  assert.deepEqual(await a.locator('.group.planned h2').allTextContents(), ['4 V pripravi', '5 V pripravi']);
+  await a.goto(`${APP}/ucitelj/razredi/${classId}/vaje`);
+  rows = await measure();
+  assert.ok(same(rows), JSON.stringify(rows));
+  assert.equal(await a.locator('.group.planned').count(), 2);
+  const s = await login('Ana Kovač');
+  await s.goto(`${APP}/vaje`);
+  assert.doesNotMatch(await s.textContent('main'), /V pripravi/);
+  await s.context().close();
+  await a.context().close();
+});
+test('admin deletes students and teachers with all their data', async () => {
+  const a = await login('Sara Skrbnik');
+  for (const mail of ['bor.novak@sola.test', 'ucitelj@sola.test']) {
+    await a.goto(`${APP}/admin`);
+    const u = a.locator('tr', { hasText: mail });
+    await u.locator('summary:text("Izbriši")').click();
+    await u.locator('button:text("Da, izbriši")').click();
+    await a.waitForURL(/sporocilo/);
+  }
+  assert.equal((await sql(`SELECT count(*)::int n FROM users WHERE oid IN ('u-bor','u-teacher')`))[0].n, 0);
   assert.equal((await sql(`SELECT count(*)::int n FROM task_events e LEFT JOIN users u ON u.id=e.user_id WHERE u.id IS NULL`))[0].n, 0);
+  assert.equal((await sql(`SELECT count(*)::int n FROM student_notes e LEFT JOIN users u ON u.id=e.user_id WHERE u.id IS NULL`))[0].n, 0);
+  assert.equal((await sql(`SELECT count(*)::int n FROM classes WHERE id=$1`, [classId]))[0].n, 1); // the class stays
   await a.goto(`${APP}/admin/dnevnik`);
   assert.match(await a.textContent('table'), /Izbrisal uporabnika/);
+  assert.match(await a.textContent('table'), /Odprl skupino vaj/);
   await a.context().close();
 });
 test('nothing is loaded from other sites, and there were no page errors', async () => {

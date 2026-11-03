@@ -87,13 +87,13 @@ export async function loadUser(req, res, next) {
     res.locals.user = null;
     if (req.session?.uid) {
       const u = await one(
-        `SELECT u.*, (SELECT count(*) FROM class_members m WHERE m.user_id=u.id) AS class_count FROM users u WHERE u.id=$1`,
+        `SELECT u.*, (SELECT m.class_id FROM class_members m WHERE m.user_id=u.id) AS class_id FROM users u WHERE u.id=$1`,
         [req.session.uid],
       );
       if (u) {
         u.isAdmin = isAdmin(u);
         u.isTeacher = u.isAdmin || u.role === 'teacher';
-        u.isWaiting = !u.isTeacher && u.class_count === 0;
+        u.isWaiting = !u.isTeacher && !u.class_id;
         req.user = u;
         res.locals.user = u;
         res.locals.csrf = req.session.csrf;

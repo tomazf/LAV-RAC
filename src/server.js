@@ -5,7 +5,6 @@ import pgSession from 'connect-pg-simple';
 import helmet from 'helmet';
 import { config } from './config.js';
 import { migrate, pool } from './db.js';
-import { seedSettings } from './catalog.js';
 import * as fmt from './format.js';
 import { authRouter, loadUser } from './auth.js';
 import { exerciseRouter } from './routes/exercises.js';
@@ -80,7 +79,6 @@ app.use((err, req, res, next) => {
 });
 
 await migrate();
-await seedSettings();
 const server = app.listen(config.port, () => console.log(`LAV-ELS posluša na vratih ${config.port}`));
 for (const sig of ['SIGTERM', 'SIGINT']) {
   process.on(sig, () => server.close(() => pool.end().finally(() => process.exit(0))));

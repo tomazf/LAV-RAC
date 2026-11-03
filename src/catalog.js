@@ -18,22 +18,31 @@ export const totalTasks = exercises.reduce((a, e) => a + e.tasks.length, 0);
 
 export function renderExercise(ex, boot) {
   const json = JSON.stringify(boot).replace(/</g, '\\u003c');
-  return ex.html.replace(PLACEHOLDER, () => `<script>window.__LAVELS=${json}</script>\n<script src="/static/js/tracker.js"></script>`);
+  return ex.html.replace(PLACEHOLDER, () => `<script>window.__LAVELS=${json}</script>\n<script src="/static/js/notes.js"></script>\n<script src="/static/js/tracker.js"></script>`);
 }
-export async function seedSettings() {
-  for (const [i, e] of exercises.entries()) {
-    await q('INSERT INTO exercise_settings(exercise_id, sort_order) VALUES($1,$2) ON CONFLICT DO NOTHING', [e.id, i]);
-  }
+// Groups that are planned but have no content yet; shown only to teachers and admins.
+export const plannedModules = [4, 5].filter((id) => !modules.some((m) => m.id === id));
+
+function grouped(items) {
+  return modules
+    .map((m) => ({ ...m, exercises: items.filter((e) => e.module === m.id) }))
+    .filter((m) => m.exercises.length);
 }
-// Exercises grouped by module, in the order set by the admin.
-export async function arranged({ includeHidden = false } = {}) {
-  const rows = await many('SELECT * FROM exercise_settings');
+const light = (e, extra) => ({ ...e, html: undefined, ...extra });
+// All exercises in the standard order, for teachers, admins and the overview.
+export const standardGroups = () => grouped(exercises.map((e, i) => light(e, { visible: true, order: i })));
+// Exercises in the order chosen for a class, with what is open to its students.
+export async function classGroups(classId, { openOnly = false } = {}) {
+  const rows = await many('SELECT * FROM class_exercises WHERE class_id=$1', [classId]);
   const s = new Map(rows.map((r) => [r.exercise_id, r]));
-  return modules.map((m) => ({
-    ...m,
-    exercises: exercises
-      .filter((e) => e.module === m.id && byId.has(e.id) && (includeHidden || s.get(e.id)?.visible !== false))
-      .map((e) => ({ ...e, html: undefined, visible: s.get(e.id)?.visible !== false, order: s.get(e.id)?.sort_order ?? 0 }))
-      .sort((a, b) => a.order - b.order),
-  })).filter((m) => m.exercises.length);
+  const items = exercises
+    .map((e, i) => light(e, { visible: s.get(e.id)?.visible === true, order: s.get(e.id)?.sort_order ?? i }))
+    .filter((e) => !openOnly || e.visible)
+    .sort((a, b) => a.order - b.order);
+  return grouped(items);
+}
+export async function ensureClassRows(classId) {
+  for (const [i, e] of exercises.entries()) {
+    await q('INSERT INTO class_exercises(class_id, exercise_id, sort_order) VALUES($1,$2,$3) ON CONFLICT DO NOTHING', [classId, e.id, i]);
+  }
 }

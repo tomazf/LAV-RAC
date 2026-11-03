@@ -96,6 +96,9 @@
         } else if (x.status === 409) {
           rawDel(PENDING); dirty = false; stopped = true;
           show('Ta vaja je bila spremenjena v drugem zavihku.', 'warn', { href: location.pathname, text: 'Osveži stran' });
+        } else if (x.status === 403 && x.d.code === 'closed') {
+          rawDel(PENDING); dirty = false; stopped = true;
+          show('Učitelj je zaprl to vajo. Novi odgovori se ne shranijo.', 'warn', { href: '/vaje', text: 'Na seznam vaj' });
         } else if (x.status === 401 || x.status === 403) {
           stopped = true;
           show('Prijava je potekla. Odgovori so varni v tem brskalniku.', 'warn', { href: '/', text: 'Prijavi se znova' });
@@ -144,7 +147,7 @@
   function bar() {
     var css = document.createElement('style');
     css.textContent = '.lvs-bar{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;justify-content:space-between;background:#0a1020;color:#e8edf6;font:15px/1.4 "Atkinson Hyperlegible",system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px))}'
-      + '.lvs-bar a{color:#fff;font-weight:700;text-underline-offset:3px}.lvs-right{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center}.lvs-out{margin:0}.lvs-out button{background:none;border:0;color:#fff;font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px 0}.lvs-status{opacity:.85;font-size:14px}.lvs-warn{opacity:1;color:#f1b95a}.lvs-warn a{color:#f1b95a}';
+      + '.lvs-bar a{color:#fff;font-weight:700;text-underline-offset:3px}.lvs-right{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center}.lvs-out{margin:0}.lvs-out button{background:none;border:0;color:#fff;font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px 0}.lvs-bar .lvn-btn{color:#fff}.lvs-exnote{margin:0 auto;max-width:1180px;width:calc(100% - 32px)}.lvs-exnote:not([hidden]){margin-top:12px}.lvs-status{opacity:.85;font-size:14px}.lvs-warn{opacity:1;color:#f1b95a}.lvs-warn a{color:#f1b95a}';
     document.head.appendChild(css);
     var el = document.createElement('div');
     el.className = 'lvs-bar';
@@ -167,12 +170,54 @@
     });
     var right = document.createElement('span');
     right.className = 'lvs-right';
-    right.appendChild(status); right.appendChild(out);
+    var exNote = document.createElement('div');
+    exNote.className = 'lvn-text lvs-exnote';
+    var exBtn = noteButton('Opomba k vaji ' + B.id, null, exNote, 'Moja opomba');
+    right.appendChild(status); right.appendChild(exBtn); right.appendChild(out);
     el.appendChild(back); el.appendChild(right);
     document.body.insertBefore(el, document.body.firstChild);
+    el.parentNode.insertBefore(exNote, el.nextSibling);
+    LavelsNotes.show(exNote, B.notes.exercise, exBtn);
+  }
+  // A letter icon opens the note; a saved note is shown next to what it belongs to.
+  function noteButton(heading, task, box, label) {
+    var value = task === null ? B.notes.exercise : (B.notes.tasks[task] || '');
+    var btn = LavelsNotes.button(label, !!value);
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      LavelsNotes.edit({
+        heading: heading, value: task === null ? B.notes.exercise : (B.notes.tasks[task] || ''), csrf: B.csrf, exercise: B.id, task: task,
+        onSaved: function (text) {
+          if (task === null) B.notes.exercise = text; else B.notes.tasks[task] = text;
+          LavelsNotes.show(box, text, btn);
+        },
+      });
+    });
+    return btn;
+  }
+  function decorateTasks() {
+    document.querySelectorAll('.task').forEach(function (card) {
+      if (card.querySelector('.lvn-btn')) return;
+      var i = Number(card.id.replace(/^t/, ''));
+      var crumb = card.querySelector('.crumb');
+      if (!crumb || isNaN(i)) return;
+      var q = card.querySelector('.qt, .q');
+      var n = crumb.textContent.match(/Naloga (\d+)/);
+      var box = document.createElement('div');
+      box.className = 'lvn-text';
+      if (q) q.parentNode.insertBefore(box, q.nextSibling); else card.appendChild(box);
+      var btn = noteButton('Opomba k nalogi ' + (n ? n[1] : i + 1), i, box, '');
+      var right = crumb.querySelector('.lv');
+      (right || crumb).appendChild(btn);
+      LavelsNotes.show(box, B.notes.tasks[i] || '', btn);
+    });
   }
   document.addEventListener('DOMContentLoaded', function () {
     bar();
+    decorateTasks();
+    var list = document.getElementById('tasks');
+    if (list) new MutationObserver(decorateTasks).observe(list, { childList: true });
     page = pageId();
     setInterval(tick, 5000);
     sendTime(page);

@@ -1,16 +1,12 @@
 <%- include('../partials/head', { pageTitle: 'Vaje', mainClass: 'wide' }) %>
 <%- include('../partials/adminnav') %>
+<p>Vse vaje v portalu. Katere vidijo dijaki in v kakšnem vrstnem redu, določijo učitelji pri posameznem razredu.</p>
 <% mods.forEach((m) => { %>
-<section class="block"><h2><%= m.id %> <%= m.title %></h2>
-<div class="scroll"><table class="data"><thead><tr><th class="l">Vaja</th><th>Naloge</th><th>Točke</th><th class="l">Vidnost</th><th class="l">Vrstni red</th></tr></thead><tbody>
-  <% m.exercises.forEach((e, i) => { %><tr class="<%= e.visible ? '' : 'unseen' %>">
-    <td class="l"><a href="/vaje/<%= e.id %>"><strong><%= e.id %></strong> <%= e.title %></a></td><td><%= e.tasks.length %></td><td><%= e.maxPoints %></td>
-    <td class="l"><form class="inline tight" method="post" action="/admin/vaje/<%= e.id %>"><input type="hidden" name="_csrf" value="<%= csrf %>">
-      <label><input type="checkbox" name="visible" <%= e.visible ? 'checked' : '' %>> vidna dijakom</label>
-      <button class="btn ghost small">Shrani</button></form></td>
-    <td class="l"><form class="inline tight" method="post" action="/admin/vaje/<%= e.id %>/premik"><input type="hidden" name="_csrf" value="<%= csrf %>">
-      <button class="btn ghost small" name="dir" value="up" <%= i === 0 ? 'disabled' : '' %>>Gor</button><button class="btn ghost small" name="dir" value="down" <%= i === m.exercises.length - 1 ? 'disabled' : '' %>>Dol</button></form></td>
-  </tr><% }) %>
+<section class="group"><h2><%= m.id %> <%= m.title %></h2>
+<div class="scroll"><table class="data ex-table"><colgroup><col class="c-title"><col class="c-num"><col class="c-num"><col class="c-num"></colgroup>
+<thead><tr><th class="l">Vaja</th><th>Naloge</th><th>Točke</th><th>Strani</th></tr></thead><tbody>
+  <% m.exercises.forEach((e) => { %><tr><td class="l"><a href="/vaje/<%= e.id %>"><strong><%= e.id %></strong> <%= e.title %></a></td><td><%= e.tasks.length %></td><td><%= e.maxPoints %></td><td><%= e.pages.length %></td></tr><% }) %>
 </tbody></table></div></section>
 <% }) %>
+<% plannedModules.forEach((id) => { %><section class="group planned"><h2><%= id %> V pripravi</h2><p class="planned-row">Vaje te skupine še niso dodane.</p></section><% }) %>
 <%- include('../partials/foot') %>

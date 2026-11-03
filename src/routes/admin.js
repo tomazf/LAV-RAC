@@ -1,32 +1,42 @@
 import express from 'express';
 import { checkCsrf, isAdmin, requireAdmin } from '../auth.js';
-import { arranged, exercises } from '../catalog.js';
-import { audit, many, one, q } from '../db.js';
+import { plannedModules, standardGroups } from '../catalog.js';
+import { audit, many, one, q, tx } from '../db.js';
 
 export const adminRouter = express.Router();
 adminRouter.use(requireAdmin);
 
 const flash = (res, path, msg) => res.redirect(`${path}${path.includes('?') ? '&' : '?'}sporocilo=${encodeURIComponent(msg)}`);
-const ROLES = { admin: 'Skrbnik', teacher: 'Učitelj', student: 'Dijak', waiting: 'Čaka na razred' };
-const roleOf = (u) => (isAdmin(u) ? 'admin' : u.role === 'teacher' ? 'teacher' : u.class_count > 0 ? 'student' : 'waiting');
+const ROLES = { admin: 'Skrbnik', teacher: 'Učitelj', student: 'Dijak', waiting: 'Brez razreda' };
+const roleOf = (u) => (isAdmin(u) ? 'admin' : u.role === 'teacher' ? 'teacher' : u.class_names ? 'student' : 'waiting');
 
 adminRouter.get('/', async (req, res, next) => {
   try {
     const search = String(req.query.q || '').trim();
+    const kind = ROLES[req.query.vloga] ? req.query.vloga : '';
     const rows = await many(
-      `SELECT u.*, (SELECT count(*)::int FROM class_members m WHERE m.user_id=u.id) AS class_count,
-         (SELECT string_agg(c.name, ', ' ORDER BY c.name) FROM class_members m JOIN classes c ON c.id=m.class_id WHERE m.user_id=u.id) AS class_names
+      `SELECT u.*,
+         (SELECT c.name FROM class_members m JOIN classes c ON c.id=m.class_id WHERE m.user_id=u.id) AS class_names,
+         (SELECT string_agg(c.name, ', ' ORDER BY c.name) FROM class_teachers t JOIN classes c ON c.id=t.class_id WHERE t.user_id=u.id) AS teaching
        FROM users u WHERE ($1='' OR u.name ILIKE '%'||$1||'%' OR u.username ILIKE '%'||$1||'%' OR coalesce(u.email,'') ILIKE '%'||$1||'%')
-       ORDER BY u.name LIMIT 500`, [search],
+       ORDER BY u.name`, [search],
     );
-    const users = rows.map((u) => ({ ...u, kind: roleOf(u) }));
-    res.render('admin/users', { users, search, ROLES, message: req.query.sporocilo || null, tab: 'users' });
+    const users = rows.map((u) => ({ ...u, kind: roleOf(u) })).filter((u) => !kind || u.kind === kind);
+    res.render('admin/users', { users, search, kind, ROLES, message: req.query.sporocilo || null, tab: 'users' });
   } catch (e) { next(e); }
 });
 adminRouter.post('/uporabniki/:id/vloga', checkCsrf, async (req, res, next) => {
   try {
     const role = req.body.role === 'teacher' ? 'teacher' : 'user';
-    const u = await one('UPDATE users SET role=$2 WHERE id=$1 RETURNING name', [Number(req.params.id) || 0, role]);
+    const id = Number(req.params.id) || 0;
+    const u = await tx(async (c) => {
+      const row = (await c.query('UPDATE users SET role=$2 WHERE id=$1 RETURNING name', [id, role])).rows[0];
+      if (!row) return null;
+      // A teacher is not a student, and a former teacher no longer has classes.
+      if (role === 'teacher') await c.query('DELETE FROM class_members WHERE user_id=$1', [id]);
+      else await c.query('DELETE FROM class_teachers WHERE user_id=$1', [id]);
+      return row;
+    });
     if (u) await audit(req.user, role === 'teacher' ? 'Določil učitelja' : 'Odvzel vlogo učitelja', u.name);
     res.redirect('/admin');
   } catch (e) { next(e); }
@@ -52,51 +62,65 @@ adminRouter.post('/ciscenje', checkCsrf, async (req, res, next) => {
     flash(res, '/admin', `Izbrisanih uporabnikov: ${ids.length}.`);
   } catch (e) { next(e); }
 });
-adminRouter.get('/vaje', async (req, res, next) => {
-  try {
-    res.render('admin/exercises', { mods: await arranged({ includeHidden: true }), tab: 'exercises', message: null });
-  } catch (e) { next(e); }
-});
-adminRouter.post('/vaje/:id', checkCsrf, async (req, res, next) => {
-  try {
-    const ex = exercises.find((e) => e.id === req.params.id);
-    if (!ex) return res.redirect('/admin/vaje');
-    await q('UPDATE exercise_settings SET visible=$2 WHERE exercise_id=$1', [ex.id, req.body.visible === 'on']);
-    await audit(req.user, 'Spremenil vajo', `${ex.id}: ${req.body.visible === 'on' ? 'vidna' : 'skrita'}`);
-    res.redirect('/admin/vaje');
-  } catch (e) { next(e); }
-});
-adminRouter.post('/vaje/:id/premik', checkCsrf, async (req, res, next) => {
-  try {
-    const mods = await arranged({ includeHidden: true });
-    const m = mods.find((x) => x.exercises.some((e) => e.id === req.params.id));
-    if (m) {
-      const ids = m.exercises.map((e) => e.id);
-      const i = ids.indexOf(req.params.id);
-      const j = req.body.dir === 'up' ? i - 1 : i + 1;
-      if (j >= 0 && j < ids.length) {
-        const orders = m.exercises.map((e) => e.order);
-        [ids[i], ids[j]] = [ids[j], ids[i]];
-        for (const [k, id] of ids.entries()) await q('UPDATE exercise_settings SET sort_order=$2 WHERE exercise_id=$1', [id, orders[k]]);
-      }
-    }
-    res.redirect('/admin/vaje');
-  } catch (e) { next(e); }
+adminRouter.get('/vaje', (req, res) => {
+  res.render('admin/exercises', { mods: standardGroups(), plannedModules, tab: 'exercises', message: null });
 });
 adminRouter.get('/razredi', async (req, res, next) => {
   try {
     const classes = await many(
-      `SELECT c.*, u.name AS owner_name, (SELECT count(*)::int FROM class_members m WHERE m.class_id=c.id) AS students FROM classes c LEFT JOIN users u ON u.id=c.owner_id ORDER BY c.name`,
+      `SELECT c.*, (SELECT count(*)::int FROM class_members m WHERE m.class_id=c.id) AS students FROM classes c ORDER BY c.name`,
     );
-    const all = await many(`SELECT id, name, username, role FROM users ORDER BY name`);
+    const links = await many(`SELECT t.class_id, u.id, u.name FROM class_teachers t JOIN users u ON u.id=t.user_id ORDER BY u.name`);
+    for (const c of classes) c.teachers = links.filter((l) => l.class_id === c.id);
+    const all = await many('SELECT id, name, username, role FROM users ORDER BY name');
     const teachers = all.filter((u) => u.role === 'teacher' || isAdmin(u));
-    res.render('admin/classes', { classes, teachers, tab: 'classes', message: null });
+    res.render('admin/classes', { classes, teachers, tab: 'classes', message: req.query.sporocilo || null });
   } catch (e) { next(e); }
 });
-adminRouter.post('/razredi/:id/lastnik', checkCsrf, async (req, res, next) => {
+adminRouter.post('/razredi', checkCsrf, async (req, res, next) => {
   try {
-    const c = await one('UPDATE classes SET owner_id=$2 WHERE id=$1 RETURNING name', [Number(req.params.id) || 0, Number(req.body.owner) || null]);
-    if (c) await audit(req.user, 'Spremenil učitelja razreda', c.name);
+    const name = String(req.body.name || '').trim().slice(0, 80);
+    if (!name) return res.redirect('/admin/razredi');
+    await q('INSERT INTO classes(name) VALUES($1)', [name]);
+    await audit(req.user, 'Ustvaril razred', name);
+    flash(res, '/admin/razredi', `Razred ${name} je ustvarjen.`);
+  } catch (e) { next(e); }
+});
+adminRouter.post('/razredi/:id/preimenuj', checkCsrf, async (req, res, next) => {
+  try {
+    const name = String(req.body.name || '').trim().slice(0, 80);
+    if (name) {
+      const before = await one('SELECT name FROM classes WHERE id=$1', [Number(req.params.id) || 0]);
+      await q('UPDATE classes SET name=$2 WHERE id=$1', [Number(req.params.id) || 0, name]);
+      if (before) await audit(req.user, 'Preimenoval razred', `${before.name}: ${name}`);
+    }
+    res.redirect('/admin/razredi');
+  } catch (e) { next(e); }
+});
+adminRouter.post('/razredi/:id/izbrisi', checkCsrf, async (req, res, next) => {
+  try {
+    const c = await one('DELETE FROM classes WHERE id=$1 RETURNING name', [Number(req.params.id) || 0]);
+    if (c) await audit(req.user, 'Izbrisal razred', c.name);
+    res.redirect('/admin/razredi');
+  } catch (e) { next(e); }
+});
+adminRouter.post('/razredi/:id/ucitelji', checkCsrf, async (req, res, next) => {
+  try {
+    const c = await one('SELECT id, name FROM classes WHERE id=$1', [Number(req.params.id) || 0]);
+    const t = await one('SELECT * FROM users WHERE id=$1', [Number(req.body.user) || 0]);
+    if (c && t && (t.role === 'teacher' || isAdmin(t))) {
+      await q('INSERT INTO class_teachers(class_id, user_id) VALUES($1,$2) ON CONFLICT DO NOTHING', [c.id, t.id]);
+      await audit(req.user, 'Dodal učitelja razredu', `${c.name}: ${t.name}`);
+    }
+    res.redirect('/admin/razredi');
+  } catch (e) { next(e); }
+});
+adminRouter.post('/razredi/:id/ucitelji/:uid/odstrani', checkCsrf, async (req, res, next) => {
+  try {
+    const c = await one('SELECT name FROM classes WHERE id=$1', [Number(req.params.id) || 0]);
+    const t = await one('SELECT name FROM users WHERE id=$1', [Number(req.params.uid) || 0]);
+    await q('DELETE FROM class_teachers WHERE class_id=$1 AND user_id=$2', [Number(req.params.id) || 0, Number(req.params.uid) || 0]);
+    if (c && t) await audit(req.user, 'Odstranil učitelja iz razreda', `${c.name}: ${t.name}`);
     res.redirect('/admin/razredi');
   } catch (e) { next(e); }
 });

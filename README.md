@@ -6,10 +6,10 @@ Portal za laboratorijske vaje iz digitalne elektronike. Poveže vaje 1.1 do 3.3,
 
 | Vloga | Kako jo dobi | Kaj lahko |
 |---|---|---|
-| Skrbnik | e-poštni naslov v `ADMIN_EMAILS` | določa učitelje, vidi vse, izbriše uporabnike, določa vidnost in vrstni red vaj |
-| Učitelj | določi ga skrbnik | ustvarja razrede, dodaja čakajoče, vidi rezultate svojih razredov |
-| Dijak | učitelj ga doda v razred | rešuje vaje in vidi svoj napredek |
-| Čaka | vsak nov uporabnik | vidi samo obvestilo, da čaka na razred |
+| Skrbnik | uporabniško ime v `ADMIN_EMAILS` | ustvarja in briše razrede, določa učitelje, briše uporabnike, lahko dela vse kot učitelj v vsakem razredu |
+| Učitelj | določi ga skrbnik | se pridruži razredom ali jih zapusti, v svojih razredih dodaja in odstranjuje dijake, izbira odprte vaje in vrstni red, vidi rezultate in dijake brez razreda |
+| Dijak | učitelj ali skrbnik ga doda v en razred | rešuje odprte vaje, vidi svoj napredek in piše svoje opombe |
+| Brez razreda | vsak nov ali odstranjen uporabnik | vidi samo obvestilo, da čaka na razred |
 
 ## Hitri predogled brez Microsoftovega računa
 
@@ -64,8 +64,9 @@ Posredovalnik mora poslati `X-Forwarded-Proto: https`. Preveri delovanje: `curl 
 
 1. Skrbnik se prijavi in odpre **Administracija**.
 2. Učitelji se enkrat prijavijo, skrbnik jim dodeli vlogo.
-3. Učitelj ustvari razred pod **Razredi**.
-4. Dijaki se prijavijo in čakajo, učitelj jih doda v razred.
+3. Skrbnik ustvari razrede pod **Administracija > Razredi**.
+4. Učitelj se pod **Razredi** pridruži razredu in pod **Vaje razreda** izbere vaje. Novi razred nima odprte nobene vaje.
+5. Dijaki se prijavijo in čakajo, učitelj jih doda v razred.
 
 ## Vzdrževanje
 

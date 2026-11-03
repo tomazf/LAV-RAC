@@ -1,6 +1,7 @@
 import express from 'express';
-import { arranged, totalPoints, totalTasks } from '../catalog.js';
+import { classGroups, standardGroups } from '../catalog.js';
 import { requireAccess } from '../auth.js';
+import { many } from '../db.js';
 import { cell, latest, progressFor, rollup, strip } from '../stats.js';
 
 export const studentRouter = express.Router();
@@ -13,20 +14,24 @@ studentRouter.get('/', (req, res) => {
 studentRouter.get('/zasebnost', (req, res) => res.render('privacy'));
 studentRouter.get('/vaje', requireAccess, async (req, res, next) => {
   try {
-    const mods = await arranged({ includeHidden: false });
+    const mods = req.user.isTeacher ? standardGroups() : await classGroups(req.user.class_id, { openOnly: true });
     const map = (await progressFor([req.user.id])).get(req.user.id);
     const list = mods.flatMap((m) => m.exercises);
     const rows = new Map(list.map((e) => {
       const c = cell(map, e.id);
       return [e.id, { ...c, strip: strip(e, c.state), last: latest(c.updatedAt, c.lastSeen) }];
     }));
-    const visibleMap = new Map(list.map((e) => [e.id, rows.get(e.id)]));
-    const total = rollup(visibleMap);
+    const total = rollup(new Map(list.map((e) => [e.id, rows.get(e.id)])));
     const maxPoints = list.reduce((a, e) => a + e.maxPoints, 0);
     const maxTasks = list.reduce((a, e) => a + e.tasks.length, 0);
     const unfinished = list.filter((e) => rows.get(e.id).done < e.tasks.length);
     const inProgress = unfinished.filter((e) => rows.get(e.id).started).sort((a, b) => (rows.get(b.id).last ?? 0) - (rows.get(a.id).last ?? 0));
     const next_ = inProgress[0] ?? unfinished[0] ?? null;
-    res.render('dashboard', { mods, rows, total, maxPoints, maxTasks, next_, nextStarted: next_ ? rows.get(next_.id).started : false, totalPoints, totalTasks });
+    const notes = await many('SELECT exercise_id, task_index, body FROM student_notes WHERE user_id=$1', [req.user.id]);
+    const generalNote = notes.find((n) => n.exercise_id === '')?.body ?? '';
+    const exerciseNote = new Map(notes.filter((n) => n.exercise_id && n.task_index === -1).map((n) => [n.exercise_id, n.body]));
+    const taskNotes = new Map();
+    for (const n of notes) if (n.task_index >= 0) taskNotes.set(n.exercise_id, (taskNotes.get(n.exercise_id) || 0) + 1);
+    res.render('dashboard', { mods, rows, total, maxPoints, maxTasks, next_, nextStarted: next_ ? rows.get(next_.id).started : false, generalNote, exerciseNote, taskNotes });
   } catch (e) { next(e); }
 });

@@ -3,12 +3,12 @@
 <p class="crumbs"><a href="/ucitelj">Razredi</a> / <a href="/ucitelj/razredi/<%= cls.id %>"><%= cls.name %></a></p>
 <div class="title-row"><div><h1><%= m.name %></h1><p class="dim"><%= m.email || m.username %></p></div>
   <details class="danger-zone right"><summary>Odstrani iz razreda</summary>
-  <p>Dijak obdrži napredek. Če ni v drugem razredu, spet čaka na razred.</p>
+  <p>Dijak obdrži napredek in opombe, a nima več dostopa do vaj, dokler ga ne dodaš v razred.</p>
   <form method="post" action="/ucitelj/razredi/<%= cls.id %>/odstrani"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="user" value="<%= m.id %>"><button class="btn danger">Da, odstrani</button></form></details>
 </div>
 <dl class="stats">
-  <div><dt>Točke</dt><dd><%= f.num(total.score) %> <small>od <%= maxPoints %></small></dd></div>
-  <div><dt>Naloge</dt><dd><%= total.done %> <small>od <%= maxTasks %></small></dd></div>
+  <div><dt>Točke v odprtih vajah</dt><dd><%= f.num(total.score) %> <small>od <%= maxPoints %></small></dd></div>
+  <div><dt>Naloge v odprtih vajah</dt><dd><%= total.done %> <small>od <%= maxTasks %></small></dd></div>
   <div><dt>Teorija</dt><dd><%= f.duration(total.time.Teorija) %></dd></div>
   <div><dt>Simulacija</dt><dd><%= f.duration(total.time.Simulacija) %></dd></div>
   <div><dt>Naloge</dt><dd><%= f.duration(total.time.Naloge) %></dd></div>
@@ -26,7 +26,7 @@
   <% exs.forEach((e) => { %>
   <details class="exd">
     <summary>
-      <span class="exd-t"><span class="ex-no"><%= e.id %></span> <%= e.title %></span>
+      <span class="exd-t"><span class="ex-no"><%= e.id %></span> <%= e.title %><% if (!e.visible) { %> <span class="tag">zaprta</span><% } %></span>
       <%- include('../partials/strip', { items: e.strip }) %>
       <span class="exd-m"><%= f.num(e.c.score) %> / <%= e.maxPoints %> t, <%= f.duration(e.c.seconds) %><% if (e.c.resets) { %>, ↺<%= e.c.resets %><% } %></span>
     </summary>

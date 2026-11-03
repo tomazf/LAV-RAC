@@ -52,6 +52,23 @@ input[type=checkbox]{width:20px;height:20px;min-height:0;accent-color:var(--acc)
 .title-row{display:flex;flex-wrap:wrap;gap:12px 20px;justify-content:space-between;align-items:center;margin:0 0 18px}
 .crumbs{margin:0 0 6px;color:var(--mut);font-size:.95rem}
 .notice{background:var(--okbg);border-left:5px solid var(--ok);padding:10px 14px;border-radius:6px}
+.notice-warn{background:var(--sigbg);border-left:5px solid var(--sig);padding:10px 14px;border-radius:6px;max-width:none}
+.team{margin:-10px 0 16px}
+.my-note{margin:-10px 0 18px}
+.ex-meta [data-note-slot]{margin-left:4px}
+.matrix .closed,.matrix th.closed a{opacity:.55}
+.ex-table{table-layout:fixed;min-width:640px}
+.ex-table .c-title{width:auto}
+.ex-table .c-num{width:84px}
+.ex-table .c-vis{width:190px}
+.ex-table .c-order{width:150px}
+.ex-table tbody tr{scroll-margin-top:20px}
+.group{margin-top:28px;scroll-margin-top:20px}
+.group-head{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;margin-bottom:6px}
+.group-head h2{margin:0}
+.group.planned h2{color:var(--mut)}
+.planned-row{max-width:none;margin:6px 0 0;border:2px dashed var(--line);border-radius:8px;padding:14px 16px;color:var(--mut)}
+.switch{display:inline-flex;gap:8px;align-items:center;cursor:pointer}
 .empty{background:var(--tile);border-radius:8px;padding:14px 16px;margin:10px 0}
 .block{margin-top:32px}
 /* Login and waiting: the gate is the page */
@@ -170,3 +187,8 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
   .who-name{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.teacher-chip{display:inline-flex;align-items:center;gap:2px;background:var(--tile);border-radius:99px;padding:1px 3px 1px 11px;margin:2px 4px 2px 0}
+.teacher-chip button{background:none;border:0;color:var(--mut);cursor:pointer;font-size:1.1rem;line-height:1;min-width:28px;min-height:28px;border-radius:50%}
+.teacher-chip button:hover{background:var(--line);color:var(--bad)}
+.inline-details{margin-top:0}
+.inline-details summary{white-space:nowrap}
