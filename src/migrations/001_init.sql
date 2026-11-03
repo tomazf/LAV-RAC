@@ -72,8 +72,7 @@ CREATE TABLE page_time (
 CREATE TABLE exercise_settings (
   exercise_id TEXT PRIMARY KEY,
   visible     BOOLEAN NOT NULL DEFAULT TRUE,
-  sort_order  INT NOT NULL,
-  est_minutes INT
+  sort_order  INT NOT NULL
 );
 CREATE TABLE audit_log (
   id         BIGSERIAL PRIMARY KEY,

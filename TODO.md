@@ -20,8 +20,7 @@ Podrobna navodila so v `README.md`. Skrbnik vse vrednosti vpiše v `.env` na str
 Skrivnosti ne pišemo v repozitorij. Vpišejo se samo v datoteko `.env` na strežniku.
 
 ### 3. Admin
-- [ ] E-poštni naslov admina (ali več naslovov): `____________`
-- [ ] Naslov mora biti uporabniško ime za prijavo (UPN), običajno `ime.priimek@sola.si`.
+- [x] Admin: `tomaz.ferbezar@sc-nm.si` (uporabniško ime za prijavo, že vpisano v `.env.example`).
 
 ### 4. Varstvo osebnih podatkov
 - [ ] Obvestiti pooblaščeno osebo za varstvo podatkov šole.

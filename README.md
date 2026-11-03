@@ -6,7 +6,7 @@ Portal za laboratorijske vaje iz digitalne elektronike. Poveže vaje 1.1 do 3.3,
 
 | Vloga | Kako jo dobi | Kaj lahko |
 |---|---|---|
-| Skrbnik | e-poštni naslov v `ADMIN_EMAILS` | določa učitelje, vidi vse, izbriše uporabnike, ureja vaje |
+| Skrbnik | e-poštni naslov v `ADMIN_EMAILS` | določa učitelje, vidi vse, izbriše uporabnike, določa vidnost in vrstni red vaj |
 | Učitelj | določi ga skrbnik | ustvarja razrede, dodaja čakajoče, vidi rezultate svojih razredov |
 | Dijak | učitelj ga doda v razred | rešuje vaje in vidi svoj napredek |
 | Čaka | vsak nov uporabnik | vidi samo obvestilo, da čaka na razred |
@@ -42,7 +42,7 @@ cp .env.example .env
 
 V `.env` vpiši vrednosti. `SESSION_SECRET` in `POSTGRES_PASSWORD` ustvari z `openssl rand -hex 32`.
 
-`ADMIN_EMAILS` primerja uporabniško ime za prijavo (UPN), običajno `ime.priimek@sola.si`. Pri več skrbnikih naslove loči z vejico. Spremembe veljajo po `docker compose up -d`.
+`ADMIN_EMAILS` primerja uporabniško ime za prijavo (UPN), npr. `tomaz.ferbezar@sc-nm.si`. Pri več skrbnikih naslove loči z vejico. Spremembe veljajo po `docker compose up -d`.
 
 ### 3. Zagon
 

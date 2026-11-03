@@ -61,8 +61,7 @@ adminRouter.post('/vaje/:id', checkCsrf, async (req, res, next) => {
   try {
     const ex = exercises.find((e) => e.id === req.params.id);
     if (!ex) return res.redirect('/admin/vaje');
-    const est = req.body.est_minutes === '' ? null : Math.max(1, Math.min(600, Number(req.body.est_minutes) || 0)) || null;
-    await q('UPDATE exercise_settings SET visible=$2, est_minutes=$3 WHERE exercise_id=$1', [ex.id, req.body.visible === 'on', est]);
+    await q('UPDATE exercise_settings SET visible=$2 WHERE exercise_id=$1', [ex.id, req.body.visible === 'on']);
     await audit(req.user, 'Spremenil vajo', `${ex.id}: ${req.body.visible === 'on' ? 'vidna' : 'skrita'}`);
     res.redirect('/admin/vaje');
   } catch (e) { next(e); }

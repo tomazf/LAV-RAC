@@ -360,7 +360,6 @@ test('admin hides and reorders exercises and deletes a user with all data', asyn
   await a.goto(`${APP}/admin/vaje`);
   const row = a.locator('tr', { hasText: 'Kodiranje in pariteta' });
   await row.locator('input[name=visible]').uncheck();
-  await row.locator('input[name=est_minutes]').fill('45');
   await row.locator('button:text("Shrani")').click();
   await a.waitForLoadState();
   await a.locator('tr', { hasText: 'Binarni seštevalniki' }).locator('button:text("Dol")').click();

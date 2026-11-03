@@ -33,7 +33,7 @@ export async function arranged({ includeHidden = false } = {}) {
     ...m,
     exercises: exercises
       .filter((e) => e.module === m.id && byId.has(e.id) && (includeHidden || s.get(e.id)?.visible !== false))
-      .map((e) => ({ ...e, html: undefined, visible: s.get(e.id)?.visible !== false, estMinutes: s.get(e.id)?.est_minutes ?? null, order: s.get(e.id)?.sort_order ?? 0 }))
+      .map((e) => ({ ...e, html: undefined, visible: s.get(e.id)?.visible !== false, order: s.get(e.id)?.sort_order ?? 0 }))
       .sort((a, b) => a.order - b.order),
   })).filter((m) => m.exercises.length);
 }

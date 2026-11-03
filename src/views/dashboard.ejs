@@ -25,7 +25,6 @@
         <div><dt>Teorija</dt><dd><%= f.duration(r.time.Teorija) %></dd></div>
         <div><dt>Simulacija</dt><dd><%= f.duration(r.time.Simulacija) %></dd></div>
         <div><dt>Naloge</dt><dd><%= f.duration(r.time.Naloge) %></dd></div>
-        <% if (e.estMinutes) { %><div><dt>Predviden čas</dt><dd><%= e.estMinutes %> min</dd></div><% } %>
       </dl>
       <a class="btn <%= r.started && !finished ? '' : 'ghost' %>" href="/vaje/<%= e.id %>" aria-label="<%= finished ? 'Odpri' : r.started ? 'Nadaljuj' : 'Začni' %> vajo <%= e.id %>"><%= finished ? 'Odpri' : r.started ? 'Nadaljuj' : 'Začni' %></a>
     </li>
