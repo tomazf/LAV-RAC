@@ -1,0 +1,30 @@
+{
+  "name": "lav-els",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "LAV-ELS: portal za laboratorijske vaje z napredkom dijakov in pogledom učitelja",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "import": "node scripts/import-exercises.js",
+    "demo": "node test/demo.js",
+    "test": "node --test --test-concurrency=1 test/*.test.js"
+  },
+  "dependencies": {
+    "connect-pg-simple": "^10.0.0",
+    "ejs": "^7.0.2",
+    "express": "^5.3.0",
+    "express-session": "^1.19.0",
+    "helmet": "^8.3.0",
+    "openid-client": "^6.8.9",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@fontsource/atkinson-hyperlegible": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "playwright": "1.63.0"
+  }
+}

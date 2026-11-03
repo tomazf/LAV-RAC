@@ -1,0 +1,8 @@
+<div class="title-row"><h1>Administracija</h1></div>
+<nav class="tabs" aria-label="Administracija">
+  <a href="/admin" <%- tab==='users' ? 'aria-current="page"' : '' %>>Uporabniki</a>
+  <a href="/admin/vaje" <%- tab==='exercises' ? 'aria-current="page"' : '' %>>Vaje</a>
+  <a href="/admin/razredi" <%- tab==='classes' ? 'aria-current="page"' : '' %>>Razredi</a>
+  <a href="/admin/dnevnik" <%- tab==='log' ? 'aria-current="page"' : '' %>>Dnevnik</a>
+</nav>
+<% if (message) { %><p class="notice" role="status"><%= message %></p><% } %>

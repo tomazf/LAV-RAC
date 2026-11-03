@@ -1,0 +1,12 @@
+<%# Real logic: outputs follow inputs. a = school account, b = class %>
+<% const out = a && b; const wire = (v) => v ? 'wire on' : 'wire'; %>
+<svg class="gate-fig" viewBox="0 0 560 190" role="img" aria-label="<%= a ? 'Šolski račun je prijavljen' : 'Šolski račun še ni prijavljen' %>, <%= b ? 'razred je dodeljen' : 'razred še ni dodeljen' %>, vaje so <%= out ? 'odprte' : 'zaprte' %>.">
+  <g class="<%= a ? 'chip on' : 'chip' %>"><rect x="2" y="26" width="164" height="44" rx="22"/><text x="84" y="54" text-anchor="middle">Šolski račun = <%= a ? 1 : 0 %></text></g>
+  <path class="<%= wire(a) %>" d="M166 48H250"/>
+  <g class="<%= b ? 'chip on' : 'chip' %>"><rect x="2" y="120" width="164" height="44" rx="22"/><text x="84" y="148" text-anchor="middle">Razred = <%= b ? 1 : 0 %></text></g>
+  <path class="<%= wire(b) %>" d="M166 142H250"/>
+  <rect class="gate-box" x="250" y="14" width="96" height="162" rx="6"/>
+  <text class="gate-sym" x="298" y="110" text-anchor="middle">&amp;</text>
+  <path class="<%= wire(out) %>" d="M346 95H408"/>
+  <g class="<%= out ? 'chip on' : 'chip' %>"><rect x="408" y="73" width="150" height="44" rx="22"/><text x="483" y="101" text-anchor="middle">Vaje = <%= out ? 1 : 0 %></text></g>
+</svg>

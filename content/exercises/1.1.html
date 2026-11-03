@@ -1,0 +1,1921 @@
+<!doctype html>
+<html lang="sl"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!--LAVELS:BOOT-->
+<title>Logični nivoji in spremenljivke</title>
+<link href="/static/fonts/fonts.css" rel="stylesheet">
+<style>
+/* Shema kot pri LAV-ELS 3.1 do 3.3: temno modra glava z napredkom, desni meni s tremi poglavji (Teorija, Simulacija, Naloge),
+   stran za stranjo z gumboma Nazaj/Naprej. Signal (logična 1) = oranžna. Vrata so pravokotni IEC simboli. */
+:root{
+  --bg:#f2f5f9;--card:#fff;--ink:#14213d;--mut:#586377;--acc:#0b6e8a;--onacc:#fff;--sig:#e8590c;--sigbg:#fff0e3;
+  --ok:#2b8a3e;--bad:#c92a2a;--line:#d3dae5;--tile:#e6edf5;--okbg:#e3f5e8;--badbg:#fde8e8;--wire:#a9b4c4;--hdr:#14213d;--amb:#e9a23b;
+  --fb:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;--fm:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  /* aliasi za risbe v SVG */
+  --on:var(--sig);--off:var(--wire);--panel:var(--card);--fg:var(--ink);--muted:var(--mut);--accent:var(--acc);--accent-ink:var(--onacc);
+  --code:var(--tile);--on-ink:#1b1206;--warn:var(--amb);--okc:var(--ok);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1626;--card:#172238;--ink:#e8edf6;--mut:#9aa7bd;--acc:#4cc2e0;--onacc:#0e1626;--sig:#ff9f43;--sigbg:#3a2a18;
+  --ok:#6fd48a;--bad:#ff8080;--line:#2b3a57;--tile:#22304c;--okbg:#17352a;--badbg:#3d2230;--wire:#4a5a76;--hdr:#0a1020;--amb:#f1b95a;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1626;--card:#172238;--ink:#e8edf6;--mut:#9aa7bd;--acc:#4cc2e0;--onacc:#0e1626;--sig:#ff9f43;--sigbg:#3a2a18;
+  --ok:#6fd48a;--bad:#ff8080;--line:#2b3a57;--tile:#22304c;--okbg:#17352a;--badbg:#3d2230;--wire:#4a5a76;--hdr:#0a1020;--amb:#f1b95a;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 var(--fb)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--hdr)}
+button,input{font:inherit}
+button:focus-visible,input:focus-visible{outline:3px solid var(--amb);outline-offset:2px}
+[hidden]{display:none!important}
+header{background:var(--hdr);color:#fff;padding-block:14px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.hin{max-width:1180px;margin:auto;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.hin .ttl{flex:1;min-width:200px}
+.hin h1{font-size:1.25rem;margin:0;line-height:1.25}
+.hin small{display:block;opacity:.8;font-size:.84rem}
+.sc{min-width:220px;font-size:.95rem}.sc b{font-size:1.25rem}
+.hbar{height:8px;background:#ffffff33;border-radius:5px;overflow:hidden;margin-top:5px}.hbar i{display:block;height:100%;background:var(--amb);width:0;transition:width .4s}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:20px;max-width:1180px;margin:auto;padding-block:16px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{min-width:0}
+aside{position:sticky;top:calc(12px + env(safe-area-inset-top,0px));align-self:start}
+.navc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px}
+.chap{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:2px solid transparent;background:none;color:var(--ink);border-radius:10px;padding:8px 10px;margin-top:4px;font-weight:700;cursor:pointer}
+.chap:first-child{margin-top:0}
+.chap:hover{background:var(--tile)}
+.chap.on{border-color:var(--acc);background:var(--tile)}
+.chap.done .sn{background:var(--ok);border-color:var(--ok);color:#fff}
+.subnav{margin:2px 0 6px 18px;border-left:3px solid var(--line);padding-left:6px}
+.sb{display:block;width:100%;text-align:left;border:2px solid transparent;background:none;color:var(--ink);border-radius:10px;padding:6px 8px;margin-top:2px;cursor:pointer;font-size:.95rem}
+.sb:hover{background:var(--tile)}
+.sb.on{border-color:var(--acc);background:var(--tile)}
+.sn{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--tile);color:var(--acc);font-weight:700;font-size:.85rem;border:2px solid var(--line)}
+.chap.on .sn{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
+main .page{display:none}
+main .page.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 26px;margin-bottom:14px;scroll-margin-top:12px;min-width:0}
+.crumb{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px;color:var(--mut);font-size:.92rem}
+.pager{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:6px 0 4px}
+h1,h2,h3,h4{line-height:1.2;text-wrap:balance}
+h2{margin:.1em 0 .45em;font-size:1.55rem}
+h3{margin:1.3em 0 .4em;font-size:1.1rem;color:var(--acc)}
+h4{margin:1.2em 0 .3em;font-size:1rem}
+p{margin:.45em 0;max-width:72ch}
+ul,ol{max-width:72ch;padding-left:22px}li{margin:4px 0}
+.lead{font-size:1.08rem}
+.label{font:600 .74rem var(--fm);text-transform:uppercase;letter-spacing:.08em;color:var(--mut)}
+.mut{color:var(--mut)}.sm{font-size:.88rem}
+.m{font-family:var(--fm)}
+.note{font-size:.92rem;color:var(--mut)}
+.btn{border:0;border-radius:8px;padding:10px 18px;cursor:pointer;background:var(--acc);color:var(--onacc);min-height:44px}
+.btn.g2{background:var(--tile);color:var(--ink)}
+.btn.sm{min-height:36px;padding:6px 12px;font-size:.9rem}
+.btn.danger{background:var(--bad);color:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+.eqb{font:500 .98rem var(--fm);background:var(--tile);border-radius:8px;padding:9px 12px;overflow-x:auto;white-space:nowrap;margin:8px 0}
+.ex{font-size:.95rem;background:var(--tile);border-radius:10px;padding:10px 12px;margin:8px 0}
+.ex strong{display:block;margin-bottom:2px}
+.ex .acts{margin-top:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid2>*{min-width:0}
+@media (max-width:640px){.grid2{grid-template-columns:1fr}}
+.idea{background:var(--tile);border-left:5px solid var(--acc);padding:10px 14px;border-radius:8px;margin:12px 0;max-width:76ch}
+.scroll{overflow-x:auto;max-width:100%}
+.fig{display:flex;justify-content:center;background:var(--tile);border-radius:10px;padding:10px;margin:10px 0;overflow-x:auto}
+.fig svg{display:block;width:100%;height:auto;max-width:100%}
+.fig.wide{justify-content:flex-start}.fig.wide svg{min-width:560px}
+.fig.wider{justify-content:flex-start}.fig.wider svg{min-width:760px}
+svg text{fill:var(--ink);font-family:var(--fm);font-size:13px}
+svg .gate{fill:var(--card);stroke:var(--ink);stroke-width:2}
+svg .net{fill:var(--acc);font-weight:600}
+svg .lbl{fill:var(--mut);font-size:11px}
+svg .sym{font-weight:700;font-size:13px}
+svg .selband{fill:color-mix(in srgb,var(--acc) 13%,transparent)}
+svg .blk{fill:var(--card);stroke:var(--acc);stroke-width:2}
+svg .blkt{fill:var(--acc);font-weight:700;font-size:12px}
+svg .blks{fill:var(--mut);font-size:11px}
+svg .pin{fill:var(--mut);font-size:11px}
+svg .pin.sel{fill:var(--accent);font-weight:700}
+svg .dash{fill:none;stroke:var(--mut);stroke-width:1.2;stroke-dasharray:5 4}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:.94rem}
+th,td{border:1px solid var(--line);padding:5px 9px;text-align:center}
+th{background:var(--tile);font-weight:600}
+td.l,th.l{text-align:left}
+tr.hl td,tr.cur td{background:var(--sigbg);font-weight:700}
+th.o,td.o{background:color-mix(in srgb,var(--acc) 9%,transparent)}
+td.mid,th.mid{color:var(--mut)}
+td.m,th.m{font-family:var(--fm)}
+/* simulacija */
+.toggles{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.tg{min-width:56px;min-height:44px;padding:8px 10px;border-radius:8px;border:2px solid var(--ink);background:var(--card);color:var(--ink);font:700 1rem var(--fm);cursor:pointer}
+.tg[aria-pressed="true"]{background:var(--sig);border-color:var(--sig);color:#1b1206}
+.tg.sq{min-width:44px;padding:8px 6px}
+.pill{font:600 .9rem var(--fm);padding:6px 13px;border-radius:99px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;min-height:36px}
+.pill[aria-pressed="true"]{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px;align-items:center}
+.lamps{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.lamp{min-width:78px;text-align:center;padding:8px 6px;border-radius:10px;border:2px solid var(--line);background:var(--card)}
+.lamp .b{font:700 1.5rem/1.2 var(--fm);color:var(--mut)}
+.lamp.on{background:var(--sig);border-color:var(--sig)}
+.lamp.on .b,.lamp.on .label{color:#1b1206}
+.lamp.txt .b{font-size:1.1rem}
+.readout{font-size:.95rem;margin:8px 0;padding:10px 12px;border-radius:10px;background:var(--tile)}
+.status{font-size:.95rem;margin-top:6px;min-height:1.4em}
+.status.ok{color:var(--ok)}.status.bad{color:var(--bad)}
+.izziv{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+.izziv p{margin:0}
+.hintbox{margin-top:8px;padding:10px 12px;border-radius:8px;background:var(--tile);border-left:5px solid var(--amb);font-size:.94rem}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.sec{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.sec>h3:first-child{margin-top:0}
+.inp{font:600 1.05rem var(--fm);padding:8px 12px;border:2px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);min-width:0;width:100%;max-width:320px;min-height:44px}
+.inp.right{border-color:var(--ok);background:var(--okbg)}
+.inp.wrong{border-color:var(--bad);background:var(--badbg)}
+.inp:disabled{opacity:.9}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
+.tile{background:var(--tile);border-radius:10px;padding:10px 12px;min-width:0}
+.tile .v{font:700 1.2rem var(--fm);overflow-wrap:anywhere}
+.tile.on{background:var(--sigbg)}
+.stp{font:500 .9rem/1.6 var(--fm);background:var(--tile);border-radius:10px;padding:10px 12px;margin:8px 0;max-height:300px;overflow:auto}
+.stp div{white-space:nowrap}
+.stp .hd{font:600 .74rem var(--fm);text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin-top:8px;white-space:normal}
+.stp .hd:first-child{margin-top:0}
+.stp .res{font-weight:700;color:var(--acc)}
+table.cs{width:auto;border-collapse:collapse;font:700 1.25rem var(--fm);margin:8px 0}
+table.cs td,table.cs th{border:0;padding:3px 9px;min-width:34px;background:none}
+table.cs td.cr{color:var(--sig);font-size:.95rem}
+table.cs tr.ln td{border-top:3px solid var(--ink)}
+table.cs td.rl{text-align:left;font:600 .8rem var(--fb);color:var(--mut);min-width:90px}
+table.cs td.one{color:var(--sig)}
+table.cs td.ov{color:var(--bad)}
+table.cs td.hi,table.cs th.hi{background:var(--sigbg)}
+table.cs th{font:600 .72rem var(--fm);color:var(--mut)}
+.wt td,.wt th{font-family:var(--fm);padding:4px 7px}
+.wt td.neg,.wt th.neg{color:var(--bad)}
+.ser{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.fnrow{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+.fnrow>*{min-width:0}
+/* cilji in sklopi (uvod) */
+.goals label{display:flex;gap:10px;align-items:flex-start;padding:5px 0;cursor:pointer;max-width:72ch}
+.goals input{width:20px;height:20px;margin-top:3px;accent-color:var(--acc);flex:none}
+.mods{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:10px 0}
+.mods>div{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.mods .n{font:700 1.6rem var(--fm);color:var(--acc);line-height:1}
+.mods p{margin:0;font-size:.93rem}
+.mods .btn{margin-top:auto;align-self:flex-start}
+/* naloge */
+.sticky{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:8px 0 10px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.progress{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.bar{flex:1;min-width:120px;height:8px;background:var(--tile);border-radius:999px;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.nums{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.nums button{width:36px;height:36px;border-radius:50%;border:2px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;cursor:pointer}
+.nums button.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.nums button.zero{background:var(--mut);border-color:var(--mut);color:var(--card)}
+.lv{font-size:.88rem;color:var(--mut);display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.lvt{font:700 .74rem var(--fm);text-transform:uppercase;letter-spacing:.06em;padding:2px 9px;border-radius:99px;color:#fff}
+.lvt.l1{background:var(--ok)}.lvt.l2{background:#b7791f}.lvt.l3{background:var(--bad)}
+.qt{font-size:1.13rem;margin:10px 0 14px;max-width:72ch}
+.opts{display:flex;flex-direction:column;gap:6px;max-width:620px}
+.opt{display:flex;gap:10px;align-items:center;padding:9px 12px;border:2px solid var(--line);border-radius:10px;cursor:pointer;min-height:46px}
+.opt:has(input:checked){border-color:var(--acc);background:var(--tile)}
+.opt input{width:18px;height:18px;accent-color:var(--acc);flex:none}
+.opt.mono span{font-family:var(--fm)}
+.fld{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:8px 0}
+.fld .fl{min-width:140px;font-size:.95rem;color:var(--mut)}
+.fld .u{font:600 1.25rem var(--fm);color:var(--mut)}
+.cell{width:46px;height:36px;border:2px solid var(--amb);border-radius:6px;background:var(--card);color:var(--ink);font:700 1rem var(--fm);cursor:pointer}
+.cell.un{color:var(--mut);border-style:dashed}
+.cell.one{background:var(--sig);border-color:var(--sig);color:#1b1206}
+.cell.bad{outline:3px solid var(--bad)}
+.cell:disabled{cursor:default}
+.ttask td.o{padding:3px 6px}
+.fb{margin-top:12px;padding:10px 14px;border-radius:8px;min-height:1px}
+.fb:empty{display:none}
+.fb.ok{background:var(--okbg);color:var(--ok)}.fb.bad{background:var(--badbg);color:var(--bad)}
+.hn,.slb{margin-top:10px;padding:10px 14px;border-radius:8px;background:var(--tile)}
+.hn{border-left:5px solid var(--amb)}
+.slb{border-left:5px solid var(--acc)}
+.hn::before{content:"Namig: ";font-weight:700;color:var(--amb)}
+.slb::before{content:"Rešitev: ";font-weight:700;color:var(--acc)}
+.slb .stp{max-height:none}
+.task{scroll-margin-top:150px}
+.confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+@media (max-width:900px){
+  .wrap{grid-template-columns:minmax(0,1fr)}
+  aside{order:-1;position:static}
+  .subnav{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 6px;border-left:0;padding-left:0}
+  .subnav .sb{width:auto;flex:1 1 auto;margin:0;border:1px solid var(--line);text-align:center}
+  .card{padding:16px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* vrste bitov s težami */
+.bcol{display:flex;flex-direction:column;align-items:center;gap:3px}
+.bcol .label{font-size:.68rem;letter-spacing:0}
+.nib{display:flex;gap:8px;margin-right:10px}
+.nib:last-child{margin-right:0}
+.toggles.tight .nib{gap:4px}
+.toggles.tight .tg.sq{min-width:36px;padding:8px 2px}
+@media (max-width:480px){
+  .toggles{gap:4px}
+  .tg.sq{min-width:34px;padding:8px 2px}
+  .nib{gap:4px;margin-right:6px}
+  .toggles.tight .tg.sq{min-width:32px}
+}
+
+/* tabela ASCII */
+.asg{width:auto;border-collapse:separate;border-spacing:3px;font-size:.85rem}
+.asg th{background:none;border:0;padding:2px 4px;font:600 .72rem var(--fm);color:var(--mut)}
+.asg td{border:0;padding:0;background:none}
+.asg button{width:38px;height:34px;border:2px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);font:600 .95rem var(--fm);cursor:pointer;padding:0}
+.asg button.c0{color:var(--mut);font-size:.62rem;background:var(--tile)}
+.asg button.c1{border-color:var(--acc)}
+.asg button.c2{background:var(--tile)}
+.asg button.c3{background:var(--sigbg)}
+.asg button[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--onacc)}
+.seg{display:inline-block}
+
+
+/* ===== dodatki za tematiko 1 (logična vrata in Booleova algebra) ===== */
+/* negacija s črto nad spremenljivko ali skupino; gnezdene črte so ena nad drugo */
+.ng{display:inline-block;border-top:1.6px solid currentColor;padding-top:1px;line-height:1.1}
+.symsel{margin:4px 0 8px}
+table.tt{width:auto;min-width:0}
+table.tt td,table.tt th{font-family:var(--fm);min-width:2.4rem;padding:4px 10px}
+table.tt td.one{color:var(--sig);font-weight:700}
+table.tt tr.cur td{background:var(--sigbg)}
+table.tt tr[data-m]:hover td{background:var(--tile)}
+.eqbig{font:600 1.15rem var(--fm);background:var(--tile);border-radius:8px;padding:10px 14px;margin:8px 0;overflow-x:auto;white-space:nowrap}
+.eqbig .ng,.eqb .ng{border-top-width:2px}
+.simrow{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+@media (min-width:980px){.simrow.two{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}}
+.simrow>*{min-width:0}
+.desc{background:var(--tile);border-left:5px solid var(--acc);border-radius:8px;padding:10px 14px;margin:8px 0;max-width:76ch}
+.volt{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center;margin:8px 0}
+.volt input[type=range]{flex:1 1 260px;max-width:460px;accent-color:var(--sig);min-height:36px}
+.volt .vv{font:700 1.6rem var(--fm);min-width:5.5ch}
+.zone{display:inline-block;padding:2px 10px;border-radius:99px;font:700 .85rem var(--fb)}
+.zone.z0{background:var(--tile);color:var(--ink);border:2px solid var(--mut)}
+.zone.z1{background:var(--sig);color:#1b1206}
+.zone.zx{background:var(--amb);color:#1b1206}
+.lamp.mid{background:var(--amb);border-color:var(--amb)}
+.lamp.mid .b,.lamp.mid .label{color:#1b1206}
+.qtab{width:auto;min-width:0;margin:6px 0}
+.qtab td,.qtab th{font-family:var(--fm);padding:3px 10px}
+.cmp td,.cmp th{text-align:left}
+.cmp td.m,.cmp th.m{text-align:center}
+.cellrow .cell{width:42px}
+/* barve skupin v Veitchevem diagramu */
+:root{--g1:#1c7ed6;--g2:#d6336c;--g3:#2b8a3e;--g4:#9c36b5;--g5:#e67700;--g6:#0c8599}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--g1:#74c0fc;--g2:#f783ac;--g3:#8ce99a;--g4:#e599f7;--g5:#ffc078;--g6:#66d9e8}}
+:root[data-theme="dark"]{--g1:#74c0fc;--g2:#f783ac;--g3:#8ce99a;--g4:#e599f7;--g5:#ffc078;--g6:#66d9e8}
+.gchips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.gchip{font:600 1rem var(--fm);border:3px solid;border-radius:99px;padding:2px 12px;background:var(--card)}
+.kp{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.kp .kb{min-width:42px;min-height:40px;border:2px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:700 1rem var(--fm);cursor:pointer}
+.kp .kb:hover{border-color:var(--acc)}
+.kp .kb:disabled{opacity:.45;cursor:default}
+.exf .inp{max-width:520px;font-size:1.1rem}
+.expv{font-size:1rem;margin-top:4px}
+.steps{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.step{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,auto);gap:4px 14px;align-items:baseline;background:var(--tile);border-radius:8px;padding:8px 12px}
+.step .ex2{font:600 1.05rem var(--fm);overflow-x:auto;white-space:nowrap}
+.step .rule{font-size:.88rem;color:var(--mut)}
+.step.new{outline:2px solid var(--acc)}
+@media (max-width:640px){.step{grid-template-columns:minmax(0,1fr)}}
+.verd{font-weight:700}.verd.ok{color:var(--ok)}.verd.bad{color:var(--bad)}
+.law td,.law th{text-align:left}
+.law td.m{font-family:var(--fm);white-space:nowrap}
+.gchips{align-items:center;align-self:center}
+.fig.kmex,.kmsol .fig{flex-direction:column;align-items:center}
+
+
+</style>
+<header><div class="hin">
+  <div class="ttl"><small>LAV-ELS · laboratorijska vaja 1.1</small><h1>Logični nivoji, stanja in spremenljivke</h1></div>
+  <div class="sc"><b id="sc">0</b> / <span id="mx"></span> točk · <span id="pc"></span><div class="hbar"><i id="bf"></i></div></div>
+</div></header>
+
+<div class="wrap">
+<main id="main">
+  <!-- ===================== TEORIJA ===================== -->
+  <div class="card page" id="uvod" data-grp="Teorija">
+    <h2>Uvod in cilji</h2>
+    <p class="lead">Digitalno vezje pozna samo dve stanji: <strong>0</strong> in <strong>1</strong>. V resnici pa po žici teče napetost, ki ni nikoli natanko 0 V ali 5 V. V tej vaji spoznaš, kako vezje iz napetosti »prebere« logično stanje, kaj je logična spremenljivka, logična funkcija in kako vse možnosti zapišemo v <strong>pravilnostno tabelo</strong>.</p>
+    <div class="scroll"><table class="cmp">
+      <tr><th>Napetost na žici</th><th>Logično stanje</th><th>Drugi zapisi</th><th>Primer</th></tr>
+      <tr><td>blizu 0 V</td><td class="m">0</td><td>L (low), ni, izključeno, laž</td><td>tipka ni pritisnjena</td></tr>
+      <tr><td>blizu napajalne napetosti</td><td class="m">1</td><td>H (high), je, vključeno, resnica</td><td>tipka je pritisnjena</td></tr>
+    </table></div>
+    <p class="note">Tematika 1 »Logična vrata in Booleova algebra« ima štiri vaje: 1.1 Logični nivoji, stanja in spremenljivke, 1.2 Logične operacije in logična vrata, 1.3 Booleova algebra in minimizacija, 1.4 Analiza in sinteza kombinacijskega vezja.</p>
+    <h3>Cilji</h3>
+    <div class="goals" id="goals"></div>
+    <h3>Sklopi</h3>
+    <div class="mods" id="mods"></div>
+    <h3>Kako poteka vaja</h3>
+    <ol>
+      <li>Preberi teorijo in jo takoj preizkusi v simulaciji. Stikala vklapljaš s klikom: oranžna pomeni 1, siva 0.</li>
+      <li>Vezja so narisana s simboli IEC (pravokotniki). V vsaki simulaciji lahko preklopiš na simbole ANSI.</li>
+      <li>Ko razumeš vse sklope, reši naloge. Nekatere so izbira odgovora, pri drugih odgovor vpišeš ali izpolniš tabelo.</li>
+    </ol>
+    <h3>Točkovanje</h3>
+    <ul>
+      <li><strong>Lahka</strong> naloga je vredna 1 točko, <strong>srednja</strong> 2 točki, <strong>težka</strong> 3 točke.</li>
+      <li>Namig odbije 50 % točk naloge. Ogled rešitve prinese 0 točk.</li>
+      <li>Ko pritisneš »Preveri«, se odgovor zaklene in popravkov ni.</li>
+      <li>Napetosti vpisuj v voltih, decimalno vejico ali piko (npr. 0,4).</li>
+    </ul>
+  </div>
+
+  <div class="card page" id="nivoji" data-grp="Teorija">
+    <h2>Logični nivoji</h2>
+    <p class="lead">Logično stanje je <strong>območje napetosti</strong>, ne ena sama vrednost. Vsaka družina logičnih vezij ima v podatkovnem listu zapisano, katero napetost vrata še razumejo kot 0 in katero kot 1. Vmes je <strong>prepovedano (nedoločeno) območje</strong>: tam ne vemo, kaj bodo vrata prebrala.</p>
+    <div class="fig" id="fig-zones"></div>
+    <h3>Vhodni in izhodni nivoji</h3>
+    <ul>
+      <li><strong>V<sub>IL</sub></strong> (največja vhodna napetost za 0): vse, kar je nižje, vrata preberejo kot 0.</li>
+      <li><strong>V<sub>IH</sub></strong> (najmanjša vhodna napetost za 1): vse, kar je višje, vrata preberejo kot 1.</li>
+      <li><strong>V<sub>OL</sub></strong> in <strong>V<sub>OH</sub></strong>: napetosti, ki jih vrata zagotovo dajo na izhodu za 0 in za 1.</li>
+    </ul>
+    <div class="scroll"><table class="cmp">
+      <tr><th>Družina</th><th class="m">V<sub>CC</sub></th><th class="m">V<sub>IL</sub> največ</th><th class="m">V<sub>IH</sub> najmanj</th><th class="m">V<sub>OL</sub> največ</th><th class="m">V<sub>OH</sub> najmanj</th></tr>
+      <tr><td>TTL (npr. SN7400)</td><td class="m">5 V (4,75 do 5,25 V)</td><td class="m">0,8 V</td><td class="m">2,0 V</td><td class="m">0,4 V</td><td class="m">2,4 V</td></tr>
+      <tr><td>CMOS 74HC (npr. SN74HC00)</td><td class="m">4,5 V (od 2 do 6 V)</td><td class="m">1,35 V</td><td class="m">3,15 V</td><td class="m">0,1 V</td><td class="m">4,4 V</td></tr>
+    </table></div>
+    <p class="note">Vrednosti so iz podatkovnih listov Texas Instruments SN7400 in SN74HC00. Pri CMOS so pragovi približno 30 % in 70 % napajalne napetosti, zato se spreminjajo z V<sub>CC</sub>. Izhodni vrednosti za 74HC veljata pri majhnem toku (20 µA).</p>
+    <h3>Šumna rezerva</h3>
+    <p>Na poti od izhoda enih vrat do vhoda drugih se signalu lahko prišteje motnja (šum). Vezje deluje pravilno, dokler motnja ne potisne napetosti v prepovedano območje. Kolikšno motnjo prenese, pove <strong>šumna rezerva</strong>:</p>
+    <div class="eqb">NM<sub>H</sub> = V<sub>OH</sub> − V<sub>IH</sub> &nbsp;&nbsp; NM<sub>L</sub> = V<sub>IL</sub> − V<sub>OL</sub></div>
+    <div class="ex"><strong>Primer: TTL</strong>NM<sub>H</sub> = 2,4 V − 2,0 V = 0,4 V in NM<sub>L</sub> = 0,8 V − 0,4 V = 0,4 V. Pri 74HC (4,5 V) je NM<sub>H</sub> = 4,4 V − 3,15 V = 1,25 V, torej je CMOS na motnje precej bolj odporen.</div>
+    <h3>Pozitivna in negativna logika</h3>
+    <p>Običajno velja <strong>pozitivna logika</strong>: višja napetost pomeni 1. V <strong>negativni logiki</strong> je dogovor obrnjen, nizka napetost pomeni 1. Tako delajo na primer signali, ki so aktivni pri nizkem nivoju (npr. »reset« na mikrokrmilniku). V vajah uporabljamo pozitivno logiko.</p>
+    <div class="idea"><strong>Primer iz vsakdana, tipka na mikrokrmilniku:</strong> Arduino Uno ima napajanje 5 V. Če tipka na vhod pripelje 5 V, je to zanesljivo 1. Če pa vhod ostane »v zraku« (ni povezan nikamor), se napetost na njem naključno spreminja in pogosto pristane v prepovedanem območju. Zato vhodu dodamo upor (dvižni ali spustni), ki ga pri nepritisnjeni tipki drži na znanem nivoju.</div>
+    <div class="acts"><button class="btn g2" data-sim="s-nivoji">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <div class="card page" id="spremenljivke" data-grp="Teorija">
+    <h2>Logična stanja in spremenljivke</h2>
+    <p class="lead"><strong>Logična spremenljivka</strong> je veličina, ki ima lahko samo dve vrednosti: 0 ali 1. Označimo jo z veliko črko (A, B, C, … ali smiselno: T za tipko, V za vrata). <strong>Stanje</strong> je trenutna vrednost spremenljivke.</p>
+    <h3>Stikalo kot spremenljivka</h3>
+    <p>Najlažje si spremenljivko predstavljamo kot tipko. Tipka A ima dve stanji: ni pritisnjena (A = 0) in je pritisnjena (A = 1). Žarnica je <strong>izhod</strong> Y: ne sveti (Y = 0) ali sveti (Y = 1).</p>
+    <div class="scroll"><table class="cmp">
+      <tr><th>Kontakt</th><th>A = 0 (tipka ni pritisnjena)</th><th>A = 1 (tipka je pritisnjena)</th><th>Enačba za žarnico</th></tr>
+      <tr><td><strong>delovni</strong> (zapiralni, NO)</td><td>odprt, žarnica ne sveti</td><td>sklenjen, žarnica sveti</td><td class="m">Y = A</td></tr>
+      <tr><td><strong>mirovni</strong> (odpiralni, NC)</td><td>sklenjen, žarnica sveti</td><td>odprt, žarnica ne sveti</td><td class="m">Y = <span class="ng">A</span></td></tr>
+    </table></div>
+    <p>Črta nad spremenljivko pomeni <strong>negacijo</strong>: <span class="m"><span class="ng">A</span></span> beremo »ne A« ali »A negirano«. Ko je A = 0, je <span class="m"><span class="ng">A</span></span> = 1, in obratno. Pri vpisu na računalniku namesto črte pišemo ¬A ali A'.</p>
+    <h3>Povezovanje spremenljivk</h3>
+    <p>Spremenljivke povezujemo z <strong>logičnimi operatorji</strong>. Natančneje jih spoznaš v vaji 1.2, tukaj samo pogled s stikali:</p>
+    <div class="scroll"><table class="cmp">
+      <tr><th>Vezava tipk</th><th>Žarnica sveti, ko …</th><th>Operacija</th><th>Zapis</th></tr>
+      <tr><td>zaporedno</td><td>sta pritisnjeni A <em>in</em> B</td><td>konjunkcija (IN, AND)</td><td class="m">Y = A·B</td></tr>
+      <tr><td>vzporedno</td><td>je pritisnjena A <em>ali</em> B (ali obe)</td><td>disjunkcija (ALI, OR)</td><td class="m">Y = A + B</td></tr>
+      <tr><td>mirovni kontakt</td><td>A <em>ni</em> pritisnjena</td><td>negacija (NE, NOT)</td><td class="m">Y = <span class="ng">A</span></td></tr>
+    </table></div>
+    <div class="idea"><strong>Primer iz vsakdana, luč v hladilniku:</strong> stikalo v hladilniku je mirovni kontakt. Ko so vrata zaprta, pritiskajo na stikalo (A = 1) in luč ne sveti. Ko vrata odpreš, se stikalo sprosti (A = 0) in luč zasveti: Y = <span class="ng">A</span>.</div>
+    <div class="acts"><button class="btn g2" data-sim="s-stikala">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <div class="card page" id="funkcija" data-grp="Teorija">
+    <h2>Logična funkcija</h2>
+    <p class="lead"><strong>Logična funkcija</strong> pove, kako je izhod odvisen od vhodnih spremenljivk: Y = f(A, B, C, …). Za vsako kombinacijo vhodov ima izhod natanko eno vrednost, 0 ali 1. Funkcijo zapišemo z <strong>logično enačbo</strong>, s <strong>pravilnostno tabelo</strong> ali z <strong>vezjem iz logičnih vrat</strong>. Vsi trije zapisi povedo isto.</p>
+    <h3>Od opisa do enačbe</h3>
+    <div class="ex"><strong>Opozorilo za varnostni pas</strong>
+      Spremenljivki: S = voznik sedi na sedežu, P = pas je pripet. Opozorilo Y zapiska, ko voznik sedi <em>in</em> pas <em>ni</em> pripet:
+      <div class="eqbig">Y = S·<span class="ng">P</span></div></div>
+    <div class="ex"><strong>Alarm v hiši</strong>
+      Spremenljivke: V = alarm je vključen, O = okno je odprto, G = senzor zazna gibanje. Sirena Y se oglasi, ko je alarm vključen <em>in</em> je odprto okno <em>ali</em> je zaznano gibanje:
+      <div class="eqbig">Y = V·(O + G)</div></div>
+    <h3>Vrstni red računanja</h3>
+    <p>Kot v matematiki ima množenje prednost pred seštevanjem, ima tudi v logiki <strong>IN (·) prednost pred ALI (+)</strong>. Negacija ima prednost pred obema. Če želimo drugačen vrstni red, uporabimo oklepaje.</p>
+    <div class="eqb">A + B·C pomeni A + (B·C) &nbsp;&nbsp; (A + B)·C je nekaj drugega</div>
+    <div class="ex"><strong>Izračun za eno kombinacijo</strong> Y = V·(O + G) pri V = 1, O = 0, G = 1: najprej oklepaj, O + G = 0 + 1 = 1, nato Y = 1·1 = 1. Sirena se oglasi.</div>
+    <h3>Koliko je kombinacij in koliko funkcij?</h3>
+    <ul>
+      <li>Funkcija z <strong>n</strong> spremenljivkami ima <strong>2<sup>n</sup></strong> različnih kombinacij vhodov: 1 spremenljivka 2, dve 4, tri 8, štiri 16.</li>
+      <li>Ker je lahko izhod pri vsaki kombinaciji 0 ali 1, obstaja <strong>2<sup>2<sup>n</sup></sup></strong> različnih funkcij: za eno spremenljivko 4, za dve kar 16.</li>
+    </ul>
+    <div class="acts"><button class="btn g2" data-sim="s-funkcija">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <div class="card page" id="tabela" data-grp="Teorija">
+    <h2>Pravilnostna tabela</h2>
+    <p class="lead"><strong>Pravilnostna tabela</strong> našteje vse kombinacije vhodov in za vsako zapiše vrednost izhoda. Je najbolj pregleden zapis funkcije: iz nje takoj vidimo, kdaj je izhod 1.</p>
+    <h3>Kako sestavimo tabelo</h3>
+    <ol>
+      <li>V levi del zapiši stolpce vhodnih spremenljivk, v desni stolpec izhoda.</li>
+      <li>Vrstic je 2<sup>n</sup>. Vhode piši po vrsti kot dvojiška števila od 0 do 2<sup>n</sup> − 1: prva spremenljivka je najvišji bit.</li>
+      <li>Zadnji stolpec se menja v vsaki vrstici (0101…), predzadnji na dve vrstici (0011…), naslednji na štiri in tako naprej.</li>
+      <li>Za vsako vrstico izračunaj izhod iz enačbe ali opisa.</li>
+    </ol>
+    <div class="grid2">
+      <div><p class="label">Primer: Y = S·<span class="ng">P</span></p><div id="tabEx1"></div></div>
+      <div><p class="label">Primer: večina od treh</p><div id="tabEx2"></div></div>
+    </div>
+    <p><strong>Številka vrstice</strong> je dvojiško število, ki ga tvorijo vhodi. Vrstica A = 1, B = 0, C = 1 je vrstica 101<sub>2</sub> = 5. Ta zapis bomo pri minimizaciji pogosto uporabljali.</p>
+    <h3>Večina od treh (glasovanje)</h3>
+    <p>Trije sodniki pritisnejo tipko A, B ali C, če je met veljaven. Lučka Y zasveti, ko sta pritisnjeni <strong>vsaj dve</strong> tipki. V tabeli je Y = 1 v vrsticah 3, 5, 6 in 7. Iz opisa smo dobili tabelo, enačbo bomo izpeljali v vaji 1.4.</p>
+    <div class="idea"><strong>Primer iz vsakdana, varnostna stiskalnica:</strong> stiskalnica se spusti samo, ko operater z obema rokama drži tipki L in D <em>in</em> so zaščitna vrata zaprta (Z = 1). Od 8 vrstic tabele je Y = 1 samo v eni, Y = L·D·Z. Tako stroj ne more zmečkati roke.</div>
+    <div class="acts"><button class="btn g2" data-sim="s-tabela">Poskusi v simulaciji ›</button></div>
+  </div>
+
+  <!-- ===================== SIMULACIJA ===================== -->
+  <div class="card sim page" id="s-nivoji" data-grp="Simulacija">
+    <h2>Simulacija: logični nivoji</h2>
+    <h3>Kaj prebere vhod?</h3>
+    <p class="note">Izberi družino vezij in s drsnikom nastavi napetost na vhodu. Opazuj, v katerem območju je napetost in kaj vrata pošljejo naprej do svetleče diode.</p>
+    <div class="pills" id="nvFam"><span class="label">Družina</span>
+      <button class="pill" data-f="ttl" aria-pressed="true">TTL 74xx (5 V)</button><button class="pill" data-f="hc" aria-pressed="false">CMOS 74HC (4,5 V)</button></div>
+    <div class="volt"><label for="nvU" class="label">U<sub>vh</sub></label><input type="range" id="nvU" min="0" max="5" step="0.05" value="0.3"><span class="vv" id="nvUv"></span><span id="nvZone"></span></div>
+    <div class="pills symsel"></div>
+    <div class="simrow two">
+      <div class="fig" id="fig-nv1"></div>
+      <div class="fig" id="fig-nvbar"></div>
+    </div>
+    <div class="readout" id="nvRo"></div>
+
+    <div class="sec">
+      <h3>Šumna rezerva</h3>
+      <p class="note">Oddajnik pošilja logično stanje z najslabšo zagotovljeno izhodno napetostjo (V<sub>OL</sub> ali V<sub>OH</sub>). Na žici se prišteje motnja. Ali sprejemnik še prebere pravo vrednost?</p>
+      <div class="pills" id="nmBit"><span class="label">Oddajnik pošilja</span>
+        <button class="pill" data-b="0" aria-pressed="false">0</button><button class="pill" data-b="1" aria-pressed="true">1</button></div>
+      <div class="volt"><label for="nmN" class="label">Motnja</label><input type="range" id="nmN" min="-1.5" max="1.5" step="0.05" value="0"><span class="vv" id="nmNv"></span></div>
+      <div class="fig wide" id="fig-nm"></div>
+      <div class="readout" id="nmRo"></div>
+    </div>
+    <div class="izziv"><p><strong>Izziv:</strong> pri TTL pošlji 1. Kolikšna je največja motnja navzdol, pri kateri sprejemnik še zanesljivo prebere 1? Preklopi na 74HC in primerjaj.</p><button class="btn g2 sm" data-hint="nvHint">Namig</button></div>
+    <p class="hintbox" id="nvHint" hidden>TTL: V<sub>OH</sub> = 2,4 V, V<sub>IH</sub> = 2,0 V, torej največ −0,4 V. 74HC: 4,4 V − 3,15 V = 1,25 V. To je šumna rezerva NM<sub>H</sub>.</p>
+  </div>
+
+  <div class="card sim page" id="s-stikala" data-grp="Simulacija">
+    <h2>Simulacija: stikala in žarnica</h2>
+    <p class="note">Izberi vezavo, nato pritiskaj tipki A in B. Levo je vezje s kontakti, desno ista funkcija z logičnimi vrati. Spodaj je pravilnostna tabela, trenutna vrstica je obarvana.</p>
+    <div class="pills" id="swMode"><span class="label">Vezava</span>
+      <button class="pill" data-m="no" aria-pressed="true">delovni kontakt</button>
+      <button class="pill" data-m="nc" aria-pressed="false">mirovni kontakt</button>
+      <button class="pill" data-m="ser" aria-pressed="false">zaporedno</button>
+      <button class="pill" data-m="par" aria-pressed="false">vzporedno</button>
+      <button class="pill" data-m="mix" aria-pressed="false">delovni A, mirovni B</button></div>
+    <div class="toggles" id="swT"></div>
+    <div class="pills symsel"></div>
+    <div class="simrow two">
+      <div class="fig" id="fig-sw"></div>
+      <div class="fig" id="fig-swg"></div>
+    </div>
+    <div class="simrow two">
+      <div id="swTab"></div>
+      <div class="readout" id="swRo"></div>
+    </div>
+    <div class="izziv"><p><strong>Izziv:</strong> izberi »delovni A, mirovni B«. Pri kateri kombinaciji tipk žarnica sveti? Kje bi tako vezavo srečal v resnici?</p><button class="btn g2 sm" data-hint="swHint">Namig</button></div>
+    <p class="hintbox" id="swHint" hidden>Žarnica sveti samo pri A = 1 in B = 0, torej Y = A·<span class="ng">B</span>. Primer: motor se vrti, ko držiš tipko »start« (A) in ni pritisnjena tipka »stop« (B).</p>
+  </div>
+
+  <div class="card sim page" id="s-funkcija" data-grp="Simulacija">
+    <h2>Simulacija: logična funkcija v živo</h2>
+    <p class="note">Izberi primer, nato preklapljaj vhode. Enačba, vezje in tabela so trije zapisi iste funkcije. Klik na vrstico tabele nastavi vhode na to kombinacijo.</p>
+    <div class="pills" id="fnSel"><span class="label">Primer</span></div>
+    <div class="desc" id="fnDesc"></div>
+    <div class="eqbig" id="fnEq"></div>
+    <div class="toggles" id="fnT"></div>
+    <div class="pills symsel"></div>
+    <div class="simrow two">
+      <div class="fig" id="fig-fn"></div>
+      <div id="fnTab"></div>
+    </div>
+    <div class="readout" id="fnRo"></div>
+    <div class="izziv"><p><strong>Izziv:</strong> pri alarmu nastavi O = 1 in G = 1. Kaj mora veljati za V, da se sirena oglasi? Pri koliko vrsticah tabele je Y = 1?</p><button class="btn g2 sm" data-hint="fnHint">Namig</button></div>
+    <p class="hintbox" id="fnHint" hidden>Brez V = 1 sirena nikoli ne zapiska, ker je V vezan z IN. Y = 1 je v vrsticah 5, 6 in 7 (V = 1 in vsaj eden od O, G).</p>
+  </div>
+
+  <div class="card sim page" id="s-tabela" data-grp="Simulacija">
+    <h2>Simulacija: pravilnostna tabela</h2>
+    <h3>Kako raste tabela</h3>
+    <p class="note">Izberi število spremenljivk in s tipko »Naslednja vrstica« štej. Svetilke kažejo kombinacijo trenutne vrstice. Opazuj, kako pogosto se menja vsak stolpec.</p>
+    <div class="pills" id="tgN"><span class="label">Spremenljivk</span>
+      <button class="pill" data-n="1" aria-pressed="false">1</button><button class="pill" data-n="2" aria-pressed="false">2</button><button class="pill" data-n="3" aria-pressed="true">3</button><button class="pill" data-n="4" aria-pressed="false">4</button></div>
+    <div class="acts" style="margin-top:0"><button class="btn g2 sm" id="tgPrev">‹ Prejšnja vrstica</button><button class="btn g2 sm" id="tgNext">Naslednja vrstica ›</button></div>
+    <div class="lamps" id="tgLamps"></div>
+    <div class="simrow two">
+      <div id="tgTab"></div>
+      <div class="readout" id="tgRo"></div>
+    </div>
+
+    <div class="sec">
+      <h3>Od opisa do tabele</h3>
+      <p class="note">Preberi opis, nato v stolpcu Y klikaj celice (? → 0 → 1). Ko izpolniš vse, preveri. Nato si lahko ogledaš še vezje, ki to funkcijo izvede.</p>
+      <div class="pills" id="odSel"><span class="label">Naloga</span></div>
+      <div class="desc" id="odDesc"></div>
+      <div id="odTab"></div>
+      <div class="acts"><button class="btn sm" id="odChk">Preveri tabelo</button><button class="btn g2 sm" id="odShow">Pokaži enačbo in vezje</button></div>
+      <p class="status" id="odMsg"></p>
+      <div id="odSol" hidden><div class="eqbig" id="odEq"></div><div class="pills symsel"></div><div class="fig" id="fig-od"></div></div>
+    </div>
+    <div class="izziv"><p><strong>Izziv:</strong> koliko vrstic ima tabela s štirimi spremenljivkami? Kateri stolpec se menja najredkeje?</p><button class="btn g2 sm" data-hint="tgHint">Namig</button></div>
+    <p class="hintbox" id="tgHint" hidden>2<sup>4</sup> = 16 vrstic. Prvi stolpec (A, najvišji bit) je osem vrstic 0 in nato osem vrstic 1.</p>
+  </div>
+
+  <!-- ===================== NALOGE ===================== -->
+  <div class="page" id="naloge" data-grp="Naloge">
+    <div class="sticky">
+      <div class="progress">
+        <span class="label">Napredek</span>
+        <div class="bar"><i id="bar"></i></div>
+        <span id="score" class="m">0 / 0 t</span>
+      </div>
+      <div class="nums" id="nums" aria-label="Številke nalog"></div>
+    </div>
+    <div id="tasks"></div>
+    <div class="card">
+      <p class="note">Napredek se shranjuje v tvojem računu. Če želiš začeti znova, vse naloge in cilje počistiš tukaj.</p>
+      <div id="resetBox"><button class="btn danger sm" id="resetBtn">Ponastavi napredek</button></div>
+    </div>
+  </div>
+
+
+</main>
+
+<aside id="nav" aria-label="Navigacija po vaji"></aside>
+</div>
+<script>
+/* Skupne pomožne funkcije za vaji 2.1 in 2.2: pretvorbe, rešitve po korakih, preverjanje vnosa. */
+const LIB=(function(){
+  const SUBS={2:'₂',8:'₈',10:'₁₀',16:'₁₆'};
+  const SUPD='⁰¹²³⁴⁵⁶⁷⁸⁹';
+  const sup=n=>String(n).split('').map(c=>SUPD[+c]).join('');
+  const dcm=x=>String(Math.round(x*1e9)/1e9).replace('.',',');
+  const toB=(n,b,w)=>{ const s=Math.floor(Math.abs(n)).toString(b).toUpperCase(); return w?s.padStart(w,'0'):s; };
+
+  // niz v bazi b (z morebitnim ulomkom) -> število; NaN pri napačnem vnosu
+  const parse=(s,b)=>{
+    s=String(s).trim().toUpperCase().replace(',','.'); if(s==='') return NaN;
+    const ok={2:/^[01]*(\.[01]*)?$/,8:/^[0-7]*(\.[0-7]*)?$/,10:/^\d*(\.\d*)?$/,16:/^[0-9A-F]*(\.[0-9A-F]*)?$/}[b];
+    if(!ok.test(s)||s==='.') return NaN;
+    const parts=s.split('.'), i=parts[0], f=parts[1]||'';
+    let v=i?parseInt(i,b):0;
+    for(let k=0;k<f.length;k++) v+=parseInt(f[k],b)/Math.pow(b,k+1);
+    return v;
+  };
+  // ulomek v bazi b z največ max števkami
+  const fracStr=(x,b,max)=>{ max=max||8; let f=x-Math.floor(x),d='',n=0;
+    while(f>1e-9&&n<max){ f*=b; const k=Math.floor(f+1e-9); d+=k.toString(b).toUpperCase(); f-=k; n++; }
+    return {d:d,exact:f<=1e-9}; };
+  const fromNum=(x,b,max)=>{ const i=toB(x,b), fr=fracStr(x,b,max); return {s:i+(fr.d?'.'+fr.d:''),exact:fr.exact}; };
+
+  // ---- rešitve po korakih (HTML) ----
+  const divSteps=(n,b)=>{
+    let h='<div class="stp"><div class="hd">Deljenje z '+b+' (ostanke beri od spodaj navzgor)</div>';
+    let q=n; if(q===0) h+='<div>0 : '+b+' = 0, ostanek 0</div>';
+    while(q>0){ const r=q%b, nq=Math.floor(q/b);
+      h+='<div>'+q+' : '+b+' = '+nq+', ostanek '+r+(r>9?' ('+r.toString(16).toUpperCase()+')':'')+'</div>'; q=nq; }
+    return h+'<div class="res">'+n+SUBS[10]+' = '+toB(n,b)+SUBS[b]+'</div></div>';
+  };
+  const mulSteps=(x,b,max)=>{
+    max=max||8; let f=x-Math.floor(x), n=0;
+    let h='<div class="stp"><div class="hd">Ulomek: množi z '+b+' in beri cele dele od zgoraj navzdol</div>';
+    while(f>1e-9&&n<max){ const v=f*b, k=Math.floor(v+1e-9);
+      h+='<div>'+dcm(f)+' · '+b+' = '+dcm(Math.round(v*1e6)/1e6)+' → '+k.toString(b).toUpperCase()+'</div>'; f=v-k; n++; }
+    return h+'</div>';
+  };
+  const weightSum=(s,b)=>{
+    s=String(s).toUpperCase().replace(',','.'); const p=s.split('.'), i=p[0], f=p[1]||'';
+    const terms=[]; let tot=0;
+    for(let k=0;k<i.length;k++){ const e=i.length-1-k, d=parseInt(i[k],b), w=Math.pow(b,e); tot+=d*w; terms.push(d+'·'+w); }
+    for(let k=0;k<f.length;k++){ const d=parseInt(f[k],b), w=Math.pow(b,-(k+1)); tot+=d*w; terms.push(d+'·'+dcm(w)); }
+    return '<div class="stp"><div class="hd">Vsaka števka krat utež njenega mesta</div><div>'+terms.join(' + ')+'</div><div class="res">= '+dcm(tot)+SUBS[10]+'</div></div>';
+  };
+  const grpBits=(s,k)=>{ const p=s.padStart(Math.ceil(s.length/k)*k,'0'); return p.match(new RegExp('.{'+k+'}','g')); };
+  const bin2x=(s,b)=>{ const k=Math.log2(b), g=grpBits(s,k);
+    return '<div class="stp"><div class="hd">Bite razdeli v skupine po '+k+' (od desne)</div><div>'+g.join(' ')+'</div><div>'+g.map(x=>parseInt(x,2).toString(b).toUpperCase()).join(' ')+'</div><div class="res">'+s+SUBS[2]+' = '+toB(parseInt(s,2),b)+SUBS[b]+'</div></div>'; };
+  const x2bin=(s,b)=>{ const k=Math.log2(b), d=s.toUpperCase().split('');
+    return '<div class="stp"><div class="hd">Vsako števko zapiši s '+k+' biti</div><div>'+d.map(c=>c+' = '+parseInt(c,b).toString(2).padStart(k,'0')).join(', ')+'</div><div class="res">'+s.toUpperCase()+SUBS[b]+' = '+toB(parseInt(s,b),2)+SUBS[2]+'</div></div>'; };
+  // splošna rešitev za pretvorbo niza s iz baze f v bazo t
+  const solFor=(s,f,t)=>{
+    s=String(s).toUpperCase();
+    if(f===t) return '';
+    if(f===10){ const x=parse(s,10); let h=divSteps(Math.floor(x),t); if(x%1) h+=mulSteps(x,t); return h; }
+    if(t===10) return weightSum(s,f);
+    if(f===2) return bin2x(s,t);
+    if(t===2) return x2bin(s,f);
+    return x2bin(s,f)+bin2x(toB(parseInt(s,f),2),t);
+  };
+
+  // ---- dvojiški komplement ----
+  const tc=(n,w)=>toB(((n%(1<<w))+(1<<w))%(1<<w),2,w);
+  const sv=bits=>{ const w=bits.length, v=parseInt(bits,2); return bits[0]==='1'?v-(1<<w):v; };
+  const inv=bits=>bits.split('').map(c=>c==='1'?'0':'1').join('');
+  // ---- Grayeva koda ----
+  const gray=n=>n^(n>>1);
+  const ungray=g=>{ let b=0; for(let x=g;x;x>>=1) b^=x; return b; };
+  // ---- pariteta ----
+  const ones=s=>String(s).split('').filter(c=>c==='1').length;
+  const pbit=(bits,mode)=>{ const o=ones(bits)%2; return mode==='liho'?1-o:o; };
+  // ---- ASCII ----
+  const ac=c=>c.charCodeAt(0);
+  const hexBytes=t=>t.split('').map(c=>toB(ac(c),16,2)).join(' ');
+
+  // ---- naloge: izbira odgovora s pravilnim odgovorom na mestu pos ----
+  const mc=(correct,wrong,pos)=>{
+    const c=String(correct), w=[...new Set(wrong.map(String))].filter(x=>x!==c).slice(0,3);
+    const o=w.slice(); o.splice(pos,0,c); return {opts:o,ans:pos};
+  };
+
+  // ---- preverjanje vnosa ----
+  // fmt: bin | oct | dec | hex | txt; w: natančna dolžina (vodilne ničle štejejo)
+  const canon=(s,fmt,w)=>{
+    if(s==null) return null;
+    let t=String(s).trim().toUpperCase().replace(/[\s_]/g,'').replace(/[−–]/g,'-').replace(',','.');
+    if(fmt==='txt') return t;
+    if(fmt==='hex') t=t.replace(/^0X/,''); else if(fmt==='bin') t=t.replace(/^0B/,'');
+    const neg=t[0]==='-'; if(neg) t=t.slice(1);
+    if(t[0]==='.') t='0'+t;
+    const re={bin:/^[01]+(\.[01]+)?$/,oct:/^[0-7]+(\.[0-7]+)?$/,dec:/^\d+(\.\d+)?$/,hex:/^[0-9A-F]+(\.[0-9A-F]+)?$/}[fmt];
+    if(!re||!re.test(t)) return null;
+    if(w){ return t.length===w?(neg?'-':'')+t:null; }
+    const p=t.split('.'); let i=p[0].replace(/^0+(?=.)/,''), f=p[1];
+    if(f!==undefined) f=f.replace(/0+$/,'');
+    let r=i+(f?'.'+f:''); if(neg&&r!=='0') r='-'+r; return r;
+  };
+  const same=(given,fld)=>{ const a=canon(given,fld.f,fld.w), b=canon(fld.a,fld.f,fld.w); return a!==null&&a===b; };
+
+  return {SUBS,sup,dcm,toB,parse,fracStr,fromNum,divSteps,mulSteps,weightSum,grpBits,bin2x,x2bin,solFor,tc,sv,inv,gray,ungray,ones,pbit,ac,hexBytes,mc,canon,same};
+})();
+if(typeof module!=='undefined') module.exports=LIB;
+
+
+</script>
+<script>
+/* BOOL: logični izrazi za vaje LAV-ELS 1.x
+   - parse(niz): drevo izraza. Negacija: ¬A, !A, /A, ~A ali A'. IN: · * & ali zapis skupaj (AB). ALI: + |. XOR: ⊕ ^. NAND: ↑. NOR: ↓.
+   - ev(drevo, okolje): vrednost 0 ali 1
+   - html(drevo): zapis s črto nad negacijo
+   - vars, table, minterms, qm (minimalna vsota produktov), lits (število literalov) */
+const BOOL=(function(){
+  const PREC={or:1,nor:1,xor:2,xnor:2,and:3,nand:3,not:4,var:5,const:5};
+  function tokenize(src){
+    const s=String(src).replace(/^\s*[A-Za-z]\s*=/,'').toUpperCase();
+    const out=[];
+    for(let i=0;i<s.length;i++){
+      const c=s[i];
+      if(/\s/.test(c)) continue;
+      if(/[A-Z]/.test(c)) out.push({k:'v',v:c});
+      else if(c==='0'||c==='1') out.push({k:'c',v:+c});
+      else if('¬!/~'.includes(c)) out.push({k:'not'});
+      else if(c==="'"||c==='’'||c==='´') out.push({k:'post'});
+      else if('·*&∙•'.includes(c)) out.push({k:'and'});
+      else if('+|∨'.includes(c)) out.push({k:'or'});
+      else if('⊕^'.includes(c)) out.push({k:'xor'});
+      else if(c==='↑') out.push({k:'nand'});
+      else if(c==='↓') out.push({k:'nor'});
+      else if(c==='(') out.push({k:'('});
+      else if(c===')') out.push({k:')'});
+      else throw new Error('Neznan znak »'+src[i]+'«');
+    }
+    return out;
+  }
+  function parse(src){
+    const T=tokenize(src); let p=0;
+    const peek=()=>T[p], eat=k=>{ if(!T[p]||T[p].k!==k) throw new Error(k===')'?'Manjka zaklepaj':'Napaka v izrazu'); return T[p++]; };
+    function orE(){
+      let a=xorE(), list=[a];
+      while(peek()&&(peek().k==='or'||peek().k==='nor')){
+        const k=T[p++].k, b=xorE();
+        if(k==='or'){ list.push(b); }
+        else { const left=list.length>1?{t:'or',args:list}:list[0]; list=[{t:'nor',args:[left,b]}]; }
+      }
+      return list.length>1?{t:'or',args:list}:list[0];
+    }
+    function xorE(){
+      let list=[andE()];
+      while(peek()&&peek().k==='xor'){ p++; list.push(andE()); }
+      return list.length>1?{t:'xor',args:list}:list[0];
+    }
+    const startsUnary=t=>t&&(t.k==='v'||t.k==='c'||t.k==='('||t.k==='not');
+    function andE(){
+      let list=[unE()];
+      for(;;){
+        const t=peek();
+        if(t&&t.k==='and'){ p++; list.push(unE()); }
+        else if(t&&t.k==='nand'){ p++; const b=unE(); const left=list.length>1?{t:'and',args:list}:list[0]; list=[{t:'nand',args:[left,b]}]; }
+        else if(startsUnary(t)) list.push(unE());
+        else break;
+      }
+      return list.length>1?{t:'and',args:list}:list[0];
+    }
+    function unE(){
+      const t=peek();
+      if(t&&t.k==='not'){ p++; return {t:'not',a:unE()}; }
+      let n=prim();
+      while(peek()&&peek().k==='post'){ p++; n={t:'not',a:n}; }
+      return n;
+    }
+    function prim(){
+      const t=peek();
+      if(!t) throw new Error('Izraz je nepopoln');
+      if(t.k==='v'){ p++; return {t:'var',n:t.v}; }
+      if(t.k==='c'){ p++; return {t:'const',v:t.v}; }
+      if(t.k==='('){ p++; const e=orE(); eat(')'); return {t:'par',a:e}; }
+      throw new Error('Napaka v izrazu');
+    }
+    if(!T.length) throw new Error('Izraz je prazen');
+    const r=orE();
+    if(p<T.length) throw new Error(T[p].k===')'?'Preveč zaklepajev':'Napaka v izrazu');
+    return strip(r);
+  }
+  // oklepaji so samo v razčlenjevanju; v drevesu jih ne hranimo
+  function strip(n){
+    if(n.t==='par') return strip(n.a);
+    if(n.t==='not') return {t:'not',a:strip(n.a)};
+    if(n.args) return {t:n.t,args:n.args.map(strip)};
+    return n;
+  }
+  const kids=n=>n.t==='not'?[n.a]:(n.args||[]);
+  function ev(n,env){
+    switch(n.t){
+      case 'var': return env[n.n]?1:0;
+      case 'const': return n.v;
+      case 'not': return 1-ev(n.a,env);
+      case 'and': return n.args.every(a=>ev(a,env))?1:0;
+      case 'or': return n.args.some(a=>ev(a,env))?1:0;
+      case 'xor': return n.args.reduce((s,a)=>s^ev(a,env),0);
+      case 'xnor': return 1-n.args.reduce((s,a)=>s^ev(a,env),0);
+      case 'nand': return n.args.every(a=>ev(a,env))?0:1;
+      case 'nor': return n.args.some(a=>ev(a,env))?0:1;
+    }
+    throw new Error('Neznano vozlišče');
+  }
+  function vars(n,set){ set=set||new Set(); if(n.t==='var') set.add(n.n); kids(n).forEach(k=>vars(k,set)); return set; }
+  // oklepaj: nižja prednost; NAND in NOR vedno v oklepaju, pod NAND ali NOR vsaka dvomestna operacija
+  const NN=t=>t==='nand'||t==='nor';
+  const needP=(t,par)=>!!par&&(PREC[t]<PREC[par]||NN(t)||(NN(par)&&PREC[t]<4));
+  const SYMB={and:'·',or:' + ',xor:' ⊕ ',nand:' ↑ ',nor:' ↓ ',xnor:' ⊙ '};
+  function html(n,par){
+    let s;
+    if(n.t==='var') return n.n;
+    if(n.t==='const') return String(n.v);
+    if(n.t==='not') return '<span class="ng">'+html(n.a,null)+'</span>';
+    s=n.args.map(a=>html(a,n.t)).join(SYMB[n.t]);
+    if(needP(n.t,par)) s='('+s+')';
+    return s;
+  }
+  function text(n,par){
+    let s;
+    if(n.t==='var') return n.n;
+    if(n.t==='const') return String(n.v);
+    if(n.t==='not') return '¬'+(n.a.t==='var'||n.a.t==='const'||n.a.t==='not'?text(n.a,'not'):'('+text(n.a,null)+')');
+    s=n.args.map(a=>text(a,n.t)).join(SYMB[n.t]);
+    if(needP(n.t,par)) s='('+s+')';
+    return s;
+  }
+  // vrstice tabele: prva spremenljivka je najvišji bit
+  const envOf=(vs,m)=>{ const e={}; vs.forEach((v,i)=>{ e[v]=(m>>(vs.length-1-i))&1; }); return e; };
+  const table=(n,vs)=>Array.from({length:1<<vs.length},(_,m)=>ev(n,envOf(vs,m)));
+  const minterms=(n,vs)=>table(n,vs).map((v,m)=>v?m:-1).filter(m=>m>=0);
+  const H=s=>html(parse(s));
+  // Quine-McCluskey: implikanti kot [vrednost, maska]; maska ima 1 tam, kjer spremenljivka izpade
+  function qm(on,nv,dc){
+    dc=dc||[];
+    const all=[...new Set([...on,...dc])];
+    if(!on.length) return [];
+    let cur=all.map(m=>({v:m,m:0,used:false})), primes=[];
+    const pc=x=>{ let c=0; while(x){ c+=x&1; x>>=1; } return c; };
+    while(cur.length){
+      const nxt=[], seen=new Set();
+      for(let i=0;i<cur.length;i++) for(let j=i+1;j<cur.length;j++){
+        const a=cur[i], b=cur[j];
+        if(a.m!==b.m) continue;
+        const d=a.v^b.v;
+        if(pc(d)===1){ a.used=b.used=true; const v=a.v&~d, m=a.m|d, k=v+':'+m; if(!seen.has(k)){ seen.add(k); nxt.push({v,m,used:false}); } }
+      }
+      cur.forEach(c=>{ if(!c.used) primes.push(c); });
+      cur=nxt;
+    }
+    const covers=(p,x)=>(x&~p.m)===p.v;
+    // najmanjše pokritje: najprej najmanj implikantov, nato najmanj literalov (izčrpno pri do 4 spremenljivkah)
+    const cost=p=>nv-pc(p.m);
+    let best=null;
+    const P=primes.filter(p=>on.some(x=>covers(p,x)));
+    const n=P.length;
+    if(n<=20){
+      for(let mask=1;mask<(1<<n);mask++){
+        const pick=P.filter((_,i)=>mask>>i&1);
+        if(!on.every(x=>pick.some(p=>covers(p,x)))) continue;
+        const sc=[pick.length,pick.reduce((s,p)=>s+cost(p),0)];
+        if(!best||sc[0]<best.sc[0]||(sc[0]===best.sc[0]&&sc[1]<best.sc[1])) best={pick,sc};
+      }
+      return best.pick;
+    }
+    return P;
+  }
+  // implikant v izraz (vsota produktov ali produkt vsot)
+  function impSOP(p,vs){ const nv=vs.length, l=[]; vs.forEach((v,i)=>{ const b=1<<(nv-1-i); if(!(p.m&b)) l.push((p.v&b)?v:'¬'+v); }); return l.length?l.join('·'):'1'; }
+  function impPOS(p,vs){ const nv=vs.length, l=[]; vs.forEach((v,i)=>{ const b=1<<(nv-1-i); if(!(p.m&b)) l.push((p.v&b)?'¬'+v:v); }); return l.length>1?'('+l.join(' + ')+')':(l[0]||'0'); }
+  const sop=(on,vs,dc)=>{ if(!on.length) return '0'; if(on.length+(dc||[]).length===(1<<vs.length)&&!qm(on,vs.length,dc).some(p=>p.m!==(1<<vs.length)-1)) return '1'; const ps=qm(on,vs.length,dc); return ps.some(p=>p.m===(1<<vs.length)-1)?'1':ps.map(p=>impSOP(p,vs)).join(' + '); };
+  const pos=(on,vs,dc)=>{ const N=1<<vs.length, off=[]; for(let m=0;m<N;m++) if(!on.includes(m)&&!(dc||[]).includes(m)) off.push(m); if(!off.length) return '1'; const ps=qm(off,vs.length,dc); return ps.some(p=>p.m===N-1)?'0':ps.map(p=>impPOS(p,vs)).join('·'); };
+  // število literalov in vrat (za preverjanje, ali je izraz res okrajšan)
+  function lits(n){ if(n.t==='var') return 1; if(n.t==='const') return 0; return kids(n).reduce((s,k)=>s+lits(k),0); }
+  function gates(n){ if(n.t==='var'||n.t==='const') return 0; if(n.t==='not'&&n.a.t==='var') return 1; return 1+kids(n).reduce((s,k)=>s+gates(k),0); }
+  function onlyOps(n,ok){ if(n.t==='var'||n.t==='const') return true; if(!ok.includes(n.t)) return false; return kids(n).every(k=>onlyOps(k,ok)); }
+  return {parse,ev,vars,html,text,H,envOf,table,minterms,qm,sop,pos,lits,gates,onlyOps,kids,impSOP,impPOS};
+})();
+if(typeof module!=='undefined') module.exports=BOOL;
+
+</script>
+<script>
+const CFG={
+  key:'scnm_lavele_1_1_v1',
+  th:['uvod','nivoji','spremenljivke','funkcija','tabela'],
+  sim:['s-nivoji','s-stikala','s-funkcija','s-tabela'],
+  LAB:{
+    uvod:'Uvod in cilji', nivoji:'Logični nivoji', spremenljivke:'Stanja in spremenljivke', funkcija:'Logična funkcija', tabela:'Pravilnostna tabela',
+    's-nivoji':'Logični nivoji', 's-stikala':'Stikala in žarnica', 's-funkcija':'Funkcija v živo', 's-tabela':'Pravilnostna tabela', naloge:'Naloge'},
+  GOALS:[
+    'Poznam pomen logičnih nivojev in znam razbrati V<sub>IL</sub>, V<sub>IH</sub>, V<sub>OL</sub> in V<sub>OH</sub> za TTL in CMOS.',
+    'Znam izračunati šumno rezervo in razložiti prepovedano območje.',
+    'Vem, kaj je logična spremenljivka in kako jo predstavimo s stikalom.',
+    'Znam zapisati logično funkcijo z enačbo in jo izračunati za dano kombinacijo vhodov.',
+    'Znam sestaviti pravilnostno tabelo za funkcijo dveh, treh ali štirih spremenljivk.'
+  ],
+  MODS:[
+    {id:'niv', n:'01', t:'Logični nivoji', d:'Napetost in logično stanje, TTL in CMOS, šumna rezerva.', first:'nivoji', th:1, sim:1},
+    {id:'spr', n:'02', t:'Stanja in spremenljivke', d:'Tipka kot spremenljivka, delovni in mirovni kontakt, negacija.', first:'spremenljivke', th:1, sim:1},
+    {id:'fun', n:'03', t:'Logična funkcija', d:'Od opisa do enačbe, vrstni red računanja, število kombinacij.', first:'funkcija', th:1, sim:1},
+    {id:'tab', n:'04', t:'Pravilnostna tabela', d:'Vse kombinacije vhodov, številka vrstice, od opisa do tabele.', first:'tabela', th:1, sim:1}
+  ],
+  MODN:{niv:'Logični nivoji',spr:'Stanja in spremenljivke',fun:'Logična funkcija',tab:'Pravilnostna tabela'}
+};
+
+</script>
+<script>
+// Skupne pomožne funkcije za naloge tematike 1 (izbira, vpis, tabela, rešitve s tabelo).
+const mm=s=>'<span class="m">'+s+'</span>';
+const NG=s=>'<span class="ng">'+s+'</span>';
+let _pi=0; const POS=[1,3,0,2,2,0,3,1]; const P=()=>POS[_pi++%POS.length];
+const mcq=(lvl,mod,q,correct,wrong,hint,sol,mono)=>Object.assign({lvl,mod,q,hint,sol,mono:!!mono},LIB.mc(correct,wrong,P()));
+const inq=(lvl,mod,q,fields,hint,sol)=>({lvl,mod,type:'in',q,fields,hint,sol});
+const F=(l,a,f,o)=>Object.assign({l,a:String(a),f},o||{});
+const ans=(t,v)=>'<p>'+t+' <strong class="m">'+v+'</strong></p>';
+const stp=(hd,lines,res)=>'<div class="stp"><div class="hd">'+hd+'</div>'+lines.map(l=>'<div>'+l+'</div>').join('')+(res?'<div class="res">'+res+'</div>':'')+'</div>';
+// tabela z vmesnimi stolpci za rešitve: cols = [[ime, izraz], ...]
+function solTab(ins,cols){
+  const C=cols.map(c=>({n:c[0],a:BOOL.parse(c[1])}));
+  let h='<div class="scroll"><table class="qtab"><tr>'+ins.map(v=>'<th>'+v+'</th>').join('')+C.map(c=>'<th>'+c.n+'</th>').join('')+'</tr>';
+  for(let m=0;m<(1<<ins.length);m++){ const e=BOOL.envOf(ins,m);
+    h+='<tr>'+ins.map(v=>'<td>'+e[v]+'</td>').join('')+C.map((c,j)=>{ const y=BOOL.ev(c.a,e); return '<td'+(j===C.length-1&&y?' style="color:var(--sig);font-weight:700"':'')+'>'+y+'</td>'; }).join('')+'</tr>'; }
+  return h+'</table></div>';
+}
+// naloga »izpolni tabelo«: outs = {ime: izraz}
+function ttq(lvl,mod,q,ins,outs,hint,sol){
+  const names=Object.keys(outs), asts=names.map(n=>BOOL.parse(outs[n]));
+  return {lvl,mod,type:'tt',q,ins,outs:names,fn:row=>{ const e={}; ins.forEach((v,i)=>e[v]=row[i]); return asts.map(a=>BOOL.ev(a,e)); },hint,sol,_ex:outs};
+}
+const qtab=(ins,ys)=>'<table class="qtab"><tr>'+ins.map(v=>'<th>'+v+'</th>').join('')+'<th>Y</th></tr>'+ys.map((y,m)=>'<tr>'+ins.map((v,i)=>'<td>'+((m>>(ins.length-1-i))&1)+'</td>').join('')+'<td>'+y+'</td></tr>').join('')+'</table>';
+
+// vpis izraza: o = {vars, target ali on/dc, min, nv, ops, pos, lab, ph}
+const exq=(lvl,mod,q,o,hint,sol)=>Object.assign({lvl,mod,type:'ex',q,hint,sol},o);
+// izpolni Veitchev diagram: o = {vars, target ali on}
+const kmq=(lvl,mod,q,o,hint,sol)=>Object.assign({lvl,mod,type:'km',q,hint,sol},o);
+const KMS='<div class="kmsol"></div>';
+const EQ=(s,lab)=>'<div class="eqbig">'+(lab===undefined?'Y = ':lab)+BOOL.H(s)+'</div>';
+// sam označi skupine v diagramu in zapiši minimalno PDNO
+const grq=(lvl,mod,q,o,hint,sol,extra)=>Object.assign({lvl,mod,type:'grp',q,hint,sol},o,extra||{});
+
+// Naloge vaje 1.1. Odgovori pri tabelah se izračunajo z BOOL iz enačb, verify.js jih primerja z ročno zapisanimi stolpci.
+const TASKS=[
+// ===================== LOGIČNI NIVOJI =====================
+mcq('lahka','niv','Pri vezjih TTL (V<sub>CC</sub> = 5 V) je V<sub>IL</sub> = 0,8 V in V<sub>IH</sub> = 2,0 V. Katere vhodne napetosti vrata zanesljivo preberejo kot logično 1?','od 2,0 V do 5 V',['od 0 V do 0,8 V','od 0,8 V do 2,0 V','samo natanko 5 V'],
+  'V<sub>IH</sub> je najmanjša napetost, ki jo vrata še razumejo kot 1.',ans('Odgovor:','od 2,0 V do 5 V')+'<p>Vse od V<sub>IH</sub> = 2,0 V navzgor (do napajalne napetosti) je logična 1.</p>'),
+mcq('lahka','niv','Na vhod vrat TTL pripeljemo 1,4 V. Kaj vrata preberejo?','Ne vemo: napetost je v prepovedanem območju',['Zanesljivo 0','Zanesljivo 1','Polovično vrednost 0,5'],
+  'Primerjaj 1,4 V z V<sub>IL</sub> = 0,8 V in V<sub>IH</sub> = 2,0 V.',ans('Odgovor:','prepovedano območje')+'<p>1,4 V je nad 0,8 V in pod 2,0 V. Proizvajalec za to območje ne zagotavlja ničesar. Logično vezje ne pozna »polovične« vrednosti.</p>'),
+inq('srednja','niv','Izhod vrat TTL da za logično 1 najmanj V<sub>OH</sub> = 2,4 V, vhod pa potrebuje najmanj V<sub>IH</sub> = 2,0 V. Kolikšna je šumna rezerva NM<sub>H</sub>?',[F('NM<sub>H</sub>','0.4','dec',{u:'V',ph:'v voltih'})],
+  'NM<sub>H</sub> = V<sub>OH</sub> − V<sub>IH</sub>.',stp('Šumna rezerva za stanje 1',['NM<sub>H</sub> = V<sub>OH</sub> − V<sub>IH</sub>','NM<sub>H</sub> = 2,4 V − 2,0 V'],'NM<sub>H</sub> = 0,4 V')),
+mcq('srednja','niv','Senzor z napajanjem 3,3 V pošlje logično 1 kot 3,3 V na vhod vrat 74HC z V<sub>CC</sub> = 4,5 V (V<sub>IL</sub> = 1,35 V, V<sub>IH</sub> = 3,15 V). Kaj vrata preberejo?','Logično 1, ker je 3,3 V več kot 3,15 V',['Logično 0, ker je 3,3 V manj kot 4,5 V','Nedoločeno, ker je 3,3 V v prepovedanem območju','Logično 0, ker je napajanje drugačno'],
+  'Pomembna je samo primerjava s pragovoma V<sub>IL</sub> in V<sub>IH</sub>.',ans('Odgovor:','logično 1')+'<p>3,3 V ≥ V<sub>IH</sub> = 3,15 V, zato je to 1. Rezerve pa je malo (0,15 V), zato se v praksi uporabljajo pretvorniki nivojev.</p>'),
+inq('srednja','niv','Izračunaj šumno rezervo NM<sub>L</sub> za vrata 74HC pri V<sub>CC</sub> = 4,5 V (V<sub>IL</sub> = 1,35 V, V<sub>OL</sub> = 0,1 V).',[F('NM<sub>L</sub>','1.25','dec',{u:'V',ph:'v voltih'})],
+  'NM<sub>L</sub> = V<sub>IL</sub> − V<sub>OL</sub>.',stp('Šumna rezerva za stanje 0',['NM<sub>L</sub> = V<sub>IL</sub> − V<sub>OL</sub>','NM<sub>L</sub> = 1,35 V − 0,1 V'],'NM<sub>L</sub> = 1,25 V')+'<p>To je trikrat več kot pri TTL (0,4 V).</p>'),
+mcq('težka','niv','Izhod vrat TTL (V<sub>OH</sub> najmanj 2,4 V) vežemo na vhod vrat 74HC z V<sub>CC</sub> = 4,5 V (V<sub>IH</sub> = 3,15 V). Ali vrata 74HC zanesljivo preberejo logično 1?','Ne, ker je 2,4 V lahko manj od 3,15 V',['Da, ker je 2,4 V več od V<sub>IL</sub>','Da, ker imata obe družini 5 V napajanje','Ne, ker TTL sploh nima logične 1'],
+  'Primerjaj najslabšo izhodno napetost oddajnika z zahtevo sprejemnika za 1.',ans('Odgovor:','ne zanesljivo')+'<p>Proizvajalec TTL zagotavlja samo 2,4 V. To je pod V<sub>IH</sub> = 3,15 V, torej v prepovedanem območju vrat 74HC. Rešitev: uporabimo družino 74HCT (vhodi združljivi s TTL) ali dodamo dvižni upor.</p>'),
+mcq('težka','niv','V negativni logiki pri vezju TTL izmerimo na izhodu 0,2 V. Kakšno je logično stanje?','Logična 1',['Logična 0','Prepovedano območje','Odvisno od vhoda'],
+  'V negativni logiki je dogovor obrnjen: nizka napetost pomeni 1.',ans('Odgovor:','logična 1')+'<p>0,2 V je nizek nivo (L). V pozitivni logiki bi bil to 0, v negativni pa 1. Napetost je enaka, spremeni se le dogovor.</p>'),
+
+// ===================== STANJA IN SPREMENLJIVKE =====================
+mcq('lahka','spr','Koliko različnih vrednosti ima logična spremenljivka?','2',['1','3','10'],
+  'Pomisli na tipko: ali je pritisnjena ali ne.',ans('Odgovor:','2')+'<p>Logična spremenljivka je lahko samo 0 ali 1.</p>',true),
+mcq('lahka','spr','Žarnica je vezana prek <strong>mirovnega</strong> kontakta tipke A. Kdaj sveti?','Ko tipka A ni pritisnjena (A = 0)',['Ko je tipka A pritisnjena (A = 1)','Vedno','Nikoli'],
+  'Mirovni kontakt je sklenjen, ko je tipka v mirovanju.',ans('Odgovor:','ko tipka ni pritisnjena')+'<p>Y = '+NG('A')+'. Pritisk na tipko kontakt odpre in žarnica ugasne.</p>'),
+mcq('srednja','spr','Tipki A in B (delovna kontakta) sta vezani <strong>zaporedno</strong> z žarnico. Kateri zapis opisuje žarnico Y?','Y = A·B',['Y = A + B','Y = '+NG('A')+'·'+NG('B'),'Y = '+NG('A+B')],
+  'Tok teče, samo če sta sklenjena oba kontakta.',ans('Odgovor:','Y = A·B')+'<p>Zaporedna vezava pomeni IN (konjunkcija).</p>',true),
+mcq('srednja','spr','Tipki A in B (delovna kontakta) sta vezani <strong>vzporedno</strong>. Katera operacija je to?','Disjunkcija (ALI): Y = A + B',['Konjunkcija (IN): Y = A·B','Negacija: Y = '+NG('A'),'Nobena, ker sta tipki dve'],
+  'Tok ima dve poti. Kdaj teče vsaj po eni?',ans('Odgovor:','disjunkcija, Y = A + B')+'<p>Dovolj je, da je sklenjen en kontakt.</p>'),
+mcq('težka','spr','Motor se vrti, ko je pritisnjena tipka START (S, delovni kontakt) in <em>ni</em> pritisnjena tipka STOP (T, mirovni kontakt). Kontakta sta zaporedno. Katera enačba velja?','Y = S·'+NG('T'),['Y = S + '+NG('T'),'Y = '+NG('S')+'·T','Y = '+NG('S·T')],
+  'Mirovni kontakt prevaja pri T = 0. Zaporedna vezava je IN.',ans('Odgovor:','Y = S·'+NG('T'))+'<p>Delovni kontakt da S, mirovni '+NG('T')+', zaporedna vezava ju poveže z IN.</p>',true),
+
+// ===================== LOGIČNA FUNKCIJA =====================
+inq('lahka','fun','Koliko različnih kombinacij vhodov ima logična funkcija treh spremenljivk?',[F('Kombinacij','8','dec')],
+  'Vsaka spremenljivka ima dve vrednosti: 2·2·2.',ans('Odgovor:','2³ = 8')),
+inq('srednja','fun','Izračunaj Y = A·'+NG('B')+' + C pri A = 1, B = 0 in C = 0.',[F('Y','1','dec',{ph:'0 ali 1'})],
+  'Najprej negacija, nato IN, na koncu ALI.',stp('Po vrstnem redu',[NG('B')+' = '+NG('0')+' = 1','A·'+NG('B')+' = 1·1 = 1','Y = 1 + C = 1 + 0'],'Y = 1')),
+inq('srednja','fun','Koliko različnih logičnih funkcij dveh spremenljivk obstaja?',[F('Funkcij','16','dec')],
+  'Tabela ima 4 vrstice. V vsaki je izhod lahko 0 ali 1.',stp('Štetje',['vrstic: 2² = 4','vsaka vrstica ima izhod 0 ali 1: 2·2·2·2'],'2⁴ = 16 funkcij')+'<p>Med njimi so IN, ALI, NEIN, NEALI, XOR, XNOR in še druge.</p>'),
+mcq('srednja','fun','Opozorilo za pas je Y = S·'+NG('P')+' (S = voznik sedi, P = pas pripet). Kdaj zapiska?','Ko voznik sedi in pas ni pripet',['Ko voznik sedi in je pas pripet','Ko voznik ne sedi','Vedno, ko pas ni pripet'],
+  'Preberi enačbo: S = 1 in '+NG('P')+' = 1.',ans('Odgovor:','ko voznik sedi in pas ni pripet')+'<p>Y = 1 samo pri S = 1 in P = 0.</p>'),
+inq('težka','fun','Sirena alarma je Y = V·(O + G). Izračunaj Y za tri primere.',[F('V = 1, O = 0, G = 1','1','dec',{ph:'0 ali 1'}),F('V = 0, O = 1, G = 1','0','dec',{ph:'0 ali 1'}),F('V = 1, O = 0, G = 0','0','dec',{ph:'0 ali 1'})],
+  'Najprej izračunaj oklepaj, nato IN z V.',stp('Izračun',['V = 1, O = 0, G = 1: O + G = 1, Y = 1·1 = 1','V = 0, O = 1, G = 1: O + G = 1, Y = 0·1 = 0','V = 1, O = 0, G = 0: O + G = 0, Y = 1·0 = 0'],'1, 0, 0')),
+
+// ===================== PRAVILNOSTNA TABELA =====================
+inq('lahka','tab','Koliko vrstic ima pravilnostna tabela funkcije štirih spremenljivk?',[F('Vrstic','16','dec')],
+  'Vrstic je 2<sup>n</sup>.',ans('Odgovor:','2⁴ = 16')),
+inq('lahka','tab','V tabeli s spremenljivkami A, B, C (A je najvišji bit) poišči vrstico A = 1, B = 0, C = 1. Katera je njena številka (začnemo z 0)?',[F('Vrstica','5','dec')],
+  'Preberi ABC kot dvojiško število.',stp('Dvojiško število ABC',['101₂ = 4 + 0 + 1'],'vrstica 5')),
+ttq('srednja','tab','Izpolni pravilnostno tabelo za opozorilo za pas Y = S·'+NG('P')+'.',['S','P'],{Y:'S·¬P'},
+  'Y = 1 samo v eni vrstici: S = 1 in P = 0.',solTab(['S','P'],[[NG('P'),'¬P'],['Y','S·¬P']])),
+ttq('srednja','tab','Trije sodniki glasujejo s tipkami A, B in C. Lučka Y zasveti, ko so pritisnjene <strong>vsaj dve</strong> tipki. Izpolni tabelo.',['A','B','C'],{Y:'A·B+A·C+B·C'},
+  'Za vsako vrstico preštej enice v A, B, C. Y = 1, če sta enici vsaj dve.',solTab(['A','B','C'],[['Y','A·B+A·C+B·C']])+'<p>Y = 1 v vrsticah 3, 5, 6 in 7.</p>'),
+ttq('težka','tab','Izpolni tabelo za Y = '+NG('A')+'·B + C.',['A','B','C'],{Y:'¬A·B+C'},
+  'Za vsako vrstico izračunaj '+NG('A')+'·B, nato ALI s C. Kjer je C = 1, je Y zagotovo 1.',solTab(['A','B','C'],[[NG('A'),'¬A'],[NG('A')+'·B','¬A·B'],['Y','¬A·B+C']])),
+ttq('težka','tab','Klimatska naprava ima vhode O (okno odprto), T (v sobi je vroče) in R (ročni vklop). Klima K deluje, ko je okno zaprto in je vroče ali je vključen ročni vklop: K = '+NG('O')+'·(T + R). Lučka L opozori »zapri okno«, ko bi klima delovala, a je okno odprto: L = O·(T + R). Izpolni oba stolpca.',['O','T','R'],{K:'¬O·(T+R)',L:'O·(T+R)'},
+  'Najprej izračunaj T + R za vsako vrstico. K je ta vrednost pri O = 0, L pa pri O = 1.',solTab(['O','T','R'],[['T + R','T+R'],['K','¬O·(T+R)']])+solTab(['O','T','R'],[['T + R','T+R'],['L','O·(T+R)']])),
+mcq('težka','tab','Kateri opis ustreza tej tabeli?'+qtab(['A','B','C'],[0,1,1,0,1,0,0,0]),'Natanko en vhod je 1',['Vsaj en vhod je 1','Vsaj dva vhoda sta 1','Vsi vhodi so 1'],
+  'Poglej vrstice z Y = 1 in preštej enice na vhodih.',ans('Odgovor:','natanko en vhod je 1')+'<p>Y = 1 v vrsticah 1 (001), 2 (010) in 4 (100). V vsaki je ena sama enica. Vrstica 7 (111) ima Y = 0, zato »vsaj en« ni pravilno.</p>')
+];
+
+</script>
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const KEY = CFG.key;
+
+  // ---------- shranjen napredek (po potrebi brez localStorage) ----------
+  let S = {t:{}, g:[]};
+  try { const raw = localStorage.getItem(KEY); if(raw){ const o = JSON.parse(raw); if(o && typeof o==='object') S = {t:o.t||{}, g:Array.isArray(o.g)?o.g:[]}; } } catch(e){}
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+
+  // ---------- navigacija: stran za stranjo ----------
+  const PAGES = [...CFG.th, ...CFG.sim, 'naloge'];
+  const LAB = CFG.LAB;
+  const CHAPTERS = [
+    {name:'Teorija', ids:CFG.th},
+    {name:'Simulacija', ids:CFG.sim},
+    {name:'Naloge', ids:['naloge']}
+  ];
+  let chapEls=[], subEls=[], curPage=null;
+  function markNav(id){
+    const gi = CHAPTERS.findIndex(c=>c.ids.includes(id));
+    chapEls.forEach((b,i)=>b.classList.toggle('on', i===gi));
+    subEls.forEach((s,i)=>{ if(s) s.hidden = i!==gi; });
+    document.querySelectorAll('#nav .sb').forEach(b=>b.classList.toggle('on', b.dataset.page===id));
+  }
+  function showPage(id, smooth){
+    if(!PAGES.includes(id)) return;
+    curPage = id;
+    PAGES.forEach(p=>{ const el=$(p); if(el) el.classList.toggle('on', p===id); });
+    markNav(id);
+    try { history.replaceState(null,'','#'+id); } catch(e){}
+    window.scrollTo({top:0, behavior: smooth ? 'smooth' : 'auto'});
+  }
+  PAGES.forEach((id,k)=>{
+    const el=$(id); if(!el) return;
+    const grp = el.dataset.grp || 'Naloge';
+    const crumb=document.createElement('div'); crumb.className='crumb';
+    crumb.innerHTML=`<span>${grp} · ${LAB[id]}</span><span>${k+1} / ${PAGES.length}</span>`;
+    el.prepend(crumb);
+    const pg=document.createElement('div'); pg.className='pager';
+    const prev = k>0 ? `<button class="btn g2" data-go="${PAGES[k-1]}">‹ ${LAB[PAGES[k-1]]}</button>` : '<span></span>';
+    const next = k<PAGES.length-1 ? `<button class="btn" data-go="${PAGES[k+1]}">${LAB[PAGES[k+1]]} ›</button>` : '<span></span>';
+    pg.innerHTML = prev+next;
+    el.appendChild(pg);
+  });
+  document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.go,true)));
+  document.querySelectorAll('[data-sim]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.sim,true)));
+  document.querySelectorAll('[data-hint]').forEach(b=>b.addEventListener('click',()=>{ $(b.dataset.hint).hidden=false; }));
+
+  const navc=document.createElement('div'); navc.className='navc'; $('nav').appendChild(navc);
+  CHAPTERS.forEach((c,ci)=>{
+    const cb=document.createElement('button'); cb.className='chap'; cb.dataset.page=c.ids[0];
+    cb.innerHTML=`<span class="sn">${ci+1}</span><span>${c.name}</span>`;
+    cb.addEventListener('click',()=>showPage(c.ids[0],true));
+    navc.appendChild(cb); chapEls.push(cb);
+    if(c.ids.length>1){
+      const sub=document.createElement('div'); sub.className='subnav'; sub.hidden=true;
+      c.ids.forEach(id=>{
+        const b=document.createElement('button'); b.className='sb'; b.dataset.page=id; b.textContent=LAB[id];
+        b.addEventListener('click',()=>showPage(id,true));
+        sub.appendChild(b);
+      });
+      navc.appendChild(sub); subEls.push(sub);
+    } else subEls.push(null);
+  });
+  window.addEventListener('hashchange',()=>{ const h=location.hash.slice(1); if(PAGES.includes(h) && h!==curPage) showPage(h,false); });
+
+  // ---------- SVG gradniki ----------
+  const ON='var(--on)', OFF='var(--muted)';
+  const W=(pts,v)=>`<polyline points="${pts.map(p=>p[0]+','+p[1]).join(' ')}" fill="none" stroke="${v?ON:OFF}" stroke-width="${v?2.8:1.4}" stroke-linejoin="round" stroke-linecap="round"/>`;
+  const CH=(x,y,t,v,w=34)=>`<rect x="${x}" y="${y}" width="${w}" height="18" rx="9" fill="${v?ON:'var(--card)'}" stroke="${v?ON:OFF}" stroke-width="1.2"/><text x="${x+w/2}" y="${y+13}" text-anchor="middle" style="fill:${v?'var(--on-ink)':'var(--ink)'};font-size:12px;font-weight:700">${t}</text>`;
+  const DOTV=(x,y,v)=>`<circle cx="${x}" cy="${y}" r="3.5" fill="${v?ON:OFF}"/>`;
+  const TX=(x,y,t,a='start',cls='net')=>`<text class="${cls}" x="${x}" y="${y}" text-anchor="${a}">${t}</text>`;
+  // naravna velikost risbe (malo povečana), da se majhna vezja ne raztegnejo čez vso širino
+  const sized=(svg,w)=>svg.replace('<svg ','<svg style="width:'+Math.round(w)+'px;max-width:100%" ');
+  const svgWrap=(vb,body,label)=>`<svg viewBox="${vb}" role="img" aria-label="${label}" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
+  // logična vrata: IEC (pravokotnik z znakom) ali ANSI (oblikovana vrata); izbira velja za vse vaje LAV-ELS
+  let SYM='IEC'; try{ const s=localStorage.getItem('scnm_lavele_sym'); if(s==='ANSI'||s==='IEC') SYM=s; }catch(e){}
+  const REDRAW=[];
+  // dodatne vrste nalog: XT[vrsta] = {html, restore, check, lock, showSol, click}
+  const XT={};
+  function G(type,x,y,n,sty){
+    const S=sty||SYM;
+    const w=56, h = n===1?30:16*n+12;
+    const bub = /^(NOT|NAND|NOR|XNOR)$/.test(type);
+    const pins=[]; for(let i=0;i<n;i++) pins.push([x, y+h*(i+0.5)/n]);
+    const circ = bub ? `<circle class="gate" cx="${x+w+4}" cy="${y+h/2}" r="4"/>` : '';
+    const out=[x+w+(bub?8:0), y+h/2];
+    let s;
+    if(S==='IEC'){
+      const sym={AND:'&',NAND:'&',OR:'≥1',NOR:'≥1',XOR:'=1',XNOR:'=1',NOT:'1',BUF:'1'}[type];
+      s=`<rect class="gate" x="${x}" y="${y}" width="${w}" height="${h}" rx="4"/><text class="sym" x="${x+w/2}" y="${y+h/2+5}" text-anchor="middle">${sym}</text>`;
+    } else {
+      const base=type.replace(/^N(?=AND|OR)/,'').replace(/^XN/,'X');
+      if(base==='AND'){
+        const r=h/2, xs=x+w-r;
+        s=`<path class="gate" d="M${x},${y} H${xs} A${r},${r} 0 0 1 ${xs},${y+h} H${x} Z"/>`;
+      } else if(base==='OR'||base==='XOR'){
+        const ox = base==='XOR'?8:0, bx=x+ox, k=0.32*w;
+        s=`<path class="gate" d="M${bx},${y} Q${bx+0.62*(w-ox)},${y} ${x+w},${y+h/2} Q${bx+0.62*(w-ox)},${y+h} ${bx},${y+h} Q${bx+k},${y+h/2} ${bx},${y} Z"/>`;
+        if(ox) s+=`<path class="gate" style="fill:none" d="M${x},${y} Q${x+k},${y+h/2} ${x},${y+h}"/>`;
+        // kratke žice od roba do ukrivljene zadnje stranice
+        pins.forEach(p=>{ const t=(p[1]-y)/h, cx=bx+2*t*(1-t)*k; s+=`<line x1="${x}" y1="${p[1]}" x2="${cx}" y2="${p[1]}" style="stroke:var(--ink);stroke-width:1.4"/>`; });
+      } else { // NOT, BUF: trikotnik
+        s=`<path class="gate" d="M${x+4},${y-2} L${x+w},${y+h/2} L${x+4},${y+h+2} Z"/>`;
+        pins.forEach(p=>{ s+=`<line x1="${x}" y1="${p[1]}" x2="${x+4}" y2="${p[1]}" style="stroke:var(--ink);stroke-width:1.4"/>`; });
+      }
+    }
+    return {s:s+circ,pins,out,h};
+  }
+  // izbirnik simbolov: vsak element z razredom .symsel dobi gumba IEC in ANSI
+  function symPickers(){
+    document.querySelectorAll('.symsel').forEach(box=>{
+      box.innerHTML='<span class="label">Simboli</span><button class="pill" data-s="IEC">IEC</button><button class="pill" data-s="ANSI">ANSI</button>';
+      box.querySelectorAll('.pill').forEach(b=>b.addEventListener('click',()=>{ SYM=b.dataset.s; try{localStorage.setItem('scnm_lavele_sym',SYM);}catch(e){} syncSym(); REDRAW.forEach(f=>f()); }));
+    });
+    syncSym();
+  }
+  // vezje iz drevesa izraza: vsak list dobi svojo vrstico in čip z imenom, vrata stojijo po nivojih
+  const GT={and:'AND',or:'OR',xor:'XOR',xnor:'XNOR',nand:'NAND',nor:'NOR',not:'NOT'};
+  function treeSVG(ast,env,o){
+    o=o||{};
+    const P=o.pitch||32, colW=o.colW||104, X0=50;
+    const kids=n=>n.t==='not'?[n.a]:(n.args||[]);
+    const leaf=n=>n.t==='var'||n.t==='const';
+    const lev=n=>leaf(n)?(n.lv=0):(n.lv=1+Math.max(...kids(n).map(lev)));
+    // kopija drevesa, da ne spreminjamo izvirnika
+    const cp=n=>n.t==='not'?{t:'not',a:cp(n.a)}:n.args?{t:n.t,args:n.args.map(cp)}:{...n};
+    const root=cp(ast); lev(root);
+    let slot=0;
+    const place=n=>{ if(leaf(n)){ n.y=18+slot*P; slot++; return n.y; } const ys=kids(n).map(place); n.y=(Math.min(...ys)+Math.max(...ys))/2; return n.y; };
+    place(root);
+    const H=18+slot*P-P+18+(o.extraH||0);
+    let s=''; const val=n=>o.static?0:BOOL.ev(n,env);
+    function draw(n){
+      const v=val(n);
+      if(leaf(n)){ s+=CH(6,n.y-9,n.t==='var'?n.n:String(n.v),v,32); return [38,n.y]; }
+      const ks=kids(n), outs=ks.map(draw);
+      const gx=X0+(n.lv-1)*colW+28, gh=ks.length===1?30:16*ks.length+12;
+      const gg=G(GT[n.t],gx,n.y-gh/2,ks.length);
+      s+=gg.s;
+      ks.forEach((k,i)=>{
+        const [ox,oy]=outs[i], py=gg.pins[i][1], kv=val(k);
+        if(Math.abs(oy-py)<0.5) s+=W([[ox,oy],[gx,py]],kv);
+        else { const jx=Math.max(ox+6,gx-12-7*Math.min(i,ks.length-1-i)); s+=W([[ox,oy],[jx,oy],[jx,py],[gx,py]],kv); }
+      });
+      return gg.out;
+    }
+    const ro=draw(root), rv=val(root), lab=o.out||'Y';
+    const ex=ro[0]+26;
+    s+=W([ro,[ex,ro[1]]],rv)+CH(ex,ro[1]-9,lab,rv,Math.max(32,lab.length*9+14));
+    const Wd=ex+Math.max(32,lab.length*9+14)+8;
+    return {svg:sized(svgWrap('0 0 '+Wd+' '+Math.max(H,40),s,o.label||'Logično vezje'),Wd*(o.scale||1.25)),w:Wd,h:H};
+  }
+  // vezje iz seznama vrat (signal lahko napaja več vrat): N={ins:[{n,y}], g:[{id,t,in:[...],x,y,j:[...]}], out:[{n,src}]}
+  const GEV={AND:a=>a.every(x=>x)?1:0,OR:a=>a.some(x=>x)?1:0,NOT:a=>1-a[0],BUF:a=>a[0],NAND:a=>a.every(x=>x)?0:1,NOR:a=>a.some(x=>x)?0:1,XOR:a=>a.reduce((p,x)=>p^x,0),XNOR:a=>1-a.reduce((p,x)=>p^x,0)};
+  function netSVG(N,env,o){
+    o=o||{}; const colW=o.colW||104, X0=N.x0||o.x0||64;
+    const val={}, pts={}, uses={}; let s='', body='';
+    N.ins.forEach(i=>{ val[i.n]=o.static?0:(env[i.n]||0); pts[i.n]=[38,i.y]; s+=CH(6,i.y-9,i.n,val[i.n],32); });
+    N.g.forEach(g=>g.in.forEach(k=>{ uses[k]=(uses[k]||0)+1; }));
+    let maxX=0, maxY=0;
+    N.g.forEach(g=>{
+      const n=g.in.length, gh=n===1?30:16*n+12, gx=X0+g.x*colW;
+      g._g=G(g.t,gx,g.y-gh/2,n,o.sty);
+      val[g.id]=o.static?0:GEV[g.t](g.in.map(k=>val[k]));
+      pts[g.id]=g._g.out; maxX=Math.max(maxX,g._g.out[0]); maxY=Math.max(maxY,g.y+gh/2);
+    });
+    N.g.forEach(g=>{
+      body+=g._g.s;
+      if(o.labels&&g.id!==(N.out&&N.out[0]&&N.out[0].src)) body+=`<text x="${g._g.out[0]+4}" y="${g._g.out[1]-7}" class="lbl" style="font-weight:700;fill:var(--acc)">${g.id}</text>`;
+      g.in.forEach((k,i)=>{
+        const [sx,sy]=pts[k], [px,py]=g._g.pins[i], v=val[k];
+        if(Math.abs(sy-py)<0.5&&!(g.j&&g.j[i]!=null)){ s+=W([[sx,sy],[px,py]],v); return; }
+        const jx=(g.j&&g.j[i]!=null)?g.j[i]:Math.max(sx+8,px-12-7*i);
+        s+=W([[sx,sy],[jx,sy],[jx,py],[px,py]],v);
+        if(uses[k]>1) s+=DOTV(jx,sy,v);
+      });
+    });
+    let xe=maxX+30;
+    (N.out||[]).forEach(q=>{ const [sx,sy]=pts[q.src], v=val[q.src], w=Math.max(32,q.n.length*9+14); s+=W([[sx,sy],[xe,sy]],v)+CH(xe,sy-9,q.n,v,w); });
+    const Wd=xe+60, Hd=Math.max(maxY,...N.ins.map(i=>i.y+9))+12;
+    return {svg:sized(svgWrap('0 0 '+Wd+' '+Hd,s+body,o.label||'Logično vezje'),Wd*(o.scale||1.2)),val};
+  }
+  // pravilnostna tabela z označeno vrstico (cur) in poljubnimi izhodnimi stolpci [{n:'Y',ast}]
+  function truthHTML(vs,cols,cur,o){
+    o=o||{};
+    let h='<div class="scroll"><table class="tt"><tr>'+(o.idx?'<th class="mid">vrstica</th>':'')+vs.map(v=>'<th>'+v+'</th>').join('')+cols.map(c=>'<th class="o">'+c.n+'</th>').join('')+'</tr>';
+    for(let m=0;m<(1<<vs.length);m++){
+      const e=BOOL.envOf(vs,m);
+      h+='<tr class="'+(m===cur?'cur':'')+'"'+(o.click?' data-m="'+m+'" style="cursor:pointer"':'')+'>'+(o.idx?'<td class="mid">'+m+'</td>':'')+vs.map(v=>'<td>'+e[v]+'</td>').join('')+cols.map(c=>{ const y=BOOL.ev(c.ast,e); return '<td class="o'+(y?' one':'')+'">'+y+'</td>'; }).join('')+'</tr>';
+    }
+    return h+'</table></div>';
+  }
+  function syncSym(){ document.querySelectorAll('.symsel .pill').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===SYM?'true':'false')); }
+  // blok z nožicami L (levo), R (desno), B (spodaj)
+  function BLK(o){
+    const {x,y,w,h,t,sub} = o, L=o.L||[], R=o.R||[], B=o.B||[];
+    let s=`<rect class="blk" x="${x}" y="${y}" width="${w}" height="${h}" rx="6"/>`;
+    if(o.top) s+=`<text class="blkt" x="${x+w/2}" y="${y+16}" text-anchor="middle">${t}${sub?' '+sub:''}</text>`;
+    else {
+      s+=`<text class="blkt" x="${x+w/2}" y="${y+h/2-(sub?2:-4)}" text-anchor="middle">${t}</text>`;
+      if(sub) s+=`<text class="blks" x="${x+w/2}" y="${y+h/2+13}" text-anchor="middle">${sub}</text>`;
+    }
+    const pins={L:[],R:[],B:[]};
+    L.forEach((l,i)=>{ const py=o.Ly?o.Ly[i]:y+h*(i+0.5)/L.length; pins.L.push([x,py]); s+=`<text class="pin${o.selL===i?' sel':''}" x="${x+6}" y="${py+4}">${l}</text>`; });
+    R.forEach((l,i)=>{ const py=o.Ry?o.Ry[i]:y+h*(i+0.5)/R.length; pins.R.push([x+w,py]); s+=`<text class="pin" x="${x+w-6}" y="${py+4}" text-anchor="end">${l}</text>`; });
+    B.forEach((l,i)=>{ const px=o.Bx?o.Bx[i]:x+w*(i+1)/(B.length+1); pins.B.push([px,y+h]); s+=`<text class="pin" x="${px}" y="${y+h-6}" text-anchor="middle">${l}</text>`; });
+    return {s,pins};
+  }
+  const bit=(v,i)=>(v>>i)&1;
+  function mkToggle(parent,label,onChange,on=false,cls=''){
+    const b=document.createElement('button'); b.className='tg'+(cls?' '+cls:''); b.textContent=label; b.setAttribute('aria-pressed',on?'true':'false');
+    b.addEventListener('click',()=>onChange(b)); parent.appendChild(b); return b;
+  }
+  const setP=(b,v)=>b.setAttribute('aria-pressed',v?'true':'false');
+  function pillGroup(container,onPick){
+    const bs=[...container.querySelectorAll('.pill')];
+    bs.forEach(b=>b.addEventListener('click',()=>{ bs.forEach(x=>setP(x,x===b)); onPick(b); }));
+    return bs;
+  }
+  const lamp=(label,v,txt,cls)=>`<div class="lamp ${v?'on':''} ${cls||''}"><div class="label">${label}</div><div class="b">${txt===undefined?v:txt}</div></div>`;
+  const tile=(label,val,on)=>`<div class="tile ${on?'on':''}"><div class="label">${label}</div><div class="v">${val}</div></div>`;
+  const dcm=LIB.dcm;
+  // drevo vrat XOR (za paritetni bit): labels in vals so ista dolžina
+  function xorTreeLive(labels,vals,pitch){
+    pitch=pitch||22;
+    let s='';
+    let nodes=labels.map((l,i)=>({x:48,y:20+i*pitch,v:vals[i]}));
+    nodes.forEach((nd,i)=>{ s+=CH(14,nd.y-9,labels[i],nd.v); });
+    let gx=120;
+    while(nodes.length>1){
+      const next=[];
+      for(let i=0;i+1<nodes.length;i+=2){
+        const a=nodes[i], b=nodes[i+1];
+        const yc=(a.y+b.y)/2; const g=G('XOR',gx,yc-22,2);
+        const v=a.v^b.v;
+        s+=g.s;
+        s+=W([[a.x,a.y],[gx-14,a.y],[gx-14,g.pins[0][1]],[gx,g.pins[0][1]]],a.v);
+        s+=W([[b.x,b.y],[gx-14,b.y],[gx-14,g.pins[1][1]],[gx,g.pins[1][1]]],b.v);
+        next.push({x:g.out[0],y:g.out[1],v});
+      }
+      if(nodes.length%2===1) next.push(nodes[nodes.length-1]);
+      nodes=next; gx+=90;
+    }
+    return {svg:s,out:nodes[0],h:20+labels.length*pitch,w:gx};
+  }
+  // vrsta stikal za bite (od najvišjega proti najnižjemu), pod vsakim stikalom je utež
+  function bitRow(parent,n,getV,setV,lab){
+    parent.innerHTML=''; parent.classList.toggle('tight',n>12); const btns=[]; let nib=null;
+    for(let i=n-1;i>=0;i--){
+      if(n>4&&(i%4===3||!nib)){ nib=document.createElement('div'); nib.className='nib'; parent.appendChild(nib); }
+      const col=document.createElement('div'); col.className='bcol';
+      const lb=document.createElement('div'); lb.className='label'; lb.textContent=lab(i); col.appendChild(lb);
+      btns[i]=mkToggle(col,String(bit(getV(),i)),()=>setV(getV()^(1<<i)),bit(getV(),i)===1,'sq');
+      (n>4?nib:parent).appendChild(col);
+    }
+    return {sync(){ for(let i=0;i<n;i++){ const v=bit(getV(),i); btns[i].textContent=v; setP(btns[i],v); } }};
+  }
+
+
+
+
+  // =================== VEITCHEV DIAGRAM IN NALOGE Z IZRAZI (tematika 1) ===================
+  /* RAZPOREDITEV VEITCHEVEGA DIAGRAMA (kot v skripti DIT in na gradivu šole; spremeni samo tukaj)
+     2 spremenljivki: stolpca A = 1 | A = 0, vrstici B = 1 | B = 0
+     3 spremenljivke: stolpci (A,C) = 10, 11, 01, 00, vrstici B = 1 | B = 0
+     4 spremenljivke: stolpci (A,C) = 10, 11, 01, 00, vrstice (B,D) = 10, 11, 01, 00
+     črte: A zgoraj (levi polovici), C spodaj (srednja stolpca), B levo (zgornji polovici), D desno (srednji vrstici) */
+  const SEQ1=[1,0], SEQ2=[[1,0],[1,1],[0,1],[0,0]];
+  function KL(n){
+    const ax=(v1,v2)=>v2===undefined?SEQ1.map(a=>({[v1]:a})):SEQ2.map(([a,b])=>({[v1]:a,[v2]:b}));
+    if(n===2) return {cols:ax(0),rows:ax(1),bars:[{v:0,side:'top'},{v:1,side:'left'}]};
+    if(n===3) return {cols:ax(0,2),rows:ax(1),bars:[{v:0,side:'top'},{v:2,side:'bottom'},{v:1,side:'left'}]};
+    return {cols:ax(0,2),rows:ax(1,3),bars:[{v:0,side:'top'},{v:2,side:'bottom'},{v:1,side:'left'},{v:3,side:'right'}]};
+  }
+  // številka vrstice tabele (prva spremenljivka je najvišji bit) za celico (vrstica r, stolpec c)
+  const kmM=(n,r,c)=>{ const e=Object.assign({},r,c); let m=0; for(let i=0;i<n;i++) m=m*2+(e[i]||0); return m; };
+  // implikant {v,m} vsebuje celico, če se ujema v vseh neizpadlih spremenljivkah osi
+  const axisHit=(n,p,o)=>Object.keys(o).every(i=>{ const b=1<<(n-1-i); return (p.m&b)||(((p.v&b)?1:0)===o[i]); });
+  /* zaporedni odseki v krožnem zaporedju: [od, do, odprtZačetek, odprtKonec]
+     skupina čez rob se razdeli na dva kosa, ki sta na robu diagrama odprta */
+  function runs(idx,len){
+    if(idx.length===len) return [[0,len-1,false,false]];
+    const s=new Set(idx), out=[];
+    let start=-1;
+    for(let i=0;i<len;i++){ if(s.has(i)&&start<0) start=i; if(!s.has(i)&&start>=0){ out.push([start,i-1,false,false]); start=-1; } }
+    if(start>=0) out.push([start,len-1,false,false]);
+    if(out.length===2&&out[0][0]===0&&out[1][1]===len-1){ out[0][2]=true; out[1][3]=true; }
+    return out;
+  }
+  // zaobljen okvir; odprta stranica sega čez rob diagrama (kot v zvezku)
+  function loopPath(x0,y0,x1,y1,oL,oR,oT,oB,r,ext){
+    if(oL) x0-=ext; if(oR) x1+=ext; if(oT) y0-=ext; if(oB) y1+=ext;
+    r=Math.min(r,(x1-x0)/2,(y1-y0)/2);
+    const tl=!oT&&!oL, tr=!oT&&!oR, br=!oB&&!oR, bl=!oB&&!oL; let d='';
+    if(!oT) d+=`M${x0+(tl?r:0)},${y0}H${x1-(tr?r:0)}`;
+    if(tr) d+=`Q${x1},${y0} ${x1},${y0+r}`;
+    if(!oR) d+=`M${x1},${y0+(tr?r:0)}V${y1-(br?r:0)}`;
+    if(br) d+=`Q${x1},${y1} ${x1-r},${y1}`;
+    if(!oB) d+=`M${x1-(br?r:0)},${y1}H${x0+(bl?r:0)}`;
+    if(bl) d+=`Q${x0},${y1} ${x0},${y1-r}`;
+    if(!oL) d+=`M${x0},${y1-(bl?r:0)}V${y0+(tl?r:0)}`;
+    if(tl) d+=`Q${x0},${y0} ${x0+r},${y0}`;
+    return d;
+  }
+  /* kmapSVG(n, vrednosti[0|1|'X'|null], o)
+     o.names: imena spremenljivk, o.groups: implikanti {v,m}, o.zero: skupine ničel (črtkane), o.click: celice klikljive,
+     o.bad: napačne celice, o.pick: izbrane celice (ročno označevanje), o.cells: seznami celic (ročno narisane skupine) */
+  function kmapSVG(n,vals,o){
+    o=o||{};
+    const names=(o.names||['A','B','C','D']).slice(0,n), K=KL(n), cs=o.cs||54;
+    const NR=K.rows.length, NC=K.cols.length;
+    const padL=n===2||n===3||n===4?40:20, x0=padL+14, y0=40, W0=x0+NC*cs, H0=y0+NR*cs;
+    let s='';
+    // črte spremenljivk: kjer je spremenljivka 1
+    K.bars.forEach(b=>{
+      const v=names[b.v];
+      if(b.side==='top'||b.side==='bottom'){
+        const idx=K.cols.map((c,j)=>c[b.v]===1?j:-1).filter(j=>j>=0), a=idx[0], z=idx[idx.length-1], yy=b.side==='top'?y0-12:H0+12;
+        s+=`<line x1="${x0+a*cs+3}" y1="${yy}" x2="${x0+(z+1)*cs-3}" y2="${yy}" style="stroke:var(--acc);stroke-width:3.5;stroke-linecap:round"/>`+TX(x0+(a+z+1)*cs/2,b.side==='top'?yy-7:yy+17,v,'middle','net');
+      } else {
+        const idx=K.rows.map((r,i)=>r[b.v]===1?i:-1).filter(i=>i>=0), a=idx[0], z=idx[idx.length-1], xx=b.side==='left'?x0-12:W0+12;
+        s+=`<line x1="${xx}" y1="${y0+a*cs+3}" x2="${xx}" y2="${y0+(z+1)*cs-3}" style="stroke:var(--acc);stroke-width:3.5;stroke-linecap:round"/>`+TX(b.side==='left'?xx-8:xx+8,y0+(a+z+1)*cs/2+5,v,b.side==='left'?'end':'start','net');
+      }
+    });
+    // celice
+    K.rows.forEach((r,i)=>K.cols.forEach((c,j)=>{
+      const m=kmM(n,r,c), v=vals[m], x=x0+j*cs, y=y0+i*cs;
+      const bad=o.bad&&o.bad.includes(m), pk=o.pick&&o.pick.includes(m);
+      const fill=pk?'var(--tile)':v===1?'var(--sigbg)':'var(--card)';
+      s+=`<rect x="${x}" y="${y}" width="${cs}" height="${cs}" style="fill:${fill};stroke:${bad?'var(--bad)':pk?'var(--acc)':'var(--line)'};stroke-width:${bad||pk?3:1}"/>`;
+      if(o.num!==false) s+=`<text x="${x+4}" y="${y+12}" class="lbl" style="font-size:9.5px">${m}</text>`;
+      s+=`<text x="${x+cs/2}" y="${y+cs/2+8}" text-anchor="middle" style="font-size:20px;font-weight:700;fill:${v===1?'var(--sig)':v==='X'?'var(--amb)':'var(--mut)'}">${v===null||v===undefined?'?':v}</text>`;
+    }));
+    s+=`<rect x="${x0}" y="${y0}" width="${NC*cs}" height="${NR*cs}" style="fill:none;stroke:var(--ink);stroke-width:2"/>`;
+    // obrobe skupin
+    const cellsOfImp=p=>{ const rows=K.rows.map((r,i)=>axisHit(n,p,r)?i:-1).filter(i=>i>=0), cols=K.cols.map((c,j)=>axisHit(n,p,c)?j:-1).filter(j=>j>=0); return {rows,cols}; };
+    const cellsOfList=L=>{ const rows=new Set(), cols=new Set(); K.rows.forEach((r,i)=>K.cols.forEach((c,j)=>{ if(L.includes(kmM(n,r,c))){ rows.add(i); cols.add(j); } })); return {rows:[...rows],cols:[...cols]}; };
+    const drawGroups=(gs,dash,list)=>gs.forEach((g,gi)=>{
+      const {rows,cols}=list?cellsOfList(g):cellsOfImp(g);
+      const pad=5+(gi%4)*4, col=`var(--g${gi%6+1})`;
+      runs(rows,NR).forEach(([r0,r1,oT,oB])=>runs(cols,NC).forEach(([c0,c1,oL,oR])=>{
+        const d=loopPath(x0+c0*cs+pad,y0+r0*cs+pad,x0+(c1+1)*cs-pad,y0+(r1+1)*cs-pad,oL,oR,oT,oB,cs/3,pad+10);
+        s+=`<path d="${d}" style="fill:none;stroke:${col};stroke-width:3;stroke-linecap:round;${dash?'stroke-dasharray:7 4':''}"/>`;
+      }));
+    });
+    if(o.groups) drawGroups(o.groups,false);
+    if(o.zero) drawGroups(o.zero,true);
+    if(o.cells) drawGroups(o.cells,false,true);
+    // klikljive celice (prozorni pravokotniki na vrhu)
+    if(o.click) K.rows.forEach((r,i)=>K.cols.forEach((c,j)=>{ const m=kmM(n,r,c); s+=`<rect data-m="${m}" x="${x0+j*cs}" y="${y0+i*cs}" width="${cs}" height="${cs}" style="fill:transparent;cursor:pointer;touch-action:none" role="button" aria-label="Celica ${m}"/>`; }));
+    const Wd=W0+(n===4?34:16), Hd=H0+(n>=3?34:14);
+    return sized(svgWrap('0 0 '+Wd+' '+Hd,s,'Veitchev diagram za '+n+' spremenljivke'),Wd*(o.scale||1.15));
+  }
+  // implikant v izraz s črto nad negacijo
+  function impHTML(p,names,pos){ return BOOL.html(BOOL.parse(pos?BOOL.impPOS(p,names):BOOL.impSOP(p,names))); }
+  const groupChips=(gs,names,pos)=>'<div class="gchips">'+gs.map((p,i)=>`<span class="gchip" style="border-color:var(--g${i%6+1})">${impHTML(p,names,pos)}</span>`).join('')+'</div>';
+  const offSet=(on,n,dc)=>{ const r=[]; for(let m=0;m<(1<<n);m++) if(!on.includes(m)&&!(dc||[]).includes(m)) r.push(m); return r; };
+  const valsOf=(on,n,dc)=>Array.from({length:1<<n},(_,m)=>on.includes(m)?1:(dc||[]).includes(m)?'X':0);
+  // minimalna vsota produktov (ali produkt vsot) kot HTML
+  function minHTML(on,names,dc,pos){ const s=pos?BOOL.pos(on,names,dc):BOOL.sop(on,names,dc); return BOOL.html(BOOL.parse(s)); }
+
+  // ---------- naloga: vpis izraza ----------
+  const negVarsOnly=n=>n.t==='not'?n.a.t==='var':BOOL.kids(n).every(negVarsOnly);
+  const litW=n=>n+' '+(n===1?'literal':n===2?'literala':n<5?'literali':'literalov');
+  const KEYS=['¬','·','+','(',')','↑','↓','⊕'];
+  function exTarget(t){ // vrne {names, on, dc}
+    const names=t.vars;
+    if(t.on) return {names,on:t.on,dc:t.dc||[]};
+    return {names,on:BOOL.minterms(BOOL.parse(t.target),names),dc:[]};
+  }
+  XT.ex={
+    html(t,i){
+      const keys=(t.keys||KEYS).concat(t.vars);
+      return `<div class="fld exf"><span class="fl">${t.lab||'Y ='}</span><input class="inp xin" type="text" id="x${i}" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="${t.ph||'npr. A·¬B + C'}"></div>`+
+        `<div class="kp" aria-label="Znaki za vnos">${keys.map(k=>`<button type="button" class="kb" data-ins="${k}">${k}</button>`).join('')}<button type="button" class="kb" data-ins="⌫" aria-label="Briši">⌫</button></div>`+
+        `<p class="sm mut">Negacija: ¬A ali A'. IN: · ali zapis skupaj (AB). ALI: +.${t.ops?' Dovoljeni operatorji: '+t.ops.map(o=>({nand:'↑ (NAND)',nor:'↓ (NOR)',not:'¬',and:'·',or:'+'})[o]).join(', ')+'.':''}</p><div class="expv"></div>`;
+    },
+    click(e,card,t,st){
+      const b=e.target.closest('.kb'); if(!b) return false;
+      const inp=card.querySelector('input.xin'); if(inp.disabled) return true;
+      const k=b.dataset.ins;
+      if(k==='⌫'){ const a=inp.selectionStart??inp.value.length; if(a>0){ inp.setRangeText('',a-1,a,'end'); } }
+      else { const a=inp.selectionStart??inp.value.length, z=inp.selectionEnd??a; inp.setRangeText(k,a,z,'end'); }
+      inp.focus(); st.x=inp.value; return true;
+    },
+    restore(card,t,st){ const inp=card.querySelector('input.xin'); if(st.x) inp.value=st.x; if(st.d&&!st.sol&&st.x) this.mark(card,t,st); },
+    lock(card){ card.querySelectorAll('input.xin,.kb').forEach(x=>x.disabled=true); },
+    mark(card,t,st){ const inp=card.querySelector('input.xin'); inp.classList.toggle('right',st.p>0); inp.classList.toggle('wrong',!(st.p>0)); try{ card.querySelector('.expv').innerHTML='Tvoj izraz: <span class="m">'+BOOL.html(BOOL.parse(st.x))+'</span>'; }catch(e){} },
+    check(card,t,st){
+      const inp=card.querySelector('input.xin'), src=inp.value.trim(); st.x=inp.value;
+      if(!src) return {err:'Najprej vpiši izraz.'};
+      let a; try{ a=BOOL.parse(src); }catch(e){ return {err:'Izraza ni mogoče prebrati: '+e.message+'. Popravi ga in preveri znova.'}; }
+      const T=exTarget(t), extra=[...BOOL.vars(a)].filter(v=>!T.names.includes(v));
+      if(extra.length) return {err:'Izraz vsebuje spremenljivko '+extra.join(', ')+', ki je v nalogi ni. Uporabi samo '+T.names.join(', ')+'.'};
+      card.querySelector('.expv').innerHTML='Tvoj izraz: <span class="m">'+BOOL.html(a)+'</span>';
+      const tab=BOOL.table(a,T.names), eq=tab.every((y,m)=>T.dc.includes(m)||y===(T.on.includes(m)?1:0));
+      let ok=eq, msg='';
+      if(eq&&t.ops&&!BOOL.onlyOps(a,t.ops)){ ok=false; msg='Izraz da pravo tabelo, vendar uporablja nedovoljene operatorje.'; }
+      else if(eq&&t.nv&&!negVarsOnly(a)){ ok=false; msg='Tabela je prava, vendar ima izraz še črto nad oklepajem. Razreši jo z De Morganom.'; }
+      else if(eq&&t.min){ const best=BOOL.lits(BOOL.parse(t.pos?BOOL.pos(T.on,T.names,T.dc):BOOL.sop(T.on,T.names,T.dc))); if(BOOL.lits(a)>best){ ok=false; msg='Izraz je pravilen, vendar ni najkrajši (najkrajši zapis: '+litW(best)+', tvoj: '+litW(BOOL.lits(a))+').'; } }
+      else if(!eq) msg='Tabela tvojega izraza se ne ujema z zahtevano.';
+      inp.classList.toggle('right',ok); inp.classList.toggle('wrong',!ok);
+      return {ok,msg};
+    }
+  };
+
+  // ---------- naloga: izpolni Veitchev diagram ----------
+  XT.km={
+    tv(t){ const T=exTarget(t); return valsOf(T.on,t.vars.length,T.dc); },
+    html(t,i){ return `<div class="fig kmh" data-i="${i}"></div><p class="sm mut">Klikni celico, da zamenjaš 0 in 1. Majhna številka v kotu je številka vrstice tabele.</p>`; },
+    draw(card,t,st,o){ const n=t.vars.length, k=st.k||Array(1<<n).fill(0); card.querySelector('.kmh').innerHTML=kmapSVG(n,k,Object.assign({names:t.vars,click:!st.d},o||{})); },
+    click(e,card,t,st){ const r=e.target.closest('[data-m]'); if(!r||!card.querySelector('.kmh').contains(r)) return false; const n=t.vars.length; st.k=st.k||Array(1<<n).fill(0); const m=+r.dataset.m; st.k[m]=st.k[m]?0:1; this.draw(card,t,st); return true; },
+    restore(card,t,st){ if(st.sol) this.showSol(card,t); else this.draw(card,t,st,st.d?{bad:this.bad(t,st)}:{}); },
+    bad(t,st){ const tv=this.tv(t), k=st.k||[]; return tv.map((v,m)=>v==='X'?-1:(k[m]||0)!==v?m:-1).filter(m=>m>=0); },
+    lock(card,t){ /* risba se zaklene ob ponovnem izrisu */ },
+    showSol(card,t){ const T=exTarget(t), n=t.vars.length; card.querySelector('.kmh').innerHTML=kmapSVG(n,valsOf(T.on,n,T.dc),{names:t.vars,groups:T.on.length?BOOL.qm(T.on,n,T.dc):[]}); },
+    check(card,t,st){ const bad=this.bad(t,st); this.draw(card,Object.assign({},t),Object.assign({},st,{d:true}),{bad}); return {ok:!bad.length,msg:bad.length?'Napačnih celic: '+bad.length+' (rdeča obroba).':''}; }
+  };
+  // rešitve in slike z diagramom v nalogah: t.qkm (diagram v vprašanju), t.solKm (diagram s skupinami na začetku rešitve)
+  function kmTaskFigs(){
+    TASKS.forEach((t,i)=>{
+      const card=$('t'+i); if(!card) return;
+      if(t.qkm){ const el=card.querySelector('.tfig'); if(el){ const q=t.qkm, n=q.names.length; el.innerHTML=kmapSVG(n,valsOf(q.on,n,q.dc),{names:q.names}); } }
+      if(t.solKm){ const el=card.querySelector('.kmsol'); if(el){ const q=t.solKm, n=q.names.length, gs=q.pos?BOOL.qm(offSet(q.on,n,q.dc),n,q.dc):BOOL.qm(q.on,n,q.dc);
+        el.innerHTML='<div class="fig">'+kmapSVG(n,valsOf(q.on,n,q.dc),{names:q.names,groups:q.pos?null:gs,zero:q.pos?gs:null})+'</div>'+groupChips(gs,q.names,q.pos); } }
+      if(t.type==='km'){ const st=S.t[i]; if(!st) XT.km.draw(card,t,{}); }
+    });
+  }
+
+  // ---------- naloga: sam označi skupine in zapiši minimalno PDNO ----------
+  const pcount=x=>{ let c=0; while(x){ c+=x&1; x>>=1; } return c; };
+  function cubeOf(cells){
+    if(!cells.length) return null;
+    const a=cells.reduce((x,y)=>x&y), o=cells.reduce((x,y)=>x|y), mk=a^o, v=a&~mk;
+    if(new Set(cells).size!==cells.length||cells.length!==(1<<pcount(mk))) return null;
+    return cells.every(m=>(m&~mk)===v)?{m:mk,v}:null;
+  }
+  function grpCheck(t,gs){
+    const T=exTarget(t), n=t.vars.length, ok1=m=>T.on.includes(m)||T.dc.includes(m);
+    if(!gs.length) return 'Najprej označi skupine enic.';
+    const cu=gs.map(cubeOf);
+    for(let i=0;i<gs.length;i++){
+      if(!cu[i]) return 'Skupina '+(i+1)+' ni veljavna: biti mora pravokotnik iz 1, 2, 4, 8 ali 16 sosednjih celic.';
+      if(gs[i].some(m=>!ok1(m))) return 'Skupina '+(i+1)+' vsebuje ničlo.';
+    }
+    const cov=new Set(); gs.forEach(g=>g.forEach(m=>cov.add(m)));
+    const miss=T.on.filter(m=>!cov.has(m));
+    if(miss.length) return miss.length===1?'Ena enica ni v nobeni skupini.':miss.length+' enic ni v nobeni skupini.';
+    for(let i=0;i<gs.length;i++) for(let b=0;b<n;b++){ if((cu[i].m>>b)&1) continue; if(gs[i].every(m=>ok1(m^(1<<b)))) return 'Skupina '+(i+1)+' ni največja možna: lahko jo podvojiš.'; }
+    for(let i=0;i<gs.length;i++){ const other=new Set(); gs.forEach((g,j)=>{ if(j!==i) g.forEach(m=>other.add(m)); }); if(gs[i].filter(m=>T.on.includes(m)).every(m=>other.has(m))) return 'Skupina '+(i+1)+' je odveč: vse njene enice so že v drugih skupinah.'; }
+    const L=cu.reduce((a,c)=>a+n-pcount(c.m),0), best=BOOL.lits(BOOL.parse(BOOL.sop(T.on,t.vars,T.dc)));
+    if(gs.length>BOOL.qm(T.on,n,T.dc).length||L>best) return 'Skupine so veljavne, vendar jih je mogoče izbrati bolj ugodno.';
+    return '';
+  }
+  XT.grp={
+    html(t,i){ return `<div class="fig kmh kmg" data-i="${i}"></div>
+      <div class="acts" style="margin-top:4px"><button type="button" class="btn sm gadd">Dodaj skupino</button><button type="button" class="btn g2 sm gclr">Počisti izbiro</button><span class="sm mut gsel" aria-live="polite"></span></div>
+      <div class="gl gchips"></div>
+      <p class="sm mut">Povleci z miško ali prstom čez celice ene skupine (ali jih klikaj posamično). Skupina sme segati čez rob diagrama. Nato pritisni »Dodaj skupino«. Skupino odstraniš s klikom na ×.</p>`+XT.ex.html(Object.assign({},t,{lab:'Minimalna PDNO: Y ='}),i); },
+    vals(t){ const T=exTarget(t); return valsOf(T.on,t.vars.length,T.dc); },
+    draw(card,t,st){
+      const n=t.vars.length;
+      card.querySelector('.kmh').innerHTML=kmapSVG(n,this.vals(t),{names:t.vars,click:!st.d,pick:st.pick||[],cells:st.g||[],scale:1.3});
+      card.querySelector('.gsel').textContent=(st.pick&&st.pick.length)?'Izbranih celic: '+st.pick.length:'';
+      card.querySelector('.gl').innerHTML=(st.g||[]).map((g,k)=>{ const c=cubeOf(g); return `<span class="gchip" style="border-color:var(--g${k%6+1})">${c?impHTML(c,t.vars):'neveljavna'}${st.d?'':` <button type="button" class="kb gdel" data-k="${k}" aria-label="Odstrani skupino ${k+1}" style="min-width:26px;min-height:26px;padding:0">×</button>`}</span>`; }).join('');
+    },
+    mount(card,t,st){
+      const host=card.querySelector('.kmh'); let drag=false, mode=1;
+      const cellAt=e=>{ const el=document.elementFromPoint(e.clientX,e.clientY); const r=el&&el.closest&&el.closest('[data-m]'); return r&&host.contains(r)?+r.dataset.m:null; };
+      const apply=m=>{ if(m===null||st.d) return; st.pick=st.pick||[]; const has=st.pick.includes(m); if(mode&&!has) st.pick.push(m); if(!mode&&has) st.pick=st.pick.filter(x=>x!==m); this.draw(card,t,st); };
+      host.addEventListener('pointerdown',e=>{ const r=e.target.closest('[data-m]'); if(!r||st.d) return; e.preventDefault(); const m=+r.dataset.m; mode=(st.pick||[]).includes(m)?0:1; drag=true; apply(m); });
+      host.addEventListener('pointermove',e=>{ if(drag) apply(cellAt(e)); });
+      window.addEventListener('pointerup',()=>{ if(drag){ drag=false; save(); } });
+      this.draw(card,t,st);
+    },
+    click(e,card,t,st){
+      if(e.target.closest('.kb')&&!e.target.closest('.gdel')) return XT.ex.click(e,card,t,st);
+      const del=e.target.closest('.gdel'); if(del){ st.g.splice(+del.dataset.k,1); this.draw(card,t,st); return true; }
+      if(e.target.closest('.gclr')){ st.pick=[]; this.draw(card,t,st); return true; }
+      if(e.target.closest('.gadd')){ if(st.pick&&st.pick.length){ st.g=st.g||[]; st.g.push(st.pick.slice().sort((a,b)=>a-b)); st.pick=[]; this.draw(card,t,st); } return true; }
+      return false;
+    },
+    restore(card,t,st){ const inp=card.querySelector('input.xin'); if(st.x) inp.value=st.x; if(st.sol) this.showSol(card,t); else this.draw(card,t,st); },
+    lock(card,t){ card.querySelectorAll('input.xin,.kb,.gadd,.gclr').forEach(x=>x.disabled=true); },
+    showSol(card,t){ const T=exTarget(t), n=t.vars.length, gs=BOOL.qm(T.on,n,T.dc); card.querySelector('.kmh').innerHTML=kmapSVG(n,valsOf(T.on,n,T.dc),{names:t.vars,groups:gs,scale:1.3}); card.querySelector('.gl').innerHTML=groupChips(gs,t.vars).replace(/^<div class="gchips">|<\/div>$/g,''); },
+    check(card,t,st){
+      const gm=grpCheck(t,st.g||[]);
+      const inp=card.querySelector('input.xin');
+      if(!inp.value.trim()) return {err:gm?'Skupine: '+gm+' Vpiši še minimalno PDNO.':'Skupine so dobre. Vpiši še minimalno PDNO.'};
+      if(inp.value.includes('(')) return {err:'Zapiši minimalno PDNO: vsoto produktov brez oklepajev.'};
+      const r=XT.ex.check(card,Object.assign({},t,{min:true}),st);
+      if(r.err) return r;
+      const ok=!gm&&r.ok;
+      this.draw(card,t,Object.assign({},st,{d:true}));
+      return {ok,msg:(gm?'Skupine: '+gm+' ':'Skupine so pravilne. ')+(r.ok?'Izraz je pravilen.':r.msg)};
+    }
+  };
+
+
+  // =================== SIMULACIJE VAJE 1.1 ===================
+  const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fv=(v,d)=>(Math.round(v*100)/100).toFixed(d===undefined?2:d).replace('.',',').replace('-','−');
+  const AMB='var(--amb)';
+  // vrednosti iz izraza nadomesti s konstantami (za izpis izračuna)
+  const subst=(n,e)=>n.t==='var'?{t:'const',v:e[n.n]}:n.t==='not'?{t:'not',a:subst(n.a,e)}:n.args?{t:n.t,args:n.args.map(a=>subst(a,e))}:n;
+  const FAM={
+    ttl:{n:'TTL 74xx',vcc:5,vil:0.8,vih:2.0,vol:0.4,voh:2.4},
+    hc:{n:'CMOS 74HC',vcc:4.5,vil:1.35,vih:3.15,vol:0.1,voh:4.4}
+  };
+  const zoneOf=(f,u)=>u<=f.vil?0:u>=f.vih?1:-1;
+  const zoneHTML=z=>z===1?'<span class="zone z1">logična 1</span>':z===0?'<span class="zone z0">logična 0</span>':'<span class="zone zx">prepovedano območje</span>';
+  // žica v prepovedanem območju je jantarna in črtkana
+  const WZ=(pts,z)=>z===-1?`<polyline points="${pts.map(p=>p[0]+','+p[1]).join(' ')}" fill="none" stroke="${AMB}" stroke-width="2.4" stroke-dasharray="6 4"/>`:W(pts,z);
+  const CHZ=(x,y,t,z,w)=>z===-1?`<rect x="${x}" y="${y}" width="${w}" height="18" rx="9" fill="${AMB}"/><text x="${x+w/2}" y="${y+13}" text-anchor="middle" style="fill:#1b1206;font-size:12px;font-weight:700">${t}</text>`:CH(x,y,t,z,w);
+  const LED=(x,y,z)=>`<circle cx="${x}" cy="${y}" r="13" style="fill:${z===1?'var(--on)':z===-1?AMB:'var(--card)'};stroke:var(--ink);stroke-width:2"/><text x="${x}" y="${y+5}" text-anchor="middle" style="font-weight:700;fill:${z?'#1b1206':'var(--mut)'}">${z===-1?'?':z}</text>`;
+
+  // napetostni stolpci z območji (teorija in simulacija)
+  function zonesSVG(sel,U){
+    const y=v=>22+(5-v)*36, colX={ttl:70,hc:270};
+    let s='';
+    for(let v=0;v<=5;v++){ s+=`<line x1="40" y1="${y(v)}" x2="44" y2="${y(v)}" style="stroke:var(--mut)"/>`+TX(36,y(v)+4,v+' V','end','lbl'); }
+    s+=`<line x1="44" y1="${y(5)}" x2="44" y2="${y(0)}" style="stroke:var(--mut)"/>`;
+    for(const k of ['ttl','hc']){
+      const f=FAM[k], x=colX[k], w=56, on=!sel||sel===k;
+      const op=on?1:0.35;
+      s+=`<g style="opacity:${op}">`;
+      s+=`<rect x="${x}" y="${y(f.vil)}" width="${w}" height="${y(0)-y(f.vil)}" style="fill:var(--tile);stroke:var(--mut)"/>`;
+      s+=`<rect x="${x}" y="${y(f.vih)}" width="${w}" height="${y(f.vil)-y(f.vih)}" style="fill:${AMB};opacity:.75"/>`;
+      s+=`<rect x="${x}" y="${y(f.vcc)}" width="${w}" height="${y(f.vih)-y(f.vcc)}" style="fill:var(--on);opacity:.8"/>`;
+      if(f.vcc<5) s+=`<rect x="${x}" y="${y(5)}" width="${w}" height="${y(f.vcc)-y(5)}" style="fill:none;stroke:var(--mut);stroke-dasharray:3 3"/>`;
+      s+=TX(x+w/2,y(0)+18,f.n,'middle','net');
+      s+=TX(x+w/2,(y(f.vih)+y(f.vcc))/2+4,'1','middle','sym')+TX(x+w/2,(y(0)+y(f.vil))/2+4,'0','middle','sym')+TX(x+w/2,(y(f.vil)+y(f.vih))/2+4,'?','middle','sym');
+      s+=TX(x+w+6,y(f.vih)+4,'V<tspan dy="3" style="font-size:9px">IH</tspan><tspan dy="-3"> '+fv(f.vih)+' V</tspan>','start','lbl');
+      s+=TX(x+w+6,y(f.vil)+4,'V<tspan dy="3" style="font-size:9px">IL</tspan><tspan dy="-3"> '+fv(f.vil)+' V</tspan>','start','lbl');
+      s+='</g>';
+      if(sel===k&&U!==undefined){ const yy=y(U); s+=`<polygon points="${x-14},${yy-7} ${x-2},${yy} ${x-14},${yy+7}" style="fill:var(--ink)"/><line x1="${x-2}" y1="${yy}" x2="${x+w}" y2="${yy}" style="stroke:var(--ink);stroke-width:2.2"/>`; }
+    }
+    return sized(svgWrap('0 0 400 232',s,'Območja logičnih nivojev za TTL in CMOS'),420);
+  }
+  $('fig-zones').innerHTML=zonesSVG(null);
+
+  // ---------- 1) logični nivoji ----------
+  (function(){
+    const st={f:'ttl',U:0.3,b:1,N:0};
+    const slider=$('nvU'), ns=$('nmN');
+    pillGroup($('nvFam'),b=>{ st.f=b.dataset.f; slider.max=FAM[st.f].vcc; if(st.U>FAM[st.f].vcc){ st.U=FAM[st.f].vcc; slider.value=st.U; } draw(); });
+    pillGroup($('nmBit'),b=>{ st.b=+b.dataset.b; draw(); });
+    slider.addEventListener('input',()=>{ st.U=+slider.value; draw(); });
+    ns.addEventListener('input',()=>{ st.N=+ns.value; draw(); });
+    function draw(){
+      const f=FAM[st.f], U=st.U, z=zoneOf(f,U);
+      $('nvUv').textContent=fv(U)+' V'; $('nvZone').innerHTML=zoneHTML(z);
+      // vhod → vrata (ojačevalnik) → svetleča dioda
+      const g=G('BUF',150,26,1);
+      let s=CHZ(6,32,fv(U)+' V',z,62)+WZ([[68,41],[150,41]],z)+g.s+WZ([g.out,[250,41]],z)+LED(266,41,z);
+      s+=TX(178,86,'vrata (ojačevalnik)','middle','lbl')+TX(266,72,'LED','middle','lbl');
+      $('fig-nv1').innerHTML=sized(svgWrap('0 0 300 96',s,'Vhodna napetost, vrata in svetleča dioda'),380);
+      $('fig-nvbar').innerHTML=zonesSVG(st.f,U);
+      let ro=`<b>${f.n}</b>, V<sub>CC</sub> = ${fv(f.vcc,f.vcc%1?2:0)} V. Vhod ${fv(U)} V je `;
+      ro+= z===0?`pod V<sub>IL</sub> = ${fv(f.vil)} V, vrata preberejo <b>0</b>.`: z===1?`nad V<sub>IH</sub> = ${fv(f.vih)} V, vrata preberejo <b>1</b>.`:`med V<sub>IL</sub> = ${fv(f.vil)} V in V<sub>IH</sub> = ${fv(f.vih)} V. Izhod <b>ni zagotovljen</b>: lahko je 0, 1 ali celo niha.`;
+      $('nvRo').innerHTML=ro;
+      // šumna rezerva
+      const out=st.b?f.voh:f.vol, rx=out+st.N, zr=zoneOf(f,rx), ok=zr===st.b;
+      $('nmNv').textContent=(st.N>0?'+':'')+fv(st.N)+' V';
+      const g1=G('BUF',70,26,1), g2=G('BUF',380,26,1);
+      let t=CH(6,32,String(st.b),st.b,34)+W([[40,41],[70,41]],st.b)+g1.s+W([g1.out,[200,41]],st.b);
+      t+=`<circle cx="220" cy="41" r="16" style="fill:var(--card);stroke:var(--ink);stroke-width:2"/><text x="220" y="46" text-anchor="middle" style="font-size:16px;font-weight:700">~</text>`+TX(220,80,'motnja '+(st.N>0?'+':'')+fv(st.N)+' V','middle','lbl');
+      t+=WZ([[236,41],[380,41]],zr)+g2.s+WZ([g2.out,[470,41]],zr)+CHZ(470,32,zr===-1?'?':String(zr),zr,34);
+      t+=TX(98,80,'oddajnik '+fv(out)+' V','middle','lbl')+TX(408,80,'sprejemnik '+fv(rx)+' V','middle','lbl');
+      $('fig-nm').innerHTML=svgWrap('0 0 520 92',t,'Oddajnik, motnja na žici in sprejemnik');
+      const nm=st.b?f.voh-f.vih:f.vil-f.vol;
+      $('nmRo').innerHTML=`Oddajnik zagotovi ${st.b?'V<sub>OH</sub>':'V<sub>OL</sub>'} = ${fv(out)} V. Na vhodu sprejemnika je ${fv(out)} ${st.N<0?'−':'+'} ${fv(Math.abs(st.N))} = <b>${fv(rx)} V</b> → ${zoneHTML(zr)}.<br>Šumna rezerva ${st.b?'NM<sub>H</sub> = V<sub>OH</sub> − V<sub>IH</sub>':'NM<sub>L</sub> = V<sub>IL</sub> − V<sub>OL</sub>'} = <b>${fv(nm)} V</b>. `+(ok?'<b style="color:var(--ok)">Sprejemnik prebere pravo vrednost.</b>':'<b style="color:var(--bad)">Motnja je prevelika, prenos ni zanesljiv.</b>');
+    }
+    REDRAW.push(draw); draw();
+  })();
+
+  // ---------- 2) stikala in žarnica ----------
+  (function(){
+    const MODES={
+      no:{e:'A',v:['A'],k:{A:'no'},t:'Ena tipka z delovnim kontaktom'},
+      nc:{e:'¬A',v:['A'],k:{A:'nc'},t:'Ena tipka z mirovnim kontaktom'},
+      ser:{e:'A·B',v:['A','B'],k:{A:'no',B:'no'},t:'Dve tipki zaporedno'},
+      par:{e:'A+B',v:['A','B'],k:{A:'no',B:'no'},t:'Dve tipki vzporedno'},
+      mix:{e:'A·¬B',v:['A','B'],k:{A:'no',B:'nc'},t:'Delovni kontakt A zaporedno z mirovnim kontaktom B'}
+    };
+    const st={m:'no',A:0,B:0};
+    const tg={}; ['A','B'].forEach(v=>{ tg[v]=mkToggle($('swT'),v,()=>{ st[v]^=1; draw(); }); });
+    pillGroup($('swMode'),b=>{ st.m=b.dataset.m; draw(); });
+    // kontakt: tipka nad njim, vzvod je sklenjen ali odprt
+    function contact(x1,x2,y,v,kind,lab,cur){
+      const closed=kind==='no'?v:!v, c=cur?ON:OFF, sw=cur?2.8:1.4;
+      let s=`<circle cx="${x1}" cy="${y}" r="3.5" style="fill:${c}"/><circle cx="${x2}" cy="${y}" r="3.5" style="fill:${closed&&cur?ON:OFF}"/>`;
+      s+= closed?`<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" style="stroke:${c};stroke-width:${sw}"/>`:`<line x1="${x1}" y1="${y}" x2="${x2-4}" y2="${y-20}" style="stroke:var(--ink);stroke-width:2"/>`;
+      if(kind==='nc') s+=`<line x1="${x2}" y1="${y}" x2="${x2}" y2="${y-10}" style="stroke:var(--ink);stroke-width:2"/>`;
+      const mx=(x1+x2)/2;
+      s+=`<line x1="${mx}" y1="${y-(closed?2:12)}" x2="${mx}" y2="${y-34}" style="stroke:var(--mut);stroke-dasharray:3 3"/>`;
+      s+=`<rect x="${mx-14}" y="${y-48}" width="28" height="14" rx="4" style="fill:${v?'var(--on)':'var(--card)'};stroke:var(--ink);stroke-width:1.5"/>`;
+      s+=TX(mx,y+20,lab+(kind==='nc'?' (mirovni)':' (delovni)'),'middle','lbl');
+      return s;
+    }
+    function circuit(){
+      const M=MODES[st.m], e={A:st.A,B:st.B}, Y=BOOL.ev(BOOL.parse(M.e),e), L=v=>W(v,Y);
+      const top=52, bot=180, xL=30, xR=380;
+      let s='';
+      // baterija
+      s+=W([[xL,top],[xL,104]],Y)+`<line x1="${xL-16}" y1="104" x2="${xL+16}" y2="104" style="stroke:var(--ink);stroke-width:2.5"/><line x1="${xL-8}" y1="112" x2="${xL+8}" y2="112" style="stroke:var(--ink);stroke-width:4"/>`+W([[xL,112],[xL,bot]],Y)+TX(xL+22,100,'+','start','lbl');
+      // žarnica
+      s+=W([[xR,top],[xR,118]],Y)+W([[xR,150],[xR,bot],[xL,bot]],Y);
+      s+=`<circle cx="${xR}" cy="134" r="16" style="fill:${Y?'var(--on)':'var(--card)'};stroke:var(--ink);stroke-width:2"/><line x1="${xR-11}" y1="123" x2="${xR+11}" y2="145" style="stroke:var(--ink);stroke-width:1.6"/><line x1="${xR+11}" y1="123" x2="${xR-11}" y2="145" style="stroke:var(--ink);stroke-width:1.6"/>`+TX(xR-24,138,'Y','end','net');
+      if(st.m==='no'||st.m==='nc'){
+        s+=L([[xL,top],[175,top]])+contact(175,235,top,st.A,M.k.A,'A',Y)+L([[235,top],[xR,top]]);
+      } else if(st.m==='ser'||st.m==='mix'){
+        s+=L([[xL,top],[110,top]])+contact(110,170,top,st.A,M.k.A,'A',Y)+L([[170,top],[230,top]])+contact(230,290,top,st.B,M.k.B,'B',Y)+L([[290,top],[xR,top]]);
+      } else {
+        const ya=top, yb=top+62, ca=Y&&st.A, cb=Y&&st.B;
+        s+=L([[xL,top],[130,top]])+W([[130,ya],[130,yb],[180,yb]],cb)+W([[130,ya],[180,ya]],ca)+DOTV(130,ya,Y);
+        s+=contact(180,240,ya,st.A,'no','A',ca)+contact(180,240,yb,st.B,'no','B',cb);
+        s+=W([[240,ya],[300,ya]],ca)+W([[240,yb],[300,yb],[300,ya]],cb)+DOTV(300,ya,Y)+L([[300,top],[xR,top]]);
+      }
+      return sized(svgWrap('0 0 420 200',s,'Vezje s tipkami, baterijo in žarnico'),500);
+    }
+    function draw(){
+      const M=MODES[st.m], a=BOOL.parse(M.e);
+      tg.B.hidden=M.v.length<2; if(M.v.length<2) st.B=0;
+      setP(tg.A,st.A); tg.A.textContent='A = '+st.A; setP(tg.B,st.B); tg.B.textContent='B = '+st.B;
+      const e={A:st.A,B:st.B}, Y=BOOL.ev(a,e), cur=M.v.length===1?st.A:st.A*2+st.B;
+      $('fig-sw').innerHTML=circuit();
+      if(a.t==='var'){ // ena tipka z delovnim kontaktom: vrata »1« (ojačevalnik) prenesejo A na izhod
+        const g=G('BUF',70,8,1), v=e.A;
+        $('fig-swg').innerHTML=sized(svgWrap('0 0 220 46',CH(6,14,'A',v,32)+W([[38,23],[70,23]],v)+g.s+W([g.out,[160,23]],v)+CH(160,14,'Y',v,32),'Ojačevalnik'),275);
+      } else $('fig-swg').innerHTML=treeSVG(a,e,{out:'Y',label:'Ista funkcija z logičnimi vrati'}).svg;
+      $('swTab').innerHTML=truthHTML(M.v,[{n:'Y',ast:a}],cur);
+      $('swRo').innerHTML=`<b>${M.t}</b><div class="eqbig" style="margin:6px 0">Y = ${BOOL.html(a)}</div>`+M.v.map(v=>`${v} = ${e[v]} (tipka ${e[v]?'je':'ni'} pritisnjena)`).join('<br>')+`<br>Žarnica <b>${Y?'sveti':'ne sveti'}</b> (Y = ${Y}).`;
+    }
+    REDRAW.push(draw); draw();
+  })();
+
+  // ---------- 3) logična funkcija v živo ----------
+  (function(){
+    const EX=[
+      {id:'pas',t:'Varnostni pas',v:['S','P'],e:'S·¬P',d:'S = voznik sedi na sedežu, P = pas je pripet. Opozorilo Y zapiska, ko voznik sedi in pas ni pripet.'},
+      {id:'alarm',t:'Alarm v hiši',v:['V','O','G'],e:'V·(O+G)',d:'V = alarm je vključen, O = okno je odprto, G = senzor zazna gibanje. Sirena Y se oglasi, ko je alarm vključen in je odprto okno ali je zaznano gibanje.'},
+      {id:'hodnik',t:'Luč na hodniku',v:['A','B'],e:'A·¬B+¬A·B',d:'Na vsakem koncu hodnika je stikalo (A in B). Luč Y se prižge ali ugasne ob preklopu kateregakoli stikala: sveti, ko sta stikali v različnih legah.'},
+      {id:'vecina',t:'Večina od treh',v:['A','B','C'],e:'A·B+A·C+B·C',d:'Trije sodniki pritisnejo tipke A, B in C. Lučka Y zasveti, ko sta pritisnjeni vsaj dve tipki.'},
+      {id:'stiskalnica',t:'Stiskalnica',v:['L','D','Z'],e:'L·D·Z',d:'Stiskalnica Y se spusti samo, ko operater drži levo (L) in desno (D) tipko in so zaščitna vrata zaprta (Z = 1).'}
+    ];
+    const st={i:1,env:{}};
+    const sel=$('fnSel');
+    EX.forEach((x,i)=>{ const b=document.createElement('button'); b.className='pill'; b.textContent=x.t; b.dataset.i=i; b.setAttribute('aria-pressed',i===st.i?'true':'false'); sel.appendChild(b); });
+    pillGroup(sel,b=>{ st.i=+b.dataset.i; st.env={}; build(); });
+    $('fnTab').addEventListener('click',e=>{ const tr=e.target.closest('tr[data-m]'); if(!tr) return; const X=EX[st.i]; st.env=BOOL.envOf(X.v,+tr.dataset.m); draw(); });
+    let tgs={};
+    function build(){
+      const X=EX[st.i], box=$('fnT'); box.innerHTML=''; tgs={};
+      X.v.forEach(v=>{ st.env[v]=st.env[v]||0; tgs[v]=mkToggle(box,v,()=>{ st.env[v]^=1; draw(); }); });
+      $('fnDesc').textContent=X.d;
+      draw();
+    }
+    function draw(){
+      const X=EX[st.i], a=BOOL.parse(X.e), e=st.env;
+      X.v.forEach(v=>{ setP(tgs[v],e[v]); tgs[v].textContent=v+' = '+e[v]; });
+      const m=X.v.reduce((s,v)=>s*2+e[v],0), Y=BOOL.ev(a,e);
+      $('fnEq').innerHTML='Y = '+BOOL.html(a);
+      $('fig-fn').innerHTML=treeSVG(a,e,{out:'Y',label:'Vezje funkcije '+X.t}).svg;
+      $('fnTab').innerHTML=truthHTML(X.v,[{n:'Y',ast:a}],m,{idx:true,click:true});
+      $('fnRo').innerHTML=`Vstavimo vrednosti: Y = ${BOOL.html(subst(a,e))} = <b>${Y}</b>. To je vrstica ${m} tabele (${X.v.join('')} = ${X.v.map(v=>e[v]).join('')}<sub>2</sub>).`;
+    }
+    REDRAW.push(draw); build();
+  })();
+
+  // ---------- 4) pravilnostna tabela ----------
+  (function(){
+    const NAMES=['A','B','C','D'];
+    const st={n:3,m:0};
+    pillGroup($('tgN'),b=>{ st.n=+b.dataset.n; st.m=0; draw(); });
+    $('tgPrev').addEventListener('click',()=>{ st.m=(st.m+(1<<st.n)-1)%(1<<st.n); draw(); });
+    $('tgNext').addEventListener('click',()=>{ st.m=(st.m+1)%(1<<st.n); draw(); });
+    $('tgTab').addEventListener('click',e=>{ const tr=e.target.closest('tr[data-m]'); if(tr){ st.m=+tr.dataset.m; draw(); } });
+    function draw(){
+      const vs=NAMES.slice(0,st.n), e=BOOL.envOf(vs,st.m), N=1<<st.n;
+      $('tgLamps').innerHTML=vs.map(v=>lamp(v,e[v],e[v])).join('');
+      $('tgTab').innerHTML=truthHTML(vs,[],st.m,{idx:true,click:true});
+      $('tgRo').innerHTML=`${st.n} ${st.n===1?'spremenljivka':st.n===2?'spremenljivki':'spremenljivke'} → 2<sup>${st.n}</sup> = <b>${N} vrstic</b>.<br>Trenutna vrstica: <b>${st.m}</b> = <span class="m">${LIB.toB(st.m,2,st.n)}</span><sub>2</sub>.<br>`+vs.map((v,i)=>`Stolpec ${v} se menja na ${1<<(st.n-1-i)} ${(1<<(st.n-1-i))===1?'vrstico':(1<<(st.n-1-i))===2?'vrstici':(1<<(st.n-1-i))<5?'vrstice':'vrstic'}.`).join('<br>');
+    }
+    draw();
+
+    // od opisa do tabele
+    const OD=[
+      {t:'Klima',v:['O','T'],e:'¬O·T',d:'Klimatska naprava Y se vklopi, ko je okno zaprto (O = 0) in je v sobi vroče (T = 1).'},
+      {t:'Okna',v:['A','B','C'],e:'A+B+C',d:'Senzorji A, B in C so na treh oknih (1 = okno odprto). Lučka Y na vratih opozori, ko je odprto vsaj eno okno.'},
+      {t:'Zapornica',v:['A','P','V'],e:'A·P+V',d:'Zapornica Y na parkirišču se dvigne, ko pred njo stoji avto (A) in je parkirnina plačana (P), ali ko varnostnik pritisne tipko (V).'},
+      {t:'Stiskalnica',v:['L','D','Z'],e:'L·D·Z',d:'Stiskalnica Y se spusti samo, ko operater drži obe tipki L in D in so zaščitna vrata zaprta (Z = 1).'}
+    ];
+    const od={i:0,c:[]};
+    const sel=$('odSel');
+    OD.forEach((x,i)=>{ const b=document.createElement('button'); b.className='pill'; b.textContent=x.t; b.dataset.i=i; b.setAttribute('aria-pressed',i===0?'true':'false'); sel.appendChild(b); });
+    pillGroup(sel,b=>{ od.i=+b.dataset.i; reset(); });
+    function reset(){
+      const X=OD[od.i]; od.c=Array(1<<X.v.length).fill(null);
+      $('odDesc').textContent=X.d; $('odMsg').textContent=''; $('odMsg').className='status'; $('odSol').hidden=true;
+      tab();
+    }
+    function tab(bad){
+      const X=OD[od.i];
+      let h='<div class="scroll"><table class="tt"><tr><th class="mid">vrstica</th>'+X.v.map(v=>'<th>'+v+'</th>').join('')+'<th class="o">Y</th></tr>';
+      od.c.forEach((c,m)=>{ const e=BOOL.envOf(X.v,m);
+        h+='<tr><td class="mid">'+m+'</td>'+X.v.map(v=>'<td>'+e[v]+'</td>').join('')+`<td class="o"><button class="cell ${c===null?'un':c?'one':''} ${bad&&bad.includes(m)?'bad':''}" data-m="${m}" aria-label="Y v vrstici ${m}">${c===null?'?':c}</button></td></tr>`; });
+      $('odTab').innerHTML=h+'</table></div>';
+    }
+    $('odTab').addEventListener('click',e=>{ const b=e.target.closest('.cell'); if(!b) return; const m=+b.dataset.m; od.c[m]=od.c[m]===null?0:1-od.c[m]; tab(); });
+    $('odChk').addEventListener('click',()=>{
+      const X=OD[od.i], a=BOOL.parse(X.e), msg=$('odMsg');
+      if(od.c.some(c=>c===null)){ msg.textContent='Najprej izpolni vse celice stolpca Y.'; msg.className='status bad'; return; }
+      const bad=od.c.map((c,m)=>c!==BOOL.ev(a,BOOL.envOf(X.v,m))?m:-1).filter(m=>m>=0);
+      tab(bad);
+      if(!bad.length){ msg.textContent='Tabela je pravilna. Oglej si še enačbo in vezje.'; msg.className='status ok'; }
+      else { msg.textContent='Napačnih celic: '+bad.length+' (obrobljene rdeče). Še enkrat preberi opis in popravi.'; msg.className='status bad'; }
+    });
+    function showSol(){
+      const X=OD[od.i], a=BOOL.parse(X.e), e=BOOL.envOf(X.v,0);
+      $('odEq').innerHTML='Y = '+BOOL.html(a);
+      $('fig-od').innerHTML=treeSVG(a,e,{out:'Y'}).svg;
+    }
+    $('odShow').addEventListener('click',()=>{ $('odSol').hidden=false; showSol(); });
+    REDRAW.push(()=>{ if(!$('odSol').hidden) showSol(); });
+    reset();
+
+    // primera tabel v teoriji
+    $('tabEx1').innerHTML=truthHTML(['S','P'],[{n:'Y',ast:BOOL.parse('S·¬P')}],-1,{idx:true});
+    $('tabEx2').innerHTML=truthHTML(['A','B','C'],[{n:'Y',ast:BOOL.parse('A·B+A·C+B·C')}],-1,{idx:true});
+  })();
+
+
+  // ---------- cilji in kartice sklopov ----------
+  const pl=(n,f)=>n+' '+(n===1?f[0]:n===2?f[1]:(n===3||n===4)?f[2]:f[3]);
+  const goalsEl=$('goals');
+  CFG.GOALS.forEach((g,i)=>{
+    const lb=document.createElement('label');
+    lb.innerHTML=`<input type="checkbox"> <span>${g}</span>`;
+    const cb=lb.querySelector('input'); cb.checked=!!S.g[i];
+    cb.addEventListener('change',()=>{ S.g[i]=cb.checked; save(); });
+    goalsEl.appendChild(lb);
+  });
+  const taskCount=mod=>TASKS.filter(t=>t.mod===mod).length;
+  const modsEl=$('mods');
+  CFG.MODS.forEach(m=>{
+    const n=taskCount(m.id);
+    const d=document.createElement('div');
+    d.innerHTML=`<div class="n">${m.n}</div><h4 style="margin:0">${m.t}</h4><p>${m.d}</p>
+      <p class="mut sm">${pl(m.th,['stran','strani','strani','strani'])} teorije · ${pl(m.sim,['simulacija','simulaciji','simulacije','simulacij'])} · ${pl(n,['naloga','nalogi','naloge','nalog'])}</p>
+      <p class="m sm" id="mp-${m.id}"></p>
+      <button class="btn g2 sm" data-first="${m.first}">Odpri sklop ›</button>`;
+    d.querySelector('button').addEventListener('click',()=>showPage(m.first,true));
+    modsEl.appendChild(d);
+  });
+
+  // ---------- naloge ----------
+  const LEVEL_PTS={lahka:1,srednja:2,'težka':3};
+  const LVL_CLASS={lahka:'l1',srednja:'l2','težka':'l3'};
+  const fmtPts=x=>String(Math.round(x*10)/10).replace('.',',');
+  const maxScore=TASKS.reduce((a,t)=>a+LEVEL_PTS[t.lvl],0);
+  const list=$('tasks'), nums=$('nums');
+  const MODN=CFG.MODN;
+  const tstate=i=>S.t[i]||(S.t[i]={d:false,p:0,h:false,sol:false,sel:null,c:null,a:null});
+  const FMTMSG={bin:'v dvojiškem zapisu so samo števki 0 in 1',oct:'v osmiškem zapisu so števke od 0 do 7',dec:'v desetiškem zapisu so števke od 0 do 9 (decimalna vejica je dovoljena)',hex:'v šestnajstiškem zapisu so števke 0 do 9 in črke A do F',txt:''};
+  function ttRows(t){ const n=t.ins.length, rows=[]; for(let r=0;r<(1<<n);r++){ const ins=[]; for(let b=n-1;b>=0;b--) ins.push((r>>b)&1); rows.push(ins); } return rows; }
+  function ttHtml(t){
+    const rows=ttRows(t);
+    let h='<div class="scroll"><table class="ttask"><tr>'+t.ins.map(n=>`<th>${n}</th>`).join('')+t.outs.map(n=>`<th class="o">${n}</th>`).join('')+'</tr>';
+    rows.forEach((ins,r)=>{
+      h+='<tr>'+ins.map(v=>`<td>${v}</td>`).join('')+t.outs.map((n,j)=>`<td class="o"><button class="cell un" data-r="${r}" data-j="${j}" aria-label="${n} v vrstici ${r+1}">?</button></td>`).join('')+'</tr>';
+    });
+    return h+'</table></div>';
+  }
+  function inHtml(t,i){
+    return '<div class="flds">'+t.fields.map((f,j)=>`<label class="fld"><span class="fl">${f.l}</span><input class="inp" type="text" id="t${i}f${j}" data-j="${j}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${f.ph||''}">${f.u?`<span class="u">${f.u}</span>`:''}</label>`).join('')+'</div>';
+  }
+  function cellSet(btn,v){
+    btn.classList.toggle('un',v===null); btn.classList.toggle('one',v===1);
+    btn.textContent=v===null?'?':v;
+  }
+  function buildTasks(){
+    list.innerHTML=''; nums.innerHTML='';
+    TASKS.forEach((t,i)=>{
+      const nb=document.createElement('button'); nb.textContent=i+1; nb.setAttribute('aria-label','Naloga '+(i+1));
+      nb.addEventListener('click',()=>{ $('t'+i).scrollIntoView({behavior:'smooth',block:'start'}); });
+      nums.appendChild(nb);
+      const card=document.createElement('div'); card.className='card task'; card.id='t'+i;
+      const pts=LEVEL_PTS[t.lvl], isTT=t.type==='tt', isIN=t.type==='in';
+      card.innerHTML=`
+        <div class="crumb"><span>Naloga ${i+1} od ${TASKS.length} · ${MODN[t.mod]}</span><span class="lv"><span class="lvt ${LVL_CLASS[t.lvl]}">${t.lvl} · ${pts} t</span></span></div>
+        <p class="qt">${t.q}</p>
+        ${(t.fig||t.gfig||t.nfig||t.qkm)?`<div class="fig tfig" data-i="${i}"></div>`:''}
+        ${isTT?ttHtml(t):isIN?inHtml(t,i):XT[t.type]?XT[t.type].html(t,i):`<div class="opts">${t.opts.map((o,j)=>`<label class="opt ${t.mono?'mono':''}"><input type="radio" name="t${i}" value="${j}"> <span>${o}</span></label>`).join('')}</div>`}
+        <div class="acts">
+          <button class="btn" data-act="check">Preveri</button>
+          <button class="btn g2" data-act="hint">Namig (−50 % točk)</button>
+          <button class="btn g2" data-act="sol">Rešitev (0 t, zaklene)</button>
+        </div>
+        <div class="fb" aria-live="polite"></div>
+        <div class="hn" hidden>${t.hint}</div>
+        <div class="slb" hidden>${t.sol}</div>`;
+      list.appendChild(card);
+      restoreCard(card,i);
+      if(XT[t.type]&&XT[t.type].mount) XT[t.type].mount(card,t,tstate(i));
+    });
+  }
+  function lockCard(card,t){
+    if(t&&XT[t.type]&&XT[t.type].lock) XT[t.type].lock(card,t);
+    card.querySelectorAll('input[type=radio]').forEach(r=>r.disabled=true);
+    card.querySelectorAll('input.inp').forEach(r=>r.disabled=true);
+    card.querySelectorAll('.cell').forEach(c=>c.disabled=true);
+    card.querySelector('[data-act="check"]').disabled=true;
+    card.querySelector('[data-act="hint"]').disabled=true;
+  }
+  function markIn(card,t,vals){
+    card.querySelectorAll('input.inp').forEach((inp,j)=>{ const ok=LIB.same(vals[j],t.fields[j]); inp.classList.toggle('right',ok); inp.classList.toggle('wrong',!ok); });
+  }
+  function restoreCard(card,i){
+    const t=TASKS[i], st=S.t[i]; if(!st) return;
+    const pts=LEVEL_PTS[t.lvl], fb=card.querySelector('.fb');
+    if(t.type==='tt'){
+      const rows=ttRows(t);
+      if(st.c) card.querySelectorAll('.cell').forEach(c=>{ const v=st.c[+c.dataset.r*t.outs.length+ +c.dataset.j]; cellSet(c,v===undefined?null:v); });
+      if(st.d && !st.sol) card.querySelectorAll('.cell').forEach(c=>{ const exp=t.fn(rows[+c.dataset.r])[+c.dataset.j]; if(+c.textContent!==exp) c.classList.add('bad'); });
+      if(st.sol) card.querySelectorAll('.cell').forEach(c=>{ cellSet(c,t.fn(rows[+c.dataset.r])[+c.dataset.j]); });
+    } else if(t.type==='in'){
+      const inps=card.querySelectorAll('input.inp');
+      if(st.a) inps.forEach((inp,j)=>{ inp.value=st.a[j]||''; });
+      if(st.d && !st.sol && st.a) markIn(card,t,st.a);
+    } else if(XT[t.type]){ XT[t.type].restore(card,t,st);
+    } else if(st.sel!==null && st.sel!==undefined){
+      const r=card.querySelector(`input[value="${st.sel}"]`); if(r) r.checked=true;
+    }
+    if(st.h){ card.querySelector('.hn').hidden=false; card.querySelector('[data-act="hint"]').disabled=true; }
+    if(st.sol||st.v) card.querySelector('.slb').hidden=false;
+    if(st.d){
+      lockCard(card,t);
+      if(st.sol){ fb.className='fb bad'; fb.textContent='Rešitev prikazana: 0 točk. Naloga je zaklenjena.'; }
+      else { const ok=st.p>0; fb.className='fb '+(ok?'ok':'bad'); fb.textContent=(st.m?st.m+' ':'')+(ok?'Pravilno':'Ni pravilno')+': dobiš '+fmtPts(st.p)+' od '+pts+' t. Odgovor je zaklenjen.'; }
+    } else if(st.h){ fb.className='fb'; fb.textContent='Namig je odbil 50 % točk te naloge.'; }
+  }
+  // vpisani odgovori se sproti shranjujejo
+  list.addEventListener('input',e=>{
+    const xi=e.target.closest('input.xin'); if(xi){ const card=xi.closest('.task'), i=+card.id.slice(1), st=tstate(i); if(!st.d){ st.x=xi.value; save(); } return; }
+    const inp=e.target.closest('input.inp'); if(!inp) return;
+    const card=inp.closest('.task'), i=+card.id.slice(1), st=tstate(i);
+    if(st.d) return;
+    st.a=[...card.querySelectorAll('input.inp')].map(x=>x.value); save();
+  });
+  list.addEventListener('keydown',e=>{
+    if(e.key==='Enter' && e.target.matches('input.inp,input.xin')){ const card=e.target.closest('.task'); const b=card.querySelector('[data-act="check"]'); if(b && !b.disabled) b.click(); }
+  });
+  list.addEventListener('click',e=>{
+    // vrste nalog z lastnim klikom (Veitchev diagram, tipke za vpis izraza)
+    { const card=e.target.closest('.task'); if(card){ const i=+card.id.slice(1), t=TASKS[i]; if(XT[t.type]&&XT[t.type].click&&!(e.target.closest('button[data-act]'))){ const st=tstate(i); if(!st.d&&XT[t.type].click(e,card,t,st)){ save(); return; } } } }
+    // klik na celico tabele
+    const cell=e.target.closest('.cell');
+    if(cell && !cell.disabled){
+      const card=cell.closest('.task'), i=+card.id.slice(1), t=TASKS[i], st=tstate(i);
+      if(st.d) return;
+      const cur=cell.classList.contains('un')?null:+cell.textContent;
+      const nv=cur===null?0:1-cur; cellSet(cell,nv);
+      st.c=st.c||Array(ttRows(t).length*t.outs.length).fill(null);
+      st.c[+cell.dataset.r*t.outs.length+ +cell.dataset.j]=nv; save();
+      return;
+    }
+    const btn=e.target.closest('button[data-act]'); if(!btn) return;
+    const card=btn.closest('.task'); const i=+card.id.slice(1); const t=TASKS[i]; const st=tstate(i);
+    const fb=card.querySelector('.fb'), pts=LEVEL_PTS[t.lvl], isTT=t.type==='tt', isIN=t.type==='in';
+    if(btn.dataset.act==='sol'){
+      if(st.d){ card.querySelector('.slb').hidden=false; st.v=true; save(); return; }
+      card.querySelector('.slb').hidden=false;
+      if(isTT){ const rows=ttRows(t); card.querySelectorAll('.cell').forEach(c=>cellSet(c,t.fn(rows[+c.dataset.r])[+c.dataset.j])); }
+      st.d=true; st.p=0; st.sol=true; lockCard(card,t);
+      if(XT[t.type]&&XT[t.type].showSol) XT[t.type].showSol(card,t);
+      fb.className='fb bad'; fb.textContent='Rešitev prikazana: 0 točk. Naloga je zaklenjena.';
+      save(); refresh(); return;
+    }
+    if(st.d) return;
+    if(btn.dataset.act==='hint'){
+      st.h=true; card.querySelector('.hn').hidden=false; btn.disabled=true;
+      fb.className='fb'; fb.textContent='Namig je odbil 50 % točk te naloge.'; save(); refresh(); return;
+    }
+    if(btn.dataset.act==='check'){
+      let ok, extra='';
+      if(isTT){
+        const rows=ttRows(t), cells=[...card.querySelectorAll('.cell')];
+        if(cells.some(c=>c.classList.contains('un'))){ fb.className='fb bad'; fb.textContent='Najprej dopolni vse celice izhodov.'; return; }
+        ok=true;
+        cells.forEach(c=>{ const exp=t.fn(rows[+c.dataset.r])[+c.dataset.j]; if(+c.textContent!==exp){ ok=false; c.classList.add('bad'); } });
+      } else if(isIN){
+        const vals=[...card.querySelectorAll('input.inp')].map(x=>x.value);
+        if(vals.some(v=>v.trim()==='')){ fb.className='fb bad'; fb.textContent='Najprej vpiši odgovor.'; return; }
+        for(let j=0;j<t.fields.length;j++){
+          const f=t.fields[j];
+          if(LIB.canon(vals[j],f.f,f.w)===null){
+            fb.className='fb bad';
+            fb.textContent = f.w ? 'Odgovor mora imeti natanko '+f.w+' števk'+(FMTMSG[f.f]?' ('+FMTMSG[f.f]+')':'')+'.' : 'Odgovor ni v pravilni obliki: '+(FMTMSG[f.f]||'preveri vnos')+'.';
+            return;
+          }
+        }
+        ok=t.fields.every((f,j)=>LIB.same(vals[j],f));
+        st.a=vals; markIn(card,t,vals);
+      } else if(XT[t.type]){
+        const r=XT[t.type].check(card,t,st);
+        if(r.err){ fb.className='fb bad'; fb.textContent=r.err; save(); return; }
+        ok=r.ok; extra=r.msg||'';
+      } else {
+        const sel=card.querySelector('input:checked');
+        if(!sel){ fb.className='fb bad'; fb.textContent='Najprej izberi odgovor.'; return; }
+        st.sel=+sel.value; ok=st.sel===t.ans;
+      }
+      st.p = ok ? (st.h ? pts/2 : pts) : 0;
+      st.d=true; st.m=extra; lockCard(card,t);
+      fb.className='fb '+(ok?'ok':'bad');
+      fb.textContent=(extra?extra+' ':'')+(ok?'Pravilno':'Ni pravilno')+': dobiš '+fmtPts(st.p)+' od '+pts+' t. Odgovor je zaklenjen.';
+      save(); refresh();
+    }
+  });
+  function refresh(){
+    const doneCount=TASKS.reduce((a,t,i)=>a+((S.t[i]&&S.t[i].d)?1:0),0);
+    const got=TASKS.reduce((a,t,i)=>a+((S.t[i]&&S.t[i].d)?S.t[i].p:0),0);
+    const pct=doneCount/TASKS.length*100;
+    $('bar').style.width=pct+'%';
+    $('score').textContent=fmtPts(got)+' / '+maxScore+' t · '+doneCount+'/'+TASKS.length;
+    $('sc').textContent=fmtPts(got); $('mx').textContent=maxScore; $('pc').textContent=doneCount+'/'+TASKS.length+' nalog';
+    $('bf').style.width=pct+'%';
+    [...nums.children].forEach((b,i)=>{ const st=S.t[i]; b.classList.toggle('done',!!(st&&st.d&&st.p>0)); b.classList.toggle('zero',!!(st&&st.d&&st.p===0)); });
+    const chN=document.querySelector('#nav .chap[data-page="naloge"]');
+    if(chN) chN.classList.toggle('done', doneCount===TASKS.length);
+    CFG.MODS.forEach(m=>{
+      const ids=TASKS.map((t,i)=>t.mod===m.id?i:-1).filter(i=>i>=0);
+      const dn=ids.filter(i=>S.t[i]&&S.t[i].d).length;
+      const el=$('mp-'+m.id); if(el) el.textContent='Rešeno: '+dn+' / '+ids.length+' nalog';
+    });
+  }
+  // ponastavitev z vgrajenim potrjevanjem (brez confirm())
+  function resetUI(step){
+    const box=$('resetBox');
+    if(step===1){
+      box.innerHTML='<div class="confirm"><span>Res izbrišem vse odgovore in cilje? Učitelj bo videl ponastavitev in prejšnji rezultat.</span><button class="btn danger sm" id="resetYes">Da, ponastavi</button><button class="btn g2 sm" id="resetNo">Prekliči</button></div>';
+      $('resetYes').addEventListener('click',()=>{
+        S={t:{},g:[]}; save();
+        goalsEl.querySelectorAll('input').forEach(c=>c.checked=false);
+        buildTasks(); refresh(); renderFigs(); resetUI(0);
+      });
+      $('resetNo').addEventListener('click',()=>resetUI(0));
+    } else {
+      box.innerHTML='<button class="btn danger sm" id="resetBtn">Ponastavi napredek</button>';
+      $('resetBtn').addEventListener('click',()=>resetUI(1));
+    }
+  }
+  // slike vezij v nalogah (sledijo izbranim simbolom, razen kjer naloga sama določi slog)
+  function renderFigs(){
+    document.querySelectorAll('.tfig').forEach(el=>{
+      const t=TASKS[+el.dataset.i];
+      if(t.fig) el.innerHTML=treeSVG(BOOL.parse(t.fig),{},{out:t.figOut||'Y',static:true}).svg;
+      else if(t.nfig) el.innerHTML=netSVG(t.nfig,{},{static:true,labels:true}).svg;
+      else if(t.qkm){ /* Veitchev diagram nariše kmTaskFigs */ }
+      else if(t.gfig){ const n=t.gfig.n, gh=n===1?30:16*n+12, g=G(t.gfig.t,40,10,n,t.gfig.s); let b=g.s; g.pins.forEach(p=>{ b+=W([[8,p[1]],[40,p[1]]],0); }); b+=W([g.out,[g.out[0]+30,g.out[1]]],0); el.innerHTML=sized(svgWrap('0 0 '+(g.out[0]+40)+' '+(gh+20),b,'Simbol vrat'),(g.out[0]+40)*1.6); }
+    });
+    kmTaskFigs();
+  }
+  REDRAW.push(renderFigs);
+  resetUI(0);
+  buildTasks(); refresh(); renderFigs();
+
+  symPickers();
+  const h0=location.hash.slice(1);
+  showPage(PAGES.includes(h0)?h0:CFG.th[0],false);
+})();
+
+
+</script>
+
+</html>

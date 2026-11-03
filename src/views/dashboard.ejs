@@ -1,0 +1,37 @@
+<%- include('partials/head', { pageTitle: 'Vaje' }) %>
+<% const f = fmt; %>
+<section class="hello">
+  <div>
+    <h1><%= user.name %></h1>
+    <p class="big-line"><strong><%= f.num(total.score) %></strong> od <%= maxPoints %> točk, <%= total.done %> od <%= maxTasks %> nalog, <%= f.duration(total.seconds) %> dela</p>
+  </div>
+  <% if (next_) { %>
+  <a class="btn big" href="/vaje/<%= next_.id %>"><%= nextStarted ? 'Nadaljuj' : 'Začni' %> vajo <%= next_.id %>: <%= next_.title %></a>
+  <% } else if (maxTasks) { %><p class="all-done">Vse naloge so rešene.</p><% } %>
+</section>
+<% if (!mods.length) { %><p class="empty">Trenutno ni objavljenih vaj.</p><% } %>
+<% mods.forEach((m) => { %>
+<section class="module">
+  <h2><span class="m-no"><%= m.id %></span> <%= m.title %></h2>
+  <ol class="rail">
+    <% m.exercises.forEach((e) => { const r = rows.get(e.id); const finished = r.done === e.tasks.length; %>
+    <li class="node <%= finished ? 'lit' : r.started ? 'half' : '' %>">
+      <div class="ex-main">
+        <h3><a href="/vaje/<%= e.id %>"><span class="ex-no"><%= e.id %></span> <%= e.title %></a></h3>
+        <%- include('partials/strip', { items: r.strip }) %>
+        <p class="ex-meta"><%= f.num(r.score) %> od <%= e.maxPoints %> točk, <%= r.done %> od <%= e.tasks.length %> nalog<% if (r.resets) { %>, ponastavljeno <%= r.resets %>-krat<% } %></p>
+      </div>
+      <dl class="times">
+        <div><dt>Teorija</dt><dd><%= f.duration(r.time.Teorija) %></dd></div>
+        <div><dt>Simulacija</dt><dd><%= f.duration(r.time.Simulacija) %></dd></div>
+        <div><dt>Naloge</dt><dd><%= f.duration(r.time.Naloge) %></dd></div>
+        <% if (e.estMinutes) { %><div><dt>Predviden čas</dt><dd><%= e.estMinutes %> min</dd></div><% } %>
+      </dl>
+      <a class="btn <%= r.started && !finished ? '' : 'ghost' %>" href="/vaje/<%= e.id %>" aria-label="<%= finished ? 'Odpri' : r.started ? 'Nadaljuj' : 'Začni' %> vajo <%= e.id %>"><%= finished ? 'Odpri' : r.started ? 'Nadaljuj' : 'Začni' %></a>
+    </li>
+    <% }) %>
+  </ol>
+</section>
+<% }) %>
+<%- include('partials/legend') %>
+<%- include('partials/foot') %>

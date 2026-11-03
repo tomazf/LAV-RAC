@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title><%= typeof pageTitle !== 'undefined' ? pageTitle + ' | LAV-ELS' : 'LAV-ELS' %></title>
+<link rel="stylesheet" href="/static/fonts/fonts.css">
+<link rel="stylesheet" href="/static/css/app.css">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<a class="skip" href="#vsebina">Skoči na vsebino</a>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="/" aria-label="LAV-ELS, začetna stran">
+      <svg viewBox="0 0 34 28" width="34" height="28" aria-hidden="true"><path class="w" d="M0 8h7M0 20h7M27 14h7"/><rect class="g" x="7" y="2" width="20" height="24" rx="2"/><text x="17" y="19" text-anchor="middle">&amp;</text></svg>
+      <span>LAV-ELS</span>
+    </a>
+    <% if (user) { %>
+    <nav aria-label="Glavni meni">
+      <% if (!user.isWaiting) { %><a href="/vaje" <%- path.startsWith('/vaje') ? 'aria-current="page"' : '' %>>Vaje</a><% } %>
+      <% if (user.isTeacher) { %><a href="/ucitelj" <%- path.startsWith('/ucitelj') ? 'aria-current="page"' : '' %>>Razredi</a><% } %>
+      <% if (user.isAdmin) { %><a href="/admin" <%- path.startsWith('/admin') ? 'aria-current="page"' : '' %>>Administracija</a><% } %>
+    </nav>
+    <div class="who">
+      <span class="who-name"><%= user.name %></span>
+      <form method="post" action="/auth/logout"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="linkish">Odjava</button></form>
+    </div>
+    <% } %>
+  </div>
+</header>
+<main id="vsebina" class="<%= typeof mainClass !== 'undefined' ? mainClass : '' %>">

@@ -1,0 +1,9 @@
+<%- include('../partials/head', { pageTitle: 'Razredi', mainClass: 'wide' }) %>
+<%- include('../partials/adminnav') %>
+<% if (!classes.length) { %><p class="empty">Še ni razredov. Ustvari jih učitelj na strani Razredi.</p><% } else { %>
+<div class="scroll"><table class="data"><thead><tr><th class="l">Razred</th><th>Dijaki</th><th class="l">Učitelj</th></tr></thead><tbody>
+<% classes.forEach((c) => { %><tr><td class="l"><a href="/ucitelj/razredi/<%= c.id %>"><strong><%= c.name %></strong></a></td><td><%= c.students %></td>
+  <td class="l"><form class="inline tight" method="post" action="/admin/razredi/<%= c.id %>/lastnik"><input type="hidden" name="_csrf" value="<%= csrf %>">
+    <label class="sr" for="own<%= c.id %>">Učitelj razreda <%= c.name %></label><select id="own<%= c.id %>" name="owner"><option value="">ni določen</option><% teachers.forEach((t) => { %><option value="<%= t.id %>" <%= t.id === c.owner_id ? 'selected' : '' %>><%= t.name %></option><% }) %></select><button class="btn ghost small">Shrani</button></form></td></tr><% }) %>
+</tbody></table></div><% } %>
+<%- include('../partials/foot') %>

@@ -1,0 +1,49 @@
+<%- include('../partials/head', { pageTitle: m.name, mainClass: 'wide' }) %>
+<% const f = fmt; const peak = Math.max(1, ...days.map((d) => d[1])); %>
+<p class="crumbs"><a href="/ucitelj">Razredi</a> / <a href="/ucitelj/razredi/<%= cls.id %>"><%= cls.name %></a></p>
+<div class="title-row"><div><h1><%= m.name %></h1><p class="dim"><%= m.email || m.username %></p></div>
+  <details class="danger-zone right"><summary>Odstrani iz razreda</summary>
+  <p>Dijak obdrži napredek. Če ni v drugem razredu, spet čaka na razred.</p>
+  <form method="post" action="/ucitelj/razredi/<%= cls.id %>/odstrani"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="user" value="<%= m.id %>"><button class="btn danger">Da, odstrani</button></form></details>
+</div>
+<dl class="stats">
+  <div><dt>Točke</dt><dd><%= f.num(total.score) %> <small>od <%= maxPoints %></small></dd></div>
+  <div><dt>Naloge</dt><dd><%= total.done %> <small>od <%= maxTasks %></small></dd></div>
+  <div><dt>Teorija</dt><dd><%= f.duration(total.time.Teorija) %></dd></div>
+  <div><dt>Simulacija</dt><dd><%= f.duration(total.time.Simulacija) %></dd></div>
+  <div><dt>Naloge</dt><dd><%= f.duration(total.time.Naloge) %></dd></div>
+  <div><dt>Zadnja aktivnost</dt><dd><%= f.ago(total.last) %></dd></div>
+</dl>
+<section class="block">
+  <h2>Odgovori v zadnjih 30 dneh</h2>
+  <div class="bars" role="img" aria-label="Število odgovorov po dnevih v zadnjih 30 dneh">
+    <% days.forEach(([d, n]) => { %><span class="bar <%= n ? '' : 'zero' %>" style="height:<%= n ? Math.max(8, Math.round(n / peak * 100)) : 3 %>%" title="<%= f.date(d) %>: <%= n %>"></span><% }) %>
+  </div>
+  <div class="bars-axis"><span><%= f.date(days[0][0]) %></span><span>največ <%= peak %> na dan</span><span><%= f.date(days[days.length - 1][0]) %></span></div>
+</section>
+<section class="block">
+  <h2>Vaje</h2>
+  <% exs.forEach((e) => { %>
+  <details class="exd">
+    <summary>
+      <span class="exd-t"><span class="ex-no"><%= e.id %></span> <%= e.title %></span>
+      <%- include('../partials/strip', { items: e.strip }) %>
+      <span class="exd-m"><%= f.num(e.c.score) %> / <%= e.maxPoints %> t, <%= f.duration(e.c.seconds) %><% if (e.c.resets) { %>, ↺<%= e.c.resets %><% } %></span>
+    </summary>
+    <div class="exd-body">
+      <% if (e.resets.length) { %><h3>Ponastavitve</h3>
+      <ul class="plain"><% e.resets.forEach((r) => { %><li><%= f.dateTime(r.created_at) %>: <%= r.reason === 'version' ? 'nova različica vaje' : 'ponastavil dijak' %>, prejšnji rezultat <%= f.num(r.score) %> od <%= e.maxPoints %> t, <%= r.done_count %> nalog</li><% }) %></ul><% } %>
+      <h3>Naloge</h3>
+      <div class="scroll"><table class="data"><thead><tr><th>Št.</th><th class="l">Naloga</th><th class="l">Izid</th><th>Točke</th><th class="l">Oddano</th></tr></thead><tbody>
+        <% e.strip.forEach((t) => { %><tr><td><%= t.n %></td><td class="l q-cell"><%= t.q %></td><td class="l nw"><i class="dot s-<%= t.status %>"></i> <%= t.label.split(': ')[1].split(',')[0] %></td><td class="nw"><%= t.status === 'open' || t.status === 'hint' ? '–' : f.num(t.points) + ' / ' + t.max %></td><td class="l nw"><%= e.finished.has(t.i) ? f.dateTime(e.finished.get(t.i)) : '' %></td></tr><% }) %>
+      </tbody></table></div>
+      <h3>Odprte strani</h3>
+      <div class="scroll"><table class="data"><thead><tr><th class="l">Poglavje</th><th class="l">Stran</th><th>Čas</th><th class="l">Zadnjič</th></tr></thead><tbody>
+        <% e.visits.forEach((v) => { %><tr class="<%= v.row ? '' : 'unseen' %>"><td class="l"><%= v.chapter %></td><td class="l"><%= v.label %></td><td class="nw"><%= v.row ? f.duration(v.row.seconds) : 'ni odprl' %></td><td class="l nw"><%= v.row ? f.ago(v.row.last_seen) : '' %></td></tr><% }) %>
+      </tbody></table></div>
+    </div>
+  </details>
+  <% }) %>
+  <%- include('../partials/legend') %>
+</section>
+<%- include('../partials/foot') %>

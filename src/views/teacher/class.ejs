@@ -1,0 +1,55 @@
+<%- include('../partials/head', { pageTitle: cls.name, mainClass: 'wide' }) %>
+<% const f = fmt; const sl = (key, text) => `<a href="?sort=${key}" ${sort===key?'aria-current="true"':''}>${text}</a>`; %>
+<p class="crumbs"><a href="/ucitelj">Razredi</a></p>
+<div class="title-row"><h1><%= cls.name %></h1>
+  <div class="row"><a class="btn ghost" href="/ucitelj/razredi/<%= cls.id %>/izvoz.csv">Izvozi CSV</a>
+  <a class="btn" href="#dodaj">Dodaj dijake (<%= waiting.length %>)</a></div>
+</div>
+<dl class="stats">
+  <div><dt>Dijaki</dt><dd><%= rows.length %></dd></div>
+  <div><dt>Povprečje točk</dt><dd><%= stats.avg %> %</dd></div>
+  <div><dt>Aktivni v 7 dneh</dt><dd><%= stats.active %></dd></div>
+  <div><dt>Še niso začeli</dt><dd><%= stats.never %></dd></div>
+  <div><dt>Povprečni čas</dt><dd><%= f.duration(stats.seconds) %></dd></div>
+</dl>
+<% if (!rows.length) { %><p class="empty">V razredu še ni dijakov. Dodaj jih s seznama spodaj.</p><% } else { %>
+<p class="sorter">Razvrsti: <%- sl('name','po imenu') %> <%- sl('score','po točkah') %> <%- sl('time','po času') %> <%- sl('last','po zadnji aktivnosti') %></p>
+<div class="scroll matrix-wrap" tabindex="0" role="region" aria-label="Rezultati razreda po vajah">
+<table class="matrix">
+  <thead><tr><th class="l stick">Dijak</th>
+    <% list.forEach((e) => { %><th title="<%= e.title %>"><a href="/ucitelj/razredi/<%= cls.id %>/vaje/<%= e.id %>"><%= e.id %></a></th><% }) %>
+    <th>Skupaj</th><th>Čas</th><th class="l">Zadnja aktivnost</th></tr></thead>
+  <tbody>
+  <% rows.forEach((r) => { %><tr>
+    <td class="l stick"><a href="/ucitelj/razredi/<%= cls.id %>/dijaki/<%= r.id %>"><%= r.name %></a></td>
+    <% list.forEach((e) => { const c = cell(r.cells, e.id); const p = f.pct(c.score, e.maxPoints); const d = f.pct(c.done, e.tasks.length); %>
+    <td class="heat" style="--p:<%= p %>" title="<%= e.id %>: <%= f.num(c.score) %> od <%= e.maxPoints %> t, <%= c.done %> od <%= e.tasks.length %> nalog, <%= f.duration(c.seconds) %><%= c.resets ? `, ponastavitve: ${c.resets}` : '' %>">
+      <% if (c.started) { %><span class="hv"><%= p %></span><% if (c.resets) { %><span class="rs" aria-label="Ponastavitve: <%= c.resets %>">↺<%= c.resets %></span><% } %><span class="hb" style="width:<%= d %>%"></span><% } else { %><span class="hn">–</span><% } %>
+    </td><% }) %>
+    <td><strong><%= f.pct(r.total.score, maxPoints) %> %</strong></td>
+    <td class="nw"><%= f.duration(r.total.seconds) %></td>
+    <td class="l nw"><%= f.ago(r.total.last) %></td>
+  </tr><% }) %>
+  </tbody>
+</table></div>
+<p class="dim note">Število je delež doseženih točk v odstotkih, črta pod njim delež rešenih nalog. ↺ pomeni ponastavitve. Pomakni miško nad celico za podrobnosti.</p>
+<% } %>
+<section class="block" id="dodaj">
+  <h2>Dodaj dijake, ki čakajo</h2>
+  <% if (!waiting.length) { %><p class="empty">Nihče ne čaka. Dijak se pojavi tukaj po prvi prijavi.</p><% } else { %>
+  <form method="post" action="/ucitelj/razredi/<%= cls.id %>/dodaj"><input type="hidden" name="_csrf" value="<%= csrf %>">
+    <div class="row"><label class="sr" for="iskanje">Išči po imenu</label><input id="iskanje" type="search" data-filter="#cakajo" placeholder="Išči po imenu ali računu"><button class="btn">Dodaj izbrane</button></div>
+    <ul class="checks" id="cakajo"><% waiting.forEach((w) => { %><li><label><input type="checkbox" name="user" value="<%= w.id %>"> <%= w.name %> <span class="dim"><%= w.email || w.username %></span></label></li><% }) %></ul>
+  </form>
+  <script src="/static/js/filter.js"></script>
+  <% } %>
+</section>
+<section class="block">
+  <h2>Nastavitve razreda</h2>
+  <form class="inline" method="post" action="/ucitelj/razredi/<%= cls.id %>/preimenuj"><input type="hidden" name="_csrf" value="<%= csrf %>"><label for="ime">Ime razreda</label><input id="ime" name="name" value="<%= cls.name %>" required maxlength="80"><button class="btn ghost">Preimenuj razred</button></form>
+  <details class="danger-zone"><summary>Izbriši razred</summary>
+    <p>Dijaki ostanejo prijavljeni in obdržijo napredek. Če niso v drugem razredu, spet čakajo na razred.</p>
+    <form method="post" action="/ucitelj/razredi/<%= cls.id %>/izbrisi"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn danger">Da, izbriši razred <%= cls.name %></button></form>
+  </details>
+</section>
+<%- include('../partials/foot') %>

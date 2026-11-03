@@ -1,0 +1,17 @@
+<%- include('../partials/head', { pageTitle: 'Vaje', mainClass: 'wide' }) %>
+<%- include('../partials/adminnav') %>
+<% mods.forEach((m) => { %>
+<section class="block"><h2><%= m.id %> <%= m.title %></h2>
+<div class="scroll"><table class="data"><thead><tr><th class="l">Vaja</th><th>Naloge</th><th>Točke</th><th class="l">Vidnost in predviden čas</th><th class="l">Vrstni red</th></tr></thead><tbody>
+  <% m.exercises.forEach((e, i) => { %><tr class="<%= e.visible ? '' : 'unseen' %>">
+    <td class="l"><a href="/vaje/<%= e.id %>"><strong><%= e.id %></strong> <%= e.title %></a></td><td><%= e.tasks.length %></td><td><%= e.maxPoints %></td>
+    <td class="l"><form class="inline tight" method="post" action="/admin/vaje/<%= e.id %>"><input type="hidden" name="_csrf" value="<%= csrf %>">
+      <label><input type="checkbox" name="visible" <%= e.visible ? 'checked' : '' %>> vidna dijakom</label>
+      <label><input class="short" type="number" name="est_minutes" min="1" max="600" value="<%= e.estMinutes ?? '' %>" aria-label="Predviden čas v minutah"> min</label>
+      <button class="btn ghost small">Shrani</button></form></td>
+    <td class="l"><form class="inline tight" method="post" action="/admin/vaje/<%= e.id %>/premik"><input type="hidden" name="_csrf" value="<%= csrf %>">
+      <button class="btn ghost small" name="dir" value="up" <%= i === 0 ? 'disabled' : '' %>>Gor</button><button class="btn ghost small" name="dir" value="down" <%= i === m.exercises.length - 1 ? 'disabled' : '' %>>Dol</button></form></td>
+  </tr><% }) %>
+</tbody></table></div></section>
+<% }) %>
+<%- include('../partials/foot') %>

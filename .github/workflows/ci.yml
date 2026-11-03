@@ -1,0 +1,45 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: lav_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 3s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
+        env:
+          TEST_DATABASE_URL: postgres://postgres:test@localhost:5432/lav_test
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and start the demo from the Compose file
+        run: docker compose -f docker-compose.demo.yml up -d --build
+      - name: The app must become healthy and show the login page
+        run: |
+          for i in $(seq 1 40); do curl -sf http://localhost:3000/healthz && break; sleep 3; done
+          curl -sf http://localhost:3000/ | grep -q "Prijava s šolskim računom"
+          docker compose -f docker-compose.demo.yml ps
+      - name: Validate the production Compose file
+        run: |
+          cp .env.example .env
+          POSTGRES_PASSWORD=x docker compose --profile https config -q
+      - if: failure()
+        run: docker compose -f docker-compose.demo.yml logs
