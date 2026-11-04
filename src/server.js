@@ -5,6 +5,7 @@ import pgSession from 'connect-pg-simple';
 import helmet from 'helmet';
 import { config } from './config.js';
 import { migrate, pool } from './db.js';
+import { isMaintenance } from './backup.js';
 import { asset } from './assets.js';
 import * as fmt from './format.js';
 import { authRouter, loadUser } from './auth.js';
@@ -51,6 +52,14 @@ const exerciseCsp = helmet.contentSecurityPolicy({
 });
 app.use(helmet({ contentSecurityPolicy: false, strictTransportSecurity: config.secureCookies, crossOriginOpenerPolicy: false }));
 app.use((req, res, next) => (req.path.startsWith('/vaje/') ? exerciseCsp : portalCsp)(req, res, next));
+
+// While the database is being replaced from a backup, nothing else may touch it (this includes sessions).
+app.use((req, res, next) => {
+  if (!isMaintenance()) return next();
+  res.set('Retry-After', '30');
+  if (req.path.startsWith('/api/')) return res.status(503).json({ ok: false });
+  res.status(503).type('html').send('<!doctype html><html lang="sl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LAV-ELS</title><body style="font:1.1rem system-ui;max-width:34rem;margin:4rem auto;padding:0 1rem"><h1>Portal se posodablja</h1><p>Podatki se obnavljajo iz varnostne kopije. Poskusi znova čez minuto.</p></body></html>');
+});
 
 const Store = pgSession(session);
 app.use(session({

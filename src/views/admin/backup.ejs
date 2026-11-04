@@ -1,0 +1,44 @@
+<%- include('../partials/head', { pageTitle: 'Varnostne kopije', mainClass: 'wide' }) %>
+<% const f = fmt; %>
+<%- include('../partials/adminnav') %>
+<% if (error) { %><p class="notice-warn" role="alert"><%= error %></p><% } %>
+<section class="block">
+  <h2>Varnostna kopija</h2>
+  <p>Prenese se celotna baza: uporabniki, razredi, napredek, opombe in dnevnik. Vaje in program so na GitHubu, nastavitve (<code>.env</code>) pa niso del kopije. Datoteka se ne shrani na strežnik, ampak samo na tvoj računalnik.</p>
+  <p>Zadnja kopija: <strong><%= last ? f.dateTime(last) + ' (' + f.ago(last) + ')' : 'še ni bila prenesena' %></strong></p>
+  <form method="post" action="/admin/kopije/prenesi"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn">Prenesi varnostno kopijo</button></form>
+</section>
+<section class="block">
+  <h2>Obnovitev iz kopije</h2>
+  <% if (!pending) { %>
+  <p>Obnovitev <strong>zamenja vse podatke v portalu</strong> s podatki iz datoteke. Dijaki, ki so bili po izdelavi kopije izbrisani, ostanejo izbrisani. Vsi uporabniki bodo odjavljeni. Datoteka mora biti kopija, prenesena na tej strani.</p>
+  <form id="upload" class="inline" method="post" action="/admin/kopije/nalozi" data-csrf="<%= csrf %>">
+    <label for="file">Datoteka kopije</label><input id="file" type="file" accept=".dump" required>
+    <button class="btn ghost">Naloži in preveri</button>
+  </form>
+  <p id="upload-msg" role="status" class="dim"></p>
+  <noscript><p class="notice-warn">Za nalaganje datoteke je potreben JavaScript.</p></noscript>
+  <% } else { %>
+  <p>Datoteka je preverjena in pripravljena do <%= f.dateTime(pending.expires) %>. Podatki še niso spremenjeni.</p>
+  <dl class="stats">
+    <div><dt>Kopija narejena</dt><dd><%= pending.info.createdAt || 'neznano' %></dd></div>
+    <div><dt>Uporabniki</dt><dd><%= pending.info.users %></dd></div>
+    <div><dt>Razredi</dt><dd><%= pending.info.classes %></dd></div>
+    <div><dt>Zapisi napredka</dt><dd><%= pending.info.progress %></dd></div>
+  </dl>
+  <% if (pending.info.erasedAgain) { %><p class="notice-warn"><%= pending.info.erasedAgain %> uporabnikov, ki so bili po izdelavi kopije izbrisani, bo po obnovitvi znova izbrisanih.</p><% } %>
+  <% if (pending.info.older) { %><p class="dim">Kopija je iz starejše različice portala. Zgradba baze se po obnovitvi posodobi sama.</p><% } %>
+  <form id="restore" method="post" action="/admin/kopije/obnovi" class="stack">
+    <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="token" value="<%= pending.token %>">
+    <% if (fresh) { %><p class="dim">Trenutno stanje je bilo pred kratkim preneseno, zato ga lahko vrneš.</p>
+    <% } else { %><p class="notice-warn">Trenutnega stanja še nisi prenesel. Najprej ga prenesi zgoraj, da ga lahko vrneš, ali pa označi, da ga ne potrebuješ.</p>
+    <label><input type="checkbox" name="skip" value="1"> Trenutnega stanja ne potrebujem</label><% } %>
+    <label for="potrdi">Za potrditev vpiši OBNOVI</label>
+    <input id="potrdi" name="potrdi" autocomplete="off" required>
+    <button class="btn danger">Obnovi bazo</button>
+  </form>
+  <form method="post" action="/admin/kopije/preklici"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn ghost">Prekliči in odstrani datoteko</button></form>
+  <% } %>
+</section>
+<script src="<%= asset('js/restore.js') %>"></script>
+<%- include('../partials/foot') %>

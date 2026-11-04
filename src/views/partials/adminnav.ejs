@@ -3,6 +3,8 @@
   <a href="/admin" <%- tab==='users' ? 'aria-current="page"' : '' %>>Uporabniki</a>
   <a href="/admin/vaje" <%- tab==='exercises' ? 'aria-current="page"' : '' %>>Vaje</a>
   <a href="/admin/razredi" <%- tab==='classes' ? 'aria-current="page"' : '' %>>Razredi</a>
+  <a href="/admin/kopije" <%- tab==='backup' ? 'aria-current="page"' : '' %>>Kopije</a>
   <a href="/admin/dnevnik" <%- tab==='log' ? 'aria-current="page"' : '' %>>Dnevnik</a>
 </nav>
+<% if (typeof backupWarn !== 'undefined' && backupWarn && tab !== 'backup') { %><p class="notice-warn" role="status"><%= backupWarn.at ? 'Zadnja varnostna kopija baze je bila narejena ' + fmt.ago(backupWarn.at) + '.' : 'Varnostna kopija baze še ni bila prenesena.' %> <a href="/admin/kopije">Prenesi kopijo</a></p><% } %>
 <% if (message) { %><p class="notice" role="status"><%= message %></p><% } %>

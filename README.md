@@ -80,18 +80,30 @@ cd /opt/lav-els && git pull && docker compose up -d --build
 
 Podatki ostanejo, ker so v trajnem nosilcu `db-data`. Spremembe baze (`src/migrations/`) se izvedejo same ob zagonu. Dijaki z odprto vajo naj po posodobitvi osvežijo stran.
 
-Varnostna kopija in obnovitev:
+### Varnostna kopija in obnovitev
+
+Skrbnik ju naredi sam pod **Administracija > Kopije**. Kopija je ena datoteka z vso bazo (uporabniki, razredi, napredek, opombe, dnevnik). Prenese se na skrbnikov računalnik, na strežniku se ne shrani. Vaje in program so na GitHubu, `.env` pa v kopijo ni vključen, zato si ga shrani posebej. Datoteka vsebuje osebne podatke dijakov, zato jo hrani varno in jo po izteku roka hrambe izbriši. Če kopije ni ali je starejša od sedmih dni, skrbniške strani pokažejo opozorilo.
+
+Obnovitev naloži datoteko, jo preveri in pokaže, kaj vsebuje, šele nato (z vpisom OBNOVI) zamenja vse podatke. Pred tem mora skrbnik prenesti trenutno stanje ali izrecno označiti, da ga ne potrebuje. Med obnovitvijo (nekaj sekund) portal odgovarja z obvestilom o posodabljanju, po njej so vsi odjavljeni. Če obnovitev ne uspe, ostane stara baza nespremenjena. Kopija iz starejše različice portala se po obnovitvi sama posodobi, kopije iz novejše pa portal zavrne.
+
+Izbrisani uporabniki ostanejo izbrisani tudi po obnovitvi stare kopije. Zato baza hrani samo zgoščeno vrednost njihovega ID-ja v Entra (ne imena ali računa), po obnovitvi pa takšne uporabnike znova izbriše.
+
+Če za portalom stoji nginx, je za nalaganje datoteke treba dvigniti omejitev, npr. `client_max_body_size 200m;`.
+
+Če portal ne teče, gre tudi na ukazni vrstici:
 
 ```bash
 docker compose exec -T db pg_dump -U lavels lavels | gzip > lavels-$(date +%F).sql.gz
 gunzip -c lavels-DATUM.sql.gz | docker compose exec -T db psql -U lavels lavels
 ```
 
+Ukazna vrstica ne pozna seznama izbrisanih, zato po takšni obnovitvi ročno izbriši uporabnike, ki so bili izbrisani po izdelavi kopije.
+
 Skrivnost v Entra poteče. Pred iztekom ustvari novo in posodobi `OIDC_CLIENT_SECRET`.
 
 ## Osebni podatki
 
-Portal hrani podatke dijakov, zato se pred uporabo pogovori s pooblaščeno osebo za varstvo podatkov in določi rok hrambe. Odstranitev iz razreda podatkov ne izbriše, izbris uporabnika pod **Administracija** pa je trajen (račun, napredek, opombe, zgodovina in ime v dnevniku), v varnostnih kopijah pa podatki ostanejo do njihovega izteka.
+Portal hrani podatke dijakov, zato se pred uporabo pogovori s pooblaščeno osebo za varstvo podatkov in določi rok hrambe. Odstranitev iz razreda podatkov ne izbriše, izbris uporabnika pod **Administracija** pa je trajen (račun, napredek, opombe, zgodovina in ime v dnevniku), v varnostnih kopijah pa podatki ostanejo, dokler jih skrbnik ne izbriše.
 
 ## Napredek in ponastavitev
 
@@ -140,12 +152,13 @@ npx playwright install chromium
 TEST_DATABASE_URL=postgres://uporabnik@localhost/lav_test npm test
 ```
 
-Preizkusi uporabijo pravi strežnik, PostgreSQL in brskalnik, prijavo pa nadomesti `test/mock-oidc.js`. **Baza `TEST_DATABASE_URL` se ob vsakem zagonu izbriše.** `test/variants.test.js` vsako spremenljivo nalogo primerja z ločenim izračunom in jo reši na strani ter ne potrebuje baze. GitHub Actions ob vsaki objavi požene preizkuse in gradnjo slike Docker.
+Preizkusi uporabijo pravi strežnik, PostgreSQL in brskalnik, prijavo pa nadomesti `test/mock-oidc.js`. **Baza `TEST_DATABASE_URL` se ob vsakem zagonu izbriše.** `test/variants.test.js` vsako spremenljivo nalogo primerja z ločenim izračunom in jo reši na strani ter ne potrebuje baze. Preizkus kopij potrebuje `pg_dump`, `pg_restore` in `psql` iste različice kot strežnik baze (po potrebi `PG_BIN=/usr/lib/postgresql/17/bin`). GitHub Actions ob vsaki objavi požene preizkuse in gradnjo slike Docker.
 
 ## Zgradba
 
 - `src/server.js`: strežnik in varnostne nastavitve
 - `src/auth.js`: prijava Entra in vloge
+- `src/backup.js`: varnostna kopija in obnovitev baze (`pg_dump`, `pg_restore`, `psql`)
 - `src/progress.js`: pravila za točke, zaklepanje in namige na strežniku
 - `src/public/js/tracker.js`: sledilnik, ki se naloži pred vsako vajo
 - `src/public/js/variants/`: spremenljiva števila po vajah

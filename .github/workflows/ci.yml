@@ -23,9 +23,15 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      - name: PostgreSQL 17 tools for the backup tests (pg_dump must not be older than the server)
+        run: |
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-client-17
       - run: npm test
         env:
           TEST_DATABASE_URL: postgres://postgres:test@localhost:5432/lav_test
+          PG_BIN: /usr/lib/postgresql/17/bin
   docker:
     runs-on: ubuntu-latest
     steps:
@@ -37,6 +43,10 @@ jobs:
           for i in $(seq 1 40); do curl -sf http://localhost:4000/healthz && break; sleep 3; done
           curl -sf http://localhost:4000/ | grep -q "Elektronski sistemi"
           docker compose -f docker-compose.demo.yml ps
+      - name: The image has the backup tools and they work against the database
+        run: |
+          docker compose -f docker-compose.demo.yml exec -T app sh -c 'pg_dump --version && pg_restore --version && psql --version'
+          docker compose -f docker-compose.demo.yml exec -T app sh -c 'pg_dump --schema-only --format=custom --file=/tmp/t.dump "$DATABASE_URL" && pg_restore --list /tmp/t.dump | grep -q "TABLE public users"'
       - name: Validate the production Compose file
         run: |
           cp .env.example .env

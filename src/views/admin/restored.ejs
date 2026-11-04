@@ -1,0 +1,7 @@
+<%- include('../partials/head', { pageTitle: 'Obnovitev končana', mainClass: 'stage' }) %>
+<section class="stage-in">
+  <h1>Obnovitev je končana</h1>
+  <p class="lead">Uporabnikov v portalu: <%= result.users %>.<% if (result.erased) { %> Znova izbrisanih: <%= result.erased %>.<% } %> Vsi uporabniki so odjavljeni, zato se prijavi znova.</p>
+  <a class="btn big" href="/">Na začetno stran</a>
+</section>
+<%- include('../partials/foot') %>

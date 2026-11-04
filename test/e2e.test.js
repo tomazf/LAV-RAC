@@ -2,8 +2,10 @@
 // Needs TEST_DATABASE_URL pointing to an empty test database.
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
-import { spawn } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { execFileSync, spawn } from 'node:child_process';
+import { mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import pg from 'pg';
 import { chromium } from 'playwright';
@@ -803,6 +805,141 @@ test('removing from a class keeps the user; deleting from the system erases them
   assert.match(await a.textContent('table'), /Izbrisal uporabnika/);
   await t.context().close();
   await a.context().close();
+});
+test('backup from the admin page: download, warning, restore keeps deleted users deleted', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'lav-bk-'));
+  const a = await login('Sara Skrbnik');
+  const uid = async (oid) => (await sql('SELECT id FROM users WHERE oid=$1', [oid]))[0]?.id;
+  const loggedIn = async (name) => { const p = await login(name); await p.context().close(); };
+  await loggedIn('Cene Zupan');
+  await loggedIn('Daša Horvat');
+  // nobody has made a backup yet: every admin page says so, as a warning
+  await a.goto(`${APP}/admin`);
+  assert.match(await a.textContent('.notice-warn'), /še ni bila prenesena/);
+  assert.equal((await a.goto(`${APP}/admin/kopije`)).status(), 200);
+  assert.equal(await a.locator('.notice-warn').count(), 0, 'the backup page has its own status line');
+  // download
+  const [dl] = await Promise.all([a.waitForEvent('download'), a.click('button:text("Prenesi varnostno kopijo")')]);
+  assert.match(dl.suggestedFilename(), /^lavels-\d{4}-\d\d-\d\d-\d\d-\d\d\.dump$/);
+  const good = path.join(dir, 'kopija.dump');
+  await dl.saveAs(good);
+  assert.equal(readFileSync(good).subarray(0, 5).toString(), 'PGDMP');
+  const text = (file, ...args) => execFileSync('pg_restore', [...args, '--file=-', file], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, env: { ...process.env, PATH: `${process.env.PG_BIN ? `${process.env.PG_BIN}:` : ''}${process.env.PATH}` } });
+  assert.match(text(good, '--data-only', '--table=users'), /Cene Zupan/);
+  assert.doesNotMatch(text(good), /COPY public\.session /, 'sessions are not in the backup');
+  assert.equal(readdirSync(tmpdir()).filter((d) => d.startsWith('lavels-backup-')).length, 0, 'nothing is left on the server');
+  await a.goto(`${APP}/admin`);
+  assert.equal(await a.locator('.notice-warn').count(), 0, 'warning is gone after a backup');
+  assert.match(await (await a.request.get(`${APP}/admin/dnevnik`)).text(), /Prenesel varnostno kopijo/);
+  // an old backup brings the warning back, with the age
+  await sql(`UPDATE audit_log SET created_at = now() - interval '9 days' WHERE action='Prenesel varnostno kopijo'`);
+  await a.goto(`${APP}/admin/razredi`);
+  assert.match(await a.textContent('.notice-warn'), /Zadnja varnostna kopija baze je bila narejena/);
+  await sql(`UPDATE audit_log SET created_at = now() WHERE action='Prenesel varnostno kopijo'`);
+
+  // after the backup: Cene is deleted for good, Daša becomes a teacher
+  await a.goto(`${APP}/admin?q=cene`);
+  const row = a.locator('tr', { hasText: 'cene.zupan@sola.test' });
+  await row.locator('summary:text("Izbriši za vedno")').click();
+  await row.locator('button:text("Da, izbriši za vedno")').click();
+  await a.waitForURL(/sporocilo/);
+  assert.equal(await uid('u-cene'), undefined);
+  await a.goto(`${APP}/admin?q=dasa`);
+  await a.locator('tr', { hasText: 'dasa.horvat@sola.test' }).locator('button:text("Določi za učitelja")').click();
+  await a.waitForURL(`${APP}/admin`);
+  assert.equal((await sql(`SELECT role FROM users WHERE oid='u-dasa'`))[0].role, 'teacher');
+  const usersBefore = (await sql('SELECT count(*)::int n FROM users'))[0].n;
+
+  // wrong files are refused with a clear message and leave nothing behind
+  await a.goto(`${APP}/admin/kopije`);
+  const csrf = await a.locator('#upload').getAttribute('data-csrf');
+  const send = (body, headers = { 'x-csrf-token': csrf }) => a.request.post(`${APP}/admin/kopije/nalozi`, { headers: { 'content-type': 'application/octet-stream', ...headers }, data: body });
+  assert.equal((await send(good, {})).status(), 403, 'no token, no upload');
+  const notDump = await send(Buffer.from('to ni kopija'));
+  assert.equal(notDump.status(), 400);
+  assert.match((await notDump.json()).error, /ni kopija/);
+  const whole = readFileSync(good);
+  const cut = await send(whole.subarray(0, Math.floor(whole.length / 2)));
+  assert.equal(cut.status(), 400);
+  assert.match((await cut.json()).error, /poškodovana/);
+  assert.equal((await send(Buffer.alloc(0))).status(), 400);
+  await a.goto(`${APP}/admin/kopije`);
+  assert.equal(await a.locator('#restore').count(), 0, 'nothing is waiting for confirmation');
+  assert.equal(readdirSync(tmpdir()).filter((d) => d.startsWith('lavels-restore-')).length, 0, 'refused files are deleted');
+  assert.equal((await sql('SELECT count(*)::int n FROM users'))[0].n, usersBefore, 'data untouched');
+
+  // the right file is checked and shown before anything changes
+  await a.setInputFiles('#file', good);
+  await a.click('button:text("Naloži in preveri")');
+  await a.waitForSelector('#restore');
+  assert.match(await a.textContent('.stats'), /Uporabniki\s*\d+/);
+  assert.match(await a.textContent('main'), /bo po obnovitvi znova izbrisanih/);
+  assert.match(await a.textContent('.notice-warn'), /znova izbrisanih/);
+  assert.equal((await sql('SELECT count(*)::int n FROM users'))[0].n, usersBefore, 'preview changes nothing');
+  // the word is required
+  await a.fill('#potrdi', 'ne');
+  await a.click('button:text("Obnovi bazo")');
+  await a.waitForURL(/napaka/);
+  assert.match(await a.textContent('.notice-warn[role=alert]'), /OBNOVI/);
+  assert.equal((await sql('SELECT count(*)::int n FROM users'))[0].n, usersBefore);
+  await a.waitForSelector('#restore');
+  // restore
+  await a.fill('#potrdi', 'obnovi');
+  // while the data is replaced, other visitors are told to wait instead of touching the database
+  const waiting = (async () => {
+    for (let i = 0; i < 80; i++) {
+      if ((await a.request.get(`${APP}/vaje`, { maxRedirects: 0 })).status() === 503) return true;
+      await new Promise((ok) => setTimeout(ok, 100));
+    }
+    return false;
+  })();
+  const [, sawMaintenance] = await Promise.all([a.click('button:text("Obnovi bazo")'), waiting]);
+  assert.equal(sawMaintenance, true, 'visitors get 503 during the restore');
+  await a.waitForSelector('h1:text("Obnovitev je končana")');
+  assert.match(await a.textContent('.lead'), /Znova izbrisanih: 1/);
+  assert.equal(await uid('u-cene'), undefined, 'a user deleted after the backup stays deleted');
+  assert.equal((await sql(`SELECT role FROM users WHERE oid='u-dasa'`))[0].role, 'user', 'other changes went back');
+  assert.equal((await sql('SELECT count(*)::int n FROM users'))[0].n, usersBefore);
+  assert.equal((await sql('SELECT count(*)::int n FROM session'))[0].n, 0, 'everybody is signed out');
+  const hash = createHash('sha256').update('lavels-erased:u-cene').digest('hex');
+  assert.equal((await sql('SELECT count(*)::int n FROM erased_users WHERE oid_hash=$1', [hash]))[0].n, 1, 'who was deleted is remembered, by hash only');
+  assert.equal((await sql(`SELECT encode(sha256(convert_to('lavels-erased:u-cene', 'UTF8')), 'hex') AS h`))[0].h, hash, 'SQL and program agree on the hash');
+  assert.equal((await sql(`SELECT count(*)::int n FROM erased_users WHERE oid_hash LIKE '%cene%'`))[0].n, 0);
+  // the old browser is signed out; the admin signs in again and finds the entry in the log
+  await a.goto(`${APP}/admin`);
+  assert.equal(new URL(a.url()).pathname, '/');
+  const a2 = await login('Sara Skrbnik');
+  await a2.goto(`${APP}/admin/dnevnik`);
+  assert.match(await a2.textContent('table'), /Obnovil bazo iz kopije[\s\S]*znova izbrisanih 1/);
+  assert.equal((await sql(`SELECT actor_id FROM audit_log WHERE action='Obnovil bazo iz kopije'`))[0].actor_id, null);
+  assert.equal(readdirSync(tmpdir()).filter((d) => d.startsWith('lavels-restore-')).length, 0);
+  // a deleted user can still sign in again, as a new empty account
+  const c = await login('Cene Zupan');
+  assert.match(await c.textContent('h1'), /Čakaš/);
+  await c.context().close();
+
+  // with no recent backup, restoring needs the box to be ticked
+  await sql(`UPDATE audit_log SET created_at = now() - interval '2 days' WHERE action='Prenesel varnostno kopijo'`);
+  await a2.goto(`${APP}/admin/kopije`);
+  const csrf2 = await a2.locator('#upload').getAttribute('data-csrf');
+  assert.equal((await a2.request.post(`${APP}/admin/kopije/nalozi`, { headers: { 'x-csrf-token': csrf2, 'content-type': 'application/octet-stream' }, data: readFileSync(good) })).status(), 200);
+  await a2.goto(`${APP}/admin/kopije`);
+  assert.match(await a2.textContent('#restore'), /Trenutnega stanja še nisi prenesel/);
+  await a2.fill('#potrdi', 'OBNOVI');
+  await a2.click('button:text("Obnovi bazo")');
+  await a2.waitForURL(/napaka/);
+  assert.match(await a2.textContent('.notice-warn[role=alert]'), /prenesi trenutno stanje/);
+  await a2.click('button:text("Prekliči in odstrani datoteko")');
+  await a2.waitForURL(/sporocilo/);
+  assert.equal(await a2.locator('#restore').count(), 0);
+  assert.equal(readdirSync(tmpdir()).filter((d) => d.startsWith('lavels-restore-')).length, 0);
+  // not allowed for anyone but the admin
+  const s = await login('Ana Kovač');
+  assert.equal((await s.goto(`${APP}/admin/kopije`)).status(), 403);
+  assert.equal((await s.request.post(`${APP}/admin/kopije/nalozi`, { headers: { 'x-csrf-token': 'x' }, data: 'x' })).status(), 403);
+  await s.context().close();
+  await a2.context().close();
+  rmSync(dir, { recursive: true, force: true });
 });
 test('login page, school logo and data notice page', async () => {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 } });

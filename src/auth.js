@@ -102,10 +102,16 @@ export async function loadUser(req, res, next) {
     next();
   } catch (e) { next(e); }
 }
-export function csrfValid(req) {
-  const sent = Buffer.from(String(req.body?._csrf ?? req.body?.csrf ?? ''));
+function sameToken(req, value) {
+  const sent = Buffer.from(String(value ?? ''));
   const real = Buffer.from(String(req.session?.csrf ?? ''));
   return real.length > 0 && sent.length === real.length && crypto.timingSafeEqual(sent, real);
+}
+export const csrfValid = (req) => sameToken(req, req.body?._csrf ?? req.body?.csrf);
+// For requests whose body is a file, so the token travels in a header.
+export function checkCsrfHeader(req, res, next) {
+  if (!sameToken(req, req.get('x-csrf-token'))) return res.status(403).json({ ok: false, error: 'Obrazec je potekel. Osveži stran in poskusi znova.' });
+  next();
 }
 export function checkCsrf(req, res, next) {
   if (!csrfValid(req)) return res.status(403).render('error', { title: 'Obrazec je potekel', message: 'Vrni se na prejšnjo stran, jo osveži in poskusi znova.' });

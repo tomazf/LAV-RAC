@@ -2,9 +2,16 @@ import express from 'express';
 import { checkCsrf, isAdmin, requireAdmin } from '../auth.js';
 import { plannedModules, standardGroups } from '../catalog.js';
 import { audit, eraseUser, many, one, q, tx } from '../db.js';
+import { backupWarning } from '../backup.js';
+import { backupRouter } from './backup.js';
 
 export const adminRouter = express.Router();
 adminRouter.use(requireAdmin);
+// Every admin page reminds the admin when there is no recent backup; this is a warning, not an error.
+adminRouter.use(async (req, res, next) => {
+  try { if (req.method === 'GET') res.locals.backupWarn = await backupWarning(); next(); } catch (e) { next(e); }
+});
+adminRouter.use('/kopije', backupRouter);
 
 const flash = (res, path, msg) => res.redirect(`${path}${path.includes('?') ? '&' : '?'}sporocilo=${encodeURIComponent(msg)}`);
 const ROLES = { admin: 'Skrbnik', teacher: 'Učitelj', student: 'Dijak', waiting: 'Brez razreda' };

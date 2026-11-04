@@ -1,5 +1,7 @@
 FROM node:22-alpine
 ENV NODE_ENV=production
+# pg_dump, pg_restore and psql for backups from the admin page; the version must match the database (postgres:17)
+RUN apk add --no-cache postgresql17-client
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
