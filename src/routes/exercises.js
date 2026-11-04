@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import express from 'express';
 import { byId, renderExercise } from '../catalog.js';
 import { csrfValid, requireAccess } from '../auth.js';
@@ -15,6 +16,16 @@ const canOpen = async (user, ex) => {
 const MAX_NOTE = 5000;
 const stateOk = (s) => s && typeof s === 'object' && !Array.isArray(s) && (s.t === undefined || (typeof s.t === 'object' && !Array.isArray(s.t)));
 
+// Tasks already started when numbers are first assigned keep their original numbers.
+async function withSeed(c, user, ex, p) {
+  if (!ex.hasVariants || p.variant_seed !== null) return p;
+  const keep = Object.keys(p.state?.t ?? {}).map(Number).filter(Number.isInteger);
+  return (await c.query(
+    'UPDATE progress SET variant_seed=$3, variant_keep=$4 WHERE user_id=$1 AND exercise_id=$2 RETURNING *',
+    [user.id, ex.id, crypto.randomInt(1, 2147483647), keep],
+  )).rows[0];
+}
+
 // Opens the current attempt; a new exercise version starts a new attempt, since task numbers may have moved.
 async function openAttempt(user, ex) {
   return tx(async (c) => {
@@ -23,14 +34,16 @@ async function openAttempt(user, ex) {
       [user.id, ex.id, ex.version],
     );
     const p = (await c.query('SELECT * FROM progress WHERE user_id=$1 AND exercise_id=$2 FOR UPDATE', [user.id, ex.id])).rows[0];
-    if (p.content_version === ex.version) return p;
+    if (p.content_version === ex.version) return withSeed(c, user, ex, p);
     if (p.done_count > 0) {
       await c.query('INSERT INTO resets(user_id, exercise_id, attempt, score, done_count, reason) VALUES($1,$2,$3,$4,$5,$6)', [user.id, ex.id, p.attempt, p.score, p.done_count, 'version']);
     }
-    return (await c.query(
-      `UPDATE progress SET attempt=attempt+1, content_version=$3, state='{}', score=0, done_count=0, hint_count=0, solution_count=0, completed_at=NULL, updated_at=now()
+    const fresh = (await c.query(
+      `UPDATE progress SET attempt=attempt+1, content_version=$3, state='{}', score=0, done_count=0, hint_count=0, solution_count=0, completed_at=NULL, updated_at=now(),
+         variant_seed=NULL, variant_keep='{}'
        WHERE user_id=$1 AND exercise_id=$2 RETURNING *`, [user.id, ex.id, ex.version],
     )).rows[0];
+    return withSeed(c, user, ex, fresh);
   });
 }
 
@@ -44,6 +57,7 @@ exerciseRouter.get('/vaje/:id', requireAccess, async (req, res, next) => {
     for (const n of noteRows) if (n.task_index >= 0) tasks[n.task_index] = n.body;
     res.type('html').send(renderExercise(ex, {
       id: ex.id, title: ex.title, key: ex.key, attempt: p.attempt, uid: req.user.id, name: req.user.name, state: p.state, csrf: req.session.csrf,
+      variant: ex.hasVariants ? { seed: p.variant_seed, keep: p.variant_keep } : null,
       notes: req.user.isAdmin ? null : { exercise: noteRows.find((n) => n.task_index === -1)?.body ?? '', tasks },
     }));
   } catch (e) { next(e); }
@@ -65,7 +79,7 @@ exerciseRouter.post('/api/progress/:id', async (req, res, next) => {
         if (had.done === 0 && had.hints === 0) return { attempt: p.attempt, ...had };
         await c.query('INSERT INTO resets(user_id, exercise_id, attempt, score, done_count) VALUES($1,$2,$3,$4,$5)', [req.user.id, ex.id, p.attempt, had.score, had.done]);
         const fresh = merge(ex, {}, req.body.state);
-        await c.query(`UPDATE progress SET attempt=attempt+1, state=$3, score=0, done_count=0, hint_count=0, solution_count=0, completed_at=NULL, updated_at=now() WHERE user_id=$1 AND exercise_id=$2`, [req.user.id, ex.id, { ...fresh.state, t: {} }]);
+        await c.query(`UPDATE progress SET attempt=attempt+1, state=$3, score=0, done_count=0, hint_count=0, solution_count=0, completed_at=NULL, updated_at=now(), variant_seed=NULL, variant_keep='{}' WHERE user_id=$1 AND exercise_id=$2`, [req.user.id, ex.id, { ...fresh.state, t: {} }]);
         return { attempt: p.attempt + 1, score: 0, done: 0 };
       }
       const { state, events, summary } = merge(ex, p.state, req.body.state);

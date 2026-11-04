@@ -251,8 +251,10 @@ test('reset works and is logged in all 9 exercises', async () => {
     assert.ok(before_.done_count >= 1, ex.id);
     await s.click('#resetBtn');
     assert.match(await s.textContent('.confirm'), /Učitelj bo videl ponastavitev/, ex.id);
+    const resetDone = s.waitForResponse((r) => r.url().includes('/api/progress/') && r.request().postDataJSON().reset === true);
     await s.click('#resetYes');
-    await synced(s);
+    await resetDone;
+    await s.waitForTimeout(300); // exercises with varied numbers load again
     const row = (await sql(`SELECT attempt, done_count FROM progress WHERE exercise_id=$1 AND user_id=(SELECT id FROM users WHERE oid='u-ana')`, [ex.id]))[0];
     assert.deepEqual(row, { attempt: before_.attempt + 1, done_count: 0 }, ex.id);
     await s.reload();
@@ -302,8 +304,9 @@ test('another tab cannot bring back answers after a reset', async () => {
   await b.goto(`${APP}/vaje/2.2`);
   await b.evaluate(() => { [...document.querySelectorAll('#nav .chap')].find((c) => /Naloge/.test(c.textContent)).click(); });
   await b.click('#resetBtn');
+  const resetDone = b.waitForResponse((r) => r.url().includes('/api/progress/') && r.request().postDataJSON().reset === true);
   await b.click('#resetYes');
-  await synced(b);
+  await resetDone;
   await a.evaluate(() => { document.querySelectorAll('.task')[1].querySelector('[data-act=sol]').click(); });
   await a.waitForSelector('.lvs-warn');
   assert.equal((await sql(`SELECT done_count FROM progress WHERE exercise_id='2.2' AND user_id=(SELECT id FROM users WHERE oid='u-bor')`))[0].done_count, 0);
@@ -464,7 +467,153 @@ test('a teacher resets an exercise for one student or the whole class; history a
   await b.context().close();
   await t.context().close();
 });
-test('several teachers per class and classes per teacher; a teacher can leave; removing the role ends it', async () => {
+test('varied numbers: own numbers per student, stable until reset, all answers correct', async () => {
+  const uid = async (oid) => (await sql('SELECT id FROM users WHERE oid=$1', [oid]))[0].id;
+  const variants = JSON.parse(readFileSync(path.join(root, 'content/variants.json'), 'utf8'));
+  const bor = await uid('u-bor');
+  const b = await login('Bor Novak');
+  const a = await login('Ana Kovač');
+  const questions = (p, list) => p.evaluate((list) => list.map((i) => TASKS[i].q), list);
+  await openTasks(b, '2.1');
+  await openTasks(a, '2.1');
+  const qb = await questions(b, variants['2.1']);
+  assert.notDeepEqual(qb, await questions(a, variants['2.1']), 'students have different numbers');
+  // fixed tasks stay the same for everyone
+  assert.deepEqual(await questions(b, [0, 3, 11]), await questions(a, [0, 3, 11]));
+  // correct answers from the student's own numbers earn full points, and the shown question matches
+  const pts = await b.evaluate((list) => {
+    const out = [];
+    for (const i of list) {
+      const card = document.getElementById('t' + i);
+      TASKS[i].fields.forEach((f, j) => { card.querySelector('#t' + i + 'f' + j).value = f.a.replace('.', ','); });
+      card.querySelector('[data-act=check]').click();
+      out.push([i, card.querySelector('.fb').textContent, card.querySelector('.qt').innerHTML === TASKS[i].q]);
+    }
+    return out;
+  }, variants['2.1']);
+  for (const [i, fb, same] of pts) { assert.match(fb, /^Pravilno/, `2.1 task ${i}: ${fb}`); assert.ok(same); }
+  await synced(b);
+  // the same numbers after a reload and on another computer
+  await b.reload();
+  assert.deepEqual(await questions(b, variants['2.1']), qb);
+  const other = await login('Bor Novak');
+  await other.goto(`${APP}/vaje/2.1`);
+  assert.deepEqual(await questions(other, variants['2.1']), qb);
+  await other.context().close();
+  const row = (await sql(`SELECT score, done_count FROM progress WHERE user_id=$1 AND exercise_id='2.1'`, [bor]))[0];
+  assert.equal(row.done_count, variants['2.1'].length);
+  // a reset gives new numbers
+  await openTasks(b, '2.1');
+  await b.click('#resetBtn');
+  const done = b.waitForResponse((r) => r.url().includes('/api/progress/') && r.request().postDataJSON().reset === true);
+  await b.click('#resetYes');
+  await done;
+  await b.waitForFunction(() => document.getElementById('sc')?.textContent === '0');
+  await b.waitForLoadState();
+  assert.notDeepEqual(await questions(b, variants['2.1']), qb, 'new numbers after a reset');
+  // a teacher's reset also gives new numbers on the next opening
+  const qb2 = await questions(b, variants['2.1']);
+  const t = await login('Tomaž Učitelj');
+  await b.evaluate(() => { document.querySelectorAll('.task')[1].querySelector('[data-act=sol]').click(); });
+  await synced(b);
+  await t.goto(`${APP}/ucitelj/razredi/${classId}/rezultati/2.1`);
+  assert.ok((await t.locator('.tag', { hasText: 'svoja števila' }).count()) === variants['2.1'].length);
+  await t.click('summary:text("Ponastavi vajo 2.1 celemu razredu")');
+  await t.click('button:text("Da, ponastavi vajo 2.1")');
+  await t.waitForLoadState();
+  await b.goto(`${APP}/vaje/2.1`);
+  assert.notDeepEqual(await questions(b, variants['2.1']), qb2);
+  await t.context().close();
+  // an attempt started before this feature keeps numbers on tasks already started; the others change
+  await db.query(`UPDATE progress SET variant_seed=NULL, variant_keep='{}', attempt=attempt+1, state='{"t":{"4":{"d":true,"p":2,"h":false,"a":["101101"]}},"g":[]}', score=2, done_count=1 WHERE user_id=$1 AND exercise_id='2.1'`, [bor]);
+  await b.goto(`${APP}/vaje/2.1`);
+  assert.match((await questions(b, [4]))[0], />45</);
+  assert.match(await b.textContent('#sc'), /^2$/);
+  assert.equal(await b.locator('#t4 .fb').evaluate((x) => x.textContent.startsWith('Pravilno')), true);
+  await a.context().close();
+  await b.context().close();
+});
+test('varied numbers: every sampled answer matches an independent calculation', async () => {
+  const conv = (n, base) => { let s = ''; let x = n; do { s = '0123456789ABCDEF'[x % base] + s; x = Math.floor(x / base); } while (x > 0); return s; };
+  const bin = (n, w) => conv(n, 2).padStart(w, '0');
+  const tc8 = (n) => bin(n < 0 ? 256 + n : n, 8);
+  const gray = (n) => { const b = bin(n, 8); let g = b[0]; for (let i = 1; i < 8; i++) g += b[i] === b[i - 1] ? '0' : '1'; return g; };
+  const ungray4 = (g) => { const s = bin(g, 4); let out = s[0]; for (let i = 1; i < 4; i++) out += out[i - 1] === s[i] ? '0' : '1'; return out; };
+  const ones = (s) => [...s].filter((c) => c === '1').length;
+  const bcd = (s) => [...s].map((d) => bin(Number(d), 4)).join('');
+  const inRange = (x, lo, hi, what) => assert.ok(x >= lo && x <= hi, `${what}: ${x}`);
+  const oracle = {
+    '2.1': {
+      1: ({ n }) => { inRange(n, 8, 15, 'n'); return [String(n)]; },
+      2: ({ n }) => { inRange(n, 8, 31, 'n'); return [conv(n, 2)]; },
+      4: ({ n }) => { inRange(n, 32, 63, 'n'); return [conv(n, 2)]; },
+      5: ({ n }) => { inRange(n, 128, 254, 'n'); return [String(n)]; },
+      6: ({ n }) => { inRange(n, 100, 255, 'n'); return [conv(n, 16)]; },
+      7: ({ n }) => { inRange(n, 16, 255, 'n'); assert.match(conv(n, 16), /[A-F]/); return [bin(n, 8)]; },
+      8: ({ n }) => { inRange(n, 128, 254, 'n'); return [conv(n, 16), conv(n, 8)]; },
+      9: ({ n }) => { inRange(n, 65, 255, 'n'); return [String(n)]; },
+      10: ({ n }) => { inRange(n, 64, 255, 'n'); return [conv(n, 8)]; },
+      15: ({ x }) => [{ 0.125: '0.001', 0.375: '0.011', 0.625: '0.101', 0.875: '0.111' }[x]],
+      20: ({ a, b }) => { inRange(a + b, 260, 400, 'sum'); assert.ok(a % 10 === 0 && b % 10 === 0 && a < 256 && b < 256); return [bin(a + b - 256, 8), '1']; },
+      22: ({ a, b }) => { inRange(a, 64, 240, 'a'); inRange(b, 64, 240, 'b'); assert.ok(a + b > 255); return [bin(a + b - 256, 8), '1']; },
+      25: ({ n }) => { inRange(n, 2, 15, 'n'); return [tc8(-n)]; },
+      26: ({ n }) => { inRange(n, 2, 16, 'n'); return [String(-n)]; },
+      27: ({ n }) => { inRange(n, 17, 60, 'n'); return [tc8(-n)]; },
+      29: ({ n }) => { inRange(n, 100, 127, 'n'); return [String(-n)]; },
+      32: ({ a, b }) => { inRange(a, 10, 40, 'a'); inRange(b, 2, a - 1, 'b'); return [bin(a - b, 8)]; },
+      33: ({ a, b }) => { inRange(a, 1, 15, 'a'); inRange(b, a + 1, 20, 'b'); return [tc8(a - b), String(a - b)]; },
+      36: ({ a, b }) => { inRange(a, 40, 100, 'a'); inRange(b, 40, 100, 'b'); inRange(a + b, 128, 200, 'sum'); return [bin(a + b, 8), String(a + b - 256)]; },
+      37: ({ a, b }) => { inRange(a, 100, 250, 'a'); inRange(b, 10, a - 1, 'b'); return [bin(a - b, 8), '1']; },
+    },
+    '2.2': {
+      1: ({ n }) => { inRange(n, 0, 9, 'n'); return [bin(n, 4)]; },
+      2: ({ n }) => { inRange(n, 10, 99, 'n'); return [bcd(String(n))]; },
+      3: ({ n }) => { inRange(n, 100, 999, 'n'); return [String(n)]; },
+      5: ({ n }) => { inRange(n, 10, 99, 'n'); return [bcd(String(n)), conv(n, 2)]; },
+      6: ({ h, m }) => { inRange(h, 0, 23, 'h'); inRange(m, 0, 59, 'm'); return [bcd(String(h).padStart(2, '0') + String(m).padStart(2, '0'))]; },
+      8: ({ n }) => { inRange(n, 1, 15, 'n'); return [gray(n).slice(4)]; },
+      9: ({ n }) => { inRange(n, 8, 15, 'n'); return [gray(n).slice(4)]; },
+      10: ({ g }) => { inRange(g, 8, 15, 'g'); return [ungray4(g)]; },
+      12: ({ g }) => { inRange(g, 8, 15, 'g'); return [ungray4(g), String(parseInt(ungray4(g), 2))]; },
+      13: ({ n }) => { inRange(n, 64, 200, 'n'); return [gray(n)]; },
+      16: ({ c }) => { inRange(c, 65, 90, 'c'); return [String(c)]; },
+      23: ({ c }) => { inRange(c, 32, 126, 'c'); return [String(ones(bin(c, 7)) % 2)]; },
+      24: ({ c }) => { inRange(c, 65, 90, 'c'); const b = bin(c, 7); return [b + (ones(b) % 2)]; },
+      25: ({ c }) => { inRange(c, 65, 90, 'c'); const b = bin(c, 7); return [b + (1 - ones(b) % 2)]; },
+      28: ({ c }) => { inRange(c, 48, 57, 'c'); const b = bin(c, 7); return [b, b + (ones(b) % 2)]; },
+    },
+  };
+  const variants = JSON.parse(readFileSync(path.join(root, 'content/variants.json'), 'utf8'));
+  const t = await login('Sara Skrbnik');
+  for (const ex of ['2.1', '2.2']) {
+    await t.goto(`${APP}/vaje/${ex}`);
+    const samples = await t.evaluate(() => LavelsVariants.indexes().map((i) => {
+      const list = [];
+      for (let seed = 1; seed <= 3000; seed++) {
+        const s = LavelsVariants.sample(i, seed * 7919);
+        list.push({ params: s.params, a: s.fields.map((f) => f.a), ok: s.fields.every((f) => LIB.same(f.a, f)), n: s.fields.length, tot: TASKS[i].fields.length,
+          bad: /undefined|NaN|null/.test(s.q + s.hint + s.sol), key: s.q,
+          labels: s.fields.map((f) => [f.l, f.f, f.w, f.u]).join(), labels0: TASKS[i].fields.map((f) => [f.l, f.f, f.w, f.u]).join(), sol: s.sol });
+      }
+      return [i, list];
+    }));
+    assert.deepEqual(samples.map((x) => x[0]), variants[ex], `${ex} list matches variants.json`);
+    for (const [i, list] of samples) {
+      assert.ok(oracle[ex][i], `${ex} task ${i} has a check`);
+      for (const s of list) {
+        assert.deepEqual(s.a, oracle[ex][i](s.params), `${ex} #${i + 1} ${JSON.stringify(s.params)}`);
+        assert.ok(s.ok, `${ex} #${i + 1} accepted`);
+        assert.equal(s.n, s.tot, `${ex} #${i + 1} fields`);
+        assert.equal(s.labels, s.labels0, `${ex} #${i + 1} same answer boxes as the original`);
+        if (ex === '2.2' && [24, 25, 28].includes(i)) assert.ok(s.sol.includes(`beseda = ${s.a.at(-1)}`), `${ex} #${i + 1} solution shows the answer`);
+        assert.ok(!s.bad, `${ex} #${i + 1} text`);
+      }
+      assert.ok(new Set(list.map((s) => s.key)).size >= 4, `${ex} #${i + 1} variety`);
+    }
+  }
+  await t.context().close();
+});
+test('several teachers per class and classes per teacher; removing the role ends it', async () => {
   const a = await login('Sara Skrbnik');
   const second = await adminMakesClass(a, 'R3B');
   await a.goto(`${APP}/admin/razredi`);
@@ -480,10 +629,13 @@ test('several teachers per class and classes per teacher; a teacher can leave; r
   await c.waitForURL(/razredi\/\d+/);
   await c.goto(`${APP}/ucitelj`);
   assert.equal(await c.locator('section', { hasText: 'Moji razredi' }).locator('tbody tr').count(), 2);
+  // teachers have no way to leave a class themselves; the admin removes them
   await c.goto(`${APP}/ucitelj/razredi/${second}`);
-  await c.click('summary:text("Zapusti razred")');
-  await c.click('text=Da, zapusti razred');
-  await c.waitForURL(`${APP}/ucitelj`);
+  assert.equal(await c.locator('text=Zapusti razred').count(), 0);
+  assert.equal((await c.request.post(`${APP}/ucitelj/razredi/${second}/zapusti`, { form: {} })).status(), 404);
+  await a.goto(`${APP}/admin/razredi`);
+  await a.locator('tr', { hasText: 'R3B' }).locator('.teacher-chip', { hasText: 'Cene Zupan' }).locator('button').click();
+  await a.waitForLoadState();
   assert.equal((await c.goto(`${APP}/ucitelj/razredi/${second}`)).status(), 404);
   // the admin can open any class without joining
   assert.equal((await a.goto(`${APP}/ucitelj/razredi/${second}`)).status(), 200);

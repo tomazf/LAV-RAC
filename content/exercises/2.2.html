@@ -627,7 +627,7 @@ const graySol=(n,w)=>{ const b=B2(n,w), g=B2(LIB.gray(n),w), L=['G'+(w-1)+' = B'
 const ungraySol=(g,w)=>{ const gb=B2(g,w), bv=B2(LIB.ungray(g),w), L=['B'+(w-1)+' = G'+(w-1)+' = '+gb[0]];
   for(let i=1;i<w;i++) L.push('B'+(w-1-i)+' = B'+(w-i)+' ⊕ G'+(w-1-i)+' = '+bv[i-1]+' ⊕ '+gb[i]+' = '+bv[i]);
   return stp('Gray v dvojiško: vsak bit je XOR prejšnjega dvojiškega bita in Grayevega bita',['G = '+gb].concat(L),'dvojiško = '+bv); };
-const parSol=(code,mode)=>{ const b=B2(code,7), o=LIB.ones(b), p=LIB.pbit(b,mode);
+const parSol=(code,mode)=>{ const b=B2(code,7), o=LIB.ones(b), p=LIB.pbit(b,mode==='liha'?'liho':mode);
   return stp('Paritetni bit ('+(mode==='soda'?'soda':'liha')+' pariteta)',[(code>=32?'»'+String.fromCharCode(code)+'« = ':'')+code+' = '+b,'število enic: '+o,'dodamo P = '+p+', da je skupaj '+(mode==='soda'?'sodo':'liho')+' število enic ('+(o+p)+')'],'beseda = '+b+p); };
 
 const TASKS=[
@@ -703,6 +703,7 @@ inq('težka','par','Znak »A« ima kodo 1000001. Zapiši 8-bitno besedo z lihim 
 ];
 
 </script>
+<!--LAVELS:VARIANTS-->
 <script>
 (function(){
   const $ = id => document.getElementById(id);

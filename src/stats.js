@@ -18,7 +18,7 @@ export function strip(ex, state) {
   return ex.tasks.map((task, n) => {
     const t = readTask(ex, tasks[task.i]);
     const status = taskStatus(t);
-    return { n: n + 1, i: task.i, status, points: t.points, max: task.max, level: task.level, q: task.q, section: task.section,
+    return { n: n + 1, i: task.i, status, points: t.points, max: task.max, level: task.level, q: task.q, section: task.section, varied: task.varied,
       label: `Naloga ${n + 1}: ${STATUS[status]}${t.done ? `, ${num(t.points)} od ${task.max} t` : ''}` };
   });
 }

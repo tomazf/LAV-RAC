@@ -6,9 +6,13 @@ import { many, q } from './db.js';
 const root = path.resolve(import.meta.dirname, '..');
 const raw = JSON.parse(fs.readFileSync(path.join(root, 'content/catalog.json'), 'utf8'));
 const PLACEHOLDER = '<!--LAVELS:BOOT-->';
+const VARIANTS = '<!--LAVELS:VARIANTS-->';
+const varied = JSON.parse(fs.readFileSync(path.join(root, 'content/variants.json'), 'utf8'));
 export const modules = raw.modules;
 export const exercises = raw.exercises.map((e) => ({
   ...e,
+  hasVariants: !!varied[e.id],
+  tasks: e.tasks.map((t) => ({ ...t, varied: !!varied[e.id]?.includes(t.i) })),
   pageMap: new Map(e.pages.map((p) => [p.id, p])),
   html: fs.readFileSync(path.join(root, 'content/exercises', `${e.id}.html`), 'utf8'),
 }));
@@ -19,7 +23,8 @@ export const totalTasks = exercises.reduce((a, e) => a + e.tasks.length, 0);
 
 export function renderExercise(ex, boot) {
   const json = JSON.stringify(boot).replace(/</g, '\\u003c');
-  return ex.html.replace(PLACEHOLDER, () => `<script>window.__LAVELS=${json}</script>\n<script src="${asset('js/notes.js')}"></script>\n<script src="${asset('js/tracker.js')}"></script>`);
+  const variants = ex.hasVariants ? `<script src="${asset('js/variants/core.js')}"></script>\n<script src="${asset(`js/variants/${ex.id}.js`)}"></script>` : '';
+  return ex.html.replace(PLACEHOLDER, () => `<script>window.__LAVELS=${json}</script>\n<script src="${asset('js/notes.js')}"></script>\n<script src="${asset('js/tracker.js')}"></script>`).replace(VARIANTS, () => variants);
 }
 // Groups that are planned but have no content yet; shown only to teachers and admins.
 export const plannedModules = [4, 5].filter((id) => !modules.some((m) => m.id === id));

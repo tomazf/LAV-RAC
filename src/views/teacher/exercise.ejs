@@ -22,7 +22,7 @@
   <div class="scroll"><table class="data">
     <thead><tr><th>Št.</th><th class="l">Naloga</th><th class="l">Stopnja</th><th>Odgovorili</th><th>Pravilno</th><th>Namigi</th><th>Rešitve</th></tr></thead>
     <tbody><% tasks.forEach((t) => { const p = t.answered ? f.pct(t.right, t.answered) : null; %><tr>
-      <td><%= t.n %></td><td class="l q-cell"><%= t.q %></td><td class="l"><%= t.level %></td><td><%= t.answered %></td>
+      <td><%= t.n %></td><td class="l q-cell"><%= t.q %><% if (t.varied) { %> <span class="tag">dijaki imajo svoja števila</span><% } %></td><td class="l"><%= t.level %></td><td><%= t.answered %></td>
       <td class="<%= p !== null && p < 50 ? 'weak' : '' %>"><%= p === null ? '–' : p + ' %' %></td><td><%= t.hints %></td><td><%= t.solutions %></td>
     </tr><% }) %></tbody>
   </table></div>

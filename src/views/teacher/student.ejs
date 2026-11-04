@@ -39,7 +39,7 @@
       </details><% } %>
       <h3>Naloge</h3>
       <div class="scroll"><table class="data"><thead><tr><th>Št.</th><th class="l">Naloga</th><th class="l">Izid</th><th>Točke</th><th class="l">Oddano</th></tr></thead><tbody>
-        <% e.strip.forEach((t) => { %><tr><td><%= t.n %></td><td class="l q-cell"><%= t.q %></td><td class="l nw"><i class="dot s-<%= t.status %>"></i> <%= t.label.split(': ')[1].split(',')[0] %></td><td class="nw"><%= t.status === 'open' || t.status === 'hint' ? '–' : f.num(t.points) + ' / ' + t.max %></td><td class="l nw"><%= e.finished.has(t.i) ? f.dateTime(e.finished.get(t.i)) : '' %></td></tr><% }) %>
+        <% e.strip.forEach((t) => { %><tr><td><%= t.n %></td><td class="l q-cell"><%= t.q %><% if (t.varied) { %> <span class="tag">primer, dijak ima svoja števila</span><% } %></td><td class="l nw"><i class="dot s-<%= t.status %>"></i> <%= t.label.split(': ')[1].split(',')[0] %></td><td class="nw"><%= t.status === 'open' || t.status === 'hint' ? '–' : f.num(t.points) + ' / ' + t.max %></td><td class="l nw"><%= e.finished.has(t.i) ? f.dateTime(e.finished.get(t.i)) : '' %></td></tr><% }) %>
       </tbody></table></div>
       <h3>Odprte strani</h3>
       <div class="scroll"><table class="data"><thead><tr><th class="l">Poglavje</th><th class="l">Stran</th><th>Čas</th><th class="l">Zadnjič</th></tr></thead><tbody>

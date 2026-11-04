@@ -49,6 +49,11 @@ function transform(html, id) {
   } else {
     s = `<!doctype html>\n<html lang="sl"><head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n${BOOT}\n${s}\n</html>\n`;
   }
+  const tasks = s.indexOf('const TASKS=[');
+  if (tasks >= 0) {
+    const end = s.indexOf('</script>', tasks) + '</script>'.length;
+    s = `${s.slice(0, end)}\n<!--LAVELS:VARIANTS-->${s.slice(end)}`;
+  }
   if (!s.includes(BOOT)) throw new Error(`${id}: boot marker missing`);
   return s;
 }

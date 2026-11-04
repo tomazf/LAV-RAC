@@ -6,6 +6,7 @@
   if (!B) return;
   var PENDING = 'lavels_pending_' + B.uid + '_' + B.id;
   var HEARTBEAT = 15000, IDLE_AFTER = 60000;
+  var lastSaved = null;
   var attempt = B.attempt, dirty = false, sending = false, pendingReset = false, stopped = false;
   var store = window.localStorage;
   var realSet = Storage.prototype.setItem;
@@ -37,7 +38,8 @@
   Storage.prototype.setItem = function (k, v) {
     realSet.call(this, k, v);
     if (this === store && k === B.key) {
-      rawSet(PENDING, JSON.stringify({ attempt: attempt, state: JSON.parse(v), reset: pendingReset }));
+      lastSaved = { attempt: attempt, state: JSON.parse(v), reset: pendingReset };
+      rawSet(PENDING, JSON.stringify(lastSaved));
       dirty = true;
       show('Shranjujem …');
       schedule();
@@ -71,7 +73,8 @@
   }
   function flush() {
     if (!dirty || sending || stopped) return;
-    var cur = current();
+    // Another tab that just opened may have cleared this tab's waiting copy.
+    var cur = current() || lastSaved;
     if (!cur) { dirty = false; return; }
     var snapshot = JSON.stringify(cur);
     var wasReset = !!(cur.reset || pendingReset);
@@ -85,6 +88,8 @@
         sending = false;
         if (x.status === 200 && x.d.ok) {
           if (wasReset) pendingReset = false;
+          // A new attempt means new numbers, which the page only gets by loading again.
+          if (wasReset && B.variant) { rawDel(PENDING); dirty = false; stopped = true; location.reload(); return; }
           if (x.d.attempt !== attempt) attempt = x.d.attempt;
           var after = current();
           if (after && JSON.stringify(after) !== snapshot) {

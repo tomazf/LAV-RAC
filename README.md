@@ -7,7 +7,7 @@ Portal za laboratorijske vaje iz digitalne elektronike. Poveže vaje 1.1 do 3.3,
 | Vloga | Kako jo dobi | Kaj lahko |
 |---|---|---|
 | Skrbnik | uporabniško ime v `ADMIN_EMAILS` | ustvarja in briše razrede, določa učitelje, briše uporabnike, lahko dela vse kot učitelj v vsakem razredu |
-| Učitelj | določi ga skrbnik | se pridruži razredom ali jih zapusti, v svojih razredih dodaja in odstranjuje dijake, izbira odprte vaje in vrstni red, vidi rezultate in dijake brez razreda |
+| Učitelj | določi ga skrbnik | se pridruži razredom (iz razreda ga lahko odstrani skrbnik), v svojih razredih dodaja in odstranjuje dijake, izbira odprte vaje in vrstni red, vidi rezultate in dijake brez razreda |
 | Dijak | učitelj ali skrbnik ga doda v en razred | rešuje odprte vaje, vidi svoj napredek in piše svoje opombe |
 | Brez razreda | vsak nov ali odstranjen uporabnik | vidi samo obvestilo, da čaka na razred |
 
@@ -97,6 +97,8 @@ Vaje so v `content/exercises/`, seznam nalog in strani pa v `content/catalog.jso
 npm ci
 node scripts/import-exercises.js POT/DO/MAPE
 ```
+
+Naloge s spremenljivimi števili so naštete v `content/variants.json`, njihovi razponi pa v `src/public/js/variants/`. Če spremeniš nalogo s tega seznama, popravi tudi njen zapis tam.
 
 Napredek je vezan na zaporedno številko naloge. Če spremeniš vrstni red ali število nalog, v vaji povečaj različico v ključu napredka (npr. `scnm_lavele_1_3_v1` v `_v2`). Dijaki tako začnejo nov poskus, prejšnji rezultat pa ostane zabeležen. Popravek besedila različice ne potrebuje.
 

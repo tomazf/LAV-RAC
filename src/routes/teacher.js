@@ -73,16 +73,6 @@ teacherRouter.post('/razredi/:id/pridruzi', checkCsrf, async (req, res, next) =>
     res.redirect(`/ucitelj/razredi/${c.id}`);
   } catch (e) { next(e); }
 });
-teacherRouter.post('/razredi/:id/zapusti', checkCsrf, async (req, res, next) => {
-  try {
-    const c = await one('SELECT id, name FROM classes WHERE id=$1', [Number(req.params.id) || 0]);
-    if (c) {
-      await q('DELETE FROM class_teachers WHERE class_id=$1 AND user_id=$2', [c.id, req.user.id]);
-      await audit(req.user, 'Zapustil je razred', c.name);
-    }
-    res.redirect('/ucitelj');
-  } catch (e) { next(e); }
-});
 const SORTS = {
   name: (a, b) => a.name.localeCompare(b.name, 'sl'),
   score: (a, b) => b.total.score - a.total.score,
@@ -143,7 +133,7 @@ async function resetExercise(ex, userId) {
     const had = summarize(ex, p.state);
     if (had.done === 0 && had.hints === 0) return false;
     await c.query(`INSERT INTO resets(user_id, exercise_id, attempt, score, done_count, reason) VALUES($1,$2,$3,$4,$5,'teacher')`, [userId, ex.id, p.attempt, had.score, had.done]);
-    await c.query(`UPDATE progress SET attempt=attempt+1, state='{}', score=0, done_count=0, hint_count=0, solution_count=0, completed_at=NULL, updated_at=now() WHERE user_id=$1 AND exercise_id=$2`, [userId, ex.id]);
+    await c.query(`UPDATE progress SET attempt=attempt+1, state='{}', score=0, done_count=0, hint_count=0, solution_count=0, completed_at=NULL, updated_at=now(), variant_seed=NULL, variant_keep='{}' WHERE user_id=$1 AND exercise_id=$2`, [userId, ex.id]);
     return true;
   });
 }

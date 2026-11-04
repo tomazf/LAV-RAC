@@ -47,16 +47,9 @@
   <script src="<%= asset('js/filter.js') %>"></script>
   <% } %>
 </section>
-<section class="block">
+<% if (user.isAdmin) { %><section class="block">
   <h2>Razred</h2>
-  <% if (cls.iTeach) { %>
-  <details class="danger-zone"><summary>Zapusti razred</summary>
-    <p>Razred ostane, dijaki obdržijo vaje in napredek. Znova se mu lahko pridružiš kadar koli.</p>
-    <form method="post" action="/ucitelj/razredi/<%= cls.id %>/zapusti"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn danger">Da, zapusti razred <%= cls.name %></button></form>
-  </details>
-  <% } else { %>
-  <form method="post" action="/ucitelj/razredi/<%= cls.id %>/pridruzi"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn ghost">Pridruži se razredu</button></form>
-  <% } %>
-  <% if (user.isAdmin) { %><p><a href="/admin/razredi">Preimenuj ali izbriši razred</a></p><% } %>
-</section>
+  <% if (!cls.iTeach) { %><form method="post" action="/ucitelj/razredi/<%= cls.id %>/pridruzi"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn ghost">Pridruži se razredu</button></form><% } %>
+  <p><a href="/admin/razredi">Uredi učitelje, preimenuj ali izbriši razred</a></p>
+</section><% } %>
 <%- include('../partials/foot') %>
