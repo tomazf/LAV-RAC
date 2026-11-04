@@ -95,7 +95,7 @@
           show('Shranjeno');
         } else if (x.status === 409) {
           rawDel(PENDING); dirty = false; stopped = true;
-          show('Ta vaja je bila spremenjena v drugem zavihku.', 'warn', { href: location.pathname, text: 'Osveži stran' });
+          show('Vaja je bila medtem ponastavljena ali spremenjena.', 'warn', { href: location.pathname, text: 'Osveži stran' });
         } else if (x.status === 403 && x.d.code === 'closed') {
           rawDel(PENDING); dirty = false; stopped = true;
           show('Učitelj je zaprl to vajo. Novi odgovori se ne shranijo.', 'warn', { href: '/vaje', text: 'Na seznam vaj' });

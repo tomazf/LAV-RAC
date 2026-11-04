@@ -233,7 +233,7 @@ test('reset: the student can restart, the teacher sees it with the earlier score
   assert.equal(await t.locator('.matrix tbody tr', { hasText: 'Ana' }).locator('.rs').count(), 1);
   await t.locator('.matrix a', { hasText: 'Ana Kovač' }).click();
   await t.waitForURL(/dijaki/);
-  await t.locator('details.exd', { hasText: 'Logični nivoji' }).locator('summary').click();
+  await t.locator('details.exd', { hasText: 'Logični nivoji' }).locator('summary').first().click();
   assert.match(await t.locator('details.exd', { hasText: 'Logični nivoji' }).textContent(), /ponastavil dijak, prejšnji rezultat/);
   await s.context().close();
   await t.context().close();
@@ -362,6 +362,7 @@ test('teachers only see their own classes; CSV export is safe', async () => {
   assert.equal((await other.goto(`${APP}/ucitelj/razredi/${classId}`)).status(), 404);
   assert.equal((await other.goto(`${APP}/ucitelj/razredi/${classId}/izvoz.csv`)).status(), 404);
   assert.equal((await other.goto(`${APP}/ucitelj/razredi/${classId}/vaje`)).status(), 404);
+  assert.equal((await other.request.post(`${APP}/ucitelj/razredi/${classId}/rezultati/1.1/ponastavi`, { form: {} })).status(), 404);
   await other.context().close();
   await db.query(`UPDATE users SET name='=HYPERLINK("x")' WHERE oid='u-bor'`);
   const t = await login('Tomaž Učitelj');
@@ -393,6 +394,74 @@ test('removing a student returns them to waiting; progress comes back when they 
   await s.goto(`${APP}/vaje`);
   assert.equal(await s.locator('.rail li').count(), 9);
   await s.context().close();
+  await t.context().close();
+});
+test('a teacher resets an exercise for one student or the whole class; history and notes stay', async () => {
+  const ana = (await sql(`SELECT id FROM users WHERE oid='u-ana'`))[0].id;
+  const bor = (await sql(`SELECT id FROM users WHERE oid='u-bor'`))[0].id;
+  const row = async (uid, ex) => (await sql('SELECT attempt, score, done_count, state FROM progress WHERE user_id=$1 AND exercise_id=$2', [uid, ex]))[0];
+  const a = await login('Ana Kovač');
+  const b = await login('Bor Novak');
+  const answer = async (p, ex, n) => {
+    await openTasks(p, ex);
+    await p.evaluate((n) => {
+      const open = [...document.querySelectorAll('.task')].filter((t) => !t.querySelector('[data-act=check]').disabled);
+      open.slice(0, n).forEach((t) => {
+        const r = t.querySelector('input[type=radio]');
+        if (r) { r.checked = true; t.querySelector('[data-act=check]').click(); } else t.querySelector('[data-act=sol]').click();
+      });
+    }, n);
+    await synced(p);
+  };
+  await answer(a, '3.2', 2);
+  await answer(a, '3.3', 2);
+  await answer(b, '3.2', 1);
+  const before3 = await row(ana, '3.3');
+  assert.ok(before3.done_count >= 2);
+  const studentResets = (await sql(`SELECT count(*)::int n FROM resets WHERE user_id=$1 AND reason='student'`, [ana]))[0].n;
+  // one student, one exercise
+  const t = await login('Tomaž Učitelj');
+  await t.goto(`${APP}/ucitelj/razredi/${classId}/dijaki/${ana}`);
+  const box = t.locator('details.exd', { hasText: 'MUX, DEMUX' });
+  await box.locator('summary').first().click();
+  await box.locator('summary:text("Ponastavi to vajo dijaku")').click();
+  await box.locator('button:text("Da, ponastavi vajo")').click();
+  await t.waitForLoadState();
+  const after3 = await row(ana, '3.3');
+  assert.deepEqual([after3.attempt, Number(after3.score), after3.done_count, after3.state], [before3.attempt + 1, 0, 0, {}]);
+  assert.ok((await row(ana, '3.2')).done_count >= 2, 'other exercises stay');
+  const r = (await sql(`SELECT * FROM resets WHERE user_id=$1 AND exercise_id='3.3' ORDER BY id DESC LIMIT 1`, [ana]))[0];
+  assert.deepEqual([r.reason, r.done_count], ['teacher', before3.done_count]);
+  await t.locator('details.exd', { hasText: 'MUX, DEMUX' }).locator('summary').first().click();
+  assert.match(await t.locator('details.exd', { hasText: 'MUX, DEMUX' }).textContent(), /ponastavil učitelj/);
+  // a tab the student left open cannot bring answers back
+  await a.evaluate(() => { [...document.querySelectorAll('.task')].find((t) => !t.querySelector('[data-act=check]').disabled).querySelector('[data-act=sol]').click(); });
+  await a.waitForSelector('.lvs-warn');
+  assert.equal((await row(ana, '3.3')).done_count, 0);
+  // the student starts fresh on reload
+  await a.goto(`${APP}/vaje/3.3`);
+  assert.match(await a.textContent('#pc'), /^0\//);
+  // the whole class, one exercise; a student with nothing to reset is not logged
+  await t.goto(`${APP}/ucitelj/razredi/${classId}/rezultati/3.2`);
+  await t.click('summary:text("Ponastavi vajo 3.2 celemu razredu")');
+  await t.click('button:text("Da, ponastavi vajo 3.2")');
+  await t.waitForLoadState();
+  assert.match(await t.textContent('.notice'), /Dijakov: 2/);
+  assert.equal((await row(ana, '3.2')).done_count, 0);
+  assert.equal((await row(bor, '3.2')).done_count, 0);
+  await t.reload();
+  await t.goto(`${APP}/ucitelj/razredi/${classId}/rezultati/3.2`);
+  await t.click('summary:text("Ponastavi vajo 3.2 celemu razredu")');
+  await t.click('button:text("Da, ponastavi vajo 3.2")');
+  await t.waitForLoadState();
+  assert.match(await t.textContent('.notice'), /Dijakov: 0/);
+  // teacher resets are not counted as the student's own; the log says who did it; notes stay
+  assert.equal((await sql(`SELECT count(*)::int n FROM resets WHERE user_id=$1 AND reason='student'`, [ana]))[0].n, studentResets);
+  const log = await sql(`SELECT action, actor_name, detail FROM audit_log WHERE action LIKE 'Ponastavil vajo%' ORDER BY id`);
+  assert.deepEqual(log.map((l) => [l.action, l.actor_name]), [['Ponastavil vajo dijaku', 'Tomaž Učitelj'], ['Ponastavil vajo razredu', 'Tomaž Učitelj']]);
+  assert.match(log[0].detail, /Ana Kovač: 3\.3/);
+  await a.context().close();
+  await b.context().close();
   await t.context().close();
 });
 test('several teachers per class and classes per teacher; a teacher can leave; removing the role ends it', async () => {
@@ -573,22 +642,75 @@ test('exercise groups line up on the admin overview and class page; empty groups
   await s.context().close();
   await a.context().close();
 });
-test('admin deletes students and teachers with all their data', async () => {
+test('removing from a class keeps the user; deleting from the system erases them forever', async () => {
+  const uid = async (oid) => (await sql('SELECT id FROM users WHERE oid=$1', [oid]))[0]?.id;
+  const counts = async (id) => {
+    const out = {};
+    for (const tbl of ['progress', 'resets', 'task_events', 'page_time', 'student_notes', 'class_members', 'class_teachers']) {
+      out[tbl] = (await sql(`SELECT count(*)::int n FROM ${tbl} WHERE user_id=$1`, [id]))[0].n;
+    }
+    return out;
+  };
+  const bor = await uid('u-bor');
+  const s = await login('Bor Novak');
+  await s.goto(`${APP}/vaje`);
+  await s.locator('.my-note .lvn-btn').click();
+  await s.fill('.lvn-dialog textarea', 'Borova zasebna opomba');
+  await s.click('.lvn-save');
+  await s.waitForSelector('#note-general:not([hidden])');
+  // removed from a class: everything stays, and another class can take the student
+  const t = await login('Tomaž Učitelj');
+  await t.goto(`${APP}/ucitelj/razredi/${classId}/dijaki/${bor}`);
+  await t.click('summary:text("Odstrani iz razreda")');
+  await t.click('text=Da, odstrani');
+  await t.waitForURL(/razredi\/\d+$/);
+  let c = await counts(bor);
+  assert.equal(c.class_members, 0);
+  assert.ok(c.progress > 0 && c.task_events > 0 && c.student_notes === 1);
   const a = await login('Sara Skrbnik');
-  for (const mail of ['bor.novak@sola.test', 'ucitelj@sola.test']) {
-    await a.goto(`${APP}/admin`);
-    const u = a.locator('tr', { hasText: mail });
-    await u.locator('summary:text("Izbriši")').click();
-    await u.locator('button:text("Da, izbriši")').click();
-    await a.waitForURL(/sporocilo/);
-  }
-  assert.equal((await sql(`SELECT count(*)::int n FROM users WHERE oid IN ('u-bor','u-teacher')`))[0].n, 0);
-  assert.equal((await sql(`SELECT count(*)::int n FROM task_events e LEFT JOIN users u ON u.id=e.user_id WHERE u.id IS NULL`))[0].n, 0);
-  assert.equal((await sql(`SELECT count(*)::int n FROM student_notes e LEFT JOIN users u ON u.id=e.user_id WHERE u.id IS NULL`))[0].n, 0);
-  assert.equal((await sql(`SELECT count(*)::int n FROM classes WHERE id=$1`, [classId]))[0].n, 1); // the class stays
+  const second = (await sql(`SELECT id FROM classes WHERE name='R3B'`))[0].id;
+  await a.goto(`${APP}/ucitelj/razredi/${second}`);
+  await a.locator('#cakajo label', { hasText: 'Bor Novak' }).locator('input').check();
+  await a.click('text=Dodaj izbrane');
+  await a.waitForLoadState();
+  assert.equal((await sql('SELECT class_id FROM class_members WHERE user_id=$1', [bor])).length, 1);
+  assert.ok((await counts(bor)).progress === c.progress, 'progress follows the student');
+  // deleted from the system: nothing of the student remains, including the name in the log
+  assert.ok((await sql(`SELECT count(*)::int n FROM audit_log WHERE detail LIKE '%Bor Novak%'`))[0].n > 0, 'name was in the log');
+  await a.goto(`${APP}/admin`);
+  const u = a.locator('tr', { hasText: 'bor.novak@sola.test' });
+  await u.locator('summary:text("Izbriši za vedno")').click();
+  await u.locator('button:text("Da, izbriši za vedno")').click();
+  await a.waitForURL(/sporocilo/);
+  assert.ok(!decodeURIComponent(a.url()).includes('Bor'), 'name is not in the address');
+  assert.deepEqual(Object.values(await counts(bor)), [0, 0, 0, 0, 0, 0, 0]);
+  assert.equal(await uid('u-bor'), undefined);
+  assert.equal((await sql(`SELECT count(*)::int n FROM audit_log WHERE detail LIKE '%Bor Novak%' OR actor_name LIKE '%Bor Novak%'`))[0].n, 0);
+  assert.equal((await sql(`SELECT count(*)::int n FROM session WHERE (sess->>'uid')::bigint=$1`, [bor]))[0].n, 0);
+  // their open browser is logged out, and logging in again gives a new empty waiting account
+  await s.goto(`${APP}/vaje`);
+  assert.equal(new URL(s.url()).pathname, '/');
+  await s.click('text=Prijava s šolskim računom');
+  await s.click('a:text-is("Bor Novak")');
+  await s.waitForURL(`${APP}/**`);
+  assert.match(await s.textContent('h1'), /Čakaš/);
+  const fresh = await uid('u-bor');
+  assert.notEqual(fresh, bor);
+  assert.deepEqual(Object.values(await counts(fresh)), [0, 0, 0, 0, 0, 0, 0]);
+  await s.context().close();
+  // a teacher can be deleted too; the class stays and the log no longer names them
+  await a.goto(`${APP}/admin`);
+  const tr = a.locator('tr', { hasText: 'ucitelj@sola.test' });
+  await tr.locator('summary:text("Izbriši za vedno")').click();
+  await tr.locator('button:text("Da, izbriši za vedno")').click();
+  await a.waitForURL(/sporocilo/);
+  assert.equal(await uid('u-teacher'), undefined);
+  assert.equal((await sql(`SELECT count(*)::int n FROM audit_log WHERE actor_name LIKE '%Tomaž%' OR detail LIKE '%Tomaž%'`))[0].n, 0);
+  assert.ok((await sql(`SELECT count(*)::int n FROM audit_log WHERE actor_name='izbrisan uporabnik'`))[0].n > 0);
+  assert.equal((await sql('SELECT count(*)::int n FROM classes WHERE id=$1', [classId]))[0].n, 1);
   await a.goto(`${APP}/admin/dnevnik`);
   assert.match(await a.textContent('table'), /Izbrisal uporabnika/);
-  assert.match(await a.textContent('table'), /Odprl vajo/);
+  await t.context().close();
   await a.context().close();
 });
 test('nothing is loaded from other sites, and there were no page errors', async () => {

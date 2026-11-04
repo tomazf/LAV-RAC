@@ -3,7 +3,7 @@
 <p class="crumbs"><a href="/ucitelj">Razredi</a> / <a href="/ucitelj/razredi/<%= cls.id %>"><%= cls.name %></a></p>
 <div class="title-row"><div><h1><%= m.name %></h1><p class="dim"><%= m.email || m.username %></p></div>
   <details class="danger-zone right"><summary>Odstrani iz razreda</summary>
-  <p>Dijak obdrži napredek in opombe, a nima več dostopa do vaj, dokler ga ne dodaš v razred.</p>
+  <p>Dijak ostane v sistemu in obdrži napredek in opombe. Nima dostopa do vaj, dokler ga učitelj ne doda v razred, tudi v drugega.</p>
   <form method="post" action="/ucitelj/razredi/<%= cls.id %>/odstrani"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="user" value="<%= m.id %>"><button class="btn danger">Da, odstrani</button></form></details>
 </div>
 <dl class="stats">
@@ -32,7 +32,11 @@
     </summary>
     <div class="exd-body">
       <% if (e.resets.length) { %><h3>Ponastavitve</h3>
-      <ul class="plain"><% e.resets.forEach((r) => { %><li><%= f.dateTime(r.created_at) %>: <%= r.reason === 'version' ? 'nova različica vaje' : 'ponastavil dijak' %>, prejšnji rezultat <%= f.num(r.score) %> od <%= e.maxPoints %> t, <%= r.done_count %> nalog</li><% }) %></ul><% } %>
+      <ul class="plain"><% e.resets.forEach((r) => { %><li><%= f.dateTime(r.created_at) %>: <%= { version: 'nova različica vaje', teacher: 'ponastavil učitelj', student: 'ponastavil dijak' }[r.reason] %>, prejšnji rezultat <%= f.num(r.score) %> od <%= e.maxPoints %> t, <%= r.done_count %> nalog</li><% }) %></ul><% } %>
+      <% if (e.c.done || e.c.hints) { %><details class="danger-zone"><summary>Ponastavi to vajo dijaku</summary>
+        <p>Dijaku se izbrišejo odgovori in točke te vaje, začne znova. Prejšnji rezultat ostane v zgodovini, porabljen čas in opombe ostanejo.</p>
+        <form method="post" action="/ucitelj/razredi/<%= cls.id %>/dijaki/<%= m.id %>/vaje/<%= e.id %>/ponastavi"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn danger small">Da, ponastavi vajo <%= e.id %> dijaku <%= m.name %></button></form>
+      </details><% } %>
       <h3>Naloge</h3>
       <div class="scroll"><table class="data"><thead><tr><th>Št.</th><th class="l">Naloga</th><th class="l">Izid</th><th>Točke</th><th class="l">Oddano</th></tr></thead><tbody>
         <% e.strip.forEach((t) => { %><tr><td><%= t.n %></td><td class="l q-cell"><%= t.q %></td><td class="l nw"><i class="dot s-<%= t.status %>"></i> <%= t.label.split(': ')[1].split(',')[0] %></td><td class="nw"><%= t.status === 'open' || t.status === 'hint' ? '–' : f.num(t.points) + ' / ' + t.max %></td><td class="l nw"><%= e.finished.has(t.i) ? f.dateTime(e.finished.get(t.i)) : '' %></td></tr><% }) %>

@@ -1,7 +1,7 @@
 import express from 'express';
 import { checkCsrf, isAdmin, requireAdmin } from '../auth.js';
 import { plannedModules, standardGroups } from '../catalog.js';
-import { audit, many, one, q, tx } from '../db.js';
+import { audit, eraseUser, many, one, q, tx } from '../db.js';
 
 export const adminRouter = express.Router();
 adminRouter.use(requireAdmin);
@@ -46,9 +46,9 @@ adminRouter.post('/uporabniki/:id/izbrisi', checkCsrf, async (req, res, next) =>
     const u = await one('SELECT * FROM users WHERE id=$1', [Number(req.params.id) || 0]);
     if (!u) return res.redirect('/admin');
     if (isAdmin(u)) return flash(res, '/admin', 'Skrbnika ni mogoče izbrisati. Najprej ga odstrani iz nastavitve ADMIN_EMAILS.');
-    await q('DELETE FROM users WHERE id=$1', [u.id]);
-    await audit(req.user, 'Izbrisal uporabnika in njegove podatke', u.name);
-    flash(res, '/admin', `Izbrisano: ${u.name}.`);
+    await eraseUser(u);
+    await audit(req.user, 'Izbrisal uporabnika in njegove podatke');
+    flash(res, '/admin', 'Uporabnik in vsi njegovi podatki so izbrisani.');
   } catch (e) { next(e); }
 });
 adminRouter.post('/ciscenje', checkCsrf, async (req, res, next) => {
@@ -56,10 +56,10 @@ adminRouter.post('/ciscenje', checkCsrf, async (req, res, next) => {
     const days = Number(req.body.days);
     if (!Number.isInteger(days) || days < 30 || req.body.confirm !== 'da') return flash(res, '/admin', 'Vpiši vsaj 30 dni in potrdi brisanje.');
     const old = await many(`SELECT * FROM users WHERE role='user' AND last_login_at < now() - make_interval(days => $1)`, [days]);
-    const ids = old.filter((u) => !isAdmin(u)).map((u) => u.id);
-    await q('DELETE FROM users WHERE id = ANY($1)', [ids]);
-    await audit(req.user, 'Izbrisal neaktivne uporabnike', `${ids.length} (brez prijave ${days} dni)`);
-    flash(res, '/admin', `Izbrisanih uporabnikov: ${ids.length}.`);
+    const gone = old.filter((u) => !isAdmin(u));
+    for (const u of gone) await eraseUser(u);
+    await audit(req.user, 'Izbrisal neaktivne uporabnike', `${gone.length} (brez prijave ${days} dni)`);
+    flash(res, '/admin', `Izbrisanih uporabnikov: ${gone.length}.`);
   } catch (e) { next(e); }
 });
 adminRouter.get('/vaje', (req, res) => {

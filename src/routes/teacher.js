@@ -3,7 +3,7 @@ import { checkCsrf, isAdmin, requireTeacher } from '../auth.js';
 import { byId, classGroups, CHAPTERS, ensureClassRows, exercises, plannedModules } from '../catalog.js';
 import { audit, many, one, q, tx } from '../db.js';
 import { csvCell, dayKey, date, duration, num, pct } from '../format.js';
-import { readTask } from '../progress.js';
+import { readTask, summarize } from '../progress.js';
 import { cell, progressFor, rollup, strip } from '../stats.js';
 
 export const teacherRouter = express.Router();
@@ -135,6 +135,38 @@ teacherRouter.post('/razredi/:id/odstrani', loadClass, checkCsrf, async (req, re
     res.redirect(`/ucitelj/razredi/${req.cls.id}`);
   } catch (e) { next(e); }
 });
+// A teacher's reset starts a new attempt for the student; the earlier score stays in the history.
+async function resetExercise(ex, userId) {
+  return tx(async (c) => {
+    const p = (await c.query('SELECT * FROM progress WHERE user_id=$1 AND exercise_id=$2 FOR UPDATE', [userId, ex.id])).rows[0];
+    if (!p) return false;
+    const had = summarize(ex, p.state);
+    if (had.done === 0 && had.hints === 0) return false;
+    await c.query(`INSERT INTO resets(user_id, exercise_id, attempt, score, done_count, reason) VALUES($1,$2,$3,$4,$5,'teacher')`, [userId, ex.id, p.attempt, had.score, had.done]);
+    await c.query(`UPDATE progress SET attempt=attempt+1, state='{}', score=0, done_count=0, hint_count=0, solution_count=0, completed_at=NULL, updated_at=now() WHERE user_id=$1 AND exercise_id=$2`, [userId, ex.id]);
+    return true;
+  });
+}
+teacherRouter.post('/razredi/:id/dijaki/:uid/vaje/:eid/ponastavi', loadClass, checkCsrf, async (req, res, next) => {
+  try {
+    const uid = Number(req.params.uid) || 0;
+    const ex = byId.get(req.params.eid);
+    const m = (await members(req.cls.id)).find((x) => x.id === uid);
+    if (!ex || !m) return res.status(404).render('error', { title: 'Dijak ni v razredu', message: 'Dijak je bil odstranjen iz razreda.' });
+    if (await resetExercise(ex, uid)) await audit(req.user, 'Ponastavil vajo dijaku', `${req.cls.name}: ${m.name}: ${ex.id}`);
+    res.redirect(`/ucitelj/razredi/${req.cls.id}/dijaki/${uid}`);
+  } catch (e) { next(e); }
+});
+teacherRouter.post('/razredi/:id/rezultati/:eid/ponastavi', loadClass, checkCsrf, async (req, res, next) => {
+  try {
+    const ex = byId.get(req.params.eid);
+    if (!ex) return res.status(404).render('error', { title: 'Vaja ne obstaja', message: 'Povezava je napačna.' });
+    let n = 0;
+    for (const m of await members(req.cls.id)) if (await resetExercise(ex, m.id)) n++;
+    if (n) await audit(req.user, 'Ponastavil vajo razredu', `${req.cls.name}: ${ex.id}: ${n}`);
+    res.redirect(`/ucitelj/razredi/${req.cls.id}/rezultati/${ex.id}?sporocilo=${encodeURIComponent(`Vaja ${ex.id} je ponastavljena. Dijakov: ${n}.`)}`);
+  } catch (e) { next(e); }
+});
 // Which exercises the class can see, and in what order.
 teacherRouter.get('/razredi/:id/vaje', loadClass, async (req, res, next) => {
   try {
@@ -215,7 +247,7 @@ teacherRouter.get('/razredi/:id/rezultati/:eid', loadClass, async (req, res, nex
       }
       return r;
     });
-    res.render('teacher/exercise', { cls: req.cls, ex, students, tasks });
+    res.render('teacher/exercise', { cls: req.cls, ex, students, tasks, message: req.query.sporocilo || null });
   } catch (e) { next(e); }
 });
 teacherRouter.get('/razredi/:id/dijaki/:uid', loadClass, async (req, res, next) => {

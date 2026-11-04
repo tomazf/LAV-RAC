@@ -45,3 +45,14 @@ export async function migrate() {
 }
 export const audit = (actor, action, detail = '') =>
   q('INSERT INTO audit_log(actor_id, actor_name, action, detail) VALUES($1,$2,$3,$4)', [actor?.id ?? null, actor?.name ?? 'sistem', action, detail]);
+// Deleting a user is permanent: all their rows go, and their name is removed from the log and sessions.
+export const DELETED_NAME = 'izbrisan uporabnik';
+export async function eraseUser(user) {
+  await tx(async (c) => {
+    await c.query('UPDATE audit_log SET actor_name=$2 WHERE actor_id=$1', [user.id, DELETED_NAME]);
+    await c.query('UPDATE audit_log SET actor_name=replace(actor_name, $1, $2), detail=replace(detail, $1, $2) WHERE actor_name LIKE $3 OR detail LIKE $3',
+      [user.name, DELETED_NAME, `%${user.name.replace(/[\\%_]/g, '\\$&')}%`]);
+    await c.query(`DELETE FROM session WHERE (sess->>'uid')::bigint = $1`, [user.id]);
+    await c.query('DELETE FROM users WHERE id=$1', [user.id]);
+  });
+}

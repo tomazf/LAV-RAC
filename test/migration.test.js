@@ -32,5 +32,10 @@ test('migration 002 keeps data, one class per student, all exercises closed', as
     assert.equal((await q(`SELECT count(*)::int n FROM audit_log WHERE action LIKE 'Odstranil%'`))[0].n, 2);
     await assert.rejects(c.query(`INSERT INTO class_members(class_id, user_id) VALUES (10,3)`));
     await assert.rejects(c.query('SELECT owner_id FROM classes'));
+    // 003: teacher resets are allowed; names from earlier deletions are cleared
+    await c.query(`INSERT INTO audit_log(actor_name, action, detail) VALUES ('x','Izbrisal uporabnika in njegove podatke','Stari Dijak')`);
+    await c.query(read('003_teacher_reset_erasure.sql'));
+    await c.query(`INSERT INTO resets(user_id, exercise_id, attempt, score, done_count, reason) VALUES (2,'1.1',1,1,1,'teacher')`);
+    assert.equal((await q(`SELECT count(*)::int n FROM audit_log WHERE detail='Stari Dijak'`))[0].n, 0);
   } finally { await c.end(); }
 });
