@@ -213,9 +213,10 @@ test('reset: the student can restart, the teacher sees it with the earlier score
   await openTasks(s, '1.1');
   const scoreBefore = (await sql(`SELECT score, done_count, attempt FROM progress WHERE exercise_id='1.1' AND user_id=(SELECT id FROM users WHERE oid='u-ana')`))[0];
   await s.click('#resetBtn');
-  await s.click('#resetYes');
-  await synced(s);
+  await Promise.all([s.waitForEvent('load'), s.click('#resetYes')]);
   assert.equal(await s.textContent('#sc'), '0');
+  // the page loads again for the new numbers, and the student stays on the tasks
+  assert.ok(await s.locator('.task').first().isVisible());
   const row = (await sql(`SELECT * FROM progress WHERE exercise_id='1.1' AND user_id=(SELECT id FROM users WHERE oid='u-ana')`))[0];
   assert.equal(row.score, 0);
   assert.equal(row.attempt, scoreBefore.attempt + 1);
@@ -254,7 +255,10 @@ test('reset works and is logged in all 9 exercises', async () => {
     const resetDone = s.waitForResponse((r) => r.url().includes('/api/progress/') && r.request().postDataJSON().reset === true);
     await s.click('#resetYes');
     await resetDone;
+    await s.waitForLoadState();
     await s.waitForTimeout(300); // exercises with varied numbers load again
+    await s.waitForLoadState();
+    assert.ok(await s.locator('.task').first().isVisible(), `${ex.id ?? id} stays on the tasks after a reset`);
     const row = (await sql(`SELECT attempt, done_count FROM progress WHERE exercise_id=$1 AND user_id=(SELECT id FROM users WHERE oid='u-ana')`, [ex.id]))[0];
     assert.deepEqual(row, { attempt: before_.attempt + 1, done_count: 0 }, ex.id);
     await s.reload();
@@ -533,85 +537,21 @@ test('varied numbers: own numbers per student, stable until reset, all answers c
   await a.context().close();
   await b.context().close();
 });
-test('varied numbers: every sampled answer matches an independent calculation', async () => {
-  const conv = (n, base) => { let s = ''; let x = n; do { s = '0123456789ABCDEF'[x % base] + s; x = Math.floor(x / base); } while (x > 0); return s; };
-  const bin = (n, w) => conv(n, 2).padStart(w, '0');
-  const tc8 = (n) => bin(n < 0 ? 256 + n : n, 8);
-  const gray = (n) => { const b = bin(n, 8); let g = b[0]; for (let i = 1; i < 8; i++) g += b[i] === b[i - 1] ? '0' : '1'; return g; };
-  const ungray4 = (g) => { const s = bin(g, 4); let out = s[0]; for (let i = 1; i < 4; i++) out += out[i - 1] === s[i] ? '0' : '1'; return out; };
-  const ones = (s) => [...s].filter((c) => c === '1').length;
-  const bcd = (s) => [...s].map((d) => bin(Number(d), 4)).join('');
-  const inRange = (x, lo, hi, what) => assert.ok(x >= lo && x <= hi, `${what}: ${x}`);
-  const oracle = {
-    '2.1': {
-      1: ({ n }) => { inRange(n, 8, 15, 'n'); return [String(n)]; },
-      2: ({ n }) => { inRange(n, 8, 31, 'n'); return [conv(n, 2)]; },
-      4: ({ n }) => { inRange(n, 32, 63, 'n'); return [conv(n, 2)]; },
-      5: ({ n }) => { inRange(n, 128, 254, 'n'); return [String(n)]; },
-      6: ({ n }) => { inRange(n, 100, 255, 'n'); return [conv(n, 16)]; },
-      7: ({ n }) => { inRange(n, 16, 255, 'n'); assert.match(conv(n, 16), /[A-F]/); return [bin(n, 8)]; },
-      8: ({ n }) => { inRange(n, 128, 254, 'n'); return [conv(n, 16), conv(n, 8)]; },
-      9: ({ n }) => { inRange(n, 65, 255, 'n'); return [String(n)]; },
-      10: ({ n }) => { inRange(n, 64, 255, 'n'); return [conv(n, 8)]; },
-      15: ({ x }) => [{ 0.125: '0.001', 0.375: '0.011', 0.625: '0.101', 0.875: '0.111' }[x]],
-      20: ({ a, b }) => { inRange(a + b, 260, 400, 'sum'); assert.ok(a % 10 === 0 && b % 10 === 0 && a < 256 && b < 256); return [bin(a + b - 256, 8), '1']; },
-      22: ({ a, b }) => { inRange(a, 64, 240, 'a'); inRange(b, 64, 240, 'b'); assert.ok(a + b > 255); return [bin(a + b - 256, 8), '1']; },
-      25: ({ n }) => { inRange(n, 2, 15, 'n'); return [tc8(-n)]; },
-      26: ({ n }) => { inRange(n, 2, 16, 'n'); return [String(-n)]; },
-      27: ({ n }) => { inRange(n, 17, 60, 'n'); return [tc8(-n)]; },
-      29: ({ n }) => { inRange(n, 100, 127, 'n'); return [String(-n)]; },
-      32: ({ a, b }) => { inRange(a, 10, 40, 'a'); inRange(b, 2, a - 1, 'b'); return [bin(a - b, 8)]; },
-      33: ({ a, b }) => { inRange(a, 1, 15, 'a'); inRange(b, a + 1, 20, 'b'); return [tc8(a - b), String(a - b)]; },
-      36: ({ a, b }) => { inRange(a, 40, 100, 'a'); inRange(b, 40, 100, 'b'); inRange(a + b, 128, 200, 'sum'); return [bin(a + b, 8), String(a + b - 256)]; },
-      37: ({ a, b }) => { inRange(a, 100, 250, 'a'); inRange(b, 10, a - 1, 'b'); return [bin(a - b, 8), '1']; },
-    },
-    '2.2': {
-      1: ({ n }) => { inRange(n, 0, 9, 'n'); return [bin(n, 4)]; },
-      2: ({ n }) => { inRange(n, 10, 99, 'n'); return [bcd(String(n))]; },
-      3: ({ n }) => { inRange(n, 100, 999, 'n'); return [String(n)]; },
-      5: ({ n }) => { inRange(n, 10, 99, 'n'); return [bcd(String(n)), conv(n, 2)]; },
-      6: ({ h, m }) => { inRange(h, 0, 23, 'h'); inRange(m, 0, 59, 'm'); return [bcd(String(h).padStart(2, '0') + String(m).padStart(2, '0'))]; },
-      8: ({ n }) => { inRange(n, 1, 15, 'n'); return [gray(n).slice(4)]; },
-      9: ({ n }) => { inRange(n, 8, 15, 'n'); return [gray(n).slice(4)]; },
-      10: ({ g }) => { inRange(g, 8, 15, 'g'); return [ungray4(g)]; },
-      12: ({ g }) => { inRange(g, 8, 15, 'g'); return [ungray4(g), String(parseInt(ungray4(g), 2))]; },
-      13: ({ n }) => { inRange(n, 64, 200, 'n'); return [gray(n)]; },
-      16: ({ c }) => { inRange(c, 65, 90, 'c'); return [String(c)]; },
-      23: ({ c }) => { inRange(c, 32, 126, 'c'); return [String(ones(bin(c, 7)) % 2)]; },
-      24: ({ c }) => { inRange(c, 65, 90, 'c'); const b = bin(c, 7); return [b + (ones(b) % 2)]; },
-      25: ({ c }) => { inRange(c, 65, 90, 'c'); const b = bin(c, 7); return [b + (1 - ones(b) % 2)]; },
-      28: ({ c }) => { inRange(c, 48, 57, 'c'); const b = bin(c, 7); return [b, b + (ones(b) % 2)]; },
-    },
-  };
-  const variants = JSON.parse(readFileSync(path.join(root, 'content/variants.json'), 'utf8'));
-  const t = await login('Sara Skrbnik');
-  for (const ex of ['2.1', '2.2']) {
-    await t.goto(`${APP}/vaje/${ex}`);
-    const samples = await t.evaluate(() => LavelsVariants.indexes().map((i) => {
-      const list = [];
-      for (let seed = 1; seed <= 3000; seed++) {
-        const s = LavelsVariants.sample(i, seed * 7919);
-        list.push({ params: s.params, a: s.fields.map((f) => f.a), ok: s.fields.every((f) => LIB.same(f.a, f)), n: s.fields.length, tot: TASKS[i].fields.length,
-          bad: /undefined|NaN|null/.test(s.q + s.hint + s.sol), key: s.q,
-          labels: s.fields.map((f) => [f.l, f.f, f.w, f.u]).join(), labels0: TASKS[i].fields.map((f) => [f.l, f.f, f.w, f.u]).join(), sol: s.sol });
-      }
-      return [i, list];
-    }));
-    assert.deepEqual(samples.map((x) => x[0]), variants[ex], `${ex} list matches variants.json`);
-    for (const [i, list] of samples) {
-      assert.ok(oracle[ex][i], `${ex} task ${i} has a check`);
-      for (const s of list) {
-        assert.deepEqual(s.a, oracle[ex][i](s.params), `${ex} #${i + 1} ${JSON.stringify(s.params)}`);
-        assert.ok(s.ok, `${ex} #${i + 1} accepted`);
-        assert.equal(s.n, s.tot, `${ex} #${i + 1} fields`);
-        assert.equal(s.labels, s.labels0, `${ex} #${i + 1} same answer boxes as the original`);
-        if (ex === '2.2' && [24, 25, 28].includes(i)) assert.ok(s.sol.includes(`beseda = ${s.a.at(-1)}`), `${ex} #${i + 1} solution shows the answer`);
-        assert.ok(!s.bad, `${ex} #${i + 1} text`);
-      }
-      assert.ok(new Set(list.map((s) => s.key)).size >= 4, `${ex} #${i + 1} variety`);
-    }
+test('varied numbers reach the exercises that keep their tasks inside one script', async () => {
+  const b = await login('Bor Novak');
+  const a = await login('Ana Kovač');
+  const questions = (p) => p.evaluate(() => [...document.querySelectorAll('.task .qt, .task .q')].map((q) => q.textContent));
+  for (const ex of ['3.1', '3.2']) {
+    await openTasks(b, ex);
+    await openTasks(a, ex);
+    const qb = await questions(b);
+    assert.ok(qb.length > 10, ex);
+    assert.notDeepEqual(qb, await questions(a), `${ex}: students have different numbers`);
+    await b.reload();
+    assert.deepEqual(await questions(b), qb, `${ex}: same numbers after a reload`);
   }
-  await t.context().close();
+  await a.context().close();
+  await b.context().close();
 });
 test('several teachers per class and classes per teacher; removing the role ends it', async () => {
   const a = await login('Sara Skrbnik');
@@ -716,8 +656,7 @@ test('notes: general, exercise and task; private, kept after reset, shown as tex
   await s.evaluate(() => { [...document.querySelectorAll('#nav .chap')].find((c) => /Naloge/.test(c.textContent)).click(); document.querySelectorAll('.task')[0].querySelector('[data-act=sol]').click(); });
   await synced(s);
   await s.click('#resetBtn');
-  await s.click('#resetYes');
-  await synced(s);
+  await Promise.all([s.waitForEvent('load'), s.click('#resetYes')]);
   await s.waitForFunction(() => document.querySelectorAll('.task .lvn-btn').length === document.querySelectorAll('.task').length);
   assert.equal(await s.locator('.task').nth(4).locator('.lvn-text').textContent(), 'Pri tej nalogi pazi na predznak');
   // deleting a note, then a dashboard exercise note

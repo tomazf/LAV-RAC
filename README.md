@@ -98,7 +98,7 @@ npm ci
 node scripts/import-exercises.js POT/DO/MAPE
 ```
 
-Naloge s spremenljivimi števili so naštete v `content/variants.json`, njihovi razponi pa v `src/public/js/variants/`. Če spremeniš nalogo s tega seznama, popravi tudi njen zapis tam.
+Naloge s spremenljivimi števili so naštete v `content/variants.json`, njihovi razponi pa v `src/public/js/variants/`. Če spremeniš nalogo s tega seznama, popravi tudi njen zapis tam. Vaji 3.1 in 3.2 imata poleg tega v svoji kodi vrstico `LavelsVariants.apply(...)`, ki jo uvoz vaj ne doda sam.
 
 Napredek je vezan na zaporedno številko naloge. Če spremeniš vrstni red ali število nalog, v vaji povečaj različico v ključu napredka (npr. `scnm_lavele_1_3_v1` v `_v2`). Dijaki tako začnejo nov poskus, prejšnji rezultat pa ostane zabeležen. Popravek besedila različice ne potrebuje.
 

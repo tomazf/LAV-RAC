@@ -471,6 +471,7 @@ tr.rk:hover td{background:var(--tile)}
 <aside id="nav" aria-label="Navigacija po vaji"></aside>
 </div>
 
+<!--LAVELS:VARIANTS-->
 <script>
 (function(){
   const $ = id => document.getElementById(id);
@@ -993,6 +994,7 @@ tr.rk:hover td{background:var(--tile)}
      opts:['0','1'],ans:0,hint:'Za 0100 ocenjuj člene A, C, B·D in ¬B·¬D po vrsti.',
      sol:'A = 0, C = 0, B·D = 0 (D = 0), ¬B·¬D = 0 (B = 1). Zato je a = 0.'}
   ];
+  if(window.LavelsVariants)LavelsVariants.apply(tasks);
   const state=tasks.map((t,i)=>{
     const s=S.t[i]||{};
     return {done:!!s.done, hinted:!!s.hinted, pts:(+s.pts>0?+s.pts:0), sel:(Number.isInteger(s.sel)?s.sel:null), sol:!!s.sol, viewed:!!s.viewed};

@@ -247,6 +247,7 @@ b.bad{color:var(--bad)}
 <aside id="nav" aria-label="Navigacija po vaji"></aside>
 </div>
 
+<!--LAVELS:VARIANTS-->
 <script>
 (function(){
 const $=id=>document.getElementById(id);
@@ -773,6 +774,7 @@ add(2,3,{t:'tt',q:'Dopolni pravilnostno tabelo polnega odštevalnika (A − B �
 add(2,3,{t:'num',q:'8 bitov: izračunaj 00010100 − 00000111 (20 − 7). Vpiši 8-bitni rezultat.',a:['00001101'],h:['NOT 00000111 = 11111000, nato prištej 1: 11111001.','00010100 + 11111001 = 1 00001101. Cout zavrzi.'],sol:'00010100 + 11111001 = 1 00001101. Rezultat <b class="m">00001101</b> = 13.'});
 add(2,3,{t:'multi',q:'8 bitov: izračunaj 00000101 − 00001000 (5 − 8).',f:[{l:'Rezultat (8 bitov)',a:['11111101']},{l:'Desetiško s predznakom',a:['-3']},{l:'Cout',a:['0']}],h:['NOT 00001000 = 11110111, + 1 = 11111000.','00000101 + 11111000 = ? Cout = 0 pomeni A < B.'],sol:'00000101 + 11111000 = 11111101 = −3, Cout = 0 (pravi rezultat je negativen).'});
 add(2,3,{t:'ch',q:'4 biti s predznakom: 0111 − 1000, torej 7 − (−8). Ali pride do prekoračitve?',o:['Da','Ne'],a:0,h:['Desetiško: 7 − (−8) = 15. Je 15 v obsegu −8 … 7?','Izračunaj 0111 + 0111 + 1 in primerjaj c₃ ter c₄.'],sol:'Da. 0111 + 0111 + 1 = 1111 (−1), c₃ = 1, c₄ = 0, V = 1.'});
+if(window.LavelsVariants)LavelsVariants.apply(T);
 if(typeof window!=='undefined')window.__T=T;
 
 const LEVEL_PTS={1:1,2:2,3:3},LVN={1:'lahka',2:'srednja',3:'težka'};
