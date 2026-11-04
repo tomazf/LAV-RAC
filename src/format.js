@@ -9,6 +9,12 @@ export const count = (n, forms) => `${n} ${plural(n, forms)}`;
 export const NALOG = ['naloga', 'nalogi', 'naloge', 'nalog'];
 export const TOCK = ['točka', 'točki', 'točke', 'točk'];
 export const DIJAKOV = ['dijak', 'dijaka', 'dijaki', 'dijakov'];
+// Names are "Ime Priimek". Slovene order puts č, š and ž after c, s and z, which the database does not do.
+const collator = new Intl.Collator('sl');
+export const surname = (name) => String(name ?? '').trim().split(/\s+/).pop();
+const givenNames = (name) => String(name ?? '').trim().split(/\s+/).slice(0, -1).join(' ');
+export const byName = (a, b) => collator.compare(a.name, b.name);
+export const bySurname = (a, b) => collator.compare(surname(a.name), surname(b.name)) || collator.compare(givenNames(a.name), givenNames(b.name));
 export const num = (x) => String(Math.round((Number(x) || 0) * 10) / 10).replace('.', ',');
 export const pct = (a, b) => (b > 0 ? Math.round((a / b) * 100) : 0);
 export function duration(sec) {

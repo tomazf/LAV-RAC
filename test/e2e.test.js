@@ -941,6 +941,55 @@ test('backup from the admin page: download, warning, restore keeps deleted users
   await a2.context().close();
   rmSync(dir, { recursive: true, force: true });
 });
+test('people without a class: names only, account on hover, search by name, Slovene order by name or surname', async () => {
+  const people = [['Anja Žnidaršič', 'anja.znidarsic'], ['Črt Cvetko', 'crt.cvetko'], ['Dušan Kralj', 'dusan.kralj'], ['Šimen Brglez', 'simen.brglez']];
+  const byName = ['Anja Žnidaršič', 'Črt Cvetko', 'Dušan Kralj', 'Šimen Brglez'];
+  const bySurname = ['Šimen Brglez', 'Črt Cvetko', 'Dušan Kralj', 'Anja Žnidaršič'];
+  for (const [name, user] of people) await sql(`INSERT INTO users(oid, username, name, role) VALUES($1,$2,$3,'user')`, [`sort-${user}`, `${user}@sola.test`, name]);
+  const a = await login('Sara Skrbnik');
+  try {
+    const mine = (names) => names.map((n) => n.trim()).filter((n) => byName.includes(n));
+    const order = async (sel) => mine(await a.locator(sel).allTextContents());
+    const pressed = () => a.locator('.sorter button[aria-pressed=true]').textContent();
+    // overview
+    await a.goto(`${APP}/ucitelj`);
+    assert.deepEqual(await order('#brez-razreda li'), byName);
+    assert.doesNotMatch(await a.textContent('#brez-razreda'), /@|sola\.test/, 'no account in the list');
+    assert.equal(await a.locator('#brez-razreda li', { hasText: 'Črt Cvetko' }).getAttribute('title'), 'crt.cvetko@sola.test');
+    await a.click('.sorter button:text("po priimku")');
+    assert.deepEqual(await order('#brez-razreda li'), bySurname);
+    assert.equal(await pressed(), 'po priimku');
+    await a.click('.sorter button:text("po imenu")');
+    assert.deepEqual(await order('#brez-razreda li'), byName);
+    // class page: adding people
+    await a.goto(`${APP}/ucitelj/razredi/${classId}`);
+    assert.deepEqual(await order('#cakajo li'), byName);
+    assert.doesNotMatch(await a.textContent('#cakajo'), /@|sola\.test/);
+    assert.equal(await a.locator('#cakajo label', { hasText: 'Šimen Brglez' }).getAttribute('title'), 'simen.brglez@sola.test');
+    assert.equal(await a.getAttribute('#iskanje', 'placeholder'), 'Išči po imenu');
+    await a.fill('#iskanje', 'cvetko');
+    assert.deepEqual(await a.locator('#cakajo li:visible').allTextContents().then((x) => x.map((n) => n.trim())), ['Črt Cvetko']);
+    await a.fill('#iskanje', 'sola.test');
+    assert.equal(await a.locator('#cakajo li:visible').count(), 0, 'the account is not searched');
+    await a.fill('#iskanje', '');
+    await a.locator('#cakajo label', { hasText: 'Dušan Kralj' }).locator('input').check();
+    await a.click('.sorter button:text("po priimku")');
+    assert.deepEqual(await order('#cakajo li'), bySurname);
+    assert.equal(await a.locator('#cakajo label', { hasText: 'Dušan Kralj' }).locator('input').isChecked(), true, 'a ticked box stays ticked');
+    // people in the class: by name, and by surname on request
+    await sql(`INSERT INTO class_members(class_id, user_id) SELECT $1, id FROM users WHERE oid LIKE 'sort-%'`, [classId]);
+    await a.goto(`${APP}/ucitelj/razredi/${classId}`);
+    assert.deepEqual(await order('.matrix td.stick a'), byName);
+    await a.click('.sorter a:text("po priimku")');
+    assert.deepEqual(await order('.matrix td.stick a'), bySurname);
+    assert.equal(await a.locator('.sorter a[aria-current]').textContent(), 'po priimku');
+    await a.goto(`${APP}/ucitelj/razredi/${classId}/rezultati/1.1`);
+    assert.deepEqual(await order('tbody tr td:first-child a'), byName);
+  } finally {
+    await sql(`DELETE FROM users WHERE oid LIKE 'sort-%'`);
+    await a.context().close();
+  }
+});
 test('login page, school logo and data notice page', async () => {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 } });
   const p = await ctx.newPage();

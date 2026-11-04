@@ -28,8 +28,10 @@
 <section class="block">
   <h2>Dijaki brez razreda (<%= unassigned.length %>)</h2>
   <% if (!unassigned.length) { %><p class="empty">Vsi prijavljeni dijaki imajo razred.</p><% } else { %>
-  <p>Odpri svoj razred in jih dodaj s seznama.</p>
-  <ul class="names"><% unassigned.forEach((w) => { %><li><%= w.name %> <span class="dim"><%= w.email || w.username %></span></li><% }) %></ul>
+  <p>Odpri svoj razred in jih dodaj s seznama. Račun se pokaže, ko pomakneš miško nad ime.</p>
+  <%- include('../partials/sortbar', { target: '#brez-razreda' }) %>
+  <ul class="names" id="brez-razreda"><% unassigned.forEach((w) => { %><li title="<%= w.email || w.username %>" data-name="<%= w.nameAt %>" data-surname="<%= w.surnameAt %>"><%= w.name %></li><% }) %></ul>
+  <script src="<%= asset('js/sort.js') %>"></script>
   <% } %>
 </section>
 <%- include('../partials/foot') %>

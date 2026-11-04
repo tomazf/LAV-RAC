@@ -3,6 +3,7 @@ import { checkCsrf, isAdmin, requireAdmin } from '../auth.js';
 import { plannedModules, standardGroups } from '../catalog.js';
 import { audit, eraseUser, many, one, q, tx } from '../db.js';
 import { backupWarning } from '../backup.js';
+import { byName } from '../format.js';
 import { backupRouter } from './backup.js';
 
 export const adminRouter = express.Router();
@@ -28,7 +29,7 @@ adminRouter.get('/', async (req, res, next) => {
        FROM users u WHERE ($1='' OR u.name ILIKE '%'||$1||'%' OR u.username ILIKE '%'||$1||'%' OR coalesce(u.email,'') ILIKE '%'||$1||'%')
        ORDER BY u.name`, [search],
     );
-    const users = rows.map((u) => ({ ...u, kind: roleOf(u) })).filter((u) => !kind || u.kind === kind);
+    const users = rows.map((u) => ({ ...u, kind: roleOf(u) })).filter((u) => !kind || u.kind === kind).sort(byName);
     res.render('admin/users', { users, search, kind, ROLES, message: req.query.sporocilo || null, tab: 'users' });
   } catch (e) { next(e); }
 });

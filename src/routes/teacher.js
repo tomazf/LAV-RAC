@@ -2,21 +2,27 @@ import express from 'express';
 import { checkCsrf, isAdmin, requireTeacher } from '../auth.js';
 import { byId, classGroups, CHAPTERS, ensureClassRows, exercises, plannedModules } from '../catalog.js';
 import { audit, many, one, q, tx } from '../db.js';
-import { csvCell, dayKey, date, duration, num, pct } from '../format.js';
+import { byName, bySurname, csvCell, dayKey, date, duration, num, pct } from '../format.js';
 import { readTask, summarize } from '../progress.js';
 import { cell, progressFor, rollup, strip } from '../stats.js';
 
 export const teacherRouter = express.Router();
 teacherRouter.use(requireTeacher);
 
-const unassignedUsers = async () => (await many(
-  `SELECT u.id, u.name, u.username, u.email, u.created_at FROM users u
-   WHERE u.role='user' AND NOT EXISTS (SELECT 1 FROM class_members m WHERE m.user_id=u.id)
-   ORDER BY u.name`,
-)).filter((u) => !isAdmin(u));
-const teachersOf = (classId) => many(
-  'SELECT u.id, u.name FROM class_teachers t JOIN users u ON u.id=t.user_id WHERE t.class_id=$1 ORDER BY u.name', [classId],
-);
+// Listed by name; each person also carries their place in the order by surname, so the page can switch without a reload.
+const unassignedUsers = async () => {
+  const people = (await many(
+    `SELECT u.id, u.name, u.username, u.email, u.created_at FROM users u
+     WHERE u.role='user' AND NOT EXISTS (SELECT 1 FROM class_members m WHERE m.user_id=u.id)`,
+  )).filter((u) => !isAdmin(u));
+  const place = (order) => new Map(order.map((u, i) => [u.id, i]));
+  const nameAt = place([...people].sort(byName));
+  const surnameAt = place([...people].sort(bySurname));
+  return people.map((u) => ({ ...u, nameAt: nameAt.get(u.id), surnameAt: surnameAt.get(u.id) })).sort((a, b) => a.nameAt - b.nameAt);
+};
+const teachersOf = async (classId) => (await many(
+  'SELECT u.id, u.name FROM class_teachers t JOIN users u ON u.id=t.user_id WHERE t.class_id=$1', [classId],
+)).sort(byName);
 // Teachers manage only classes they have joined; the admin manages every class.
 async function loadClass(req, res, next) {
   try {
@@ -31,9 +37,9 @@ async function loadClass(req, res, next) {
     next();
   } catch (e) { next(e); }
 }
-const members = (classId) => many(
-  `SELECT u.id, u.name, u.username, u.email, u.last_login_at, m.added_at FROM class_members m JOIN users u ON u.id=m.user_id WHERE m.class_id=$1 ORDER BY u.name`, [classId],
-);
+const members = async (classId) => (await many(
+  `SELECT u.id, u.name, u.username, u.email, u.last_login_at, m.added_at FROM class_members m JOIN users u ON u.id=m.user_id WHERE m.class_id=$1`, [classId],
+)).sort(byName);
 const exerciseList = async (classId) => (await classGroups(classId)).flatMap((m) => m.exercises);
 const sums = (list) => ({
   maxPoints: list.reduce((a, e) => a + e.maxPoints, 0),
@@ -74,7 +80,8 @@ teacherRouter.post('/razredi/:id/pridruzi', checkCsrf, async (req, res, next) =>
   } catch (e) { next(e); }
 });
 const SORTS = {
-  name: (a, b) => a.name.localeCompare(b.name, 'sl'),
+  name: byName,
+  surname: bySurname,
   score: (a, b) => b.total.score - a.total.score,
   time: (a, b) => b.total.seconds - a.total.seconds,
   last: (a, b) => new Date(b.total.last || 0) - new Date(a.total.last || 0),
