@@ -11,7 +11,8 @@ import { Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { isAdmin } from './auth.js';
 import { config } from './config.js';
-import { audit, erasedHash, eraseUser, many, migrate, one, pool } from './db.js';
+import { audit, ERASED_SALT, erasedHash, eraseUser, many, migrate, one, pool } from './db.js';
+import { portal } from './portal.js';
 
 export class BackupError extends Error {
   constructor(message, status = 400) { super(message); this.userMessage = message; this.status = status; }
@@ -47,9 +48,9 @@ function exec(cmd, args, onLine) {
     child.on('close', (code) => read.then(() => resolve({ code, stderr: stderr.trim() })));
   });
 }
-const tempDir = (kind) => fs.mkdtempSync(path.join(os.tmpdir(), `lavels-${kind}-`));
+const tempDir = (kind) => fs.mkdtempSync(path.join(os.tmpdir(), `${portal.slug}-${kind}-`));
 const rmDir = (dir) => fs.rmSync(dir, { recursive: true, force: true });
-for (const d of fs.readdirSync(os.tmpdir())) if (/^lavels-(backup|restore)-/.test(d)) rmDir(path.join(os.tmpdir(), d));
+for (const d of fs.readdirSync(os.tmpdir())) if (d.startsWith(`${portal.slug}-backup-`) || d.startsWith(`${portal.slug}-restore-`)) rmDir(path.join(os.tmpdir(), d));
 
 // ---------- when was the last backup ----------
 export async function lastBackup() {
@@ -72,7 +73,7 @@ export async function createDump(actor) {
   dumping = true;
   const dir = tempDir('backup');
   const file = path.join(dir, 'kopija.dump');
-  const name = `lavels-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')}.dump`;
+  const name = `${portal.slug}-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')}.dump`;
   let logId = null;
   try {
     // Logged first, so the entry is inside the backup it describes.
@@ -231,7 +232,7 @@ async function afterRestore(job, live, actor) {
   }
   const back = await many(
     `SELECT u.* FROM users u JOIN erased_users e
-       ON e.oid_hash = encode(sha256(convert_to('lavels-erased:' || u.oid, 'UTF8')), 'hex') AND u.created_at < e.erased_at`,
+       ON e.oid_hash = encode(sha256(convert_to($1 || u.oid, 'UTF8')), 'hex') AND u.created_at < e.erased_at`, [ERASED_SALT],
   );
   let erased = 0;
   for (const u of back) if (!isAdmin(u)) { await eraseUser(u); erased++; }

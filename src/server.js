@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import { config } from './config.js';
 import { migrate, pool } from './db.js';
 import { isMaintenance } from './backup.js';
+import { portal } from './portal.js';
 import { asset } from './assets.js';
 import * as fmt from './format.js';
 import { authRouter, loadUser } from './auth.js';
@@ -20,6 +21,7 @@ app.set('trust proxy', 1);
 app.set('view engine', 'ejs');
 app.set('views', path.join(import.meta.dirname, 'views'));
 app.locals.fmt = fmt;
+app.locals.portal = portal;
 app.locals.asset = asset;
 app.locals.path = '/';
 app.locals.user = null;
@@ -58,12 +60,12 @@ app.use((req, res, next) => {
   if (!isMaintenance()) return next();
   res.set('Retry-After', '30');
   if (req.path.startsWith('/api/')) return res.status(503).json({ ok: false });
-  res.status(503).type('html').send('<!doctype html><html lang="sl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LAV-ELS</title><body style="font:1.1rem system-ui;max-width:34rem;margin:4rem auto;padding:0 1rem"><h1>Portal se posodablja</h1><p>Podatki se obnavljajo iz varnostne kopije. Poskusi znova čez minuto.</p></body></html>');
+  res.status(503).type('html').send('<!doctype html><html lang="sl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + portal.name + '</title><body style="font:1.1rem system-ui;max-width:34rem;margin:4rem auto;padding:0 1rem"><h1>Portal se posodablja</h1><p>Podatki se obnavljajo iz varnostne kopije. Poskusi znova čez minuto.</p></body></html>');
 });
 
 const Store = pgSession(session);
 app.use(session({
-  name: 'lavels.sid',
+  name: `${portal.slug}.sid`,
   store: new Store({ pool, tableName: 'session', pruneSessionInterval: 3600 }),
   secret: config.sessionSecret,
   resave: false,
@@ -95,7 +97,7 @@ app.use((err, req, res, next) => {
 });
 
 await migrate();
-const server = app.listen(config.port, () => console.log(`LAV-ELS posluša na vratih ${config.port}`));
+const server = app.listen(config.port, () => console.log(`${portal.name} posluša na vratih ${config.port}`));
 for (const sig of ['SIGTERM', 'SIGINT']) {
   process.on(sig, () => server.close(() => pool.end().finally(() => process.exit(0))));
 }

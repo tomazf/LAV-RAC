@@ -144,6 +144,10 @@ Nova vaja: dodaj jo v seznam `EXERCISES` v `scripts/import-exercises.js`. Vaja m
 
 Tehnični ključi `scnm_lavele_*` namenoma ohranijo staro ime.
 
+## Nov portal iz tega repozitorija
+
+Ime, naslov prijavne strani, opis in šola so v `content/portal.json`, vsebina v `content/`. Splošni dogovori (vloge, pravila, zasebnost, varnost, kopije, pogodba med vajo in portalom) so v [`docs/NACRT_PORTALA.md`](docs/NACRT_PORTALA.md), skupaj s postopkom za nov portal in seznamom stvari, ki so vezane na vsebino. Kratek povzetek za Claude Code je v `CLAUDE.md`.
+
 ## Razvoj in preizkusi
 
 ```bash
@@ -164,4 +168,6 @@ Preizkusi uporabijo pravi strežnik, PostgreSQL in brskalnik, prijavo pa nadomes
 - `src/public/js/variants/`: spremenljiva števila po vajah
 - `src/migrations/`: spremembe baze, izvedejo se ob zagonu
 - `src/routes/`, `src/views/`: strani za dijake, učitelje in skrbnike
-- `content/`: vaje, katalog in seznam spremenljivih nalog
+- `content/`: vaje, katalog, seznam spremenljivih nalog in `portal.json` (ime, besedila, šola)
+- `src/portal.js`: bere in preveri `content/portal.json`
+- `docs/NACRT_PORTALA.md`: splošni dogovori za ta in podobne portale

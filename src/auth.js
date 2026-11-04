@@ -3,6 +3,7 @@ import express from 'express';
 import * as oidc from 'openid-client';
 import { config } from './config.js';
 import { one } from './db.js';
+import { portal } from './portal.js';
 
 let discovered = null;
 async function oidcConfig() {
@@ -72,7 +73,7 @@ authRouter.get('/callback', async (req, res, next) => {
 authRouter.post('/logout', async (req, res, next) => {
   try {
     await new Promise((ok) => req.session.destroy(() => ok()));
-    res.clearCookie('lavels.sid');
+    res.clearCookie(`${portal.slug}.sid`);
     let target = `${config.publicUrl}/`;
     try {
       target = oidc.buildEndSessionUrl(await oidcConfig(), { post_logout_redirect_uri: `${config.publicUrl}/`, client_id: config.clientId }).href;

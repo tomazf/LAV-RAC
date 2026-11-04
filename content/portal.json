@@ -1,0 +1,8 @@
+{
+  "name": "LAV-ELS",
+  "slug": "lavels",
+  "title": "Elektronski sistemi",
+  "about": "portal z interaktivnimi laboratorijskimi vajami iz digitalne elektronike",
+  "school": { "name": "Šolski center Novo mesto", "url": "https://www.sc-nm.si", "logo": "img/sc-nm-logo.jpg" },
+  "plannedModules": [4, 5]
+}

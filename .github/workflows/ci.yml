@@ -41,7 +41,7 @@ jobs:
       - name: The app must become healthy and show the login page
         run: |
           for i in $(seq 1 40); do curl -sf http://localhost:4000/healthz && break; sleep 3; done
-          curl -sf http://localhost:4000/ | grep -q "Elektronski sistemi"
+          curl -sf http://localhost:4000/ | grep -qF "$(jq -r .title content/portal.json)"
           docker compose -f docker-compose.demo.yml ps
       - name: The image has the backup tools and they work against the database
         run: |

@@ -16,6 +16,7 @@ const DB = process.env.TEST_DATABASE_URL;
 if (!DB) { console.error('Set TEST_DATABASE_URL'); process.exit(1); }
 const root = path.resolve(import.meta.dirname, '..');
 const catalog = JSON.parse(readFileSync(path.join(root, 'content/catalog.json'), 'utf8'));
+const portal = JSON.parse(readFileSync(path.join(root, 'content/portal.json'), 'utf8'));
 const APP = 'http://localhost:3101';
 const OIDC_PORT = 9401;
 let server, mock, browser, db;
@@ -820,14 +821,14 @@ test('backup from the admin page: download, warning, restore keeps deleted users
   assert.equal(await a.locator('.notice-warn').count(), 0, 'the backup page has its own status line');
   // download
   const [dl] = await Promise.all([a.waitForEvent('download'), a.click('button:text("Prenesi varnostno kopijo")')]);
-  assert.match(dl.suggestedFilename(), /^lavels-\d{4}-\d\d-\d\d-\d\d-\d\d\.dump$/);
+  assert.match(dl.suggestedFilename(), new RegExp(`^${portal.slug}-\\d{4}-\\d\\d-\\d\\d-\\d\\d-\\d\\d\\.dump$`));
   const good = path.join(dir, 'kopija.dump');
   await dl.saveAs(good);
   assert.equal(readFileSync(good).subarray(0, 5).toString(), 'PGDMP');
   const text = (file, ...args) => execFileSync('pg_restore', [...args, '--file=-', file], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, env: { ...process.env, PATH: `${process.env.PG_BIN ? `${process.env.PG_BIN}:` : ''}${process.env.PATH}` } });
   assert.match(text(good, '--data-only', '--table=users'), /Cene Zupan/);
   assert.doesNotMatch(text(good), /COPY public\.session /, 'sessions are not in the backup');
-  assert.equal(readdirSync(tmpdir()).filter((d) => d.startsWith('lavels-backup-')).length, 0, 'nothing is left on the server');
+  assert.equal(readdirSync(tmpdir()).filter((d) => d.startsWith(`${portal.slug}-backup-`)).length, 0, 'nothing is left on the server');
   await a.goto(`${APP}/admin`);
   assert.equal(await a.locator('.notice-warn').count(), 0, 'warning is gone after a backup');
   assert.match(await (await a.request.get(`${APP}/admin/dnevnik`)).text(), /Prenesel varnostno kopijo/);
@@ -865,7 +866,7 @@ test('backup from the admin page: download, warning, restore keeps deleted users
   assert.equal((await send(Buffer.alloc(0))).status(), 400);
   await a.goto(`${APP}/admin/kopije`);
   assert.equal(await a.locator('#restore').count(), 0, 'nothing is waiting for confirmation');
-  assert.equal(readdirSync(tmpdir()).filter((d) => d.startsWith('lavels-restore-')).length, 0, 'refused files are deleted');
+  assert.equal(readdirSync(tmpdir()).filter((d) => d.startsWith(`${portal.slug}-restore-`)).length, 0, 'refused files are deleted');
   assert.equal((await sql('SELECT count(*)::int n FROM users'))[0].n, usersBefore, 'data untouched');
 
   // the right file is checked and shown before anything changes
@@ -901,9 +902,9 @@ test('backup from the admin page: download, warning, restore keeps deleted users
   assert.equal((await sql(`SELECT role FROM users WHERE oid='u-dasa'`))[0].role, 'user', 'other changes went back');
   assert.equal((await sql('SELECT count(*)::int n FROM users'))[0].n, usersBefore);
   assert.equal((await sql('SELECT count(*)::int n FROM session'))[0].n, 0, 'everybody is signed out');
-  const hash = createHash('sha256').update('lavels-erased:u-cene').digest('hex');
+  const hash = createHash('sha256').update(`${portal.slug}-erased:u-cene`).digest('hex');
   assert.equal((await sql('SELECT count(*)::int n FROM erased_users WHERE oid_hash=$1', [hash]))[0].n, 1, 'who was deleted is remembered, by hash only');
-  assert.equal((await sql(`SELECT encode(sha256(convert_to('lavels-erased:u-cene', 'UTF8')), 'hex') AS h`))[0].h, hash, 'SQL and program agree on the hash');
+  assert.equal((await sql(`SELECT encode(sha256(convert_to($1, 'UTF8')), 'hex') AS h`, [`${portal.slug}-erased:u-cene`]))[0].h, hash, 'SQL and program agree on the hash');
   assert.equal((await sql(`SELECT count(*)::int n FROM erased_users WHERE oid_hash LIKE '%cene%'`))[0].n, 0);
   // the old browser is signed out; the admin signs in again and finds the entry in the log
   await a.goto(`${APP}/admin`);
@@ -912,7 +913,7 @@ test('backup from the admin page: download, warning, restore keeps deleted users
   await a2.goto(`${APP}/admin/dnevnik`);
   assert.match(await a2.textContent('table'), /Obnovil bazo iz kopije[\s\S]*znova izbrisanih 1/);
   assert.equal((await sql(`SELECT actor_id FROM audit_log WHERE action='Obnovil bazo iz kopije'`))[0].actor_id, null);
-  assert.equal(readdirSync(tmpdir()).filter((d) => d.startsWith('lavels-restore-')).length, 0);
+  assert.equal(readdirSync(tmpdir()).filter((d) => d.startsWith(`${portal.slug}-restore-`)).length, 0);
   // a deleted user can still sign in again, as a new empty account
   const c = await login('Cene Zupan');
   assert.match(await c.textContent('h1'), /Čakaš/);
@@ -932,7 +933,7 @@ test('backup from the admin page: download, warning, restore keeps deleted users
   await a2.click('button:text("Prekliči in odstrani datoteko")');
   await a2.waitForURL(/sporocilo/);
   assert.equal(await a2.locator('#restore').count(), 0);
-  assert.equal(readdirSync(tmpdir()).filter((d) => d.startsWith('lavels-restore-')).length, 0);
+  assert.equal(readdirSync(tmpdir()).filter((d) => d.startsWith(`${portal.slug}-restore-`)).length, 0);
   // not allowed for anyone but the admin
   const s = await login('Ana Kovač');
   assert.equal((await s.goto(`${APP}/admin/kopije`)).status(), 403);
@@ -994,9 +995,9 @@ test('login page, school logo and data notice page', async () => {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 } });
   const p = await ctx.newPage();
   await p.goto(APP);
-  assert.equal(await p.textContent('h1'), 'Elektronski sistemi');
+  assert.equal(await p.textContent('h1'), portal.title);
   assert.doesNotMatch(await p.textContent('main'), /Vaje vidiš/);
-  assert.equal(await p.locator('.school-logo').getAttribute('href'), 'https://www.sc-nm.si');
+  assert.equal(await p.locator('.school-logo').getAttribute('href'), portal.school.url);
   assert.ok(await p.evaluate(() => document.querySelector('.school-logo img').naturalWidth > 0), 'logo loads');
   const box = await p.locator('main a.btn').boundingBox();
   assert.ok(Math.abs(box.x + box.width / 2 - 640) < 2, 'button is centred');

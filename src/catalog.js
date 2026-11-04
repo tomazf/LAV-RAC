@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { asset } from './assets.js';
 import { many, q } from './db.js';
+import { portal } from './portal.js';
 
 const root = path.resolve(import.meta.dirname, '..');
 const raw = JSON.parse(fs.readFileSync(path.join(root, 'content/catalog.json'), 'utf8'));
@@ -27,7 +28,7 @@ export function renderExercise(ex, boot) {
   return ex.html.replace(PLACEHOLDER, () => `<script>window.__LAVELS=${json}</script>\n<script src="${asset('js/notes.js')}"></script>\n<script src="${asset('js/tracker.js')}"></script>`).replace(VARIANTS, () => variants);
 }
 // Groups that are planned but have no content yet; shown only to teachers and admins.
-export const plannedModules = [4, 5].filter((id) => !modules.some((m) => m.id === id));
+export const plannedModules = portal.plannedModules.filter((id) => !modules.some((m) => m.id === id));
 
 function grouped(items) {
   return modules

@@ -2,6 +2,7 @@ import express from 'express';
 import { checkCsrf, isAdmin, requireTeacher } from '../auth.js';
 import { byId, classGroups, CHAPTERS, ensureClassRows, exercises, plannedModules } from '../catalog.js';
 import { audit, many, one, q, tx } from '../db.js';
+import { portal } from '../portal.js';
 import { byName, bySurname, csvCell, dayKey, date, duration, num, pct } from '../format.js';
 import { readTask, summarize } from '../progress.js';
 import { cell, progressFor, rollup, strip } from '../stats.js';
@@ -217,7 +218,7 @@ teacherRouter.get('/razredi/:id/izvoz.csv', loadClass, async (req, res, next) =>
     }
     const safe = req.cls.name.replace(/[^\p{L}\p{N}_-]+/gu, '_');
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(`LAV-ELS_${safe}.csv`)}`);
+    res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(`${portal.name}_${safe}.csv`)}`);
     res.send(`﻿${lines.join('\r\n')}\r\n`);
   } catch (e) { next(e); }
 });
