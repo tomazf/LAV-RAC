@@ -91,7 +91,7 @@ Skrivnost v Entra poteče. Pred iztekom ustvari novo in posodobi `OIDC_CLIENT_SE
 
 ## Osebni podatki
 
-Portal hrani podatke dijakov, zato se pred uporabo pogovori s pooblaščeno osebo za varstvo podatkov in določi rok hrambe. **Odstranitev iz razreda** podatkov ne izbriše in dijaka lahko dodaš v drug razred. **Izbris uporabnika** je trajen: izbriše račun, napredek, opombe in zgodovino ter ime v dnevniku. Če se ista oseba znova prijavi, je to nov prazen račun. Stare varnostne kopije še vsebujejo podatke, zato jih hrani samo toliko časa, kot je določeno. Kaj se beleži, je opisano na strani **Kateri podatki se beležijo** v portalu. Skrbnik lahko pod **Administracija** izbriše posameznega uporabnika ali vse dijake, ki se dolgo niso prijavili. Stran ne nalaga ničesar z drugih strežnikov.
+Portal hrani podatke dijakov, zato se pred uporabo pogovori s pooblaščeno osebo za varstvo podatkov in določi rok hrambe. Odstranitev iz razreda podatkov ne izbriše, izbris uporabnika pod **Administracija** pa je trajen (račun, napredek, opombe, zgodovina in ime v dnevniku), v varnostnih kopijah pa podatki ostanejo do njihovega izteka.
 
 ## Napredek in ponastavitev
 
