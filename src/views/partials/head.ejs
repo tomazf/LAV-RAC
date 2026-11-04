@@ -16,6 +16,9 @@
       <svg viewBox="0 0 34 28" width="34" height="28" aria-hidden="true"><path class="w" d="M0 8h7M0 20h7M27 14h7"/><rect class="g" x="7" y="2" width="20" height="24" rx="2"/><text x="17" y="19" text-anchor="middle">&amp;</text></svg>
       <span>LAV-ELS</span>
     </a>
+    <% if (typeof schoolLogo !== 'undefined' && schoolLogo) { %>
+    <a class="school-logo" href="https://www.sc-nm.si" target="_blank" rel="noopener" aria-label="Šolski center Novo mesto, spletna stran (odpre nov zavihek)"><img src="<%= asset('img/sc-nm-logo.jpg') %>" alt="Šolski center Novo mesto" height="40"></a>
+    <% } %>
     <% if (user) { %>
     <nav aria-label="Glavni meni">
       <% if (!user.isWaiting) { %><a href="/vaje" <%- path.startsWith('/vaje') ? 'aria-current="page"' : '' %>>Vaje</a><% } %>

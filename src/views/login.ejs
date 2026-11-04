@@ -1,8 +1,7 @@
-<%- include('partials/head', { pageTitle: 'Prijava', mainClass: 'stage' }) %>
-<section class="stage-in">
-  <h1>Laboratorijske vaje iz digitalne elektronike</h1>
+<%- include('partials/head', { pageTitle: 'Prijava', mainClass: 'stage', schoolLogo: true }) %>
+<section class="stage-in centered">
+  <h1>Elektronski sistemi</h1>
   <%- include('partials/gate', { a: false, b: false }) %>
-  <p class="lead">Vaje vidiš, ko imaš oboje: prijavo s šolskim računom in razred, v katerega te doda učitelj.</p>
-  <a class="btn big" href="/auth/login">Prijava s šolskim računom</a>
+  <a class="btn big" href="/auth/login">Prijava</a>
 </section>
 <%- include('partials/foot') %>

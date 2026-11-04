@@ -35,7 +35,7 @@ jobs:
       - name: The app must become healthy and show the login page
         run: |
           for i in $(seq 1 40); do curl -sf http://localhost:4000/healthz && break; sleep 3; done
-          curl -sf http://localhost:4000/ | grep -q "Prijava s šolskim računom"
+          curl -sf http://localhost:4000/ | grep -q "Elektronski sistemi"
           docker compose -f docker-compose.demo.yml ps
       - name: Validate the production Compose file
         run: |

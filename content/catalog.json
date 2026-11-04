@@ -2235,7 +2235,7 @@
      "level": "lahka",
      "max": 1,
      "section": "",
-     "q": "Trije podatkovni biti so 1, 0, 1. Kakšen bit parnosti P dodamo za sodo pariteto?"
+     "q": "Katera logična vrata uporabimo za izračun bita parnosti?"
     },
     {
      "i": 5,
@@ -2277,14 +2277,14 @@
      "level": "srednja",
      "max": 2,
      "section": "",
-     "q": "Podatki so 1, 1, 0. Za liho pariteto je bit P = ?"
+     "q": "Vezje iz vrat XOR izračuna bit P za sodo pariteto. Kaj dodamo na izhod, da dobimo bit za liho pariteto?"
     },
     {
      "i": 11,
      "level": "srednja",
      "max": 2,
      "section": "",
-     "q": "Osembitni podatki so 1 1 0 1 0 1 1 0. Kolikšen je bit P za sodo pariteto?"
+     "q": "Koliko vrat XOR z dvema vhodoma potrebujemo za generator bita parnosti pri 8 podatkovnih bitih?"
     },
     {
      "i": 12,

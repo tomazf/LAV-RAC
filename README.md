@@ -91,7 +91,7 @@ Portal hrani podatke dijakov, zato se pred uporabo pogovori s pooblaščeno oseb
 
 ## Spreminjanje vaj
 
-Vaje so v `content/exercises/`, seznam nalog in strani pa v `content/catalog.json`. Oboje ustvari orodje za uvoz iz mape z datotekami `1.1.html`, `1.2.html` in tako naprej:
+Vaje so v `content/exercises/`, seznam nalog in strani pa v `content/catalog.json`. **To je zdaj glavna različica vaj.** Objavljeni artefakti in predloge v projektu lahko vsebujejo starejše naloge (npr. vaja 3.2), zato ponovni uvoz iz njih popravke povozi. Oboje ustvari orodje za uvoz iz mape z datotekami `1.1.html`, `1.2.html` in tako naprej:
 
 ```bash
 npm ci

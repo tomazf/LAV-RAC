@@ -78,6 +78,10 @@ main.stage{display:flex;align-items:center;justify-content:center;max-width:none
 .stage-in a:not(.btn){color:#fff}
 .stage-in .btn{background:#e9a23b;border-color:#e9a23b;color:#1b1206}
 .stage-in .btn.ghost{background:transparent;color:#fff;border-color:#fff}
+.stage-in.centered{align-items:center;text-align:center}
+.school-logo{margin-left:auto;display:block;background:#fff;border-radius:6px;padding:4px 8px;line-height:0}
+.school-logo img{display:block;height:40px;width:auto}
+.back-row{margin:0 0 16px}
 .gate-fig{width:100%;height:auto;display:block;margin:6px 0}
 .gate-fig text{font:600 15px var(--fm);fill:#e8edf6}
 .gate-fig .chip rect{fill:#0a1020;stroke:#6a7a96;stroke-width:2}

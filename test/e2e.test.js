@@ -28,7 +28,7 @@ async function loginIn(ctx, name) {
   const page = await ctx.newPage();
   page.on('pageerror', (e) => pageErrors.push(`${page.url()}: ${e.message}`));
   await page.goto(APP);
-  await page.click('text=Prijava s šolskim računom');
+  await page.click('a.btn:text-is("Prijava")');
   await page.click(`a:text-is("${name}")`);
   await page.waitForURL(`${APP}/**`);
   return page;
@@ -79,7 +79,7 @@ test('an account from another tenant is refused', async () => {
   const ctx = await browser.newContext();
   const page = await ctx.newPage();
   await page.goto(APP);
-  await page.click('text=Prijava s šolskim računom');
+  await page.click('a.btn:text-is("Prijava")');
   await page.click('a:text-is("Zunanji Gost")');
   await page.waitForSelector('h1');
   assert.match(await page.textContent('h1'), /Prijava ni mogoča/);
@@ -201,7 +201,7 @@ test('shared computer: the next student sees nothing from the previous one', asy
   await a.waitForURL(`${APP}/`);
   const left = await a.evaluate(() => Object.keys(localStorage).filter((k) => /^(scnm_lavele_\d|lavels_)/.test(k)));
   assert.deepEqual(left, []);
-  await a.click('text=Prijava s šolskim računom');
+  await a.click('a.btn:text-is("Prijava")');
   await a.click('a:text-is("Bor Novak")');
   await a.waitForURL(`${APP}/**`);
   await a.goto(`${APP}/vaje/3.2`);
@@ -690,7 +690,7 @@ test('removing from a class keeps the user; deleting from the system erases them
   // their open browser is logged out, and logging in again gives a new empty waiting account
   await s.goto(`${APP}/vaje`);
   assert.equal(new URL(s.url()).pathname, '/');
-  await s.click('text=Prijava s šolskim računom');
+  await s.click('a.btn:text-is("Prijava")');
   await s.click('a:text-is("Bor Novak")');
   await s.waitForURL(`${APP}/**`);
   assert.match(await s.textContent('h1'), /Čakaš/);
@@ -712,6 +712,41 @@ test('removing from a class keeps the user; deleting from the system erases them
   assert.match(await a.textContent('table'), /Izbrisal uporabnika/);
   await t.context().close();
   await a.context().close();
+});
+test('login page, school logo and data notice page', async () => {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 } });
+  const p = await ctx.newPage();
+  await p.goto(APP);
+  assert.equal(await p.textContent('h1'), 'Elektronski sistemi');
+  assert.doesNotMatch(await p.textContent('main'), /Vaje vidiš/);
+  assert.equal(await p.locator('.school-logo').getAttribute('href'), 'https://www.sc-nm.si');
+  assert.ok(await p.evaluate(() => document.querySelector('.school-logo img').naturalWidth > 0), 'logo loads');
+  const box = await p.locator('main a.btn').boundingBox();
+  assert.ok(Math.abs(box.x + box.width / 2 - 640) < 2, 'button is centred');
+  await p.click('a:text("Kateri podatki se beležijo")');
+  await p.waitForURL(/zasebnost/);
+  assert.equal(await p.locator('footer a').count(), 0);
+  await p.click('[data-back]');
+  await p.waitForURL(`${APP}/`);
+  await p.goto(`${APP}/zasebnost`);
+  await p.click('[data-back]'); // opened directly: goes home
+  await p.waitForURL(`${APP}/`);
+  await ctx.close();
+});
+test('the replaced 3.2 tasks are in place and score correctly', async () => {
+  const s = await login('Ana Kovač');
+  await openTasks(s, '3.2');
+  const before_ = Number((await s.textContent('#sc')).replace(',', '.'));
+  const task = (n) => s.locator('.task').nth(n - 1);
+  assert.match(await task(5).locator('.q').textContent(), /Katera logična vrata uporabimo za izračun bita parnosti/);
+  for (const [n, label] of [[5, 'XOR'], [11, 'Negator (NE)'], [12, '7']]) {
+    await task(n).locator('label.opt', { hasText: new RegExp(`^\\s*${label.replace(/[()]/g, '\\$&')}\\s*$`) }).locator('input').check();
+    await task(n).locator('[data-act=check]').click();
+    assert.match(await task(n).locator('.fb').textContent(), /Pravilno/, `task ${n}`);
+  }
+  await synced(s);
+  assert.equal(Number((await s.textContent('#sc')).replace(',', '.')), before_ + 5);
+  await s.context().close();
 });
 test('nothing is loaded from other sites, and there were no page errors', async () => {
   const s = await login('Ana Kovač');
