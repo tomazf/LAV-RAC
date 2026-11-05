@@ -1,9 +1,9 @@
 {
-  "name": "lav-els",
+  "name": "lav-rac",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "LAV-ELS: portal za laboratorijske vaje z napredkom dijakov in pogledom učitelja",
+  "description": "LAV-RAČ: portal za laboratorijske vaje iz računalništva z napredkom dijakov in pogledom učitelja",
   "engines": {
     "node": ">=22"
   },

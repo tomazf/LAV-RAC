@@ -6,6 +6,7 @@
 <title><%= typeof pageTitle !== 'undefined' ? pageTitle + ' | ' + portal.name : portal.name %></title>
 <link rel="stylesheet" href="<%= asset('fonts/fonts.css') %>">
 <link rel="stylesheet" href="<%= asset('css/app.css') %>">
+<link rel="stylesheet" href="<%= asset('css/panel.css') %>">
 <link rel="icon" href="<%= asset('favicon.svg') %>" type="image/svg+xml">
 </head>
 <body>
@@ -13,7 +14,7 @@
 <header class="top">
   <div class="top-in">
     <a class="brand" href="/" aria-label="<%= portal.name %>, začetna stran">
-      <svg viewBox="0 0 34 28" width="34" height="28" aria-hidden="true"><path class="w" d="M0 8h7M0 20h7M27 14h7"/><rect class="g" x="7" y="2" width="20" height="24" rx="2"/><text x="17" y="19" text-anchor="middle">&amp;</text></svg>
+      <svg viewBox="0 0 28 14" width="42" height="21" aria-hidden="true"><% [0,1,0,1,0,0,1,0].forEach((b, i) => { %><circle class="<%= b ? 'on' : 'off' %>" cx="<%= 3 + (i % 4) * 7.3 %>" cy="<%= i < 4 ? 3.5 : 10.5 %>" r="2.5"/><% }) %></svg>
       <span><%= portal.name %></span>
     </a>
     <% if (portal.school && typeof schoolLogo !== 'undefined' && schoolLogo) { %>

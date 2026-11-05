@@ -1,13 +1,13 @@
-/* Same language as the exercises: logic 1 is orange, wires are grey, navy header. */
+/* LAV-RAČ: plum front panel, warm lamps. Logic 1 is a lit lamp, wires are grey. */
 :root{
-  --bg:#f2f5f9;--card:#fff;--ink:#14213d;--mut:#586377;--acc:#0b6e8a;--onacc:#fff;--sig:#e8590c;--sigbg:#fff0e3;--onsig:#1b1206;
-  --ok:#2b8a3e;--amb:#b7791f;--bad:#c92a2a;--line:#d3dae5;--tile:#e6edf5;--wire:#a9b4c4;--hdr:#14213d;--onhdr:#fff;--heat:11,110,138;--okbg:#e3f5e8;--badbg:#fde8e8;
+  --bg:#f5f3f8;--card:#fff;--ink:#241433;--mut:#5f5470;--acc:#6b2a7a;--onacc:#fff;--sig:#b4500a;--sigbg:#fdf0dd;--onsig:#1b1206;
+  --ok:#2b8a3e;--amb:#b7791f;--bad:#c92a2a;--line:#ddd6e6;--tile:#ece6f2;--wire:#b3a8c2;--hdr:#2e1a40;--onhdr:#fff;--heat:107,42,122;--okbg:#e3f5e8;--badbg:#fde8e8;
   --fb:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;--fm:"IBM Plex Mono",ui-monospace,Consolas,monospace;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root{
-  --bg:#0e1626;--card:#172238;--ink:#e8edf6;--mut:#9aa7bd;--acc:#4cc2e0;--onacc:#0e1626;--sig:#ff9f43;--sigbg:#3a2a18;--onsig:#1b1206;
-  --ok:#6fd48a;--amb:#f1b95a;--bad:#ff8080;--line:#2b3a57;--tile:#22304c;--wire:#4a5a76;--hdr:#0a1020;--heat:76,194,224;--okbg:#17352a;--badbg:#3d2230;color-scheme:dark}}
+  --bg:#171021;--card:#231833;--ink:#efe9f5;--mut:#a99cba;--acc:#d5a6e6;--onacc:#1f1130;--sig:#ffb454;--sigbg:#3a2a18;--onsig:#1b1206;
+  --ok:#6fd48a;--amb:#f1b95a;--bad:#ff8080;--line:#3a2c4d;--tile:#2f2242;--wire:#5c4d70;--hdr:#1f1130;--heat:213,166,230;--okbg:#17352a;--badbg:#3d2230;color-scheme:dark}}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 var(--fb);min-height:100vh;display:flex;flex-direction:column}
@@ -27,7 +27,7 @@ p{max-width:72ch}
 .top{background:var(--hdr);color:var(--onhdr)}
 .top-in{max-width:1320px;margin:0 auto;padding:10px 16px;display:flex;flex-wrap:wrap;gap:6px 22px;align-items:center}
 .brand{display:flex;gap:10px;align-items:center;color:#fff;font-weight:700;font-size:1.15rem;text-decoration:none}
-.brand .w{stroke:#e9a23b;stroke-width:2;fill:none}.brand .g{fill:none;stroke:#fff;stroke-width:2}.brand text{fill:#fff;font:700 14px var(--fm)}
+.brand .on{fill:#ffc45c}.brand .off{fill:none;stroke:#ffffff80;stroke-width:1.5}
 .top nav{display:flex;gap:4px;flex:1;flex-wrap:wrap}
 .top nav a{color:#fff;text-decoration:none;padding:6px 12px;border-radius:6px}
 .top nav a:hover{background:#ffffff1f}
@@ -83,15 +83,6 @@ main.stage{display:flex;align-items:center;justify-content:center;max-width:none
 .school-logo{margin-left:auto;display:block;background:#fff;border-radius:6px;padding:4px 8px;line-height:0}
 .school-logo img{display:block;height:40px;width:auto}
 .back-row{margin:0 0 16px}
-.gate-fig{width:100%;height:auto;display:block;margin:6px 0}
-.gate-fig text{font:600 15px var(--fm);fill:#e8edf6}
-.gate-fig .chip rect{fill:#0a1020;stroke:#6a7a96;stroke-width:2}
-.gate-fig .chip.on rect{fill:#ff9f43;stroke:#ff9f43}
-.gate-fig .chip.on text{fill:#1b1206}
-.gate-fig .wire{fill:none;stroke:#6a7a96;stroke-width:2.5}
-.gate-fig .wire.on{stroke:#ff9f43;stroke-width:4}
-.gate-box{fill:#0a1020;stroke:#fff;stroke-width:3}
-.gate-fig .gate-sym{font:700 44px var(--fm);fill:#fff}
 /* Student dashboard */
 .hello{display:flex;flex-wrap:wrap;gap:14px 28px;justify-content:space-between;align-items:center;margin-bottom:28px}
 .big-line{margin:4px 0 0;font-size:1.08rem}

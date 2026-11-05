@@ -1,7 +1,12 @@
 <%- include('partials/head', { pageTitle: 'Prijava', mainClass: 'stage', schoolLogo: true }) %>
-<section class="stage-in centered">
-  <h1><%= portal.title %></h1>
-  <%- include('partials/gate', { a: false, b: false }) %>
-  <a class="btn big" href="/auth/login">Prijava</a>
+<section class="entry">
+  <div class="entry-text">
+    <h1><%= portal.title %></h1>
+    <% if (portal.subtitle) { %><p class="lead"><%= portal.subtitle %></p><% } %>
+    <a class="btn big" href="/auth/login">Prijava</a>
+    <p class="entry-note">Prijaviš se s svojim šolskim Microsoftovim računom.</p>
+  </div>
+  <%- include('partials/panel') %>
 </section>
+<script src="<%= asset('js/panel.js') %>"></script>
 <%- include('partials/foot') %>

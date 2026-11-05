@@ -1,8 +1,8 @@
-# LAV-ELS
+# LAV-RAČ
 
-Portal za laboratorijske vaje iz digitalne elektronike. Poveže 9 vaj (1.1 do 3.3, skupaj 266 nalog), dijakom shranjuje napredek, učiteljem pokaže, kako razred napreduje. Rezultati so za vajo in spremljanje, ne za ocenjevanje, ker se točkovanje izvaja v brskalniku.
+Portal za laboratorijske vaje iz računalništva za dijake 2., 3. in 4. letnika Tehniške gimnazije Šolskega centra Novo mesto. Dijakom shranjuje napredek, učiteljem pokaže, kako razred napreduje. Rezultati so za vajo in spremljanje, ne za ocenjevanje, ker se točkovanje izvaja v brskalniku.
 
-Portal teče na [els.sc-nm.si](https://els.sc-nm.si) in ga dijaki že uporabljajo.
+Portal bo na `lavrac.sc-nm.si`. Zgrajen je na ogrodju [LAV-ELS](https://github.com/tomazf/LAV-ELS), stanje in posebnosti so v [`docs/LAV-RAC.md`](docs/LAV-RAC.md).
 
 ## Vloge
 
@@ -30,7 +30,7 @@ Potrebuješ strežnik z Dockerjem in Docker Compose, domeno in pravice za regist
 V [Microsoft Entra](https://entra.microsoft.com): **App registrations > New registration**.
 
 - **Supported account types**: Accounts in this organizational directory only (single tenant).
-- **Redirect URI**: platforma Web, `https://TVOJA-DOMENA/auth/callback`. Pod **Authentication** dodaj še `https://TVOJA-DOMENA/`, da se dijak po odjavi vrne na portal.
+- **Redirect URI**: platforma Web, `https://lavrac.sc-nm.si/auth/callback`. Pod **Authentication** dodaj še `https://lavrac.sc-nm.si/`, da se dijak po odjavi vrne na portal.
 - Pod **Certificates & secrets** ustvari skrivnost in si zapiši rok veljavnosti.
 - Zapiši **Directory (tenant) ID**, **Application (client) ID** in vrednost skrivnosti.
 - Dodatna dovoljenja niso potrebna. Aplikacija zahteva samo `openid`, `profile` in `email`.
@@ -38,7 +38,7 @@ V [Microsoft Entra](https://entra.microsoft.com): **App registrations > New regi
 ### 2. Nastavitve
 
 ```bash
-git clone https://github.com/tomazf/LAV-ELS.git && cd LAV-ELS
+git clone https://github.com/tomazf/LAV-RAC.git && cd LAV-RAC
 cp .env.example .env
 ```
 
@@ -54,13 +54,13 @@ S samodejnim HTTPS (Caddy, vrati 80 in 443 morata biti prosta, domena mora kazat
 docker compose --profile https up -d --build
 ```
 
-Če že imaš obratni posredovalnik, ga usmeri na `127.0.0.1:4000`, nato (tako teče `els.sc-nm.si`, nameščen v `/opt/lav-els`):
+Če že imaš obratni posredovalnik, ga usmeri na `127.0.0.1:4001` (`APP_PORT` v `.env`, vrata 4000 uporablja LAV-ELS), nato:
 
 ```bash
 docker compose up -d --build
 ```
 
-Posredovalnik mora poslati `X-Forwarded-Proto: https`. Preveri delovanje: `curl http://127.0.0.1:4000/healthz`.
+Posredovalnik mora poslati `X-Forwarded-Proto: https`. Preveri delovanje: `curl http://127.0.0.1:4001/healthz`.
 
 ### 4. Prvi koraki
 
@@ -75,7 +75,7 @@ Posredovalnik mora poslati `X-Forwarded-Proto: https`. Preveri delovanje: `curl 
 Posodobitev:
 
 ```bash
-cd /opt/lav-els && git pull && docker compose up -d --build
+git pull && docker compose up -d --build
 ```
 
 Podatki ostanejo, ker so v trajnem nosilcu `db-data`. Spremembe baze (`src/migrations/`) se izvedejo same ob zagonu. Dijaki z odprto vajo naj po posodobitvi osvežijo stran.

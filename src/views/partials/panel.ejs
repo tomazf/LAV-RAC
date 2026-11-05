@@ -1,0 +1,26 @@
+<%# The portal's name, written out in bytes. Windows-1250, because that is where Č has one byte. %>
+<%
+  const special = { 'Č': 0xC8, 'č': 0xE8, 'Š': 0x8A, 'š': 0x9A, 'Ž': 0x8E, 'ž': 0x9E };
+  const chars = [...portal.name];
+  const bytes = chars.map((c) => special[c] ?? c.charCodeAt(0));
+  const weights = [128, 64, 32, 16, 8, 4, 2, 1];
+  const hex = (b) => b.toString(16).toUpperCase().padStart(2, '0');
+%>
+<figure class="panel" data-panel style="--cols:<%= chars.length %>">
+  <div class="plate">
+    <div class="lamps" role="group" aria-label="Biti imena <%= portal.name %>. Vsak stolpec je en znak, puščice premikajo med lučkami, preslednica lučko preklopi.">
+      <span class="band hi"></span><span class="band lo"></span>
+      <div class="col weights" aria-hidden="true"><% weights.forEach((w) => { %><span><%= w %></span><% }) %></div>
+      <% bytes.forEach((b, c) => { %><div class="col" data-col="<%= c %>" style="--c:<%= c %>"><% weights.forEach((w, r) => { %><button type="button" class="lamp" data-w="<%= w %>" aria-pressed="<%= b & w ? 'true' : 'false' %>" aria-label="Znak <%= c + 1 %>, bit <%= w %>" tabindex="<%= c === 0 && r === 0 ? 0 : -1 %>"><i></i></button><% }) %></div><% }) %>
+    </div>
+    <div class="read" aria-hidden="true">
+      <span class="row-label">znak</span><% chars.forEach((ch, c) => { %><b class="glyph" data-glyph="<%= c %>"><%= ch %></b><% }) %>
+      <span class="row-label">hex</span><% bytes.forEach((b, c) => { %><span class="hex" data-hex="<%= c %>"><%= hex(b) %></span><% }) %>
+    </div>
+  </div>
+  <figcaption>
+    <span>Tudi ime portala je zapisano v bajtih. Prižgi ali ugasni lučko in poglej, kateri znak nastane.</span>
+    <button type="button" class="btn small ghost panel-reset" data-reset hidden>Povrni <%= portal.name %></button>
+  </figcaption>
+  <p class="sr" aria-live="polite" data-say></p>
+</figure>

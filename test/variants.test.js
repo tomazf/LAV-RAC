@@ -7,14 +7,14 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-const variants = JSON.parse(readFileSync(path.join(root, 'content/variants.json'), 'utf8'));
+const variants = JSON.parse(readFileSync(path.join(root, 'test/fixtures/content/variants.json'), 'utf8'));
 const read = (p) => readFileSync(path.join(root, p), 'utf8');
 const SEEDS = 1500;
 
 function page(ex, seed) {
   const boot = { variant: seed === null ? null : { seed, keep: [] } };
   const safe = (js) => `<script>${js}</script>`;
-  return read(`content/exercises/${ex}.html`)
+  return read(`test/fixtures/content/exercises/${ex}.html`)
     .replace('<!--LAVELS:BOOT-->', () => safe(`window.__LAVELS=${JSON.stringify(boot)}`))
     .replace('<!--LAVELS:VARIANTS-->', () => safe(read('src/public/js/variants/core.js')) + safe(read(`src/public/js/variants/${ex}.js`)));
 }
