@@ -1000,7 +1000,11 @@ test('login page, school logo and data notice page', async () => {
   assert.doesNotMatch(await p.textContent('main'), /Vaje vidiš/);
   assert.equal(await p.locator('.school-logo').getAttribute('href'), portal.school.url);
   assert.ok(await p.evaluate(() => document.querySelector('.school-logo img').naturalWidth > 0), 'logo loads');
-  assert.ok(await p.locator('main a.btn').isVisible(), 'the login button is on the page');
+  // the title and the login button share one centre line
+  const centre = async (sel) => { const b = await p.locator(sel).boundingBox(); return b.x + b.width / 2; };
+  assert.ok(Math.abs(await centre('.entry h1') - await centre('main a.btn')) < 2, 'the button is centred under the title');
+  assert.equal(await p.evaluate(() => getComputedStyle(document.querySelector('.entry h1')).textAlign), 'center');
+  assert.doesNotMatch(await p.textContent('main'), /Prijaviš se/);
   await p.click('a:text("Kateri podatki se beležijo")');
   await p.waitForURL(/zasebnost/);
   assert.equal(await p.locator('footer a').count(), 0);
