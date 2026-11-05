@@ -1,0 +1,42 @@
+/* Login page: a computer front panel. The lamps are the one loud thing here; the rest stays quiet. */
+:root{--lamp:#ffc45c;--lamp-hot:#fff0c4;--plate:#4a2160;--band-hi:#7b2d6f;--band-lo:#5a2a78;--lamp-off:#2a1237;--silk:#f0e4f4}
+.stage-in .btn:not(.ghost),.entry .btn:not(.ghost){background:var(--lamp);border-color:var(--lamp);color:#1b1206}
+.entry{width:100%;max-width:1120px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:32px 64px;align-items:center}
+.entry-text{display:flex;flex-direction:column;align-items:flex-start;gap:18px;min-width:0}
+.entry h1{font-size:clamp(2.1rem,4.4vw,3.4rem);line-height:1.08;letter-spacing:-.01em;max-width:14ch}
+.entry .lead{margin:0;font-size:1.12rem;max-width:40ch;color:#efe3f4}
+.entry .btn.big{min-height:56px;padding:12px 40px;font-size:1.15rem}
+.entry-note{margin:-8px 0 0;font-size:.95rem;color:#d9c8e2}
+.panel{--cell:clamp(30px,8.2vw,46px);margin:0;width:max-content;max-width:100%;min-width:0}
+.plate{background:var(--plate);border-radius:6px;padding:14px 14px 12px;box-shadow:inset 0 0 0 1px #ffffff1f,0 18px 50px #12061c80}
+.lamps{position:relative;display:grid;grid-template-columns:var(--cell) repeat(var(--cols),var(--cell));grid-template-rows:repeat(8,var(--cell));grid-auto-flow:column;border-radius:3px;overflow:hidden}
+/* The two nibbles get their own colour, because one hex digit is four bits */
+.band{position:absolute;left:0;right:0;height:50%}
+.band.hi{top:0;background:var(--band-hi)}
+.band.lo{top:50%;background:var(--band-lo)}
+.col{display:contents}
+.weights span{position:relative;display:grid;place-items:center;font:500 .72rem var(--fm);color:var(--silk)}
+.lamp{position:relative;display:grid;place-items:center;width:var(--cell);height:var(--cell);padding:0;background:none;border:0;cursor:pointer;border-radius:50%}
+.lamp i{display:block;width:58%;height:58%;border-radius:50%;background:var(--lamp-off);box-shadow:inset 0 1px 2px #0009;transition:background .14s ease-out,box-shadow .14s ease-out}
+.lamp:hover i{background:#47235a}
+.lamp[aria-pressed=true] i{background:radial-gradient(circle at 42% 38%,var(--lamp-hot),var(--lamp) 62%);box-shadow:0 0 calc(var(--cell)*.32) #ffb84a99,0 0 2px #ffe0a0}
+/* One moment on arrival: the bytes warm up from the first letter to the last */
+@keyframes warm{from{background:var(--lamp-off);box-shadow:inset 0 1px 2px #0009}}
+.panel:not(.live) .lamp[aria-pressed=true] i{animation:warm .5s ease-out both;animation-delay:calc(var(--c)*90ms + .15s)}
+.read{display:grid;grid-template-columns:var(--cell) repeat(var(--cols),var(--cell));align-items:center;justify-items:center;margin-top:10px;color:var(--silk)}
+.row-label{font:400 .72rem var(--fb);color:#d9c8e2}
+.glyph{font:600 calc(var(--cell)*.72)/1.25 var(--fm);color:#fff}
+.hex{font:500 .86rem/1.5 var(--fm);color:#e7d6ee}
+.panel figcaption{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;margin-top:14px;width:0;min-width:100%;min-height:6.2rem;align-content:flex-start;font-size:.95rem;color:#d9c8e2}
+.panel figcaption span{flex:1 1 16rem}
+.btn.ghost.panel-reset{color:#fff;border-color:#ffffff99}
+.stage+.foot a{color:#efe3f4}
+@media (max-width:900px){
+  .entry{grid-template-columns:minmax(0,1fr);gap:28px}
+  .entry h1{max-width:18ch}
+}
+/* Waiting page: the same lamps tell where the student stands */
+.gate-fig{list-style:none;margin:6px 0;padding:0;display:flex;flex-wrap:wrap;gap:10px 28px}
+.status{display:flex;align-items:center;gap:10px;font:500 1rem var(--fm)}
+.status i{width:18px;height:18px;border-radius:50%;background:var(--lamp-off);box-shadow:inset 0 1px 2px #0009,0 0 0 1px #ffffff40}
+.status.on i{background:radial-gradient(circle at 42% 38%,var(--lamp-hot),var(--lamp) 62%);box-shadow:0 0 12px #ffb84a99}

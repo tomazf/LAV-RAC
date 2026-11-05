@@ -1,3 +1,5 @@
+# Fixed name, so this portal never shares containers or volumes with another one on the same server.
+name: lavrac
 services:
   app:
     build: .

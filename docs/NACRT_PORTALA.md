@@ -101,6 +101,7 @@ Strani: Uporabniki (iskanje, vloge, izbris), Vaje (pregled), Razredi, Kopije, Dn
 ## 11. Preizkusi in CI
 
 - `npm test`: e2e preizkusi z resničnim strežnikom, PostgreSQL in brskalnikom (Playwright), prijavo nadomesti `test/mock-oidc.js`; preizkus migracij; preizkusi spremenljivih števil; preizkus imen in `portal.json`.
+- Vsebina se pri portalih menja, zato glavni preizkusi tečejo na svojih vajah v `test/fixtures/content` (`CONTENT_DIR`), `test/empty-portal.test.js` pa preveri portal s pravo vsebino.
 - Baza `TEST_DATABASE_URL` se ob vsakem zagonu izbriše. Preizkus kopij potrebuje `pg_dump`, `pg_restore` in `psql` iste različice kot baza (`PG_BIN`).
 - GitHub Actions: `test` (postgres:17, odjemalec 17) in `docker` (gradnja demo slike, preverjanje orodij v sliki in produkcijske datoteke Compose).
 - Vsaka sprememba, ki jo vidi uporabnik, dobi preizkus. Spremembe gredo v `main`, portal na strežniku pa se posodobi šele, ko je CI zelen.
@@ -109,7 +110,7 @@ Strani: Uporabniki (iskanje, vloge, izbris), Vaje (pregled), Razredi, Kopije, Dn
 
 | Kje | Kaj |
 |---|---|
-| `content/portal.json` | ime, `slug`, naslov prijavne strani, opis, šola (povezava, logotip), skupine »V pripravi« |
+| `content/portal.json` | ime, `slug`, naslov in podnaslov prijavne strani, opis, šola (povezava, logotip), skupine »V pripravi« |
 | `content/catalog.json`, `content/exercises/`, `content/variants.json` | vaje, naloge, strani, spremenljive naloge |
 | `src/public/js/variants/`, `test/variants.test.js` | generatorji števil in njihovo preverjanje (če vaje nimajo spremenljivih števil, se izbrišejo) |
 | `scripts/import-exercises.js` | seznam vaj in modulov, preoblikovanje objavljenih strani |

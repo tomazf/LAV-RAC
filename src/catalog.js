@@ -5,17 +5,19 @@ import { many, q } from './db.js';
 import { portal } from './portal.js';
 
 const root = path.resolve(import.meta.dirname, '..');
-const raw = JSON.parse(fs.readFileSync(path.join(root, 'content/catalog.json'), 'utf8'));
+// The tests run on their own exercises (test/fixtures/content), because the portal's content changes.
+const content = path.resolve(root, process.env.CONTENT_DIR || 'content');
+const raw = JSON.parse(fs.readFileSync(path.join(content, 'catalog.json'), 'utf8'));
 const PLACEHOLDER = '<!--LAVELS:BOOT-->';
 const VARIANTS = '<!--LAVELS:VARIANTS-->';
-const varied = JSON.parse(fs.readFileSync(path.join(root, 'content/variants.json'), 'utf8'));
+const varied = JSON.parse(fs.readFileSync(path.join(content, 'variants.json'), 'utf8'));
 export const modules = raw.modules;
 export const exercises = raw.exercises.map((e) => ({
   ...e,
   hasVariants: !!varied[e.id],
   tasks: e.tasks.map((t) => ({ ...t, varied: !!varied[e.id]?.includes(t.i) })),
   pageMap: new Map(e.pages.map((p) => [p.id, p])),
-  html: fs.readFileSync(path.join(root, 'content/exercises', `${e.id}.html`), 'utf8'),
+  html: fs.readFileSync(path.join(content, 'exercises', `${e.id}.html`), 'utf8'),
 }));
 export const byId = new Map(exercises.map((e) => [e.id, e]));
 export const CHAPTERS = ['Teorija', 'Simulacija', 'Naloge'];

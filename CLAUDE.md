@@ -1,6 +1,6 @@
-# LAV-ELS
+# LAV-RAČ
 
-Portal z vajami, razredi in spremljanjem napredka (Node 22, Express 5, EJS, PostgreSQL 17, prijava Entra). Teče na `https://els.sc-nm.si`, dijaki ga uporabljajo, zato je vsaka sprememba živa.
+Portal z laboratorijskimi vajami iz računalništva za 2., 3. in 4. letnik Tehniške gimnazije (Node 22, Express 5, EJS, PostgreSQL 17, prijava Entra). Bo na `https://lavrac.sc-nm.si`. Ogrodje prihaja iz LAV-ELS (`upstream`). Stanje in posebnosti tega portala so v `docs/LAV-RAC.md`.
 
 **Najprej preberi `docs/NACRT_PORTALA.md`**: splošni dogovor (vloge, pravila, zasebnost, varnost, kopije, pogodba med vajo in portalom, postavitev). Natančno vedenje je v `test/`. Postopek postavitve in vzdrževanja je v `README.md`. Kar je splošno, drži tudi za druge portale iz tega ogrodja; kar je vezano na vsebino, je v razdelku 12 načrta.
 
