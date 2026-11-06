@@ -2,11 +2,10 @@
 
 - [x] Gumbi v vajah malo večji (6. 11. 2026).
 - [ ] Gumbi za listanje med stranmi brez napisa Naprej/Nazaj (smer povesta puščica in položaj). `content/shell/vaja.js` (`buildPager`), nato `npm run import`.
-- [ ] Odpiranje dela poglavja (skupine razlag) namesto celega poglavja. Učitelj se odloči med:
-  - A: deli znotraj ene vaje (nova tabela odprtih delov, strežnik in statistika štejeta samo odprte dele; večja sprememba jedra),
-  - B: vsak del je samostojna vaja (uvoz iz enega artifacta naredi več vaj, prikaz jih združi pod poglavje; jedro ostane kot v LAV-ELS). Priporočeno.
+- [x] Odpiranje dela poglavja: ne delamo (6. 11. 2026). Poglavje je odprto v celoti; če bo treba, se vsebina razdeli v ločene artifacte, ki postanejo ločene vaje.
+- [ ] Prazno mesto poglavja (LAV-RAČ2, 4. poglavje) se pokaže kot »V pripravi« v seznamu vaj za učitelje in skrbnike (dijaki ga ne vidijo). Ogrodje zdaj pozna samo prazne dele, ne praznih poglavij.
 - [ ] Letnik razreda in prehod v naslednji letnik (glej spodaj).
-- [ ] Ikona strani: dodati `favicon.ico` (zdaj je samo `favicon.svg`, ki ga brskalnik dobi le na straneh portala; na straneh vaj in pri zaznamkih išče `/favicon.ico`, ki ga ni).
+- [ ] Ikona strani povsod: obstoječi `favicon.svg` tudi na straneh vaj (uvoz doda povezavo), `/favicon.ico` naj vrne isto ikono (brskalniki in zaznamki ga iščejo sami).
 
 ## Letnik razreda in prehod v naslednji letnik
 
@@ -23,8 +22,7 @@ Dogovorjeno (6. 11. 2026):
 - Dijak, ki se med letom izpiše, se izbriše kot zdaj (Administracija > Uporabniki).
 - Podatki dijaka se hranijo, dokler je vpisan. Za pooblaščeno osebo za varstvo podatkov ostane še rok hrambe kopij baze.
 
-Še za odločiti:
-- Kaj se zgodi z dijakom, ki ga skrbnik pri prehodu odznači (ne napreduje): ostane brez razreda in ga skrbnik doda v razred nižjega letnika, ali ostane v razredu z istim letnikom.
+- Dijak, ki ga skrbnik pri prehodu odznači (ne napreduje), ostane brez razreda; skrbnik ga doda v ustrezen razred.
 
 Kaj je treba narediti: letnik in nastavitev v bazi in pri razredu, filtriranje po letniku v vseh pogledih, razdelek »Prejšnji letniki«, stran Šolsko leto s predogledom in izbiro dijakov, preizkusi, zapis v `docs/NACRT_PORTALA.md`. Razmisliti, ali spremembo jedra ponudimo tudi LAV-ELS.
 

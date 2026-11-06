@@ -14,7 +14,7 @@ Razpored (od učitelja, popravljen 6. 11. 2026). Poglavja se v vsakem letniku š
 Še ni dogovorjeno:
 - letnik razreda: dijak naj vidi samo svoj letnik in v njem samo vsebine, ki mu jih odpre učitelj. Zdaj vidi vaje, odprte njegovemu razredu; razred še nima letnika, učitelj pa vidi vse vaje,
 - kako štejejo naloge »Za doma« in maturitetne naloge,
-- prikaz praznega mesta 2.4 kot »V pripravi« (ogrodje zdaj pozna samo prazne dele, ne praznih vaj).
+- prikaz praznega mesta 2.4 kot »V pripravi« (dogovorjeno, še ni narejeno; glej `TODO.md`).
 
 ## Odločitve
 
