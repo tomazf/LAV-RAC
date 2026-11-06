@@ -178,6 +178,7 @@ test('parts without exercises wait for staff; a closed class shows a clear messa
   assert.match(await s.textContent('main'), /Številski sistemi, kodiranje in pariteta/);
   // chapters count from 1 within each year; the technical id stays in the address
   assert.equal(await s.locator('h3:has-text("Številski sistemi") .ex-no').textContent(), '1');
+  assert.match(await s.textContent('main a.btn.big'), /^Začni vajo 1: Številski sistemi/);
   assert.match(await s.locator('h3:has-text("Številski sistemi") a').getAttribute('href'), /\/vaje\/2\.1$/);
   await a.goto(classUrl);
   assert.deepEqual(await a.locator('thead th a').allTextContents(), ['1', '2', '3']);

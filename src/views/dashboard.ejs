@@ -6,7 +6,7 @@
     <p class="big-line"><strong><%= f.num(total.score) %></strong> od <%= maxPoints %> točk, <%= total.done %> od <%= maxTasks %> nalog, <%= f.duration(total.seconds) %> dela</p>
   </div>
   <% if (next_) { %>
-  <a class="btn big" href="/vaje/<%= next_.id %>"><%= nextStarted ? 'Nadaljuj' : 'Začni' %> vajo <%= next_.id %>: <%= next_.title %></a>
+  <a class="btn big" href="/vaje/<%= next_.id %>"><%= nextStarted ? 'Nadaljuj' : 'Začni' %> vajo <%= next_.no %>: <%= next_.title %></a>
   <% } else if (maxTasks) { %><p class="all-done">Vse naloge so rešene.</p><% } %>
 </section>
 <% if (!user.isAdmin) { %><section class="my-note">
@@ -32,7 +32,7 @@
         <div><dt>Simulacija</dt><dd><%= f.duration(r.time.Simulacija) %></dd></div>
         <div><dt>Naloge</dt><dd><%= f.duration(r.time.Naloge) %></dd></div>
       </dl>
-      <a class="btn <%= r.started && !finished ? '' : 'ghost' %>" href="/vaje/<%= e.id %>" aria-label="<%= finished ? 'Odpri' : r.started ? 'Nadaljuj' : 'Začni' %> vajo <%= e.id %>"><%= finished ? 'Odpri' : r.started ? 'Nadaljuj' : 'Začni' %></a>
+      <a class="btn <%= r.started && !finished ? '' : 'ghost' %>" href="/vaje/<%= e.id %>" aria-label="<%= finished ? 'Odpri' : r.started ? 'Nadaljuj' : 'Začni' %> vajo <%= e.no %>"><%= finished ? 'Odpri' : r.started ? 'Nadaljuj' : 'Začni' %></a>
     </li>
     <% }) %>
   </ol>
