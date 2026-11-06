@@ -12,11 +12,11 @@ Razpored (od učitelja, popravljen 6. 11. 2026). Poglavja se v vsakem letniku š
 - LAV-RAČ4: še ni določeno
 
 Še ni dogovorjeno:
-- letnik razreda: dijak naj vidi samo svoj letnik in v njem samo vsebine, ki mu jih odpre učitelj. Zdaj vidi vaje, odprte njegovemu razredu; razred še nima letnika, učitelj pa vidi vse vaje,
 - kako štejejo naloge »Za doma« in maturitetne naloge,
 
 ## Odločitve
 
+- Letniki (6. 11. 2026): `years` v `content/portal.json` poveže 2., 3. in 4. letnik z LAV-RAČ2, LAV-RAČ3 in LAV-RAČ4. Razred ima letnik, prejšnji letniki so lahko odprti za ponavljanje, ob koncu leta skrbnik naredi prehod na strani Šolsko leto (razdelka 3 in 8 načrta). Ob postavitvi letos: vsem razredom nastavi letnik, »vidi prejšnje letnike« pusti izklopljeno.
 - Ime `LAV-RAČ`, `slug` `lavrac`, naslov `lavrac.sc-nm.si`. `slug` se po začetku uporabe ne spreminja.
 - Prave uporabnike, bazo in registracijo v Entra ima portal svoje, z LAV-ELS si deli samo ogrodje.
 - Artifacti se pri uvozu pretvorijo v pogodbo iz razdelka 5 načrta, jedro (`tracker.js`, `progress.js`) ostane nespremenjeno, da združitve iz `upstream` ostanejo čiste.

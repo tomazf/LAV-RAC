@@ -9,7 +9,7 @@
     <thead><tr><th class="l">Razred</th><th>Dijaki</th><th>Odprte vaje</th><th>Povprečje točk</th><th>Aktivni v 7 dneh</th><th class="l">Učitelji</th></tr></thead>
     <tbody><% mine.forEach((c) => { %><tr>
       <td class="l"><a href="/ucitelj/razredi/<%= c.id %>"><strong><%= c.name %></strong></a></td>
-      <td><%= c.students %></td><td><a href="/ucitelj/razredi/<%= c.id %>/vaje"><%= c.open_count %> od <%= exerciseCount %></a></td><td><%= c.avg %> %</td><td><%= c.activeWeek %></td><td class="l"><%= c.teachers %></td>
+      <td><%= c.students %></td><td><a href="/ucitelj/razredi/<%= c.id %>/vaje"><%= c.open_count %> od <%= c.total %></a></td><td><%= c.avg %> %</td><td><%= c.activeWeek %></td><td class="l"><%= c.teachers %></td>
     </tr><% }) %></tbody>
   </table></div><% } %>
 </section>

@@ -66,7 +66,7 @@ Posredovalnik mora poslati `X-Forwarded-Proto: https`. Preveri delovanje: `curl 
 
 1. Skrbnik se prijavi in odpre **Administracija**.
 2. Učitelji se enkrat prijavijo, skrbnik jim dodeli vlogo.
-3. Skrbnik ustvari razrede pod **Administracija > Razredi**.
+3. Skrbnik ustvari razrede pod **Administracija > Razredi** in vsakemu izbere letnik (če ima portal v `content/portal.json` nastavljene `years`).
 4. Učitelj se pod **Razredi** pridruži razredu in pod **Vaje razreda** izbere vaje. Novi razred nima odprte nobene vaje.
 5. Dijaki se prijavijo in čakajo, učitelj jih doda v razred.
 
@@ -100,6 +100,10 @@ gunzip -c lavels-DATUM.sql.gz | docker compose exec -T db psql -U lavels lavels
 Ukazna vrstica ne pozna seznama izbrisanih, zato po takšni obnovitvi ročno izbriši uporabnike, ki so bili izbrisani po izdelavi kopije.
 
 Skrivnost v Entra poteče. Pred iztekom ustvari novo in posodobi `OIDC_CLIENT_SECRET`.
+
+### Konec šolskega leta
+
+Če ima portal letnike, skrbnik ob koncu leta odpre **Administracija > Šolsko leto**: najprej prenese kopijo, pregleda predogled (izbris zadnjega letnika, napredovanje in nova imena razredov, kateri dijaki gredo z razredom), vpiše PREHOD in potrdi. Nato razredom dodeli učitelje.
 
 ## Osebni podatki
 

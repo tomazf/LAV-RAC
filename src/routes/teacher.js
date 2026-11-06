@@ -1,6 +1,6 @@
 import express from 'express';
 import { checkCsrf, isAdmin, requireTeacher } from '../auth.js';
-import { byId, classGroups, CHAPTERS, ensureClassRows, exercises, plannedIn, plannedModules } from '../catalog.js';
+import { byId, classGroups, CHAPTERS, ensureClassRows, inYear, plannedIn, plannedModules } from '../catalog.js';
 import { audit, many, one, q, tx } from '../db.js';
 import { portal } from '../portal.js';
 import { byName, bySurname, csvCell, dayKey, date, duration, num, pct } from '../format.js';
@@ -42,6 +42,16 @@ const members = async (classId) => (await many(
   `SELECT u.id, u.name, u.username, u.email, u.last_login_at, m.added_at FROM class_members m JOIN users u ON u.id=m.user_id WHERE m.class_id=$1`, [classId],
 )).sort(byName);
 const exerciseList = async (classId) => (await classGroups(classId)).flatMap((m) => m.exercises);
+// A class sees only its year; progress in other exercises (lower years) is the student's own and stays out of every view.
+const ofList = (map, list) => {
+  const ids = new Set(list.map((e) => e.id));
+  for (const m of map.values()) for (const id of [...m.keys()]) if (!ids.has(id)) m.delete(id);
+  return map;
+};
+const exerciseOf = (req) => {
+  const ex = byId.get(req.params.eid);
+  return ex && inYear(req.cls.year, ex.module) ? ex : null;
+};
 const sums = (list) => ({
   maxPoints: list.reduce((a, e) => a + e.maxPoints, 0),
   maxTasks: list.reduce((a, e) => a + e.tasks.length, 0),
@@ -54,21 +64,23 @@ teacherRouter.get('/', async (req, res, next) => {
       `SELECT c.id, c.name,
          (SELECT count(*)::int FROM class_members m WHERE m.class_id=c.id) AS students,
          (SELECT string_agg(u.name, ', ' ORDER BY u.name) FROM class_teachers t JOIN users u ON u.id=t.user_id WHERE t.class_id=c.id) AS teachers,
-         EXISTS (SELECT 1 FROM class_teachers t WHERE t.class_id=c.id AND t.user_id=$1) AS mine,
-         (SELECT count(*)::int FROM class_exercises x WHERE x.class_id=c.id AND x.visible) AS open_count
+         EXISTS (SELECT 1 FROM class_teachers t WHERE t.class_id=c.id AND t.user_id=$1) AS mine
        FROM classes c ORDER BY c.name`, [req.user.id],
     );
     const mine = classes.filter((c) => c.mine);
     const others = classes.filter((c) => !c.mine);
     for (const c of req.user.isAdmin ? classes : mine) {
       const ms = await members(c.id);
-      const open = sums((await exerciseList(c.id)).filter((e) => e.visible));
-      const map = await progressFor(ms.map((m) => m.id));
+      const list = await exerciseList(c.id);
+      const open = sums(list.filter((e) => e.visible));
+      c.open_count = open.ids.size;
+      c.total = list.length;
+      const map = ofList(await progressFor(ms.map((m) => m.id)), list);
       const rolled = ms.map((m) => rollup(map.get(m.id), open.ids));
       c.avg = ms.length ? Math.round(rolled.reduce((a, r) => a + pct(r.score, open.maxPoints), 0) / ms.length) : 0;
       c.activeWeek = rolled.filter((r) => r.last && Date.now() - new Date(r.last) < 7 * 864e5).length;
     }
-    res.render('teacher/index', { mine, others, unassigned: await unassignedUsers(), exerciseCount: exercises.length });
+    res.render('teacher/index', { mine, others, unassigned: await unassignedUsers() });
   } catch (e) { next(e); }
 });
 teacherRouter.post('/razredi/:id/pridruzi', checkCsrf, async (req, res, next) => {
@@ -92,7 +104,7 @@ teacherRouter.get('/razredi/:id', loadClass, async (req, res, next) => {
     const ms = await members(req.cls.id);
     const list = await exerciseList(req.cls.id);
     const open = sums(list.filter((e) => e.visible));
-    const map = await progressFor(ms.map((m) => m.id));
+    const map = ofList(await progressFor(ms.map((m) => m.id)), list);
     const sort = SORTS[req.query.sort] ? req.query.sort : 'name';
     const rows = ms.map((m) => ({ ...m, total: rollup(map.get(m.id), open.ids), cells: map.get(m.id) })).sort(SORTS[sort]);
     const stats = {
@@ -148,7 +160,7 @@ async function resetExercise(ex, userId) {
 teacherRouter.post('/razredi/:id/dijaki/:uid/vaje/:eid/ponastavi', loadClass, checkCsrf, async (req, res, next) => {
   try {
     const uid = Number(req.params.uid) || 0;
-    const ex = byId.get(req.params.eid);
+    const ex = exerciseOf(req);
     const m = (await members(req.cls.id)).find((x) => x.id === uid);
     if (!ex || !m) return res.status(404).render('error', { title: 'Dijak ni v razredu', message: 'Dijak je bil odstranjen iz razreda.' });
     if (await resetExercise(ex, uid)) await audit(req.user, 'Ponastavil vajo dijaku', `${req.cls.name}: ${m.name}: ${ex.id}`);
@@ -157,7 +169,7 @@ teacherRouter.post('/razredi/:id/dijaki/:uid/vaje/:eid/ponastavi', loadClass, ch
 });
 teacherRouter.post('/razredi/:id/rezultati/:eid/ponastavi', loadClass, checkCsrf, async (req, res, next) => {
   try {
-    const ex = byId.get(req.params.eid);
+    const ex = exerciseOf(req);
     if (!ex) return res.status(404).render('error', { title: 'Vaja ne obstaja', message: 'Povezava je napačna.' });
     let n = 0;
     for (const m of await members(req.cls.id)) if (await resetExercise(ex, m.id)) n++;
@@ -169,12 +181,16 @@ teacherRouter.post('/razredi/:id/rezultati/:eid/ponastavi', loadClass, checkCsrf
 teacherRouter.get('/razredi/:id/vaje', loadClass, async (req, res, next) => {
   try {
     const mods = await classGroups(req.cls.id);
-    res.render('teacher/sections', { cls: req.cls, mods, plannedModules, plannedIn, exerciseCount: exercises.length, openCount: mods.flatMap((m) => m.exercises).filter((e) => e.visible).length });
+    const list = mods.flatMap((m) => m.exercises);
+    res.render('teacher/sections', {
+      cls: req.cls, mods, plannedIn, plannedModules: plannedModules.filter((id) => inYear(req.cls.year, id)),
+      exerciseCount: list.length, openCount: list.filter((e) => e.visible).length,
+    });
   } catch (e) { next(e); }
 });
 teacherRouter.post('/razredi/:id/vaje/:eid/vidnost', loadClass, checkCsrf, async (req, res, next) => {
   try {
-    const ex = byId.get(req.params.eid);
+    const ex = exerciseOf(req);
     if (!ex) return res.redirect(`/ucitelj/razredi/${req.cls.id}/vaje`);
     await ensureClassRows(req.cls.id);
     const open = req.body.visible === 'on';
@@ -206,7 +222,7 @@ teacherRouter.get('/razredi/:id/izvoz.csv', loadClass, async (req, res, next) =>
     const ms = await members(req.cls.id);
     const list = await exerciseList(req.cls.id);
     const open = sums(list.filter((e) => e.visible));
-    const map = await progressFor(ms.map((m) => m.id));
+    const map = ofList(await progressFor(ms.map((m) => m.id)), list);
     const head = ['Dijak', 'Račun', ...list.flatMap((e) => [`${e.no} točke (od ${e.maxPoints})`, `${e.no} naloge (od ${e.tasks.length})`, `${e.no} čas (min)`, `${e.no} ponastavitve`]), `Odprte vaje točke (od ${open.maxPoints})`, 'Odprte vaje %', 'Skupaj čas (min)', 'Zadnja aktivnost'];
     const lines = [head.map(csvCell).join(';')];
     for (const m of ms) {
@@ -224,7 +240,7 @@ teacherRouter.get('/razredi/:id/izvoz.csv', loadClass, async (req, res, next) =>
 });
 teacherRouter.get('/razredi/:id/rezultati/:eid', loadClass, async (req, res, next) => {
   try {
-    const ex = byId.get(req.params.eid);
+    const ex = exerciseOf(req);
     if (!ex) return res.status(404).render('error', { title: 'Vaja ne obstaja', message: 'Povezava je napačna.' });
     const ms = await members(req.cls.id);
     const map = await progressFor(ms.map((m) => m.id));
@@ -255,8 +271,9 @@ teacherRouter.get('/razredi/:id/dijaki/:uid', loadClass, async (req, res, next) 
     if (!m) return res.status(404).render('error', { title: 'Dijak ni v razredu', message: 'Dijak je bil odstranjen iz razreda.' });
     const list = await exerciseList(req.cls.id);
     const open = sums(list.filter((e) => e.visible));
-    const map = (await progressFor([uid])).get(uid);
-    const events = await many('SELECT * FROM task_events WHERE user_id=$1 ORDER BY created_at', [uid]);
+    const map = ofList(await progressFor([uid]), list).get(uid);
+    const ids = new Set(list.map((e) => e.id));
+    const events = (await many('SELECT * FROM task_events WHERE user_id=$1 ORDER BY created_at', [uid])).filter((ev) => ids.has(ev.exercise_id));
     const resets = await many('SELECT * FROM resets WHERE user_id=$1 ORDER BY created_at DESC', [uid]);
     const pages = await many('SELECT * FROM page_time WHERE user_id=$1', [uid]);
     const days = new Map();

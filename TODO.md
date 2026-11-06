@@ -4,7 +4,7 @@
 - [x] Gumbi za listanje med stranmi brez napisa Naprej/Nazaj (6. 11. 2026).
 - [x] Odpiranje dela poglavja: ne delamo (6. 11. 2026). Poglavje je odprto v celoti; če bo treba, se vsebina razdeli v ločene artifacte, ki postanejo ločene vaje.
 - [x] Prazno mesto poglavja (LAV-RAČ2, 4. poglavje) je »V pripravi« za učitelje in skrbnike (6. 11. 2026). Nova prazna mesta se dodajo v `content/sources.json` (`planned`).
-- [ ] Letnik razreda in prehod v naslednji letnik (glej spodaj).
+- [x] Letnik razreda in prehod v naslednji letnik (6. 11. 2026, glej spodaj).
 - [x] Ikona strani povsod (6. 11. 2026): `/favicon.ico` (izdelan iz `favicon.svg` z `node scripts/make-favicon.js`) in povezava na vseh straneh, tudi v vajah.
 
 ## Letnik razreda in prehod v naslednji letnik
@@ -24,6 +24,8 @@ Dogovorjeno (6. 11. 2026):
 
 - Dijak, ki ga skrbnik pri prehodu odznači (ne napreduje), ostane brez razreda; skrbnik ga doda v ustrezen razred.
 
-Kaj je treba narediti: letnik in nastavitev v bazi in pri razredu, filtriranje po letniku v vseh pogledih, razdelek »Prejšnji letniki«, stran Šolsko leto s predogledom in izbiro dijakov, preizkusi, zapis v `docs/NACRT_PORTALA.md`. Razmisliti, ali spremembo jedra ponudimo tudi LAV-ELS.
+Narejeno (6. 11. 2026): letnik in nastavitev pri razredu (migracija 007, `years` v `content/portal.json`), filtriranje po letniku v vseh pogledih učitelja, razdelek »Prejšnji letniki«, stran Šolsko leto, preizkus v `test/content.test.js`, zapis v `docs/NACRT_PORTALA.md`. Dodatno: tudi dijake zadnjega letnika je mogoče odznačiti (ostanejo brez razreda, niso izbrisani).
+
+- [ ] Razmisliti, ali spremembo jedra (letniki, Šolsko leto) ponudimo tudi LAV-ELS. Tam brez `years` vse ostane kot zdaj.
 
 Odprta vprašanja o vsebini so tudi v `docs/LAV-RAC.md` (razdelek Stanje).

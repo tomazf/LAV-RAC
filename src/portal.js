@@ -10,3 +10,6 @@ for (const key of ['name', 'title', 'about']) if (typeof portal[key] !== 'string
 if (!/^[a-z][a-z0-9-]*$/.test(portal.slug ?? '')) bad('"slug" mora biti iz malih črk, številk in vezajev (npr. "lavels")');
 if (portal.school && !(portal.school.name && portal.school.url && portal.school.logo)) bad('"school" potrebuje "name", "url" in "logo"');
 portal.plannedModules ??= [];
+// Years (letniki): which group of exercises each year works on, e.g. { "2": "LAV-RAČ2" }. Empty means classes have no year.
+portal.years ??= {};
+if (typeof portal.years !== 'object' || Object.entries(portal.years).some(([y, m]) => !/^[1-9]$/.test(y) || typeof m !== 'string')) bad('"years" mora biti npr. { "2": "LAV-RAČ2" }');

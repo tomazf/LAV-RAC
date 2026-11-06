@@ -32,6 +32,8 @@ Pravila:
 - Če učitelj vajo zapre, se novi odgovori dijakov ne shranijo. Rezultati ostanejo v pregledu.
 - Učitelji in skrbniki vidijo vse vaje in prazne skupine »V pripravi«, dijaki ne.
 - Vaje so razdeljene v module (skupine); modul prikažemo samo, če ima vaje.
+- **Letniki** (dogovorjeno 6. 11. 2026, neobvezno): `content/portal.json` ima `years`, npr. `{ "2": "LAV-RAČ2" }` (letnik: skupina). Ko je nastavljen in ima vsaj ena od teh skupin vaje, ima vsak razred letnik (skrbnik ga izbere ob ustvarjanju in ga lahko spremeni). Razred dela samo na skupini svojega letnika: učitelj odpira samo ta poglavja, pregled razreda, rezultati, CSV in podrobnosti dijaka kažejo samo ta letnik. Brez `years` (ali za razred brez letnika) razred vidi vse skupine, kot prej.
+- Razred ima nastavitev **»vidi prejšnje letnike«** (za cel razred, nastavi skrbnik). Takrat dijaki vidijo vsa poglavja nižjih letnikov, ne glede na to, kaj je odprto tem letnikom, ločeno pod »Prejšnji letniki«. Vsebina je vedno trenutna različica. Napredek se pri njih hrani, dijak ga vidi in ga lahko sam ponastavi; ne šteje v letošnji seštevek in ga učitelj ne vidi.
 
 ## 4. Napredek, točke, ponastavitve
 
@@ -73,13 +75,19 @@ Vaja je ena HTML datoteka (`content/exercises/<id>.html`), seznam nalog in stran
 
 ## 8. Skrbnik
 
-Strani: Uporabniki (iskanje, vloge, izbris), Vaje (pregled), Razredi, Kopije, Dnevnik. Dnevnik dejanj beleži, kdo je kaj naredil (slovenska imena dejanj).
+Strani: Uporabniki (iskanje, vloge, izbris), Vaje (pregled), Razredi, Šolsko leto (samo z letniki), Kopije, Dnevnik. Dnevnik dejanj beleži, kdo je kaj naredil (slovenska imena dejanj).
 
 **Kopije** (Administracija > Kopije):
 - Prenos: `pg_dump` (zapis `custom`, brez sej), datoteka se ne shrani na strežnik, ampak samo na skrbnikov računalnik. Zadnja kopija se zabeleži v dnevnik.
 - **Opozorilo** (rumeno, ne napaka) na vseh skrbniških straneh, če kopije ni ali je starejša od 7 dni.
 - Obnova: nalaganje, preverjanje (podpis arhiva, tabele, ali se prebere v celoti, različica migracij, število uporabnikov), predogled, potrditev z vpisom OBNOVI, pred tem svež prenos (30 minut) ali izrecno »ne potrebujem«. Skript se najprej napiše v datoteko in izvede v eni transakciji (`DROP SCHEMA`, vsebina), zato ob napaki ostane stara baza. Med obnovo portal odgovarja 503, po njej so vsi odjavljeni. Kopija iz novejše različice portala se zavrne, starejša se posodobi z migracijami.
 - Datoteka vsebuje osebne podatke; hrani se varno in se po izteku roka hrambe izbriše. `.env` ni del kopije.
+
+**Šolsko leto** (Administracija > Šolsko leto, samo s `years`, dogovorjeno 6. 11. 2026): zaključek leta naredi samo skrbnik.
+- Predogled: razredi zadnjega letnika (izbris), razredi nižjih letnikov (napredovanje, predlagano novo ime, npr. R2A v R3A, ki se lahko popravi), razredi brez letnika (ostanejo). Pri vsakem razredu so dijaki, privzeto vsi označeni.
+- Zadnji letnik: označeni dijaki se trajno izbrišejo (kot izbris uporabnika, tudi `erased_users`), odznačeni ostanejo brez razreda; razredi se izbrišejo.
+- Nižji letniki: razred dobi višji letnik in novo ime, vklopi se »vidi prejšnje letnike«, odprta poglavja se ponastavijo (vse zaprto), učitelji se odstranijo (dodeli jih skrbnik). Odznačeni dijaki ostanejo brez razreda. Napredek ostane.
+- Pogoji: svež prenos kopije (30 minut, brez možnosti »ne potrebujem«), potrditev z vpisom PREHOD, drugi zaključek v 120 dneh še dodatna potrditev. Vse se zgodi v eni transakciji; spremeni se samo, kar je bilo v predogledu (dijak, dodan medtem, ostane, kjer je). V dnevnik gre število izbrisanih in premaknjenih, brez imen.
 
 ## 9. Seznami in vmesnik
 

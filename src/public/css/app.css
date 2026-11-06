@@ -190,3 +190,10 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 .teacher-chip button:hover{background:var(--line);color:var(--bad)}
 .inline-details{margin-top:0}
 .inline-details summary{white-space:nowrap}
+/* Lower years, open for revision */
+.past-years{margin-top:44px;padding-top:6px;border-top:2px dashed var(--line)}
+.past-years > p{margin:4px 0 0}
+/* End of the school year */
+.year-class{border:1px solid var(--line);border-radius:8px;padding:10px 16px;margin:12px 0;background:var(--card)}
+.year-class legend{padding:0 6px}
+.year-end div.stack{display:grid;gap:10px;max-width:34rem;margin:14px 0}

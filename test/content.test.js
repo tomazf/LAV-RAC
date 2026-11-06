@@ -155,7 +155,12 @@ test('parts without exercises wait for staff; a closed class shows a clear messa
   // the empty 4th chapter of LAV-RAČ2 has its place
   assert.deepEqual(await a.locator('.planned-ex td:first-child').allTextContents(), ['4 V pripravi']);
   await a.goto(`${APP}/admin/razredi`);
+  // a class needs its year, also when the form is sent by hand
+  const csrf = await a.inputValue('form[action="/admin/razredi"] input[name=_csrf]');
+  const bare = await a.request.post(`${APP}/admin/razredi`, { form: { _csrf: csrf, name: 'Brez letnika' } });
+  assert.match(decodeURIComponent(bare.url()), /Izberi letnik razreda/);
   await a.fill('#novi', 'R2A');
+  await a.selectOption('#novi-letnik', '2');
   await a.click('text=Ustvari razred');
   await a.waitForLoadState();
   await a.goto(`${APP}/ucitelj`);
@@ -457,5 +462,104 @@ test('the exercise fits a phone, in both colour schemes', async () => {
     assert.equal(await p.locator('.page.on').getAttribute('id'), 'gray');
     await ctx.close();
   }
+  assert.deepEqual(errors, []);
+});
+
+test('a class works on its year; lower years open for revision; the admin closes the school year', async () => {
+  const db = new pg.Client({ connectionString: DB });
+  await db.connect();
+  const uid = async (oid) => (await db.query('SELECT id FROM users WHERE oid=$1', [oid])).rows[0]?.id;
+  const cid = async (name) => (await db.query('SELECT id FROM classes WHERE name=$1', [name])).rows[0]?.id;
+  for (const name of ['Cene Zupan', 'Daša Horvat']) await (await login(name)).context().close();
+  const a = await login('Sara Skrbnik');
+  for (const [name, year] of [['R3A', '3'], ['R4A', '4']]) {
+    await a.goto(`${APP}/admin/razredi`);
+    await a.fill('#novi', name);
+    await a.selectOption('#novi-letnik', year);
+    await a.click('text=Ustvari razred');
+    await a.waitForLoadState();
+  }
+  const r3 = await cid('R3A');
+  const r4 = await cid('R4A');
+  const r2 = await cid('R2A');
+  await db.query('INSERT INTO class_members(class_id, user_id) VALUES($1,$2),($3,$4)', [r3, await uid('u-cene'), r4, await uid('u-dasa')]);
+  await db.query('INSERT INTO class_teachers(class_id, user_id) SELECT id, $1 FROM classes', [await uid('u-admin')]);
+
+  // 3rd year: nothing of its own yet, and lower years stay hidden until the class may see them
+  const c = await login('Cene Zupan');
+  assert.match(await c.textContent('main'), /Učitelj še ni odprl nobene vaje/);
+  assert.equal(await c.locator('.past-years').count(), 0);
+  assert.equal((await c.goto(`${APP}/vaje/2.1`)).status(), 404);
+  await a.goto(`${APP}/admin/razredi`);
+  const row = a.locator('tr', { has: a.locator(`a[href="/ucitelj/razredi/${r3}"]`) });
+  await row.locator('input[name=show_past]').check();
+  await row.locator('button:text-is("Shrani")').click();
+  await a.waitForLoadState();
+  assert.match(await a.textContent('.notice'), /R3A: 3\. letnik, vidi prejšnje letnike/);
+  await c.goto(`${APP}/vaje`);
+  assert.deepEqual(await c.locator('.past-years .ex-no').allTextContents(), ['1', '2', '3']);
+  assert.match(await c.textContent('.hello'), /0 od 0 točk/); // lower years are not in this year's totals
+  assert.equal((await c.goto(`${APP}/vaje/2.1`)).status(), 200);
+
+  // the teacher sees only the class's year: not its progress in lower years, not their results
+  await a.goto(`${APP}/ucitelj/razredi/${r3}`);
+  assert.match(await a.textContent('.title-row'), /Vaje razreda \(0 od 0\)/);
+  assert.match(await a.textContent('.team'), /3\. letnik, dijaki vidijo tudi prejšnje letnike/);
+  assert.equal((await a.goto(`${APP}/ucitelj/razredi/${r3}/rezultati/2.1`)).status(), 404);
+  assert.doesNotMatch(await (await a.request.get(`${APP}/ucitelj/razredi/${r3}/izvoz.csv`)).text(), /2\.1/);
+  await a.goto(`${APP}/ucitelj/razredi/${r3}/vaje`);
+  assert.deepEqual(await a.locator('.group h2').allTextContents(), ['LAV-RAČ3 V pripravi']);
+  await a.goto(`${APP}/ucitelj/razredi/${r2}/vaje`);
+  assert.equal(await a.locator('.ex-table tbody tr:not(.planned-ex)').count(), 3);
+
+  // the end of the school year needs a fresh backup and the typed word
+  const anaBefore = (await db.query(`SELECT score, attempt FROM progress WHERE user_id=$1 AND exercise_id='2.1'`, [await uid('u-ana')])).rows[0];
+  assert.ok(anaBefore);
+  await a.goto(`${APP}/admin/solsko-leto`);
+  assert.match(await a.textContent('main'), /prenesi svežo varnostno kopijo/);
+  assert.deepEqual(await a.locator('.year-class legend strong').allTextContents(), ['R4A', 'R3A', 'R2A']);
+  assert.equal(await a.inputValue(`#name_${r3}`), 'R4A');
+  assert.equal(await a.inputValue(`#name_${r2}`), 'R3A');
+  await a.fill('#potrdi', 'PREHOD');
+  await a.click('text=Zaključi šolsko leto');
+  await a.waitForLoadState();
+  assert.match(await a.textContent('[role=alert]'), /Najprej prenesi svežo varnostno kopijo/);
+  assert.ok(await uid('u-dasa'));
+  const csrf = await a.inputValue('input[name=_csrf]');
+  assert.equal((await a.request.post(`${APP}/admin/kopije/prenesi`, { form: { _csrf: csrf } })).status(), 200);
+  await a.goto(`${APP}/admin/solsko-leto`);
+  await a.locator('.year-class', { hasText: 'R2A' }).locator('label', { hasText: 'Bor Novak' }).locator('input[type=checkbox]').uncheck();
+  await a.fill('#potrdi', 'prehod');
+  await a.click('text=Zaključi šolsko leto');
+  await a.waitForURL(/admin\/razredi/);
+  assert.match(await a.textContent('.notice'), /Izbrisanih dijakov: 1\. Razredov v višjem letniku: 2\. Dijakov brez razreda: 1\./);
+
+  // 4th year gone for good; the others moved up, without teachers, with nothing open, and see lower years
+  assert.equal(await uid('u-dasa'), undefined);
+  assert.equal((await db.query('SELECT count(*)::int AS n FROM erased_users')).rows[0].n >= 1, true);
+  const classes = (await db.query('SELECT id, name, year, show_past FROM classes ORDER BY name')).rows;
+  assert.deepEqual(classes, [{ id: r2, name: 'R3A', year: 3, show_past: true }, { id: r3, name: 'R4A', year: 4, show_past: true }]);
+  assert.equal((await db.query('SELECT count(*)::int AS n FROM class_teachers')).rows[0].n, 0);
+  assert.equal((await db.query('SELECT count(*)::int AS n FROM class_exercises')).rows[0].n, 0);
+  const left = (await db.query('SELECT u.oid FROM class_members m JOIN users u ON u.id=m.user_id ORDER BY u.oid')).rows.map((r) => r.oid);
+  assert.deepEqual(left, ['u-ana', 'u-cene']); // Bor stays without a class
+  assert.deepEqual((await db.query(`SELECT score, attempt FROM progress WHERE user_id=$1 AND exercise_id='2.1'`, [await uid('u-ana')])).rows[0], anaBefore);
+  const ana = await login('Ana Kovač');
+  assert.match(await ana.textContent('main'), /Učitelj še ni odprl nobene vaje/);
+  assert.deepEqual(await ana.locator('.past-years .ex-no').allTextContents(), ['1', '2', '3']);
+  const bor = await login('Bor Novak');
+  assert.match(await bor.textContent('h1'), /Čakaš/);
+  const log = (await db.query(`SELECT detail FROM audit_log WHERE action='Zaključil šolsko leto'`)).rows;
+  assert.deepEqual(log.map((r) => r.detail), ['izbrisanih dijakov 1, izbrisanih razredov 1, razredov v višjem letniku 2, dijakov brez razreda 1']);
+
+  // a second run so soon needs an extra confirmation
+  await a.goto(`${APP}/admin/solsko-leto`);
+  await a.fill('#potrdi', 'PREHOD');
+  await a.click('text=Zaključi šolsko leto');
+  await a.waitForLoadState();
+  assert.match(await a.textContent('[role=alert]'), /pred kratkim že zaključeno/);
+  assert.equal((await db.query('SELECT year FROM classes WHERE id=$1', [r2])).rows[0].year, 3);
+  for (const p of [a, c, ana, bor]) await p.context().close();
+  await db.end();
   assert.deepEqual(errors, []);
 });

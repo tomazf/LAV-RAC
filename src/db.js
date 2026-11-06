@@ -52,8 +52,10 @@ export const DELETED_NAME = 'izbrisan uporabnik';
 // Same calculation as in SQL (backup.js): encode(sha256(convert_to(ERASED_SALT || oid, 'UTF8')), 'hex')
 export const ERASED_SALT = `${portal.slug}-erased:`;
 export const erasedHash = (oid) => crypto.createHash('sha256').update(`${ERASED_SALT}${oid}`).digest('hex');
-export async function eraseUser(user) {
-  await tx(async (c) => {
+// Pass a client to erase as part of a larger transaction (the end of the school year).
+export async function eraseUser(user, client = null) {
+  const run = client ? (fn) => fn(client) : tx;
+  await run(async (c) => {
     await c.query('INSERT INTO erased_users(oid_hash) VALUES($1) ON CONFLICT (oid_hash) DO UPDATE SET erased_at=now()', [erasedHash(user.oid)]);
     await c.query('UPDATE audit_log SET actor_name=$2 WHERE actor_id=$1', [user.id, DELETED_NAME]);
     await c.query('UPDATE audit_log SET actor_name=replace(actor_name, $1, $2), detail=replace(detail, $1, $2) WHERE actor_name LIKE $3 OR detail LIKE $3',

@@ -1,7 +1,7 @@
 import express from 'express';
-import { classGroups, standardGroups } from '../catalog.js';
+import { classGroups, pastGroups, standardGroups } from '../catalog.js';
 import { requireAccess } from '../auth.js';
-import { many } from '../db.js';
+import { many, one } from '../db.js';
 import { cell, latest, progressFor, rollup, strip } from '../stats.js';
 
 export const studentRouter = express.Router();
@@ -15,9 +15,12 @@ studentRouter.get('/zasebnost', (req, res) => res.render('privacy'));
 studentRouter.get('/vaje', requireAccess, async (req, res, next) => {
   try {
     const mods = req.user.isTeacher ? standardGroups() : await classGroups(req.user.class_id, { openOnly: true });
+    // A class that may revisit lower years sees them in a section of their own, outside this year's totals.
+    const cls = req.user.isTeacher ? null : await one('SELECT year, show_past FROM classes WHERE id=$1', [req.user.class_id]);
+    const past = cls?.show_past ? pastGroups(cls.year) : [];
     const map = (await progressFor([req.user.id])).get(req.user.id);
     const list = mods.flatMap((m) => m.exercises);
-    const rows = new Map(list.map((e) => {
+    const rows = new Map([...list, ...past.flatMap((m) => m.exercises)].map((e) => {
       const c = cell(map, e.id);
       return [e.id, { ...c, strip: strip(e, c.state), last: latest(c.updatedAt, c.lastSeen) }];
     }));
@@ -32,6 +35,6 @@ studentRouter.get('/vaje', requireAccess, async (req, res, next) => {
     const exerciseNote = new Map(notes.filter((n) => n.exercise_id && n.task_index === -1).map((n) => [n.exercise_id, n.body]));
     const taskNotes = new Map();
     for (const n of notes) if (n.task_index >= 0) taskNotes.set(n.exercise_id, (taskNotes.get(n.exercise_id) || 0) + 1);
-    res.render('dashboard', { mods, rows, total, maxPoints, maxTasks, next_, nextStarted: next_ ? rows.get(next_.id).started : false, generalNote, exerciseNote, taskNotes });
+    res.render('dashboard', { mods, past, rows, total, maxPoints, maxTasks, next_, nextStarted: next_ ? rows.get(next_.id).started : false, generalNote, exerciseNote, taskNotes });
   } catch (e) { next(e); }
 });

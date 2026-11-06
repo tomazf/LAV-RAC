@@ -1,0 +1,59 @@
+<%- include('../partials/head', { pageTitle: 'Šolsko leto', mainClass: 'wide' }) %>
+<% const f = fmt; const people = (n) => f.count(n, f.DIJAKOV); %>
+<%- include('../partials/adminnav') %>
+<% if (error) { %><p class="notice-warn" role="alert"><%= error %></p><% } %>
+<section class="block">
+  <h2>Zaključek šolskega leta</h2>
+  <p>Ob koncu šolskega leta se <%= finalYear %>. letniki poslovijo od portala, drugi razredi pa napredujejo v višji letnik. Spodaj je predogled. Podatki se spremenijo šele, ko potrdiš na dnu strani.</p>
+  <ul>
+    <li>Dijaki <%= finalYear %>. letnikov se <strong>trajno izbrišejo</strong> z napredkom, opombami in vsemi zapisi, njihovi razredi pa tudi. Tega ni mogoče razveljaviti, razen z obnovitvijo kopije, ki jo preneseš zdaj.</li>
+    <li>Drugi razredi preidejo v višji letnik in dobijo novo ime. Poglavja novega letnika so zaprta, dokler jih učitelj ne odpre. Razredi zagledajo prejšnje letnike za ponavljanje.</li>
+    <li>Učitelji se odstranijo iz razredov, ki napredujejo. Po prehodu jih dodeliš na strani Razredi.</li>
+    <li>Napredek dijakov ostane. Dijak, ki ga odznačiš, ostane brez razreda in ga pozneje dodaš v ustrezen razred.</li>
+  </ul>
+  <% if (lastRun) { %><p class="dim">Zadnji zaključek šolskega leta: <%= f.dateTime(lastRun) %> (<%= f.ago(lastRun) %>).</p><% } %>
+</section>
+<form method="post" action="/admin/solsko-leto" class="year-end">
+<input type="hidden" name="_csrf" value="<%= csrf %>">
+<section class="block">
+  <h2><%= finalYear %>. letnik: izbris</h2>
+  <% if (!leaving.length) { %><p class="empty">Ni razredov <%= finalYear %>. letnika.</p><% } %>
+  <% leaving.forEach((c) => { %>
+  <fieldset class="year-class">
+    <legend><strong><%= c.name %></strong>: razred se izbriše, <%= people(c.students.length) %></legend>
+    <% if (c.students.length) { %><p class="dim">Označeni dijaki se trajno izbrišejo. Odznačeni ostanejo brez razreda.</p>
+    <ul class="checks"><% c.students.forEach((s) => { %><li><label title="<%= s.email || s.username %>"><input type="hidden" name="leaving" value="<%= s.id %>"><input type="checkbox" name="erase" value="<%= s.id %>" checked> <%= s.name %></label></li><% }) %></ul><% } %>
+  </fieldset>
+  <% }) %>
+</section>
+<section class="block">
+  <h2>Napredovanje v višji letnik</h2>
+  <% if (!moving.length) { %><p class="empty">Ni razredov, ki bi napredovali.</p><% } %>
+  <% moving.forEach((c) => { %>
+  <fieldset class="year-class">
+    <legend><strong><%= c.name %></strong>: iz <%= c.year %>. v <%= c.year + 1 %>. letnik, <%= people(c.students.length) %></legend>
+    <p class="inline"><label for="name_<%= c.id %>">Novo ime razreda</label> <input id="name_<%= c.id %>" name="name_<%= c.id %>" value="<%= c.next %>" required maxlength="80"></p>
+    <% if (c.teachers.length) { %><p class="dim">Odstranjeni učitelji: <%= c.teachers.join(', ') %></p><% } %>
+    <% if (c.students.length) { %><p class="dim">Označeni dijaki napredujejo z razredom. Odznačeni ostanejo brez razreda.</p>
+    <ul class="checks"><% c.students.forEach((s) => { %><li><label title="<%= s.email || s.username %>"><input type="hidden" name="moving" value="<%= s.id %>"><input type="checkbox" name="keep" value="<%= s.id %>" checked> <%= s.name %></label></li><% }) %></ul><% } %>
+  </fieldset>
+  <% }) %>
+</section>
+<% if (other.length) { %><section class="block">
+  <h2>Razredi brez letnika</h2>
+  <p>Ti razredi ostanejo nespremenjeni: <%= other.map((c) => c.name).join(', ') %>. Letnik jim lahko nastaviš na strani Razredi.</p>
+</section><% } %>
+<section class="block">
+  <h2>Potrditev</h2>
+  <% if (fresh) { %><p class="dim">Trenutno stanje je bilo pred kratkim preneseno, zato ga lahko vrneš z obnovitvijo.</p>
+  <% } else { %><p class="notice-warn">Najprej <a href="/admin/kopije">prenesi svežo varnostno kopijo</a>. Brez nje prehoda ni mogoče potrditi.</p><% } %>
+  <div class="stack">
+    <% if (lastRun && Date.now() - new Date(lastRun) < againDays * 864e5) { %><p class="notice-warn">Šolsko leto je bilo zaključeno <%= f.ago(lastRun) %>. Drugi zaključek bi razrede premaknil še za en letnik.</p>
+    <label><input type="checkbox" name="again" value="1"> Vem, da je bilo šolsko leto že zaključeno, in ga želim zaključiti znova</label><% } %>
+    <label for="potrdi">Za potrditev vpiši <%= word %></label>
+    <input id="potrdi" name="potrdi" autocomplete="off" required>
+    <button class="btn danger">Zaključi šolsko leto</button>
+  </div>
+</section>
+</form>
+<%- include('../partials/foot') %>

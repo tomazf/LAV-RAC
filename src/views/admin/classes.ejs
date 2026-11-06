@@ -1,11 +1,16 @@
 <%- include('../partials/head', { pageTitle: 'Razredi', mainClass: 'wide' }) %>
 <%- include('../partials/adminnav') %>
 <form class="inline" method="post" action="/admin/razredi"><input type="hidden" name="_csrf" value="<%= csrf %>">
-  <label class="sr" for="novi">Ime novega razreda</label><input id="novi" name="name" required maxlength="80" placeholder="npr. E4A 26/27"><button class="btn">Ustvari razred</button></form>
+  <label class="sr" for="novi">Ime novega razreda</label><input id="novi" name="name" required maxlength="80" placeholder="npr. R2A">
+  <% if (YEARS.length) { %><label class="sr" for="novi-letnik">Letnik</label><select id="novi-letnik" name="year" required><option value="">Letnik …</option><% YEARS.forEach((y) => { %><option value="<%= y.year %>"><%= y.year %>. letnik</option><% }) %></select><% } %><button class="btn">Ustvari razred</button></form>
 <% if (!classes.length) { %><p class="empty">Še ni razredov. Vpiši ime zgoraj. Učitelji se nato sami pridružijo ali jih dodaš ti.</p><% } else { %>
-<div class="scroll block"><table class="data"><thead><tr><th class="l">Razred</th><th>Dijaki</th><th class="l">Učitelji</th><th class="l">Dodaj učitelja</th><th class="l">Urejanje</th></tr></thead><tbody>
+<div class="scroll block"><table class="data"><thead><tr><th class="l">Razred</th><% if (YEARS.length) { %><th class="l">Letnik</th><% } %><th>Dijaki</th><th class="l">Učitelji</th><th class="l">Dodaj učitelja</th><th class="l">Urejanje</th></tr></thead><tbody>
 <% classes.forEach((c) => { const free = teachers.filter((t) => !c.teachers.some((x) => x.id === t.id)); %><tr>
-  <td class="l"><a href="/ucitelj/razredi/<%= c.id %>"><strong><%= c.name %></strong></a></td><td><%= c.students %></td>
+  <td class="l"><a href="/ucitelj/razredi/<%= c.id %>"><strong><%= c.name %></strong></a></td>
+  <% if (YEARS.length) { %><td class="l"><form class="inline tight" method="post" action="/admin/razredi/<%= c.id %>/letnik"><input type="hidden" name="_csrf" value="<%= csrf %>">
+    <label class="sr" for="y<%= c.id %>">Letnik razreda <%= c.name %></label><select id="y<%= c.id %>" name="year"><% if (!c.year) { %><option value="">brez letnika</option><% } %><% YEARS.forEach((y) => { %><option value="<%= y.year %>" <%= c.year === y.year ? 'selected' : '' %>><%= y.year %>. letnik</option><% }) %></select>
+    <label class="switch"><input type="checkbox" name="show_past" <%= c.show_past ? 'checked' : '' %>> vidi prejšnje letnike</label><button class="btn ghost small">Shrani</button></form></td><% } %>
+  <td><%= c.students %></td>
   <td class="l"><% if (!c.teachers.length) { %><span class="dim">še brez učitelja</span><% } %><% c.teachers.forEach((t) => { %>
     <form class="teacher-chip" method="post" action="/admin/razredi/<%= c.id %>/ucitelji/<%= t.id %>/odstrani"><input type="hidden" name="_csrf" value="<%= csrf %>"><span><%= t.name %></span><button aria-label="Odstrani učitelja <%= t.name %> iz razreda <%= c.name %>" title="Odstrani iz razreda">×</button></form><% }) %></td>
   <td class="l"><% if (free.length) { %><form class="inline tight" method="post" action="/admin/razredi/<%= c.id %>/ucitelji"><input type="hidden" name="_csrf" value="<%= csrf %>">

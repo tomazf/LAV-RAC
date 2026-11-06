@@ -14,30 +14,14 @@
   <div class="lvn-text" id="note-general" <%- generalNote ? '' : 'hidden' %>><%= generalNote %></div>
 </section><% } %>
 <% if (!mods.length) { %><p class="empty">Učitelj še ni odprl nobene vaje. Ko jih odpre, se pojavijo tukaj.</p><% } %>
-<% mods.forEach((m) => { %>
-<section class="module">
-  <h2><span class="m-no"><%= m.id %></span> <%= m.title %></h2>
-  <ol class="rail">
-    <% m.exercises.forEach((e) => { const r = rows.get(e.id); const finished = r.done === e.tasks.length; %>
-    <li class="node <%= finished ? 'lit' : r.started ? 'half' : '' %>">
-      <div class="ex-main">
-        <h3><a href="/vaje/<%= e.id %>"><span class="ex-no"><%= e.no %></span> <%= e.title %></a></h3>
-        <%- include('partials/strip', { items: r.strip }) %>
-        <p class="ex-meta"><%= f.num(r.score) %> od <%= e.maxPoints %> točk, <%= r.done %> od <%= e.tasks.length %> nalog<% if (r.resets) { %>, ponastavljeno <%= r.resets %>-krat<% } %><% if (taskNotes.get(e.id)) { %>, opombe pri nalogah: <%= taskNotes.get(e.id) %><% } %>
-          <% if (!user.isAdmin) { %><span data-note-slot data-box="note-<%= e.id %>" data-exercise="<%= e.id %>" data-heading="Opomba k vaji <%= e.no %>" data-csrf="<%= csrf %>"></span><% } %></p>
-        <% if (!user.isAdmin) { %><div class="lvn-text" id="note-<%= e.id %>" <%- exerciseNote.get(e.id) ? '' : 'hidden' %>><%= exerciseNote.get(e.id) || '' %></div><% } %>
-      </div>
-      <dl class="times">
-        <div><dt>Teorija</dt><dd><%= f.duration(r.time.Teorija) %></dd></div>
-        <div><dt>Simulacija</dt><dd><%= f.duration(r.time.Simulacija) %></dd></div>
-        <div><dt>Naloge</dt><dd><%= f.duration(r.time.Naloge) %></dd></div>
-      </dl>
-      <a class="btn <%= r.started && !finished ? '' : 'ghost' %>" href="/vaje/<%= e.id %>" aria-label="<%= finished ? 'Odpri' : r.started ? 'Nadaljuj' : 'Začni' %> vajo <%= e.no %>"><%= finished ? 'Odpri' : r.started ? 'Nadaljuj' : 'Začni' %></a>
-    </li>
-    <% }) %>
-  </ol>
+<%- include('partials/rail', { groups: mods }) %>
+<% if (past.length) { %>
+<section class="past-years" aria-labelledby="past-h">
+  <h2 id="past-h">Prejšnji letniki</h2>
+  <p class="dim">Vaje nižjih letnikov so odprte za ponavljanje. Točke tukaj se ne štejejo v letošnji pregled in jih učitelj ne vidi.</p>
+  <%- include('partials/rail', { groups: past }) %>
 </section>
-<% }) %>
+<% } %>
 <%- include('partials/legend') %>
 <script src="<%= asset('js/notes.js') %>"></script>
 <%- include('partials/foot') %>

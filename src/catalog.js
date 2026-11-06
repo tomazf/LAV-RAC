@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { asset } from './assets.js';
-import { many, q } from './db.js';
+import { many, one, q } from './db.js';
 import { portal } from './portal.js';
 
 const root = path.resolve(import.meta.dirname, '..');
@@ -37,6 +37,16 @@ export const plannedIn = (moduleId) => plannedExercises.filter((p) => p.module =
 // Groups that are planned but have no content yet; shown only to teachers and admins.
 export const plannedModules = portal.plannedModules.filter((id) => !modules.some((m) => m.id === id));
 
+// Years: each class works on its year's group. Off when the portal has no years or none of their groups has content
+// yet (the tests run on other content); then a class sees every group, as before.
+export const YEARS = Object.entries(portal.years).map(([y, module]) => ({ year: Number(y), module })).sort((a, b) => a.year - b.year);
+export const yearsOn = YEARS.some((y) => modules.some((m) => m.id === y.module));
+export const finalYear = yearsOn ? YEARS.at(-1).year : null;
+export const yearOf = (moduleId) => YEARS.find((y) => y.module === moduleId)?.year ?? null;
+export const inYear = (year, moduleId) => !yearsOn || !year || yearOf(moduleId) === year;
+// Groups of lower years, which a class may be allowed to revisit.
+export const pastYear = (year, moduleId) => yearsOn && !!year && yearOf(moduleId) !== null && yearOf(moduleId) < year;
+
 function grouped(items) {
   return modules
     .map((m) => ({ ...m, exercises: items.filter((e) => e.module === m.id) }))
@@ -47,14 +57,17 @@ const light = (e, extra) => ({ ...e, html: undefined, ...extra });
 export const standardGroups = () => grouped(exercises.map((e, i) => light(e, { visible: true, order: i })));
 // Exercises in the order chosen for a class, with what is open to its students.
 export async function classGroups(classId, { openOnly = false } = {}) {
+  const year = (await one('SELECT year FROM classes WHERE id=$1', [classId]))?.year ?? null;
   const rows = await many('SELECT * FROM class_exercises WHERE class_id=$1', [classId]);
   const s = new Map(rows.map((r) => [r.exercise_id, r]));
   const items = exercises
     .map((e, i) => light(e, { visible: s.get(e.id)?.visible === true, order: s.get(e.id)?.sort_order ?? i }))
-    .filter((e) => !openOnly || e.visible)
+    .filter((e) => inYear(year, e.module) && (!openOnly || e.visible))
     .sort((a, b) => a.order - b.order);
   return grouped(items);
 }
+// Everything from lower years, in the standard order; open regardless of what the teachers opened.
+export const pastGroups = (year) => grouped(exercises.filter((e) => pastYear(year, e.module)).map((e, i) => light(e, { visible: true, order: i })));
 export async function ensureClassRows(classId) {
   for (const [i, e] of exercises.entries()) {
     await q('INSERT INTO class_exercises(class_id, exercise_id, sort_order) VALUES($1,$2,$3) ON CONFLICT DO NOTHING', [classId, e.id, i]);
