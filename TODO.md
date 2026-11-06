@@ -7,6 +7,10 @@
 - [x] Letnik razreda in prehod v naslednji letnik (6. 11. 2026, glej spodaj).
 - [x] Administracija > Razredi: gumbi Dodaj (in Shrani) (učitelj) naj bodo poravnani v stolpcu, ne glede na dolžino imena v izbirnem polju (6. 11. 2026).
 - [x] Administracija > Razredi: pri najnižjem letniku (2.) ni izbire »vidi prejšnje letnike«, ker nižjega letnika ni. Pri 3. in 4. naj napis pove, kaj se odpre (3.: »vidi 2. letnik«, 4.: »vidi 2. in 3. letnik«) (6. 11. 2026).
+- [ ] Administracija > Šolsko leto: lepši in bolj praktičen predogled (6. 11. 2026):
+  - naslov razreda (»T4A: razred se izbriše, 0 dijakov«) je v robu okvirja, na sredini črte, in izgleda zamaknjeno; naj bo znotraj kartice kot naslov,
+  - seznam razredov je preširok; kartice razredov v dveh (ali več) stolpcih,
+  - bolj pregledno in hitreje za delo (npr. strnjen prikaz razredov brez dijakov).
 - [x] Ikona strani povsod (6. 11. 2026): `/favicon.ico` (izdelan iz `favicon.svg` z `node scripts/make-favicon.js`) in povezava na vseh straneh, tudi v vajah.
 
 ## Letnik razreda in prehod v naslednji letnik
