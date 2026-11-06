@@ -10,7 +10,7 @@
 - [ ] Administracija > Šolsko leto: lepši in bolj praktičen predogled (6. 11. 2026):
   - naslov razreda (»T4A: razred se izbriše, 0 dijakov«) je v robu okvirja, na sredini črte, in izgleda zamaknjeno; naj bo znotraj kartice kot naslov,
   - seznam razredov je preširok; kartice razredov v dveh (ali več) stolpcih,
-  - bolj pregledno in hitreje za delo (npr. strnjen prikaz razredov brez dijakov).
+  - bolj pregledno in hitreje za delo: strnjen prikaz (razred, novo ime in dijaki v eni vrstici), povzetek na vrhu (koliko razredov se izbriše, koliko napreduje, koliko dijakov), pri razredih z dijaki »izberi vse / nobenega«.
 - [x] Ikona strani povsod (6. 11. 2026): `/favicon.ico` (izdelan iz `favicon.svg` z `node scripts/make-favicon.js`) in povezava na vseh straneh, tudi v vajah.
 
 ## Letnik razreda in prehod v naslednji letnik
