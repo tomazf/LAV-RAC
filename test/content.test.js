@@ -340,6 +340,11 @@ test('staff see the tasks without reading the theory first', async () => {
   await a.goto(`${EX}#naloge-b`);
   assert.ok(await a.locator('.page.on .lr-locked').isHidden());
   assert.equal(await a.locator('.page.on .lr-num').count(), 23);
+  // back sits at the left edge, forward at the right edge
+  const bar = await a.locator('.page.on .lr-pager').boundingBox();
+  const prev = await a.locator('.page.on .lr-prevp').boundingBox();
+  const next = await a.locator('.page.on .lr-nextp').boundingBox();
+  assert.ok(Math.abs(prev.x - bar.x) < 2 && Math.abs(next.x + next.width - bar.x - bar.width) < 2);
   await a.context().close();
 });
 
