@@ -1004,7 +1004,7 @@ test('login page, school logo and data notice page', async () => {
   const centre = async (sel) => { const b = await p.locator(sel).boundingBox(); return b.x + b.width / 2; };
   assert.ok(Math.abs(await centre('.entry h1') - await centre('main a.btn')) < 2, 'the button is centred under the title');
   assert.equal(await p.evaluate(() => getComputedStyle(document.querySelector('.entry h1')).textAlign), 'center');
-  assert.doesNotMatch(await p.textContent('main'), /Prijaviš se/);
+  assert.doesNotMatch(await p.textContent('main'), /Prijaviš se|Tudi ime portala/);
   await p.click('a:text("Kateri podatki se beležijo")');
   await p.waitForURL(/zasebnost/);
   assert.equal(await p.locator('footer a').count(), 0);

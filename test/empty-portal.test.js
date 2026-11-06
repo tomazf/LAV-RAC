@@ -107,6 +107,31 @@ test('one tab stop on the panel: arrows move, space flips, the login comes first
   assert.equal(await p.locator('.lamp[tabindex="0"]').count(), 1);
   await ctx.close();
 });
+test('the title breaks in one place only: Laboratorijske vaje, then iz računalništva', async () => {
+  for (const width of [320, 360, 768, 1024, 1280, 1920]) {
+    const ctx = await browser.newContext({ viewport: { width, height: 800 } });
+    const p = await ctx.newPage();
+    await p.goto(APP);
+    const lines = await p.evaluate(() => {
+      const h1 = document.querySelector('.entry h1');
+      const text = h1.firstChild;
+      const out = [];
+      let top = null;
+      for (let i = 0; i < text.length; i++) {
+        const r = document.createRange();
+        r.setStart(text, i);
+        r.setEnd(text, i + 1);
+        const t = Math.round(r.getBoundingClientRect().top);
+        if (t !== top) { out.push(''); top = t; }
+        out[out.length - 1] += text.data[i];
+      }
+      return out.map((l) => l.replace(/\u00a0/g, ' ').trim());
+    });
+    assert.deepEqual(lines, ['Laboratorijske vaje', 'iz računalništva'], `at ${width}px`);
+    assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `no sideways scroll at ${width}px`);
+    await ctx.close();
+  }
+});
 test('the page fits a phone with no sideways scrolling, in both colour schemes', async () => {
   for (const colorScheme of ['light', 'dark']) {
     const ctx = await browser.newContext({ viewport: { width: 360, height: 740 }, colorScheme });

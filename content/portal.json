@@ -1,7 +1,7 @@
 {
   "name": "LAV-RAČ",
   "slug": "lavrac",
-  "title": "Laboratorijske vaje iz računalništva",
+  "title": "Laboratorijske vaje iz računalništva",
   "subtitle": "Za dijake 2., 3. in 4. letnika Tehniške gimnazije Šolskega centra Novo mesto.",
   "about": "portal z laboratorijskimi vajami iz računalništva za dijake 2., 3. in 4. letnika Tehniške gimnazije Šolskega centra Novo mesto",
   "school": { "name": "Šolski center Novo mesto", "url": "https://www.sc-nm.si", "logo": "img/sc-nm-logo.jpg" },
