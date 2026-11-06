@@ -10,6 +10,7 @@
   const TASKS = [];            // index -> { id, max, src }
   const byId = new Map();      // artifact task id -> index
   const cards = new Map();     // index -> card element
+  const notes = new Map();     // index -> why the answer was wrong (only until the page is reloaded)
   let state = read();
   let cfg = null;
   let pages = [];              // every page in order: { id, kind, title, group, el, set }
@@ -49,7 +50,7 @@
   const MESSAGE = {
     ok: (r) => 'Pravilno: ' + pts(r.p) + '.',
     half: (r) => 'Pravilno z namigom: ' + pts(r.p) + '.',
-    bad: () => 'Napačno: 0 točk. Naloga je zaklenjena, rešitev si lahko ogledaš.',
+    bad: (r, note) => 'Napačno: 0 točk.' + (note ? ' ' + note : '') + ' Naloga je zaklenjena, rešitev si lahko ogledaš.',
     seen: () => 'Rešitev prikazana: 0 točk. Naloga je zaklenjena.',
   };
   const LABEL = { ok: 'Pravilno', half: 'Pravilno z namigom', bad: 'Napačno', seen: 'Rešitev ogledana' };
@@ -68,8 +69,10 @@
 
   // ---------- calls from the artifact ----------
   const api = {
-    tasks(list) {
-      list.forEach((t, i) => { t.idx = i; TASKS.push({ id: t.id, max: Number(t.pts) || 1, task: t }); byId.set(t.id, i); });
+    // list: the artifact's tasks in the order they are shown; level(t) gives 1, 2 or 3 for the teacher's list.
+    tasks(list, opts) {
+      const level = (opts && opts.level) || ((t) => t.lv);
+      list.forEach((t, i) => { t.idx = i; TASKS.push({ id: t.id, max: Number(t.pts) || 1, task: t, level: level(t) }); byId.set(t.id, i); });
     },
     // The artifact's own memory of what was typed and how many hints are open.
     loadUi() {
@@ -98,9 +101,11 @@
       });
       if (changed) persist();
     },
-    answered(i, ok) {
+    // note: the artifact's explanation of a wrong answer, shown with the result.
+    answered(i, ok, note) {
       const r = rec(i);
       if (r.d) return;
+      notes.set(i, ok ? '' : String(note || '').trim());
       const max = TASKS[i].max;
       r.d = true;
       r.p = ok ? (r.h ? half(max) : max) : 0;
@@ -165,6 +170,8 @@
     const rail = buildRail(groups, sets, c);
     main.append(buildMobileNav());
     pages.forEach((p) => {
+      // The page gets the artifact's id; the artifact's own element keeps a different one, so ids stay unique.
+      if (p.el && p.el.id === p.id) p.el.id = 'src-' + p.id;
       p.page = h('div', { class: 'page lr-page lr-' + p.kind, id: p.id, 'data-chapter': p.kind === 'theory' || p.kind === 'overview' ? 'Teorija' : 'Naloge' });
       if (p.kind === 'overview') buildOverview(p, groups, sets, c);
       if (p.kind === 'theory') buildTheory(p, theory);
@@ -366,7 +373,9 @@
       actions.classList.add('lr-actions');
       const left = h('div', { class: 'lr-left' });
       const right = h('div', { class: 'lr-right' });
-      [check, fb].forEach((x) => x && left.append(x));
+      const extra = sel.extra ? [...card.querySelectorAll(sel.extra)] : [];
+      extra.forEach((x) => x.classList.add('lr-extra'));
+      [...extra, check, fb].forEach((x) => x && left.append(x));
       [hint, sol].forEach((x) => x && right.append(x));
       actions.prepend(left, right);
       const ask = h('div', { class: 'lr-solask', hidden: true, role: 'alert' });
@@ -420,8 +429,8 @@
     if (tag) { tag.hidden = !done; tag.textContent = LABEL[s] || ''; tag.className = 'tag lr-st lr-' + s; }
     const fb = card.lrFb;
     if (done) {
-      card.querySelectorAll('.lr-q input, .lr-q select, .lr-q textarea, .lr-q button, .lr-check').forEach((x) => { x.disabled = true; });
-      if (fb) { fb.textContent = MESSAGE[s](state.t[i]); fb.className = 'feedback lr-fb ' + (s === 'ok' || s === 'half' ? 'ok' : 'bad'); }
+      card.querySelectorAll('.lr-q input, .lr-q select, .lr-q textarea, .lr-q button, .lr-check, .lr-extra').forEach((x) => { x.disabled = true; });
+      if (fb) { fb.textContent = MESSAGE[s](state.t[i], notes.get(i)); fb.className = 'feedback lr-fb ' + (s === 'ok' || s === 'half' ? 'ok' : 'bad'); }
     }
     if (announce) {
       const sb = card.querySelector('.lr-solask');
@@ -541,7 +550,7 @@
     const tasks = [];
     pages.filter((p) => p.kind === 'set').forEach((s) => s.tasks.forEach((t) => {
       const src = TASKS[t.idx].task;
-      tasks.push({ i: t.idx, level: LEVEL[src.lv] || '', max: TASKS[t.idx].max, section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
+      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
     }));
     tasks.sort((a, b) => a.i - b.i);
     return {

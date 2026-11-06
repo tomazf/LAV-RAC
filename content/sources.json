@@ -1,14 +1,35 @@
 {
   "modules": [
-    { "id": "LAV-RAČ2", "title": "2. letnik" },
-    { "id": "LAV-RAČ3", "title": "3. letnik" },
-    { "id": "LAV-RAČ4", "title": "4. letnik" }
+    {
+      "id": "LAV-RAČ2",
+      "title": "2. letnik"
+    },
+    {
+      "id": "LAV-RAČ3",
+      "title": "3. letnik"
+    },
+    {
+      "id": "LAV-RAČ4",
+      "title": "4. letnik"
+    }
   ],
   "exercises": [
     {
       "id": "2.1",
       "artifact": "https://claude.ai/artifact/1DpaFu13FvJP1y14YhPHX8",
       "artifactTitle": "Številski sistemi, kodiranje in pariteta – ŠCNM",
+      "version": 1
+    },
+    {
+      "id": "2.2",
+      "artifact": "https://claude.ai/artifact/D6zjTkn8qaSecaN948ZYdi",
+      "artifactTitle": "Logične funkcije – utrjevanje | ŠCNM",
+      "version": 1
+    },
+    {
+      "id": "2.3",
+      "artifact": "https://claude.ai/artifact/3F2fwvqNFDK1nBTS3UAEVQ",
+      "artifactTitle": "Arhitektura računalniških sistemov",
       "version": 1
     }
   ]

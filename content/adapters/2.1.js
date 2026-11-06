@@ -32,7 +32,7 @@ export default {
 let S = {};
 try { S = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; } catch(e) { S = {}; }
 function save(){ try { localStorage.setItem(STORE, JSON.stringify(S)); } catch(e){} }`,
-    `LavRac.tasks(TT);
+    `LavRac.tasks(TT, { level: (t) => t.lv });
 let S = LavRac.loadUi();
 function save(){ LavRac.saveUi(S); }`],
     // One answer per task: an incomplete answer only gets a message, a complete one locks the task.
@@ -64,7 +64,7 @@ LavRac.mount({
   sets: LEVELS.map(L=>({ id: L.id, tag: L.tag, title: L.title, note: L.note, el: document.getElementById("p-"+L.id),
     tasks: L.list.map(t=>({ idx: t.idx, el: document.getElementById("t-"+t.id) })) })),
   extra: { id: "doma", title: "Za doma", note: document.querySelector("#sec-doma > .prose").textContent.trim(), el: document.getElementById("sec-doma") },
-  sel: { head: ".thead", num: ".tnum", tags: ".tags", q: ".q", check: ".js-check", hint: ".js-hint", sol: ".js-sol", fb: ".feedback", actions: ".actions" },
+  sel: { head: ".thead", num: ".tnum", tags: ".tags", q: ".q", check: ".js-check", hint: ".js-hint", sol: ".js-sol", fb: ".feedback", actions: ":scope > .actions" },
 });`],
   ],
 };

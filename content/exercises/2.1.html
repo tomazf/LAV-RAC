@@ -17,6 +17,7 @@
   const TASKS = [];            // index -> { id, max, src }
   const byId = new Map();      // artifact task id -> index
   const cards = new Map();     // index -> card element
+  const notes = new Map();     // index -> why the answer was wrong (only until the page is reloaded)
   let state = read();
   let cfg = null;
   let pages = [];              // every page in order: { id, kind, title, group, el, set }
@@ -56,7 +57,7 @@
   const MESSAGE = {
     ok: (r) => 'Pravilno: ' + pts(r.p) + '.',
     half: (r) => 'Pravilno z namigom: ' + pts(r.p) + '.',
-    bad: () => 'Napačno: 0 točk. Naloga je zaklenjena, rešitev si lahko ogledaš.',
+    bad: (r, note) => 'Napačno: 0 točk.' + (note ? ' ' + note : '') + ' Naloga je zaklenjena, rešitev si lahko ogledaš.',
     seen: () => 'Rešitev prikazana: 0 točk. Naloga je zaklenjena.',
   };
   const LABEL = { ok: 'Pravilno', half: 'Pravilno z namigom', bad: 'Napačno', seen: 'Rešitev ogledana' };
@@ -75,8 +76,10 @@
 
   // ---------- calls from the artifact ----------
   const api = {
-    tasks(list) {
-      list.forEach((t, i) => { t.idx = i; TASKS.push({ id: t.id, max: Number(t.pts) || 1, task: t }); byId.set(t.id, i); });
+    // list: the artifact's tasks in the order they are shown; level(t) gives 1, 2 or 3 for the teacher's list.
+    tasks(list, opts) {
+      const level = (opts && opts.level) || ((t) => t.lv);
+      list.forEach((t, i) => { t.idx = i; TASKS.push({ id: t.id, max: Number(t.pts) || 1, task: t, level: level(t) }); byId.set(t.id, i); });
     },
     // The artifact's own memory of what was typed and how many hints are open.
     loadUi() {
@@ -105,9 +108,11 @@
       });
       if (changed) persist();
     },
-    answered(i, ok) {
+    // note: the artifact's explanation of a wrong answer, shown with the result.
+    answered(i, ok, note) {
       const r = rec(i);
       if (r.d) return;
+      notes.set(i, ok ? '' : String(note || '').trim());
       const max = TASKS[i].max;
       r.d = true;
       r.p = ok ? (r.h ? half(max) : max) : 0;
@@ -172,6 +177,8 @@
     const rail = buildRail(groups, sets, c);
     main.append(buildMobileNav());
     pages.forEach((p) => {
+      // The page gets the artifact's id; the artifact's own element keeps a different one, so ids stay unique.
+      if (p.el && p.el.id === p.id) p.el.id = 'src-' + p.id;
       p.page = h('div', { class: 'page lr-page lr-' + p.kind, id: p.id, 'data-chapter': p.kind === 'theory' || p.kind === 'overview' ? 'Teorija' : 'Naloge' });
       if (p.kind === 'overview') buildOverview(p, groups, sets, c);
       if (p.kind === 'theory') buildTheory(p, theory);
@@ -373,7 +380,9 @@
       actions.classList.add('lr-actions');
       const left = h('div', { class: 'lr-left' });
       const right = h('div', { class: 'lr-right' });
-      [check, fb].forEach((x) => x && left.append(x));
+      const extra = sel.extra ? [...card.querySelectorAll(sel.extra)] : [];
+      extra.forEach((x) => x.classList.add('lr-extra'));
+      [...extra, check, fb].forEach((x) => x && left.append(x));
       [hint, sol].forEach((x) => x && right.append(x));
       actions.prepend(left, right);
       const ask = h('div', { class: 'lr-solask', hidden: true, role: 'alert' });
@@ -427,8 +436,8 @@
     if (tag) { tag.hidden = !done; tag.textContent = LABEL[s] || ''; tag.className = 'tag lr-st lr-' + s; }
     const fb = card.lrFb;
     if (done) {
-      card.querySelectorAll('.lr-q input, .lr-q select, .lr-q textarea, .lr-q button, .lr-check').forEach((x) => { x.disabled = true; });
-      if (fb) { fb.textContent = MESSAGE[s](state.t[i]); fb.className = 'feedback lr-fb ' + (s === 'ok' || s === 'half' ? 'ok' : 'bad'); }
+      card.querySelectorAll('.lr-q input, .lr-q select, .lr-q textarea, .lr-q button, .lr-check, .lr-extra').forEach((x) => { x.disabled = true; });
+      if (fb) { fb.textContent = MESSAGE[s](state.t[i], notes.get(i)); fb.className = 'feedback lr-fb ' + (s === 'ok' || s === 'half' ? 'ok' : 'bad'); }
     }
     if (announce) {
       const sb = card.querySelector('.lr-solask');
@@ -548,7 +557,7 @@
     const tasks = [];
     pages.filter((p) => p.kind === 'set').forEach((s) => s.tasks.forEach((t) => {
       const src = TASKS[t.idx].task;
-      tasks.push({ i: t.idx, level: LEVEL[src.lv] || '', max: TASKS[t.idx].max, section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
+      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
     }));
     tasks.sort((a, b) => a.i - b.i);
     return {
@@ -926,7 +935,7 @@ html body{background:var(--lr-bg);color:var(--lr-ink);font-family:var(--lr-fb);p
 html body .lvs-bar{background:var(--lr-hdr)}
 [hidden]{display:none!important}
 .lr{min-height:100vh}
-.lr-btn{font:600 .84rem var(--lr-fb);border-radius:6px;padding:4px 11px;min-height:31px;cursor:pointer;border:1.5px solid var(--lr-acc);background:var(--lr-acc);color:var(--lr-card);text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.lr-btn{font:600 .9rem var(--lr-fb);border-radius:7px;padding:6px 14px;min-height:36px;cursor:pointer;border:1.5px solid var(--lr-acc);background:var(--lr-acc);color:var(--lr-card);text-decoration:none;display:inline-flex;align-items:center;gap:6px}
 .lr-btn.lr-ghost{background:transparent;color:var(--lr-acc)}
 .lr-btn.lr-danger{background:var(--lr-bad);border-color:var(--lr-bad);color:#fff}
 .lr-btn:disabled{opacity:.4;cursor:default}
@@ -965,7 +974,7 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr-pg.seen .lr-dot{background:var(--lr-ok);border-color:var(--lr-ok)}
 .lr-pg.seen .lr-dot svg{stroke:#fff}
 .lr-lock{display:none;width:18px;height:18px;color:var(--lr-mut)}
-.lr-lock svg{width:18px;height:18px}
+.lr-lock svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .lr-vaje.locked .lr-lock{display:block}
 .lr-rail a.locked{opacity:.55}
 .lr-gi svg,.lr-ti svg{fill:none;stroke:var(--lr-acc);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
@@ -973,7 +982,7 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr-gi svg .fill,.lr-ti svg .fill{fill:var(--lr-acc);stroke:none}
 .lr-mnav{display:none}
 .lr-main{min-width:0}
-.lr-main .prose,.lr-main .note,.lr-main .q,.lr-main .qtext,.lr-main .hint,.lr-main .sol .why,.lr-main .wnote,.lr-main .think,.lr-lead,.lr-shead>div,.lr-rules,.lr-src,.lr-hero h1{max-width:none}
+.lr-main .prose,.lr-main .note,.lr-main .q,.lr-main .qtext,.lr-main .hint,.lr-main .sol .why,.lr-main .wnote,.lr-main .think,.lr-main .lead,.lr-main p,.lr-main ul,.lr-main ol,.lr-shead>div{max-width:none}
 .lr-page{display:flex;flex-direction:column;gap:22px;scroll-margin-top:140px}
 .lr-just,.lr-main .prose p,.lr-main p.prose,.lr-main .note,.lr-main .qtext,.lr-main .wnote,.lr-main .hint,.lr-main .sol .why p,.lr-main .level>header p,.lr-main .think div{text-align:justify;hyphens:auto;-webkit-hyphens:auto}
 
@@ -989,8 +998,8 @@ html body .lvs-bar{background:var(--lr-hdr)}
 
 /* overview */
 .lr-hero{display:flex;flex-direction:column;gap:14px;padding:4px 0 6px}
-.lr-hero h1{font-size:clamp(1.8rem,3.6vw,2.6rem);line-height:1.12;margin:0;max-width:24ch}
-.lr-lead{font-size:1.12rem;color:var(--lr-mut);max-width:66ch;text-align:justify;hyphens:auto}
+.lr-hero h1{font-size:clamp(1.8rem,3.6vw,2.6rem);line-height:1.12;margin:0}
+.lr-lead{font-size:1.12rem;color:var(--lr-mut);text-align:justify;hyphens:auto}
 .lr-resume{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 14px;border-radius:10px;background:var(--lr-acc-soft)}
 .lr-resume a{color:var(--lr-acc);font-weight:700}
 .lr-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
@@ -1011,17 +1020,17 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr-tile-vaje.locked .lr-td,.lr-tile-vaje.locked ul,.lr-tile-vaje.locked .lr-tf{color:var(--lr-mut)}
 .lr-tile-vaje.locked .lr-ti{background:var(--lr-card)}
 .lr-tile-vaje.locked .lr-ti svg{stroke:var(--lr-mut)}
-.lr-rules{padding:18px 20px;border-radius:14px;background:var(--lr-card);border:1px solid var(--lr-line);max-width:78ch}
+.lr-rules{padding:18px 20px;border-radius:14px;background:var(--lr-card);border:1px solid var(--lr-line)}
 .lr-rules h2{font-size:1.15rem;margin:0 0 6px}
 .lr-rules ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:4px}
 .lr-rules p{margin:10px 0 0;color:var(--lr-mut);font-size:.95rem}
-.lr-src{font-size:.88rem;color:var(--lr-mut);max-width:78ch}
+.lr-src{font-size:.88rem;color:var(--lr-mut);text-align:justify;hyphens:auto}
 
 /* set page */
 .lr-shead{display:flex;gap:16px;align-items:flex-start}
 .lr-shead>.lr-gi{flex:none;width:56px;height:56px;border-radius:14px;background:var(--lr-acc-soft);display:grid;place-items:center}
 .lr-shead>.lr-gi svg{width:40px;height:40px}
-.lr-shead>div{display:flex;flex-direction:column;gap:6px;min-width:0;max-width:72ch}
+.lr-shead>div{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
 .lr-shead h2{margin:0}
 .lr-kick{font-size:.9rem;font-weight:700;color:var(--lr-acc)}
 .lr-board{background:var(--lr-card);border:1px solid var(--lr-line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
@@ -1029,7 +1038,7 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr-bh b{font-size:1rem}
 .lr-done{font-size:.92rem;color:var(--lr-mut);font-variant-numeric:tabular-nums}
 .lr-nums{display:flex;flex-wrap:wrap;gap:6px}
-.lr-num{width:32px;height:28px;border-radius:6px;border:1.5px solid var(--lr-line);background:var(--lr-card);color:var(--lr-ink);font:700 .82rem var(--lr-fb);cursor:pointer}
+.lr-num{width:36px;height:32px;border-radius:6px;border:1.5px solid var(--lr-line);background:var(--lr-card);color:var(--lr-ink);font:700 .82rem var(--lr-fb);cursor:pointer}
 .lr-num:hover{border-color:var(--lr-acc)}
 .lr-num[data-s=ok]{background:var(--lr-ok-bg);border-color:var(--lr-ok);color:var(--lr-ok)}
 .lr-num[data-s=half]{background:var(--lr-half-bg);border-color:var(--lr-half);color:var(--lr-half)}
@@ -1052,16 +1061,19 @@ html body .lvs-bar{background:var(--lr-hdr)}
 
 /* task card: check on the left, help on the right */
 .lr-task .crumb{align-items:center}
-.lr-actions{display:flex!important;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.lr-actions{display:flex!important;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-top:6px}
+/* empty help boxes take no room, so the space above and below the buttons stays even */
+.lr-task .hints:empty,.lr-task .tests:empty{display:none}
 .lr-left,.lr-right{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
 .lr-right{margin-left:auto}
-.lr-task .lr-hint,.lr-task .lr-sol{background:transparent!important;border:1.5px solid var(--lr-acc)!important;color:var(--lr-acc)!important;border-radius:6px;min-height:31px;padding:3px 11px;font-size:.84rem;font-weight:600}
+.lr-task .lr-hint,.lr-task .lr-sol{background:transparent!important;border:1.5px solid var(--lr-acc)!important;color:var(--lr-acc)!important;border-radius:7px;min-height:36px;padding:5px 14px;font-size:.9rem;font-weight:600}
 .lr-task .lr-hint:disabled{opacity:.45}
 .lr-task[data-lr=open] .lr-hint::after,.lr-task[data-lr=open] .lr-sol::after,.lr-task[data-lr=hinted] .lr-sol::after{font:500 .74rem var(--lr-fm);margin-left:8px;padding:1px 6px;border-radius:99px;background:var(--lr-acc-soft)}
 .lr-task[data-lr=open] .lr-hint::after{content:"−50 %"}
 .lr-task[data-lr=open] .lr-sol::after,.lr-task[data-lr=hinted] .lr-sol::after{content:"0 točk"}
-.lr-task .lr-check{background:var(--lr-acc)!important;border-color:var(--lr-acc)!important;color:var(--lr-card)!important;border-radius:6px;min-height:31px;padding:3px 14px;font-size:.84rem}
-.lr-task .lr-check:disabled{opacity:.4;cursor:default}
+.lr-task .lr-check{background:var(--lr-acc)!important;border-color:var(--lr-acc)!important;color:var(--lr-card)!important;border-radius:7px;min-height:36px;padding:5px 16px;font-size:.9rem}
+.lr-task .lr-check:disabled,.lr-task .lr-extra:disabled{opacity:.4;cursor:default}
+.lr-task .lr-extra{background:transparent!important;border:1.5px solid var(--lr-acc)!important;color:var(--lr-acc)!important;border-radius:7px;min-height:36px;padding:5px 14px;font-size:.9rem;font-weight:600}
 .lr-solask{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:flex-end;padding:10px 12px;border-radius:10px;background:var(--lr-bad-bg);font-size:.95rem}
 .lr-task[data-lr=ok]{border-color:var(--lr-ok)!important}
 .lr-task[data-lr=half]{border-color:var(--lr-half)!important}
@@ -1075,10 +1087,10 @@ html body .lvs-bar{background:var(--lr-hdr)}
 
 /* pager between pages, bottom right */
 .lr-pager{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--lr-line);padding-top:14px;margin-top:4px;flex-wrap:wrap}
-.lr-pager a{display:flex;flex-direction:column;gap:0;padding:3px 10px;border:1.5px solid var(--lr-line);border-radius:6px;background:var(--lr-card);color:var(--lr-ink);text-decoration:none;min-width:0;max-width:320px;line-height:1.3}
+.lr-pager a{display:flex;flex-direction:column;gap:0;padding:5px 12px;border:1.5px solid var(--lr-line);border-radius:7px;background:var(--lr-card);color:var(--lr-ink);text-decoration:none;min-width:0;max-width:320px;line-height:1.3}
 .lr-pager a:hover{border-color:var(--lr-acc)}
-.lr-pager small{font-size:.68rem;color:var(--lr-mut)}
-.lr-pager span{font-weight:700;font-size:.84rem}
+.lr-pager small{font-size:.72rem;color:var(--lr-mut)}
+.lr-pager span{font-weight:700;font-size:.9rem}
 .lr-pager .lr-prevp span::before{content:"‹ "}
 .lr-pager .lr-nextp{border-color:var(--lr-acc);text-align:right;margin-left:auto}
 .lr-pager .lr-nextp span::after{content:" ›"}
@@ -1893,7 +1905,7 @@ const HOME = [
 
 
 /* ---------- shranjevanje (brskalnik) ---------- */
-LavRac.tasks(TT);
+LavRac.tasks(TT, { level: (t) => t.lv });
 let S = LavRac.loadUi();
 function save(){ LavRac.saveUi(S); }
 const st = id => S[id] || (S[id] = {});
@@ -2569,7 +2581,7 @@ LavRac.mount({
   sets: LEVELS.map(L=>({ id: L.id, tag: L.tag, title: L.title, note: L.note, el: document.getElementById("p-"+L.id),
     tasks: L.list.map(t=>({ idx: t.idx, el: document.getElementById("t-"+t.id) })) })),
   extra: { id: "doma", title: "Za doma", note: document.querySelector("#sec-doma > .prose").textContent.trim(), el: document.getElementById("sec-doma") },
-  sel: { head: ".thead", num: ".tnum", tags: ".tags", q: ".q", check: ".js-check", hint: ".js-hint", sol: ".js-sol", fb: ".feedback", actions: ".actions" },
+  sel: { head: ".thead", num: ".tnum", tags: ".tags", q: ".q", check: ".js-check", hint: ".js-hint", sol: ".js-sol", fb: ".feedback", actions: ":scope > .actions" },
 });
 })();
 

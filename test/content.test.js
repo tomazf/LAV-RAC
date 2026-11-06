@@ -368,6 +368,52 @@ test('a reset starts a new attempt that the teacher sees; read pages stay read',
   await p.context().close();
 });
 
+test('2.2 and 2.3: every page opens without errors, with their theory groups', async () => {
+  const want = { '2.2': [85, ['Logična vrata', 'Funkcije in poenostavljanje', 'Aritmetična vezja', 'Vaje']], '2.3': [129, ['Podatki in procesor', 'Zbirnik', 'Prekinitve in pomnilniki', 'Vhod, izhod in cevovod', 'Vaje']] };
+  for (const [id, [n, groups]] of Object.entries(want)) {
+    const ex = catalog.exercises.find((e) => e.id === id);
+    assert.equal(ex.module, 'LAV-RAČ2');
+    assert.equal(ex.tasks.length, n);
+    const a = await login('Sara Skrbnik');
+    await a.goto(`${APP}/vaje/${id}`);
+    assert.deepEqual(await a.locator('.lr-grp b').allTextContents(), groups);
+    for (const p of ex.pages) {
+      await go(a, p.id);
+      assert.ok(await a.locator('.page.on').isVisible(), `${id} ${p.id}`);
+    }
+    // page and task ids stay unique after the shell moves the artifact's sections
+    const own = [...ex.pages.map((p) => p.id), ...ex.tasks.map((t) => `t${t.i}`)];
+    assert.deepEqual(await a.evaluate((list) => list.filter((x) => document.querySelectorAll(`[id="${x}"]`).length !== 1), own), []);
+    await a.context().close();
+  }
+  assert.deepEqual(errors, []);
+});
+
+test('2.2: an empty expression is not an answer; 2.3: test runs do not count, handing in does', async () => {
+  const a = await login('Sara Skrbnik');
+  await a.goto(`${APP}/vaje/2.2#naloge-e`);
+  const k = await a.evaluate(() => [...document.querySelectorAll('.page.on .lr-task')].findIndex((c) => c.querySelector('input[data-prev]')));
+  await go(a, `naloge-e/${k + 1}`);
+  await card(a).locator('.lr-check').click();
+  assert.match(await card(a).locator('.lr-left .feedback').textContent(), /Najprej/);
+  assert.equal(await card(a).getAttribute('data-lr'), 'open');
+  await a.goto(`${APP}/vaje/2.3#naloge-d`);
+  await at(a, 'naloge-d');
+  const j = await a.evaluate(() => [...document.querySelectorAll('.page.on .lr-task')].findIndex((c) => c.querySelector('.js-run')));
+  await go(a, `naloge-d/${j + 1}`);
+  assert.equal(await card(a).locator('.lr-left .lr-check').textContent(), 'Oddaj');
+  await card(a).locator('.js-run').click();
+  assert.match(await card(a).locator('.lr-left .feedback').textContent(), /Testi se ne točkujejo/);
+  assert.equal(await card(a).getAttribute('data-lr'), 'open');
+  await card(a).locator('.js-run').click();
+  assert.equal(await card(a).getAttribute('data-lr'), 'open');
+  await card(a).locator('.lr-check').click();
+  assert.equal(await card(a).getAttribute('data-lr'), 'bad');
+  assert.match(await card(a).locator('.lr-left .feedback').textContent(), /Napačno: 0 točk\. Uspešnih testov/);
+  assert.ok(await card(a).locator('.js-run').isDisabled());
+  await a.context().close();
+});
+
 test('the exercise fits a phone, in both colour schemes', async () => {
   for (const colorScheme of ['light', 'dark']) {
     const ctx = await browser.newContext({ viewport: { width: 360, height: 740 }, colorScheme });

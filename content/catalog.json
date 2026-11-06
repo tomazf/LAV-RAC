@@ -845,6 +845,1751 @@
     "precna-vzdolzna",
     "popravljanje"
    ]
+  },
+  {
+   "id": "2.2",
+   "module": "LAV-RAČ2",
+   "title": "Logične funkcije – utrjevanje",
+   "fullTitle": "Logične funkcije – utrjevanje",
+   "key": "scnm_lavrac_2_2_v1",
+   "version": 1,
+   "format": "short",
+   "maxPoints": 164,
+   "tasks": [
+    {
+     "i": 0,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrata in pravilnostne tabele",
+     "q": "Katera vrata prikazuje simbol?"
+    },
+    {
+     "i": 1,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrata in pravilnostne tabele",
+     "q": "Katera vrata prikazuje simbol?"
+    },
+    {
+     "i": 2,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrata in pravilnostne tabele",
+     "q": "Katera vrata prikazuje simbol?"
+    },
+    {
+     "i": 3,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrata in pravilnostne tabele",
+     "q": "Katera vrata prikazuje simbol?"
+    },
+    {
+     "i": 4,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrata in pravilnostne tabele",
+     "q": "Izhod vrat IN je 1, kadar …"
+    },
+    {
+     "i": 5,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrata in pravilnostne tabele",
+     "q": "Koliko vrstic ima pravilnostna tabela funkcije s štirimi vhodi?"
+    },
+    {
+     "i": 6,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrata in pravilnostne tabele",
+     "q": "Dopolni stolpec Q (klikaj celice) za funkcijo Q = A·B."
+    },
+    {
+     "i": 7,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrata in pravilnostne tabele",
+     "q": "Dopolni stolpec Q (klikaj celice) za funkcijo Q = A+B."
+    },
+    {
+     "i": 8,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrata in pravilnostne tabele",
+     "q": "Dopolni stolpec Q (klikaj celice) za funkcijo Q = ¬A."
+    },
+    {
+     "i": 9,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrata in pravilnostne tabele",
+     "q": "Dopolni stolpec Q za vrata NEIN: Q = ¬(A·B)."
+    },
+    {
+     "i": 10,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrata in pravilnostne tabele",
+     "q": "Dopolni stolpec Q za vrata NEALI: Q = ¬(A+B)."
+    },
+    {
+     "i": 11,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrata in pravilnostne tabele",
+     "q": "Dopolni stolpec Q (klikaj celice) za funkcijo Q = A⊕B."
+    },
+    {
+     "i": 12,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrata in pravilnostne tabele",
+     "q": "XNOR (ekvivalenca) je 1, kadar …"
+    },
+    {
+     "i": 13,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrata in pravilnostne tabele",
+     "q": "Vsakemu opisu priredi vrata."
+    },
+    {
+     "i": 14,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vrata in pravilnostne tabele",
+     "q": "Vsakemu imenu vrat priredi izraz."
+    },
+    {
+     "i": 15,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vrata in pravilnostne tabele",
+     "q": "Dopolni stolpec Q (klikaj celice) za funkcijo Q = A·¬B."
+    },
+    {
+     "i": 16,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vrata in pravilnostne tabele",
+     "q": "Dopolni stolpec Q (klikaj celice) za funkcijo Q = (A+B)·¬C."
+    },
+    {
+     "i": 17,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vrata in pravilnostne tabele",
+     "q": "Dopolni stolpec Q (klikaj celice) za funkcijo Q = A⊕B⊕C."
+    },
+    {
+     "i": 18,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vrata in pravilnostne tabele",
+     "q": "Pravilnostna tabela ima 32 vrstic. Koliko vhodov ima funkcija?"
+    },
+    {
+     "i": 19,
+     "level": "lažja",
+     "max": 1,
+     "section": "Zapis funkcij",
+     "q": "Motor se vrti (Q = 1), če sta pritisnjeni obe tipki, A in B. Zapiši funkcijo Q."
+    },
+    {
+     "i": 20,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zapis funkcij",
+     "q": "Alarm piska (Q = 1), če voznik sedi (A = 1) in pas ni pripet (B = 0). Zapiši funkcijo Q in jo preveri s tabelo."
+    },
+    {
+     "i": 21,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zapis funkcij",
+     "q": "Vrata se odprejo (Q = 1), če je pritisnjena tipka A ali tipka B in sistem ni zaklenjen (C = 1 pomeni zaklenjen). Zapiši Q."
+    },
+    {
+     "i": 22,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zapis funkcij",
+     "q": "Glasovanje: Q = 1, če sta vsaj dva od treh članov (A, B, C) za. Zapiši Q."
+    },
+    {
+     "i": 23,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zapis funkcij",
+     "q": "Funkcija ima tabelo, prikazano spodaj (Q = A⊕C, B je poljuben). Zapiši njeno PDNO: v vsakem produktu so vse tri spremenljivke."
+    },
+    {
+     "i": 24,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zapis funkcij",
+     "q": "Funkcija Q = A·B ima prikazano tabelo. Zapiši njeno PKNO: v vsaki vsoti sta obe spremenljivki."
+    },
+    {
+     "i": 25,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zapis funkcij",
+     "q": "Kdaj je PKNO krajša od PDNO?"
+    },
+    {
+     "i": 26,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zapis funkcij",
+     "q": "Koliko različnih funkcij z dvema vhodoma obstaja? (Vsaka je določena s stolpcem Q v tabeli s štirimi vrsticami.)"
+    },
+    {
+     "i": 27,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zapis funkcij",
+     "q": "Funkcija treh vhodov ima v tabeli 5 enic. Koliko členov ima njena PDNO in koliko njena PKNO?"
+    },
+    {
+     "i": 28,
+     "level": "težja",
+     "max": 3,
+     "section": "Zapis funkcij",
+     "q": "Seštevalnik sešteva bite A, B in prenos C. Bit vsote S je 1, kadar je med A, B, C liho število enic. Zapiši S z operatorjem ⊕."
+    },
+    {
+     "i": 29,
+     "level": "lažja",
+     "max": 1,
+     "section": "Boolova algebra",
+     "q": "Absorpcija: A + A·B = ?"
+    },
+    {
+     "i": 30,
+     "level": "srednja",
+     "max": 2,
+     "section": "Boolova algebra",
+     "q": "Za vsako enakost presodi, ali velja."
+    },
+    {
+     "i": 31,
+     "level": "srednja",
+     "max": 2,
+     "section": "Boolova algebra",
+     "q": "Okrajšaj: Q = A·B + A·¬B."
+    },
+    {
+     "i": 32,
+     "level": "srednja",
+     "max": 2,
+     "section": "Boolova algebra",
+     "q": "Okrajšaj: Q = A + ¬A·B."
+    },
+    {
+     "i": 33,
+     "level": "srednja",
+     "max": 2,
+     "section": "Boolova algebra",
+     "q": "Okrajšaj: Q = ¬A·¬B + ¬A·B + A·B."
+    },
+    {
+     "i": 34,
+     "level": "srednja",
+     "max": 2,
+     "section": "Boolova algebra",
+     "q": "Okrajšaj: Q = (A + B)·(A + ¬B)."
+    },
+    {
+     "i": 35,
+     "level": "srednja",
+     "max": 2,
+     "section": "Boolova algebra",
+     "q": "Katera enakost je pravilna?"
+    },
+    {
+     "i": 36,
+     "level": "težja",
+     "max": 3,
+     "section": "Boolova algebra",
+     "q": "Okrajšaj: Q = A·B + ¬A·C + B·C. Namig: tretji člen je odvečen."
+    },
+    {
+     "i": 37,
+     "level": "lažja",
+     "max": 1,
+     "section": "Veitchev diagram",
+     "q": "V diagramu s štirimi spremenljivkami združimo 4 sosednje celice z enicami. Koliko spremenljivk izpade iz produkta?"
+    },
+    {
+     "i": 38,
+     "level": "lažja",
+     "max": 1,
+     "section": "Veitchev diagram",
+     "q": "Zakaj so spremenljivke v Veitchevem diagramu razporejene po robu (A v levi polovici, C v sredini stolpcev …), celice pa ne ležijo po vrsti 0, 1, 2, 3?"
+    },
+    {
+     "i": 39,
+     "level": "srednja",
+     "max": 2,
+     "section": "Veitchev diagram",
+     "q": "Vnesi funkcijo Q = A·B + C v Veitchev diagram. Klikni celice, v katerih je Q = 1."
+    },
+    {
+     "i": 40,
+     "level": "srednja",
+     "max": 2,
+     "section": "Veitchev diagram",
+     "q": "Okrajšaj z Veitchem: Q = ¬A·B·C + A·B·C + A·B·¬C + A·¬B·¬C."
+    },
+    {
+     "i": 41,
+     "level": "srednja",
+     "max": 2,
+     "section": "Veitchev diagram",
+     "q": "Spodnja tabela ima enice v vrsticah 0, 1, 4, 5 in 6. Zapiši minimalno PDNO."
+    },
+    {
+     "i": 42,
+     "level": "težja",
+     "max": 3,
+     "section": "Veitchev diagram",
+     "q": "Q = 1 za vrstice 0, 4, 8 in 12 pravilnostne tabele s štirimi spremenljivkami (A, B, C, D). Okrajšaj."
+    },
+    {
+     "i": 43,
+     "level": "težja",
+     "max": 3,
+     "section": "Veitchev diagram",
+     "q": "Okrajšaj z Veitchem (štiri spremenljivke): Q = ABCD + AB¬CD + ¬ABCD + ¬AB¬CD + ABC¬D + A¬BC¬D."
+    },
+    {
+     "i": 44,
+     "level": "težja",
+     "max": 3,
+     "section": "Veitchev diagram",
+     "q": "Q = 1 za vrstice 0, 2, 5, 7, 8, 10, 13 in 15 (spremenljivke A, B, C, D). Okrajšaj in prepoznaj znano funkcijo."
+    },
+    {
+     "i": 45,
+     "level": "težja",
+     "max": 3,
+     "section": "Veitchev diagram",
+     "q": "Okrajšaj in zapiši rezultat kot produkt vsot (PKNO): Q = (A + B)·(¬A + C)·(B + C)."
+    },
+    {
+     "i": 46,
+     "level": "težja",
+     "max": 3,
+     "section": "Veitchev diagram",
+     "q": "Vnesi funkcijo Q = A·¬C + ¬B·¬C·D v Veitchev diagram za štiri spremenljivke."
+    },
+    {
+     "i": 47,
+     "level": "srednja",
+     "max": 2,
+     "section": "Veitchev diagram",
+     "q": "Krmilnik črpalke ima tri vhode A, B in C. Njegova funkcija Q (Q = 1: črpalka teče) je že vpisana v Veitchev diagram. Z miško ali prstom povleci čez celice ene s"
+    },
+    {
+     "i": 48,
+     "level": "težja",
+     "max": 3,
+     "section": "Veitchev diagram",
+     "q": "Prezračevanje strojnice. Vhodi: A = temperatura je previsoka, B = zaznan je plin, C = vrata strojnice so odprta, D = vklopljen je ročni preklic. Izhoda: Q1 = ve"
+    },
+    {
+     "i": 49,
+     "level": "težja",
+     "max": 3,
+     "section": "Veitchev diagram",
+     "q": "Ventilator iz prejšnje naloge: funkcija Q1 je vpisana v Veitchev diagram (A, B, C, D). Označi skupine enic in zapiši minimalno PDNO."
+    },
+    {
+     "i": 50,
+     "level": "težja",
+     "max": 3,
+     "section": "Veitchev diagram",
+     "q": "Sirena iz iste strojnice: funkcija Q2 je vpisana v diagram. Označi skupine enic in zapiši minimalno PDNO. Zapiši vsoto produktov (PDNO)."
+    },
+    {
+     "i": 51,
+     "level": "težja",
+     "max": 3,
+     "section": "Veitchev diagram",
+     "q": "Signalna lučka L ima štiri vhode A, B, C, D in sveti v vrsticah 0, 4, 5, 7, 8 in 12 pravilnostne tabele (Q = 1). Funkcija je vpisana v diagram. Označi skupine e"
+    },
+    {
+     "i": 52,
+     "level": "lažja",
+     "max": 1,
+     "section": "De Morgan, NAND in NOR",
+     "q": "De Morgan: ¬(A·B) = ?"
+    },
+    {
+     "i": 53,
+     "level": "lažja",
+     "max": 1,
+     "section": "De Morgan, NAND in NOR",
+     "q": "De Morgan: ¬(A+B) = ?"
+    },
+    {
+     "i": 54,
+     "level": "lažja",
+     "max": 1,
+     "section": "De Morgan, NAND in NOR",
+     "q": "Katera od naštetih vrat sama zadoščajo za gradnjo vseh ostalih vrat?"
+    },
+    {
+     "i": 55,
+     "level": "srednja",
+     "max": 2,
+     "section": "De Morgan, NAND in NOR",
+     "q": "Podan je izraz Q = ¬(A·B). Kateri simbol vrat ustreza De Morganovi obliki ¬A + ¬B?"
+    },
+    {
+     "i": 56,
+     "level": "srednja",
+     "max": 2,
+     "section": "De Morgan, NAND in NOR",
+     "q": "Zapiši ¬A samo z vrati NEIN. Vrata NEIN zapišemo kot negacijo produkta dveh vhodov, vhoda lahko združiš."
+    },
+    {
+     "i": 57,
+     "level": "srednja",
+     "max": 2,
+     "section": "De Morgan, NAND in NOR",
+     "q": "Zapiši A·B samo z vrati NEIN (dovoljeno: spremenljivke, negacija in produkt · samo neposredno pod negacijo. Uporabi največ dve vrati."
+    },
+    {
+     "i": 58,
+     "level": "srednja",
+     "max": 2,
+     "section": "De Morgan, NAND in NOR",
+     "q": "Kako z vrati NEIN dobiš ALI (A + B)?"
+    },
+    {
+     "i": 59,
+     "level": "srednja",
+     "max": 2,
+     "section": "De Morgan, NAND in NOR",
+     "q": "Zapiši A + B samo z vrati NEALI (dovoljeno: spremenljivke, negacija in vsota + samo neposredno pod negacijo. Uporabi največ dve vrati."
+    },
+    {
+     "i": 60,
+     "level": "srednja",
+     "max": 2,
+     "section": "De Morgan, NAND in NOR",
+     "q": "Zapiši A·B samo z vrati NEALI (dovoljeno: spremenljivke, negacija in vsota + samo neposredno pod negacijo). Uporabi največ tri vrata."
+    },
+    {
+     "i": 61,
+     "level": "srednja",
+     "max": 2,
+     "section": "De Morgan, NAND in NOR",
+     "q": "Koliko vrat NEIN potrebuješ, če z njimi realiziraš vrata IN (A·B) in vrata ALI (A+B)?"
+    },
+    {
+     "i": 62,
+     "level": "težja",
+     "max": 3,
+     "section": "De Morgan, NAND in NOR",
+     "q": "Zapiši Q = A·B + C·D samo z vrati NEIN. Uporabi samo tri vrata NEIN."
+    },
+    {
+     "i": 63,
+     "level": "težja",
+     "max": 3,
+     "section": "De Morgan, NAND in NOR",
+     "q": "Zapiši Q = A·B + ¬A·C (multiplekser) samo z vrati NEIN. Uporabi največ štiri vrata."
+    },
+    {
+     "i": 64,
+     "level": "težja",
+     "max": 3,
+     "section": "De Morgan, NAND in NOR",
+     "q": "Zapiši Q = (A + B)·(C + D) samo z vrati NEALI. Uporabi samo tri vrata NEALI."
+    },
+    {
+     "i": 65,
+     "level": "težja",
+     "max": 3,
+     "section": "De Morgan, NAND in NOR",
+     "q": "Zapiši Q = A·¬B + ¬C samo z vrati NEIN. Uporabi največ tri vrata (negator ¬B šteje kot vrata)."
+    },
+    {
+     "i": 66,
+     "level": "težja",
+     "max": 3,
+     "section": "De Morgan, NAND in NOR",
+     "q": "Zapiši A⊕B samo z vrati NEIN (znana rešitev uporablja štiri vrata, ker enak podizraz X = ¬(A·B) uporabiš dvakrat). Dovoljeno je poljubno število vrat."
+    },
+    {
+     "i": 67,
+     "level": "srednja",
+     "max": 2,
+     "section": "De Morgan, NAND in NOR",
+     "q": "Funkcijo Q = A·B + C·D realiziraš z vrati IN in ALI (čipi 7408 z 4×IN in 7432 z 4×ALI, tri vrata) ali samo z vrati NEIN (čip 7400 s 4×NEIN, tri vrata). Koliko č"
+    },
+    {
+     "i": 68,
+     "level": "lažja",
+     "max": 1,
+     "section": "De Morgan, NAND in NOR",
+     "q": "Zakaj v praksi pogosto gradimo vezja samo iz vrat NEIN ali NEALI?"
+    },
+    {
+     "i": 69,
+     "level": "lažja",
+     "max": 1,
+     "section": "Seštevalnik in odštevalnik",
+     "q": "Iz katerih vrat je sestavljen polovični seštevalnik?"
+    },
+    {
+     "i": 70,
+     "level": "lažja",
+     "max": 1,
+     "section": "Seštevalnik in odštevalnik",
+     "q": "Seštej dvojiško: 1 + 1. Rezultat zapišemo kot dve števki: prenos in bit vsote."
+    },
+    {
+     "i": 71,
+     "level": "lažja",
+     "max": 1,
+     "section": "Seštevalnik in odštevalnik",
+     "q": "Polovični seštevalnik sešteje bita A in B. Izhoda sta S (bit vsote) in C (bit prenosa). Dopolni oba stolpca pravilnostne tabele."
+    },
+    {
+     "i": 72,
+     "level": "lažja",
+     "max": 1,
+     "section": "Seštevalnik in odštevalnik",
+     "q": "Zapiši izraz za bit prenosa C polovičnega seštevalnika."
+    },
+    {
+     "i": 73,
+     "level": "srednja",
+     "max": 2,
+     "section": "Seštevalnik in odštevalnik",
+     "q": "Polni seštevalnik sešteje bita A in B ter prenos Cin (v tabeli je to stolpec C). Dopolni stolpca S (bit vsote) in Cout (prenos naprej)."
+    },
+    {
+     "i": 74,
+     "level": "srednja",
+     "max": 2,
+     "section": "Seštevalnik in odštevalnik",
+     "q": "Zapiši najkrajšo PDNO za prenos Cout polnega seštevalnika (vhoda A, B in prenos C). Cout = 1, kadar sta vsaj dva od A, B, C enaka 1."
+    },
+    {
+     "i": 75,
+     "level": "srednja",
+     "max": 2,
+     "section": "Seštevalnik in odštevalnik",
+     "q": "Zapiši bit vsote S polnega seštevalnika (A, B in C kot vhodi) z operatorjem XOR (⊕)."
+    },
+    {
+     "i": 76,
+     "level": "srednja",
+     "max": 2,
+     "section": "Seštevalnik in odštevalnik",
+     "q": "Koliko polnih seštevalnikov potrebuje 4-bitni seštevalnik s potujočim prenosom?"
+    },
+    {
+     "i": 77,
+     "level": "srednja",
+     "max": 2,
+     "section": "Seštevalnik in odštevalnik",
+     "q": "Seštej dvojiško v štirih bitih: 0110 + 0011. Zapiši štiri bite rezultata in prenos iz najvišjega mesta Cout."
+    },
+    {
+     "i": 78,
+     "level": "srednja",
+     "max": 2,
+     "section": "Seštevalnik in odštevalnik",
+     "q": "Seštej dvojiško v štirih bitih: 1011 + 0110. Zapiši štiri bite rezultata in Cout."
+    },
+    {
+     "i": 79,
+     "level": "težja",
+     "max": 3,
+     "section": "Seštevalnik in odštevalnik",
+     "q": "Odštej s komplementom: A = 0111, B = 0010. Najprej zapiši ¬B (vsi biti B obrnjeni), nato izračunaj A + ¬B + 1 v štirih bitih."
+    },
+    {
+     "i": 80,
+     "level": "težja",
+     "max": 3,
+     "section": "Seštevalnik in odštevalnik",
+     "q": "Pri odštevanju A − B s seštevalnikom (A + ¬B + 1) je prenos iz najvišjega mesta Cout = 0. Kaj to pomeni?"
+    },
+    {
+     "i": 81,
+     "level": "srednja",
+     "max": 2,
+     "section": "Seštevalnik in odštevalnik",
+     "q": "Zapiši izraz za izposojo Bout polovičnega odštevalnika (A − B). Izposoja je 1, kadar odštevamo 1 od 0."
+    },
+    {
+     "i": 82,
+     "level": "težja",
+     "max": 3,
+     "section": "Seštevalnik in odštevalnik",
+     "q": "Polni odštevalnik izračuna A − B − Bin (v tabeli je Bin stolpec C). Izhoda sta D (razlika) in Bout (izposoja). Izposoja je 1, kadar je A manjši od B + Bin. Dopo"
+    },
+    {
+     "i": 83,
+     "level": "težja",
+     "max": 3,
+     "section": "Seštevalnik in odštevalnik",
+     "q": "Zakaj je bit vsote S polnega seštevalnika enak XOR vseh treh vhodov?"
+    },
+    {
+     "i": 84,
+     "level": "srednja",
+     "max": 2,
+     "section": "Seštevalnik in odštevalnik",
+     "q": "Prenos Cout polnega seštevalnika sestavljata dva polovična seštevalnika in vrata ALI. Prvi sešteje A in B (S1 = A⊕B, C1 = A·B), drugi S1 in Cin (v nalogi C). Za"
+    }
+   ],
+   "pages": [
+    {
+     "id": "pregled",
+     "chapter": "Teorija",
+     "label": "Pregled"
+    },
+    {
+     "id": "vrata1",
+     "chapter": "Teorija",
+     "label": "IN, ALI, NE"
+    },
+    {
+     "id": "vrata2",
+     "chapter": "Teorija",
+     "label": "NEIN, NEALI, XOR, XNOR"
+    },
+    {
+     "id": "zapis",
+     "chapter": "Teorija",
+     "label": "Zapis funkcij: PDNO in PKNO"
+    },
+    {
+     "id": "algebra",
+     "chapter": "Teorija",
+     "label": "Boolova algebra"
+    },
+    {
+     "id": "veitch",
+     "chapter": "Teorija",
+     "label": "Veitchev diagram"
+    },
+    {
+     "id": "demorgan",
+     "chapter": "Teorija",
+     "label": "De Morgan, NAND in NOR"
+    },
+    {
+     "id": "sestevalnik",
+     "chapter": "Teorija",
+     "label": "Seštevalnik"
+    },
+    {
+     "id": "odstevalnik",
+     "chapter": "Teorija",
+     "label": "Odštevalnik"
+    },
+    {
+     "id": "naloge-a",
+     "chapter": "Naloge",
+     "label": "Vaje A · Vrata in pravilnostne tabele"
+    },
+    {
+     "id": "naloge-b",
+     "chapter": "Naloge",
+     "label": "Vaje B · Zapis funkcij"
+    },
+    {
+     "id": "naloge-c",
+     "chapter": "Naloge",
+     "label": "Vaje C · Boolova algebra"
+    },
+    {
+     "id": "naloge-d",
+     "chapter": "Naloge",
+     "label": "Vaje D · Veitchev diagram"
+    },
+    {
+     "id": "naloge-e",
+     "chapter": "Naloge",
+     "label": "Vaje E · De Morgan, NAND in NOR"
+    },
+    {
+     "id": "naloge-f",
+     "chapter": "Naloge",
+     "label": "Vaje F · Seštevalnik in odštevalnik"
+    },
+    {
+     "id": "doma",
+     "chapter": "Naloge",
+     "label": "Za doma"
+    }
+   ],
+   "gate": [
+    "vrata1",
+    "vrata2",
+    "zapis",
+    "algebra",
+    "veitch",
+    "demorgan",
+    "sestevalnik",
+    "odstevalnik"
+   ]
+  },
+  {
+   "id": "2.3",
+   "module": "LAV-RAČ2",
+   "title": "Arhitektura računalniških sistemov",
+   "fullTitle": "Arhitektura računalniških sistemov",
+   "key": "scnm_lavrac_2_3_v1",
+   "version": 1,
+   "format": "short",
+   "maxPoints": 237,
+   "tasks": [
+    {
+     "i": 0,
+     "level": "lažja",
+     "max": 1,
+     "section": "Podatki in števila",
+     "q": "Barva besedila je kodirana s šestimi biti. Koliko različnih barv imamo na voljo?"
+    },
+    {
+     "i": 1,
+     "level": "lažja",
+     "max": 1,
+     "section": "Podatki in števila",
+     "q": "Paket je lahko v petih stanjih: sprejet, v poti, dostavljen, vrnjen, izgubljen. Najmanj koliko bitov potrebujemo, da stanje zapišemo?"
+    },
+    {
+     "i": 2,
+     "level": "srednja",
+     "max": 2,
+     "section": "Podatki in števila",
+     "q": "Nenegativno celo število je zapisano z osmimi biti, najbolj desni bit je 0. Kateri trditvi sta resnični?"
+    },
+    {
+     "i": 3,
+     "level": "srednja",
+     "max": 2,
+     "section": "Podatki in števila",
+     "q": "Desetiško število 205 zapiši z osmimi biti v dvojiškem sestavu in v šestnajstiškem sestavu."
+    },
+    {
+     "i": 4,
+     "level": "srednja",
+     "max": 2,
+     "section": "Podatki in števila",
+     "q": "Število 9E v šestnajstiškem sestavu zapiši v desetiškem in v dvojiškem sestavu."
+    },
+    {
+     "i": 5,
+     "level": "srednja",
+     "max": 2,
+     "section": "Podatki in števila",
+     "q": "Izračunaj vsoto 2F₁₆ + 101101₂. Rezultat zapiši v dvojiškem in v šestnajstiškem sestavu."
+    },
+    {
+     "i": 6,
+     "level": "lažja",
+     "max": 1,
+     "section": "Podatki in števila",
+     "q": "V šestnajstiškem sestavu seštej števili 8C in 29."
+    },
+    {
+     "i": 7,
+     "level": "srednja",
+     "max": 2,
+     "section": "Podatki in števila",
+     "q": "Dano je 8-bitno število 00101101. Zapiši njegov eniški in njegov dvojiški komplement."
+    },
+    {
+     "i": 8,
+     "level": "lažja",
+     "max": 1,
+     "section": "Podatki in števila",
+     "q": "Katero desetiško negativno celo število predstavlja 8-bitno dvojiško število 11110100 (dvojiški komplement)?"
+    },
+    {
+     "i": 9,
+     "level": "srednja",
+     "max": 2,
+     "section": "Podatki in števila",
+     "q": "8-bitno število 10110010 je zapisano v dvojiškem komplementu in je negativno. Zapiši njegovo absolutno vrednost v dvojiškem in desetiškem sestavu."
+    },
+    {
+     "i": 10,
+     "level": "lažja",
+     "max": 1,
+     "section": "Podatki in števila",
+     "q": "Katero je najmanjše število, ki ga zapišemo z 8 biti v dvojiškem komplementu?"
+    },
+    {
+     "i": 11,
+     "level": "srednja",
+     "max": 2,
+     "section": "Podatki in števila",
+     "q": "Beseda Dijak ima 5 znakov. Koliko bitov porabi, če jo kodiramo z osnovno ASCII (7 bitov na znak)? Koliko, če uporabimo razširjeno ASCII (8 bitov na znak)?"
+    },
+    {
+     "i": 12,
+     "level": "srednja",
+     "max": 2,
+     "section": "Podatki in števila",
+     "q": "Črka A ima kodo 65. Kateri znak je zapisan z razširjeno ASCII kodo 01000100? Zapiši še šestnajstiško kodo tega znaka."
+    },
+    {
+     "i": 13,
+     "level": "srednja",
+     "max": 2,
+     "section": "Podatki in števila",
+     "q": "Pošiljatelj je poslal 10-bitno nenegativno celo število 300, prejemnik pa je prejel 316. Pri prenosu je bil napačen natanko en bit. Najbolj desni bit ima zapore"
+    },
+    {
+     "i": 14,
+     "level": "težja",
+     "max": 3,
+     "section": "Podatki in števila",
+     "q": "Za preverjanje pravilnosti prenosa izračunaj sodo pariteto: paritetni bit za vsako vrstico (desni stolpec, od zgoraj navzdol), paritetni bit za vsak stolpec (sp"
+    },
+    {
+     "i": 15,
+     "level": "srednja",
+     "max": 2,
+     "section": "Podatki in števila",
+     "q": "Pri prenosu smo izračunali sodo pariteto (zadnji stolpec in zadnja vrstica sta paritetna). Pri prenosu je bil napačen natanko en bit. V kateri vrstici in v kate"
+    },
+    {
+     "i": 16,
+     "level": "srednja",
+     "max": 2,
+     "section": "Podatki in števila",
+     "q": "Kateri trditvi o pariteti sta resnični?"
+    },
+    {
+     "i": 17,
+     "level": "lažja",
+     "max": 1,
+     "section": "Podatki in števila",
+     "q": "Podatku 1101001100 dodamo paritetni bit za sodo pariteto. Kolikšen je paritetni bit?"
+    },
+    {
+     "i": 18,
+     "level": "težja",
+     "max": 3,
+     "section": "Podatki in števila",
+     "q": "Izračunaj nad 8-bitnima številoma x = 10110110 in y = 00001111."
+    },
+    {
+     "i": 19,
+     "level": "srednja",
+     "max": 2,
+     "section": "Podatki in števila",
+     "q": "Katero operacijo z masko uporabimo?"
+    },
+    {
+     "i": 20,
+     "level": "srednja",
+     "max": 2,
+     "section": "Podatki in števila",
+     "q": "13 pomaknemo za 3 mesta v levo (osem bitov). Koliko je rezultat v desetiškem sestavu? Nato 100 pomaknemo za 2 mesti v desno. Koliko je rezultat?"
+    },
+    {
+     "i": 21,
+     "level": "lažja",
+     "max": 1,
+     "section": "Von Neumannov model in CPE",
+     "q": "Katero nalogo opravlja krmilna enota?"
+    },
+    {
+     "i": 22,
+     "level": "lažja",
+     "max": 1,
+     "section": "Von Neumannov model in CPE",
+     "q": "Katero nalogo opravlja aritmetično-logična enota (ALE)?"
+    },
+    {
+     "i": 23,
+     "level": "lažja",
+     "max": 1,
+     "section": "Von Neumannov model in CPE",
+     "q": "Katera komponenta von Neumannovega modela ne spada v centralno procesno enoto?"
+    },
+    {
+     "i": 24,
+     "level": "srednja",
+     "max": 2,
+     "section": "Von Neumannov model in CPE",
+     "q": "Je enota del centralne procesne enote?"
+    },
+    {
+     "i": 25,
+     "level": "srednja",
+     "max": 2,
+     "section": "Von Neumannov model in CPE",
+     "q": "Vsakemu registru priredi njegovo vlogo."
+    },
+    {
+     "i": 26,
+     "level": "lažja",
+     "max": 1,
+     "section": "Von Neumannov model in CPE",
+     "q": "Register, ki vsebuje naslov naslednjega ukaza za izvajanje, se imenuje ____ (dve besedi)."
+    },
+    {
+     "i": 27,
+     "level": "srednja",
+     "max": 2,
+     "section": "Von Neumannov model in CPE",
+     "q": "Kateri trditvi sta resnični za von Neumannov model računalnika?"
+    },
+    {
+     "i": 28,
+     "level": "srednja",
+     "max": 2,
+     "section": "Von Neumannov model in CPE",
+     "q": "Vodilo med CPE in pomnilnikom je ozko grlo von Neumannove arhitekture. Kateri trditvi sta resnični?"
+    },
+    {
+     "i": 29,
+     "level": "srednja",
+     "max": 2,
+     "section": "Von Neumannov model in CPE",
+     "q": "Naslovno vodilo je široko 12 bitov. Koliko pomnilniških lokacij lahko CPE naslovi? Koliko bitov mora imeti naslovno vodilo, da naslovimo 1 MiB (1 048 576) bajtn"
+    },
+    {
+     "i": 30,
+     "level": "srednja",
+     "max": 2,
+     "section": "Von Neumannov model in CPE",
+     "q": "Katero vodilo opisuje trditev?"
+    },
+    {
+     "i": 31,
+     "level": "srednja",
+     "max": 2,
+     "section": "Von Neumannov model in CPE",
+     "q": "Razvrsti korake izvajanja enega ukaza v pravilni vrstni red (1 = prvi)."
+    },
+    {
+     "i": 32,
+     "level": "srednja",
+     "max": 2,
+     "section": "Von Neumannov model in CPE",
+     "q": "Delovanje CPE opišemo z dvema cikloma: ____ cikel (ukaz se prebere iz pomnilnika) in ____ cikel (ukaz se izvede)."
+    },
+    {
+     "i": 33,
+     "level": "lažja",
+     "max": 1,
+     "section": "Von Neumannov model in CPE",
+     "q": "Po izvedbi navadnega (ne skočnega) ukaza se programski števec poveča za ____ (dve besedi)."
+    },
+    {
+     "i": 34,
+     "level": "lažja",
+     "max": 1,
+     "section": "Von Neumannov model in CPE",
+     "q": "Mikroračunalnik je računalnik, ki"
+    },
+    {
+     "i": 35,
+     "level": "lažja",
+     "max": 1,
+     "section": "Von Neumannov model in CPE",
+     "q": "Na sliki von Neumannovega modela klikni enoto, ki prevzema in dekodira ukaze ter usklajuje delo drugih enot."
+    },
+    {
+     "i": 36,
+     "level": "lažja",
+     "max": 1,
+     "section": "Von Neumannov model in CPE",
+     "q": "Klikni vodilo, po katerem CPE pove, s katere pomnilniške lokacije želi brati."
+    },
+    {
+     "i": 37,
+     "level": "lažja",
+     "max": 1,
+     "section": "Von Neumannov model in CPE",
+     "q": "Klikni register, ki ga CPE uporabi na začetku vsakega ukaznega cikla, da ve, kje v pomnilniku je naslednji ukaz."
+    },
+    {
+     "i": 38,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ukaz in naslavljanje",
+     "q": "Ukaz je sestavljen iz ____ in ____. (Zapiši vsak del posebej.)"
+    },
+    {
+     "i": 39,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ukaz in naslavljanje",
+     "q": "Katere vrste je operacija?"
+    },
+    {
+     "i": 40,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ukaz in naslavljanje",
+     "q": "Katera vrsta operanda je najprimernejša za podatek?"
+    },
+    {
+     "i": 41,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ukaz in naslavljanje",
+     "q": "Pri takojšnjem naslavljanju je operand"
+    },
+    {
+     "i": 42,
+     "level": "težja",
+     "max": 3,
+     "section": "Ukaz in naslavljanje",
+     "q": "Pomnilnik ima vsebino, prikazano v tabeli. Register X vsebuje $10. Kaj se naloži v A pri posameznem ukazu? Zapiši šestnajstiško (dve števki)."
+    },
+    {
+     "i": 43,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ukaz in naslavljanje",
+     "q": "Vsakemu načinu naslavljanja priredi opis."
+    },
+    {
+     "i": 44,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ukaz in naslavljanje",
+     "q": "Kateri trditvi o naslovih sta resnični?"
+    },
+    {
+     "i": 45,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ukaz in naslavljanje",
+     "q": "Kaj naredi ukaz LDAA #$30?"
+    },
+    {
+     "i": 46,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ukaz in naslavljanje",
+     "q": "Kaj naredi ukaz STAA $30?"
+    },
+    {
+     "i": 47,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ukaz in naslavljanje",
+     "q": "Kateri ukaz uporablja indeksno naslavljanje?"
+    },
+    {
+     "i": 48,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ukaz in naslavljanje",
+     "q": "Program se začne na naslovu $0100. Ukazi so po vrsti dolgi: LDAA #$0A (2 bajta), ADDA $20 (2 bajta), LDX #$0030 (3 bajti), WAI (1 bajt). Kakšen je PC, ko CPE pr"
+    },
+    {
+     "i": 49,
+     "level": "lažja",
+     "max": 1,
+     "section": "Zbirnik in sklad",
+     "q": "Kaj je zbirnik (assembler)?"
+    },
+    {
+     "i": 50,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zbirnik in sklad",
+     "q": "Ali trditev drži?"
+    },
+    {
+     "i": 51,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zbirnik in sklad",
+     "q": "Naslov naslednjega ukaza je med izvajanjem programa shranjen v ____ (register). Podatkovno strukturo, ki omogoča uporabo nazadnje shranjenega podatka (LIFO), im"
+    },
+    {
+     "i": 52,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zbirnik in sklad",
+     "q": "Kaj je po izvedbi programa v registru A (šestnajstiško) in na naslovu $20 (desetiško)?"
+    },
+    {
+     "i": 53,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zbirnik in sklad",
+     "q": "Na naslovu $30 je število 23 (desetiško). Kaj je po izvedbi treh ukazov v registru B? Zapiši šestnajstiško in desetiško kot predznačeno število (dvojiški komple"
+    },
+    {
+     "i": 54,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zbirnik in sklad",
+     "q": "Število je zapisano na naslovu $2000. Katero zaporedje ukazov v B izračuna njegov dvojiški komplement?"
+    },
+    {
+     "i": 55,
+     "level": "težja",
+     "max": 3,
+     "section": "Zbirnik in sklad",
+     "q": "Sledi programu. Kakšni so vsebini registrov po izvedbi (desetiško) in kolikokrat se izvede ukaz ABA?"
+    },
+    {
+     "i": 56,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zbirnik in sklad",
+     "q": "Kaj je po izvedbi programa v registru B, če je na naslovu $20 število 7? Kaj, če je tam število 12? (Števila so desetiška.)"
+    },
+    {
+     "i": 57,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zbirnik in sklad",
+     "q": "Kaj sta po izvedbi programa registra A in B? (šestnajstiško)"
+    },
+    {
+     "i": 58,
+     "level": "težja",
+     "max": 3,
+     "section": "Zbirnik in sklad",
+     "q": "Sklad raste proti nižjim naslovom: ukaz PSH zapiše podatek na naslov SP in nato SP zmanjša, ukaz PUL najprej SP poveča in nato prebere podatek. Na kateri naslov"
+    },
+    {
+     "i": 59,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zbirnik in sklad",
+     "q": "Na naslovih $20 in $21 sta števili. Napiši program, ki ju sešteje in vsoto zapiše na naslov $22. Konec programa označi z WAI."
+    },
+    {
+     "i": 60,
+     "level": "težja",
+     "max": 3,
+     "section": "Zbirnik in sklad",
+     "q": "Na naslovu $20 je število. Napiši program, ki na naslov $21 zapiše njegov dvojiški komplement (8 bitov)."
+    },
+    {
+     "i": 61,
+     "level": "težja",
+     "max": 3,
+     "section": "Zbirnik in sklad",
+     "q": "Na naslovih $20 in $21 sta števili brez predznaka. Napiši program, ki na naslov $22 zapiše večje od njiju."
+    },
+    {
+     "i": 62,
+     "level": "težja",
+     "max": 3,
+     "section": "Zbirnik in sklad",
+     "q": "Na naslovu $20 je število. Na naslov $21 zapiši 1, če je število liho, in 0, če je sodo."
+    },
+    {
+     "i": 63,
+     "level": "težja",
+     "max": 3,
+     "section": "Zbirnik in sklad",
+     "q": "Na naslovu $20 je število od 0 do 31. Pomnoži ga z 8 samo s premiki bitov in rezultat zapiši na $21."
+    },
+    {
+     "i": 64,
+     "level": "težja",
+     "max": 3,
+     "section": "Zbirnik in sklad",
+     "q": "Na naslovu $20 je število N (od 1 do 20). Izračunaj vsoto 1 + 2 + … + N in jo zapiši na $21. Uporabi zanko."
+    },
+    {
+     "i": 65,
+     "level": "težja",
+     "max": 3,
+     "section": "Zbirnik in sklad",
+     "q": "Na naslovih $20, $21 in $22 so tri števila. Z uporabo sklada (PSHA, PULA) jih zapiši na $30, $31 in $32 v obratnem vrstnem redu."
+    },
+    {
+     "i": 66,
+     "level": "težja",
+     "max": 3,
+     "section": "Zbirnik in sklad",
+     "q": "Na naslovu $20 je 8-bitno število. Izračunaj, koliko enic ima v dvojiškem zapisu, in rezultat zapiši na $21."
+    },
+    {
+     "i": 67,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pomiki in rotacije",
+     "q": "V registru A je 00010110 (slika). Klikaj bite tako, da bo v A vrednost po ukazu LSLA."
+    },
+    {
+     "i": 68,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pomiki in rotacije",
+     "q": "V A je 10010111, C = 0. Nastavi A in zastavico C, kot sta po ukazu LSRA."
+    },
+    {
+     "i": 69,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pomiki in rotacije",
+     "q": "V A je 01100100, zastavica C = 1. Nastavi A in C po ukazu ROLA (rotacija v levo skozi C)."
+    },
+    {
+     "i": 70,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pomiki in rotacije",
+     "q": "V A je 00000011, C = 0. Nastavi A in C po ukazu RORA (rotacija v desno skozi C)."
+    },
+    {
+     "i": 71,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pomiki in rotacije",
+     "q": "V A je 11110000 (to je −16). Nastavi A in C po ukazu ASRA."
+    },
+    {
+     "i": 72,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pomiki in rotacije",
+     "q": "S katerim ukazom število v A (brez predznaka) pomnožimo z 2?"
+    },
+    {
+     "i": 73,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pomiki in rotacije",
+     "q": "V A je predznačeno število −36. Kateri ukaz ga pravilno deli z 2?"
+    },
+    {
+     "i": 74,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pomiki in rotacije",
+     "q": "Kakšna sta po izvedbi treh ukazov register A (dvojiško, 8 bitov) in zastavica C?"
+    },
+    {
+     "i": 75,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pomiki in rotacije",
+     "q": "Za katero vrsto ukaza velja trditev?"
+    },
+    {
+     "i": 76,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pomiki in rotacije",
+     "q": "V A je poljubno število. Po koliko zaporednih ukazih ROLA sta A in C spet enaka kot na začetku?"
+    },
+    {
+     "i": 77,
+     "level": "težja",
+     "max": 3,
+     "section": "Pomiki in rotacije",
+     "q": "Na naslovu $20 je število od 0 do 25. Pomnoži ga z 10 samo s pomiki in seštevanjem (x · 10 = x · 8 + x · 2) in rezultat zapiši na $21."
+    },
+    {
+     "i": 78,
+     "level": "težja",
+     "max": 3,
+     "section": "Pomiki in rotacije",
+     "q": "Na naslovu $20 je bajt, na primer $B7. Na $21 zapiši njegovo zgornjo šestnajstiško števko ($0B), na $22 pa spodnjo ($07)."
+    },
+    {
+     "i": 79,
+     "level": "težja",
+     "max": 3,
+     "section": "Pomiki in rotacije",
+     "q": "Zrcali bite: na $21 zapiši bajt z naslova $20 v obratnem vrstnem redu bitov (b7 ↔ b0, b6 ↔ b1 …). Primer: 00000001 → 10000000, 11010000 → 00001011."
+    },
+    {
+     "i": 80,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pomiki in rotacije",
+     "q": "16-bitno število je v $20 (zgornji bajt, $01) in $21 (spodnji bajt, $90). Kaj je po izvedbi obeh ukazov na $20 in $21 (šestnajstiško)?"
+    },
+    {
+     "i": 81,
+     "level": "težja",
+     "max": 3,
+     "section": "Prekinitve",
+     "q": "Med izvajanjem programa je prišla zahteva za prekinitev. Razvrsti dogodke v pravilni vrstni red (1 = prvi)."
+    },
+    {
+     "i": 82,
+     "level": "lažja",
+     "max": 1,
+     "section": "Prekinitve",
+     "q": "Zakaj V/I naprava CPE opozori s prekinitvijo, ko jo potrebuje?"
+    },
+    {
+     "i": 83,
+     "level": "srednja",
+     "max": 2,
+     "section": "Prekinitve",
+     "q": "Katera vrsta prekinitve je opisana?"
+    },
+    {
+     "i": 84,
+     "level": "lažja",
+     "max": 1,
+     "section": "Prekinitve",
+     "q": "Kaj so pasti (traps)?"
+    },
+    {
+     "i": 85,
+     "level": "lažja",
+     "max": 1,
+     "section": "Prekinitve",
+     "q": "Številka, ki jo naprava pošlje CPE in določi, kateri strežni program se izvede, se imenuje prekinitveni ____."
+    },
+    {
+     "i": 86,
+     "level": "srednja",
+     "max": 2,
+     "section": "Prekinitve",
+     "q": "Ali trditev drži?"
+    },
+    {
+     "i": 87,
+     "level": "lažja",
+     "max": 1,
+     "section": "Prekinitve",
+     "q": "Kam CPE ob prekinitvi shrani povratni naslov?"
+    },
+    {
+     "i": 88,
+     "level": "lažja",
+     "max": 1,
+     "section": "Prekinitve",
+     "q": "Kaj se zgodi s prekinjenim programom po končanem strežnem programu?"
+    },
+    {
+     "i": 89,
+     "level": "težja",
+     "max": 3,
+     "section": "Prekinitve",
+     "q": "Na sliki so koraki prekinitve označeni s številkami 1, 3, 4, 5 in 6. Vsaki številki priredi dogodek."
+    },
+    {
+     "i": 90,
+     "level": "lažja",
+     "max": 1,
+     "section": "Prekinitve",
+     "q": "Klikni del računalnika, kjer CPE poišče začetni naslov strežnega programa."
+    },
+    {
+     "i": 91,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Kam uvrščamo glavni pomnilnik RAM?"
+    },
+    {
+     "i": 92,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Kam uvrščamo disk SSD?"
+    },
+    {
+     "i": 93,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Je pomnilnik notranji ali zunanji?"
+    },
+    {
+     "i": 94,
+     "level": "težja",
+     "max": 3,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Katerega pomnilnika je lastnost?"
+    },
+    {
+     "i": 95,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Kateri trditvi o pomnilnikih RAM sta resnični?"
+    },
+    {
+     "i": 96,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Primerjamo SRAM in DRAM. Katera izvedba ima večjo kapaciteto? Katera ima krajši dostopni čas?"
+    },
+    {
+     "i": 97,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Razvrsti pomnilnike od najhitrejšega (1) do najpočasnejšega (5)."
+    },
+    {
+     "i": 98,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Pomnilnik v centralni procesni enoti, ki je na vrhu pomnilniške hierarhije, so ____."
+    },
+    {
+     "i": 99,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Predpomnilnik je uveden, ker"
+    },
+    {
+     "i": 100,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Vsakemu pomnilniškemu elementu priredi natanko eno njegovo funkcijo."
+    },
+    {
+     "i": 101,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Kdaj pomnilniku rečemo pomnilnik z naključnim dostopom (RAM)?"
+    },
+    {
+     "i": 102,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Kateri pomnilniški medij ima zaporedni dostop do podatkov?"
+    },
+    {
+     "i": 103,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Ali pomnilnik po izklopu napajanja obdrži vsebino?"
+    },
+    {
+     "i": 104,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Pomembno vlogo pri zagonu računalnika ima BIOS. Kateri stavek ga najbolje opisuje?"
+    },
+    {
+     "i": 105,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Starejši BIOS danes nadomešča novejši program ____ (kratica)."
+    },
+    {
+     "i": 106,
+     "level": "težja",
+     "max": 3,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Dostop do predpomnilnika traja 2 ns, do glavnega pomnilnika 100 ns. Predpomnilnik je zadel pri 95 % dostopov. Koliko je povprečni čas dostopa (v ns)? Kolikokrat"
+    },
+    {
+     "i": 107,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Navidezni (virtualni) pomnilnik omogoča"
+    },
+    {
+     "i": 108,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Kateri trditvi sta resnični, če pomnilniško hierarhijo gledamo z vidika CPE?"
+    },
+    {
+     "i": 109,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Predpomnilnik hrani bloke po 4 bajte (naslovi 0–3 so blok 0, 4–7 blok 1 …) in je na začetku prazen. Program po vrsti bere naslove na sliki. Ob zgrešku se v pred"
+    },
+    {
+     "i": 110,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pomnilniki in hierarhija",
+     "q": "Pri dostopih iz prejšnje naloge je delež zadetkov 6/8 = 75 %. Dostop do predpomnilnika traja 1 ns, do glavnega pomnilnika 100 ns. Koliko je povprečni čas dostop"
+    },
+    {
+     "i": 111,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vhod, izhod in cevovod",
+     "q": "Kam spada enota?"
+    },
+    {
+     "i": 112,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vhod, izhod in cevovod",
+     "q": "Kaj je naloga gonilnika naprave?"
+    },
+    {
+     "i": 113,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vhod, izhod in cevovod",
+     "q": "Katero vrsto prenosa opisuje trditev ali primer?"
+    },
+    {
+     "i": 114,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vhod, izhod in cevovod",
+     "q": "Kako se naprava poveže?"
+    },
+    {
+     "i": 115,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vhod, izhod in cevovod",
+     "q": "Katero brezžično povezavo za kratek doseg (nekaj metrov) z majhno porabo izberemo za slušalke ali brezžično miško?"
+    },
+    {
+     "i": 116,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vhod, izhod in cevovod",
+     "q": "Wi-Fi je"
+    },
+    {
+     "i": 117,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vhod, izhod in cevovod",
+     "q": "V čem je bistvo cevovodnega (pipeline) procesiranja?"
+    },
+    {
+     "i": 118,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vhod, izhod in cevovod",
+     "q": "Ukaz poteka v 5 stopnjah, vsaka traja 1 takt. Koliko taktov potrebuje 10 ukazov brez cevovoda in koliko s cevovodom?"
+    },
+    {
+     "i": 119,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vhod, izhod in cevovod",
+     "q": "Procesor ima cevovod s 5 stopnjami. V tabeli sta vrisana prva dva ukaza. V katerem taktu se konča 4. ukaz? V katerem taktu bi se končal 4. ukaz brez cevovoda?"
+    },
+    {
+     "i": 120,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vhod, izhod in cevovod",
+     "q": "Klikni krmilnik, prek katerega računalnik pošilja sliko na monitor."
+    },
+    {
+     "i": 121,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vhod, izhod in cevovod",
+     "q": "Prenesti moramo 4 bajte. Vzporedna povezava ima 8 podatkovnih linij, serijska eno. V vsakem taktu gre po vsaki liniji en bit. Koliko taktov potrebuje vzporedni "
+    },
+    {
+     "i": 122,
+     "level": "težja",
+     "max": 3,
+     "section": "Še več maturitetnih nalog",
+     "q": "Za vsak opis zapiši primer dveh binarnih števil z osmimi biti (x in y) ali NE OBSTAJA, če takih števil ni. 1) x je večji od y in ima manj enic kot y. 2) x in y "
+    },
+    {
+     "i": 123,
+     "level": "srednja",
+     "max": 2,
+     "section": "Še več maturitetnih nalog",
+     "q": "Kateri trditvi ustrezata opisu programskega števca (PC)?"
+    },
+    {
+     "i": 124,
+     "level": "lažja",
+     "max": 1,
+     "section": "Še več maturitetnih nalog",
+     "q": "Katera od naštetih trditev je resnična za predpomnilnik?"
+    },
+    {
+     "i": 125,
+     "level": "srednja",
+     "max": 2,
+     "section": "Še več maturitetnih nalog",
+     "q": "Število DEF₁₆ zapiši v dvojiškem in v desetiškem sestavu."
+    },
+    {
+     "i": 126,
+     "level": "težja",
+     "max": 3,
+     "section": "Še več maturitetnih nalog",
+     "q": "Kaj je po izvedbi štirih ukazov v registru A? Zapiši vmesne vrednosti in končni rezultat (šestnajstiško)."
+    },
+    {
+     "i": 127,
+     "level": "težja",
+     "max": 3,
+     "section": "Še več maturitetnih nalog",
+     "q": "Na naslovih $20 do $23 so štirje bajti. Skopiraj jih na naslove $30 do $33. Uporabi indeksno naslavljanje in zanko."
+    },
+    {
+     "i": 128,
+     "level": "težja",
+     "max": 3,
+     "section": "Še več maturitetnih nalog",
+     "q": "Na naslovih $20 do $23 so štirje bajti, katerih vsota je manjša od 256. Vsoto zapiši na $24."
+    }
+   ],
+   "pages": [
+    {
+     "id": "pregled",
+     "chapter": "Teorija",
+     "label": "Pregled"
+    },
+    {
+     "id": "podatki",
+     "chapter": "Teorija",
+     "label": "Podatki in števila"
+    },
+    {
+     "id": "vn",
+     "chapter": "Teorija",
+     "label": "Von Neumannov model"
+    },
+    {
+     "id": "ukaz",
+     "chapter": "Teorija",
+     "label": "Ukaz in operandi"
+    },
+    {
+     "id": "naslavljanje",
+     "chapter": "Teorija",
+     "label": "Načini naslavljanja"
+    },
+    {
+     "id": "zbirnik",
+     "chapter": "Teorija",
+     "label": "Zbirnik in ukazi"
+    },
+    {
+     "id": "simulator",
+     "chapter": "Teorija",
+     "label": "Preizkusi sam: simulator"
+    },
+    {
+     "id": "pomiki",
+     "chapter": "Teorija",
+     "label": "Pomiki in rotacije bitov"
+    },
+    {
+     "id": "prekinitve",
+     "chapter": "Teorija",
+     "label": "Prekinitve"
+    },
+    {
+     "id": "pomnilniki",
+     "chapter": "Teorija",
+     "label": "Vrste pomnilnikov"
+    },
+    {
+     "id": "hierarhija",
+     "chapter": "Teorija",
+     "label": "Pomnilniška hierarhija"
+    },
+    {
+     "id": "vi",
+     "chapter": "Teorija",
+     "label": "Vhod in izhod"
+    },
+    {
+     "id": "cevovod",
+     "chapter": "Teorija",
+     "label": "Cevovodno procesiranje"
+    },
+    {
+     "id": "naloge-a",
+     "chapter": "Naloge",
+     "label": "Vaje A · Podatki in števila"
+    },
+    {
+     "id": "naloge-b",
+     "chapter": "Naloge",
+     "label": "Vaje B · Von Neumannov model in CPE"
+    },
+    {
+     "id": "naloge-c",
+     "chapter": "Naloge",
+     "label": "Vaje C · Ukaz in naslavljanje"
+    },
+    {
+     "id": "naloge-d",
+     "chapter": "Naloge",
+     "label": "Vaje D · Zbirnik in sklad"
+    },
+    {
+     "id": "naloge-r",
+     "chapter": "Naloge",
+     "label": "Vaje E · Pomiki in rotacije"
+    },
+    {
+     "id": "naloge-e",
+     "chapter": "Naloge",
+     "label": "Vaje F · Prekinitve"
+    },
+    {
+     "id": "naloge-f",
+     "chapter": "Naloge",
+     "label": "Vaje G · Pomnilniki in hierarhija"
+    },
+    {
+     "id": "naloge-g",
+     "chapter": "Naloge",
+     "label": "Vaje H · Vhod, izhod in cevovod"
+    },
+    {
+     "id": "doma-mat",
+     "chapter": "Naloge",
+     "label": "Vaje I · Še več maturitetnih nalog"
+    },
+    {
+     "id": "doma",
+     "chapter": "Naloge",
+     "label": "Za doma"
+    }
+   ],
+   "gate": [
+    "podatki",
+    "vn",
+    "ukaz",
+    "naslavljanje",
+    "zbirnik",
+    "simulator",
+    "pomiki",
+    "prekinitve",
+    "pomnilniki",
+    "hierarhija",
+    "vi",
+    "cevovod"
+   ]
   }
  ]
 }
