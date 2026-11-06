@@ -11,11 +11,12 @@ Razpored (od učitelja, popravljen 6. 11. 2026). Poglavja se v vsakem letniku š
 - LAV-RAČ3: 3.1 Java in delovanje JVM, 3.2 Algoritmi in diagram poteka, 3.3 Temeljni gradniki programa, 3.4 Podatkovni tipi v Javi, 3.5 Pogojni stavki v Javi, 3.6 Zanke v Javi
 - LAV-RAČ4: še ni določeno
 
-Še ni dogovorjeno:
-- kako štejejo naloge »Za doma« in maturitetne naloge,
 
 ## Odločitve
 
+- Točkovanje (6. 11. 2026): naloge »Za doma« se ne točkujejo. Maturitetne naloge se točkujejo smiselno glede na nalogo, kot v maturitetnih polah.
+- Letniki in stran Šolsko leto so samo za ta portal; LAV-ELS jih ne dobi (6. 11. 2026).
+- Kopije baze (6. 11. 2026): skrbnik jih hrani na svojem računalniku, dokler jih sam ne izbriše; drugi do njih nimajo dostopa.
 - Letniki (6. 11. 2026): `years` v `content/portal.json` poveže 2., 3. in 4. letnik z LAV-RAČ2, LAV-RAČ3 in LAV-RAČ4. Razred ima letnik, prejšnji letniki so lahko odprti za ponavljanje, ob koncu leta skrbnik naredi prehod na strani Šolsko leto (razdelka 3 in 8 načrta). Ob postavitvi letos: vsem razredom nastavi letnik, »vidi prejšnje letnike« pusti izklopljeno.
 - Ime `LAV-RAČ`, `slug` `lavrac`, naslov `lavrac.sc-nm.si`. `slug` se po začetku uporabe ne spreminja.
 - Prave uporabnike, bazo in registracijo v Entra ima portal svoje, z LAV-ELS si deli samo ogrodje.

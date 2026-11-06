@@ -20,12 +20,12 @@ Dogovorjeno (6. 11. 2026):
   - Seznam dijakov, ki napredujejo, ima privzeto izbrane vse; skrbnik lahko koga odznači.
   - Učitelje razredom dodeli skrbnik (ob prehodu se odstranijo).
 - Dijak, ki se med letom izpiše, se izbriše kot zdaj (Administracija > Uporabniki).
-- Podatki dijaka se hranijo, dokler je vpisan. Za pooblaščeno osebo za varstvo podatkov ostane še rok hrambe kopij baze.
+- Podatki dijaka se hranijo, dokler je vpisan. Kopije baze hrani skrbnik, dokler jih sam ne izbriše (6. 11. 2026).
 
 - Dijak, ki ga skrbnik pri prehodu odznači (ne napreduje), ostane brez razreda; skrbnik ga doda v ustrezen razred.
 
 Narejeno (6. 11. 2026): letnik in nastavitev pri razredu (migracija 007, `years` v `content/portal.json`), filtriranje po letniku v vseh pogledih učitelja, razdelek »Prejšnji letniki«, stran Šolsko leto, preizkus v `test/content.test.js`, zapis v `docs/NACRT_PORTALA.md`. Dodatno: tudi dijake zadnjega letnika je mogoče odznačiti (ostanejo brez razreda, niso izbrisani).
 
-- [ ] Razmisliti, ali spremembo jedra (letniki, Šolsko leto) ponudimo tudi LAV-ELS. Tam brez `years` vse ostane kot zdaj.
+- [x] Letnikov in strani Šolsko leto ne ponudimo LAV-ELS, so samo za ta portal (6. 11. 2026).
 
 Odprta vprašanja o vsebini so tudi v `docs/LAV-RAC.md` (razdelek Stanje).
