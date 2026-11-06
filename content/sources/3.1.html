@@ -1,0 +1,1820 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Številski sistemi, kodiranje in pariteta – ŠCNM</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+
+/* Layout: sticky chapter rail (desktop) + single reading column; theory first, then graded task cards, then homework. */
+:root{
+  --bg:#f4f6f8; --surface:#ffffff; --sunk:#e9edf1; --line:#d3dae1;
+  --fg:#18202b; --muted:#5a6675;
+  --accent:#8b4a1f; --accent-soft:#f3e4d8;
+  --ok:#11775f; --ok-soft:#dcf1ea; --bad:#b4372b; --bad-soft:#f8e1de; --seen:#8a6a00; --seen-soft:#f6edcc;
+  --code-bg:#1d2430; --code-fg:#e5e9f0; --k:#f0a868; --s:#9fd39a; --c:#8a96a8; --n:#d6a5f0;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11151b; --surface:#181e26; --sunk:#0d1116; --line:#2b3440;
+  --fg:#e4e8ee; --muted:#9aa5b3;
+  --accent:#e8a26f; --accent-soft:#3a2a1f;
+  --ok:#53c9a6; --ok-soft:#14322a; --bad:#f08578; --bad-soft:#3a1e1b; --seen:#e2c25a; --seen-soft:#352d12;
+  --code-bg:#0b0f14; --code-fg:#e5e9f0;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11151b; --surface:#181e26; --sunk:#0d1116; --line:#2b3440;
+  --fg:#e4e8ee; --muted:#9aa5b3;
+  --accent:#e8a26f; --accent-soft:#3a2a1f;
+  --ok:#53c9a6; --ok-soft:#14322a; --bad:#f08578; --bad-soft:#3a1e1b; --seen:#e2c25a; --seen-soft:#352d12;
+  --code-bg:#0b0f14; --code-fg:#e5e9f0;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:17px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:48px;padding-block:32px 80px}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr);gap:24px;padding-block:20px 60px}.wrap > .rail{display:none}}
+[hidden]{display:none!important}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(2rem,4.5vw,3rem);font-weight:700;letter-spacing:-.02em}
+h2{font-size:1.65rem;font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.2rem;font-weight:700}
+p{margin:0}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.eyebrow{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+main{min-width:0;display:flex;flex-direction:column;gap:56px}
+section{display:flex;flex-direction:column;gap:18px;scroll-margin-top:24px}
+.prose{max-width:68ch;display:flex;flex-direction:column;gap:14px}
+p.prose{display:block}
+.prose ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--sunk);padding:.08em .35em;border-radius:4px}
+pre{margin:0}
+.code{background:var(--code-bg);color:var(--code-fg);font-family:var(--f-mono);font-size:.84rem;line-height:1.55;padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.code .k{color:var(--k)} .code .s{color:var(--s)} .code .c{color:var(--c);font-style:italic} .code .n{color:var(--n)}
+.term .p{color:var(--k);user-select:none} .term .o{color:#a9b4c4}
+
+/* rail */
+.rail{position:sticky;top:max(24px,env(safe-area-inset-top,0px));align-self:start;display:flex;flex-direction:column;gap:20px;font-size:.93rem}
+.rail nav{display:flex;flex-direction:column;gap:2px}
+.rail nav a{color:var(--muted);text-decoration:none;padding:4px 10px;border-left:2px solid var(--line)}
+.rail nav a:hover{color:var(--fg);border-left-color:var(--accent)}
+.rail .grp{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 0 4px 12px}
+
+/* hero */
+.hero{display:flex;flex-direction:column;gap:16px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.hero .lead{font-size:1.15rem;color:var(--muted);max-width:62ch}
+.magic{font-family:var(--f-mono);font-size:clamp(.8rem,2.4vw,1rem);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.magic span{padding:3px 7px;border-radius:4px;background:var(--sunk);color:var(--muted)}
+.magic span.hi{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.magic small{color:var(--muted);font-family:var(--f-body);font-size:.85rem;margin-left:6px}
+
+/* progress */
+.progress{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.progress .row{display:flex;justify-content:space-between;gap:8px;font-variant-numeric:tabular-nums;font-size:.92rem}
+.bar{height:8px;background:var(--sunk);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.progress .tools{display:flex;gap:8px;flex-wrap:wrap}
+
+/* diagram + tables */
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;overflow-x:auto}
+.fig svg{display:block;min-width:640px;width:100%;height:auto}
+.fig figcaption{font-size:.88rem;color:var(--muted);margin-top:8px}
+figure{margin:0}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.95rem;min-width:520px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
+.note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 14px;border-radius:0 8px 8px 0;max-width:68ch;font-size:.97rem}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.two > *{min-width:0}
+
+/* task list */
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:inherit;font-size:.88rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:5px 12px;border-radius:99px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.level{display:flex;flex-direction:column;gap:14px}
+.level > header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding-top:8px}
+.level > header p{color:var(--muted);font-size:.95rem}
+.task{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px;scroll-margin-top:24px}
+.task[data-state="ok"]{border-color:var(--ok)}
+.task[data-state="seen"]{border-color:var(--seen)}
+.thead{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.tnum{font-family:var(--f-display);font-weight:700;font-size:1.05rem}
+.tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.tag{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.04em;padding:2px 8px;border-radius:4px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.tag.mat{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.tag.st-ok{background:var(--ok-soft);color:var(--ok)}
+.tag.st-seen{background:var(--seen-soft);color:var(--seen)}
+.q{display:flex;flex-direction:column;gap:10px;max-width:72ch}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 12px;border:1px solid var(--line);border-radius:8px;cursor:pointer;background:var(--bg)}
+.opt:hover{border-color:var(--muted)}
+.opt input{margin-top:5px;accent-color:var(--accent)}
+.opt b{font-family:var(--f-mono);font-weight:600;min-width:1.2em}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.blank{display:flex;flex-direction:column;gap:4px}
+.blank label{font-size:.93rem;color:var(--muted)}
+input[type="text"],textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 10px;width:100%}
+input.mono,textarea.mono{font-family:var(--f-mono);font-size:.86rem}
+textarea.editor{font-family:var(--f-mono);font-size:.84rem;line-height:1.5;min-height:180px;tab-size:4;white-space:pre;overflow:auto;resize:vertical}
+textarea.out{min-height:90px}
+input.right,textarea.right{border-color:var(--ok);background:var(--ok-soft)}
+input.wrong,textarea.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.cls{display:flex;flex-direction:column;gap:6px}
+.crow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.crow.right{border-color:var(--ok);background:var(--ok-soft)} .crow.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.crow .txt{min-width:0;font-size:.96rem}
+.seg{display:inline-flex;justify-self:start;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex-wrap:wrap}
+.seg button{font:inherit;font-size:.84rem;border:0;background:var(--surface);color:var(--fg);padding:4px 10px;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+@media (max-width:560px){.crow{grid-template-columns:minmax(0,1fr)}}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;font-size:.92rem;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:6px 14px;border-radius:6px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.feedback{font-weight:600;font-size:.95rem}
+.feedback.ok{color:var(--ok)} .feedback.bad{color:var(--bad)}
+.hints{display:flex;flex-direction:column;gap:6px}
+.hint{background:var(--sunk);border-radius:8px;padding:8px 12px;font-size:.95rem;max-width:72ch}
+.hint b{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);margin-right:6px}
+.sol{border-top:1px dashed var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px}
+.sol .ans{font-weight:700}
+.sol .why{max-width:72ch;color:var(--fg)}
+.editorbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.editorbar span{font-size:.85rem;color:var(--muted)}
+.confirm{display:inline-flex;gap:8px;align-items:center;font-size:.9rem}
+/* paging */
+.rail nav a[aria-current="page"]{color:var(--fg);border-left-color:var(--accent);font-weight:600;background:var(--surface)}
+.rail nav a{display:flex;justify-content:space-between;gap:8px}
+.rail nav a .cnt{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:400}
+.rail nav a .cnt.full{color:var(--ok)}
+.rprog{display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:.86rem;font-variant-numeric:tabular-nums}
+.sync{display:flex;gap:6px;align-items:flex-start;color:var(--muted);font-size:.8rem;line-height:1.35}
+.sync::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;margin-top:4px;background:var(--seen)}
+.sync[data-s="cloud"]::before{background:var(--ok)}
+.mtop{display:none;flex-direction:column;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.mtop select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 10px;width:100%}
+.mtop .row{display:flex;justify-content:space-between;gap:8px;font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+@media (max-width:900px){.mtop{display:flex}}
+.crumb{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-top:1px solid var(--line);padding-top:20px}
+.pager a{display:flex;flex-direction:column;gap:2px;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);text-decoration:none;min-width:0}
+.pager a:hover{border-color:var(--accent)}
+.pager a.next{text-align:right;grid-column:2}
+.pager a .t{font-family:var(--f-display);font-weight:700;font-size:1.05rem}
+.pager a.next .t::after{content:" \2192"} .pager a.prev .t::before{content:"\2190  "}
+.pager .eyebrow{font-size:.7rem}
+@media (max-width:560px){.pager{grid-template-columns:1fr}.pager a.next{grid-column:1}}
+.lvl-empty{color:var(--muted);font-style:italic}
+main{gap:40px}
+footer{color:var(--muted);font-size:.88rem;border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ===== dodatki za to poglavje ===== */
+.rail{max-height:calc(100vh - 48px);overflow-y:auto;padding-right:4px}
+.qtext{white-space:pre-line;max-width:72ch}
+.mono-opt{font-family:var(--f-mono);font-size:.84rem;white-space:pre;overflow-x:auto;min-width:0}
+.opt span{min-width:0}
+.code .s{color:var(--s)}
+.crow select{font:inherit;font-size:.92rem;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 8px;max-width:100%;min-width:0}
+.crow.sel.order{grid-template-columns:minmax(0,1fr) 5.5rem}
+.crow.sel.match{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}
+@media (max-width:560px){.crow.sel.order,.crow.sel.match{grid-template-columns:minmax(0,1fr)}}
+.tests ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.tests li{font-size:.9rem;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg)}
+.tests li.ok{border-color:var(--ok);background:var(--ok-soft)}
+.tests li.bad{border-color:var(--bad);background:var(--bad-soft)}
+.tests p.bad{color:var(--bad);font-weight:600;margin:0}
+.tests code{background:transparent;padding:0}
+
+/* tabele s paritetnimi biti */
+table.pgrid{min-width:0;width:auto}
+.pgrid td,.pgrid th{text-align:center;font-family:var(--f-mono);padding:6px 12px;min-width:2.4rem}
+.pgrid td.pb{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.pgrid td.flip{outline:2px dashed var(--muted);outline-offset:-3px}
+.pgrid td.chk{font-weight:700;border-bottom:0}
+.pgrid td.chk.good{color:var(--ok)} .pgrid td.chk.bad{color:var(--bad)}
+.pgrid .pc{font:inherit;color:inherit;background:transparent;border:0;cursor:pointer;width:100%;padding:2px 4px;border-radius:4px}
+.pgrid .pc:hover{background:var(--sunk)}
+
+/* pripomočki */
+.wbox{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.wnote{font-size:.93rem;color:var(--muted);max-width:68ch}
+.bitrow{display:flex;gap:6px;flex-wrap:wrap}
+.bitcol{display:flex;flex-direction:column;align-items:center;gap:4px}
+.bw{font-family:var(--f-mono);font-size:.72rem;color:var(--muted)}
+.bit{font-family:var(--f-mono);font-size:1.15rem;font-weight:600;width:2.6rem;height:2.6rem;border-radius:8px;border:1px solid var(--line);background:var(--sunk);color:var(--muted);cursor:pointer}
+.bit[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.vals{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:0}
+.vals > div{background:var(--sunk);border-radius:8px;padding:8px 12px;min-width:0}
+.vals dt{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.vals dd{margin:0;font-family:var(--f-mono);font-size:1.05rem;font-weight:600;overflow-wrap:anywhere}
+.stepper{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.stepper .cap{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:10px 14px;max-width:none;min-height:3.4em}
+.stepper .actions .eyebrow{margin-left:6px}
+.btn:disabled{opacity:.45;cursor:default}
+/* naslavljanje */
+.seg{max-width:100%}
+.mode-code{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.code-inline{font-size:1.05rem;font-weight:600;background:var(--code-bg);color:var(--code-fg);padding:4px 12px;border-radius:6px}
+.mem8{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:6px}
+.mc{background:var(--sunk);border:1px solid var(--line);border-radius:8px;padding:6px 8px;display:flex;flex-direction:column;align-items:center;font-family:var(--f-mono)}
+.mc small{font-size:.7rem;color:var(--muted)} .mc b{font-size:.95rem}
+
+/* ===== dodatki za številske sisteme ===== */
+.brand{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:2px}
+.brand svg{height:36px;width:auto;flex:none}
+.brand img{height:36px;width:auto}
+.brand span{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);line-height:1.4}
+.rail nav .grp:first-child{margin-top:0}
+.pgrid input{width:2.7rem;padding:4px 2px;text-align:center;font-family:var(--f-mono);font-size:.95rem}
+.pgrid .pc[aria-pressed="true"]{background:var(--bad-soft);outline:2px solid var(--bad);outline-offset:-2px;font-weight:700;color:var(--bad)}
+.pgrid td.lb{font-family:var(--f-body);text-align:right;color:var(--muted);font-size:.85rem;white-space:nowrap}
+.pgrid td.op{color:var(--muted)}
+.gline{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.wbox .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.two table{min-width:0}
+.tbl.fit{width:fit-content;max-width:100%}
+.tbl.fit table{min-width:0;width:auto}
+.dv td,.dv th{font-family:var(--f-mono);font-size:.9rem}
+.dv th{font-size:.7rem}
+.pos td.num,.pos th{text-align:center}
+.pos th:first-child,.pos td:first-child{text-align:left;font-family:var(--f-body);font-weight:600;white-space:nowrap}
+.sol .why table{min-width:0}
+.sol .why .tbl{margin:8px 0}
+.sol .why p{margin:6px 0}
+.ansline{white-space:pre-line;font-weight:400}
+.opt span{min-width:0}
+.cn-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.bitline{margin:0}
+.q .tbl{width:fit-content;max-width:100%}
+.tag.lv{font-family:var(--f-mono)}
+.bit.static{cursor:default;display:grid;place-items:center;color:var(--fg);background:var(--surface)}
+.pgrid td.pb input{background:var(--surface)}
+.nowrap{white-space:nowrap}
+.two.wide{grid-template-columns:repeat(auto-fit,minmax(min(100%,370px),1fr))}
+.dv td,.dv th{white-space:nowrap}
+
+/* ===== v2: poravnani računi, primeri, grafike ===== */
+.al{border-collapse:collapse;width:auto;min-width:0}
+.al th,.al td{border-bottom:0;padding:3px 6px;vertical-align:middle}
+.al th{background:transparent;text-transform:none;letter-spacing:0;font-family:var(--f-body);font-size:.84rem;font-weight:500;color:var(--muted);text-align:right;white-space:normal;max-width:9.5rem;line-height:1.2;padding-right:12px}
+.al td{font-family:var(--f-mono);font-size:1.02rem;text-align:center;min-width:1.55rem;white-space:nowrap}
+.al tr.carry td{color:var(--accent);font-size:.82rem;font-weight:600}
+.al tr.carry th{color:var(--accent)}
+.al tr.ln td,.al tr.ln th{border-bottom:2px solid var(--fg)}
+.al tr.ln th{border-bottom-color:transparent}
+.al tr.res td{font-weight:700;color:var(--ok);background:var(--ok-soft)}
+.al tr.res th{color:var(--ok);font-weight:600}
+.al td.z{opacity:.4}
+.al tr.skip td{opacity:.38;text-decoration:line-through}
+.al tr.skip th{opacity:.6}
+.al .co{color:var(--bad);text-decoration:line-through;font-weight:700}
+.ex{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--surface);display:flex;flex-direction:column;gap:10px;min-width:0;max-width:100%}
+.ex > strong{font-family:var(--f-display);font-size:1.02rem}
+.exs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:14px;align-items:start}
+.exs.figs{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
+.stp{margin:0;padding-left:1.25em;display:flex;flex-direction:column;gap:5px;font-size:.93rem}
+.stp.big{gap:14px;font-size:1rem}
+.stp.big > li{padding-left:2px}
+.stp.big .tbl{margin-top:6px}
+.prv{margin:0;font-size:.92rem;color:var(--muted)}
+.prv b{color:var(--fg)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px}
+.card{border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:8px;padding:12px 14px;background:var(--surface);display:flex;flex-direction:column;gap:5px;font-size:.93rem}
+.card b{font-family:var(--f-display)}
+.card span{color:var(--muted)}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
+.fb{flex:1 1 170px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface);display:flex;flex-direction:column;gap:3px;font-size:.92rem}
+.fb b{font-family:var(--f-display)}
+.fb span{color:var(--muted)}
+.fb.bad{border-color:var(--bad);background:var(--bad-soft)}
+.fa{display:grid;place-items:center;color:var(--accent);font-size:1.3rem;font-weight:700}
+.bs{display:inline-flex;gap:3px}
+.bs i{font-style:normal;font-family:var(--f-mono);font-weight:600;width:1.6rem;height:1.9rem;display:inline-grid;place-items:center;border:1px solid var(--line);border-radius:5px;background:var(--sunk)}
+.bs i.fl{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.think{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:0;max-width:68ch}
+.think summary{cursor:pointer;padding:9px 14px;font-weight:600}
+.think div{padding:0 14px 12px;color:var(--muted)}
+.figbox{align-self:start;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:10px}
+.ring{width:100%;max-width:330px;height:auto}
+.enc{width:100%;max-width:270px;height:auto}
+.seg7{width:22px;height:38px;display:block}
+.sevrow{display:flex;gap:14px;flex-wrap:wrap}
+.sevcol{display:flex;flex-direction:column;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface)}
+.sevcol .seg7{width:44px;height:76px}
+.sdig{font-family:var(--f-mono);font-weight:700;color:var(--muted)}
+.krow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px}
+.krow .lbl{flex:0 0 100%;font-size:.86rem;color:var(--muted)}
+.krow .val{font-family:var(--f-mono);font-size:.92rem}
+.bitrow.sb{display:inline-flex;gap:5px}
+.bit.static{width:2.1rem;height:2.1rem;font-size:1rem}
+.bit.static.cmp{background:var(--accent-soft);border-color:var(--accent)}
+.bit.static.chg{outline:2px solid var(--accent);outline-offset:1px;background:var(--accent-soft)}
+.bit.flipped{outline:2px solid var(--bad);outline-offset:1px}
+.bigv{font-size:1.05rem}
+.bigv b{font-family:var(--f-mono)}
+.wnote.ok{color:var(--ok)} .wnote.bad{color:var(--bad)}
+.fld{display:inline-flex;align-items:center;gap:6px;font-weight:600}
+.in{font-family:var(--f-mono);font-size:1rem;width:7.5rem;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg)}
+.in[type=number]{width:5.5rem}
+.opsym{font-family:var(--f-mono);font-size:1.2rem;font-weight:700}
+.mbars{display:flex;flex-direction:column;gap:6px}
+.mbar{position:relative;display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;font-size:.84rem;min-height:1.8rem}
+.mbar span{grid-column:1/-1;color:var(--muted)}
+.mbar i{display:block;height:10px;border-radius:5px;background:var(--accent);min-width:6px;grid-column:1}
+.mbar i.b2{background:var(--ok)}
+.mbar b{font-family:var(--f-mono);grid-row:2;grid-column:2}
+.mbar span{grid-row:1}
+.qrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:6px 0;border-bottom:1px solid var(--line)}
+.qrow:last-of-type{border-bottom:0}
+.qn{font-family:var(--f-mono);color:var(--muted);min-width:1.6rem}
+.qm{font-size:.84rem;color:var(--muted);min-width:3rem}
+.qfb{flex:1 1 100%;font-size:.9rem}
+.qfb.ok{color:var(--ok)} .qfb.bad{color:var(--bad)}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--surface);border-color:var(--accent)}
+.pf{font-family:var(--f-mono);font-size:1rem;font-weight:600;width:2.2rem;height:2.2rem;border-radius:6px;border:1px dashed var(--accent);background:var(--surface);color:var(--fg);cursor:pointer}
+.pf.ok{border:2px solid var(--ok);background:var(--ok-soft)}
+.pf.no{border:2px solid var(--bad);background:var(--bad-soft)}
+.pgrid td.pb .pf{background:var(--accent-soft)}
+.pgrid td.lb{font-family:var(--f-mono);font-weight:700}
+@media (max-width:520px){.al td{min-width:1.35rem;padding:3px 3px}.al th{font-size:.78rem;padding-right:8px}.sevcol .seg7{width:36px;height:62px}}
+
+</style>
+
+<div class="wrap">
+  <aside class="rail" aria-label="Vsebina">
+    <div class="brand" id="brand"></div>
+    <nav id="railNav"></nav>
+    <div class="rprog" aria-live="polite">
+      <strong>Tvoj napredek</strong>
+      <div class="bar"><i class="js-bar"></i></div>
+      <span class="js-progtxt"></span>
+      <span class="sync js-sync" data-s="local">Napredek se shranjuje v tem brskalniku.</span>
+    </div>
+  </aside>
+
+  <main>
+    <div class="mtop">
+      <label class="eyebrow" for="pageSel">Stran</label>
+      <select id="pageSel"></select>
+      <div class="bar"><i class="js-bar"></i></div>
+      <div class="row"><span class="js-progtxt"></span></div>
+      <span class="sync js-sync" data-s="local">Napredek se shranjuje v tem brskalniku.</span>
+    </div>
+    <div class="crumb" id="crumb"><span class="eyebrow">Številski sistemi, kodiranje in pariteta</span><span class="eyebrow" id="crumbN"></span></div>
+    <header class="hero" id="hero">
+      <div class="eyebrow">Računalništvo · Šolski center Novo mesto</div>
+      <h1>Številski sistemi, kodiranje in pariteta</h1>
+      <p class="lead">Kako računalnik zapiše števila in kako zazna napako pri prenosu. Najprej razumeš postopek, nato vadiš na nalogah od lažjih do težjih. Vsaka naloga ima namig, preverjanje in rešitev.</p>
+      <div class="magic" aria-label="Število 93 v dvojiškem, osmiškem in šestnajstiškem sistemu">
+        <span class="hi">1011101₂</span><span>=</span><span class="hi">135₈</span><span>=</span><span class="hi">5D₁₆</span>
+        <small>isto število, 93 v desetiškem sistemu, v treh zapisih. Naučil se boš pretvarjati med njimi, računati z njimi in jih zaščititi pred napakami.</small>
+      </div>
+    </header>
+
+    <div id="pages"></div>
+
+    <section id="naloge" style="gap:24px" hidden>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="eyebrow">Vaje</div>
+        <h2>Naloge od lažjih do težjih</h2>
+        <p class="prose" style="color:var(--muted)">Naloge z oznako <span class="tag mat">Iz delovnega lista</span> so povzete po delovnih listih »Pretvorbe številskih sistemov« in »Računanje paritete«. Oznaka <span class="tag">Dodatna</span> pomeni vajo, ki jo je pripravil avtor te strani. Odgovor preveri sam, če se zatakne, odpri namig (vsaka naloga ima do dva). Če si ogledaš rešitev, preden nalogo pravilno rešiš, se ti točke ne štejejo. Točke so enake težavnosti: lažja naloga 1, srednja 2, težja 3.</p>
+        <div class="filters" role="group" aria-label="Prikaži naloge">
+          <button class="chip" data-f="all" aria-pressed="true" type="button">Vse</button>
+          <button class="chip" data-f="mat" aria-pressed="false" type="button">Iz delovnih listov</button>
+          <button class="chip" data-f="own" aria-pressed="false" type="button">Samo dodatne</button>
+          <button class="chip" data-f="open" aria-pressed="false" type="button">Še nerešene</button>
+        </div>
+      </div>
+      <div id="levels" style="display:flex;flex-direction:column;gap:40px"></div>
+    </section>
+
+    <section id="sec-doma" hidden>
+      <div class="eyebrow">Za doma</div>
+      <h2>Vaje za doma</h2>
+      <p class="prose" style="color:var(--muted)">Te vaje reši na list papirja ali v zvezek. Pri teh vajah ni samodejnega preverjanja, ob koncu si ogledaš vzorčni odgovor in ga primerjaš s svojim.</p>
+      <div id="home" class="level"></div>
+    </section>
+
+    <nav class="pager" id="pager" aria-label="Listanje po straneh"></nav>
+
+    <footer>
+      <span>Vsebina sledi delovnima listoma »Pretvorbe številskih sistemov« in »Računanje paritete«. Pri nalogah z računanjem so rešitve izračunane s kodo na tej strani.</span>
+      <span id="resetWrap"></span>
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+const LOGO_SRC = ""; // podatkovni URI pravega logotipa ŠCNM (data:image/png;base64,...) vstaviš sem
+const $ = (s,el=document)=>el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const SUBS = {2:"₂",8:"₈",10:"₁₀",16:"₁₆"};
+const B = (n,w=0)=>n.toString(2).padStart(w,"0");
+const Z = (n,b)=>n.toString(b).toUpperCase();
+const sum = a=>a.reduce((x,y)=>x+y,0);
+const pb = (o,p)=>p==="even" ? o%2 : 1-o%2;
+const NM = {2:"dvojiški",8:"osmiški",10:"desetiški",16:"šestnajstiški"};
+const LC = {2:"dvojiškem",8:"osmiškem",10:"desetiškem",16:"šestnajstiškem"};
+const W8 = [128,64,32,16,8,4,2,1];
+const split = (b,k)=>b.padStart(Math.ceil(b.length/k)*k,"0").match(new RegExp(".{"+k+"}","g"));
+const ptsLabel = p => p===1 ? "1 točka" : p===2 ? "2 točki" : (p<5 ? p+" točke" : p+" točk");
+const gray = i => i^(i>>1);
+
+/* ---------- pomožni prikazi ---------- */
+const tbl = (h,rows,cls)=>`<div class="tbl${cls?" "+cls:""}"><table><thead><tr>${h.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(x=>`<td class="num">${x}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+function divT(n,b){
+  let rows=[], x=n, k=0;
+  while(x>0){ const q=Math.floor(x/b), m=x%b; rows.push(`<tr><td>${k}</td><td>${x} : ${b}</td><td>${q}</td><td>${m}</td>${b===16?`<td>${Z(m,16)}</td>`:""}</tr>`); x=q; k++; }
+  return `<div class="tbl fit"><table class="dv"><thead><tr><th>Korak</th><th>Deljenje</th><th>Rezultat</th><th>Ostanek</th>${b===16?"<th>Šestnajstiško</th>":""}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
+}
+const divBlock = (n,b)=>`<div style="display:flex;flex-direction:column;gap:8px"><strong>${n}₁₀ v ${NM[b]} sistem</strong>${divT(n,b)}<p>Ostanke prebereš od spodaj navzgor: ${n}₁₀ = <b class="nowrap">${Z(n,b)}</b>${SUBS[b]}</p></div>`;
+const powSum = (v,f)=>{ const L=v.length, ds=[...v].map(d=>parseInt(d,16)); return ds.map((d,i)=>`${d}·${f}<sup>${L-1-i}</sup>`).join(" + ")+" = "+ds.map((d,i)=>d*f**(L-1-i)).join(" + ")+` = <b>${parseInt(v,f)}</b>`; };
+function posTbl(v,f){
+  const L=v.length, ds=[...v], vals=ds.map(d=>parseInt(d,16));
+  const row=(h,cells)=>`<tr><th scope="row">${h}</th>${cells.map(c=>`<td class="num">${c}</td>`).join("")}</tr>`;
+  return `<div class="tbl fit"><table class="pos"><tbody>${row("Število "+v+SUBS[f],ds)}${f===16?row("Vrednost števke",vals):""}${row("Potenca števila "+f,ds.map((_,i)=>`${f}<sup>${L-1-i}</sup>`))}${row("Teža mesta",ds.map((_,i)=>f**(L-1-i)))}${row("Produkt",vals.map((d,i)=>d*f**(L-1-i)))}</tbody></table></div><p>${powSum(v,f)}, torej ${v}${SUBS[f]} = <b>${parseInt(v,f)}</b>₁₀</p>`;
+}
+const gline = (b,k)=>`<div class="gline">${split(b,k).map(g=>`<code class="code-inline">${g}</code>`).join("")}</div>`;
+const note = h=>`<p class="note">${h}</p>`;
+const prose = h=>`<div class="prose">${h}</div>`;
+const pgridShow = (d,p)=>{
+  const rb=d.map(r=>pb(sum(r),p)), cb=d[0].map((_,c)=>pb(sum(d.map(r=>r[c])),p)), co=pb(sum(cb),p);
+  return `<div class="tbl fit"><table class="pgrid"><tbody>${d.map((r,i)=>`<tr>${r.map(v=>`<td>${v}</td>`).join("")}<td class="pb">${rb[i]}</td></tr>`).join("")}<tr>${cb.map(v=>`<td class="pb">${v}</td>`).join("")}<td class="pb">${co}</td></tr></tbody></table></div>`;
+};
+const fullM = (d,p)=>{ const rb=d.map(r=>pb(sum(r),p)), cb=d[0].map((_,c)=>pb(sum(d.map(r=>r[c])),p)); return [...d.map((r,i)=>[...r,rb[i]]), [...cb,pb(sum(cb),p)]]; };
+const flipAt = (m,r,c)=>m.map((x,i)=>x.map((v,j)=>i===r&&j===c?1-v:v));
+const wData = (id,n)=>`<div data-w="${id}"${n!=null?` data-n="${n}"`:""}></div>`;
+
+
+/* ====================== pomožne funkcije za razlago (v2) ====================== */
+const dg = c => parseInt(c,36);
+const dc = v => v.toString(36).toUpperCase();
+const ones = s => [...String(s)].filter(c=>c==="1").length;
+const xorS = (a,b)=>[...a].map((c,i)=>c===b[i]?"0":"1").join("");
+const sub = b => SUBS[b];
+const stripZ = s => { const t = s.replace(/^0+/,""); return t===""?"0":t; };
+
+/* poravnana tabela: vrstice {l:oznaka, s:niz|polje celic, k:razred, sh:pomik (levo, z bledimi ničlami), ln:črta pod vrstico} */
+function al(rows){
+  const len = r => (Array.isArray(r.s)?r.s.length:[...r.s].length);
+  const W = Math.max(...rows.map(r=>len(r)+(r.sh||0)));
+  const body = rows.map(r=>{
+    const ch = Array.isArray(r.s) ? r.s : [...r.s].map(c=>c===" "?"":esc(c));
+    const lead = W-ch.length-(r.sh||0);
+    let cells = "";
+    for(let i=0;i<lead;i++) cells += "<td></td>";
+    ch.forEach(c=>{ cells += `<td>${c}</td>`; });
+    for(let i=0;i<(r.sh||0);i++) cells += `<td class="z">0</td>`;
+    return `<tr class="${r.k||"num"}${r.ln?" ln":""}"><th scope="row">${r.l||""}</th>${cells}</tr>`;
+  }).join("");
+  return `<div class="tbl fit"><table class="al"><tbody>${body}</tbody></table></div>`;
+}
+
+/* seštevanje več števil v poljubni osnovi (stolpično, s prenosi) */
+function colAdd(ops, base){
+  const L = Math.max(...ops.map(o=>o.length));
+  const P = ops.map(o=>o.padStart(L,"0"));
+  let carry = 0; const res = [], cin = [], steps = [];
+  for(let i=L-1,k=1;i>=0;i--,k++){
+    const vals = P.map(p=>dg(p[i]));
+    const s = sum(vals)+carry, d = s%base, c2 = Math.floor(s/base);
+    cin[i] = carry;
+    const nm = v => v>9 ? `${dc(v)} (${v})` : `${v}`;
+    const expr = vals.map(nm).join(" + ") + (carry ? ` + ${carry} (prenos)` : "");
+    steps.push(`<b>${k}. stolpec:</b> ${expr} = <b>${s}</b>` + (c2 ? ` = ${c2}·${base} + ${d}, zapišeš <b>${dc(d)}</b>, prenos <b>${c2}</b>` : `, zapišeš <b>${dc(d)}</b>, prenosa ni`));
+    res.unshift(dc(d)); carry = c2;
+  }
+  if(carry){ const cs = carry.toString(base).toUpperCase(); res.unshift(cs); steps.push(`Na koncu še prenos <b>${cs}</b>${base===2&&carry>1?` (${carry} desetiško)`:""} prepišeš na začetek rezultata.`); }
+  const carryRow = [...Array(L)].map((_,i)=>cin[i]? dc(cin[i]) : " ").join("");
+  const rows = [{l:"prenos", s:carryRow, k:"carry"}];
+  ops.forEach((o,i)=>rows.push({l:i? "+":"", s:o, ln:i===ops.length-1}));
+  const out = res.join("");
+  rows.push({l:"=", s:out, k:"res"});
+  return {rows, steps, res:out, carryRow};
+}
+
+/* odštevanje a − b (a ≥ b) v poljubni osnovi z izposojo */
+function colSub(A, B, base){
+  const L = A.length, b = B.padStart(L,"0");
+  let borrow = 0; const res = [], bor = [], steps = [];
+  for(let i=L-1,k=1;i>=0;i--,k++){
+    const x = dg(A[i]), y = dg(b[i]);
+    bor[i] = borrow;
+    const t = x-borrow-y;
+    const left = borrow ? `${x} − 1 (izposoja) − ${y}` : `${x} − ${y}`;
+    let d = t, nb = 0;
+    if(t<0){
+      d = t+base; nb = 1;
+      steps.push(`<b>${k}. stolpec:</b> ${left} je negativno. Izposodiš si ${base} iz naslednjega stolpca: ${base} + ${x}${borrow?" − 1":""} − ${y} = <b>${d}</b>, zapišeš <b>${dc(d)}</b>, izposoja <b>1</b>`);
+    } else {
+      steps.push(`<b>${k}. stolpec:</b> ${left} = <b>${t}</b>, zapišeš <b>${dc(t)}</b>${borrow?"":""}`);
+    }
+    res.unshift(dc(d)); borrow = nb;
+  }
+  const out = stripZ(res.join(""));
+  const rows = [{l:"izposoja", s:[...Array(L)].map((_,i)=>bor[i]?"1":" ").join(""), k:"carry"},
+                {l:"", s:A}, {l:"−", s:B, ln:true}, {l:"=", s:out, k:"res"}];
+  return {rows, steps, res:out};
+}
+
+/* blok primera: naslov, tabela, koraki, preizkus */
+function calcBlock(A, B, base, op){
+  const va = parseInt(A,base), vb = parseInt(B,base), s = sub(base);
+  if(op==="+"){
+    const r = colAdd([A,B], base), vr = parseInt(r.res,base);
+    return `<div class="ex"><strong>${A}${s} + ${B}${s}</strong>${al(r.rows)}<ol class="stp">${r.steps.map(x=>`<li>${x}</li>`).join("")}</ol>
+      <p class="prv"><b>Preizkus:</b> ${A}${s} = ${va}, ${B}${s} = ${vb}, ${va} + ${vb} = ${va+vb} = ${Z(va+vb,base)}${s}. Še v nasprotno smer: ${r.res}${s} − ${B}${s} = ${vr} − ${vb} = ${vr-vb} = ${va}, kar je ${A}${s} ✓</p></div>`;
+  }
+  let neg = false, X = A, Y = B;
+  if(vb>va){ neg = true; X = B; Y = A; }
+  const r = colSub(X, Y, base), vr = parseInt(r.res,base);
+  return `<div class="ex"><strong>${A}${s} − ${B}${s}</strong>${neg?`<p class="note">${A}${s} je manjše od ${B}${s}. Odštejemo manjše od večjega (${B}${s} − ${A}${s}) in rezultatu dodamo minus.</p>`:""}${al(r.rows)}<ol class="stp">${r.steps.map(x=>`<li>${x}</li>`).join("")}</ol>
+    <p class="prv"><b>Preizkus:</b> ${va} − ${vb} = ${va-vb}, rezultat ${neg?"−":""}${r.res}${s} = ${neg?"−":""}${vr} ✓. Še s seštevanjem: ${r.res}${s} + ${Y}${s} = ${vr} + ${parseInt(Y,base)} = ${vr+parseInt(Y,base)} = ${parseInt(X,base)}, kar je ${X}${s} ✓</p></div>`;
+}
+
+/* množenje: aligniran zapis delnih produktov */
+function mulRows(A, B, short){
+  const bl = B.length, rows = [{l:"A", s:A}, {l:"× B", s:B, ln:true}];
+  for(let i=0;i<bl;i++){
+    const bit = B[bl-1-i];
+    rows.push(bit==="1" ? {l:short?`bit ${i}`:`bit ${i} = 1`, s:A, sh:i} : {l:short?`bit ${i}`:`bit ${i} = 0`, s:"0".repeat(A.length), sh:i, k:"num skip"});
+  }
+  rows[rows.length-1].ln = true;
+  rows.push({l:"A · B", s:(parseInt(A,2)*parseInt(B,2)).toString(2), k:"res"});
+  return rows;
+}
+function mulBlock(A, B){
+  const a = parseInt(A,2), b = parseInt(B,2);
+  return `<div class="ex"><strong>${A}₂ · ${B}₂</strong>${al(mulRows(A,B))}
+    <p class="prv"><b>Preizkus:</b> ${a} · ${b} = ${a*b}, in ${(a*b).toString(2)}₂ = ${a*b} ✓. Bit z vrednostjo 0 v množitelju pomeni, da delnega produkta ne prištejemo (bledo prečrtana vrstica).</p></div>`;
+}
+
+/* odštevanje s komplementom v n bitih */
+function subComp(a, b, n){
+  n = n||8;
+  const m = 2**n, ba = B(a,n), bb = B(b,n);
+  const inv = [...bb].map(c=>c==="1"?"0":"1").join("");
+  const tcN = (m-b)%m, tc = B(tcN,n);
+  const one = "0".repeat(n-1)+"1";
+  const r = colAdd([ba,tc],2);
+  const full = r.res.padStart(n+1,"0");
+  const co = full[0]==="1", low = full.slice(1);
+  const val = a-b;
+  const resRows = [{l:"prenos", s:r.carryRow.padStart(n," "), k:"carry"}, {l:"A", s:ba}, {l:"+ (−B)", s:tc, ln:true},
+    {l:"=", s:[co?`<span class="co">1</span>`:"", ...[...low]], k:"res"}];
+  let interp = "";
+  if(b===0){
+    interp = `<p>B je 0, njegov dvojiški komplement je spet 0 in prenosa ni. Rezultat je kar A: <b>${low}</b>₂ = ${val}, <b>pozitiven</b>.</p>`;
+  } else if(co){
+    interp = `<p>Prenos čez zgornje mesto je <b>1</b>: zavržemo ga. To pomeni, da je A ≥ B in je rezultat <b>pozitiven</b>: <b>${low}</b>₂ = ${val}.</p>`;
+  } else {
+    const inv2 = [...low].map(c=>c==="1"?"0":"1").join(""), mag = B(m-parseInt(low,2),n);
+    interp = `<p>Prenosa čez zgornje mesto <b>ni</b>. To pomeni, da je A &lt; B in je rezultat <b>negativen</b>. Zapisan je kot dvojiški komplement, zato velikost dobimo z isto operacijo (invertiraj in prištej 1):</p>
+      ${al([{l:"rezultat", s:low}, {l:"invertirano", s:inv2}, {l:"+ 1", s:one, ln:true}, {l:"velikost", s:mag, k:"res"}])}
+      <p>${mag}₂ = ${m-parseInt(low,2)}, torej je rezultat <b>−${m-parseInt(low,2)}</b>.</p>`;
+  }
+  const chk = `<p class="prv"><b>Preizkus:</b> desetiško ${a} − ${b} = <b>${val}</b>. Z binarnim računom: rezultat + B mora dati A. ${low}₂ + ${bb}₂ = ${(parseInt(low,2)+b)%m} (mod ${m}) = ${a} ✓. Če je rezultat negativen, v tej vsoti prenos ne šteje, ker računamo samo v ${n} bitih.</p>`;
+  return `<div class="ex"><strong>${a} − ${b} v ${n} bitih</strong><ol class="stp big">
+    <li><b>Zapiši števili v ${n} bitih.</b>${al([{l:"A = "+a, s:ba},{l:"B = "+b, s:bb}])}</li>
+    <li><b>Eniški komplement števila B</b> (zamenjaj vsak bit: 0 ↔ 1).${al([{l:"B", s:bb},{l:"~B", s:inv, k:"res"}])}</li>
+    <li><b>Dvojiški komplement</b> = eniški komplement + 1. To je število <b>−B</b>.${al([{l:"~B", s:inv},{l:"+ 1", s:one, ln:true},{l:"−B", s:tc, k:"res"}])}</li>
+    <li><b>Seštej A + (−B).</b> Ker je A − B = A + (−B), odštevanje postane seštevanje.${al(resRows)}</li>
+    <li><b>Preberi rezultat.</b>${interp}</li>
+  </ol>${chk}</div>`;
+}
+
+/* 4-bitni obroč števil */
+function ringSVG(){
+  const cx=160, cy=160, r1=66, r2=102;
+  const pt=(r,deg)=>[cx+r*Math.cos(deg*Math.PI/180), cy+r*Math.sin(deg*Math.PI/180)];
+  const f = v => v.toFixed(1);
+  let s = `<svg class="ring" viewBox="0 0 320 320" role="img" aria-label="Obroč 4-bitnih števil: od 0 do 7 pozitivna, od 8 do 15 pa negativna števila od −8 do −1">`;
+  for(let k=0;k<16;k++){
+    const a1 = -90+k*22.5-11.25, a2 = a1+22.5;
+    const [x1,y1]=pt(r2,a1),[x2,y2]=pt(r2,a2),[x3,y3]=pt(r1,a2),[x4,y4]=pt(r1,a1);
+    const neg = k>=8;
+    s += `<path d="M${f(x1)} ${f(y1)}A${r2} ${r2} 0 0 1 ${f(x2)} ${f(y2)}L${f(x3)} ${f(y3)}A${r1} ${r1} 0 0 0 ${f(x4)} ${f(y4)}Z" fill="${neg?"var(--bad-soft)":"var(--ok-soft)"}" stroke="var(--surface)" stroke-width="2"/>`;
+    const th = -90+k*22.5;
+    const [tx,ty]=pt((r1+r2)/2,th), [bx,by]=pt(128,th);
+    const sv = neg? k-16 : k;
+    s += `<text x="${f(tx)}" y="${f(ty+4)}" text-anchor="middle" font-family="var(--f-mono)" font-size="13" font-weight="700" fill="${neg?"var(--bad)":"var(--ok)"}">${sv<0?"−"+(-sv):sv}</text>`;
+    s += `<text x="${f(bx)}" y="${f(by+3.5)}" text-anchor="middle" font-family="var(--f-mono)" font-size="10" fill="var(--muted)">${B(k,4)}</text>`;
+  }
+  s += `<text x="160" y="150" text-anchor="middle" font-family="var(--f-body)" font-size="12" fill="var(--fg)">4-bitna števila</text><text x="160" y="167" text-anchor="middle" font-family="var(--f-body)" font-size="11" fill="var(--muted)">vrtimo se v krogu:</text><text x="160" y="182" text-anchor="middle" font-family="var(--f-body)" font-size="11" fill="var(--muted)">15 + 1 = 0</text></svg>`;
+  return s;
+}
+
+/* sedemsegmentni prikaz */
+const SEG7 = {0:"abcdef",1:"bc",2:"abdeg",3:"abcdg",4:"bcfg",5:"acdfg",6:"acdefg",7:"abc",8:"abcdefg",9:"abcdfg"};
+function seg7(d){
+  const on = SEG7[d]||"";
+  const R = {a:[8,3,24,5], b:[32,8,5,24], c:[32,37,5,24], d:[8,62,24,5], e:[3,37,5,24], f:[3,8,5,24], g:[8,32.5,24,5]};
+  return `<svg class="seg7" viewBox="0 0 40 70" aria-hidden="true">${Object.keys(R).map(k=>`<rect x="${R[k][0]}" y="${R[k][1]}" width="${R[k][2]}" height="${R[k][3]}" rx="2" fill="${on.includes(k)?"var(--accent)":"var(--line)"}" opacity="${on.includes(k)?1:.5}"/>`).join("")}</svg>`;
+}
+
+/* Grayev obroč (kodirni disk) */
+function encoderSVG(useGray){
+  const cx=130, cy=130, rings=[[30,58],[58,86],[86,114]]; // znotraj navzven: MSB ... LSB
+  const pt=(r,deg)=>[cx+r*Math.cos(deg*Math.PI/180), cy+r*Math.sin(deg*Math.PI/180)];
+  const f=v=>v.toFixed(1);
+  let s = `<svg class="enc" viewBox="0 0 260 280" role="img" aria-label="${useGray?"Disk z Grayevo kodo":"Disk z dvojiško kodo"}, 8 odsekov, 3 sledi">`;
+  for(let k=0;k<8;k++){
+    const code = useGray? gray(k) : k;
+    const a1=-90+k*45, a2=a1+45;
+    rings.forEach(([r1,r2],j)=>{
+      const bit = (code>>(2-j))&1;
+      const [x1,y1]=pt(r2,a1),[x2,y2]=pt(r2,a2),[x3,y3]=pt(r1,a2),[x4,y4]=pt(r1,a1);
+      s += `<path d="M${f(x1)} ${f(y1)}A${r2} ${r2} 0 0 1 ${f(x2)} ${f(y2)}L${f(x3)} ${f(y3)}A${r1} ${r1} 0 0 0 ${f(x4)} ${f(y4)}Z" fill="${bit?"var(--fg)":"var(--surface)"}" stroke="var(--line)" stroke-width="1"/>`;
+    });
+    const [tx,ty]=pt(126,a1+22.5);
+    s += `<text x="${f(tx)}" y="${f(ty+3)}" text-anchor="middle" font-family="var(--f-mono)" font-size="8.5" fill="var(--muted)">${B(code,3)}</text>`;
+  }
+  const [ex,ey]=pt(120,90);
+  s += `<line x1="${cx}" y1="${cy}" x2="${f(ex)}" y2="${f(ey)}" stroke="var(--bad)" stroke-width="2" stroke-dasharray="4 3"/>`;
+  s += `<text x="130" y="272" text-anchor="middle" font-family="var(--f-body)" font-size="12" fill="var(--fg)">${useGray?"Gray: 011 → 010 (en bit)":"Dvojiško: 011 → 100 (trije biti)"}</text></svg>`;
+  return s;
+}
+
+/* poenostavljen BCD zapis */
+const bcdOf = n => String(n).split("").map(d=>B(+d,4)).join(" ");
+const ex3Of = n => String(n).split("").map(d=>B(+d+3,4)).join(" ");
+
+/* seštevanje BCD s korekcijo */
+function bcdAddRows(x, y){
+  const nd = String(x+y).length;
+  const A = [...String(x).padStart(nd,"0")].map(d=>+d), Bv = [...String(y).padStart(nd,"0")].map(d=>+d);
+  const word = arr => arr.reduce((a,d)=>a*16+d,0);
+  const wa = word(A), wb = word(Bv), raw = wa+wb;
+  let corr = 0, c = 0;
+  for(let i=0;i<nd;i++){
+    const sa=(wa>>(4*i))&15, sb=(wb>>(4*i))&15, t=sa+sb+c;
+    if(t>9){ corr |= 6<<(4*i); c = 1; } else c = 0;
+  }
+  const fin = raw+corr;
+  const grp = (v,len) => [...Array(len)].map((_,i)=>B((v>>(4*(len-1-i)))&15,4)).join(" ");
+  const rows = [{l:`A = ${x}`, s:grp(wa,nd)}, {l:`+ B = ${y}`, s:grp(wb,nd), ln:true},
+    {l:"navadna binarna vsota", s:grp(raw&((1<<(4*nd))-1),nd)}, {l:"+ korekcija 0110", s:grp(corr,nd), ln:true}, {l:`BCD rezultat = ${x+y}`, s:grp(fin,nd), k:"res"}];
+  return {rows, ok: grp(fin,nd).replace(/ /g,"")===[...String(x+y)].map(d=>B(+d,4)).join("") };
+}
+
+/* ASCII → 7 bitov */
+const a7 = ch => B(ch.charCodeAt(0)&127,7);
+
+/* ---------- gradniki za strani razlage ---------- */
+function multiBlock(ops, base){
+  const r = colAdd(ops, base), s = sub(base), vs = ops.map(o=>parseInt(o,base));
+  return `<div class="ex"><strong>${ops.map(o=>o+s).join(" + ")}</strong>${al(r.rows)}<ol class="stp">${r.steps.map(x=>`<li>${x}</li>`).join("")}</ol>
+    <p class="prv"><b>Preizkus:</b> ${vs.join(" + ")} = ${sum(vs)}, rezultat ${r.res}${s} = ${parseInt(r.res,base)} ✓</p></div>`;
+}
+const digitStrip = base => `<div class="mem8">${[...Array(base)].map((_,i)=>`<div class="mc${i>9?" on":""}"><small>${i}</small><b>${dc(i)}</b></div>`).join("")}</div>`;
+const exs = (...h) => `<div class="exs">${h.join("")}</div>`;
+const cards = list => `<div class="cards">${list.map(c=>`<div class="card"><b>${c[0]}</b><span>${c[1]}</span></div>`).join("")}</div>`;
+const flow = list => `<div class="flow">${list.map(s=>`<div class="fb${s.k?" "+s.k:""}"><b>${s.t}</b><span>${s.d}</span></div>`).join(`<div class="fa" aria-hidden="true">→</div>`)}</div>`;
+const bitStr = (str, ref) => `<span class="bs">${[...str].map((c,i)=>`<i class="${ref&&ref[i]!==c?"fl":""}">${c}</i>`).join("")}</span>`;
+const hide = (q,a) => `<details class="think"><summary>${q}</summary><div>${a}</div></details>`;
+
+/* odštevanje s komplementom v poljubni osnovi (za 8 in 16) */
+function compBase(A, Bs, base, w){
+  const s = sub(base), a = A.padStart(w,"0"), b = Bs.padStart(w,"0");
+  const top = dc(base-1);
+  const comp = [...b].map(c=>dc(base-1-dg(c))).join("");
+  const mod = base**w, c1v = (mod-parseInt(b,base))%mod, c1 = Z(c1v,base).padStart(w,"0");
+  const r = colAdd([a,c1], base), full = r.res.padStart(w+1,"0"), low = full.slice(1);
+  const one = "0".repeat(w-1)+"1";
+  const va = parseInt(A,base), vb = parseInt(Bs,base);
+  const rows = [{l:"prenos", s:r.carryRow.padStart(w," "), k:"carry"}, {l:"A", s:a}, {l:"+ (−B)", s:c1, ln:true},
+                {l:"=", s:[full[0]!=="0"?`<span class="co">${full[0]}</span>`:"", ...[...low]], k:"res"}];
+  return `<div class="ex"><strong>${A}${s} − ${Bs}${s} s komplementom (${w} mesti)</strong>
+    <ol class="stp big">
+    <li><b>Komplement števk:</b> vsako števko števila B odštej od ${top} (največje števke).${al([{l:"B", s:b},{l:`${top} − števka`, s:comp, k:"res"}])}</li>
+    <li><b>Prištej 1</b>, da dobiš −B.${al([{l:"komplement", s:comp},{l:"+ 1", s:one, ln:true},{l:"−B", s:c1, k:"res"}])}</li>
+    <li><b>Seštej A + (−B)</b> in zavrzi prenos čez zgornje mesto.${al(rows)}</li></ol>
+    <p class="prv"><b>Preizkus:</b> ${va} − ${vb} = ${va-vb}, ${low}${s} = ${parseInt(low,base)} ✓</p></div>`;
+}
+
+/* statične tabele s pariteto */
+function pgv(d, p, r, c, lab){
+  const rb = d.map(x=>pb(sum(x),p)), cb = d[0].map((_,j)=>pb(sum(d.map(x=>x[j])),p)), co = pb(sum(cb),p);
+  return `<div class="tbl fit"><table class="pgrid"><tbody>${d.map((x,i)=>`<tr>${lab?`<td class="lb">${lab[i]}</td>`:""}${x.map(v=>`<td>${v}</td>`).join("")}${r?`<td class="pb">${rb[i]}</td>`:""}</tr>`).join("")}${c?`<tr>${lab?`<td class="lb">paritetni bit</td>`:""}${cb.map(v=>`<td class="pb">${v}</td>`).join("")}${r?`<td class="pb">${co}</td>`:""}</tr>`:""}</tbody></table></div>`;
+}
+function pgFlipStatic(){
+  const orig = fullM([[1,0,1,1],[0,1,1,0],[1,1,0,0]],"even"), cu = flipAt(orig,1,2);
+  const R = cu.length, C = cu[0].length;
+  const rowBad = cu.map(r=>sum(r)%2===1), colBad = cu[0].map((_,j)=>sum(cu.map(r=>r[j]))%2===1);
+  return `<div class="tbl fit"><table class="pgrid"><tbody>${cu.map((r,i)=>`<tr>${r.map((v,j)=>`<td class="${i===R-1||j===C-1?"pb":""}${v!==orig[i][j]?" flip":""}">${v}</td>`).join("")}<td class="chk ${rowBad[i]?"bad":"good"}">${rowBad[i]?"✗":"✓"}</td></tr>`).join("")}<tr>${colBad.map(b=>`<td class="chk ${b?"bad":"good"}">${b?"✗":"✓"}</td>`).join("")}<td></td></tr></tbody></table></div>`;
+}
+const NOVO = [..."NOVO"].map(a7).map(s=>[...s].map(Number));
+const tbit = (s)=>[...s].map(Number);
+const THEORY = [
+ {id:"sistemi", g:0, t:"Pozicijski številski sistemi", h:()=>`
+  ${prose(`<p>Računalnik pozna samo <strong>dvojiški (binarni) sistem</strong>, ki ima dve števki: 0 in 1. Ljudje računamo v <strong>desetiškem</strong>, v računalništvu pa se pogosto srečamo tudi z <strong>osmiškim</strong> in <strong>šestnajstiškim</strong>, ker sta krajša zapisa dvojiškega. Vsi štirje so <strong>pozicijski</strong>: vrednost števke je odvisna od mesta, na katerem stoji. Mesto ima težo, to je potenca osnove sistema.</p>`)}
+  <h3>Teže bitov v enem bajtu</h3>
+  <div class="mem8">${W8.map((w,i)=>`<div class="mc${i%2?"":" on"}"><small>2<sup>${7-i}</sup></small><b>${w}</b></div>`).join("")}</div>
+  <h3>Števke od 0 do 15 v štirih sistemih</h3>
+  ${tbl(["Desetiško","Dvojiško","Osmiško","Šestnajstiško"],[...Array(16)].map((_,i)=>[i,B(i,4),Z(i,8),Z(i,16)]),"fit")}
+  ${note("Osnova 2 uporablja števki 0 in 1, osnova 8 števke 0 do 7, osnova 16 pa števke 0 do 9 in črke A do F (A = 10, B = 11, C = 12, D = 13, E = 14, F = 15).")}
+  <h3>Preizkusi sam</h3>
+  ${wData("bits")}`},
+ {id:"dec-v-drugi", g:0, t:"Desetiško v drugi sistem", h:()=>`
+  ${prose(`<p>Število ponavljajoče <strong>deliš z osnovo</strong> (2, 8 ali 16) in pri vsakem koraku zapišeš celoštevilčni rezultat in ostanek. Postopek ponavljaš, dokler ne dobiš rezultata 0. Število zapišeš kot zapis ostankov, pri čemer začneš pri <strong>zadnjem koraku</strong> (od spodaj navzgor). Pri šestnajstiškem sistemu ostanke 10 do 15 zapišeš s črkami A do F.</p>`)}
+  <h3>Dvojiški sistem</h3>
+  <div class="two wide">${divBlock(23,2)}${divBlock(52,2)}${divBlock(115,2)}</div>
+  <h3>Šestnajstiški sistem</h3>
+  <div class="two wide">${divBlock(23,16)}${divBlock(115,16)}${divBlock(47856,16)}</div>
+  <h3>Osmiški sistem</h3>
+  <div class="two wide">${divBlock(75,8)}</div>
+  ${note("Preveri se vedno vrne nazaj: 47856₁₀ = BAF0₁₆ pomeni 11·4096 + 10·256 + 15·16 + 0 = 47856. Spodnji bit (korak 0) je najmanj pomemben, zato je v zapisu na desni.")}`},
+ {id:"drugi-v-dec", g:0, t:"Drugi sistem v desetiško", h:()=>`
+  ${prose(`<p>Število zapišemo kot niz števk. Vsaka števka ima težo, ki je potenca osnove. Števko pomnožiš s težo mesta in vse produkte <strong>seštej</strong>. Potence štejemo od desne in začnemo z 0. Pri šestnajstiškem sistemu najprej zamenjaj črke z vrednostmi (A = 10, …, F = 15).</p>`)}
+  <h3>Dvojiško v desetiško</h3>
+  ${posTbl("10111",2)}${posTbl("110100",2)}${posTbl("1110011",2)}
+  <h3>Šestnajstiško v desetiško</h3>
+  ${posTbl("17",16)}${posTbl("BAF0",16)}
+  <h3>Osmiško v desetiško</h3>
+  ${posTbl("237",8)}`},
+ {id:"med-sistemi", g:0, t:"Dvojiško, osmiško in šestnajstiško med seboj", h:()=>`
+  ${prose(`<p>Ena osmiška števka je natanko <strong>3 biti</strong>, ena šestnajstiška natanko <strong>4 biti</strong>. Zato med njimi ne potrebuješ deljenja. Bite razdeliš v skupine od desne in vsako skupino pretvoriš posebej. Če je skupina na levi prekratka, jo dopolniš z ničlami.</p>`)}
+  <h3>Dvojiško v šestnajstiško (skupine po 4)</h3>
+  ${gline("11010110",4)}<p>1101 = D, 0110 = 6, torej 11010110₂ = <b>D6</b>₁₆</p>
+  <h3>Dvojiško v osmiško (skupine po 3)</h3>
+  ${gline("101101110",3)}<p>101 = 5, 101 = 5, 110 = 6, torej 101101110₂ = <b>556</b>₈</p>
+  <h3>Veriga pretvorb</h3>
+  ${note("B7₁₆ → 1011 0111₂ → 10 110 111 → <strong>267</strong>₈ → 2·64 + 6·8 + 7 = <strong>183</strong>₁₀")}
+  <p class="prose">Osmiško v šestnajstiško (in obratno) najlažje pretvoriš prek dvojiškega sistema.</p>`},
+ {id:"sestevanje", g:1, t:"Seštevanje", h:()=>`
+  ${prose(`<p>Seštevamo stolpično, od desne proti levi, tako kot v desetiškem sistemu. Razlika je le v tem, da <strong>prenos</strong> nastane takoj, ko vsota stolpca doseže osnovo sistema. V dvojiškem sistemu je to že pri vsoti 2.</p>`)}
+  ${tbl(["Vsota","Rezultat"],[["0 + 0","0"],["0 + 1","1"],["1 + 1","10 (zapišeš 0, prenos 1)"],["1 + 1 + 1","11 (zapišeš 1, prenos 1)"]],"fit")}
+  <h3>Dva primera po stolpcih</h3>
+  <p class="prose">Oranžne številke nad stolpci so prenosi. Pod vsakim primerom je razložen vsak stolpec in preizkus.</p>
+  ${exs(calcBlock("1011","110",2,"+"), calcBlock("11011","1101",2,"+"))}
+  <h3>Več števil hkrati</h3>
+  ${prose(`<p>Pri treh ali štirih številih je v stolpcu lahko več enic. Stolpec seštej (desetiško), zapiši <strong>ostanek pri deljenju z 2</strong>, prenos pa je <strong>rezultat deljenja</strong>. Prenos je lahko tudi večji od 1.</p>`)}
+  ${exs(multiBlock(["1011","110","11"],2), multiBlock(["1111","1011","101","11"],2))}
+  <h3>Preizkusi sam</h3>
+  ${wData("calc","2:+")}`},
+
+ {id:"odstevanje", g:1, t:"Odštevanje z izposojo", h:()=>`
+  ${prose(`<p>Pri odštevanju na papirju računamo stolpično, od desne proti levi, in uporabljamo pravila: 0 − 0 = 0, 1 − 0 = 1, 1 − 1 = 0 in 0 − 1 = 1 z <strong>izposojo</strong>. Če je števka zgoraj manjša od števke spodaj, si izposodimo iz naslednjega stolpca. Ta stolpec se zmanjša za 1, naš stolpec pa dobi dodatnih 2 (v dvojiškem sistemu).</p>`)}
+  ${tbl(["Račun","Rezultat"],[["0 − 0","0"],["1 − 0","1"],["1 − 1","0"],["0 − 1","1, izposoja 1 (dobiš 2 − 1)"]],"fit")}
+  <h3>Trije primeri</h3>
+  ${exs(calcBlock("10110","1101",2,"-"), calcBlock("1000","11",2,"-"), calcBlock("1101","10110",2,"-"))}
+  ${note("<strong>Več členov.</strong> Pri računu <code>1011 + 101 − 11 + 10</code> računaš od leve proti desni: 1011 + 101 = 10000, nato 10000 − 11 = 1101 in 1101 + 10 = <strong>1111</strong>. Preizkus: 11 + 5 − 3 + 2 = 15.")}
+  <h3>Preizkusi sam</h3>
+  ${wData("calc","2:-")}
+  ${note("<strong>Zakaj to ni dovolj?</strong> Računalnik nima posebnega vezja za odštevanje z izposojo. Ima samo seštevalnik. Odštevanje zato prevede v seštevanje negativnega števila: <strong>A − B = A + (−B)</strong>. Kako zapišemo negativno število, razloži naslednja stran.")}`},
+
+ {id:"komplement", g:1, t:"Negativna števila: eniški in dvojiški komplement", h:()=>`
+  ${prose(`<p>Računalnik pozna samo ničle in enice, znaka minus nima. Zato negativno število zapiše z <strong>vnaprej dogovorjenim številom bitov</strong> (npr. 8) in z dogovorom, da ima <strong>najvišji bit</strong> poseben pomen. Postopek se imenuje <strong>komplement</strong>.</p>`)}
+  <h3>1. Eniški komplement</h3>
+  ${prose(`<p>Vsak bit zamenjamo: 0 postane 1, 1 postane 0. Temu pravimo tudi <strong>invertiranje</strong> (operacija NOT).</p>`)}
+  ${al([{l:"5", s:"00000101"},{l:"eniški komplement", s:"11111010", k:"res"}])}
+  ${note("Eniški komplement ima eno hibo: obstajata <strong>dve ničli</strong>, 00000000 (+0) in 11111111 (−0). Zato se za zapis števil ne uporablja, je pa prvi korak do dvojiškega komplementa.")}
+  <h3>2. Dvojiški komplement</h3>
+  ${prose(`<p>Dvojiški komplement je <strong>eniški komplement + 1</strong>. Tako zapišemo število <strong>−x</strong>. To je način, ki ga uporabljajo vsi današnji procesorji.</p>`)}
+  ${al([{l:"5", s:"00000101"},{l:"1. invertiraj", s:"11111010"},{l:"2. prištej 1", s:"00000001", ln:true},{l:"−5", s:"11111011", k:"res"}])}
+  <h3>Preizkus: x + (−x) mora dati 0</h3>
+  ${al(colAdd(["00000101","11111011"],2).rows.map((r,i,a)=> i===a.length-1 ? {l:"=", s:[`<span class="co">1</span>`,..."00000000"], k:"res"} : r))}
+  <p class="prose">Prenos čez zgornje mesto zavržemo. Ostane 00000000, torej 5 + (−5) = 0 ✓.</p>
+  ${note("<strong>Bližnjica:</strong> od desne prepiši vse bite do vključno prve enice, vse ostale bite pa zamenjaj. Za 00000101 prepišeš 1 na koncu in zamenjaš ostale: 11111011.")}
+  <h3>Kako preberemo negativno število?</h3>
+  ${prose(`<p>Najvišji bit ima pri dvojiškem komplementu <strong>negativno težo</strong>. Pri 8 bitih je to −128, ostali biti imajo običajne teže.</p>`)}
+  <div class="tbl fit"><table class="pos"><tbody>
+   <tr><th scope="row">Teža mesta</th>${[-128,64,32,16,8,4,2,1].map(w=>`<td class="num">${w}</td>`).join("")}</tr>
+   <tr><th scope="row">Bit (11111011)</th>${[..."11111011"].map(c=>`<td class="num">${c}</td>`).join("")}</tr>
+   <tr><th scope="row">Produkt</th>${[..."11111011"].map((c,i)=>`<td class="num">${c==="1"?[-128,64,32,16,8,4,2,1][i]:0}</td>`).join("")}</tr></tbody></table></div>
+  <p class="prose">−128 + 64 + 32 + 16 + 8 + 2 + 1 = <b>−5</b> ✓</p>
+  <h3>Slika: obroč števil</h3>
+  ${prose(`<p>Pri 4 bitih imamo 16 različnih vzorcev. Postavimo jih v krog. Pozitivna števila (zelena) gredo od 0 do 7, negativna (rdeča) od −8 do −1. Če od 0 stopiš korak nazaj, prideš na 1111 in to je −1. Zato je odštevanje 3 enako prištevanju 13: <strong>−x = 16 − x</strong>. Pri 8 bitih je krog dolg 256, torej −x = 256 − x.</p>`)}
+  <div class="two wide">
+    <div class="figbox">${ringSVG()}</div>
+    ${tbl(["Biti","Brez predznaka","Eniški komplement","Dvojiški komplement"],[...Array(16)].map((_,k)=>[B(k,4),k,k<8?k:"−"+(15-k),k<8?k:"−"+(16-k)]),"fit")}
+  </div>
+  ${note("<strong>Domet.</strong> Z n biti zapišemo števila od −2<sup>n−1</sup> do 2<sup>n−1</sup> − 1. Pri 8 bitih od −128 do 127, pri 16 bitih od −32768 do 32767. Če je rezultat izven dometa, pride do <strong>prekoračitve</strong> (overflow).")}
+  <h3>Preizkusi sam</h3>
+  ${wData("kompl")}`},
+
+ {id:"odst-komplement", g:1, t:"Odštevanje s komplementom: A − B = A + (−B)", h:()=>`
+  ${prose(`<p>Odštevanje v računalniku ni posebna operacija. Ker velja <strong>A − B = A + (−B)</strong>, procesor števili samo sešteje. Postopek ima pet korakov:</p><ol><li>Zapiši A in B z enakim številom bitov.</li><li>Poišči eniški komplement števila B (zamenjaj bite).</li><li>Prištej 1, da dobiš dvojiški komplement, to je −B.</li><li>Seštej A + (−B).</li><li>Preberi rezultat: prenos čez zgornje mesto zavrži. Če prenos je, je rezultat pozitiven. Če ga ni, je rezultat negativen in zapisan v dvojiškem komplementu.</li></ol>`)}
+  ${note("<strong>Primerjava z uro.</strong> Na 12-urni uri je odštevanje 3 ur isto kot prištevanje 9 ur: 5 − 3 = 5 + 9 = 14, 14 pa je na uri 2. Pri 8 bitih je »ura« dolga 256. Odštevanje B je prištevanje (256 − B), čez vrh se vrnemo na začetek. Zato prenos zavržemo.")}
+  <h3>Trije primeri s preizkusom</h3>
+  ${subComp(45,18,8)}
+  ${subComp(18,45,8)}
+  ${subComp(100,37,8)}
+  <h3>Hitri pregled</h3>
+  ${tbl(["Pogoj","Prenos čez zgornje mesto","Rezultat"],[["A &gt; B","1 (zavržemo ga)","pozitiven, preberemo ga neposredno"],["A = B","1 (zavržemo ga)","00000000"],["A &lt; B","0","negativen, zapisan v dvojiškem komplementu"]],"fit")}
+  <h3>Preizkusi sam</h3>
+  ${wData("odst")}`},
+
+ {id:"mnozenje", g:1, t:"Množenje", h:()=>`
+  ${prose(`<p>Dvojiško množimo enako kot desetiško na papirju, le da je vsak delni produkt zelo preprost. Za vsak bit množitelja <strong>od desne proti levi</strong> naredimo en korak:</p><ul><li>če je bit <strong>1</strong>, prepišemo množenec in ga pomaknemo za toliko mest levo, kolikor je mesto tega bita (bledi ničli sta pomik),</li><li>če je bit <strong>0</strong>, delnega produkta ne prištejemo (v tabeli je bledo prečrtan),</li><li>nazadnje vse delne produkte <strong>seštejemo</strong>.</li></ul>`)}
+  <h3>Štirje primeri</h3>
+  <p class="prose">Števke so poravnane po stolpcih, tako da lahko seštevaš navpično. Vsaka vrstica je delni produkt za en bit množitelja.</p>
+  ${exs(mulBlock("101","11"), mulBlock("1101","101"), mulBlock("1011","110"), mulBlock("111","111"))}
+  <h3>A · B ni isto kot B · A</h3>
+  ${prose(`<p>Rezultat je enak (množenje je komutativno), <strong>postopek pa ni</strong>. Število korakov določa <strong>množitelj</strong>: koliko ima bitov (toliko pomikov) in koliko enic (toliko seštevanj delnih produktov). Če števili zamenjamo, dobimo drugačen množitelj in drugačno število korakov. Procesor zato včasih vzame za množitelj število z manj enicami, ker je račun hitrejši.</p>`)}
+  <p class="prose">Isti račun, 13 · 5 in 5 · 13, v dveh vrstnih redih:</p>
+  <div class="exs">
+    <div class="ex"><strong>1101₂ · 101₂ (13 · 5)</strong>${al(mulRows("1101","101"))}<p class="prv">Množitelj 101: <b>3 biti</b> (3 koraki), <b>2 enici</b> (2 delna produkta).</p></div>
+    <div class="ex"><strong>101₂ · 1101₂ (5 · 13)</strong>${al(mulRows("101","1101"))}<p class="prv">Množitelj 1101: <b>4 biti</b> (4 koraki), <b>3 enice</b> (3 delni produkti).</p></div>
+  </div>
+  ${note("Rezultat je v obeh primerih <strong>1000001₂ = 65</strong>. V prvem primeru je dovolj 2 + 3 = 5 korakov, v drugem 3 + 4 = 7. Večje razlike dobimo pri številih, kot sta 1111 · 1000 in 1000 · 1111.")}
+  <h3>Preizkusi sam: primerjaj A · B in B · A</h3>
+  ${wData("mul")}`},
+
+ {id:"hex", g:1, t:"Šestnajstiško računanje", h:()=>`
+  ${prose(`<p>Šestnajstiški sistem ima 16 števk. Računamo stolpično, enako kot desetiško, le da je osnova 16: <strong>prenos nastane, ko vsota stolpca doseže 16</strong>. Pri odštevanju si izposodimo 16 (ne 10). Pri računanju v glavi si pomagaj z desetiškimi vrednostmi črk.</p>`)}
+  ${digitStrip(16)}
+  <p class="prose" style="color:var(--muted)">Zgoraj je vrednost, spodaj števka. Obarvani polji sta A do F (vrednosti 10 do 15).</p>
+  <h3>Seštevanje: trije primeri</h3>
+  ${exs(calcBlock("3C","2F",16,"+"), calcBlock("A7B","5E9",16,"+"), calcBlock("FFFF","1",16,"+"))}
+  <h3>Odštevanje: trije primeri</h3>
+  ${exs(calcBlock("7A","2F",16,"-"), calcBlock("B3C","7D5",16,"-"), calcBlock("1000","1",16,"-"))}
+  <h3>Odštevanje s komplementom</h3>
+  ${prose(`<p>Tako kot v dvojiškem sistemu lahko A − B izračunaš kot A + (−B). Komplement števila dobiš tako, da <strong>vsako števko odšteješ od F</strong>, nato prišteješ 1. Prenos čez zgornje mesto zavržeš.</p>`)}
+  ${compBase("7A","2F",16,2)}
+  <h3>Preizkusi sam</h3>
+  ${wData("calc","16:+")}`},
+
+ {id:"okt", g:1, t:"Osmiško računanje", h:()=>`
+  ${prose(`<p>Osmiški sistem ima 8 števk (0 do 7). <strong>Prenos nastane, ko vsota stolpca doseže 8</strong>, pri odštevanju si izposodimo 8. Števke 8 in 9 ne obstajata, zato je vsota 7 + 1 že 10₈ (zapišeš 0, prenos 1).</p>`)}
+  ${digitStrip(8)}
+  <h3>Seštevanje: trije primeri</h3>
+  ${exs(calcBlock("27","45",8,"+"), calcBlock("237","175",8,"+"), calcBlock("777","1",8,"+"))}
+  <h3>Odštevanje: trije primeri</h3>
+  ${exs(calcBlock("52","17",8,"-"), calcBlock("463","275",8,"-"), calcBlock("1000","1",8,"-"))}
+  <h3>Odštevanje s komplementom</h3>
+  ${prose(`<p>V osmiškem sistemu je komplement števk <strong>7 − števka</strong>, nato prišteješ 1. Postopek je enak kot v dvojiškem in šestnajstiškem sistemu.</p>`)}
+  ${compBase("52","17",8,3)}
+  ${note("<strong>Bližnjica prek dvojiškega sistema:</strong> osmiški števili pretvoriš v dvojiški (po 3 bite na števko), računaš dvojiško, rezultat pretvoriš nazaj. Primer: 27₈ + 45₈ = 010 111 + 100 101 = 111 100 = <strong>74</strong>₈.")}
+  <h3>Preizkusi sam</h3>
+  ${wData("calc","8:+")}`},
+
+ {id:"bcd", g:2, t:"Koda BCD", h:()=>`
+  ${prose(`<p>Pri <strong>BCD</strong> (binary coded decimal, koda 8421) vsako <strong>desetiško števko</strong> zapišemo posebej s štirimi biti. Teže bitov so 8, 4, 2, 1. Veljavne so samo kombinacije od 0000 do 1001, kombinacije od 1010 do 1111 se ne pojavijo.</p>`)}
+  ${tbl(["Števka","BCD","Sedemsegmentni prikaz"],[...Array(10)].map((_,i)=>[i,B(i,4),seg7(i)]),"fit")}
+  ${note("<code>59 → 5 | 9 → 0101 1001</code>. Vsaka števka je ločena skupina. Štirimestno število potrebuje 16 bitov.")}
+  <h3>BCD ni isto kot dvojiški zapis</h3>
+  ${tbl(["Število","Dvojiško","BCD"],[[59,B(59),bcdOf(59)],[2026,B(2026),bcdOf(2026)],[7,B(7),bcdOf(7)]],"fit")}
+  <p class="prose">BCD porabi več bitov kot navadni dvojiški zapis, a je zelo preprosto pretvoriti v desetiške števke in nazaj. Zato ga srečamo povsod, kjer se števila <strong>prikazujejo človeku</strong>.</p>
+  <h3>Kje se uporablja?</h3>
+  ${cards([["Digitalne ure in zasloni","BCD je vhod za dekodirnik, ki prižge segmente sedemsegmentnega prikaza. Vsaka števka ure je ena skupina štirih bitov."],["Kalkulatorji in blagajne","Denar je desetiški: z BCD se izognemo napakam pri zaokroževanju, ki jih pri dvojiških ulomkih povzroči npr. 0,10 €."],["Ure realnega časa (RTC)","Čipi, ki hranijo uro in datum na računalniku in mikrokrmilniku, običajno shranjujejo čas v BCD registrih."],["Merilni instrumenti","Digitalni voltmetri in števci pošiljajo meritev po števkah v BCD, ker jo prikazujejo na zaslonu."],["Bančni in poslovni sistemi","Veliki računalniki (npr. COBOL, »packed decimal«) hranijo zneske v BCD, ker mora biti račun natančno desetiški."]])}
+  <h3>Preizkusi sam: število in njegov prikaz</h3>
+  ${wData("bcd")}
+  <h3>Seštevanje v BCD</h3>
+  ${prose(`<p>Dve števili v BCD najprej seštejemo kot navadni dvojiški števili. Če je v skupini rezultat večji od 9 (ali je nastal prenos), je skupina neveljavna. Zato tej skupini <strong>prištejemo korekcijo 0110 (6)</strong>, drugim pa 0000. Šest je razlika med 16 (pri 4 bitih) in 10 (pri desetiških števkah).</p>`)}
+  ${exs(`<div class="ex"><strong>27 + 15</strong>${al(bcdAddRows(27,15).rows)}<p class="prv"><b>Preizkus:</b> 27 + 15 = 42, in 0100 0010 je BCD za 4 in 2 ✓</p></div>`, `<div class="ex"><strong>48 + 39</strong>${al(bcdAddRows(48,39).rows)}<p class="prv"><b>Preizkus:</b> 48 + 39 = 87, in 1000 0111 je BCD za 8 in 7 ✓</p></div>`)}`},
+
+ {id:"excess3", g:2, t:"Koda Excess-3", h:()=>`
+  ${prose(`<p>Pri <strong>Excess-3</strong> vsaki desetiški števki najprej <strong>prištejemo 3</strong>, nato rezultat zapišemo s štirimi biti. Pri odčitavanju vsaki skupini 3 odštejemo. Koda nima uteži, zato ji rečemo »koda brez uteži«.</p>`)}
+  ${tbl(["Števka","+ 3","Excess-3","Invertirano","= Excess-3 števke"],[...Array(10)].map((_,i)=>[i,i+3,B(i+3,4),[...B(i+3,4)].map(c=>c==="1"?"0":"1").join(""),9-i]),"fit")}
+  ${note("<code>46 → 4 + 3 = 7, 6 + 3 = 9 → 0111 1001</code>")}
+  <h3>Zakaj prav +3? Koda je samokomplementarna</h3>
+  ${prose(`<p>Če v kodi števke <strong>invertiraš vse bite</strong> (eniški komplement), dobiš kodo števke <strong>9 − d</strong>. To je desetiški »devetiški komplement«. Zadnja stolpca v tabeli zgoraj to potrjujeta: 2 → 0101, invertirano 1010 je koda števke 7 (9 − 2). Zato je odštevanje v desetiških računalnikih enako enostavno kot v dvojiškem sistemu z dvojiškim komplementom.</p>`)}
+  <h3>Kje se uporablja?</h3>
+  ${cards([["Zgodnji računalniki in kalkulatorji","Excess-3 so uporabljali v zgodnjih desetiških strojih, npr. v Stibitzovem računalniku iz leta 1940, da je odštevanje poenostavljeno."],["Odkrivanje okvar","Koda nikoli ni 0000 ali 1111. Če iz linije pride 0000 (prekinjena žica) ali 1111, vemo, da je okvara, ne števka."],["Desetiška aritmetika","Z invertiranjem bitov dobiš devetiški komplement, zato je odštevanje samo seštevanje. Danes se uporablja redko, a je dober primer, kako izbira kode poenostavi vezje."]])}
+  <h3>Preizkusi sam</h3>
+  ${wData("ex3")}
+  <h3>Seštevanje v Excess-3</h3>
+  ${prose(`<p>Dve števki v Excess-3 seštejemo kot navadni dvojiški števili. Vsaka vsebuje +3, zato vsota vsebuje +6. Popravimo: če je nastal <strong>prenos</strong>, skupini <strong>prištejemo 3</strong>, sicer ji <strong>odštejemo 3</strong>.</p>`)}
+  ${exs(`<div class="ex"><strong>2 + 4</strong>${al([{l:"2 = Ex3", s:"0101"},{l:"+ 4 = Ex3", s:"0111", ln:true},{l:"vsota", s:"1100"},{l:"− 3 (0011)", s:"0011", ln:true},{l:"6 = Ex3", s:"1001", k:"res"}])}<p class="prv"><b>Preizkus:</b> 1001 je Excess-3 za 6 (6 + 3 = 9) ✓</p></div>`, `<div class="ex"><strong>6 + 7</strong>${al([{l:"6 = Ex3", s:"1001"},{l:"+ 7 = Ex3", s:"1010", ln:true},{l:"vsota (prenos 1)", s:"1 0011"},{l:"+ 3 nižji skupini", s:"0011", ln:true},{l:"1 | 3 = Ex3", s:"0100 0110", k:"res"}])}<p class="prv"><b>Preizkus:</b> prenos 1 je desetica, Ex3 za 1 je 0100. Nižja skupina 0110 je Ex3 za 3 (3 + 3 = 6). Rezultat 13 ✓</p></div>`)}`},
+
+ {id:"gray", g:2, t:"Grayeva koda", h:()=>`
+  ${prose(`<p>Pri <strong>Grayevi kodi</strong> se zaporedni števili razlikujeta v <strong>natanko enem bitu</strong>. V dvojiškem zapisu se pri prehodu 011 → 100 spremenijo kar trije biti. Pri Grayevi kodi 010 → 110 se spremeni samo eden.</p>`)}
+  ${tbl(["Število","Dvojiško","Gray"],[...Array(16)].map((_,i)=>[i,B(i,4),B(gray(i),4)]),"fit")}
+  <h3>Kako izračunamo Grayevo kodo</h3>
+  ${prose(`<p><strong>Pravilo:</strong> Gray = dvojiško število <strong>XOR</strong> to isto število, pomaknjeno za eno mesto desno (&gt;&gt; 1). Najvišji bit se tako prepiše, vsak naslednji Grayev bit je XOR dveh sosednjih dvojiških bitov. XOR da 1 samo, kadar sta bita različna.</p>`)}
+  <div class="exs">
+    <div class="ex"><strong>Dvojiško → Gray: 6 = 0110</strong>${al([{l:"dvojiško", s:"0110"},{l:"pomaknjeno desno", s:"0011"},{l:"XOR", s:"0101", k:"res"}])}
+      <ol class="stp"><li>Najvišji bit: 0 (prepišeš).</li><li>0 XOR 1 = 1</li><li>1 XOR 1 = 0</li><li>1 XOR 0 = 1</li></ol><p class="prv">Gray(6) = <b>0101</b>, kar se ujema s tabelo ✓</p></div>
+    <div class="ex"><strong>Dvojiško → Gray: 11 = 1011</strong>${al([{l:"dvojiško", s:"1011"},{l:"pomaknjeno desno", s:"0101"},{l:"XOR", s:"1110", k:"res"}])}
+      <ol class="stp"><li>Najvišji bit: 1 (prepišeš).</li><li>1 XOR 0 = 1</li><li>0 XOR 1 = 1</li><li>1 XOR 1 = 0</li></ol><p class="prv">Gray(11) = <b>1110</b>, kar se ujema s tabelo ✓</p></div>
+  </div>
+  <h3>Gray → dvojiško</h3>
+  ${prose(`<p>Najvišji bit prepišeš. Vsak naslednji dvojiški bit je <strong>XOR prejšnjega dvojiškega bita in trenutnega Grayevega bita</strong>.</p>`)}
+  <div class="exs">
+    <div class="ex"><strong>Gray 0101 → dvojiško</strong>${al([{l:"Gray", s:"0101"},{l:"dvojiško", s:"0110", k:"res"}])}
+      <ol class="stp"><li>b3 = 0</li><li>b2 = b3 XOR g2 = 0 XOR 1 = 1</li><li>b1 = b2 XOR g1 = 1 XOR 0 = 1</li><li>b0 = b1 XOR g0 = 1 XOR 1 = 0</li></ol><p class="prv">0110₂ = 6 ✓</p></div>
+    <div class="ex"><strong>Gray 1110 → dvojiško</strong>${al([{l:"Gray", s:"1110"},{l:"dvojiško", s:"1011", k:"res"}])}
+      <ol class="stp"><li>b3 = 1</li><li>b2 = 1 XOR 1 = 0</li><li>b1 = 0 XOR 1 = 1</li><li>b0 = 1 XOR 0 = 1</li></ol><p class="prv">1011₂ = 11 ✓</p></div>
+  </div>
+  <h3>Zakaj to potrebujemo? Kodirni disk</h3>
+  ${prose(`<p>Na vrtečem se disku senzorji berejo položaj (kot) kot dvojiško število. Na meji med sektorjema 011 in 100 se pri dvojiški kodi spremenijo trije biti. Senzorji nikoli ne preklopijo popolnoma hkrati, zato lahko za trenutek preberemo napačno število (npr. 111 = 7 namesto 3 ali 4). Pri Grayevi kodi se spremeni samo en bit, zato je napaka največ en sektor.</p>`)}
+  <div class="two wide"><div class="figbox">${encoderSVG(false)}</div><div class="figbox">${encoderSVG(true)}</div></div>
+  <p class="prose" style="color:var(--muted)">Črna polja so enice, bela ničle. Rdeča črtkana črta označuje mejo med sektorjema 3 in 4.</p>
+  <h3>Kje se uporablja?</h3>
+  ${cards([["Rotacijski dajalniki (enkoderji)","Gumbi za glasnost, roboti, motorji in tiskalniki merijo položaj z Grayevim kodiranim diskom."],["Karnaughov (Veitchev) diagram","Vrstni red vrstic in stolpcev je 00, 01, 11, 10. To je Grayeva koda, zato so sosednja polja različna v enem bitu."],["Digitalna vezja","V asinhronih pomnilnikih FIFO so kazalci v Grayevi kodi, ker prehod med urami hkrati menja le en bit."]])}
+  <h3>Preizkusi sam</h3>
+  ${wData("gray")}`},
+
+ {id:"sodo-liho", g:3, t:"Sodo in liha pariteta", h:()=>`
+  ${prose(`<p>Pariteta je metoda za <strong>zaznavanje napak</strong> pri prenosu binarnih podatkov. Podatku dodamo poseben bit, ki mu rečemo <strong>paritetni bit</strong>. S tem zagotovimo, da ima podatek <strong>sodo ali liho število enic</strong> (bitov z vrednostjo 1). Pošiljatelj in prejemnik morata vnaprej vedeti, katero vrsto paritete uporabljata.</p>`)}
+  ${flow([{t:"1. Pošiljatelj",d:"izračuna paritetni bit in ga pripne podatku"},{t:"2. Kanal",d:"kabel, brezžična zveza ali pomnilnik; tu lahko pride do napake"},{t:"3. Prejemnik",d:"preveri število enic in odloči: sprejmi ali zahtevaj ponovno pošiljanje"}])}
+  ${tbl(["Vrsta","Pravilo","Paritetni bit je 1, kadar je enic v podatku"],[["Soda (even)","skupno število enic je sodo (vključno s paritetnim bitom)","liho"],["Liha (odd)","skupno število enic je liho (vključno s paritetnim bitom)","sodo"]])}
+  <h3>Postopek v treh korakih</h3>
+  ${prose(`<ol><li>Preštej enice v podatku.</li><li>Primerjaj z želeno vrsto paritete: soda ali liha.</li><li>Dodaj paritetni bit 0 ali 1, tako da skupno število enic ustreza.</li></ol>`)}
+  ${note("Podatek <code>1010010</code> ima 3 enice (liho). Soda pariteta: dodamo 1, dobimo <code>10100101</code> (4 enice). Liha pariteta: dodamo 0, dobimo <code>10100100</code> (3 enice).")}
+  ${note("<strong>Namig:</strong> paritetni bit pri sodi pariteti je enak XOR vseh bitov podatka. Pri lihi pariteti dobiš nasprotno vrednost.")}
+  <h3>Primer iz resničnega življenja: znaki ASCII</h3>
+  ${prose(`<p>Računalniki znake pošiljajo kot 7-bitne kode ASCII. Osmi bit je pogosto paritetni. Takole pošljemo besedo <strong>NOVO</strong> s sodo pariteto:</p>`)}
+  ${tbl(["Znak","7-bitna koda","Enic","Soda pariteta","Liha pariteta","Poslano (soda)"],[..."NOVO"].map(ch=>{ const c=a7(ch), o=ones(c); return [ch,c,o,o%2,1-o%2,c+(o%2)]; }),"fit")}
+  <h3>Preizkusi sam</h3>
+  ${wData("par")}
+  <p class="prose">Zdaj še z besedilom. Vpiši besedo in oglej si paritetne bite vseh znakov:</p>
+  ${wData("parA")}
+  <h3>Razmisli</h3>
+  ${hide("Koliko enobitnih napak lahko pariteta odkrije?","Ena sama napaka na enem bitu vedno spremeni število enic za 1, zato jo pariteta vedno odkrije.")}
+  ${hide("Ali nam pariteta pove, na katerem bitu je napaka?","Ne. Pove samo, da se število enic ne ujema, ne pa, kateri bit je napačen. Za to potrebujemo prečno in vzdolžno pariteto skupaj.")}`},
+
+ {id:"napake", g:3, t:"Odkrivanje napak", h:()=>`
+  ${prose(`<p>Prejemnik preveri število enic v celotni prejeti besedi (podatek in paritetni bit skupaj). Če število ustreza dogovorjeni pariteti, sklepa, da je prenos uspel. Če se ne ujema, je prišlo do napake in je treba prenos ponoviti.</p>`)}
+  ${flow([{t:"Prejeta beseda",d:"npr. 10110101"},{t:"Preštej enice",d:"5 enic, liho število"},{t:"Primerjaj",d:"dogovorjena pariteta je soda"},{t:"Odločitev",d:"ne ujema se: napaka, ponovi prenos",k:"bad"}])}
+  <h3>Štirje primeri (soda pariteta)</h3>
+  <p class="prose">Pošiljatelj je poslal <code>10100101</code>. Rdeči biti so tisti, ki jih je kanal zamenjal.</p>
+  ${(()=>{ const sent="10100101"; const rows=[["10100101","Brez napake"],["10110101","Ena napaka v podatku"],["10110111","Dve napaki"],["10100100","Napaka v paritetnem bitu"]];
+    return `<div class="tbl"><table><thead><tr><th>Primer</th><th>Prejeto</th><th>Enic</th><th>Odločitev prejemnika</th></tr></thead><tbody>${rows.map(([r,n])=>{ const o=ones(r), okp=o%2===0, same=r===sent; const dec = okp ? (same?"sprejme (pravilno)":"<b>sprejme, a je napaka neopažena!</b>") : "zazna napako, zahteva ponovitev"; return `<tr><td>${n}</td><td>${bitStr(r,sent)}</td><td class="num">${o} (${o%2?"liho":"sodo"})</td><td>${dec}</td></tr>`; }).join("")}</tbody></table></div>`; })()}
+  ${note("<strong>Ena napaka:</strong> število enic spremeni sodost, zato napako odkrijemo.<br><strong>Dve napaki:</strong> sodost se ohrani, zato napake ne zaznamo.<br><strong>Napaka v paritetnem bitu:</strong> tudi to je napaka, čeprav podatek ostane pravilen.<br><strong>Kje je napaka:</strong> pariteta tega ne pove.")}
+  <h3>Preizkusi sam: ustvari napako</h3>
+  ${wData("nap")}
+  <h3>Kvizzek: sprejmi ali zavrni</h3>
+  <p class="prose">Prejemnik dobi besedo in ve, katera pariteta je dogovorjena. Odloči se, ali je beseda pravilna.</p>
+  ${wData("nkviz")}
+  <h3>Razmisli</h3>
+  ${hide("Koliko enobitnih napak lahko pariteta odkrije?","Vse. Vsaka ena sama napaka spremeni število enic za natanko 1 in s tem njegovo sodost.")}
+  ${hide("Kaj se zgodi ob dveh napakah na dveh ločenih bitih?","Število enic se spremeni za 0 ali 2 (če sta bita enaka, +2 ali −2, če sta različna, ostane isto). Sodost se ohrani, zato prejemnik napake ne opazi.")}
+  ${hide("Kako zaznamo več napak hkrati?","Uporabimo močnejše metode: prečno in vzdolžno pariteto (naslednja stran), kontrolne vsote ali CRC.")}`},
+
+ {id:"precna-vzdolzna", g:3, t:"Prečna in vzdolžna pariteta", h:()=>`
+  ${prose(`<p>Pri daljših podatkih podatke zapišemo v <strong>tabelo</strong>, kjer je vsaka vrstica ena beseda (npr. en znak). Paritetne bite dodamo v dveh smereh:</p><ul><li><strong>prečna pariteta</strong>: paritetni bit na koncu vsake <strong>vrstice</strong>,</li><li><strong>vzdolžna pariteta</strong>: paritetni bit pod vsakim <strong>stolpcem</strong>,</li><li>v kotu je <strong>pariteta paritetnih bitov</strong>.</li></ul>`)}
+  <h3>Ena smer ali obe? Primerjava</h3>
+  <div class="exs figs">
+    <div class="ex"><strong>Samo prečna</strong>${pgv([[1,0,1,1],[0,1,1,0],[1,1,0,0]],"even",true,false)}<p class="prv">Najde vrstico z napako, ne pa stolpca.</p></div>
+    <div class="ex"><strong>Samo vzdolžna</strong>${pgv([[1,0,1,1],[0,1,1,0],[1,1,0,0]],"even",false,true)}<p class="prv">Najde stolpec z napako, ne pa vrstice.</p></div>
+    <div class="ex"><strong>Obe skupaj</strong>${pgv([[1,0,1,1],[0,1,1,0],[1,1,0,0]],"even",true,true)}<p class="prv">Najde vrstico <b>in</b> stolpec, torej točen bit.</p></div>
+  </div>
+  <p class="prose" style="color:var(--muted)">Obarvana polja so paritetni biti (soda pariteta).</p>
+  <h3>Primer: beseda NOVO</h3>
+  ${prose(`<p>Vsak znak je ena vrstica (7 bitov ASCII). Vsaki vrstici dodamo prečni bit, pod stolpce pa vzdolžne bite (soda pariteta). To je pravi primer, kako so paritetne bite dodajali na magnetne trakove in kartice.</p>`)}
+  ${pgv(NOVO,"even",true,true,[..."NOVO"])}
+  <h3>Kaj zazna katera pariteta?</h3>
+  ${tbl(["Napaka","Samo prečna","Samo vzdolžna","Obe skupaj"],[["En bit","zazna","zazna","zazna in <b>popravi</b>"],["Dva bita v isti vrstici","ne zazna","zazna (dva stolpca)","zazna"],["Dva bita v istem stolpcu","zazna (dve vrstici)","ne zazna","zazna"],["Štirje biti v ogliščih pravokotnika","ne zazna","ne zazna","<b>ne zazna</b>"]])}
+  <h3>Preizkusi sam: dopolni paritetne bite</h3>
+  ${prose(`<p>Klikni na polje, da vpišeš 0 ali 1 (vsak klik zamenja vrednost). Uporabljamo sodo pariteto. Ko izpolniš, klikni »Preveri«.</p>`)}
+  ${wData("pgfill")}`},
+
+ {id:"popravljanje", g:3, t:"Iskanje in popravljanje napake", h:()=>`
+  ${prose(`<p>Ko podatke zapišemo v tabelo s prečno in vzdolžno pariteto, lahko napako ne samo odkrijemo, ampak jo tudi <strong>popravimo</strong>. Postopek:</p><ol><li>V prejeti tabeli ponovno izračunamo pariteto vsake vrstice in vsakega stolpca.</li><li>Poiščemo vrstico in stolpec, ki ne ustrezata pariteti.</li><li>Bit na njunem <strong>presečišču</strong> je napačen. Zamenjamo ga (0 ↔ 1).</li></ol>`)}
+  <h3>Primer</h3>
+  <p class="prose">Prejeta tabela. Rdeča križca ✗ pri vrstici 2 in stolpcu 3 pokažeta, da ne ustrezata sodi pariteti. Napaka je na presečišču (obarvano polje).</p>
+  ${pgFlipStatic()}
+  <p class="prose">Bit v vrstici 2, stolpcu 3 je 0, a bi moral biti 1. Popravek: 0 → 1. Ko ga obrneš, so vse vrstice in vsi stolpci spet v redu ✓.</p>
+  ${note("Če je napačen paritetni bit sam, se to vidi enako: napaka je še vedno na presečišču ene vrstice in enega stolpca (v zadnji vrstici ali stolpcu).")}
+  <h3>Preizkusi sam: povzroči napako in jo poišči</h3>
+  ${wData("pflip")}
+  <h3>Poišči napako</h3>
+  ${prose(`<p>V tabeli je skrita ena napaka (soda pariteta). Poišči jo in klikni na napačen bit.</p>`)}
+  ${wData("najdi")}
+  <h3>Kje se to uporablja v praksi?</h3>
+  ${cards([["RAID 5 (diski)","Podatki so razporejeni po več diskih, na enem pa je paritetni blok (XOR vseh podatkov). Če en disk odpove, se njegovi podatki izračunajo iz ostalih. To je ista ideja kot vzdolžna pariteta."],["Pomnilnik z ECC","Strežniški pomnilnik uporablja izboljšano pariteto (Hammingovo kodo). Eno napako popravi, dve zazna. Tako se ne sesuje ob kozmičnem sevanju, ki lahko obrne posamezen bit."],["Magnetni trak in kartice","Na magnetnem traku ali kartici ima vsak znak paritetni bit (prečna), na koncu bloka pa je še kontrolni znak (vzdolžna). Bralnik zazna napako pri branju."],["Serijska vrata (UART, RS-232)","Pri serijski komunikaciji lahko vsakemu znaku dodamo paritetni bit. Nastavitev »8E1« pomeni 8 podatkovnih bitov, sodo pariteto in 1 stop bit."],["Črtna koda in kontrolna števka","Zadnja števka črtne kode (EAN-13) je kontrolna: izračuna se iz ostalih. Čitalnik zazna napačno prebrano kodo. Ista ideja kot pariteta, le v desetiškem sistemu."],["Omrežje in datoteke (CRC)","Ethernet, ZIP in številne datoteke uporabljajo CRC, močnejšo posplošitev paritete, ki zazna tudi več napak hkrati."]])}
+  <h3>RAID 5 v praksi</h3>
+  ${prose(`<p>Tri diski hranijo podatke, četrti paritetni blok P = XOR vseh treh (sodo pariteto po stolpcih). Izberi disk, ki »odpove«, in oglej si, kako ga sistem obnovi.</p>`)}
+  ${wData("raid")}`}
+];
+const GROUPS = ["Pretvorbe","Računanje","Kodiranje","Pariteta"];
+
+/* ---------- naloge ---------- */
+const MODS = ["Pretvorbe","Računanje","Kodiranje","Pariteta"];
+const LET = ["A","B","C","D"];
+const MNOTE = [
+  "Pretvarjanje med desetiškim, dvojiškim, osmiškim in šestnajstiškim sistemom.",
+  "Seštevanje, odštevanje in množenje v dvojiškem, osmiškem in šestnajstiškem sistemu, tudi z več členi.",
+  "Zapis števil v kodah BCD, Excess-3 in Gray ter pretvorba nazaj.",
+  "Sodo in liha pariteta, prečna in vzdolžna pariteta ter iskanje napake."
+];
+const T = [];
+const add = (m,lv,o)=>{ T.push(Object.assign({m,lv,pts:lv,h:[]},o)); };
+
+function ci(v,f,t){
+  const n=parseInt(v,f), a=Z(n,t), L=v.length; let h1,h2,sol;
+  if(f===10){
+    h1=`Število deli z ${t} in si zapisuj ostanke.`;
+    const r=n%t; h2=`Prvi korak: ${n} : ${t} = ${Math.floor(n/t)}, ostanek ${r}${r>9?" ("+Z(r,16)+")":""}.`;
+    sol=divT(n,t)+`<p>Ostanke prebereš od spodaj navzgor: ${n}₁₀ = <b>${a}</b>${SUBS[t]}</p>`;
+  } else if(t===10){
+    h1=`Vsako števko pomnoži s potenco števila ${f} (od desne ${f}⁰, ${f}¹, ${f}², …) in seštej.`;
+    const d0=parseInt(v[0],16); h2=`Prva števka ${v[0]} ima težo ${f}^${L-1} = ${f**(L-1)}, njen prispevek je ${d0*f**(L-1)}.`;
+    sol=`<p>${powSum(v,f)}</p>`;
+  } else if(f===2){
+    const k=Math.log2(t); h1=`Bite razdeli v skupine po ${k} (od desne) in vsako skupino zapiši z eno števko.`;
+    h2=`Skupine od desne proti levi: ${split(v,k).reverse().join(", ")}.`;
+    sol=`<p>${split(v,k).map(x=>`${x} = ${Z(parseInt(x,2),t)}`).join(", ")} → <b>${a}</b></p>`;
+  } else if(t===2){
+    const k=Math.log2(f); h1=`Vsako števko zapiši s ${k} biti.`;
+    h2=`Prva števka: ${v[0]} = ${B(parseInt(v[0],16),k)}.`;
+    sol=`<p>${[...v].map(d=>`${d} = ${B(parseInt(d,16),k)}`).join(", ")} → <b>${a}</b> (vodilne ničle lahko izpustiš)</p>`;
+  } else {
+    const k=Math.log2(t); h1="Najprej pretvori v dvojiški sistem, nato bite združi v skupine.";
+    h2=`${v}${SUBS[f]} v dvojiškem sistemu je ${B(n)}.`;
+    sol=`<p>${v}${SUBS[f]} = ${B(n)}₂ → ${split(B(n),k).map(x=>`${x} = ${Z(parseInt(x,2),t)}`).join(", ")} → <b>${a}</b></p>`;
+  }
+  return {a,h:[h1,h2],sol};
+}
+const conv = (lv,v,f,t,src)=>{ const r=ci(v,f,t); add(0,lv,{t:"num",src,q:`Pretvori ${v}${SUBS[f]} v ${NM[t]} sistem.`,ans:r.a,h:r.h,sol:r.sol}); };
+function ml(lv,v,f){
+  const o=[2,8,10,16].filter(b=>b!==f), n=parseInt(v,f), ans={}; o.forEach(b=>ans[b]=Z(n,b));
+  add(0,lv,{t:"ml",o,ans,q:`Število ${v}${SUBS[f]} zapiši še v preostalih treh sistemih.`,h:["Pomagaj si z dvojiškim sistemom: osmiško dobiš iz skupin po 3 bite, šestnajstiško iz skupin po 4 bite.",`${v}${SUBS[f]} je v desetiškem sistemu ${n}.`],sol:o.map(b=>`<p><b>${NM[b]}:</b></p>${ci(v,f,b).sol}`).join("")});
+}
+function tog(m,lv,tgt,q,h,sol,wl,src){ add(m,lv,{t:"tog",tgt,wl,q,h,sol,src}); }
+const tn = (lv,n,txt)=>tog(0,lv,B(n,8),`Vklopi bite tako, da prikazujejo ${txt||`desetiško število ${n}`}.`,[`Razstavi ${n} na vsoto potenc števila 2 (največjo možno vzemi prvo).`],`<p>${n} = ${W8.filter(w=>n&w).join(" + ")} → <code>${B(n,8)}</code></p>`,W8);
+
+function calcN(lv,b,arr,ca){
+  const ns=arr.filter((_,i)=>i%2===0), os=arr.filter((_,i)=>i%2), dn=ns.map(x=>parseInt(x,b));
+  let e=""+dn[0]; os.forEach((o,i)=>{ e+=(o==="+"?"+":o==="−"?"-":"*")+dn[i+1]; });
+  const r=Function("return "+e)(), a=Z(r,b);
+  add(1,lv,{t:ca?"ca":"num",arr,fixed:ca?1:0,ans:a,
+    q:`Izračunaj v ${LC[b]} sistemu: ${arr.join(" ")}${ca?". Vpiši števke vsote.":""}`,
+    h:[`Števila pretvori v desetiški sistem (${ns.map((x,i)=>x+SUBS[b]+" = "+dn[i]).join(", ")}), izračunaj in rezultat pretvori nazaj.`,`Rezultat v desetiškem sistemu je ${r}. Pretvori ga v ${NM[b]} sistem.`],
+    sol:`<p>Desetiško: ${e.replace(/-/g," − ").replace(/\+/g," + ").replace(/\*/g," · ")} = ${r}. Nazaj v ${NM[b]} sistem: <b>${a}</b>${SUBS[b]}</p>`});
+}
+const calc = (lv,x,o,y,b)=>calcN(lv,b,[x,o,y]);
+
+/* A: pretvorbe */
+const P="pdf";
+tn(1,13); tn(1,37);
+conv(1,"10111",2,10,P); conv(1,"110100",2,10,P); conv(1,"17",16,10,P); conv(1,"23",10,2,P); conv(1,"1011",2,10); conv(1,"17",8,10);
+conv(2,"52",10,2,P); conv(2,"1110011",2,10,P); conv(2,"115",10,2,P); conv(2,"23",10,16,P); conv(2,"52",10,16,P); conv(2,"115",10,16,P);
+conv(2,"2F",16,10); conv(2,"100",10,2); conv(2,"75",10,8); conv(2,"237",8,10); conv(2,"A5",16,10); conv(2,"29",10,16);
+tn(2,183,"šestnajstiško število B7");
+conv(3,"47856",10,16,P); conv(3,"BAF0",16,10,P); conv(3,"11010110",2,16); conv(3,"3C",16,2); conv(3,"1000",10,16); conv(3,"101101110",2,8); conv(3,"7A",16,8); conv(3,"654",8,16);
+ml(3,"100",10); ml(3,"B7",16); ml(3,"11010011",2); ml(3,"777",8); ml(3,"2024",10);
+
+/* B: računanje */
+calc(1,"1011","+","0110",2); calc(1,"1101","+","1011",2); calcN(1,2,["1011","+","110","+","11"],1);
+calc(2,"10110","−","1101",2); calc(2,"11001","−","1011",2); calc(2,"101","·","11",2); calc(2,"2A","+","1F",16); calc(2,"B7","−","5C",16); calcN(2,2,["101","+","11","+","110"]); calc(2,"345","+","127",8);
+calc(3,"1101","·","101",2); calc(3,"A3","+","4F",16); calc(3,"1C","·","3",16); calc(3,"FF","−","7A",16); calc(3,"F","·","F",16); calcN(3,16,["3C","+","2F","+","1B"],1);
+calcN(3,2,["1011","+","101","+","11","+","1111"]); calcN(3,2,["1100","+","1010","−","101","+","11"]); calcN(3,16,["1A","+","2B","+","3C","+","4D"]); calcN(3,16,["FF","−","A0","+","1B","−","3"]); calcN(3,2,["11","·","101","·","11"]); calc(3,"1111","·","1111",2); calc(3,"745","−","363",8);
+
+/* C: kodiranje */
+const cod = (lv,q,ans,h,sol)=>add(2,lv,{t:"num",fixed:1,q,ans,h:[h],sol:`<p>${sol}</p>`});
+const tc = (lv,q,tgt,h,sol,wl)=>tog(2,lv,tgt,q+" Klikaj bite.",[h],`<p>${sol}</p>`,wl);
+tc(1,"Števko 9 zapiši v kodi BCD.","1001","Koda BCD je navaden dvojiški zapis števke s 4 biti (teže 8, 4, 2, 1).","9 = 8 + 1 → <code>1001</code>",[8,4,2,1]);
+tc(1,"Števko 4 zapiši v kodi Excess-3.","0111","Najprej prištej 3, nato zapiši s 4 biti.","4 + 3 = 7 → <code>0111</code>");
+tc(1,"Število 3 zapiši v 4-bitni Grayevi kodi.","0010","Dvojiško 0011. Gray: vsak bit XOR bit levo od njega (najvišji ostane).","0011 XOR 0001 = <code>0010</code>");
+cod(2,"Zapiši 59 v kodi BCD.","01011001","Vsako števko pretvori posebej: 5 in 9.","5 = 0101, 9 = 1001 → <code>0101 1001</code>");
+cod(2,"Koliko je desetiško število, zapisano v BCD: 1000 0111?","87","Skupini sta ločeni: poišči vrednost vsake.","1000 = 8, 0111 = 7 → <b>87</b>");
+cod(2,"Zapiši 46 v kodi Excess-3.","01111001","Vsaki števki prištej 3: 4 + 3 in 6 + 3.","4 + 3 = 7 = 0111, 6 + 3 = 9 = 1001 → <code>0111 1001</code>");
+cod(2,"Koliko je desetiško število, zapisano v Excess-3: 0101 1000?","25","Vsaki skupini odštej 3.","0101 = 5, 5 − 3 = 2; 1000 = 8, 8 − 3 = 5 → <b>25</b>");
+cod(2,"Zapiši 6 v 4-bitni Grayevi kodi.","0101","6 = 0110. Gray = število XOR isto število, pomaknjeno za 1 mesto desno.","0110 XOR 0011 = <code>0101</code>");
+tc(2,"Število 11 zapiši v 4-bitni Grayevi kodi.","1110","11 = 1011. Gray = 1011 XOR 0101.","1011 XOR 0101 = <code>1110</code>");
+tc(2,"Grayevo kodo 1110 pretvori v dvojiško število.","1011","Najvišji bit prepiši. Vsak naslednji = prejšnji dvojiški bit XOR trenutni Grayev bit.","b3 = 1; b2 = 1 XOR 1 = 0; b1 = 0 XOR 1 = 1; b0 = 1 XOR 0 = 1 → <code>1011</code>");
+add(2,2,{t:"ch",q:"Katera 4-bitna kombinacija ni veljavna števka v kodi BCD?",o:["0111","1001","1010"],ans:2,h:["BCD zapisuje samo števke 0 do 9."],sol:"<p>1010 je 10, to pa ni ena števka. BCD uporablja samo kombinacije od 0000 do 1001.</p>"});
+cod(3,"Grayevo kodo 1101 pretvori v dvojiško število (4 biti).","1001","Najvišji bit prepiši, nato XOR s prejšnjim dvojiškim bitom.","b3 = 1; b2 = 1 XOR 1 = 0; b1 = 0 XOR 0 = 0; b0 = 0 XOR 1 = 1 → <code>1001</code>");
+cod(3,"Dvojiško število 10110 zapiši v Grayevi kodi.","11101","Gray = število XOR število, pomaknjeno za 1 mesto desno.","10110 XOR 01011 = <code>11101</code>");
+cod(3,"Število 2026 zapiši v kodi BCD.","0010000000100110","Štiri števke, vsaka s 4 biti.","2 = 0010, 0 = 0000, 2 = 0010, 6 = 0110 → <code>0010 0000 0010 0110</code>");
+cod(3,"Število 905 zapiši v kodi Excess-3.","110000111000","Vsaki števki prištej 3 (tudi ničli).","9 + 3 = 12 = 1100, 0 + 3 = 3 = 0011, 5 + 3 = 8 = 1000 → <code>1100 0011 1000</code>");
+cod(3,"Koliko bitov je potrebnih za zapis števila 4096 v kodi BCD?","16","Koliko števk ima število? Vsaka potrebuje 4 bite.","4 števke × 4 biti = <b>16 bitov</b>");
+add(2,3,{t:"ch",q:"Kaj je glavna lastnost Grayeve kode?",o:["Vsaka števka je zapisana s svojim štiribitnim blokom","Zaporedni števili se razlikujeta le v enem bitu","Vsebuje vedno sodo število enic"],ans:1,h:["Primerjaj zaporedne kode v tabeli v razlagi."],sol:"<p>Pri prehodu na naslednje število se spremeni natanko en bit, zato je koda primerna za zaznavala položaja.</p>"});
+
+/* D: pariteta */
+const par=(lv,w,p)=>{ const o=[...w].filter(x=>x==="1").length, b=pb(o,p); add(3,lv,{t:"par",fixed:1,w,q:`Dodaj paritetni bit na konec, da bo pariteta ${p==="even"?"soda":"liha"}.`,ans:w+b,h:["Preštej enice. Pri sodi paritetni bit dopolni število enic na sodo, pri lihi na liho.",`Enic je ${o}. Je to število sodo ali liho?`],sol:`<p>Enic je ${o} (${o%2?"liho":"sodo"}). Za ${p==="even"?"sodo":"liho"} pariteto je potreben bit ${b} → <code>${w}${b}</code></p>`}); };
+const ptask=(lv,w,p)=>{ const o=[...w].filter(x=>x==="1").length; add(3,lv,{t:"pt",w,ans:pb(o,p),q:`Klikni paritetni bit (desno) tako, da bo pariteta ${p==="even"?"soda":"liha"}.`,h:["Spodaj vidiš števec enic: skupaj mora biti "+(p==="even"?"sodo.":"liho.")],sol:`<p>Podatek ima ${o} enic, zato mora biti paritetni bit <b>${pb(o,p)}</b>.</p>`}); };
+ptask(1,"1011001","even"); par(1,"1010010","odd"); par(1,"1110111","even"); ptask(1,"0110111","odd");
+par(1,"1111000","odd"); par(1,"1101101","even");
+par(2,"0001111","odd"); par(2,"1011110","even"); ptask(2,"10110110","odd");
+const bl=(lv,p,ws,lab)=>{ add(3,lv,{t:"bl",src:P,items:ws.map(w=>({w,p,ans:w+pb([...w].filter(x=>x==="1").length,p)})),q:`${lab}: vsakemu podatku dodaj paritetni bit (${p==="even"?"soda":"liha"} pariteta) in zapiši celotno besedo.`,h:["Pri vsakem podatku preštej enice in določi paritetni bit."],sol:`<div class="tbl fit"><table><thead><tr><th>Podatek</th><th>Enic</th><th>Paritetni bit</th><th>Rezultat</th></tr></thead><tbody>${ws.map(w=>{const o=[...w].filter(x=>x==="1").length,b=pb(o,p);return `<tr><td class="num">${w}</td><td class="num">${o}</td><td class="num">${b}</td><td class="num">${w}${b}</td></tr>`;}).join("")}</tbody></table></div>`}); };
+bl(2,"odd",["1010010","1111000","0001111","1010101","1100110"],"Naloga 1 (liha, prvi del)");
+bl(2,"even",["1110111","1001000","1000111","1010110","1111111"],"Naloga 1 (soda, prvi del)");
+bl(2,"odd",["1011110","0100111","1110001","1000110","1111111"],"Naloga 1 (liha, drugi del)");
+bl(2,"even",["0110101","0011100","1101101","1010011","0101110"],"Naloga 1 (soda, drugi del)");
+add(3,2,{t:"ch",q:"Prejeli smo 10110101 (zadnji bit je paritetni, dogovorjena je soda pariteta). Kaj sklepamo?",o:["Prenos je pravilen","Pri prenosu je prišlo do napake"],ans:1,h:["Preštej enice v celotni besedi. Je število sodo?"],sol:"<p>Enic je 5, to je liho število, pri sodi pariteti pa mora biti sodo. Prišlo je do napake.</p>"});
+add(3,2,{t:"ch",q:"Ali pariteta pove, na katerem bitu je napaka?",o:["Da, pokaže natančen bit","Ne, pove le, da napaka obstaja"],ans:1,h:["Pariteta primerja le skupno število enic."],sol:"<p>Preverimo samo skupno število enic, zato lokacije ne poznamo. Lokacijo omogoči šele kombinacija prečne in vzdolžne paritete.</p>"});
+const gt=(lv,d,p,cn,src,lab)=>add(3,lv,{t:"grid",d,pt:p,cn,src,q:`${lab?lab+": ":""}Vpiši paritetne bite (desni stolpec in spodnjo vrstico${cn?", tudi vogalni bit":""}) pri ${p==="even"?"sodi":"lihi"} prečni in vzdolžni pariteti.`,h:["Za vsako vrstico in vsak stolpec preštej enice in določi bit.","Vogalni bit je pariteta paritetnih bitov v zadnji vrstici."],sol:`<p>Za vsako vrstico in stolpec preštejemo enice in dodamo bit, ki dopolni število na ${p==="even"?"sodo":"liho"}. Pravilna tabela:</p>${pgridShow(d,p)}`});
+gt(2,[[1,0,1,1],[0,0,1,0],[1,1,1,0]],"odd",0,null,"");
+gt(3,[[1,0,1,0,1,1,0],[0,1,1,0,0,0,1],[1,1,0,1,1,0,0],[0,0,1,1,0,1,1]],"even",1,P,"Naloga 2");
+gt(3,[[0,0,1,1,1,1,0],[1,1,0,0,1,0,1],[0,1,0,1,1,0,1],[0,1,1,0,0,1,1]],"even",1,P,"Naloga 3");
+gt(3,[[1,1,0,1,0,0],[0,1,1,1,1,0],[1,0,0,0,1,1],[1,1,1,0,0,1],[0,0,1,0,1,0]],"even",1,null,"");
+add(3,3,{t:"ch",q:"Pri prečni in vzdolžni pariteti nastane ena napaka. Koliko napačnih bitov lahko tak sistem zanesljivo popravi?",o:["Nobenega, samo odkrije","Natanko enega","Poljubno veliko"],ans:1,h:["Napaka je na presečišču ene vrstice in enega stolpca."],sol:"<p>Ena napaka pokaže eno napačno vrstico in en napačen stolpec, zato lahko bit popravimo. Pri več napakah ni več enolično.</p>"});
+add(3,3,{t:"ch",q:"Pri sodi pariteti se spremenita dva različna bita. Kaj naredi pariteta?",o:["Vedno odkrije napako","Napake ne odkrije","Napako odpravi"],ans:1,h:["Kaj se zgodi s skupnim številom enic?"],sol:"<p>Dve spremembi ohranita sodost števila enic, zato preverjanje napako spregleda.</p>"});
+const er=(full,p,src,lab)=>{ const bad=o=>p==="even"?o%2===1:o%2===0, r=full.findIndex(x=>bad(sum(x))), c=full[0].findIndex((_,j)=>bad(sum(full.map(x=>x[j]))));
+  add(3,3,{t:"err",full,ans:[r,c],src,q:`${lab?lab+": ":""}V tabeli je en napačen bit (pariteta je ${p==="even"?"soda":"liha"}; zadnji stolpec in zadnja vrstica sta paritetna). Klikni ga.`,h:["Poišči vrstico in stolpec, v katerih število enic ne ustreza pariteti.","Napaka je na presečišču take vrstice in takega stolpca."],sol:`<p>Napačna je ${r+1}. vrstica in ${c+1}. stolpec. Bit na presečišču je napačen.${r===full.length-1||c===full[0].length-1?" To je paritetni bit.":""}</p>`}); };
+er(flipAt(fullM([[1,0,1,1],[0,1,0,1],[1,1,1,1]],"even"),1,2),"even",null,"");
+er([[1,0,1,0,1,1,0,0],[0,1,1,0,0,0,1,1],[1,1,0,1,0,0,0,0],[0,0,1,1,0,1,1,0],[0,0,1,0,0,0,0,1]],"even",P,"Naloga 4");
+er(flipAt(fullM([[1,1,0,1,0],[0,1,1,0,1],[1,0,0,1,1],[0,0,1,1,1]],"even"),1,5),"even",null,"");
+
+/* urejanje, številke in id-ji */
+const MT = MODS.map((_,m)=>T.filter(t=>t.m===m).map((t,i)=>({t,i})).sort((a,b)=>a.t.lv-b.t.lv||a.i-b.i).map(x=>x.t));
+MT.forEach((arr,m)=>arr.forEach((t,i)=>{ t.id=LET[m].toLowerCase()+(i+1); }));
+const TT = [].concat(...MT);
+const LEVELS = MODS.map((n,m)=>({id:"naloge-"+LET[m].toLowerCase(), tag:LET[m], title:n, note:MNOTE[m], list:MT[m]}));
+
+/* za doma */
+const asciiRow = c=>{ const n=c.charCodeAt(0), b=B(n,8).slice(1); return b; };
+const homeParity = (()=>{ const rows=["H","I"].map(c=>{ const b=asciiRow(c).split("").map(Number); return [...b, pb(sum(b),"even")]; });
+  const cb=rows[0].map((_,j)=>pb(sum(rows.map(r=>r[j])),"even")); return {rows,cb}; })();
+const HOME = [
+ {title:"Pretvorbe okroglih števil", q:"Število 255, 256 in 1000 pretvori v dvojiški in šestnajstiški sistem. Kaj opaziš pri številih 255 in 256?",
+  sol:`<p>255₁₀ = ${B(255)}₂ = ${Z(255,16)}₁₆</p><p>256₁₀ = ${B(256)}₂ = ${Z(256,16)}₁₆</p><p>1000₁₀ = ${B(1000)}₂ = ${Z(1000,16)}₁₆</p><p>255 = 2⁸ − 1 je osem enic (največje število v enem bajtu), 256 = 2⁸ je ena enica in osem ničel.</p>`},
+ {title:"Računanje z nasprotnim preverjanjem", q:"Izračunaj v dvojiškem sistemu 1101 · 1011 in rezultat preveri z desetiškim računom.",
+  sol:`<p>1101 · 1011 = 1101 + 11010 + 1101000 = ${B(13*11)}</p><p>Preverjanje: 13 · 11 = ${13*11} = ${B(13*11)}₂.</p>`},
+ {title:"Tabela števk", q:"Na list zapiši tabelo števil od 0 do 15 v desetiškem, dvojiškem, osmiškem in šestnajstiškem sistemu. Preveri jo z razlago.",
+  sol:tbl(["Desetiško","Dvojiško","Osmiško","Šestnajstiško"],[...Array(16)].map((_,i)=>[i,B(i,4),Z(i,8),Z(i,16)]),"fit")},
+ {title:"BCD ali dvojiško", q:"Število 1984 zapiši v kodi BCD in Excess-3. Koliko bitov porabita v primerjavi z navadnim dvojiškim zapisom?",
+  sol:`<p>BCD: ${String(1984).split("").map(d=>B(+d,4)).join(" ")} (16 bitov)</p><p>Excess-3: ${String(1984).split("").map(d=>B(+d+3,4)).join(" ")} (16 bitov)</p><p>Dvojiško: ${B(1984)} (${B(1984).length} bitov). Obe kodi porabita več bitov, a ju je lažje brati in pretvarjati po števkah.</p>`},
+ {title:"Grayeva koda do 7", q:"Zapiši Grayevo kodo za števila od 0 do 7 (3 biti) in preveri, da se sosednji kodi razlikujeta v natanko enem bitu.",
+  sol:tbl(["Število","Dvojiško","Gray"],[...Array(8)].map((_,i)=>[i,B(i,3),B(gray(i),3)]),"fit")+`<p>Primerjaj vsak par sosednjih vrstic: spremeni se natanko en bit.</p>`},
+ {title:"Pariteta besedila", q:"Znaka »H« (ASCII 72) in »I« (ASCII 73) zapiši v 7 bitih. Vsakemu dodaj sodo paritetni bit in dodaj še vrstico vzdolžne paritete.",
+  sol:`<div class="tbl fit"><table class="pgrid"><tbody>${homeParity.rows.map(r=>`<tr>${r.map((v,j)=>`<td class="${j===7?"pb":""}">${v}</td>`).join("")}</tr>`).join("")}<tr>${homeParity.cb.map(v=>`<td class="pb">${v}</td>`).join("")}</tr></tbody></table></div><p>H = 72 = ${asciiRow("H")}, I = 73 = ${asciiRow("I")}. Pri vsaki vrstici in stolpcu preštej enice in dopolni na sodo število.</p>`},
+ {title:"Razmisli o pariteti", q:"Koliko enobitnih napak lahko pariteta odkrije? Ali pove, na katerem bitu je napaka? Kaj se zgodi ob dveh napakah na dveh ločenih bitih?",
+  sol:`<p>Pariteta odkrije napako, kadar je napačnih liho število bitov (1, 3, …). Ne pove, kateri bit je napačen. Pri dveh napakah se število enic spremeni za sodo število, zato napake ne zazna. Z uporabo prečne in vzdolžne paritete lahko eno napako tudi popravimo.</p>`}
+];
+
+
+
+/* ---------- shranjevanje (brskalnik) ---------- */
+const STORE = "stevilski-sistemi-v2";
+let S = {};
+try { S = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; } catch(e) { S = {}; }
+function save(){ try { localStorage.setItem(STORE, JSON.stringify(S)); } catch(e){} }
+const st = id => S[id] || (S[id] = {});
+function summary(){
+  const r = {resenih:0, tock:0, vseh:TT.length, vsehTock:sum(TT.map(t=>t.pts)), sklopi:{}};
+  TT.forEach(t=>{ const k=LET[t.m]; r.sklopi[k] = r.sklopi[k] || {resenih:0, vseh:0}; r.sklopi[k].vseh++;
+    if(S[t.id] && S[t.id].state==="ok"){ r.resenih++; r.tock+=t.pts; r.sklopi[k].resenih++; } });
+  return r;
+}
+function progress(){
+  const r = summary();
+  const txt = `${r.resenih} / ${r.vseh} nalog · ${r.tock} / ${r.vsehTock} točk`;
+  document.querySelectorAll(".js-progtxt").forEach(e=>e.textContent=txt);
+  document.querySelectorAll(".js-bar").forEach(e=>e.style.width=(100*r.tock/r.vsehTock)+"%");
+  document.querySelectorAll(".cnt[data-lv]").forEach(e=>{ const k=r.sklopi[e.dataset.lv]; if(!k) return; e.textContent=`${k.resenih}/${k.vseh}`; e.classList.toggle("full", k.resenih===k.vseh); });
+}
+
+/* ---------- preverjanje ---------- */
+const nz = s => String(s).replace(/[\s_]/g,"").toUpperCase();
+const nl = s => nz(s).replace(/^0+(?=.)/,"");
+function gridExp(t){ const d=t.d, rb=d.map(r=>pb(sum(r),t.pt)), cb=d[0].map((_,c)=>pb(sum(d.map(r=>r[c])),t.pt)); return {r:rb, c:cb, x:pb(sum(cb),t.pt)}; }
+const optLetters = "ABCDEF";
+
+function bodyHTML(t){
+  const id=t.id;
+  const inp = (k,label,extra)=>`<div class="blank"><label for="b-${id}-${k}">${label}</label><input type="text" class="mono" id="b-${id}-${k}" data-f autocomplete="off" spellcheck="false" ${extra||""}></div>`;
+  switch(t.t){
+    case "num": return inp(0,"Tvoj odgovor");
+    case "par": return `<p><code class="code-inline">${t.w}</code> + paritetni bit</p>` + inp(0,"Celotna beseda s paritetnim bitom");
+    case "ml": return t.o.map((b,k)=>inp(k,`${NM[b][0].toUpperCase()+NM[b].slice(1)} sistem (osnova ${b})`,`data-base="${b}"`)).join("");
+    case "bl": return t.items.map((it,k)=>inp(k,`${it.w} (${it.p==="even"?"soda":"liha"} pariteta)`)).join("");
+    case "tog": { const n=t.tgt.length, wl=t.wl||t.tgt.split("").map((_,i)=>"b"+(n-1-i));
+      return `<div class="bitrow">${wl.map((l,i)=>`<div class="bitcol"><span class="bw">${l}</span><button type="button" class="bit" data-b="${i}" aria-pressed="false" aria-label="bit ${l}">0</button></div>`).join("")}</div><p class="wnote js-tv"></p>`; }
+    case "pt": return `<div class="bitrow">${[...t.w].map(x=>`<div class="bitcol"><span class="bw">&nbsp;</span><span class="bit static">${x}</span></div>`).join("")}<div class="bitcol"><span class="bw">pariteta</span><button type="button" class="bit" data-b="0" aria-pressed="false" aria-label="paritetni bit">0</button></div></div><p class="wnote js-tv"></p>`;
+    case "ch": return `<div class="opts">${t.o.map((o,k)=>`<label class="opt"><input type="radio" name="r-${id}" id="r-${id}-${k}" value="${k}"><b>${optLetters[k]}</b><span>${esc(o)}</span></label>`).join("")}</div>`;
+    case "ca": { const L=t.ans.length, ns=t.arr.filter((_,i)=>i%2===0);
+      return `<div class="tbl fit"><table class="pgrid"><tbody>${ns.map((x,i)=>`<tr><td class="op">${i?"+":""}</td>${[...x.padStart(L," ")].map(c=>`<td>${c===" "?"":c}</td>`).join("")}</tr>`).join("")}<tr><td class="op">=</td>${[...t.ans].map((_,i)=>`<td class="pb"><input type="text" data-f maxlength="1" autocomplete="off" aria-label="števka ${i+1} vsote"></td>`).join("")}</tr></tbody></table></div>`; }
+    case "grid": { const d=t.d;
+      return `<div class="tbl fit"><table class="pgrid"><tbody>${d.map((r,i)=>`<tr>${r.map(v=>`<td>${v}</td>`).join("")}<td class="pb"><input type="text" data-f data-k="r" data-i="${i}" maxlength="1" inputmode="numeric" autocomplete="off" aria-label="paritetni bit vrstice ${i+1}"></td></tr>`).join("")}<tr>${d[0].map((_,j)=>`<td class="pb"><input type="text" data-f data-k="c" data-i="${j}" maxlength="1" inputmode="numeric" autocomplete="off" aria-label="paritetni bit stolpca ${j+1}"></td>`).join("")}${t.cn?`<td class="pb"><input type="text" data-f data-k="x" data-i="0" maxlength="1" inputmode="numeric" autocomplete="off" aria-label="vogalni bit"></td>`:"<td></td>"}</tr></tbody></table></div>`; }
+    case "err": { const f=t.full, R=f.length, C=f[0].length;
+      return `<div class="tbl fit"><table class="pgrid"><tbody>${f.map((r,i)=>`<tr>${r.map((v,j)=>`<td class="${i===R-1||j===C-1?"pb":""}"><button type="button" class="pc" data-r="${i}" data-c="${j}" aria-pressed="false" aria-label="vrstica ${i+1}, stolpec ${j+1}, vrednost ${v}">${v}</button></td>`).join("")}</tr>`).join("")}</tbody></table></div>`; }
+  }
+  return "";
+}
+function solAns(t){
+  switch(t.t){
+    case "num": case "par": case "ca": return `Pravilen odgovor: <code>${esc(t.ans)}</code>`;
+    case "ml": return "Pravilni odgovori: " + t.o.map(b=>`${NM[b]}: <code>${t.ans[b]}</code>`).join(" · ");
+    case "bl": return "Pravilni odgovori: " + t.items.map(it=>`<code>${it.ans}</code>`).join(" · ");
+    case "tog": return `Pravilen zapis: <code>${t.tgt}</code>`;
+    case "pt": return `Paritetni bit: <code>${t.ans}</code>`;
+    case "ch": return `Pravilno: ${optLetters[t.ans]} (${esc(t.o[t.ans])})`;
+    case "grid": { const e=gridExp(t); return `Paritetni biti vrstic: <code>${e.r.join(" ")}</code> · stolpcev: <code>${e.c.join(" ")}</code>${t.cn?` · vogal: <code>${e.x}</code>`:""}`; }
+    case "err": return `Napačen bit: ${t.ans[0]+1}. vrstica, ${t.ans[1]+1}. stolpec`;
+  }
+  return "";
+}
+
+let counter = 0;
+function card(t){
+  const el = document.createElement("article");
+  el.className = "task"; el.id = "t-"+t.id; el.dataset.kind = t.src ? "mat" : "own";
+  const tags = (t.src ? `<span class="tag mat">Iz delovnega lista</span>` : `<span class="tag">Dodatna</span>`)
+    + `<span class="tag lv">${["Lažja","Srednja","Težja"][t.lv-1]}</span><span class="tag">${ptsLabel(t.pts)}</span><span class="tag js-st" hidden></span>`;
+  el.innerHTML = `
+    <div class="thead"><span class="tnum">${t.n}. naloga</span><div class="tags">${tags}</div></div>
+    <div class="q"><p class="qtext">${esc(t.q)}</p>${bodyHTML(t)}</div>
+    <div class="actions">
+      <button class="btn primary js-check" type="button">Preveri</button>
+      <button class="btn js-hint" type="button">Namig</button>
+      <button class="btn ghost js-sol" type="button">Pokaži rešitev</button>
+      <span class="feedback" aria-live="polite"></span>
+    </div>
+    <div class="hints"></div>
+    <div class="sol" hidden></div>`;
+  wire(el,t);
+  return el;
+}
+
+function wire(el,t){
+  const s = st(t.id);
+  const fb = $(".feedback",el), hintsEl = $(".hints",el), solEl = $(".sol",el);
+  const fields = ()=>[...el.querySelectorAll("[data-f]")];
+  el._bits = t.t==="tog" ? Array(t.tgt.length).fill(0) : t.t==="pt" ? [0] : [];
+  el._sel = null;
+  const tv = $(".js-tv",el);
+  function paintBits(){
+    el.querySelectorAll("button.bit[data-b]").forEach(b=>{ const v=el._bits[+b.dataset.b]; b.textContent=v; b.setAttribute("aria-pressed", v?"true":"false"); });
+    if(!tv) return;
+    if(t.t==="tog"){ const n=el._bits.length; tv.textContent = "Zapis: "+el._bits.join("") + (t.wl && t.wl[0]===128 ? "  =  "+el._bits.reduce((a,b,i)=>a+b*t.wl[i],0) : ""); }
+    if(t.t==="pt"){ const o=[...t.w].filter(x=>x==="1").length+el._bits[0]; tv.textContent = `Enic skupaj: ${o} (${o%2?"liho":"sodo"})`; }
+  }
+  function collect(){
+    if(["num","par","ml","bl","ca","grid"].includes(t.t)) s.v = fields().map(i=>i.value);
+    if(t.t==="tog"||t.t==="pt") s.v = el._bits.slice();
+    if(t.t==="ch"){ const r=el.querySelector(`input[name="r-${t.id}"]:checked`); s.v = r ? [+r.value] : []; }
+    if(t.t==="err") s.v = el._sel ? el._sel.slice() : [];
+    save();
+  }
+  /* obnovi vnos */
+  if(s.v){
+    if(["num","par","ml","bl","ca","grid"].includes(t.t)) fields().forEach((i,k)=>{ if(s.v[k]!=null) i.value=s.v[k]; });
+    if((t.t==="tog"||t.t==="pt") && s.v.length===el._bits.length) el._bits = s.v.slice();
+    if(t.t==="ch" && s.v.length){ const i=$(`#r-${t.id}-${s.v[0]}`,el); if(i) i.checked=true; }
+    if(t.t==="err" && s.v.length===2){ el._sel=s.v.slice(); const b=el.querySelector(`.pc[data-r="${s.v[0]}"][data-c="${s.v[1]}"]`); if(b) b.setAttribute("aria-pressed","true"); }
+  }
+  paintBits();
+  fields().forEach(i=>i.addEventListener("input",()=>{ i.classList.remove("right","wrong"); collect(); }));
+  el.querySelectorAll("input[type=radio]").forEach(i=>i.addEventListener("change",()=>{ el.querySelectorAll(".opt").forEach(o=>o.classList.remove("right","wrong")); collect(); }));
+  el.querySelectorAll("button.bit[data-b]").forEach(b=>b.addEventListener("click",()=>{ const k=+b.dataset.b; el._bits[k]^=1; paintBits(); collect(); }));
+  el.querySelectorAll(".pc").forEach(b=>b.addEventListener("click",()=>{ el.querySelectorAll(".pc").forEach(x=>x.setAttribute("aria-pressed","false")); b.setAttribute("aria-pressed","true"); el._sel=[+b.dataset.r,+b.dataset.c]; collect(); }));
+
+  function show(ok,m){ fb.textContent=m; fb.className="feedback "+(ok?"ok":"bad"); }
+  function mark(i,good){ i.classList.remove("right","wrong"); if(i.value.trim()) i.classList.add(good?"right":"wrong"); }
+
+  $(".js-check",el).addEventListener("click",()=>{
+    collect();
+    let ok=false, msg="";
+    const fl = fields();
+    if(t.t==="num"||t.t==="par"){
+      const v=fl[0].value;
+      if(!v.trim()){ show(false,"Najprej vpiši odgovor."); return; }
+      let a=nz(v), b=nz(t.ans); if(!t.fixed){ a=nl(a); b=nl(b); }
+      ok = a===b; mark(fl[0],ok);
+    }
+    if(t.t==="ml"){
+      let all=true; fl.forEach(i=>{ const good = nl(i.value)===nl(t.ans[i.dataset.base]); mark(i,good); if(!good) all=false; });
+      ok=all; if(!ok && fl.some(i=>!i.value.trim())) msg="Izpolni vsa polja.";
+    }
+    if(t.t==="bl"){
+      let all=true; fl.forEach((i,k)=>{ const good = nz(i.value)===nz(t.items[k].ans); mark(i,good); if(!good) all=false; });
+      ok=all; if(!ok && fl.some(i=>!i.value.trim())) msg="Izpolni vsa polja.";
+    }
+    if(t.t==="ca"){
+      let all=true; fl.forEach((i,k)=>{ const good = nz(i.value)===t.ans[k].toUpperCase(); mark(i,good); if(!good) all=false; });
+      ok=all; if(!ok && fl.some(i=>!i.value.trim())) msg="Izpolni vsa polja.";
+    }
+    if(t.t==="grid"){
+      const e=gridExp(t); let all=true;
+      fl.forEach(i=>{ const k=i.dataset.k, n=+i.dataset.i, want = k==="r"?e.r[n]:k==="c"?e.c[n]:e.x; const good = i.value.trim()===String(want); mark(i,good); if(!good) all=false; });
+      ok=all; if(!ok && fl.some(i=>!i.value.trim())) msg="Izpolni vsa polja.";
+    }
+    if(t.t==="tog"){ ok = el._bits.join("")===t.tgt; if(!ok && !el._bits.includes(1)) msg="Najprej vklopi kakšen bit."; }
+    if(t.t==="pt"){ ok = el._bits[0]===t.ans; }
+    if(t.t==="ch"){
+      const r=el.querySelector(`input[name="r-${t.id}"]:checked`);
+      if(!r){ show(false,"Najprej izberi odgovor."); return; }
+      const v=+r.value; ok = v===t.ans;
+      el.querySelectorAll(".opt").forEach((o,k)=>{ o.classList.remove("right","wrong"); if(k===v) o.classList.add(ok?"right":"wrong"); });
+    }
+    if(t.t==="err"){
+      if(!el._sel){ show(false,"Najprej klikni bit, za katerega misliš, da je napačen."); return; }
+      ok = el._sel[0]===t.ans[0] && el._sel[1]===t.ans[1];
+    }
+    if(ok){ if(s.state!=="seen") s.state="ok"; save(); }
+    show(ok, ok ? (s.state==="seen" ? "Pravilno. Točke se ne štejejo, ker si si ogledal rešitev." : `Pravilno. +${ptsLabel(t.pts)}`) : ("Ni še pravilno. "+msg).trim());
+    paint(); progress();
+  });
+
+  /* namigi */
+  let hi = s.h || 0;
+  const drawHints = ()=>{ hintsEl.innerHTML = t.h.slice(0,hi).map((h,k)=>`<div class="hint"><b>NAMIG ${k+1}/${t.h.length}</b>${esc(h)}</div>`).join(""); const b=$(".js-hint",el); b.disabled = hi>=t.h.length; b.textContent = hi>=t.h.length ? "Ni več namigov" : (hi? "Še en namig" : "Namig"); };
+  drawHints();
+  $(".js-hint",el).addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h=hi; save(); drawHints(); } });
+
+  /* rešitev */
+  $(".js-sol",el).addEventListener("click",()=>{
+    if(solEl.hidden){
+      solEl.innerHTML = `<div class="ans">${solAns(t)}</div><div class="why">${t.sol}</div>`;
+      solEl.hidden=false; if(s.state!=="ok"){ s.state="seen"; save(); paint(); progress(); }
+      $(".js-sol",el).textContent="Skrij rešitev";
+    } else { solEl.hidden=true; $(".js-sol",el).textContent="Pokaži rešitev"; }
+  });
+  function paint(){
+    el.dataset.state = s.state||"";
+    const tg = $(".js-st",el);
+    if(s.state==="ok"){ tg.hidden=false; tg.className="tag js-st st-ok"; tg.textContent="Rešeno"; }
+    else if(s.state==="seen"){ tg.hidden=false; tg.className="tag js-st st-seen"; tg.textContent="Rešitev ogledana"; }
+    else tg.hidden=true;
+  }
+  paint();
+}
+
+const levelsEl = $("#levels");
+function renderAll(){
+  levelsEl.innerHTML = ""; counter = 0;
+  LEVELS.forEach(L=>{
+    const wrap = document.createElement("div");
+    wrap.className = "level"; wrap.id = "p-"+L.id; wrap.hidden = true;
+    wrap.innerHTML = `<header><span class="eyebrow">Sklop ${L.tag}</span><h3 style="font-size:1.35rem">${esc(L.title)}</h3><p>${esc(L.note)}</p></header>`;
+    L.list.forEach(t=>{ counter++; t.n = counter; wrap.appendChild(card(t)); });
+    const em = document.createElement("p"); em.className = "lvl-empty"; em.hidden = true; em.textContent = "V tem sklopu ni nalog za izbrani filter.";
+    wrap.appendChild(em);
+    levelsEl.appendChild(wrap);
+  });
+  applyFilter();
+}
+
+/* za doma */
+HOME.forEach((h,k)=>{
+  const el = document.createElement("article"); el.className="task";
+  el.innerHTML = `<div class="thead"><span class="tnum">D${k+1}. ${esc(h.title)}</span><div class="tags"><span class="tag">Za doma</span></div></div>
+   <div class="q"><p class="qtext">${esc(h.q)}</p></div>
+   <div class="actions"><button class="btn ghost js-s" type="button">Pokaži rešitev</button></div>
+   <div class="sol" hidden><div class="why">${h.sol}</div></div>`;
+  const sol=$(".sol",el), b=$(".js-s",el);
+  b.addEventListener("click",()=>{ sol.hidden=!sol.hidden; b.textContent= sol.hidden?"Pokaži rešitev":"Skrij rešitev"; });
+  $("#home").appendChild(el);
+});
+
+/* filtri */
+let curFilter = "all";
+function applyFilter(){
+  document.querySelectorAll("#levels .task").forEach(el=>{
+    const s = S[el.id.slice(2)] || {};
+    el.hidden = (curFilter==="mat" && el.dataset.kind!=="mat") || (curFilter==="own" && el.dataset.kind!=="own") || (curFilter==="open" && s.state==="ok");
+  });
+  document.querySelectorAll("#levels .level").forEach(l=>{ const e=l.querySelector(".lvl-empty"); if(e) e.hidden = !!l.querySelector(".task:not([hidden])"); });
+}
+document.querySelectorAll(".chip").forEach(c=>c.addEventListener("click",()=>{
+  document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed","false"));
+  c.setAttribute("aria-pressed","true"); curFilter = c.dataset.f; applyFilter();
+}));
+
+/* ---------- strani ---------- */
+const PAGES = [
+  ...THEORY.map(p=>[p.id,p.t]),
+  ...LEVELS.map(L=>[L.id,`Naloge ${L.tag} · ${L.title}`]),
+  ["doma","Vaje za doma"]
+];
+const pagesEl = $("#pages");
+THEORY.forEach((p,k)=>{
+  const sec = document.createElement("section"); sec.id = "p-"+p.id; sec.hidden = true;
+  sec.innerHTML = `<div class="eyebrow">${GROUPS[p.g]} · razlaga ${k+1}</div><h2>${esc(p.t)}</h2>${p.h()}`;
+  pagesEl.appendChild(sec);
+});
+
+/* levi stolpec */
+(function(){
+  const brand = $("#brand");
+  brand.innerHTML = (LOGO_SRC ? `<img src="${LOGO_SRC}" alt="ŠCNM">` : `<svg viewBox="0 0 150 46" role="img" aria-label="Šolski center Novo mesto"><rect width="46" height="46" rx="10" fill="var(--accent)"/><text x="23" y="31" text-anchor="middle" font-size="22" font-weight="700" fill="var(--surface)" font-family="sans-serif">ŠC</text><text x="56" y="21" font-size="17" font-weight="700" fill="var(--fg)" font-family="sans-serif">NM</text><text x="56" y="36" font-size="9" fill="var(--muted)" font-family="sans-serif">Novo mesto</text></svg>`) + `<span>Številski sistemi,<br>kodiranje in pariteta</span>`;
+  let h = "", g = -1;
+  THEORY.forEach((p,k)=>{ if(p.g!==g){ g=p.g; h += `<div class="grp">${GROUPS[g]}</div>`; } h += `<a href="#${p.id}">${k+1} · ${esc(p.t)}</a>`; });
+  h += `<div class="grp">Vaje</div>` + LEVELS.map(L=>`<a href="#${L.id}">${L.tag} · ${esc(L.title)} <span class="cnt" data-lv="${L.tag}"></span></a>`).join("") + `<a href="#doma">Za doma</a>`;
+  $("#railNav").innerHTML = h;
+})();
+
+const sel = $("#pageSel");
+sel.innerHTML = PAGES.map((p,k)=>`<option value="${p[0]}">${k+1}. ${esc(p[1])}</option>`).join("");
+sel.addEventListener("change",()=>{ location.hash = sel.value; });
+let cur = PAGES[0][0];
+function showPage(id, quiet){
+  const k0 = PAGES.findIndex(p=>p[0]===id), k = k0<0 ? 0 : k0; cur = PAGES[k][0];
+  document.querySelectorAll("#pages > section").forEach(sec=>{ sec.hidden = sec.id!=="p-"+cur; });
+  $("#naloge").hidden = !cur.startsWith("naloge-");
+  $("#sec-doma").hidden = cur!=="doma";
+  document.querySelectorAll("#levels > .level").forEach(l=>{ l.hidden = l.id!=="p-"+cur; });
+  $("#hero").hidden = k!==0; $("#crumb").hidden = k===0;
+  $("#crumbN").textContent = `Stran ${k+1} od ${PAGES.length}`;
+  document.querySelectorAll(".rail nav a").forEach(a=>{ if(a.getAttribute("href")==="#"+cur) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
+  sel.value = cur;
+  const pv = PAGES[k-1], nx = PAGES[k+1];
+  $("#pager").innerHTML = (pv?`<a class="prev" href="#${pv[0]}"><span class="eyebrow">Nazaj</span><span class="t">${esc(pv[1])}</span></a>`:"") + (nx?`<a class="next" href="#${nx[0]}"><span class="eyebrow">Naprej</span><span class="t">${esc(nx[1])}</span></a>`:"");
+  if(!quiet) window.scrollTo(0,0);
+}
+window.addEventListener("hashchange",()=>showPage(location.hash.slice(1)));
+
+/* ponastavitev z vgrajenim potrdilom */
+const rw = $("#resetWrap");
+function resetIdle(){ rw.innerHTML = `<button class="btn ghost" id="resetBtn" type="button" style="padding-left:0">Počisti ves napredek</button>`; $("#resetBtn").addEventListener("click",resetAsk); }
+function resetAsk(){ rw.innerHTML = `<span class="confirm">Res izbrišem vse odgovore? <button class="btn" id="rY" type="button">Da, počisti</button><button class="btn ghost" id="rN" type="button">Prekliči</button></span>`;
+  $("#rY").addEventListener("click",()=>{ S = {}; save(); location.hash = PAGES[0][0]; location.reload(); });
+  $("#rN").addEventListener("click",resetIdle); }
+resetIdle();
+
+/* ---------- pripomočki v razlagi ---------- */
+const WIDGETS = {};
+WIDGETS.bits = host=>{
+  const bits = [0,1,0,1,1,1,0,1];
+  host.innerHTML = `<div class="wbox"><p class="wnote">Klikni na bite in opazuj isto število v štirih sistemih. Zgoraj je teža bita.</p>
+    <div class="bitrow">${W8.map((w,i)=>`<div class="bitcol"><span class="bw">${w}</span><button type="button" class="bit" data-i="${i}" aria-pressed="false" aria-label="bit s težo ${w}">0</button></div>`).join("")}</div>
+    <dl class="vals"><div><dt>Dvojiško</dt><dd class="v2"></dd></div><div><dt>Desetiško</dt><dd class="v10"></dd></div><div><dt>Osmiško</dt><dd class="v8"></dd></div><div><dt>Šestnajstiško</dt><dd class="v16"></dd></div></dl></div>`;
+  const draw = ()=>{
+    const n = bits.reduce((a,b,i)=>a+b*W8[i],0);
+    host.querySelectorAll(".bit").forEach(b=>{ const v=bits[+b.dataset.i]; b.textContent=v; b.setAttribute("aria-pressed",v?"true":"false"); });
+    $(".v2",host).textContent=B(n,8); $(".v10",host).textContent=n; $(".v8",host).textContent=Z(n,8); $(".v16",host).textContent=Z(n,16);
+  };
+  host.querySelectorAll(".bit").forEach(b=>b.addEventListener("click",()=>{ bits[+b.dataset.i]^=1; draw(); }));
+  draw();
+};
+WIDGETS.par = host=>{
+  const bits = [1,0,1,0,0,1,0]; let mode = "even";
+  host.innerHTML = `<div class="wbox"><p class="wnote">Klikni na bite podatka in izberi vrsto paritete. Paritetni bit se izračuna sam.</p>
+    <div class="bitrow">${bits.map((_,i)=>`<div class="bitcol"><span class="bw">b${6-i}</span><button type="button" class="bit" data-i="${i}" aria-pressed="false" aria-label="bit ${6-i}">0</button></div>`).join("")}<div class="bitcol"><span class="bw">pariteta</span><span class="bit static pr">0</span></div></div>
+    <div class="row"><span class="eyebrow">Vrsta</span><div class="seg" role="group" aria-label="Vrsta paritete"><button type="button" data-m="even" aria-pressed="true">Soda</button><button type="button" data-m="odd" aria-pressed="false">Liha</button></div></div>
+    <p class="wnote res"></p></div>`;
+  const draw = ()=>{
+    const o = sum(bits), p = pb(o,mode);
+    host.querySelectorAll(".bit[data-i]").forEach(b=>{ const v=bits[+b.dataset.i]; b.textContent=v; b.setAttribute("aria-pressed",v?"true":"false"); });
+    $(".pr",host).textContent = p;
+    host.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.m===mode)));
+    $(".res",host).innerHTML = `Enic v podatku: <b>${o}</b> (${o%2?"liho":"sodo"}). Za ${mode==="even"?"sodo":"liho"} pariteto je paritetni bit <b>${p}</b>. Poslano: <code>${bits.join("")}${p}</code>`;
+  };
+  host.querySelectorAll(".bit[data-i]").forEach(b=>b.addEventListener("click",()=>{ bits[+b.dataset.i]^=1; draw(); }));
+  host.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{ mode=b.dataset.m; draw(); }));
+  draw();
+};
+WIDGETS.pflip = host=>{
+  const orig = fullM([[1,0,1,1],[0,1,1,0],[1,1,0,0]],"even"); let cu = orig.map(r=>[...r]);
+  host.innerHTML = `<div class="wbox"><p class="wnote">To je pravilno poslana tabela s sodo pariteto. Klikni na poljuben bit in tako ponazori napako pri prenosu. Kljukice in križci kažejo, katere vrstice in stolpci ne ustrezajo pariteti.</p>
+    <div class="tbl fit"><table class="pgrid"><tbody class="tb"></tbody></table></div>
+    <p class="wnote res" aria-live="polite"></p><div class="actions"><button class="btn" type="button">Ponastavi</button></div></div>`;
+  const tb = $(".tb",host), msg = $(".res",host);
+  function draw(focus){
+    const R=cu.length, C=cu[0].length;
+    const rowBad = cu.map(r=>sum(r)%2===1), colBad = cu[0].map((_,j)=>sum(cu.map(r=>r[j]))%2===1);
+    tb.innerHTML = cu.map((r,i)=>`<tr>${r.map((v,j)=>`<td class="${i===R-1||j===C-1?"pb":""}${v!==orig[i][j]?" flip":""}"><button type="button" class="pc" data-i="${i}" data-j="${j}" aria-label="vrstica ${i+1}, stolpec ${j+1}, vrednost ${v}">${v}</button></td>`).join("")}<td class="chk ${rowBad[i]?"bad":"good"}">${rowBad[i]?"✗":"✓"}</td></tr>`).join("")
+      + `<tr>${colBad.map(b=>`<td class="chk ${b?"bad":"good"}">${b?"✗":"✓"}</td>`).join("")}<td></td></tr>`;
+    const rs = rowBad.map((b,i)=>b?i+1:0).filter(Boolean), cs = colBad.map((b,j)=>b?j+1:0).filter(Boolean);
+    const same = cu.every((r,i)=>r.every((v,j)=>v===orig[i][j]));
+    if(!rs.length && !cs.length) msg.textContent = same ? "Vse vrstice in vsi stolpci imajo sodo število enic: napake ni." : "Vse vrstice in vsi stolpci so videti v redu, a podatek ni enak poslanemu. Napake so se izravnale, pariteta jih ne zazna.";
+    else if(rs.length===1 && cs.length===1) msg.textContent = `Liha je ${rs[0]}. vrstica in ${cs[0]}. stolpec. Napaka je na njunem presečišču: obrni ta bit in podatek je popravljen.`;
+    else msg.textContent = `Pariteta javi napako (lihe vrstice: ${rs.join(", ")||"nobena"}; lihi stolpci: ${cs.join(", ")||"nobeden"}), a bita ni mogoče natančno določiti, ker je napak več.`;
+    tb.querySelectorAll(".pc").forEach(b=>b.addEventListener("click",()=>{ const i=+b.dataset.i, j=+b.dataset.j; cu[i][j]^=1; draw([i,j]); }));
+    if(focus){ const nb = tb.querySelector(`.pc[data-i="${focus[0]}"][data-j="${focus[1]}"]`); if(nb) nb.focus(); }
+  }
+  $(".actions .btn",host).addEventListener("click",()=>{ cu = orig.map(r=>[...r]); draw(); });
+  draw();
+};
+
+/* ====================== novi interaktivni pripomočki ====================== */
+let _seed = 20261104;
+const rnd = ()=>{ _seed = (_seed*1103515245+12345) & 0x7fffffff; return _seed/0x7fffffff; };
+const rint = n => Math.floor(rnd()*n);
+const segHTML = (items, cur, attr) => `<div class="seg" role="group">${items.map(([v,t])=>`<button type="button" ${attr}="${v}" aria-pressed="${String(v)===String(cur)}">${t}</button>`).join("")}</div>`;
+const staticBits = (str, cls) => `<span class="bitrow sb">${[...str].map(c=>`<span class="bit static${cls?" "+cls:""}">${c}</span>`).join("")}</span>`;
+const bitsw = n => n===1?"bit":n===2?"bita":n<5?"biti":"bitov";
+const signed8 = s => { const v = parseInt(s,2); return v>=128 ? v-256 : v; };
+
+/* --- stolpični računalnik v osnovi 2, 8 ali 16 --- */
+WIDGETS.calc = host=>{
+  const [b0,o0] = (host.dataset.n||"16:+").split(":");
+  let base = +b0, op = o0;
+  const def = {2:["10110","1101"],8:["237","175"],16:["3C","2F"]};
+  host.innerHTML = `<div class="wbox"><p class="wnote">Izberi osnovo in račun, vpiši števili. Pod njima se izpiše postopek po stolpcih s preizkusom.</p>
+    <div class="row"><span class="eyebrow">Osnova</span>${segHTML([[2,"dvojiška"],[8,"osmiška"],[16,"šestnajstiška"]],base,"data-b")}<span class="eyebrow">Račun</span>${segHTML([["+","Seštevanje"],["-","Odštevanje"]],op,"data-o")}</div>
+    <div class="row"><label class="fld">A <input class="in a" type="text" inputmode="text" autocomplete="off" spellcheck="false" maxlength="8" aria-label="Število A"></label><span class="opsym" aria-hidden="true"></span><label class="fld">B <input class="in b" type="text" autocomplete="off" spellcheck="false" maxlength="8" aria-label="Število B"></label></div>
+    <div class="out" aria-live="polite"></div></div>`;
+  const ia = $(".a",host), ib = $(".b",host), out = $(".out",host);
+  const setDef = ()=>{ ia.value = def[base][0]; ib.value = def[base][1]; };
+  const draw = ()=>{
+    $(".opsym",host).textContent = op==="+" ? "+" : "−";
+    host.querySelectorAll("[data-b]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.b===base)));
+    host.querySelectorAll("[data-o]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.o===op)));
+    const A = ia.value.trim().toUpperCase(), Bv = ib.value.trim().toUpperCase();
+    const okd = s => s.length>0 && [...s].every(c=>/[0-9A-F]/.test(c) && dg(c)<base);
+    if(!okd(A) || !okd(Bv)){ out.innerHTML = `<p class="wnote bad">Vpiši veljavni števili za izbrano osnovo (${base===2?"samo 0 in 1":base===8?"števke 0 do 7":"števke 0 do 9 in črke A do F"}).</p>`; return; }
+    out.innerHTML = calcBlock(stripZ(A), stripZ(Bv), base, op);
+  };
+  host.querySelectorAll("[data-b]").forEach(b=>b.addEventListener("click",()=>{ base=+b.dataset.b; setDef(); draw(); }));
+  host.querySelectorAll("[data-o]").forEach(b=>b.addEventListener("click",()=>{ op=b.dataset.o; draw(); }));
+  ia.addEventListener("input",draw); ib.addEventListener("input",draw);
+  setDef(); draw();
+};
+
+/* --- A · B proti B · A --- */
+WIDGETS.mul = host=>{
+  let a = 13, b = 5;
+  host.innerHTML = `<div class="wbox"><p class="wnote">Vpiši dve števili (od 1 do 255) ali izberi primer. Prikazana sta oba vrstna reda množenja. Stolpci kažejo, koliko dela ima množenje v vsakem primeru.</p>
+    <div class="row"><label class="fld">A <input class="in a" type="number" min="1" max="255" value="13" aria-label="Število A"></label><span aria-hidden="true">·</span><label class="fld">B <input class="in b" type="number" min="1" max="255" value="5" aria-label="Število B"></label>
+      <span class="eyebrow">Primeri</span><button class="chip" type="button" data-p="13,5">13 · 5</button><button class="chip" type="button" data-p="15,8">15 · 8</button><button class="chip" type="button" data-p="7,7">7 · 7</button><button class="chip" type="button" data-p="64,1">64 · 1</button></div>
+    <div class="out" aria-live="polite"></div></div>`;
+  const ia = $(".a",host), ib = $(".b",host), out = $(".out",host);
+  const panel = (x,y)=>{
+    const bx = B(x), by = B(y), st = by.length, ad = ones(by), cost = st+ad;
+    return {cost, html:`<div class="ex"><strong>${x} · ${y} (množitelj ${y})</strong>${al(mulRows(bx,by,true))}
+      <div class="mbars"><div class="mbar"><span>Koraki (biti množitelja)</span><i style="width:${st*100/8}%"></i><b>${st}</b></div>
+      <div class="mbar"><span>Delni produkti (enice množitelja)</span><i class="b2" style="width:${ad*100/8}%"></i><b>${ad}</b></div></div>
+      <p class="prv">Okvirna količina dela: ${st} + ${ad} = <b>${cost}</b></p></div>`};
+  };
+  const draw = ()=>{
+    a = Math.max(1,Math.min(255,parseInt(ia.value)||1)); b = Math.max(1,Math.min(255,parseInt(ib.value)||1));
+    const p1 = panel(a,b), p2 = panel(b,a);
+    let verdict;
+    if(p1.cost===p2.cost) verdict = `Rezultat je enak (<b>${a*b}</b>), količina dela je pri obeh vrstnih redih enaka (${p1.cost}).`;
+    else { const better = p1.cost<p2.cost ? `${a} · ${b}` : `${b} · ${a}`; verdict = `Rezultat je enak (<b>${a*b}</b> = ${(a*b).toString(2)}₂), vendar je račun <b>${better}</b> hitrejši, ker ima množitelj manj bitov in enic (${Math.min(p1.cost,p2.cost)} proti ${Math.max(p1.cost,p2.cost)}).`; }
+    out.innerHTML = `<div class="exs">${p1.html}${p2.html}</div><p class="note">${verdict}</p>`;
+  };
+  ia.addEventListener("input",draw); ib.addEventListener("input",draw);
+  host.querySelectorAll("[data-p]").forEach(c=>c.addEventListener("click",()=>{ const [x,y]=c.dataset.p.split(","); ia.value=x; ib.value=y; draw(); }));
+  draw();
+};
+
+/* --- komplement --- */
+WIDGETS.kompl = host=>{
+  const Wt = [-128,64,32,16,8,4,2,1]; const bits = [0,0,0,0,0,1,0,1];
+  host.innerHTML = `<div class="wbox"><p class="wnote">Klikni na bite in opazuj število ter njegov eniški in dvojiški komplement. Najvišji bit ima težo −128. Ali izberi primer:
+    <button class="chip" type="button" data-n="5">5</button><button class="chip" type="button" data-n="-5">−5</button><button class="chip" type="button" data-n="127">127</button><button class="chip" type="button" data-n="-128">−128</button><button class="chip" type="button" data-n="0">0</button></p>
+    <div class="krow"><span class="lbl">Število x (klikni bite)</span><div class="bitrow">${Wt.map((w,i)=>`<div class="bitcol"><span class="bw">${w}</span><button type="button" class="bit" data-i="${i}" aria-pressed="false" aria-label="bit s težo ${w}">0</button></div>`).join("")}</div><span class="val vx"></span></div>
+    <div class="krow"><span class="lbl">1. Eniški komplement (zamenjani biti)</span><div class="r1"></div><span class="val v1"></span></div>
+    <div class="krow"><span class="lbl">2. Dvojiški komplement = eniški + 1, to je −x</span><div class="r2"></div><span class="val v2"></span></div>
+    <p class="wnote res" aria-live="polite"></p></div>`;
+  const draw = ()=>{
+    const s = bits.join(""), v = signed8(s);
+    const inv = bits.map(b=>1-b).join(""), tcN = (256-parseInt(s,2))%256, tc = B(tcN,8);
+    host.querySelectorAll(".bit[data-i]").forEach(b=>{ const x=bits[+b.dataset.i]; b.textContent=x; b.setAttribute("aria-pressed",String(!!x)); });
+    $(".vx",host).textContent = `x = ${v}`;
+    $(".r1",host).innerHTML = staticBits(inv); $(".v1",host).textContent = `= ${signed8(inv)} (−x − 1)`;
+    $(".r2",host).innerHTML = staticBits(tc); $(".v2",host).textContent = `= ${signed8(tc)}`;
+    $(".res",host).innerHTML = v===-128 ? `Za −128 v 8 bitih ni pozitivnega para. Dvojiški komplement je spet −128 (prekoračitev).` : `Preizkus: ${v} + (${-v}) = 0. Dvojiški komplement števila ${v} je ${-v}.`;
+  };
+  host.querySelectorAll(".bit[data-i]").forEach(b=>b.addEventListener("click",()=>{ bits[+b.dataset.i]^=1; draw(); }));
+  host.querySelectorAll("[data-n]").forEach(c=>c.addEventListener("click",()=>{ const n=+c.dataset.n; B((n+256)%256,8).split("").forEach((x,i)=>bits[i]=+x); draw(); }));
+  draw();
+};
+
+/* --- odštevanje s komplementom --- */
+WIDGETS.odst = host=>{
+  host.innerHTML = `<div class="wbox"><p class="wnote">Vpiši števili od 0 do 127. Izpiše se celoten postopek v 8 bitih. Primeri:
+    <button class="chip" type="button" data-p="45,18">45 − 18</button><button class="chip" type="button" data-p="18,45">18 − 45</button><button class="chip" type="button" data-p="77,77">77 − 77</button><button class="chip" type="button" data-p="5,120">5 − 120</button></p>
+    <div class="row"><label class="fld">A <input class="in a" type="number" min="0" max="127" value="73" aria-label="Število A"></label><span aria-hidden="true">−</span><label class="fld">B <input class="in b" type="number" min="0" max="127" value="29" aria-label="Število B"></label></div>
+    <div class="out" aria-live="polite"></div></div>`;
+  const ia = $(".a",host), ib = $(".b",host), out = $(".out",host);
+  const draw = ()=>{
+    const a = Math.max(0,Math.min(127,parseInt(ia.value)||0)), b = Math.max(0,Math.min(127,parseInt(ib.value)||0));
+    out.innerHTML = subComp(a,b,8);
+  };
+  ia.addEventListener("input",draw); ib.addEventListener("input",draw);
+  host.querySelectorAll("[data-p]").forEach(c=>c.addEventListener("click",()=>{ const [x,y]=c.dataset.p.split(","); ia.value=x; ib.value=y; draw(); }));
+  draw();
+};
+
+/* --- BCD in sedemsegmentni prikaz --- */
+WIDGETS.bcd = host=>{
+  host.innerHTML = `<div class="wbox"><p class="wnote">Vpiši število z do štirimi števkami. Vsaka števka dobi svojo skupino štirih bitov, ki jo dekodirnik pretvori v prikaz na zaslonu.</p>
+    <div class="row"><label class="fld">Število <input class="in n" type="text" inputmode="numeric" maxlength="4" value="2026" autocomplete="off" aria-label="Število"></label>
+      <button class="chip" type="button" data-v="59">59</button><button class="chip" type="button" data-v="1234">1234</button><button class="chip" type="button" data-v="0907">0907</button></div>
+    <div class="sevrow"></div><p class="wnote res" aria-live="polite"></p></div>`;
+  const inp = $(".n",host);
+  const draw = ()=>{
+    const v = inp.value.replace(/\D/g,"").slice(0,4);
+    if(inp.value!==v) inp.value = v;
+    if(!v){ $(".sevrow",host).innerHTML = ""; $(".res",host).textContent = "Vpiši vsaj eno števko."; return; }
+    $(".sevrow",host).innerHTML = [...v].map(d=>`<div class="sevcol">${seg7(+d)}<div class="bw">8 4 2 1</div>${staticBits(B(+d,4))}<span class="sdig">${d}</span></div>`).join("");
+    const n = parseInt(v,10);
+    $(".res",host).innerHTML = `BCD: <b>${bcdOf(v)}</b> (${v.length*4} bitov). Isto število v navadnem dvojiškem zapisu: <b>${B(n)}</b> (${B(n).length} bitov).`;
+  };
+  inp.addEventListener("input",draw);
+  host.querySelectorAll("[data-v]").forEach(c=>c.addEventListener("click",()=>{ inp.value=c.dataset.v; draw(); }));
+  draw();
+};
+
+/* --- Excess-3 --- */
+WIDGETS.ex3 = host=>{
+  let d = 4;
+  host.innerHTML = `<div class="wbox"><p class="wnote">Izberi desetiško števko. Opazuj, kaj se zgodi, ko vse bite zamenjaš.</p>
+    <div class="row"><span class="eyebrow">Števka</span>${segHTML([...Array(10)].map((_,i)=>[i,i]),d,"data-d")}</div>
+    <div class="out" aria-live="polite"></div></div>`;
+  const draw = ()=>{
+    host.querySelectorAll("[data-d]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.d===d)));
+    const c = B(d+3,4), inv = [...c].map(x=>x==="1"?"0":"1").join(""), n = 9-d;
+    $(".out",host).innerHTML = `<div class="krow"><span class="lbl">Števka ${d} + 3 = ${d+3}, v dvojiškem zapisu:</span>${staticBits(c)}</div>
+      <div class="krow"><span class="lbl">Zamenjani biti (eniški komplement):</span>${staticBits(inv,"cmp")}</div>
+      <p class="note">Zamenjani biti <b>${inv}</b> so koda Excess-3 števke <b>${n}</b>, torej 9 − ${d} = ${n} ✓ (${n} + 3 = ${n+3} = ${B(n+3,4)}₂).</p>`;
+  };
+  host.querySelectorAll("[data-d]").forEach(b=>b.addEventListener("click",()=>{ d=+b.dataset.d; draw(); }));
+  draw();
+};
+
+/* --- Gray --- */
+WIDGETS.gray = host=>{
+  let n = 5;
+  host.innerHTML = `<div class="wbox"><p class="wnote">Klikni na gumba za naslednje in prejšnje število ali na bite spodaj. Moder okvir kaže bite, ki so se spremenili od prejšnjega števila.</p>
+    <div class="row"><button class="btn" type="button" data-s="-1">◀ prejšnje</button><span class="bigv">število <b class="nn"></b></span><button class="btn" type="button" data-s="1">naslednje ▶</button></div>
+    <div class="out" aria-live="polite"></div></div>`;
+  const draw = ()=>{
+    const p = (n+15)%16, b = B(n,4), pb_ = B(p,4), sh = B(n>>1,4), g = B(gray(n),4), pg = B(gray(p),4);
+    const cells = (s, ref) => `<span class="bitrow sb">${[...s].map((c,i)=>`<span class="bit static${ref&&ref[i]!==c?" chg":""}">${c}</span>`).join("")}</span>`;
+    const chB = ones(xorS(b,pb_)), chG = ones(xorS(g,pg));
+    $(".nn",host).textContent = n;
+    $(".out",host).innerHTML = `<div class="krow"><span class="lbl">Dvojiško (v primerjavi s prejšnjim številom ${p})</span>${cells(b,pb_)}<span class="val">${chB} ${bitsw(chB)} se spremeni</span></div>
+      <div class="krow"><span class="lbl">Dvojiško, pomaknjeno za 1 mesto desno</span>${cells(sh)}</div>
+      <div class="krow"><span class="lbl">XOR obeh vrstic = Gray</span>${cells(g,pg)}<span class="val">${chG} bit se spremeni</span></div>
+      <p class="note">${b} XOR ${sh} = <b>${g}</b>. Pri prehodu s ${p} na ${n} se v dvojiški kodi spremeni ${chB} ${bitsw(chB)}, v Grayevi pa vedno natanko <b>1</b>.</p>`;
+  };
+  host.querySelectorAll("[data-s]").forEach(b=>b.addEventListener("click",()=>{ n=(n+ +b.dataset.s+16)%16; draw(); }));
+  draw();
+};
+
+/* --- pariteta besedila --- */
+WIDGETS.parA = host=>{
+  let mode = "even";
+  host.innerHTML = `<div class="wbox"><p class="wnote">Vpiši do osem znakov (samo črke brez šumnikov, števke in ločila). Za vsak znak se izpiše 7-bitna koda ASCII in paritetni bit.</p>
+    <div class="row"><label class="fld">Besedilo <input class="in t" type="text" maxlength="8" value="NOVO" autocomplete="off" spellcheck="false" aria-label="Besedilo"></label><span class="eyebrow">Vrsta</span>${segHTML([["even","Soda"],["odd","Liha"]],mode,"data-m")}</div>
+    <div class="out" aria-live="polite"></div></div>`;
+  const inp = $(".t",host);
+  const draw = ()=>{
+    host.querySelectorAll("[data-m]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.m===mode)));
+    const t = [...inp.value].filter(c=>c.charCodeAt(0)>=32&&c.charCodeAt(0)<127).slice(0,8);
+    if(!t.length){ $(".out",host).innerHTML = `<p class="wnote">Vpiši vsaj en znak.</p>`; return; }
+    const rows = t.map(c=>{ const s=a7(c), o=ones(s), p=pb(o,mode); return [c===" "?"␣":esc(c), s, o, p, s+p]; });
+    $(".out",host).innerHTML = tbl(["Znak","7-bitna koda","Enic","Paritetni bit","Poslano"],rows,"fit") + (inp.value.length!==t.length?`<p class="wnote">Znake zunaj osnovne tabele ASCII (npr. Š, č, ž) sem izpustil.</p>`:"");
+  };
+  inp.addEventListener("input",draw);
+  host.querySelectorAll("[data-m]").forEach(b=>b.addEventListener("click",()=>{ mode=b.dataset.m; draw(); }));
+  draw();
+};
+
+/* --- napake: ustvari napako v prejeti besedi --- */
+WIDGETS.nap = host=>{
+  let mode = "even", data = "1010010";
+  const mk = ()=>{ const o = ones(data); return data + pb(o,mode); };
+  let sent = mk(), recv = [...sent].map(Number);
+  host.innerHTML = `<div class="wbox"><p class="wnote">Zgoraj je poslana beseda. Spodaj jo prejmemo. Klikni na bite prejete besede in tako ponazori napake pri prenosu. Preveri, kdaj prejemnik napako opazi in kdaj ne.</p>
+    <div class="row"><span class="eyebrow">Vrsta</span>${segHTML([["even","Soda"],["odd","Liha"]],mode,"data-m")}<button class="chip" type="button" data-a="new">Nov podatek</button><button class="chip" type="button" data-a="one">Ena naključna napaka</button><button class="chip" type="button" data-a="two">Dve naključni napaki</button><button class="chip" type="button" data-a="reset">Ponastavi</button></div>
+    <div class="krow"><span class="lbl">Poslano (podatek + paritetni bit)</span><span class="sentrow"></span></div>
+    <div class="krow"><span class="lbl">Prejeto (klikni bit, da ga obrneš)</span><div class="bitrow recv"></div></div>
+    <p class="wnote res" aria-live="polite"></p></div>`;
+  const draw = ()=>{
+    host.querySelectorAll("[data-m]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.m===mode)));
+    $(".sentrow",host).innerHTML = bitStr(sent);
+    $(".recv",host).innerHTML = recv.map((v,i)=>`<div class="bitcol"><span class="bw">${i<7?"b"+(6-i):"P"}</span><button type="button" class="bit${String(v)!==sent[i]?" flipped":""}" data-i="${i}" aria-pressed="${!!v}" aria-label="${i<7?"bit "+(6-i):"paritetni bit"}, vrednost ${v}">${v}</button></div>`).join("");
+    host.querySelectorAll(".recv .bit").forEach(b=>b.addEventListener("click",()=>{ recv[+b.dataset.i]^=1; draw(); }));
+    const o = sum(recv), okp = o%2===(mode==="even"?0:1), errs = recv.filter((v,i)=>String(v)!==sent[i]).length;
+    let cls, msg;
+    if(errs===0) { cls="ok"; msg = `Napak ni. Enic je ${o} (${o%2?"liho":"sodo"}), kar ustreza ${mode==="even"?"sodi":"lihi"} pariteti. Prejemnik sprejme besedo, in to je prav.`; }
+    else if(okp) { cls="bad"; msg = `Napak je ${errs}, a enic je ${o} (${o%2?"liho":"sodo"}) in to <b>ustreza</b> ${mode==="even"?"sodi":"lihi"} pariteti. Prejemnik napake <b>ne opazi</b> in sprejme napačen podatek. Pariteta ne zazna sodega števila napak.`; }
+    else { cls="ok"; msg = `Napak je ${errs}. Enic je ${o} (${o%2?"liho":"sodo"}), pričakujemo pa ${mode==="even"?"sodo":"liho"}. Prejemnik <b>zazna napako</b> in zahteva ponovno pošiljanje. Ne ve pa, kateri bit je napačen.`; }
+    const el = $(".res",host); el.className = "wnote res " + cls; el.innerHTML = msg;
+  };
+  const reset = ()=>{ sent = mk(); recv = [...sent].map(Number); };
+  host.querySelectorAll("[data-m]").forEach(b=>b.addEventListener("click",()=>{ mode=b.dataset.m; reset(); draw(); }));
+  host.querySelectorAll("[data-a]").forEach(b=>b.addEventListener("click",()=>{
+    const a = b.dataset.a;
+    if(a==="new"){ data = [...Array(7)].map(()=>rint(2)).join(""); reset(); }
+    else if(a==="reset"){ reset(); }
+    else { reset(); const k = a==="one"?1:2; const idx = []; while(idx.length<k){ const i = rint(8); if(!idx.includes(i)) idx.push(i); } idx.forEach(i=>recv[i]^=1); }
+    draw();
+  }));
+  draw();
+};
+
+/* --- kviz: sprejmi ali zavrni --- */
+WIDGETS.nkviz = host=>{
+  const items = [["01101101","even"],["11001100","odd"],["10011001","even"],["11111110","odd"],["00010001","even"],["10101010","odd"]];
+  let ans = {};
+  const draw = ()=>{
+    const done = Object.keys(ans).length, good = items.filter((it,i)=>ans[i]!==undefined && ans[i]===(ones(it[0])%2===(it[1]==="even"?0:1))).length;
+    host.innerHTML = `<div class="wbox">${items.map((it,i)=>{
+      const [w,m] = it, o = ones(w), okp = o%2===(m==="even"?0:1), a = ans[i];
+      const fb = a===undefined ? "" : `<span class="qfb ${a===okp?"ok":"bad"}">${a===okp?"Prav.":"Narobe."} Enic je ${o} (${o%2?"liho":"sodo"}), pričakujemo ${m==="even"?"sodo":"liho"}, zato je beseda ${okp?"pravilna":"napačna"}.</span>`;
+      return `<div class="qrow"><span class="qn">${i+1}.</span>${bitStr(w)}<span class="qm">${m==="even"?"soda":"liha"}</span><button class="chip" type="button" data-q="${i}" data-a="1" aria-pressed="${a===true}">Pravilno</button><button class="chip" type="button" data-q="${i}" data-a="0" aria-pressed="${a===false}">Napaka</button>${fb}</div>`;
+    }).join("")}
+    <p class="wnote res" aria-live="polite">${done<items.length?`Odgovorjeno: ${done} od ${items.length}.`:`Rezultat: ${good} od ${items.length} pravilnih.`} <button class="chip" type="button" data-r="1">Znova</button></p></div>`;
+    host.querySelectorAll("[data-q]").forEach(b=>b.addEventListener("click",()=>{ ans[+b.dataset.q] = b.dataset.a==="1"; draw(); }));
+    $("[data-r]",host).addEventListener("click",()=>{ ans = {}; draw(); });
+  };
+  draw();
+};
+
+/* --- izpolni paritetne bite --- */
+WIDGETS.pgfill = host=>{
+  let data = NOVO.map(r=>[...r]), lab = [..."NOVO"], user = null, checked = false;
+  const dims = ()=>({R:data.length, C:data[0].length});
+  const exp = ()=>{ const rb = data.map(r=>sum(r)%2), cb = data[0].map((_,j)=>sum(data.map(r=>r[j]))%2); return {rb, cb, co:sum(cb)%2}; };
+  const reset = ()=>{ const {R,C} = dims(); user = {r:Array(R).fill(null), c:Array(C).fill(null), x:null}; checked = false; };
+  reset();
+  host.innerHTML = `<div class="wbox"><p class="wnote">Dopolni paritetne bite (soda pariteta). Klik na polje ga nastavi na 1, nato na 0 in nazadnje spet izprazni.</p>
+    <div class="row"><button class="chip" type="button" data-a="novo">Primer: NOVO</button><button class="chip" type="button" data-a="new">Nov naključen primer</button></div>
+    <div class="tbl fit"><table class="pgrid"><tbody class="tb"></tbody></table></div>
+    <div class="actions"><button class="btn" type="button" data-a="check">Preveri</button><button class="btn ghost" type="button" data-a="sol">Pokaži rešitev</button><button class="btn ghost" type="button" data-a="clr">Počisti</button></div>
+    <p class="wnote res" aria-live="polite"></p></div>`;
+  const tb = $(".tb",host), res = $(".res",host);
+  const pcell = (kind,i,val,want)=>{ const cls = checked ? (val===want?" ok":" no") : ""; return `<td class="pb"><button type="button" class="pf${cls}" data-k="${kind}" data-i="${i}" aria-label="paritetni bit ${kind==="r"?"vrstice "+(i+1):kind==="c"?"stolpca "+(i+1):"v kotu"}">${val===null?"":val}</button></td>`; };
+  const draw = ()=>{
+    const e = exp(), {R,C} = dims();
+    tb.innerHTML = data.map((r,i)=>`<tr>${lab?`<td class="lb">${lab[i]||""}</td>`:""}${r.map(v=>`<td>${v}</td>`).join("")}${pcell("r",i,user.r[i],e.rb[i])}</tr>`).join("")
+      + `<tr><td class="lb">paritetni bit</td>${[...Array(C)].map((_,j)=>pcell("c",j,user.c[j],e.cb[j])).join("")}${pcell("x",0,user.x,e.co)}</tr>`;
+    tb.querySelectorAll(".pf").forEach(b=>b.addEventListener("click",()=>{
+      const k=b.dataset.k, i=+b.dataset.i; const cur = k==="r"?user.r[i]:k==="c"?user.c[i]:user.x;
+      const nx = cur===null?1:cur===1?0:null;
+      if(k==="r") user.r[i]=nx; else if(k==="c") user.c[i]=nx; else user.x=nx;
+      checked = false; res.textContent = ""; res.className = "wnote res"; draw();
+      const nb = tb.querySelector(`.pf[data-k="${k}"][data-i="${i}"]`); if(nb) nb.focus();
+    }));
+  };
+  const check = ()=>{
+    const e = exp(); checked = true;
+    const all = [...user.r.map((v,i)=>[v,e.rb[i]]), ...user.c.map((v,j)=>[v,e.cb[j]]), [user.x,e.co]];
+    const good = all.filter(([v,w])=>v===w).length, empty = all.filter(([v])=>v===null).length;
+    draw();
+    res.className = "wnote res " + (good===all.length?"ok":"bad");
+    res.innerHTML = good===all.length ? `Vse pravilno: ${all.length} od ${all.length}. Kot ugotovimo, je vogalni bit pariteta paritetnih bitov.` : `Pravilnih je ${good} od ${all.length}${empty?` (${empty} polj je praznih)`:""}. Rdeča polja popravi: za vrstico štej enice v vrstici, za stolpec enice v stolpcu, nato izberi bit tako, da je skupaj sodo.`;
+  };
+  host.querySelectorAll("[data-a]").forEach(b=>b.addEventListener("click",()=>{
+    const a=b.dataset.a;
+    if(a==="check") check();
+    else if(a==="sol"){ const e=exp(); user = {r:e.rb.slice(), c:e.cb.slice(), x:e.co}; checked=true; draw(); res.className="wnote res"; res.textContent="Rešitev je izpolnjena."; }
+    else if(a==="clr"){ reset(); res.textContent=""; res.className="wnote res"; draw(); }
+    else if(a==="novo"){ data = NOVO.map(r=>[...r]); lab=[..."NOVO"]; reset(); res.textContent=""; res.className="wnote res"; draw(); }
+    else if(a==="new"){ data = [...Array(4)].map(()=>[...Array(6)].map(()=>rint(2))); lab=null; reset(); res.textContent=""; res.className="wnote res"; draw(); }
+  }));
+  draw();
+};
+
+/* --- poišči skrito napako --- */
+WIDGETS.najdi = host=>{
+  let full, cu, bad, found = false, tries = 0, help = false, solved = 0;
+  const gen = ()=>{ const d = [...Array(4)].map(()=>[...Array(5)].map(()=>rint(2))); full = fullM(d,"even"); const R = full.length, C = full[0].length; bad = [rint(R), rint(C)]; cu = flipAt(full,bad[0],bad[1]); found = false; tries = 0; };
+  gen();
+  host.innerHTML = `<div class="wbox"><p class="wnote">Tabela je bila poslana s prečno in vzdolžno sodo pariteto. Med prenosom se je obrnil en bit. Preštej enice po vrsticah in stolpcih ter klikni na napačen bit.</p>
+    <div class="tbl fit"><table class="pgrid"><tbody class="tb"></tbody></table></div>
+    <div class="actions"><button class="btn ghost" type="button" data-a="help" aria-pressed="false">Pokaži oznake ✓ in ✗</button><button class="btn" type="button" data-a="new">Nov primer</button></div>
+    <p class="wnote res" aria-live="polite"></p></div>`;
+  const tb = $(".tb",host), res = $(".res",host);
+  const draw = ()=>{
+    const R = cu.length, C = cu[0].length;
+    const rowBad = cu.map(r=>sum(r)%2===1), colBad = cu[0].map((_,j)=>sum(cu.map(r=>r[j]))%2===1);
+    tb.innerHTML = cu.map((r,i)=>`<tr>${r.map((v,j)=>`<td class="${i===R-1||j===C-1?"pb":""}${found&&i===bad[0]&&j===bad[1]?" flip":""}"><button type="button" class="pc" data-i="${i}" data-j="${j}" aria-label="vrstica ${i+1}, stolpec ${j+1}, vrednost ${v}">${v}</button></td>`).join("")}${help?`<td class="chk ${rowBad[i]?"bad":"good"}">${rowBad[i]?"✗":"✓"}</td>`:""}</tr>`).join("")
+      + (help?`<tr>${colBad.map(b=>`<td class="chk ${b?"bad":"good"}">${b?"✗":"✓"}</td>`).join("")}<td></td></tr>`:"");
+    tb.querySelectorAll(".pc").forEach(b=>b.addEventListener("click",()=>{
+      if(found) return;
+      const i=+b.dataset.i, j=+b.dataset.j; tries++;
+      if(i===bad[0]&&j===bad[1]){ cu = full.map(r=>[...r]); found = true; solved++; res.className="wnote res ok"; res.innerHTML = `Pravilno! Napaka je bila v ${i+1}. vrstici in ${j+1}. stolpcu. Po obratu (${full[i][j]===1?"0 → 1":"1 → 0"}) so vse paritete spet v redu. Rešenih primerov: ${solved}.`; }
+      else { res.className="wnote res bad"; res.textContent = `To ni napačen bit (poskus ${tries}). Poišči vrstico in stolpec, kjer je število enic liho. Napačen bit je na njunem presečišču.`; }
+      draw();
+    }));
+  };
+  host.querySelectorAll("[data-a]").forEach(b=>b.addEventListener("click",()=>{
+    if(b.dataset.a==="help"){ help = !help; b.setAttribute("aria-pressed",String(help)); b.textContent = help?"Skrij oznake":"Pokaži oznake ✓ in ✗"; }
+    else { gen(); res.className="wnote res"; res.textContent=""; }
+    draw();
+  }));
+  draw();
+};
+
+/* --- RAID 5 --- */
+WIDGETS.raid = host=>{
+  const names = ["Disk 1","Disk 2","Disk 3","Paritetni disk P"];
+  const d = ["10110010","01101100","11100101"]; const P = xorS(xorS(d[0],d[1]),d[2]);
+  const all = [...d, P]; let failed = null;
+  host.innerHTML = `<div class="wbox"><p class="wnote">Paritetni disk vsebuje XOR podatkov (sodo pariteto po stolpcih). Izberi disk, ki odpove.</p>
+    <div class="row"><span class="eyebrow">Odpove</span>${segHTML([["none","nobeden"],[0,"Disk 1"],[1,"Disk 2"],[2,"Disk 3"],[3,"Disk P"]],"none","data-f")}</div>
+    <div class="out" aria-live="polite"></div></div>`;
+  const draw = ()=>{
+    host.querySelectorAll("[data-f]").forEach(b=>b.setAttribute("aria-pressed",String((b.dataset.f==="none"&&failed===null)||String(failed)===b.dataset.f)));
+    const rows = all.map((x,i)=>({l:names[i], s: i===failed ? "????????" : x, k: i===failed?"num skip":(i===3?"num":"num")}));
+    rows[2].ln = true;
+    let html = al(rows);
+    if(failed!==null){
+      const others = all.filter((_,i)=>i!==failed).reduce((a,b)=>xorS(a,b));
+      html += `<p class="prose">Obnova = XOR preostalih treh diskov:</p>` + al([{l:"XOR ostalih", s:others, k:"res"},{l:`pravi ${names[failed]}`, s:all[failed]}]) + `<p class="note">${others===all[failed]?"Ujema se: izgubljeni disk je v celoti obnovljen ✓":"Ne ujema se."} Zaradi tega lahko RAID 5 preživi odpoved enega diska. Pri dveh odpovedanih diskih podatkov ni več mogoče obnoviti.</p>`;
+    } else html += `<p class="wnote">P = ${d[0]} XOR ${d[1]} XOR ${d[2]} = <b>${P}</b>. Vsi diski delujejo.</p>`;
+    $(".out",host).innerHTML = html;
+  };
+  host.querySelectorAll("[data-f]").forEach(b=>b.addEventListener("click",()=>{ failed = b.dataset.f==="none"?null:+b.dataset.f; draw(); }));
+  draw();
+};
+
+
+document.querySelectorAll("[data-w]").forEach(h=>{ const f = WIDGETS[h.dataset.w]; if(f) f(h); });
+
+/* ---------- zagon ---------- */
+cur = location.hash.slice(1) || PAGES[0][0];
+renderAll();
+progress();
+showPage(cur, true);
+if(location.hash){ setTimeout(()=>window.scrollTo(0,0), 0); window.addEventListener("load",()=>window.scrollTo(0,0)); }
+})();
+
+</script>
+
+</body></html>

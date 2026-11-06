@@ -1,4 +1,850 @@
 {
- "modules": [],
- "exercises": []
+ "modules": [
+  {
+   "id": "LAV-RAČ3",
+   "title": "3. letnik"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "3.1",
+   "module": "LAV-RAČ3",
+   "title": "Številski sistemi, kodiranje in pariteta",
+   "fullTitle": "Številski sistemi, kodiranje in pariteta",
+   "key": "scnm_lavrac_3_1_v1",
+   "version": 1,
+   "format": "short",
+   "maxPoints": 216,
+   "tasks": [
+    {
+     "i": 0,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pretvorbe",
+     "q": "Vklopi bite tako, da prikazujejo desetiško število 13."
+    },
+    {
+     "i": 1,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pretvorbe",
+     "q": "Vklopi bite tako, da prikazujejo desetiško število 37."
+    },
+    {
+     "i": 2,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pretvorbe",
+     "q": "Pretvori 10111₂ v desetiški sistem."
+    },
+    {
+     "i": 3,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pretvorbe",
+     "q": "Pretvori 110100₂ v desetiški sistem."
+    },
+    {
+     "i": 4,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pretvorbe",
+     "q": "Pretvori 17₁₆ v desetiški sistem."
+    },
+    {
+     "i": 5,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pretvorbe",
+     "q": "Pretvori 23₁₀ v dvojiški sistem."
+    },
+    {
+     "i": 6,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pretvorbe",
+     "q": "Pretvori 1011₂ v desetiški sistem."
+    },
+    {
+     "i": 7,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pretvorbe",
+     "q": "Pretvori 17₈ v desetiški sistem."
+    },
+    {
+     "i": 8,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pretvorbe",
+     "q": "Pretvori 52₁₀ v dvojiški sistem."
+    },
+    {
+     "i": 9,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pretvorbe",
+     "q": "Pretvori 1110011₂ v desetiški sistem."
+    },
+    {
+     "i": 10,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pretvorbe",
+     "q": "Pretvori 115₁₀ v dvojiški sistem."
+    },
+    {
+     "i": 11,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pretvorbe",
+     "q": "Pretvori 23₁₀ v šestnajstiški sistem."
+    },
+    {
+     "i": 12,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pretvorbe",
+     "q": "Pretvori 52₁₀ v šestnajstiški sistem."
+    },
+    {
+     "i": 13,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pretvorbe",
+     "q": "Pretvori 115₁₀ v šestnajstiški sistem."
+    },
+    {
+     "i": 14,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pretvorbe",
+     "q": "Pretvori 2F₁₆ v desetiški sistem."
+    },
+    {
+     "i": 15,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pretvorbe",
+     "q": "Pretvori 100₁₀ v dvojiški sistem."
+    },
+    {
+     "i": 16,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pretvorbe",
+     "q": "Pretvori 75₁₀ v osmiški sistem."
+    },
+    {
+     "i": 17,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pretvorbe",
+     "q": "Pretvori 237₈ v desetiški sistem."
+    },
+    {
+     "i": 18,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pretvorbe",
+     "q": "Pretvori A5₁₆ v desetiški sistem."
+    },
+    {
+     "i": 19,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pretvorbe",
+     "q": "Pretvori 29₁₀ v šestnajstiški sistem."
+    },
+    {
+     "i": 20,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pretvorbe",
+     "q": "Vklopi bite tako, da prikazujejo šestnajstiško število B7."
+    },
+    {
+     "i": 21,
+     "level": "težja",
+     "max": 3,
+     "section": "Pretvorbe",
+     "q": "Pretvori 47856₁₀ v šestnajstiški sistem."
+    },
+    {
+     "i": 22,
+     "level": "težja",
+     "max": 3,
+     "section": "Pretvorbe",
+     "q": "Pretvori BAF0₁₆ v desetiški sistem."
+    },
+    {
+     "i": 23,
+     "level": "težja",
+     "max": 3,
+     "section": "Pretvorbe",
+     "q": "Pretvori 11010110₂ v šestnajstiški sistem."
+    },
+    {
+     "i": 24,
+     "level": "težja",
+     "max": 3,
+     "section": "Pretvorbe",
+     "q": "Pretvori 3C₁₆ v dvojiški sistem."
+    },
+    {
+     "i": 25,
+     "level": "težja",
+     "max": 3,
+     "section": "Pretvorbe",
+     "q": "Pretvori 1000₁₀ v šestnajstiški sistem."
+    },
+    {
+     "i": 26,
+     "level": "težja",
+     "max": 3,
+     "section": "Pretvorbe",
+     "q": "Pretvori 101101110₂ v osmiški sistem."
+    },
+    {
+     "i": 27,
+     "level": "težja",
+     "max": 3,
+     "section": "Pretvorbe",
+     "q": "Pretvori 7A₁₆ v osmiški sistem."
+    },
+    {
+     "i": 28,
+     "level": "težja",
+     "max": 3,
+     "section": "Pretvorbe",
+     "q": "Pretvori 654₈ v šestnajstiški sistem."
+    },
+    {
+     "i": 29,
+     "level": "težja",
+     "max": 3,
+     "section": "Pretvorbe",
+     "q": "Število 100₁₀ zapiši še v preostalih treh sistemih."
+    },
+    {
+     "i": 30,
+     "level": "težja",
+     "max": 3,
+     "section": "Pretvorbe",
+     "q": "Število B7₁₆ zapiši še v preostalih treh sistemih."
+    },
+    {
+     "i": 31,
+     "level": "težja",
+     "max": 3,
+     "section": "Pretvorbe",
+     "q": "Število 11010011₂ zapiši še v preostalih treh sistemih."
+    },
+    {
+     "i": 32,
+     "level": "težja",
+     "max": 3,
+     "section": "Pretvorbe",
+     "q": "Število 777₈ zapiši še v preostalih treh sistemih."
+    },
+    {
+     "i": 33,
+     "level": "težja",
+     "max": 3,
+     "section": "Pretvorbe",
+     "q": "Število 2024₁₀ zapiši še v preostalih treh sistemih."
+    },
+    {
+     "i": 34,
+     "level": "lažja",
+     "max": 1,
+     "section": "Računanje",
+     "q": "Izračunaj v dvojiškem sistemu: 1011 + 0110"
+    },
+    {
+     "i": 35,
+     "level": "lažja",
+     "max": 1,
+     "section": "Računanje",
+     "q": "Izračunaj v dvojiškem sistemu: 1101 + 1011"
+    },
+    {
+     "i": 36,
+     "level": "lažja",
+     "max": 1,
+     "section": "Računanje",
+     "q": "Izračunaj v dvojiškem sistemu: 1011 + 110 + 11. Vpiši števke vsote."
+    },
+    {
+     "i": 37,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje",
+     "q": "Izračunaj v dvojiškem sistemu: 10110 − 1101"
+    },
+    {
+     "i": 38,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje",
+     "q": "Izračunaj v dvojiškem sistemu: 11001 − 1011"
+    },
+    {
+     "i": 39,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje",
+     "q": "Izračunaj v dvojiškem sistemu: 101 · 11"
+    },
+    {
+     "i": 40,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje",
+     "q": "Izračunaj v šestnajstiškem sistemu: 2A + 1F"
+    },
+    {
+     "i": 41,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje",
+     "q": "Izračunaj v šestnajstiškem sistemu: B7 − 5C"
+    },
+    {
+     "i": 42,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje",
+     "q": "Izračunaj v dvojiškem sistemu: 101 + 11 + 110"
+    },
+    {
+     "i": 43,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje",
+     "q": "Izračunaj v osmiškem sistemu: 345 + 127"
+    },
+    {
+     "i": 44,
+     "level": "težja",
+     "max": 3,
+     "section": "Računanje",
+     "q": "Izračunaj v dvojiškem sistemu: 1101 · 101"
+    },
+    {
+     "i": 45,
+     "level": "težja",
+     "max": 3,
+     "section": "Računanje",
+     "q": "Izračunaj v šestnajstiškem sistemu: A3 + 4F"
+    },
+    {
+     "i": 46,
+     "level": "težja",
+     "max": 3,
+     "section": "Računanje",
+     "q": "Izračunaj v šestnajstiškem sistemu: 1C · 3"
+    },
+    {
+     "i": 47,
+     "level": "težja",
+     "max": 3,
+     "section": "Računanje",
+     "q": "Izračunaj v šestnajstiškem sistemu: FF − 7A"
+    },
+    {
+     "i": 48,
+     "level": "težja",
+     "max": 3,
+     "section": "Računanje",
+     "q": "Izračunaj v šestnajstiškem sistemu: F · F"
+    },
+    {
+     "i": 49,
+     "level": "težja",
+     "max": 3,
+     "section": "Računanje",
+     "q": "Izračunaj v šestnajstiškem sistemu: 3C + 2F + 1B. Vpiši števke vsote."
+    },
+    {
+     "i": 50,
+     "level": "težja",
+     "max": 3,
+     "section": "Računanje",
+     "q": "Izračunaj v dvojiškem sistemu: 1011 + 101 + 11 + 1111"
+    },
+    {
+     "i": 51,
+     "level": "težja",
+     "max": 3,
+     "section": "Računanje",
+     "q": "Izračunaj v dvojiškem sistemu: 1100 + 1010 − 101 + 11"
+    },
+    {
+     "i": 52,
+     "level": "težja",
+     "max": 3,
+     "section": "Računanje",
+     "q": "Izračunaj v šestnajstiškem sistemu: 1A + 2B + 3C + 4D"
+    },
+    {
+     "i": 53,
+     "level": "težja",
+     "max": 3,
+     "section": "Računanje",
+     "q": "Izračunaj v šestnajstiškem sistemu: FF − A0 + 1B − 3"
+    },
+    {
+     "i": 54,
+     "level": "težja",
+     "max": 3,
+     "section": "Računanje",
+     "q": "Izračunaj v dvojiškem sistemu: 11 · 101 · 11"
+    },
+    {
+     "i": 55,
+     "level": "težja",
+     "max": 3,
+     "section": "Računanje",
+     "q": "Izračunaj v dvojiškem sistemu: 1111 · 1111"
+    },
+    {
+     "i": 56,
+     "level": "težja",
+     "max": 3,
+     "section": "Računanje",
+     "q": "Izračunaj v osmiškem sistemu: 745 − 363"
+    },
+    {
+     "i": 57,
+     "level": "lažja",
+     "max": 1,
+     "section": "Kodiranje",
+     "q": "Števko 9 zapiši v kodi BCD. Klikaj bite."
+    },
+    {
+     "i": 58,
+     "level": "lažja",
+     "max": 1,
+     "section": "Kodiranje",
+     "q": "Števko 4 zapiši v kodi Excess-3. Klikaj bite."
+    },
+    {
+     "i": 59,
+     "level": "lažja",
+     "max": 1,
+     "section": "Kodiranje",
+     "q": "Število 3 zapiši v 4-bitni Grayevi kodi. Klikaj bite."
+    },
+    {
+     "i": 60,
+     "level": "srednja",
+     "max": 2,
+     "section": "Kodiranje",
+     "q": "Zapiši 59 v kodi BCD."
+    },
+    {
+     "i": 61,
+     "level": "srednja",
+     "max": 2,
+     "section": "Kodiranje",
+     "q": "Koliko je desetiško število, zapisano v BCD: 1000 0111?"
+    },
+    {
+     "i": 62,
+     "level": "srednja",
+     "max": 2,
+     "section": "Kodiranje",
+     "q": "Zapiši 46 v kodi Excess-3."
+    },
+    {
+     "i": 63,
+     "level": "srednja",
+     "max": 2,
+     "section": "Kodiranje",
+     "q": "Koliko je desetiško število, zapisano v Excess-3: 0101 1000?"
+    },
+    {
+     "i": 64,
+     "level": "srednja",
+     "max": 2,
+     "section": "Kodiranje",
+     "q": "Zapiši 6 v 4-bitni Grayevi kodi."
+    },
+    {
+     "i": 65,
+     "level": "srednja",
+     "max": 2,
+     "section": "Kodiranje",
+     "q": "Število 11 zapiši v 4-bitni Grayevi kodi. Klikaj bite."
+    },
+    {
+     "i": 66,
+     "level": "srednja",
+     "max": 2,
+     "section": "Kodiranje",
+     "q": "Grayevo kodo 1110 pretvori v dvojiško število. Klikaj bite."
+    },
+    {
+     "i": 67,
+     "level": "srednja",
+     "max": 2,
+     "section": "Kodiranje",
+     "q": "Katera 4-bitna kombinacija ni veljavna števka v kodi BCD?"
+    },
+    {
+     "i": 68,
+     "level": "težja",
+     "max": 3,
+     "section": "Kodiranje",
+     "q": "Grayevo kodo 1101 pretvori v dvojiško število (4 biti)."
+    },
+    {
+     "i": 69,
+     "level": "težja",
+     "max": 3,
+     "section": "Kodiranje",
+     "q": "Dvojiško število 10110 zapiši v Grayevi kodi."
+    },
+    {
+     "i": 70,
+     "level": "težja",
+     "max": 3,
+     "section": "Kodiranje",
+     "q": "Število 2026 zapiši v kodi BCD."
+    },
+    {
+     "i": 71,
+     "level": "težja",
+     "max": 3,
+     "section": "Kodiranje",
+     "q": "Število 905 zapiši v kodi Excess-3."
+    },
+    {
+     "i": 72,
+     "level": "težja",
+     "max": 3,
+     "section": "Kodiranje",
+     "q": "Koliko bitov je potrebnih za zapis števila 4096 v kodi BCD?"
+    },
+    {
+     "i": 73,
+     "level": "težja",
+     "max": 3,
+     "section": "Kodiranje",
+     "q": "Kaj je glavna lastnost Grayeve kode?"
+    },
+    {
+     "i": 74,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pariteta",
+     "q": "Klikni paritetni bit (desno) tako, da bo pariteta soda."
+    },
+    {
+     "i": 75,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pariteta",
+     "q": "Dodaj paritetni bit na konec, da bo pariteta liha."
+    },
+    {
+     "i": 76,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pariteta",
+     "q": "Dodaj paritetni bit na konec, da bo pariteta soda."
+    },
+    {
+     "i": 77,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pariteta",
+     "q": "Klikni paritetni bit (desno) tako, da bo pariteta liha."
+    },
+    {
+     "i": 78,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pariteta",
+     "q": "Dodaj paritetni bit na konec, da bo pariteta liha."
+    },
+    {
+     "i": 79,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pariteta",
+     "q": "Dodaj paritetni bit na konec, da bo pariteta soda."
+    },
+    {
+     "i": 80,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pariteta",
+     "q": "Dodaj paritetni bit na konec, da bo pariteta liha."
+    },
+    {
+     "i": 81,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pariteta",
+     "q": "Dodaj paritetni bit na konec, da bo pariteta soda."
+    },
+    {
+     "i": 82,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pariteta",
+     "q": "Klikni paritetni bit (desno) tako, da bo pariteta liha."
+    },
+    {
+     "i": 83,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pariteta",
+     "q": "Naloga 1 (liha, prvi del): vsakemu podatku dodaj paritetni bit (liha pariteta) in zapiši celotno besedo."
+    },
+    {
+     "i": 84,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pariteta",
+     "q": "Naloga 1 (soda, prvi del): vsakemu podatku dodaj paritetni bit (soda pariteta) in zapiši celotno besedo."
+    },
+    {
+     "i": 85,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pariteta",
+     "q": "Naloga 1 (liha, drugi del): vsakemu podatku dodaj paritetni bit (liha pariteta) in zapiši celotno besedo."
+    },
+    {
+     "i": 86,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pariteta",
+     "q": "Naloga 1 (soda, drugi del): vsakemu podatku dodaj paritetni bit (soda pariteta) in zapiši celotno besedo."
+    },
+    {
+     "i": 87,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pariteta",
+     "q": "Prejeli smo 10110101 (zadnji bit je paritetni, dogovorjena je soda pariteta). Kaj sklepamo?"
+    },
+    {
+     "i": 88,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pariteta",
+     "q": "Ali pariteta pove, na katerem bitu je napaka?"
+    },
+    {
+     "i": 89,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pariteta",
+     "q": "Vpiši paritetne bite (desni stolpec in spodnjo vrstico) pri lihi prečni in vzdolžni pariteti."
+    },
+    {
+     "i": 90,
+     "level": "težja",
+     "max": 3,
+     "section": "Pariteta",
+     "q": "Naloga 2: Vpiši paritetne bite (desni stolpec in spodnjo vrstico, tudi vogalni bit) pri sodi prečni in vzdolžni pariteti."
+    },
+    {
+     "i": 91,
+     "level": "težja",
+     "max": 3,
+     "section": "Pariteta",
+     "q": "Naloga 3: Vpiši paritetne bite (desni stolpec in spodnjo vrstico, tudi vogalni bit) pri sodi prečni in vzdolžni pariteti."
+    },
+    {
+     "i": 92,
+     "level": "težja",
+     "max": 3,
+     "section": "Pariteta",
+     "q": "Vpiši paritetne bite (desni stolpec in spodnjo vrstico, tudi vogalni bit) pri sodi prečni in vzdolžni pariteti."
+    },
+    {
+     "i": 93,
+     "level": "težja",
+     "max": 3,
+     "section": "Pariteta",
+     "q": "Pri prečni in vzdolžni pariteti nastane ena napaka. Koliko napačnih bitov lahko tak sistem zanesljivo popravi?"
+    },
+    {
+     "i": 94,
+     "level": "težja",
+     "max": 3,
+     "section": "Pariteta",
+     "q": "Pri sodi pariteti se spremenita dva različna bita. Kaj naredi pariteta?"
+    },
+    {
+     "i": 95,
+     "level": "težja",
+     "max": 3,
+     "section": "Pariteta",
+     "q": "V tabeli je en napačen bit (pariteta je soda; zadnji stolpec in zadnja vrstica sta paritetna). Klikni ga."
+    },
+    {
+     "i": 96,
+     "level": "težja",
+     "max": 3,
+     "section": "Pariteta",
+     "q": "Naloga 4: V tabeli je en napačen bit (pariteta je soda; zadnji stolpec in zadnja vrstica sta paritetna). Klikni ga."
+    },
+    {
+     "i": 97,
+     "level": "težja",
+     "max": 3,
+     "section": "Pariteta",
+     "q": "V tabeli je en napačen bit (pariteta je soda; zadnji stolpec in zadnja vrstica sta paritetna). Klikni ga."
+    }
+   ],
+   "pages": [
+    {
+     "id": "pregled",
+     "chapter": "Teorija",
+     "label": "Pregled"
+    },
+    {
+     "id": "sistemi",
+     "chapter": "Teorija",
+     "label": "Pozicijski številski sistemi"
+    },
+    {
+     "id": "dec-v-drugi",
+     "chapter": "Teorija",
+     "label": "Desetiško v drugi sistem"
+    },
+    {
+     "id": "drugi-v-dec",
+     "chapter": "Teorija",
+     "label": "Drugi sistem v desetiško"
+    },
+    {
+     "id": "med-sistemi",
+     "chapter": "Teorija",
+     "label": "Dvojiško, osmiško in šestnajstiško med seboj"
+    },
+    {
+     "id": "sestevanje",
+     "chapter": "Teorija",
+     "label": "Seštevanje"
+    },
+    {
+     "id": "odstevanje",
+     "chapter": "Teorija",
+     "label": "Odštevanje z izposojo"
+    },
+    {
+     "id": "komplement",
+     "chapter": "Teorija",
+     "label": "Negativna števila: eniški in dvojiški komplement"
+    },
+    {
+     "id": "odst-komplement",
+     "chapter": "Teorija",
+     "label": "Odštevanje s komplementom: A − B = A + (−B)"
+    },
+    {
+     "id": "mnozenje",
+     "chapter": "Teorija",
+     "label": "Množenje"
+    },
+    {
+     "id": "hex",
+     "chapter": "Teorija",
+     "label": "Šestnajstiško računanje"
+    },
+    {
+     "id": "okt",
+     "chapter": "Teorija",
+     "label": "Osmiško računanje"
+    },
+    {
+     "id": "bcd",
+     "chapter": "Teorija",
+     "label": "Koda BCD"
+    },
+    {
+     "id": "excess3",
+     "chapter": "Teorija",
+     "label": "Koda Excess-3"
+    },
+    {
+     "id": "gray",
+     "chapter": "Teorija",
+     "label": "Grayeva koda"
+    },
+    {
+     "id": "sodo-liho",
+     "chapter": "Teorija",
+     "label": "Sodo in liha pariteta"
+    },
+    {
+     "id": "napake",
+     "chapter": "Teorija",
+     "label": "Odkrivanje napak"
+    },
+    {
+     "id": "precna-vzdolzna",
+     "chapter": "Teorija",
+     "label": "Prečna in vzdolžna pariteta"
+    },
+    {
+     "id": "popravljanje",
+     "chapter": "Teorija",
+     "label": "Iskanje in popravljanje napake"
+    },
+    {
+     "id": "naloge-a",
+     "chapter": "Naloge",
+     "label": "Vaje A · Pretvorbe"
+    },
+    {
+     "id": "naloge-b",
+     "chapter": "Naloge",
+     "label": "Vaje B · Računanje"
+    },
+    {
+     "id": "naloge-c",
+     "chapter": "Naloge",
+     "label": "Vaje C · Kodiranje"
+    },
+    {
+     "id": "naloge-d",
+     "chapter": "Naloge",
+     "label": "Vaje D · Pariteta"
+    },
+    {
+     "id": "doma",
+     "chapter": "Naloge",
+     "label": "Za doma"
+    }
+   ],
+   "gate": [
+    "sistemi",
+    "dec-v-drugi",
+    "drugi-v-dec",
+    "med-sistemi",
+    "sestevanje",
+    "odstevanje",
+    "komplement",
+    "odst-komplement",
+    "mnozenje",
+    "hex",
+    "okt",
+    "bcd",
+    "excess3",
+    "gray",
+    "sodo-liho",
+    "napake",
+    "precna-vzdolzna",
+    "popravljanje"
+   ]
+  }
+ ]
 }

@@ -40,6 +40,7 @@ Pravila:
 - Napredek je vezan na zaporedno številko naloge. Če se vrstni red ali število nalog spremeni, se poveča različica v ključu vaje (`_v1` v `_v2`) in dijaki začnejo nov poskus. Popravek besedila različice ne potrebuje.
 - **Čas** šteje brskalnik samo, ko je zavihek viden in je bila v zadnji minuti aktivnost (utrip na 15 s, mirovanje po 60 s). Strežnik omeji posamezen prispevek na 60 s. Čas se beleži po straneh in poglavjih; to je ocena.
 - **Opombe**: pri nalogi, pri vaji in splošna, do 5000 znakov, kot navadno besedilo. Vidi jih samo dijak; učitelji in skrbniki jih v portalu ne vidijo. Ponastavitev jih ne izbriše.
+- **Pogoj pred nalogami** (`gate` v katalogu, neobvezno): seznam strani, ki jih mora dijak odpreti, preden naloge štejejo. Odprte strani so v stanju (`seen`), se samo dodajajo in jih ponastavitev ne izbriše; strežnik naloge, oddane pred tem, zavrže (`src/progress.js`). Učitelji in skrbniki pogoj preskočijo.
 - **Spremenljiva števila**: del nalog ima za vsakega dijaka svoja števila. Naključno seme poskusa je v bazi (`progress.variant_seed`), zato so števila enaka po osvežitvi in na drugem računalniku, ponastavitev da nova. Naloge, začete pred dodelitvijo semena, obdržijo izvirna števila (`variant_keep`). Naloge s tega seznama so v `content/variants.json`, razponi v `src/public/js/variants/`, vsaka je preverjena z neodvisnim izračunom v `test/variants.test.js`.
 
 ## 5. Pogodba med vajo in portalom
@@ -47,7 +48,7 @@ Pravila:
 Vaja je ena HTML datoteka (`content/exercises/<id>.html`), seznam nalog in strani pa je v `content/catalog.json`.
 
 - **Katalog**: `modules` (`id`, `title`) in `exercises`. Vsaka vaja: `id`, `module`, `title`, `fullTitle`, `key`, `version`, `format` (`short` ali `long`, določa imena polj v stanju), `maxPoints`, `tasks` (`i`, `level`, `max`, `section`, `q`), `pages` (`id`, `chapter`, `label`).
-- **Zagon**: datoteka mora vsebovati oznako `<!--LAVELS:BOOT-->` v `<head>`. Strežnik jo nadomesti s `window.__LAVELS` (`id`, `title`, `key`, `attempt`, `uid`, `name`, `state`, `csrf`, `variant`, `notes`) in skripti `notes.js` in `tracker.js`. Oznaka `<!--LAVELS:VARIANTS-->` je za spremenljiva števila.
+- **Zagon**: datoteka mora vsebovati oznako `<!--LAVELS:BOOT-->` v `<head>`. Strežnik jo nadomesti s `window.__LAVELS` (`id`, `title`, `key`, `attempt`, `uid`, `name`, `state`, `csrf`, `staff`, `variant`, `notes`) in skripti `notes.js` in `tracker.js`. Oznaka `<!--LAVELS:VARIANTS-->` je za spremenljiva števila.
 - **Shranjevanje**: vaja stanje shranjuje v `localStorage` pod `key` kot JSON `{ t: { <indeks naloge>: {...} } }`. Sledilnik ob zagonu postavi stanje s strežnika, vsako spremembo pošlje na `/api/progress/<id>` in šteje čas na `/api/time/<id>`. Pri poskusu, ki ga je spremenil drug zavihek ali ponastavitev, strežnik odgovori 409.
 - **Obvezni elementi vaje**: gumb `#resetBtn` s potrditvijo `#resetYes`, naloge `.task`, strani `.page`. Poglavja (`Teorija`, `Simulacija`, `Naloge`) so zapisana v kodi (`CHAPTERS` v `src/catalog.js`).
 - **Ključi**: `scnm_lavele_*` in `window.__LAVELS` so tehnična imena in ostanejo tudi v novem portalu, razen če se spremeni tudi sledilnik.
@@ -101,7 +102,7 @@ Strani: Uporabniki (iskanje, vloge, izbris), Vaje (pregled), Razredi, Kopije, Dn
 ## 11. Preizkusi in CI
 
 - `npm test`: e2e preizkusi z resničnim strežnikom, PostgreSQL in brskalnikom (Playwright), prijavo nadomesti `test/mock-oidc.js`; preizkus migracij; preizkusi spremenljivih števil; preizkus imen in `portal.json`.
-- Vsebina se pri portalih menja, zato glavni preizkusi tečejo na svojih vajah v `test/fixtures/content` (`CONTENT_DIR`), `test/empty-portal.test.js` pa preveri portal s pravo vsebino.
+- Vsebina se pri portalih menja, zato glavni preizkusi tečejo na svojih vajah v `test/fixtures/content` (`CONTENT_DIR`), `test/content.test.js` pa preveri portal s pravo vsebino.
 - Baza `TEST_DATABASE_URL` se ob vsakem zagonu izbriše. Preizkus kopij potrebuje `pg_dump`, `pg_restore` in `psql` iste različice kot baza (`PG_BIN`).
 - GitHub Actions: `test` (postgres:17, odjemalec 17) in `docker` (gradnja demo slike, preverjanje orodij v sliki in produkcijske datoteke Compose).
 - Vsaka sprememba, ki jo vidi uporabnik, dobi preizkus. Spremembe gredo v `main`, portal na strežniku pa se posodobi šele, ko je CI zelen.

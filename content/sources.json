@@ -1,0 +1,15 @@
+{
+  "modules": [
+    { "id": "LAV-RAČ2", "title": "2. letnik" },
+    { "id": "LAV-RAČ3", "title": "3. letnik" },
+    { "id": "LAV-RAČ4", "title": "4. letnik" }
+  ],
+  "exercises": [
+    {
+      "id": "3.1",
+      "artifact": "https://claude.ai/artifact/1DpaFu13FvJP1y14YhPHX8",
+      "artifactTitle": "Številski sistemi, kodiranje in pariteta – ŠCNM",
+      "version": 1
+    }
+  ]
+}

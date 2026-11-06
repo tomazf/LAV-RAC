@@ -4,12 +4,17 @@ Splošni dogovor je v `NACRT_PORTALA.md`. Tukaj je samo, kar velja za ta portal.
 
 ## Stanje
 
-Postavljena je osnova: prijava, vloge, oblika, vstopna stran in struktura z deli LAV-RAČ2, LAV-RAČ3 in LAV-RAČ4. Vsebine še ni.
+Postavljena je osnova: prijava, vloge, oblika, vstopna stran in struktura z deli LAV-RAČ2, LAV-RAČ3 in LAV-RAČ4. Uvožena je prva vaja, 3.1 Številski sistemi, kodiranje in pariteta.
+
+Razpored (od učitelja, 6. 11. 2026), številka vaje je letnik.poglavje:
+- LAV-RAČ2: 2.1 Java in delovanje JVM, 2.2 Algoritmi in diagram poteka, 2.3 Temeljni gradniki programa, 2.4 Podatkovni tipi v Javi, 2.5 Pogojni stavki v Javi, 2.6 Zanke v Javi
+- LAV-RAČ3: 3.1 Številski sistemi, kodiranje in pariteta, 3.2 Logične funkcije – utrjevanje, 3.3 Arhitektura računalniških sistemov, 3.4 (prosto, dodamo kasneje), 3.5 Operacijski sistemi in Linux lupina
+- LAV-RAČ4: še ni določeno
 
 Še ni dogovorjeno:
-- vsebina posameznega letnika in seznam artifactov,
 - letnik razreda: dijak naj vidi samo svoj letnik in v njem samo vsebine, ki mu jih odpre učitelj. Zdaj vidi vaje, odprte njegovemu razredu; razred še nima letnika, učitelj pa vidi vse vaje,
-- kako štejejo naloge »Za doma« in maturitetne naloge.
+- kako štejejo naloge »Za doma« in maturitetne naloge,
+- prikaz praznega mesta 3.4 kot »V pripravi« (ogrodje zdaj pozna samo prazne dele, ne praznih vaj).
 
 ## Odločitve
 
@@ -17,6 +22,27 @@ Postavljena je osnova: prijava, vloge, oblika, vstopna stran in struktura z deli
 - Prave uporabnike, bazo in registracijo v Entra ima portal svoje, z LAV-ELS si deli samo ogrodje.
 - Artifacti se pri uvozu pretvorijo v pogodbo iz razdelka 5 načrta, jedro (`tracker.js`, `progress.js`) ostane nespremenjeno, da združitve iz `upstream` ostanejo čiste.
 - Vaje LAV-ELS so v `test/fixtures/content`, ker na njih tečejo preizkusi ogrodja. `src/public/js/variants/` ostane iz istega razloga, dijakom se ne naloži, dokler vaja nima spremenljivih števil.
+
+## Vaje iz artifactov
+
+Artifact je vir vsebine, portal doda obliko in delovanje. Za vsako vajo:
+- `content/sources/<id>.html`: artifact, kot je objavljen (prenesen z orodjem Artifact, nespremenjen),
+- `content/adapters/<id>.js`: kako se artifact poveže z ogrodjem vaje (nekaj natančnih zamenjav v njegovi kodi, ikone skupin, barve); vsaka zamenjava mora najti svoje mesto, sicer uvoz javi napako,
+- `content/sources.json`: seznam vaj, povezava na artifact in različica (`version`).
+
+Skupna oblika vseh vaj je v `content/shell/` (`vaja.js`, `vaja.css`). `npm run import` iz tega zgradi `content/exercises/<id>.html` in `content/catalog.json`. Stran se med uvozom odpre v brskalniku z enako CSP kot v portalu.
+
+Oblika vaje (dogovor 6. 11. 2026):
+- vstopna stran Pregled s karticami skupin (ikona, razlage) in kartico Vaje,
+- levo navigacija s poudarjenimi naslovi skupin in kljukico pri pregledanih razlagah, na telefonu izbirni seznam,
+- zgoraj vedno viden skupni napredek (naloge in točke, barvni trak),
+- Vaje so zadnje poglavje in se odklenejo, ko dijak odpre vsako stran razlage (preveri tudi strežnik),
+- v sklopu vaj ena naloga naenkrat, oštevilčeni gumbi v barvi stanja, »rešenih x / n«, legenda, Prejšnja/Naslednja naloga,
+- pod nalogo levo Preveri, desno obrobljena Namig (−50 %) in Prikaži rešitev (0 točk, z vprašanjem pred ogledom),
+- besedilo razlag in nalog obojestransko poravnano z deljenjem besed,
+- barve stanj so enake kot v učiteljevem pregledu: pravilno zeleno, pravilno z namigom jantarno, napačno rdeče, ogledana rešitev sivo.
+
+Pri spremembi artifacta: prenesi novo različico v `content/sources/<id>.html`, popravi adapter, če kaka zamenjava ne najde več mesta, poženi `npm run import` in `npm test`. Če se spremeni vrstni red ali število nalog, povečaj `version` v `content/sources.json` (dijaki začnejo nov poskus).
 
 ## Vstopna stran
 

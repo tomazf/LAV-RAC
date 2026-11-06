@@ -40,11 +40,23 @@ function cleanTop(incoming) {
   }
   return out;
 }
+// Pages the student has opened only ever grow, and only real pages of the exercise count.
+function seenPages(ex, stored, incoming) {
+  const ids = new Set((ex.pages || []).map((p) => p.id));
+  const list = (s) => (Array.isArray(s?.seen) ? s.seen : []).map(String);
+  return [...new Set([...list(stored), ...list(incoming)])].filter((id) => ids.has(id));
+}
 export function merge(ex, stored, incoming) {
   const f = fieldsOf(ex);
   const prev = stored?.t && typeof stored.t === 'object' ? stored.t : {};
   const next = incoming?.t && typeof incoming.t === 'object' ? incoming.t : {};
   const state = { ...cleanTop(incoming ?? {}), t: {} };
+  // An exercise with a gate opens its tasks only after every listed page has been opened.
+  if (ex.gate) {
+    state.seen = seenPages(ex, stored, incoming);
+    if (!state.seen.length) delete state.seen;
+  }
+  const gateOpen = !ex.gate || ex.gate.every((id) => state.seen?.includes(id));
   const events = [];
   for (const task of ex.tasks) {
     const key = String(task.i);
@@ -59,6 +71,7 @@ export function merge(ex, stored, incoming) {
     }
     if (!raw) { if (before) state.t[key] = before; continue; }
     const now = readTask(ex, raw);
+    if (now.done && !gateOpen) { if (before) state.t[key] = before; continue; }
     const hinted = was.hinted || now.hinted;
     const merged = { ...raw, [f.hinted]: hinted };
     if (hinted && !was.hinted) events.push({ task: task.i, kind: 'hint', points: 0 });
