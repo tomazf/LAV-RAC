@@ -5,6 +5,8 @@
 - [x] Odpiranje dela poglavja: ne delamo (6. 11. 2026). Poglavje je odprto v celoti; če bo treba, se vsebina razdeli v ločene artifacte, ki postanejo ločene vaje.
 - [x] Prazno mesto poglavja (LAV-RAČ2, 4. poglavje) je »V pripravi« za učitelje in skrbnike (6. 11. 2026). Nova prazna mesta se dodajo v `content/sources.json` (`planned`).
 - [x] Letnik razreda in prehod v naslednji letnik (6. 11. 2026, glej spodaj).
+- [ ] Administracija > Razredi: gumbi Dodaj (učitelj) naj bodo poravnani v stolpcu, ne glede na dolžino imena v izbirnem polju (6. 11. 2026).
+- [ ] Administracija > Razredi: pri najnižjem letniku (2.) ni izbire »vidi prejšnje letnike«, ker nižjega letnika ni. Pri 3. in 4. naj napis pove, kaj se odpre (3.: »vidi 2. letnik«, 4.: »vidi 2. in 3. letnik«) (6. 11. 2026).
 - [x] Ikona strani povsod (6. 11. 2026): `/favicon.ico` (izdelan iz `favicon.svg` z `node scripts/make-favicon.js`) in povezava na vseh straneh, tudi v vajah.
 
 ## Letnik razreda in prehod v naslednji letnik
