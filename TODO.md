@@ -11,12 +11,12 @@
   - v eni vrstici najprej filter »Prikaži: …«, nato iskalno polje, na koncu gumb Išči,
   - strani: navigacija na dnu, izbira 20/50/100 na stran (privzeto 50); iskanje in filter ostaneta pri menjavi strani,
   - pri filtru »brez razreda« ima vsak dijak izbirno polje z razredi (po letniku in imenu) in na dnu en gumb »Shrani«; dodelitev gre v dnevnik,
-  - »Izbriši neaktivne dijake za vedno« se premakne na svoj, 7. zavihek »Neaktivni« (za Dnevnikom), delovanje ostane enako.
+  - »Izbriši neaktivne dijake za vedno« se premakne na svoj, 7. zavihek »Čiščenje« (za Dnevnikom), delovanje ostane enako.
 - [ ] Administracija > Dnevnik (6. 11. 2026):
   - strani kot pri Uporabnikih (20/50/100, privzeto 50) namesto zadnjih 300 zapisov,
   - razvrščanje s klikom na glavo stolpca (čas, oseba, dejanje, podrobnosti), naraščajoče/padajoče, na strežniku; privzeto najnovejši zgoraj,
   - gumb zgoraj: izbriši zapise, starejše od 1/2/3 mesecev, s potrditvijo. Zadnji zapis o prenosu kopije in zadnji zapis o zaključku šolskega leta vedno ostaneta (portal ju bere). Brisanje se zapiše v dnevnik s številom zapisov.
-- [ ] Ponastavitev vaje (6. 11. 2026): zgodovina vseh poskusov ni potrebna. Hrani in učitelju pokaže se samo seštevek točk zadnjega poskusa pred ponastavitvijo (en korak nazaj). Ponastavitev posameznega vprašanja ni potrebna. Odprto: ali ostane število ponastavitev (↺ v pregledu razreda, stolpec v CSV).
+- [ ] Ponastavitev vaje (6. 11. 2026): namen je varovalka, če dijak vajo ponastavi po nesreči. Hrani se samo seštevek točk zadnjega poskusa pred ponastavitvijo (en korak nazaj), da se točke ne izgubijo, če vaje ne reši znova. Število ponastavitev in zgodovina vseh poskusov se ne prikazujeta (↺ v pregledu razreda in stolpec »ponastavitve« v CSV se odstranita). Ponastavitev posameznega vprašanja ni potrebna. Odprto: ali se šteje boljši od obeh rezultatov (prejšnji ali novi) ali učitelj prejšnje točke vrne ročno.
 - [ ] Administracija > Šolsko leto: lepši in bolj praktičen predogled (6. 11. 2026):
   - naslov razreda (»T4A: razred se izbriše, 0 dijakov«) je v robu okvirja, na sredini črte, in izgleda zamaknjeno; naj bo znotraj kartice kot naslov,
   - seznam razredov je preširok; kartice razredov v dveh (ali več) stolpcih,
