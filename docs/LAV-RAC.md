@@ -40,7 +40,8 @@ Oblika vaje (dogovor 6. 11. 2026):
 - v sklopu vaj ena naloga naenkrat, oštevilčeni gumbi v barvi stanja, »rešenih x / n«, legenda, Prejšnja/Naslednja naloga,
 - pod nalogo levo Preveri, desno obrobljena Namig (−50 %) in Prikaži rešitev (0 točk, z vprašanjem pred ogledom),
 - besedilo razlag in nalog obojestransko poravnano z deljenjem besed,
-- ozadje vaje je svetlo oranžno, besedilo in gumbi v vijolični barvi portala,
+- ozadje vaje je svetlo oranžno (#fffaf4), besedilo in gumbi v vijolični barvi portala,
+- besedilo razlag in nalog sega čez vso širino vsebine; gumbi za listanje so majhni,
 - barve stanj so enake kot v učiteljevem pregledu: pravilno zeleno, pravilno z namigom jantarno, napačno rdeče, ogledana rešitev sivo.
 
 Pri spremembi artifacta: prenesi novo različico v `content/sources/<id>.html`, popravi adapter, če kaka zamenjava ne najde več mesta, poženi `npm run import` in `npm test`. Če se spremeni vrstni red ali število nalog, povečaj `version` v `content/sources.json` (dijaki začnejo nov poskus).
