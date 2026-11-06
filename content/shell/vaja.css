@@ -167,9 +167,8 @@ html body .lvs-bar{background:var(--lr-hdr)}
 
 /* pager between pages, bottom right */
 .lr-pager{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--lr-line);padding-top:14px;margin-top:4px;flex-wrap:wrap}
-.lr-pager a{display:flex;flex-direction:column;gap:0;padding:5px 12px;border:1.5px solid var(--lr-line);border-radius:7px;background:var(--lr-card);color:var(--lr-ink);text-decoration:none;min-width:0;max-width:320px;line-height:1.3}
+.lr-pager a{display:flex;flex-direction:column;gap:0;padding:7px 12px;border:1.5px solid var(--lr-line);border-radius:7px;background:var(--lr-card);color:var(--lr-ink);text-decoration:none;min-width:0;max-width:320px;line-height:1.3}
 .lr-pager a:hover{border-color:var(--lr-acc)}
-.lr-pager small{font-size:.72rem;color:var(--lr-mut)}
 .lr-pager span{font-weight:700;font-size:.9rem}
 .lr-pager .lr-prevp span::before{content:"‹ "}
 .lr-pager .lr-nextp{border-color:var(--lr-acc);text-align:right;margin-left:auto}

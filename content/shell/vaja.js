@@ -412,8 +412,9 @@
     const nav = h('nav', { class: 'lr-pager', 'aria-label': 'Listanje po straneh' });
     const prev = pages[k - 1], next = pages[k + 1];
     const label = (x) => x.kind === 'set' ? 'Vaje ' + x.tag + ' · ' + x.title : x.title;
-    if (prev) nav.append(h('a', { class: 'lr-prevp', href: '#' + prev.id }, h('small', { text: 'Nazaj' }), h('span', { text: label(prev) })));
-    if (next) nav.append(h('a', { class: 'lr-nextp', href: '#' + next.id, 'data-to': next.id }, h('small', { text: 'Naprej' }), h('span', { text: label(next) })));
+    // The arrow and the side say the direction; screen readers still hear it.
+    if (prev) nav.append(h('a', { class: 'lr-prevp', href: '#' + prev.id, 'aria-label': 'Nazaj: ' + label(prev) }, h('span', { text: label(prev) })));
+    if (next) nav.append(h('a', { class: 'lr-nextp', href: '#' + next.id, 'data-to': next.id, 'aria-label': 'Naprej: ' + label(next) }, h('span', { text: label(next) })));
     return nav;
   }
 

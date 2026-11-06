@@ -7,14 +7,13 @@ Splošni dogovor je v `NACRT_PORTALA.md`. Tukaj je samo, kar velja za ta portal.
 Postavljena je osnova: prijava, vloge, oblika, vstopna stran in struktura z deli LAV-RAČ2, LAV-RAČ3 in LAV-RAČ4. Uvožene so vaje 2.1 Številski sistemi, kodiranje in pariteta, 2.2 Logične funkcije – utrjevanje in 2.3 Arhitektura računalniških sistemov.
 
 Razpored (od učitelja, popravljen 6. 11. 2026). Poglavja se v vsakem letniku štejejo od 1 in tako jih vidijo dijaki in učitelji (`no`); tehnična oznaka vaje (`id`, v povezavah in bazi) je letnik.poglavje, da je enolična:
-- LAV-RAČ2: 2.1 Številski sistemi, kodiranje in pariteta, 2.2 Logične funkcije – utrjevanje, 2.3 Arhitektura računalniških sistemov, 2.4 (prosto, dodamo kasneje), 2.5 Operacijski sistemi in Linux lupina
+- LAV-RAČ2 (prazno mesto 4 je za učitelje »V pripravi«, `planned` v `content/sources.json`): 2.1 Številski sistemi, kodiranje in pariteta, 2.2 Logične funkcije – utrjevanje, 2.3 Arhitektura računalniških sistemov, 2.4 (prosto, dodamo kasneje), 2.5 Operacijski sistemi in Linux lupina
 - LAV-RAČ3: 3.1 Java in delovanje JVM, 3.2 Algoritmi in diagram poteka, 3.3 Temeljni gradniki programa, 3.4 Podatkovni tipi v Javi, 3.5 Pogojni stavki v Javi, 3.6 Zanke v Javi
 - LAV-RAČ4: še ni določeno
 
 Še ni dogovorjeno:
 - letnik razreda: dijak naj vidi samo svoj letnik in v njem samo vsebine, ki mu jih odpre učitelj. Zdaj vidi vaje, odprte njegovemu razredu; razred še nima letnika, učitelj pa vidi vse vaje,
 - kako štejejo naloge »Za doma« in maturitetne naloge,
-- prikaz praznega mesta 2.4 kot »V pripravi« (dogovorjeno, še ni narejeno; glej `TODO.md`).
 
 ## Odločitve
 

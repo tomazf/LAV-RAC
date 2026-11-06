@@ -152,6 +152,8 @@ test('parts without exercises wait for staff; a closed class shows a clear messa
   const a = await login('Sara Skrbnik');
   await a.goto(`${APP}/admin/vaje`);
   assert.deepEqual(await a.locator('.group.planned h2').allTextContents(), ['LAV-RAČ3 V pripravi', 'LAV-RAČ4 V pripravi']);
+  // the empty 4th chapter of LAV-RAČ2 has its place
+  assert.deepEqual(await a.locator('.planned-ex td:first-child').allTextContents(), ['4 V pripravi']);
   await a.goto(`${APP}/admin/razredi`);
   await a.fill('#novi', 'R2A');
   await a.click('text=Ustvari razred');
@@ -176,6 +178,9 @@ test('parts without exercises wait for staff; a closed class shows a clear messa
   await a.waitForURL(/vaje#vaja-2\.1$/);
   await s.goto(`${APP}/vaje`);
   assert.match(await s.textContent('main'), /Številski sistemi, kodiranje in pariteta/);
+  assert.doesNotMatch(await s.textContent('main'), /V pripravi/);
+  await a.goto(`${classUrl}/vaje`);
+  assert.equal(await a.locator('.planned-ex').count(), 1);
   // chapters count from 1 within each year; the technical id stays in the address
   assert.equal(await s.locator('h3:has-text("Številski sistemi") .ex-no').textContent(), '1');
   assert.match(await s.textContent('main a.btn.big'), /^Začni vajo 1: Številski sistemi/);
@@ -218,6 +223,18 @@ async function progressRow(name) {
 async function settled(p) {
   await p.waitForFunction(() => /Shranjeno/.test(document.querySelector('.lvs-status')?.textContent || ''), null, { timeout: 5000 });
 }
+
+test('the page icon is everywhere: portal pages, exercise pages and /favicon.ico', async () => {
+  const r = await fetch(`${APP}/favicon.ico`);
+  assert.equal(r.status, 200);
+  assert.match(r.headers.get('content-type'), /icon/);
+  const ico = Buffer.from(await r.arrayBuffer());
+  assert.equal(ico.readUInt16LE(2), 1);
+  assert.equal(ico.readUInt16LE(4), 3);
+  for (const id of ['2.1', '2.2', '2.3']) assert.match(readFileSync(path.join(root, `content/exercises/${id}.html`), 'utf8'), /<link rel="icon" href="\/favicon\.ico"/);
+  const login = await (await fetch(APP)).text();
+  assert.match(login, /<link rel="icon" href="\/favicon\.ico"/);
+});
 
 test('the built exercise carries the current shell and nothing from outside', async () => {
   const html = readFileSync(path.join(root, 'content/exercises/2.1.html'), 'utf8');
@@ -346,6 +363,9 @@ test('staff see the tasks without reading the theory first', async () => {
   await a.goto(`${EX}#naloge-b`);
   assert.ok(await a.locator('.page.on .lr-locked').isHidden());
   assert.equal(await a.locator('.page.on .lr-num').count(), 23);
+  // the arrow and the side give the direction, no words; screen readers still get them
+  assert.equal(await a.locator('.page.on .lr-pager small').count(), 0);
+  assert.match(await a.locator('.page.on .lr-nextp').getAttribute('aria-label'), /^Naprej: /);
   // back sits at the left edge, forward at the right edge
   const bar = await a.locator('.page.on .lr-pager').boundingBox();
   const prev = await a.locator('.page.on .lr-prevp').boundingBox();

@@ -65,6 +65,8 @@ input[type=checkbox]{width:20px;height:20px;min-height:0;accent-color:var(--acc)
 .ex-table tbody tr{scroll-margin-top:20px}
 .group{margin-top:40px;scroll-margin-top:20px}
 .group.planned h2{color:var(--mut)}
+.planned-ex td{color:var(--mut);font-style:italic}
+.planned-ex strong{font-style:normal}
 .planned-row{max-width:none;margin:6px 0 0;border:2px dashed var(--line);border-radius:8px;padding:14px 16px;color:var(--mut)}
 .switch{display:inline-flex;gap:8px;align-items:center;cursor:pointer}
 .empty{background:var(--tile);border-radius:8px;padding:14px 16px;margin:10px 0}

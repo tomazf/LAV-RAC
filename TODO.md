@@ -1,11 +1,11 @@
 # TODO
 
 - [x] Gumbi v vajah malo večji (6. 11. 2026).
-- [ ] Gumbi za listanje med stranmi brez napisa Naprej/Nazaj (smer povesta puščica in položaj). `content/shell/vaja.js` (`buildPager`), nato `npm run import`.
+- [x] Gumbi za listanje med stranmi brez napisa Naprej/Nazaj (6. 11. 2026).
 - [x] Odpiranje dela poglavja: ne delamo (6. 11. 2026). Poglavje je odprto v celoti; če bo treba, se vsebina razdeli v ločene artifacte, ki postanejo ločene vaje.
-- [ ] Prazno mesto poglavja (LAV-RAČ2, 4. poglavje) se pokaže kot »V pripravi« v seznamu vaj za učitelje in skrbnike (dijaki ga ne vidijo). Ogrodje zdaj pozna samo prazne dele, ne praznih poglavij.
+- [x] Prazno mesto poglavja (LAV-RAČ2, 4. poglavje) je »V pripravi« za učitelje in skrbnike (6. 11. 2026). Nova prazna mesta se dodajo v `content/sources.json` (`planned`).
 - [ ] Letnik razreda in prehod v naslednji letnik (glej spodaj).
-- [ ] Ikona strani povsod: obstoječi `favicon.svg` tudi na straneh vaj (uvoz doda povezavo), `/favicon.ico` naj vrne isto ikono (brskalniki in zaznamki ga iščejo sami).
+- [x] Ikona strani povsod (6. 11. 2026): `/favicon.ico` (izdelan iz `favicon.svg` z `node scripts/make-favicon.js`) in povezava na vseh straneh, tudi v vajah.
 
 ## Letnik razreda in prehod v naslednji letnik
 

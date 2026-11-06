@@ -27,6 +27,11 @@ app.locals.path = '/';
 app.locals.user = null;
 app.locals.csrf = '';
 
+// Browsers and bookmarks ask for /favicon.ico on their own, also on exercise pages.
+app.get('/favicon.ico', (req, res) => {
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.sendFile(path.join(import.meta.dirname, 'public', 'favicon.ico'));
+});
 app.get('/healthz', async (req, res) => {
   try { await pool.query('SELECT 1'); res.json({ ok: true }); } catch { res.status(503).json({ ok: false }); }
 });

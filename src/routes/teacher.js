@@ -1,6 +1,6 @@
 import express from 'express';
 import { checkCsrf, isAdmin, requireTeacher } from '../auth.js';
-import { byId, classGroups, CHAPTERS, ensureClassRows, exercises, plannedModules } from '../catalog.js';
+import { byId, classGroups, CHAPTERS, ensureClassRows, exercises, plannedIn, plannedModules } from '../catalog.js';
 import { audit, many, one, q, tx } from '../db.js';
 import { portal } from '../portal.js';
 import { byName, bySurname, csvCell, dayKey, date, duration, num, pct } from '../format.js';
@@ -169,7 +169,7 @@ teacherRouter.post('/razredi/:id/rezultati/:eid/ponastavi', loadClass, checkCsrf
 teacherRouter.get('/razredi/:id/vaje', loadClass, async (req, res, next) => {
   try {
     const mods = await classGroups(req.cls.id);
-    res.render('teacher/sections', { cls: req.cls, mods, plannedModules, exerciseCount: exercises.length, openCount: mods.flatMap((m) => m.exercises).filter((e) => e.visible).length });
+    res.render('teacher/sections', { cls: req.cls, mods, plannedModules, plannedIn, exerciseCount: exercises.length, openCount: mods.flatMap((m) => m.exercises).filter((e) => e.visible).length });
   } catch (e) { next(e); }
 });
 teacherRouter.post('/razredi/:id/vaje/:eid/vidnost', loadClass, checkCsrf, async (req, res, next) => {

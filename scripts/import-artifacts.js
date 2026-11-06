@@ -57,6 +57,8 @@ function build(id, src, adapter) {
 ${safe(shellJs)}
 </script>
 <link href="/static/fonts/fonts.css" rel="stylesheet">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
 ${head}
 <style>
 ${shellCss}
@@ -113,5 +115,8 @@ const order = sources.exercises.map((e) => e.id);
 built.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
 // Only parts with exercises are modules; the others stay "V pripravi" (content/portal.json).
 const modules = sources.modules.filter((m) => built.some((e) => e.module === m.id));
-fs.writeFileSync(C('catalog.json'), JSON.stringify({ modules, exercises: built }, null, 1) + '\n');
+// (a part with only planned chapters stays a planned part, content/portal.json)
+// Chapters that have a place but no content yet (sources.json "planned"), shown to staff as "V pripravi".
+const planned = (sources.planned || []).filter((p) => !built.some((e) => e.module === p.module && e.no === p.no));
+fs.writeFileSync(C('catalog.json'), JSON.stringify({ modules, exercises: built, planned }, null, 1) + '\n');
 console.log('Skupaj', built.length, 'vaj');

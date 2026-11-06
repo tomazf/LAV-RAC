@@ -2594,5 +2594,11 @@
     "cevovod"
    ]
   }
+ ],
+ "planned": [
+  {
+   "module": "LAV-RAČ2",
+   "no": "4"
+  }
  ]
 }

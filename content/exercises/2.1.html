@@ -419,8 +419,9 @@
     const nav = h('nav', { class: 'lr-pager', 'aria-label': 'Listanje po straneh' });
     const prev = pages[k - 1], next = pages[k + 1];
     const label = (x) => x.kind === 'set' ? 'Vaje ' + x.tag + ' · ' + x.title : x.title;
-    if (prev) nav.append(h('a', { class: 'lr-prevp', href: '#' + prev.id }, h('small', { text: 'Nazaj' }), h('span', { text: label(prev) })));
-    if (next) nav.append(h('a', { class: 'lr-nextp', href: '#' + next.id, 'data-to': next.id }, h('small', { text: 'Naprej' }), h('span', { text: label(next) })));
+    // The arrow and the side say the direction; screen readers still hear it.
+    if (prev) nav.append(h('a', { class: 'lr-prevp', href: '#' + prev.id, 'aria-label': 'Nazaj: ' + label(prev) }, h('span', { text: label(prev) })));
+    if (next) nav.append(h('a', { class: 'lr-nextp', href: '#' + next.id, 'data-to': next.id, 'aria-label': 'Naprej: ' + label(next) }, h('span', { text: label(next) })));
     return nav;
   }
 
@@ -570,6 +571,8 @@
 
 </script>
 <link href="/static/fonts/fonts.css" rel="stylesheet">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
 <title>Številski sistemi, kodiranje in pariteta – ŠCNM</title>
 <style>
 
@@ -1087,9 +1090,8 @@ html body .lvs-bar{background:var(--lr-hdr)}
 
 /* pager between pages, bottom right */
 .lr-pager{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--lr-line);padding-top:14px;margin-top:4px;flex-wrap:wrap}
-.lr-pager a{display:flex;flex-direction:column;gap:0;padding:5px 12px;border:1.5px solid var(--lr-line);border-radius:7px;background:var(--lr-card);color:var(--lr-ink);text-decoration:none;min-width:0;max-width:320px;line-height:1.3}
+.lr-pager a{display:flex;flex-direction:column;gap:0;padding:7px 12px;border:1.5px solid var(--lr-line);border-radius:7px;background:var(--lr-card);color:var(--lr-ink);text-decoration:none;min-width:0;max-width:320px;line-height:1.3}
 .lr-pager a:hover{border-color:var(--lr-acc)}
-.lr-pager small{font-size:.72rem;color:var(--lr-mut)}
 .lr-pager span{font-weight:700;font-size:.9rem}
 .lr-pager .lr-prevp span::before{content:"‹ "}
 .lr-pager .lr-nextp{border-color:var(--lr-acc);text-align:right;margin-left:auto}

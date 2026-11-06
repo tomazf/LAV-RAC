@@ -1,6 +1,6 @@
 import express from 'express';
 import { checkCsrf, isAdmin, requireAdmin } from '../auth.js';
-import { plannedModules, standardGroups } from '../catalog.js';
+import { plannedIn, plannedModules, standardGroups } from '../catalog.js';
 import { audit, eraseUser, many, one, q, tx } from '../db.js';
 import { backupWarning } from '../backup.js';
 import { byName } from '../format.js';
@@ -71,7 +71,7 @@ adminRouter.post('/ciscenje', checkCsrf, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 adminRouter.get('/vaje', (req, res) => {
-  res.render('admin/exercises', { mods: standardGroups(), plannedModules, tab: 'exercises', message: null });
+  res.render('admin/exercises', { mods: standardGroups(), plannedModules, plannedIn, tab: 'exercises', message: null });
 });
 adminRouter.get('/razredi', async (req, res, next) => {
   try {
