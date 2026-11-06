@@ -8,6 +8,7 @@
  "exercises": [
   {
    "id": "2.1",
+   "no": "1",
    "module": "LAV-RAČ2",
    "title": "Številski sistemi, kodiranje in pariteta",
    "fullTitle": "Številski sistemi, kodiranje in pariteta",
@@ -848,6 +849,7 @@
   },
   {
    "id": "2.2",
+   "no": "2",
    "module": "LAV-RAČ2",
    "title": "Logične funkcije – utrjevanje",
    "fullTitle": "Logične funkcije – utrjevanje",
@@ -1547,6 +1549,7 @@
   },
   {
    "id": "2.3",
+   "no": "3",
    "module": "LAV-RAČ2",
    "title": "Arhitektura računalniških sistemov",
    "fullTitle": "Arhitektura računalniških sistemov",

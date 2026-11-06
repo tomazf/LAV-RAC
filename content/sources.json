@@ -18,19 +18,22 @@
       "id": "2.1",
       "artifact": "https://claude.ai/artifact/1DpaFu13FvJP1y14YhPHX8",
       "artifactTitle": "Številski sistemi, kodiranje in pariteta – ŠCNM",
-      "version": 1
+      "version": 1,
+      "no": "1"
     },
     {
       "id": "2.2",
       "artifact": "https://claude.ai/artifact/D6zjTkn8qaSecaN948ZYdi",
       "artifactTitle": "Logične funkcije – utrjevanje | ŠCNM",
-      "version": 1
+      "version": 1,
+      "no": "2"
     },
     {
       "id": "2.3",
       "artifact": "https://claude.ai/artifact/3F2fwvqNFDK1nBTS3UAEVQ",
       "artifactTitle": "Arhitektura računalniških sistemov",
-      "version": 1
+      "version": 1,
+      "no": "3"
     }
   ]
 }

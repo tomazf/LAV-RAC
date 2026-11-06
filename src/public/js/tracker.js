@@ -180,7 +180,7 @@
     if (B.notes) {
       exNote = document.createElement('div');
       exNote.className = 'lvn-text lvs-exnote';
-      exBtn = noteButton('Opomba k vaji ' + B.id, null, exNote, 'Moja opomba');
+      exBtn = noteButton('Opomba k vaji ' + (B.no || B.id), null, exNote, 'Moja opomba');
       right.appendChild(exBtn);
     }
     right.appendChild(out);

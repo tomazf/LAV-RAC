@@ -20,13 +20,13 @@
 <div class="scroll matrix-wrap" tabindex="0" role="region" aria-label="Rezultati razreda po vajah">
 <table class="matrix">
   <thead><tr><th class="l stick">Dijak</th>
-    <% list.forEach((e) => { %><th class="<%= e.visible ? '' : 'closed' %>" title="<%= e.title %><%= e.visible ? '' : ' (zaprta)' %>"><a href="/ucitelj/razredi/<%= cls.id %>/rezultati/<%= e.id %>"><%= e.id %></a></th><% }) %>
+    <% list.forEach((e) => { %><th class="<%= e.visible ? '' : 'closed' %>" title="<%= e.title %><%= e.visible ? '' : ' (zaprta)' %>"><a href="/ucitelj/razredi/<%= cls.id %>/rezultati/<%= e.id %>"><%= e.no %></a></th><% }) %>
     <th>Odprte vaje</th><th>Čas</th><th class="l">Zadnja aktivnost</th></tr></thead>
   <tbody>
   <% rows.forEach((r) => { %><tr>
     <td class="l stick"><a href="/ucitelj/razredi/<%= cls.id %>/dijaki/<%= r.id %>"><%= r.name %></a></td>
     <% list.forEach((e) => { const c = cell(r.cells, e.id); const p = f.pct(c.score, e.maxPoints); const d = f.pct(c.done, e.tasks.length); %>
-    <td class="heat <%= e.visible ? '' : 'closed' %>" style="--p:<%= p %>" title="<%= e.id %>: <%= f.num(c.score) %> od <%= e.maxPoints %> t, <%= c.done %> od <%= e.tasks.length %> nalog, <%= f.duration(c.seconds) %><%= c.resets ? `, ponastavitve: ${c.resets}` : '' %>">
+    <td class="heat <%= e.visible ? '' : 'closed' %>" style="--p:<%= p %>" title="<%= e.no %> <%= e.title %>: <%= f.num(c.score) %> od <%= e.maxPoints %> t, <%= c.done %> od <%= e.tasks.length %> nalog, <%= f.duration(c.seconds) %><%= c.resets ? `, ponastavitve: ${c.resets}` : '' %>">
       <% if (c.started) { %><span class="hv"><%= p %></span><% if (c.resets) { %><span class="rs" aria-label="Ponastavitve: <%= c.resets %>">↺<%= c.resets %></span><% } %><span class="hb" style="width:<%= d %>%"></span><% } else { %><span class="hn">–</span><% } %>
     </td><% }) %>
     <td><strong><%= f.pct(r.total.score, maxPoints) %> %</strong></td>

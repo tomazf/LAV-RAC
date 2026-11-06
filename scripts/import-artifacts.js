@@ -102,7 +102,7 @@ for (const src of sources.exercises) {
   const maxPoints = data.tasks.reduce((a, t) => a + t.max, 0);
   fs.writeFileSync(C('exercises', `${src.id}.html`), html);
   built.push({
-    id: src.id, module: adapter.module, title: adapter.title, fullTitle: adapter.title, key, version: src.version,
+    id: src.id, no: src.no ?? src.id, module: adapter.module, title: adapter.title, fullTitle: adapter.title, key, version: src.version,
     format: 'short', maxPoints, tasks: data.tasks, pages: data.pages, gate: data.gate,
   });
   console.log(src.id, key, `${data.tasks.length} nalog, ${maxPoints} točk, ${data.pages.length} strani, ${data.gate.length} razlag pred vajami`);

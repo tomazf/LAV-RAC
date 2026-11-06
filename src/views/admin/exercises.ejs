@@ -5,7 +5,7 @@
 <section class="group"><h2><%= m.id %> <%= m.title %></h2>
 <div class="scroll"><table class="data ex-table"><colgroup><col class="c-title"><col class="c-num"><col class="c-num"><col class="c-num"></colgroup>
 <thead><tr><th class="l">Vaja</th><th>Naloge</th><th>Točke</th><th>Strani</th></tr></thead><tbody>
-  <% m.exercises.forEach((e) => { %><tr><td class="l"><a href="/vaje/<%= e.id %>"><strong><%= e.id %></strong> <%= e.title %></a></td><td><%= e.tasks.length %></td><td><%= e.maxPoints %></td><td><%= e.pages.length %></td></tr><% }) %>
+  <% m.exercises.forEach((e) => { %><tr><td class="l"><a href="/vaje/<%= e.id %>"><strong><%= e.no %></strong> <%= e.title %></a></td><td><%= e.tasks.length %></td><td><%= e.maxPoints %></td><td><%= e.pages.length %></td></tr><% }) %>
 </tbody></table></div></section>
 <% }) %>
 <% plannedModules.forEach((id) => { %><section class="group planned"><h2><%= id %> V pripravi</h2><p class="planned-row">Vaje te skupine še niso dodane.</p></section><% }) %>

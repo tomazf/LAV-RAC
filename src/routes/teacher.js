@@ -162,7 +162,7 @@ teacherRouter.post('/razredi/:id/rezultati/:eid/ponastavi', loadClass, checkCsrf
     let n = 0;
     for (const m of await members(req.cls.id)) if (await resetExercise(ex, m.id)) n++;
     if (n) await audit(req.user, 'Ponastavil vajo razredu', `${req.cls.name}: ${ex.id}: ${n}`);
-    res.redirect(`/ucitelj/razredi/${req.cls.id}/rezultati/${ex.id}?sporocilo=${encodeURIComponent(`Vaja ${ex.id} je ponastavljena. Dijakov: ${n}.`)}`);
+    res.redirect(`/ucitelj/razredi/${req.cls.id}/rezultati/${ex.id}?sporocilo=${encodeURIComponent(`Vaja ${ex.no} je ponastavljena. Dijakov: ${n}.`)}`);
   } catch (e) { next(e); }
 });
 // Which exercises the class can see, and in what order.
@@ -207,7 +207,7 @@ teacherRouter.get('/razredi/:id/izvoz.csv', loadClass, async (req, res, next) =>
     const list = await exerciseList(req.cls.id);
     const open = sums(list.filter((e) => e.visible));
     const map = await progressFor(ms.map((m) => m.id));
-    const head = ['Dijak', 'Račun', ...list.flatMap((e) => [`${e.id} točke (od ${e.maxPoints})`, `${e.id} naloge (od ${e.tasks.length})`, `${e.id} čas (min)`, `${e.id} ponastavitve`]), `Odprte vaje točke (od ${open.maxPoints})`, 'Odprte vaje %', 'Skupaj čas (min)', 'Zadnja aktivnost'];
+    const head = ['Dijak', 'Račun', ...list.flatMap((e) => [`${e.no} točke (od ${e.maxPoints})`, `${e.no} naloge (od ${e.tasks.length})`, `${e.no} čas (min)`, `${e.no} ponastavitve`]), `Odprte vaje točke (od ${open.maxPoints})`, 'Odprte vaje %', 'Skupaj čas (min)', 'Zadnja aktivnost'];
     const lines = [head.map(csvCell).join(';')];
     for (const m of ms) {
       const t = rollup(map.get(m.id), open.ids);

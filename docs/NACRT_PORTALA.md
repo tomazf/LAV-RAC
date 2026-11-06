@@ -47,7 +47,7 @@ Pravila:
 
 Vaja je ena HTML datoteka (`content/exercises/<id>.html`), seznam nalog in strani pa je v `content/catalog.json`.
 
-- **Katalog**: `modules` (`id`, `title`) in `exercises`. Vsaka vaja: `id`, `module`, `title`, `fullTitle`, `key`, `version`, `format` (`short` ali `long`, določa imena polj v stanju), `maxPoints`, `tasks` (`i`, `level`, `max`, `section`, `q`), `pages` (`id`, `chapter`, `label`).
+- **Katalog**: `modules` (`id`, `title`) in `exercises`. Vsaka vaja: `id`, `no` (številka, ki jo vidijo ljudje; brez nje se pokaže `id`), `module`, `title`, `fullTitle`, `key`, `version`, `format` (`short` ali `long`, določa imena polj v stanju), `maxPoints`, `tasks` (`i`, `level`, `max`, `section`, `q`), `pages` (`id`, `chapter`, `label`).
 - **Zagon**: datoteka mora vsebovati oznako `<!--LAVELS:BOOT-->` v `<head>`. Strežnik jo nadomesti s `window.__LAVELS` (`id`, `title`, `key`, `attempt`, `uid`, `name`, `state`, `csrf`, `staff`, `variant`, `notes`) in skripti `notes.js` in `tracker.js`. Oznaka `<!--LAVELS:VARIANTS-->` je za spremenljiva števila.
 - **Shranjevanje**: vaja stanje shranjuje v `localStorage` pod `key` kot JSON `{ t: { <indeks naloge>: {...} } }`. Sledilnik ob zagonu postavi stanje s strežnika, vsako spremembo pošlje na `/api/progress/<id>` in šteje čas na `/api/time/<id>`. Pri poskusu, ki ga je spremenil drug zavihek ali ponastavitev, strežnik odgovori 409.
 - **Obvezni elementi vaje**: gumb `#resetBtn` s potrditvijo `#resetYes`, naloge `.task`, strani `.page`. Poglavja (`Teorija`, `Simulacija`, `Naloge`) so zapisana v kodi (`CHAPTERS` v `src/catalog.js`).

@@ -8,7 +8,7 @@
   <div class="scroll"><table class="data ex-table"><colgroup><col class="c-title"><col class="c-num"><col class="c-num"><col class="c-vis"><col class="c-order"></colgroup>
   <thead><tr><th class="l">Vaja</th><th>Naloge</th><th>Točke</th><th class="l">Vidijo dijaki</th><th class="l">Vrstni red</th></tr></thead><tbody>
     <% m.exercises.forEach((e, i) => { %><tr id="vaja-<%= e.id %>" class="<%= e.visible ? '' : 'unseen' %>">
-      <td class="l"><a href="/vaje/<%= e.id %>"><strong><%= e.id %></strong> <%= e.title %></a></td><td><%= e.tasks.length %></td><td><%= e.maxPoints %></td>
+      <td class="l"><a href="/vaje/<%= e.id %>"><strong><%= e.no %></strong> <%= e.title %></a></td><td><%= e.tasks.length %></td><td><%= e.maxPoints %></td>
       <td class="l"><form class="inline tight" method="post" action="/ucitelj/razredi/<%= cls.id %>/vaje/<%= e.id %>/vidnost" data-autosubmit><input type="hidden" name="_csrf" value="<%= csrf %>">
         <label class="switch"><input type="checkbox" name="visible" <%= e.visible ? 'checked' : '' %>> <%= e.visible ? 'odprta' : 'zaprta' %></label>
         <noscript><button class="btn ghost small">Shrani</button></noscript></form></td>

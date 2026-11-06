@@ -14,6 +14,8 @@ const varied = JSON.parse(fs.readFileSync(path.join(content, 'variants.json'), '
 export const modules = raw.modules;
 export const exercises = raw.exercises.map((e) => ({
   ...e,
+  // The number people see; the id stays the technical name (URLs, database, keys).
+  no: e.no ?? e.id,
   hasVariants: !!varied[e.id],
   tasks: e.tasks.map((t) => ({ ...t, varied: !!varied[e.id]?.includes(t.i) })),
   pageMap: new Map(e.pages.map((p) => [p.id, p])),

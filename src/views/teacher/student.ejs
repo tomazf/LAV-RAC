@@ -26,7 +26,7 @@
   <% exs.forEach((e) => { %>
   <details class="exd">
     <summary>
-      <span class="exd-t"><span class="ex-no"><%= e.id %></span> <%= e.title %><% if (!e.visible) { %> <span class="tag">zaprta</span><% } %></span>
+      <span class="exd-t"><span class="ex-no"><%= e.no %></span> <%= e.title %><% if (!e.visible) { %> <span class="tag">zaprta</span><% } %></span>
       <%- include('../partials/strip', { items: e.strip }) %>
       <span class="exd-m"><%= f.num(e.c.score) %> / <%= e.maxPoints %> t, <%= f.duration(e.c.seconds) %><% if (e.c.resets) { %>, ↺<%= e.c.resets %><% } %></span>
     </summary>

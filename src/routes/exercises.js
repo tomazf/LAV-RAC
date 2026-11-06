@@ -56,7 +56,7 @@ exerciseRouter.get('/vaje/:id', requireAccess, async (req, res, next) => {
     const tasks = {};
     for (const n of noteRows) if (n.task_index >= 0) tasks[n.task_index] = n.body;
     res.type('html').send(renderExercise(ex, {
-      id: ex.id, title: ex.title, key: ex.key, attempt: p.attempt, uid: req.user.id, name: req.user.name, state: p.state, csrf: req.session.csrf, staff: req.user.isTeacher,
+      id: ex.id, no: ex.no, title: ex.title, key: ex.key, attempt: p.attempt, uid: req.user.id, name: req.user.name, state: p.state, csrf: req.session.csrf, staff: req.user.isTeacher,
       variant: ex.hasVariants ? { seed: p.variant_seed, keep: p.variant_keep } : null,
       notes: req.user.isAdmin ? null : { exercise: noteRows.find((n) => n.task_index === -1)?.body ?? '', tasks },
     }));

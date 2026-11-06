@@ -21,10 +21,10 @@
     <% m.exercises.forEach((e) => { const r = rows.get(e.id); const finished = r.done === e.tasks.length; %>
     <li class="node <%= finished ? 'lit' : r.started ? 'half' : '' %>">
       <div class="ex-main">
-        <h3><a href="/vaje/<%= e.id %>"><span class="ex-no"><%= e.id %></span> <%= e.title %></a></h3>
+        <h3><a href="/vaje/<%= e.id %>"><span class="ex-no"><%= e.no %></span> <%= e.title %></a></h3>
         <%- include('partials/strip', { items: r.strip }) %>
         <p class="ex-meta"><%= f.num(r.score) %> od <%= e.maxPoints %> točk, <%= r.done %> od <%= e.tasks.length %> nalog<% if (r.resets) { %>, ponastavljeno <%= r.resets %>-krat<% } %><% if (taskNotes.get(e.id)) { %>, opombe pri nalogah: <%= taskNotes.get(e.id) %><% } %>
-          <% if (!user.isAdmin) { %><span data-note-slot data-box="note-<%= e.id %>" data-exercise="<%= e.id %>" data-heading="Opomba k vaji <%= e.id %>" data-csrf="<%= csrf %>"></span><% } %></p>
+          <% if (!user.isAdmin) { %><span data-note-slot data-box="note-<%= e.id %>" data-exercise="<%= e.id %>" data-heading="Opomba k vaji <%= e.no %>" data-csrf="<%= csrf %>"></span><% } %></p>
         <% if (!user.isAdmin) { %><div class="lvn-text" id="note-<%= e.id %>" <%- exerciseNote.get(e.id) ? '' : 'hidden' %>><%= exerciseNote.get(e.id) || '' %></div><% } %>
       </div>
       <dl class="times">
