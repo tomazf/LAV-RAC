@@ -6,23 +6,26 @@
   - A: deli znotraj ene vaje (nova tabela odprtih delov, strežnik in statistika štejeta samo odprte dele; večja sprememba jedra),
   - B: vsak del je samostojna vaja (uvoz iz enega artifacta naredi več vaj, prikaz jih združi pod poglavje; jedro ostane kot v LAV-ELS). Priporočeno.
 - [ ] Letnik razreda in prehod v naslednji letnik (glej spodaj).
+- [ ] Ikona strani: dodati `favicon.ico` (zdaj je samo `favicon.svg`, ki ga brskalnik dobi le na straneh portala; na straneh vaj in pri zaznamkih išče `/favicon.ico`, ki ga ni).
 
 ## Letnik razreda in prehod v naslednji letnik
 
-Dogovorjeno (6. 11. 2026): razred ima letnik in vidi poglavja svojega letnika. Dijak, ki napreduje v naslednji letnik, dobi novo vsebino, vaje prejšnjih letnikov pa mu ostanejo kot zbirka za nazaj. Naslednje leto ga lahko uči drug učitelj.
+Dogovorjeno (6. 11. 2026):
+- Vsako leto so v portalu 2., 3. in 4. letniki. Razred ima letnik; učitelj pri razredu vidi in odpira samo poglavja tega letnika, pregledi, statistika in CSV kažejo samo ta letnik.
+- Razred ima nastavitev »Vidi prejšnje letnike« (za cel razred). Letos je pri vseh izklopljena; ob prehodu v naslednji letnik se vklopi. Takrat dijak vidi vsa poglavja nižjih letnikov ne glede na to, kaj je odprto tem letnikom, ločeno pod »Prejšnji letniki«.
+- Vsebina prejšnjih letnikov je vedno trenutna različica (dopolnjene naloge se posodobijo, odstranjene izginejo). Napredek dijaka se pri njih hrani, dijak ga vidi in ga lahko sam ponastavi; učitelj ga ne vidi in ga ne potrebuje.
+- Napredek, ki ga je dijak naredil v prejšnjem letu, ostane; ponastavi ga lahko samo dijak sam.
+- Prehod naredi samo skrbnik, na novi strani Administracija > Šolsko leto: najprej sveža kopija, nato predogled, potrditev z vpisom besede, zapis v dnevnik.
+  - 4. letniki: dijaki se trajno izbrišejo z nalogami, opombami in napredkom (obstoječi izbris uporabnika), njihovi razredi se izbrišejo.
+  - 3. in 2. letniki napredujejo; ime razreda se predlaga (R2A v R3A) in se lahko popravi; odprta poglavja se ponastavijo.
+  - Seznam dijakov, ki napredujejo, ima privzeto izbrane vse; skrbnik lahko koga odznači.
+  - Učitelje razredom dodeli skrbnik (ob prehodu se odstranijo).
+- Dijak, ki se med letom izpiše, se izbriše kot zdaj (Administracija > Uporabniki).
+- Podatki dijaka se hranijo, dokler je vpisan. Za pooblaščeno osebo za varstvo podatkov ostane še rok hrambe kopij baze.
 
-Za odločiti:
-- Ali so vaje prejšnjih letnikov dijaku še odprte za reševanje (vaja za maturo) ali samo za ogled. Predlog: odprte, ločeno pod »Prejšnji letniki«.
-- Ali se šolsko leto zaključi z enim dejanjem skrbnika (razredi se arhivirajo, dijaki ostanejo brez razreda) ali s prestavitvijo razreda (iz R2A nastane R3A z istimi dijaki). Predlog: prestavitev, ker je manj dela.
-- Ali učitelj novega letnika vidi rezultate dijaka iz prejšnjih let. Predlog: v podrobnostih dijaka, v pregledu razreda samo tekoči letnik.
-- Rok hrambe podatkov, ki traja več let (pooblaščena oseba za varstvo podatkov).
+Še za odločiti:
+- Kaj se zgodi z dijakom, ki ga skrbnik pri prehodu odznači (ne napreduje): ostane brez razreda in ga skrbnik doda v razred nižjega letnika, ali ostane v razredu z istim letnikom.
 
-Kaj je treba narediti:
-- letnik razreda (in šolsko leto) v bazi in pri ustvarjanju razreda; povezava letnika z deli LAV-RAČ2, LAV-RAČ3, LAV-RAČ4 v `content/portal.json`,
-- seznam vaj za dijaka, odpiranje vaj, pogled razreda, izvoz CSV in statistika samo za letnik razreda,
-- zgodovina članstva dijaka v razredih (iz katerega razreda in leta so stari rezultati),
-- prestavitev razreda v naslednji letnik ali zaključek leta,
-- razdelek »Prejšnji letniki« za dijaka,
-- preizkusi in zapis v `docs/NACRT_PORTALA.md`; razmisliti, ali spremembo jedra ponudimo tudi LAV-ELS, da ostaneta ogrodji enaki.
+Kaj je treba narediti: letnik in nastavitev v bazi in pri razredu, filtriranje po letniku v vseh pogledih, razdelek »Prejšnji letniki«, stran Šolsko leto s predogledom in izbiro dijakov, preizkusi, zapis v `docs/NACRT_PORTALA.md`. Razmisliti, ali spremembo jedra ponudimo tudi LAV-ELS.
 
 Odprta vprašanja o vsebini so tudi v `docs/LAV-RAC.md` (razdelek Stanje).
