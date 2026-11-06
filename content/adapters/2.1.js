@@ -12,9 +12,9 @@ const ICONS = {
 const GROUP_IDS = ['pretvorbe', 'racunanje', 'kodiranje', 'pariteta'];
 
 export default {
-  module: 'LAV-RAČ3',
+  module: 'LAV-RAČ2',
   title: 'Številski sistemi, kodiranje in pariteta',
-  kicker: 'LAV-RAČ3 · 1. poglavje',
+  kicker: 'LAV-RAČ2 · 1. poglavje',
   // The artifact's colours and fonts give way to the portal's, so every exercise looks the same.
   // html:not(#lr):root outranks the artifact's own dark-mode rule (:root:not([data-theme=light])).
   css: `html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-tile);--line:var(--lr-line);--fg:var(--lr-ink);--muted:var(--lr-mut);
@@ -54,7 +54,7 @@ if(location.hash){ setTimeout(()=>window.scrollTo(0,0), 0); window.addEventListe
     `renderAll();
 LavRac.mount({
   title: ${JSON.stringify('Številski sistemi, kodiranje in pariteta')},
-  kicker: ${JSON.stringify('LAV-RAČ3 · 1. poglavje')},
+  kicker: ${JSON.stringify('LAV-RAČ2 · 1. poglavje')},
   lead: document.querySelector("#hero .lead").textContent.trim(),
   hero: document.querySelector("#hero .magic"),
   source: document.querySelector("footer > span").textContent.trim(),

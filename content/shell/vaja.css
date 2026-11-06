@@ -1,7 +1,7 @@
-/* LAV-RAČ exercise shell: same plum and lamp colours as the portal, and the same task colours as the teacher's results. The artifact's own content keeps its styles;
+/* LAV-RAČ exercise shell: light orange background with the portal's plum for text and buttons, and the same task colours as the teacher's results. The artifact's own content keeps its styles;
    these rules own the frame (top progress, rail, pages, task paging) and the task buttons. */
 :root{
-  --lr-bg:#f5f3f8;--lr-card:#fff;--lr-ink:#241433;--lr-mut:#5f5470;--lr-acc:#6b2a7a;--lr-acc-soft:#f1e7f5;--lr-line:#ddd6e6;--lr-tile:#ece6f2;
+  --lr-bg:#fdf5ec;--lr-card:#fff;--lr-ink:#241433;--lr-mut:#5f5470;--lr-acc:#6b2a7a;--lr-acc-soft:#fbe8d4;--lr-line:#ecdcc8;--lr-tile:#f7ead9;
   --lr-hdr:#2e1a40;--lr-lamp:#ffc45c;
   --lr-ok:#2b8a3e;--lr-ok-bg:#e3f5e8;--lr-half:#9a6416;--lr-half-bg:#f8eed9;--lr-bad:#c92a2a;--lr-bad-bg:#fde8e8;--lr-seen:#5f5470;--lr-seen-bg:#ece6f2;
   --lr-fb:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;--lr-fm:"IBM Plex Mono",ui-monospace,Consolas,monospace;

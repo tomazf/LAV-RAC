@@ -4,17 +4,17 @@ Splošni dogovor je v `NACRT_PORTALA.md`. Tukaj je samo, kar velja za ta portal.
 
 ## Stanje
 
-Postavljena je osnova: prijava, vloge, oblika, vstopna stran in struktura z deli LAV-RAČ2, LAV-RAČ3 in LAV-RAČ4. Uvožena je prva vaja, 3.1 Številski sistemi, kodiranje in pariteta.
+Postavljena je osnova: prijava, vloge, oblika, vstopna stran in struktura z deli LAV-RAČ2, LAV-RAČ3 in LAV-RAČ4. Uvožena je prva vaja, 2.1 Številski sistemi, kodiranje in pariteta.
 
-Razpored (od učitelja, 6. 11. 2026), številka vaje je letnik.poglavje:
-- LAV-RAČ2: 2.1 Java in delovanje JVM, 2.2 Algoritmi in diagram poteka, 2.3 Temeljni gradniki programa, 2.4 Podatkovni tipi v Javi, 2.5 Pogojni stavki v Javi, 2.6 Zanke v Javi
-- LAV-RAČ3: 3.1 Številski sistemi, kodiranje in pariteta, 3.2 Logične funkcije – utrjevanje, 3.3 Arhitektura računalniških sistemov, 3.4 (prosto, dodamo kasneje), 3.5 Operacijski sistemi in Linux lupina
+Razpored (od učitelja, popravljen 6. 11. 2026), številka vaje je letnik.poglavje:
+- LAV-RAČ2: 2.1 Številski sistemi, kodiranje in pariteta, 2.2 Logične funkcije – utrjevanje, 2.3 Arhitektura računalniških sistemov, 2.4 (prosto, dodamo kasneje), 2.5 Operacijski sistemi in Linux lupina
+- LAV-RAČ3: 3.1 Java in delovanje JVM, 3.2 Algoritmi in diagram poteka, 3.3 Temeljni gradniki programa, 3.4 Podatkovni tipi v Javi, 3.5 Pogojni stavki v Javi, 3.6 Zanke v Javi
 - LAV-RAČ4: še ni določeno
 
 Še ni dogovorjeno:
 - letnik razreda: dijak naj vidi samo svoj letnik in v njem samo vsebine, ki mu jih odpre učitelj. Zdaj vidi vaje, odprte njegovemu razredu; razred še nima letnika, učitelj pa vidi vse vaje,
 - kako štejejo naloge »Za doma« in maturitetne naloge,
-- prikaz praznega mesta 3.4 kot »V pripravi« (ogrodje zdaj pozna samo prazne dele, ne praznih vaj).
+- prikaz praznega mesta 2.4 kot »V pripravi« (ogrodje zdaj pozna samo prazne dele, ne praznih vaj).
 
 ## Odločitve
 
@@ -40,6 +40,7 @@ Oblika vaje (dogovor 6. 11. 2026):
 - v sklopu vaj ena naloga naenkrat, oštevilčeni gumbi v barvi stanja, »rešenih x / n«, legenda, Prejšnja/Naslednja naloga,
 - pod nalogo levo Preveri, desno obrobljena Namig (−50 %) in Prikaži rešitev (0 točk, z vprašanjem pred ogledom),
 - besedilo razlag in nalog obojestransko poravnano z deljenjem besed,
+- ozadje vaje je svetlo oranžno, besedilo in gumbi v vijolični barvi portala,
 - barve stanj so enake kot v učiteljevem pregledu: pravilno zeleno, pravilno z namigom jantarno, napačno rdeče, ogledana rešitev sivo.
 
 Pri spremembi artifacta: prenesi novo različico v `content/sources/<id>.html`, popravi adapter, če kaka zamenjava ne najde več mesta, poženi `npm run import` in `npm test`. Če se spremeni vrstni red ali število nalog, povečaj `version` v `content/sources.json` (dijaki začnejo nov poskus).

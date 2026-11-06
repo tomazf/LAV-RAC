@@ -1,4 +1,4 @@
-// The portal as it ships, with its real content: login page, the three parts, and the exercise shell on 3.1.
+// The portal as it ships, with its real content: login page, the three parts, and the exercise shell on 2.1.
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { spawn } from 'node:child_process';
@@ -151,13 +151,13 @@ test('parts without exercises wait for staff; a closed class shows a clear messa
   assert.match(await s.textContent('.gate-fig'), /Šolski račun = 1[\s\S]*Razred = 0[\s\S]*Vaje = 0/);
   const a = await login('Sara Skrbnik');
   await a.goto(`${APP}/admin/vaje`);
-  assert.deepEqual(await a.locator('.group.planned h2').allTextContents(), ['LAV-RAČ2 V pripravi', 'LAV-RAČ4 V pripravi']);
+  assert.deepEqual(await a.locator('.group.planned h2').allTextContents(), ['LAV-RAČ3 V pripravi', 'LAV-RAČ4 V pripravi']);
   await a.goto(`${APP}/admin/razredi`);
-  await a.fill('#novi', 'R3A');
+  await a.fill('#novi', 'R2A');
   await a.click('text=Ustvari razred');
   await a.waitForLoadState();
   await a.goto(`${APP}/ucitelj`);
-  await a.locator('tr', { hasText: 'R3A' }).locator('a').first().click();
+  await a.locator('tr', { hasText: 'R2A' }).locator('a').first().click();
   await a.waitForURL(/razredi\/\d+/);
   classUrl = a.url().replace(/\?.*$/, '');
   for (const name of ['Ana Kovač', 'Bor Novak']) {
@@ -173,17 +173,17 @@ test('parts without exercises wait for staff; a closed class shows a clear messa
   assert.doesNotMatch(await s.textContent('main'), /V pripravi/);
   await a.goto(`${classUrl}/vaje`);
   await a.locator('input[name=visible]').first().check();
-  await a.waitForURL(/vaje#vaja-3\.1$/);
+  await a.waitForURL(/vaje#vaja-2\.1$/);
   await s.goto(`${APP}/vaje`);
   assert.match(await s.textContent('main'), /Številski sistemi, kodiranje in pariteta/);
   await s.context().close();
   await a.context().close();
 });
 
-// ---------- exercise shell on 3.1 ----------
-const EX = `${APP}/vaje/3.1`;
+// ---------- exercise shell on 2.1 ----------
+const EX = `${APP}/vaje/2.1`;
 const catalog = JSON.parse(readFileSync(path.join(root, 'content/catalog.json'), 'utf8'));
-const ex31 = catalog.exercises.find((e) => e.id === '3.1');
+const ex21 = catalog.exercises.find((e) => e.id === '2.1');
 const card = (p) => p.locator('.page.on .lr-task:not(.lr-off)');
 // Paging follows the address, which the browser reports a moment after a click.
 const at = (p, hash) => p.waitForFunction((h) => {
@@ -200,12 +200,12 @@ async function setBits(p, wrong) {
   for (let k = 0; k < 8; k++) if (n & (128 >> k)) await bits.nth(k).click();
 }
 async function readAll(p) {
-  for (const id of ex31.gate) await go(p, id);
+  for (const id of ex21.gate) await go(p, id);
 }
 async function progressRow(name) {
   const db = new pg.Client({ connectionString: DB });
   await db.connect();
-  const r = (await db.query(`SELECT p.* FROM progress p JOIN users u ON u.id=p.user_id WHERE u.name=$1 AND p.exercise_id='3.1'`, [name])).rows[0];
+  const r = (await db.query(`SELECT p.* FROM progress p JOIN users u ON u.id=p.user_id WHERE u.name=$1 AND p.exercise_id='2.1'`, [name])).rows[0];
   await db.end();
   return r;
 }
@@ -214,13 +214,13 @@ async function settled(p) {
 }
 
 test('the built exercise carries the current shell and nothing from outside', async () => {
-  const html = readFileSync(path.join(root, 'content/exercises/3.1.html'), 'utf8');
+  const html = readFileSync(path.join(root, 'content/exercises/2.1.html'), 'utf8');
   assert.ok(html.includes(readFileSync(path.join(root, 'content/shell/vaja.js'), 'utf8').trim().slice(0, 4000)), 'run npm run import after changing the shell');
   assert.ok(html.includes(readFileSync(path.join(root, 'content/shell/vaja.css'), 'utf8').trim()), 'run npm run import after changing the shell');
   assert.doesNotMatch(html, /fonts\.googleapis|Function\(|eval\(/);
-  assert.equal(ex31.module, 'LAV-RAČ3');
-  assert.equal(ex31.tasks.length, 98);
-  assert.equal(ex31.pages.filter((x) => x.chapter === 'Teorija').length, ex31.gate.length + 1);
+  assert.equal(ex21.module, 'LAV-RAČ2');
+  assert.equal(ex21.tasks.length, 98);
+  assert.equal(ex21.pages.filter((x) => x.chapter === 'Teorija').length, ex21.gate.length + 1);
 });
 
 test('overview lists the parts; the tasks open only after every theory page', async () => {
@@ -235,7 +235,7 @@ test('overview lists the parts; the tasks open only after every theory page', as
   await go(p, 'naloge-a');
   assert.ok(await p.locator('.page.on .lr-locked').isVisible());
   assert.ok(await p.locator('.page.on .lr-setbody').isHidden());
-  assert.match(await p.textContent('.page.on .lr-locked'), new RegExp(`Ostalo jih je še ${ex31.gate.length}`));
+  assert.match(await p.textContent('.page.on .lr-locked'), new RegExp(`Ostalo jih je še ${ex21.gate.length}`));
   // a tile takes you to the first page of its part, which then counts as read
   await go(p, 'pregled');
   await p.click('.lr-tile[data-tile=kodiranje]');
@@ -248,7 +248,7 @@ test('overview lists the parts; the tasks open only after every theory page', as
   assert.equal(await p.locator('.page.on .lr-num').count(), 34);
   assert.equal(await p.locator('.page.on .lr-task:not(.lr-off)').count(), 1);
   await settled(p);
-  assert.deepEqual((await progressRow('Ana Kovač')).state.seen.sort(), [...ex31.gate, 'pregled'].filter((x) => x !== 'pregled').sort());
+  assert.deepEqual((await progressRow('Ana Kovač')).state.seen.sort(), [...ex21.gate, 'pregled'].filter((x) => x !== 'pregled').sort());
   assert.deepEqual(outside, []);
   await p.context().close();
 });
@@ -326,7 +326,7 @@ test('the server does not count tasks before the theory, even if a page claims s
   await p.goto(EX);
   const res = await p.evaluate(async () => {
     const B = window.__LAVELS;
-    const r = await fetch('/api/progress/3.1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ csrf: B.csrf, attempt: B.attempt, state: { t: { 0: { d: true, p: 1 } }, seen: ['sistemi'] } }) });
+    const r = await fetch('/api/progress/2.1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ csrf: B.csrf, attempt: B.attempt, state: { t: { 0: { d: true, p: 1 } }, seen: ['sistemi'] } }) });
     return r.json();
   });
   assert.equal(res.ok, true);
@@ -357,7 +357,7 @@ test('a reset starts a new attempt that the teacher sees; read pages stay read',
   assert.equal(r.done_count, 0);
   const db = new pg.Client({ connectionString: DB });
   await db.connect();
-  const resets = (await db.query(`SELECT score, done_count FROM resets WHERE exercise_id='3.1'`)).rows;
+  const resets = (await db.query(`SELECT score, done_count FROM resets WHERE exercise_id='2.1'`)).rows;
   await db.end();
   assert.deepEqual(resets.map((x) => [Number(x.score), x.done_count]), [[1.5, 4]]);
   await p.context().close();
