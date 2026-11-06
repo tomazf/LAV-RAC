@@ -42,6 +42,11 @@ export const plannedModules = portal.plannedModules.filter((id) => !modules.some
 export const YEARS = Object.entries(portal.years).map(([y, module]) => ({ year: Number(y), module })).sort((a, b) => a.year - b.year);
 export const yearsOn = YEARS.some((y) => modules.some((m) => m.id === y.module));
 export const finalYear = yearsOn ? YEARS.at(-1).year : null;
+// What "sees past years" opens for a class: "2. letnik", "2. in 3. letnik"; empty when there is no lower year.
+export const pastLabel = (year) => {
+  const lower = YEARS.filter((y) => year && y.year < year).map((y) => `${y.year}.`);
+  return lower.length ? `${lower.length > 1 ? `${lower.slice(0, -1).join(', ')} in ${lower.at(-1)}` : lower[0]} letnik` : '';
+};
 export const yearOf = (moduleId) => YEARS.find((y) => y.module === moduleId)?.year ?? null;
 export const inYear = (year, moduleId) => !yearsOn || !year || yearOf(moduleId) === year;
 // Groups of lower years, which a class may be allowed to revisit.

@@ -1,6 +1,6 @@
 import express from 'express';
 import { checkCsrf, isAdmin, requireAdmin } from '../auth.js';
-import { plannedIn, plannedModules, standardGroups, YEARS, yearsOn } from '../catalog.js';
+import { pastLabel, plannedIn, plannedModules, standardGroups, YEARS, yearsOn } from '../catalog.js';
 import { audit, eraseUser, many, one, q, tx } from '../db.js';
 import { backupWarning } from '../backup.js';
 import { byName } from '../format.js';
@@ -85,7 +85,7 @@ adminRouter.get('/razredi', async (req, res, next) => {
     for (const c of classes) c.teachers = links.filter((l) => l.class_id === c.id);
     const all = await many('SELECT id, name, username, role FROM users ORDER BY name');
     const teachers = all.filter((u) => u.role === 'teacher' || isAdmin(u));
-    res.render('admin/classes', { classes, teachers, YEARS: yearsOn ? YEARS : [], tab: 'classes', message: req.query.sporocilo || null });
+    res.render('admin/classes', { classes, teachers, YEARS: yearsOn ? YEARS : [], pastLabel, tab: 'classes', message: req.query.sporocilo || null });
   } catch (e) { next(e); }
 });
 adminRouter.post('/razredi', checkCsrf, async (req, res, next) => {
@@ -113,11 +113,12 @@ adminRouter.post('/razredi/:id/preimenuj', checkCsrf, async (req, res, next) => 
 adminRouter.post('/razredi/:id/letnik', checkCsrf, async (req, res, next) => {
   try {
     const year = yearIn(req.body.year);
-    const past = req.body.show_past === 'on';
     if (!yearsOn || !year) return res.redirect('/admin/razredi');
+    // The lowest year has nothing to look back on.
+    const past = req.body.show_past === 'on' && !!pastLabel(year);
     const c = await one('UPDATE classes SET year=$2, show_past=$3 WHERE id=$1 RETURNING name', [Number(req.params.id) || 0, year, past]);
     if (c) await audit(req.user, 'Nastavil letnik razreda', `${c.name}: ${year}. letnik, prejšnji letniki ${past ? 'vidni' : 'skriti'}`);
-    flash(res, '/admin/razredi', c ? `Razred ${c.name}: ${year}. letnik${past ? ', vidi prejšnje letnike' : ''}.` : 'Razred ne obstaja.');
+    flash(res, '/admin/razredi', c ? `Razred ${c.name}: ${year}. letnik${past ? `, vidi ${pastLabel(year)}` : ''}.` : 'Razred ne obstaja.');
   } catch (e) { next(e); }
 });
 adminRouter.post('/razredi/:id/izbrisi', checkCsrf, async (req, res, next) => {

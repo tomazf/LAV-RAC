@@ -492,10 +492,14 @@ test('a class works on its year; lower years open for revision; the admin closes
   assert.equal((await c.goto(`${APP}/vaje/2.1`)).status(), 404);
   await a.goto(`${APP}/admin/razredi`);
   const row = a.locator('tr', { has: a.locator(`a[href="/ucitelj/razredi/${r3}"]`) });
+  // the lowest year has nothing to look back on; higher years say what opens
+  const pastOf = (id) => a.locator('tr', { has: a.locator(`a[href="/ucitelj/razredi/${id}"]`) }).locator('label.switch');
+  assert.equal(await pastOf(r2).count(), 0);
+  assert.equal((await pastOf(r4).textContent()).trim(), 'vidi 2. in 3. letnik');
   await row.locator('input[name=show_past]').check();
   await row.locator('button:text-is("Shrani")').click();
   await a.waitForLoadState();
-  assert.match(await a.textContent('.notice'), /R3A: 3\. letnik, vidi prejšnje letnike/);
+  assert.match(await a.textContent('.notice'), /R3A: 3\. letnik, vidi 2\. letnik/);
   await c.goto(`${APP}/vaje`);
   assert.deepEqual(await c.locator('.past-years .ex-no').allTextContents(), ['1', '2', '3']);
   assert.match(await c.textContent('.hello'), /0 od 0 točk/); // lower years are not in this year's totals
@@ -504,7 +508,7 @@ test('a class works on its year; lower years open for revision; the admin closes
   // the teacher sees only the class's year: not its progress in lower years, not their results
   await a.goto(`${APP}/ucitelj/razredi/${r3}`);
   assert.match(await a.textContent('.title-row'), /Vaje razreda \(0 od 0\)/);
-  assert.match(await a.textContent('.team'), /3\. letnik, dijaki vidijo tudi prejšnje letnike/);
+  assert.match(await a.textContent('.team'), /3\. letnik, dijaki vidijo tudi 2\. letnik/);
   assert.equal((await a.goto(`${APP}/ucitelj/razredi/${r3}/rezultati/2.1`)).status(), 404);
   assert.doesNotMatch(await (await a.request.get(`${APP}/ucitelj/razredi/${r3}/izvoz.csv`)).text(), /2\.1/);
   await a.goto(`${APP}/ucitelj/razredi/${r3}/vaje`);

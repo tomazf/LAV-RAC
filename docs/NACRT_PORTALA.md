@@ -33,7 +33,7 @@ Pravila:
 - Učitelji in skrbniki vidijo vse vaje in prazne skupine »V pripravi«, dijaki ne.
 - Vaje so razdeljene v module (skupine); modul prikažemo samo, če ima vaje.
 - **Letniki** (dogovorjeno 6. 11. 2026, neobvezno): `content/portal.json` ima `years`, npr. `{ "2": "LAV-RAČ2" }` (letnik: skupina). Ko je nastavljen in ima vsaj ena od teh skupin vaje, ima vsak razred letnik (skrbnik ga izbere ob ustvarjanju in ga lahko spremeni). Razred dela samo na skupini svojega letnika: učitelj odpira samo ta poglavja, pregled razreda, rezultati, CSV in podrobnosti dijaka kažejo samo ta letnik. Brez `years` (ali za razred brez letnika) razred vidi vse skupine, kot prej.
-- Razred ima nastavitev **»vidi prejšnje letnike«** (za cel razred, nastavi skrbnik). Takrat dijaki vidijo vsa poglavja nižjih letnikov, ne glede na to, kaj je odprto tem letnikom, ločeno pod »Prejšnji letniki«. Vsebina je vedno trenutna različica. Napredek se pri njih hrani, dijak ga vidi in ga lahko sam ponastavi; ne šteje v letošnji seštevek in ga učitelj ne vidi.
+- Razred ima nastavitev **»vidi prejšnje letnike«** (za cel razred, nastavi skrbnik). Najnižji letnik je nima; napis pove, kaj se odpre (»vidi 2. letnik«, »vidi 2. in 3. letnik«). Takrat dijaki vidijo vsa poglavja nižjih letnikov, ne glede na to, kaj je odprto tem letnikom, ločeno pod »Prejšnji letniki«. Vsebina je vedno trenutna različica. Napredek se pri njih hrani, dijak ga vidi in ga lahko sam ponastavi; ne šteje v letošnji seštevek in ga učitelj ne vidi.
 
 ## 4. Napredek, točke, ponastavitve
 
