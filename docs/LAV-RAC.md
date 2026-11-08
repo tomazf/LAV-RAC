@@ -37,6 +37,7 @@ Oblika vaje (dogovor 6. 11. 2026):
 - vstopna stran Pregled s karticami skupin (ikona, razlage) in kartico Vaje,
 - levo navigacija s poudarjenimi naslovi skupin in kljukico pri pregledanih razlagah, na telefonu izbirni seznam,
 - levo pri vsakem sklopu vaj majhen krog kot tortni graf v barvah stanj (pravilno, z namigom, napačno, ogledana rešitev, še neodgovorjeno) in števec ob desnem robu; Za doma dobi kljukico, ko je odprt (dogovor 9. 11. 2026, velja za vse vaje, tudi nove),
+- v levem stolpcu je oznaka (»A ·«, »1 ·«) v svojem stolpcu, pri prelomu se druga vrstica poravna z začetkom besedila, ne z oznako (dogovor 9. 11. 2026),
 - zgoraj vedno viden skupni napredek (naloge in točke, barvni trak),
 - Vaje so zadnje poglavje in se odklenejo, ko dijak odpre vsako stran razlage (preveri tudi strežnik),
 - v sklopu vaj ena naloga naenkrat, oštevilčeni gumbi v barvi stanja, »rešenih x / n«, legenda, Prejšnja/Naslednja naloga,
