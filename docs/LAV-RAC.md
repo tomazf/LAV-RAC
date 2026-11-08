@@ -41,7 +41,7 @@ Oblika vaje (dogovor 6. 11. 2026):
 - Za doma ima naslednjo črko za zadnjim sklopom vaj (npr. A–E, nato F · Za doma); črke sklopov si sledijo brez vrzeli (dogovor 9. 11. 2026),
 - zgoraj vedno viden skupni napredek (naloge in točke, barvni trak),
 - Vaje so zadnje poglavje in se odklenejo, ko dijak odpre vsako stran razlage (preveri tudi strežnik),
-- v sklopu vaj ena naloga naenkrat, oštevilčeni gumbi v barvi stanja, »rešenih x / n«, legenda, Prejšnja/Naslednja naloga,
+- v sklopu vaj ena naloga naenkrat, oštevilčeni gumbi v barvi stanja, »rešenih x / n«, legenda (desno poravnana, dogovor 9. 11. 2026), Prejšnja/Naslednja naloga,
 - pod nalogo levo Preveri, desno obrobljena Namig (−50 %) in Prikaži rešitev (0 točk, z vprašanjem pred ogledom),
 - besedilo razlag in nalog obojestransko poravnano z deljenjem besed,
 - ozadje vaje je svetlo oranžno (#fffaf4), besedilo in gumbi v vijolični barvi portala,
