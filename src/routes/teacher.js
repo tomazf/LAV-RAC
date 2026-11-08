@@ -4,7 +4,7 @@ import { byId, classGroups, CHAPTERS, ensureClassRows, inYear, plannedIn, planne
 import { audit, many, one, q, tx } from '../db.js';
 import { portal } from '../portal.js';
 import { byName, bySurname, csvCell, dayKey, date, duration, num, pct } from '../format.js';
-import { readTask, summarize } from '../progress.js';
+import { readTask, recordReset, summarize } from '../progress.js';
 import { cell, progressFor, rollup, strip } from '../stats.js';
 
 export const teacherRouter = express.Router();
@@ -145,14 +145,14 @@ teacherRouter.post('/razredi/:id/odstrani', loadClass, checkCsrf, async (req, re
     res.redirect(`/ucitelj/razredi/${req.cls.id}`);
   } catch (e) { next(e); }
 });
-// A teacher's reset starts a new attempt for the student; the earlier score stays in the history.
+// A teacher's reset starts a new attempt for the student; the score just before it is kept (recordReset).
 async function resetExercise(ex, userId) {
   return tx(async (c) => {
     const p = (await c.query('SELECT * FROM progress WHERE user_id=$1 AND exercise_id=$2 FOR UPDATE', [userId, ex.id])).rows[0];
     if (!p) return false;
     const had = summarize(ex, p.state);
     if (had.done === 0 && had.hints === 0) return false;
-    await c.query(`INSERT INTO resets(user_id, exercise_id, attempt, score, done_count, reason) VALUES($1,$2,$3,$4,$5,'teacher')`, [userId, ex.id, p.attempt, had.score, had.done]);
+    await recordReset(c, { userId, exId: ex.id, attempt: p.attempt, score: had.score, done: had.done, reason: 'teacher' });
     await c.query(`UPDATE progress SET attempt=attempt+1, state='{}', score=0, done_count=0, hint_count=0, solution_count=0, completed_at=NULL, updated_at=now(), variant_seed=NULL, variant_keep='{}' WHERE user_id=$1 AND exercise_id=$2`, [userId, ex.id]);
     return true;
   });
@@ -223,13 +223,13 @@ teacherRouter.get('/razredi/:id/izvoz.csv', loadClass, async (req, res, next) =>
     const list = await exerciseList(req.cls.id);
     const open = sums(list.filter((e) => e.visible));
     const map = ofList(await progressFor(ms.map((m) => m.id)), list);
-    const head = ['Dijak', 'Račun', ...list.flatMap((e) => [`${e.no} točke (od ${e.maxPoints})`, `${e.no} naloge (od ${e.tasks.length})`, `${e.no} čas (min)`, `${e.no} ponastavitve`]), `Odprte vaje točke (od ${open.maxPoints})`, 'Odprte vaje %', 'Skupaj čas (min)', 'Zadnja aktivnost'];
+    const head = ['Dijak', 'Račun', ...list.flatMap((e) => [`${e.no} točke (od ${e.maxPoints})`, `${e.no} naloge (od ${e.tasks.length})`, `${e.no} čas (min)`]), `Odprte vaje točke (od ${open.maxPoints})`, 'Odprte vaje %', 'Skupaj čas (min)', 'Zadnja aktivnost'];
     const lines = [head.map(csvCell).join(';')];
     for (const m of ms) {
       const t = rollup(map.get(m.id), open.ids);
       lines.push([m.name, m.email || m.username, ...list.flatMap((e) => {
         const c = cell(map.get(m.id), e.id);
-        return [num(c.score), c.done, Math.round(c.seconds / 60), c.resets];
+        return [num(c.score), c.done, Math.round(c.seconds / 60)];
       }), num(t.score), pct(t.score, open.maxPoints), Math.round(t.seconds / 60), date(t.last)].map(csvCell).join(';'));
     }
     const safe = req.cls.name.replace(/[^\p{L}\p{N}_-]+/gu, '_');
@@ -274,7 +274,6 @@ teacherRouter.get('/razredi/:id/dijaki/:uid', loadClass, async (req, res, next) 
     const map = ofList(await progressFor([uid]), list).get(uid);
     const ids = new Set(list.map((e) => e.id));
     const events = (await many('SELECT * FROM task_events WHERE user_id=$1 ORDER BY created_at', [uid])).filter((ev) => ids.has(ev.exercise_id));
-    const resets = await many('SELECT * FROM resets WHERE user_id=$1 ORDER BY created_at DESC', [uid]);
     const pages = await many('SELECT * FROM page_time WHERE user_id=$1', [uid]);
     const days = new Map();
     for (let i = 29; i >= 0; i--) days.set(dayKey(Date.now() - i * 864e5), 0);
@@ -288,7 +287,6 @@ teacherRouter.get('/razredi/:id/dijaki/:uid', loadClass, async (req, res, next) 
       for (const ev of events) if (ev.exercise_id === e.id && ev.attempt === c.attempt && ev.kind !== 'hint') finished.set(ev.task_index, ev.created_at);
       return {
         ...e, c, strip: strip(e, c.state), finished,
-        resets: resets.filter((r) => r.exercise_id === e.id),
         visits: e.pages.map((p) => ({ ...p, row: pages.find((r) => r.exercise_id === e.id && r.page_id === p.id) })),
       };
     });

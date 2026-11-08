@@ -405,6 +405,7 @@ test('2.2 and 2.3: every page opens without errors, with their theory groups', a
     const ex = catalog.exercises.find((e) => e.id === id);
     assert.equal(ex.module, 'LAV-RAČ2');
     assert.equal(ex.tasks.length, n);
+    if (id === '2.3') assert.equal(ex.tasks.at(-1).section, 'Ponavljanje'); // mixed revision, not only matura tasks
     const a = await login('Sara Skrbnik');
     await a.goto(`${APP}/vaje/${id}`);
     assert.deepEqual(await a.locator('.lr-grp b').allTextContents(), groups);

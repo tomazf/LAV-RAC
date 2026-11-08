@@ -86,3 +86,15 @@ export function merge(ex, stored, incoming) {
   }
   return { state, events, summary: summarize(ex, state) };
 }
+
+// A reset keeps only the score just before it, as a safety net for a reset by mistake: it counts until the student
+// answers a task in the new attempt. A reset of an attempt with no answers keeps the score kept before.
+export async function recordReset(c, { userId, exId, attempt, score, done, reason = 'student' }) {
+  let keep = { score, done };
+  if (done === 0) {
+    const last = (await c.query('SELECT score, done_count FROM resets WHERE user_id=$1 AND exercise_id=$2 ORDER BY id DESC LIMIT 1', [userId, exId])).rows[0];
+    if (last) keep = { score: Number(last.score), done: last.done_count };
+  }
+  await c.query('DELETE FROM resets WHERE user_id=$1 AND exercise_id=$2', [userId, exId]);
+  await c.query('INSERT INTO resets(user_id, exercise_id, attempt, score, done_count, reason) VALUES($1,$2,$3,$4,$5,$6)', [userId, exId, attempt, keep.score, keep.done, reason]);
+}

@@ -43,7 +43,7 @@ Oblika vaje (dogovor 6. 11. 2026):
 - ozadje vaje je svetlo oranžno (#fffaf4), besedilo in gumbi v vijolični barvi portala,
 - besedilo razlag in nalog sega čez vso širino vsebine; gumbi za listanje so majhni,
 - naloga, ki je dijak ni izpolnil do konca ali je izraza ni mogoče prebrati, ni oddana (samo opozorilo); vsak drug odgovor jo zaklene, z razlago artifacta, zakaj je napačen (potrjeno 6. 11. 2026),
-- Za doma so načeloma naloge brez točkovanja; točkovane naloge, ki jih ima artifact na strani za doma, postanejo svoj sklop med Vajami (2.3: sklop I Še več maturitetnih nalog),
+- Za doma so načeloma naloge brez točkovanja; točkovane naloge, ki jih ima artifact na strani za doma, postanejo svoj sklop med Vajami (2.3: sklop I Ponavljanje; v artifactu »Še več maturitetnih nalog«, preimenovan 8. 11. 2026, ker niso vse naloge iz mature),
 - naloge z zbirnikom (2.3): Zaženi teste pokaže rezultate testov in se ne točkuje, Oddaj točkuje in zaklene, tudi če testi ne uspejo,
 - skupine razlag: 2.1 Pretvorbe, Računanje, Kodiranje, Pariteta (iz artifacta); 2.2 Logična vrata, Funkcije in poenostavljanje, Aritmetična vezja; 2.3 Podatki in procesor, Zbirnik, Prekinitve in pomnilniki, Vhod, izhod in cevovod,
 - barve stanj so enake kot v učiteljevem pregledu: pravilno zeleno, pravilno z namigom jantarno, napačno rdeče, ogledana rešitev sivo.

@@ -6,13 +6,13 @@
 <section class="block">
   <h2>Dijaki</h2>
   <div class="scroll"><table class="data">
-    <thead><tr><th class="l">Dijak</th><th class="l">Naloge</th><th>Točke</th><th>Namigi</th><th>Rešitve</th><th>Teorija</th><th>Simulacija</th><th>Naloge</th><th>Ponastavitve</th><th class="l">Zadnja aktivnost</th></tr></thead>
+    <thead><tr><th class="l">Dijak</th><th class="l">Naloge</th><th>Točke</th><th>Namigi</th><th>Rešitve</th><th>Teorija</th><th>Simulacija</th><th>Naloge</th><th>Pred ponastavitvijo</th><th class="l">Zadnja aktivnost</th></tr></thead>
     <tbody><% students.forEach((s) => { %><tr>
       <td class="l"><a href="/ucitelj/razredi/<%= cls.id %>/dijaki/<%= s.id %>"><%= s.name %></a></td>
       <td class="l strip-cell"><%- include('../partials/strip', { items: s.strip }) %></td>
       <td class="nw"><%= f.num(s.c.score) %> / <%= ex.maxPoints %></td><td><%= s.c.hints %></td><td><%= s.c.solutions %></td>
       <td class="nw"><%= f.duration(s.c.time.Teorija) %></td><td class="nw"><%= f.duration(s.c.time.Simulacija) %></td><td class="nw"><%= f.duration(s.c.time.Naloge) %></td>
-      <td><%= s.c.resets %></td><td class="l nw"><%= f.ago(s.c.updatedAt || s.c.lastSeen) %></td>
+      <td class="nw"><%= s.c.prev ? `${f.num(s.c.prev.score)} / ${ex.maxPoints}${s.c.prev.counts ? ' (šteje)' : ''}` : '' %></td><td class="l nw"><%= f.ago(s.c.updatedAt || s.c.lastSeen) %></td>
     </tr><% }) %></tbody>
   </table></div>
   <%- include('../partials/legend') %>
@@ -30,7 +30,7 @@
 <section class="block">
   <h2>Ponastavitev</h2>
   <details class="danger-zone"><summary>Ponastavi vajo <%= ex.no %> celemu razredu</summary>
-    <p>Vsem dijakom v razredu se izbrišejo odgovori in točke te vaje, začnejo znova. Prejšnji rezultati ostanejo v zgodovini, porabljen čas in opombe ostanejo.</p>
+    <p>Vsem dijakom v razredu se izbrišejo odgovori in točke te vaje, začnejo znova. Točke pred ponastavitvijo štejejo, dokler dijak ne odgovori na nalogo v novem poskusu. Porabljen čas in opombe ostanejo.</p>
     <form method="post" action="/ucitelj/razredi/<%= cls.id %>/rezultati/<%= ex.id %>/ponastavi"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn danger">Da, ponastavi vajo <%= ex.id %> za razred <%= cls.name %></button></form>
   </details>
 </section>

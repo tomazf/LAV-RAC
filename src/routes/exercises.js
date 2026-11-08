@@ -3,7 +3,7 @@ import express from 'express';
 import { byId, inYear, pastYear, renderExercise } from '../catalog.js';
 import { csrfValid, requireAccess } from '../auth.js';
 import { many, one, tx } from '../db.js';
-import { merge, summarize } from '../progress.js';
+import { merge, summarize, recordReset } from '../progress.js';
 
 export const exerciseRouter = express.Router();
 
@@ -42,7 +42,7 @@ async function openAttempt(user, ex) {
     const p = (await c.query('SELECT * FROM progress WHERE user_id=$1 AND exercise_id=$2 FOR UPDATE', [user.id, ex.id])).rows[0];
     if (p.content_version === ex.version) return withSeed(c, user, ex, p);
     if (p.done_count > 0) {
-      await c.query('INSERT INTO resets(user_id, exercise_id, attempt, score, done_count, reason) VALUES($1,$2,$3,$4,$5,$6)', [user.id, ex.id, p.attempt, p.score, p.done_count, 'version']);
+      await recordReset(c, { userId: user.id, exId: ex.id, attempt: p.attempt, score: Number(p.score), done: p.done_count, reason: 'version' });
     }
     const fresh = (await c.query(
       `UPDATE progress SET attempt=attempt+1, content_version=$3, state='{}', score=0, done_count=0, hint_count=0, solution_count=0, completed_at=NULL, updated_at=now(),
@@ -83,7 +83,7 @@ exerciseRouter.post('/api/progress/:id', async (req, res, next) => {
       if (req.body.reset === true) {
         const had = summarize(ex, p.state);
         if (had.done === 0 && had.hints === 0) return { attempt: p.attempt, ...had };
-        await c.query('INSERT INTO resets(user_id, exercise_id, attempt, score, done_count) VALUES($1,$2,$3,$4,$5)', [req.user.id, ex.id, p.attempt, had.score, had.done]);
+        await recordReset(c, { userId: req.user.id, exId: ex.id, attempt: p.attempt, score: had.score, done: had.done });
         const fresh = merge(ex, {}, req.body.state);
         await c.query(`UPDATE progress SET attempt=attempt+1, state=$3, score=0, done_count=0, hint_count=0, solution_count=0, completed_at=NULL, updated_at=now(), variant_seed=NULL, variant_keep='{}' WHERE user_id=$1 AND exercise_id=$2`, [req.user.id, ex.id, { ...fresh.state, t: {} }]);
         return { attempt: p.attempt + 1, score: 0, done: 0 };

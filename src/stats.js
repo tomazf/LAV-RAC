@@ -23,7 +23,7 @@ export function strip(ex, state) {
   });
 }
 export const statusText = STATUS;
-const blank = () => ({ state: {}, score: 0, done: 0, hints: 0, solutions: 0, started: false, completedAt: null, updatedAt: null, attempt: 1, time: { Teorija: 0, Simulacija: 0, Naloge: 0 }, seconds: 0, resets: 0, lastSeen: null });
+const blank = () => ({ state: {}, score: 0, done: 0, hints: 0, solutions: 0, started: false, completedAt: null, updatedAt: null, attempt: 1, time: { Teorija: 0, Simulacija: 0, Naloge: 0 }, seconds: 0, prev: null, lastSeen: null });
 // progress[userId][exerciseId] for a set of users
 export async function progressFor(userIds) {
   const out = new Map(userIds.map((id) => [id, new Map()]));
@@ -44,19 +44,23 @@ export async function progressFor(userIds) {
     x.seconds += r.s;
     if (!x.lastSeen || r.last > x.lastSeen) x.lastSeen = r.last;
   }
-  for (const r of await many(`SELECT user_id, exercise_id, count(*)::int AS n FROM resets WHERE user_id = ANY($1) AND reason='student' GROUP BY 1,2`, [userIds])) {
-    if (byId.has(r.exercise_id)) get(r.user_id, r.exercise_id).resets = r.n;
+  // The score before the last reset counts until the student answers a task in the new attempt.
+  for (const r of await many('SELECT user_id, exercise_id, score, done_count, created_at FROM resets WHERE user_id = ANY($1)', [userIds])) {
+    if (!byId.has(r.exercise_id)) continue;
+    const x = get(r.user_id, r.exercise_id);
+    x.prev = { score: Number(r.score), done: r.done_count, at: r.created_at, counts: x.done === 0 };
+    if (x.done === 0) { x.score = Number(r.score); x.done = r.done_count; }
   }
   return out;
 }
 export const cell = (map, exId) => map?.get(exId) ?? blank();
 export const latest = (a, b) => (!a ? b : !b ? a : a > b ? a : b);
-// Points and tasks count only the given exercises (the ones open to the class); time and resets count everything.
+// Points and tasks count only the given exercises (the ones open to the class); time counts everything.
 export function rollup(map, onlyIds) {
-  const r = { score: 0, done: 0, seconds: 0, resets: 0, last: null, time: { Teorija: 0, Simulacija: 0, Naloge: 0 } };
+  const r = { score: 0, done: 0, seconds: 0, last: null, time: { Teorija: 0, Simulacija: 0, Naloge: 0 } };
   for (const [id, c] of map?.entries() ?? []) {
     if (!onlyIds || onlyIds.has(id)) { r.score += c.score; r.done += c.done; }
-    r.seconds += c.seconds; r.resets += c.resets;
+    r.seconds += c.seconds;
     r.last = latest(r.last, latest(c.updatedAt, c.lastSeen));
     for (const ch of CHAPTERS) r.time[ch] += c.time[ch] || 0;
   }

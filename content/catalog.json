@@ -2416,49 +2416,49 @@
      "i": 122,
      "level": "težja",
      "max": 3,
-     "section": "Še več maturitetnih nalog",
+     "section": "Ponavljanje",
      "q": "Za vsak opis zapiši primer dveh binarnih števil z osmimi biti (x in y) ali NE OBSTAJA, če takih števil ni. 1) x je večji od y in ima manj enic kot y. 2) x in y "
     },
     {
      "i": 123,
      "level": "srednja",
      "max": 2,
-     "section": "Še več maturitetnih nalog",
+     "section": "Ponavljanje",
      "q": "Kateri trditvi ustrezata opisu programskega števca (PC)?"
     },
     {
      "i": 124,
      "level": "lažja",
      "max": 1,
-     "section": "Še več maturitetnih nalog",
+     "section": "Ponavljanje",
      "q": "Katera od naštetih trditev je resnična za predpomnilnik?"
     },
     {
      "i": 125,
      "level": "srednja",
      "max": 2,
-     "section": "Še več maturitetnih nalog",
+     "section": "Ponavljanje",
      "q": "Število DEF₁₆ zapiši v dvojiškem in v desetiškem sestavu."
     },
     {
      "i": 126,
      "level": "težja",
      "max": 3,
-     "section": "Še več maturitetnih nalog",
+     "section": "Ponavljanje",
      "q": "Kaj je po izvedbi štirih ukazov v registru A? Zapiši vmesne vrednosti in končni rezultat (šestnajstiško)."
     },
     {
      "i": 127,
      "level": "težja",
      "max": 3,
-     "section": "Še več maturitetnih nalog",
+     "section": "Ponavljanje",
      "q": "Na naslovih $20 do $23 so štirje bajti. Skopiraj jih na naslove $30 do $33. Uporabi indeksno naslavljanje in zanko."
     },
     {
      "i": 128,
      "level": "težja",
      "max": 3,
-     "section": "Še več maturitetnih nalog",
+     "section": "Ponavljanje",
      "q": "Na naslovih $20 do $23 so štirje bajti, katerih vsota je manjša od 256. Vsoto zapiši na $24."
     }
    ],
@@ -2571,7 +2571,7 @@
     {
      "id": "doma-mat",
      "chapter": "Naloge",
-     "label": "Vaje I · Še več maturitetnih nalog"
+     "label": "Vaje I · Ponavljanje"
     },
     {
      "id": "doma",

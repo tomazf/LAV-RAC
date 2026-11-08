@@ -10,7 +10,7 @@ Portal bo na `lavrac.sc-nm.si`. Zgrajen je na ogrodju [LAV-ELS](https://github.c
 |---|---|---|
 | Skrbnik | uporabniško ime v `ADMIN_EMAILS` | ustvarja, preimenuje in briše razrede, določa učitelje in jih dodeljuje razredom, briše uporabnike, vidi dnevnik dejanj, lahko dela vse kot učitelj v vsakem razredu |
 | Učitelj | določi ga skrbnik | se pridruži razredom (iz razreda ga lahko odstrani samo skrbnik), v svojih razredih dodaja in odstranjuje dijake, izbira odprte vaje in vrstni red, vidi rezultate in dijake brez razreda, ponastavi vajo dijaku ali celemu razredu, izvozi rezultate v CSV |
-| Dijak | učitelj ali skrbnik ga doda v en razred | rešuje odprte vaje, vidi svoj napredek, sam ponastavi vajo (učitelj to vidi) in piše svoje zasebne opombe. Razreda ne more zapustiti sam |
+| Dijak | učitelj ali skrbnik ga doda v en razred | rešuje odprte vaje, vidi svoj napredek, sam ponastavi vajo in piše svoje zasebne opombe. Razreda ne more zapustiti sam |
 | Brez razreda | vsak nov ali odstranjen uporabnik | vidi samo obvestilo, da čaka na razred |
 
 ## Hitri predogled brez Microsoftovega računa
@@ -113,7 +113,7 @@ Portal hrani podatke dijakov, zato se pred uporabo pogovori s pooblaščeno oseb
 
 Vsak dijak ima pri vaji en trenutni poskus. Rešena naloga je zaklenjena, namig odbije polovico točk, prikaz rešitve pomeni 0 točk. Ta pravila preveri tudi strežnik.
 
-Ponastavitev začne nov poskus. Lahko jo sproži dijak sam, učitelj posameznemu dijaku ali celemu razredu, ali nova različica vaje. Prejšnji rezultat in razlog ostaneta zabeležena, učitelj ju vidi pri rezultatih. Opombe ostanejo.
+Ponastavitev začne nov poskus. Lahko jo sproži dijak sam, učitelj posameznemu dijaku ali celemu razredu, ali nova različica vaje. Shrani se samo rezultat tik pred zadnjo ponastavitvijo: šteje, dokler dijak v novem poskusu ne odgovori na nobeno nalogo (varovalka za ponastavitev po nesreči). Učitelj ga vidi pri dijaku. Opombe ostanejo.
 
 Novi razred nima odprte nobene vaje, učitelj jih odpre sam. Če učitelj vajo zapre, se novi odgovori ne shranijo.
 

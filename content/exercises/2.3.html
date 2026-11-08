@@ -208,7 +208,7 @@
       const yes = h('button', { type: 'button', class: 'lr-btn lr-danger', id: 'resetYes', text: 'Da, ponastavi' });
       const no = h('button', { type: 'button', class: 'lr-btn lr-ghost', text: 'Prekliči' });
       reset.replaceChildren(h('span', { class: 'lr-confirm', role: 'alert' },
-        h('span', { text: 'Res ponastavim vajo? Vsi odgovori se izbrišejo, učitelj bo videl ponastavitev in prejšnji rezultat.' }), yes, no));
+        h('span', { text: 'Res ponastavim vajo? Vsi odgovori se izbrišejo. Dokler ne odgovoriš na novo nalogo, štejejo prejšnje točke.' }), yes, no));
       yes.addEventListener('click', doReset);
       no.addEventListener('click', idle);
       no.focus();
@@ -2548,7 +2548,7 @@ const LEVELS = [
  {id:"naloge-e", tag:"F", key:"E", title:"Prekinitve", note:"Zaporedje dogodkov, maskiranje, pasti. Razlaga 7."},
  {id:"naloge-f", tag:"G", key:"F", title:"Pomnilniki in hierarhija", note:"Vrste, tehnologije, predpomnilnik, navidezni pomnilnik. Razlaga 8 in 9."},
  {id:"naloge-g", tag:"H", key:"G", title:"Vhod, izhod in cevovod", note:"Enote, krmilniki, serijski in vzporedni prenos, brezžične povezave, cevovod. Razlaga 10 in 11."},
- {id:"doma-mat", tag:"H", key:"H", title:"Še več maturitetnih nalog", note:"Mešane naloge za ponavljanje. Preverjaš jih enako kot v sklopih A–H.", home:true}
+ {id:"doma-mat", tag:"H", key:"H", title:"Ponavljanje", note:"Mešane naloge iz vseh razdelkov, med njimi tudi maturitetne. Preverjaš jih enako kot v sklopih A–H.", home:true}
 ];
 
 const T = [];

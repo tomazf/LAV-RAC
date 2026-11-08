@@ -28,13 +28,12 @@
     <summary>
       <span class="exd-t"><span class="ex-no"><%= e.no %></span> <%= e.title %><% if (!e.visible) { %> <span class="tag">zaprta</span><% } %></span>
       <%- include('../partials/strip', { items: e.strip }) %>
-      <span class="exd-m"><%= f.num(e.c.score) %> / <%= e.maxPoints %> t, <%= f.duration(e.c.seconds) %><% if (e.c.resets) { %>, ↺<%= e.c.resets %><% } %></span>
+      <span class="exd-m"><%= f.num(e.c.score) %> / <%= e.maxPoints %> t, <%= f.duration(e.c.seconds) %></span>
     </summary>
     <div class="exd-body">
-      <% if (e.resets.length) { %><h3>Ponastavitve</h3>
-      <ul class="plain"><% e.resets.forEach((r) => { %><li><%= f.dateTime(r.created_at) %>: <%= { version: 'nova različica vaje', teacher: 'ponastavil učitelj', student: 'ponastavil dijak' }[r.reason] %>, prejšnji rezultat <%= f.num(r.score) %> od <%= e.maxPoints %> t, <%= r.done_count %> nalog</li><% }) %></ul><% } %>
+      <% if (e.c.prev) { %><p class="prev-score">Pred zadnjo ponastavitvijo (<%= f.dateTime(e.c.prev.at) %>): <%= f.num(e.c.prev.score) %> od <%= e.maxPoints %> t, <%= e.c.prev.done %> nalog. <%= e.c.prev.counts ? 'Te točke štejejo, dokler dijak ne odgovori na nalogo v novem poskusu.' : 'Dijak rešuje znova, šteje novi poskus.' %></p><% } %>
       <% if (e.c.done || e.c.hints) { %><details class="danger-zone"><summary>Ponastavi to vajo dijaku</summary>
-        <p>Dijaku se izbrišejo odgovori in točke te vaje, začne znova. Prejšnji rezultat ostane v zgodovini, porabljen čas in opombe ostanejo.</p>
+        <p>Dijaku se izbrišejo odgovori in točke te vaje, začne znova. Točke pred ponastavitvijo štejejo, dokler dijak ne odgovori na nalogo v novem poskusu. Porabljen čas in opombe ostanejo.</p>
         <form method="post" action="/ucitelj/razredi/<%= cls.id %>/dijaki/<%= m.id %>/vaje/<%= e.id %>/ponastavi"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn danger small">Da, ponastavi vajo <%= e.no %> dijaku <%= m.name %></button></form>
       </details><% } %>
       <h3>Naloge</h3>

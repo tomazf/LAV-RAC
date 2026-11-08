@@ -208,7 +208,7 @@
       const yes = h('button', { type: 'button', class: 'lr-btn lr-danger', id: 'resetYes', text: 'Da, ponastavi' });
       const no = h('button', { type: 'button', class: 'lr-btn lr-ghost', text: 'Prekliči' });
       reset.replaceChildren(h('span', { class: 'lr-confirm', role: 'alert' },
-        h('span', { text: 'Res ponastavim vajo? Vsi odgovori se izbrišejo, učitelj bo videl ponastavitev in prejšnji rezultat.' }), yes, no));
+        h('span', { text: 'Res ponastavim vajo? Vsi odgovori se izbrišejo. Dokler ne odgovoriš na novo nalogo, štejejo prejšnje točke.' }), yes, no));
       yes.addEventListener('click', doReset);
       no.addEventListener('click', idle);
       no.focus();

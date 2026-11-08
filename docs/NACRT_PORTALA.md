@@ -38,7 +38,7 @@ Pravila:
 ## 4. Napredek, točke, ponastavitve
 
 - Vsak dijak ima pri vaji en trenutni **poskus**. Rešena naloga je zaklenjena, namig odbije polovico točk, prikaz rešitve pomeni 0 točk. Pravila preveri tudi strežnik (`src/progress.js`): naloge, ki so bile rešene, se ne spremenijo, uporabljen namig ostane uporabljen, točke so omejene.
-- **Ponastavitev** začne nov poskus. Sproži jo dijak, učitelj (posameznemu dijaku ali celemu razredu) ali nova različica vaje. Prejšnji rezultat in razlog (dijak, učitelj, različica) ostaneta zabeležena in ju učitelj vidi. Opombe ostanejo.
+- **Ponastavitev** začne nov poskus. Sproži jo dijak, učitelj (posameznemu dijaku ali celemu razredu) ali nova različica vaje. Hrani se samo rezultat tik pred zadnjo ponastavitvijo (`resets`, ena vrstica na dijaka in vajo), kot varovalka za ponastavitev po nesreči: dokler dijak v novem poskusu ne odgovori na nobeno nalogo, štejejo te točke; ko začne reševati, šteje novi poskus. Ponastavitev poskusa brez odgovorov obdrži prej shranjene točke. Učitelj prejšnje točke vidi pri dijaku samo kot podatek; števila ponastavitev in zgodovine poskusov ni (8. 11. 2026). Opombe ostanejo.
 - Napredek je vezan na zaporedno številko naloge. Če se vrstni red ali število nalog spremeni, se poveča različica v ključu vaje (`_v1` v `_v2`) in dijaki začnejo nov poskus. Popravek besedila različice ne potrebuje.
 - **Čas** šteje brskalnik samo, ko je zavihek viden in je bila v zadnji minuti aktivnost (utrip na 15 s, mirovanje po 60 s). Strežnik omeji posamezen prispevek na 60 s. Čas se beleži po straneh in poglavjih; to je ocena.
 - **Opombe**: pri nalogi, pri vaji in splošna, do 5000 znakov, kot navadno besedilo. Vidi jih samo dijak; učitelji in skrbniki jih v portalu ne vidijo. Ponastavitev jih ne izbriše.
@@ -94,7 +94,7 @@ Strani: Uporabniki (filter, iskanje, vloge, izbris; dijakom brez razreda skrbnik
 - Vse, kar vidi uporabnik, je v slovenščini. Komentarji v kodi in sporočila commitov so angleški.
 - Seznami oseb (brez razreda, dijaki v razredu, skrbniški seznam uporabnikov) so v slovenski abecedi (č, š, ž za c, s, z), ker je zbirka podatkov ne uredi tako. Ime je »Ime Priimek«, priimek je zadnja beseda. Seznam brez razreda in rezultate razreda je mogoče razvrstiti tudi po priimku.
 - Seznam brez razreda kaže samo ime in priimek; UPN je v oblačku ob miški; iskanje je samo po imenu.
-- Rezultati razreda: tabela po vajah, izvoz CSV, podrobnosti dijaka (zgodovina, ponastavitve, čas po straneh).
+- Rezultati razreda: tabela po vajah, izvoz CSV, podrobnosti dijaka (naloge, točke pred zadnjo ponastavitvijo, čas po straneh).
 - Dijak z odprto vajo po posodobitvi portala osveži stran.
 
 ## 10. Postavitev

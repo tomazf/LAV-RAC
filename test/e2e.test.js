@@ -212,7 +212,7 @@ test('shared computer: the next student sees nothing from the previous one', asy
   assert.match(await a.textContent('#pc'), /^0\//);
   await ctx.close();
 });
-test('reset: the student can restart, the teacher sees it with the earlier score', async () => {
+test('reset: the student can restart; the earlier score counts until a new answer, the teacher sees it once', async () => {
   const s = await login('Ana Kovač');
   await openTasks(s, '1.1');
   const scoreBefore = (await sql(`SELECT score, done_count, attempt FROM progress WHERE exercise_id='1.1' AND user_id=(SELECT id FROM users WHERE oid='u-ana')`))[0];
@@ -229,17 +229,26 @@ test('reset: the student can restart, the teacher sees it with the earlier score
   assert.equal(r.reason, 'student');
   await s.reload();
   assert.equal(await s.textContent('#sc'), '0');
-  // new answers after the reset still save
+  // until the student answers again, the earlier score counts, for the student and for the teacher
+  await s.goto(`${APP}/vaje`);
+  const meta = await s.locator('li.node', { hasText: 'Logični nivoji' }).locator('.ex-meta').textContent();
+  assert.match(meta, new RegExp(`^${String(Math.round(Number(scoreBefore.score) * 10) / 10).replace('.', ',')} od .*, ${scoreBefore.done_count} od .*točke pred ponastavitvijo`));
+  const t0 = await login('Tomaž Učitelj');
+  await t0.goto(`${APP}/ucitelj/razredi/${classId}/dijaki/${(await sql(`SELECT id FROM users WHERE oid='u-ana'`))[0].id}`);
+  assert.match(await t0.locator('details.exd', { hasText: 'Logični nivoji' }).textContent(), /Pred zadnjo ponastavitvijo .*Te točke štejejo/);
+  await t0.context().close();
+  // new answers after the reset still save, and from then on the new attempt counts
+  await openTasks(s, '1.1');
   await s.evaluate(() => { document.querySelectorAll('.task')[1].querySelector('[data-act=sol]').click(); });
   await synced(s);
   assert.equal((await sql(`SELECT done_count FROM progress WHERE exercise_id='1.1' AND user_id=(SELECT id FROM users WHERE oid='u-ana')`))[0].done_count, 1);
   const t = await login('Tomaž Učitelj');
   await t.goto(`${APP}/ucitelj/razredi/${classId}`);
-  assert.equal(await t.locator('.matrix tbody tr', { hasText: 'Ana' }).locator('.rs').count(), 1);
+  assert.equal(await t.locator('.matrix .rs').count(), 0); // how often is not shown
   await t.locator('.matrix a', { hasText: 'Ana Kovač' }).click();
   await t.waitForURL(/dijaki/);
   await t.locator('details.exd', { hasText: 'Logični nivoji' }).locator('summary').first().click();
-  assert.match(await t.locator('details.exd', { hasText: 'Logični nivoji' }).textContent(), /ponastavil dijak, prejšnji rezultat/);
+  assert.match(await t.locator('details.exd', { hasText: 'Logični nivoji' }).textContent(), /Pred zadnjo ponastavitvijo .*Dijak rešuje znova/);
   await s.context().close();
   await t.context().close();
 });
@@ -407,7 +416,7 @@ test('removing a student returns them to waiting; progress comes back when they 
   await s.context().close();
   await t.context().close();
 });
-test('a teacher resets an exercise for one student or the whole class; history and notes stay', async () => {
+test('a teacher resets an exercise for one student or the whole class; the score before it and notes stay', async () => {
   const ana = (await sql(`SELECT id FROM users WHERE oid='u-ana'`))[0].id;
   const bor = (await sql(`SELECT id FROM users WHERE oid='u-bor'`))[0].id;
   const row = async (uid, ex) => (await sql('SELECT attempt, score, done_count, state FROM progress WHERE user_id=$1 AND exercise_id=$2', [uid, ex]))[0];
@@ -429,7 +438,6 @@ test('a teacher resets an exercise for one student or the whole class; history a
   await answer(b, '3.2', 1);
   const before3 = await row(ana, '3.3');
   assert.ok(before3.done_count >= 2);
-  const studentResets = (await sql(`SELECT count(*)::int n FROM resets WHERE user_id=$1 AND reason='student'`, [ana]))[0].n;
   // one student, one exercise
   const t = await login('Tomaž Učitelj');
   await t.goto(`${APP}/ucitelj/razredi/${classId}/dijaki/${ana}`);
@@ -444,7 +452,7 @@ test('a teacher resets an exercise for one student or the whole class; history a
   const r = (await sql(`SELECT * FROM resets WHERE user_id=$1 AND exercise_id='3.3' ORDER BY id DESC LIMIT 1`, [ana]))[0];
   assert.deepEqual([r.reason, r.done_count], ['teacher', before3.done_count]);
   await t.locator('details.exd', { hasText: 'MUX, DEMUX' }).locator('summary').first().click();
-  assert.match(await t.locator('details.exd', { hasText: 'MUX, DEMUX' }).textContent(), /ponastavil učitelj/);
+  assert.match(await t.locator('details.exd', { hasText: 'MUX, DEMUX' }).textContent(), /Pred zadnjo ponastavitvijo .*Te točke štejejo/);
   // a tab the student left open cannot bring answers back
   await a.evaluate(() => { [...document.querySelectorAll('.task')].find((t) => !t.querySelector('[data-act=check]').disabled).querySelector('[data-act=sol]').click(); });
   await a.waitForSelector('.lvs-warn');
@@ -466,8 +474,8 @@ test('a teacher resets an exercise for one student or the whole class; history a
   await t.click('button:text("Da, ponastavi vajo 3.2")');
   await t.waitForLoadState();
   assert.match(await t.textContent('.notice'), /Dijakov: 0/);
-  // teacher resets are not counted as the student's own; the log says who did it; notes stay
-  assert.equal((await sql(`SELECT count(*)::int n FROM resets WHERE user_id=$1 AND reason='student'`, [ana]))[0].n, studentResets);
+  // only the last reset is kept per student and exercise; the log says who did it; notes stay
+  assert.deepEqual(await sql(`SELECT user_id, exercise_id FROM resets GROUP BY 1,2 HAVING count(*) > 1`), []);
   const log = await sql(`SELECT action, actor_name, detail FROM audit_log WHERE action LIKE 'Ponastavil vajo%' ORDER BY id`);
   assert.deepEqual(log.map((l) => [l.action, l.actor_name]), [['Ponastavil vajo dijaku', 'Tomaž Učitelj'], ['Ponastavil vajo razredu', 'Tomaž Učitelj']]);
   assert.match(log[0].detail, /Ana Kovač: 3\.3/);

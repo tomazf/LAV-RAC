@@ -31,6 +31,9 @@ export default {
   body{padding-left:0;padding-right:0}`,
   patches: [
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
+    // Set I is mixed revision; not all of its tasks come from the matura (agreed 8. 11. 2026).
+    ['title:"Še več maturitetnih nalog", note:"Mešane naloge za ponavljanje. Preverjaš jih enako kot v sklopih A–H."',
+      'title:"Ponavljanje", note:"Mešane naloge iz vseh razdelkov, med njimi tudi maturitetne. Preverjaš jih enako kot v sklopih A–H."'],
     // Storage: the portal's state for this student; the artifact's own account sync is not used.
     ["const STORE = \"arhitektura-matura-p2-v1\";\nconst $ = (s,el=document)=>el.querySelector(s);\nlet S = {}, localT = 0;\ntry { S = JSON.parse(localStorage.getItem(STORE) || \"{}\") || {}; localT = +localStorage.getItem(STORE+\"-t\") || 0; } catch(e) { S = {}; }\nlet remote = null, pushTimer = null, pushing = false, dirty = false;\nfunction saveLocal(){ try { localStorage.setItem(STORE, JSON.stringify(S)); localStorage.setItem(STORE+\"-t\", String(localT)); } catch(e){} }\nfunction save(){ localT = Date.now(); saveLocal(); if(remote){ dirty = true; clearTimeout(pushTimer); pushTimer = setTimeout(push, 1500); } }",
       "LavRac.tasks(LEVELS.flatMap(L=>T.filter(t=>t.lv===(L.key||L.tag))), { level: (t) => t.pts });\nconst $ = (s,el=document)=>el.querySelector(s);\nlet S = LavRac.loadUi(), localT = 0;\nlet remote = null, pushTimer = null, pushing = false, dirty = false;\nfunction saveLocal(){ LavRac.saveUi(S); }\nfunction save(){ LavRac.saveUi(S); }"],

@@ -26,8 +26,8 @@
   <% rows.forEach((r) => { %><tr>
     <td class="l stick"><a href="/ucitelj/razredi/<%= cls.id %>/dijaki/<%= r.id %>"><%= r.name %></a></td>
     <% list.forEach((e) => { const c = cell(r.cells, e.id); const p = f.pct(c.score, e.maxPoints); const d = f.pct(c.done, e.tasks.length); %>
-    <td class="heat <%= e.visible ? '' : 'closed' %>" style="--p:<%= p %>" title="<%= e.no %> <%= e.title %>: <%= f.num(c.score) %> od <%= e.maxPoints %> t, <%= c.done %> od <%= e.tasks.length %> nalog, <%= f.duration(c.seconds) %><%= c.resets ? `, ponastavitve: ${c.resets}` : '' %>">
-      <% if (c.started) { %><span class="hv"><%= p %></span><% if (c.resets) { %><span class="rs" aria-label="Ponastavitve: <%= c.resets %>">↺<%= c.resets %></span><% } %><span class="hb" style="width:<%= d %>%"></span><% } else { %><span class="hn">–</span><% } %>
+    <td class="heat <%= e.visible ? '' : 'closed' %>" style="--p:<%= p %>" title="<%= e.no %> <%= e.title %>: <%= f.num(c.score) %> od <%= e.maxPoints %> t, <%= c.done %> od <%= e.tasks.length %> nalog, <%= f.duration(c.seconds) %><%= c.prev?.counts ? ', točke pred ponastavitvijo' : '' %>">
+      <% if (c.started) { %><span class="hv"><%= p %></span><span class="hb" style="width:<%= d %>%"></span><% } else { %><span class="hn">–</span><% } %>
     </td><% }) %>
     <td><strong><%= f.pct(r.total.score, maxPoints) %> %</strong></td>
     <td class="nw"><%= f.duration(r.total.seconds) %></td>
@@ -35,7 +35,7 @@
   </tr><% }) %>
   </tbody>
 </table></div>
-<p class="dim note">Število je delež doseženih točk v odstotkih, črta pod njim delež rešenih nalog. ↺ pomeni ponastavitve. Zatemnjene vaje so za dijake zaprte. Pomakni miško nad celico za podrobnosti.</p>
+<p class="dim note">Število je delež doseženih točk v odstotkih, črta pod njim delež rešenih nalog. Zatemnjene vaje so za dijake zaprte. Pomakni miško nad celico za podrobnosti.</p>
 <% } %>
 <section class="block" id="dodaj">
   <h2>Dodaj dijake brez razreda</h2>
