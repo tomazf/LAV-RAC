@@ -1,0 +1,11 @@
+<%- include('../partials/head', { pageTitle: 'Čiščenje', mainClass: 'wide' }) %>
+<%- include('../partials/adminnav') %>
+<section class="block">
+  <h2>Izbriši neaktivne dijake za vedno</h2>
+  <p>Trajno izbriše račune in vse podatke dijakov, ki se dolgo niso prijavili, npr. tistih, ki so šolo zapustili med letom. Učitelji in skrbniki ostanejo.</p>
+  <form class="inline" method="post" action="/admin/ciscenje"><input type="hidden" name="_csrf" value="<%= csrf %>">
+    <label for="days">Brez prijave dni</label><input id="days" type="number" name="days" min="30" value="365" required>
+    <label><input type="checkbox" name="confirm" value="da" required> Razumem, da brisanja ni mogoče razveljaviti</label>
+    <button class="btn danger">Izbriši neaktivne</button></form>
+</section>
+<%- include('../partials/foot') %>

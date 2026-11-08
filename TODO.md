@@ -7,12 +7,12 @@
 - [x] Letnik razreda in prehod v naslednji letnik (6. 11. 2026, glej spodaj).
 - [x] Administracija > Razredi: gumbi Dodaj (in Shrani) (učitelj) naj bodo poravnani v stolpcu, ne glede na dolžino imena v izbirnem polju (6. 11. 2026).
 - [x] Administracija > Razredi: pri najnižjem letniku (2.) ni izbire »vidi prejšnje letnike«, ker nižjega letnika ni. Pri 3. in 4. naj napis pove, kaj se odpre (3.: »vidi 2. letnik«, 4.: »vidi 2. in 3. letnik«) (6. 11. 2026).
-- [ ] Administracija > Uporabniki (6. 11. 2026):
+- [x] Administracija > Uporabniki (6. 11. 2026):
   - v eni vrstici najprej filter »Prikaži: …«, nato iskalno polje, na koncu gumb Išči,
   - strani: navigacija na dnu, izbira 20/50/100 na stran (privzeto 50); iskanje in filter ostaneta pri menjavi strani,
   - pri filtru »brez razreda« ima vsak dijak izbirno polje z razredi (po letniku in imenu) in na dnu en gumb »Shrani«; dodelitev gre v dnevnik,
   - »Izbriši neaktivne dijake za vedno« se premakne na svoj, 7. zavihek »Čiščenje« (za Dnevnikom), delovanje ostane enako.
-- [ ] Administracija > Dnevnik (6. 11. 2026):
+- [x] Administracija > Dnevnik (6. 11. 2026):
   - strani kot pri Uporabnikih (20/50/100, privzeto 50) namesto zadnjih 300 zapisov,
   - razvrščanje s klikom na glavo stolpca (čas, oseba, dejanje, podrobnosti), naraščajoče/padajoče, na strežniku; privzeto najnovejši zgoraj,
   - gumb zgoraj: izbriši zapise, starejše od 1/2/3 mesecev, s potrditvijo. Zadnji zapis o prenosu kopije in zadnji zapis o zaključku šolskega leta vedno ostaneta (portal ju bere). Brisanje se zapiše v dnevnik s številom zapisov.

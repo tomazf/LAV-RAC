@@ -567,3 +567,66 @@ test('a class works on its year; lower years open for revision; the admin closes
   await db.end();
   assert.deepEqual(errors, []);
 });
+
+test('admin lists: filter row, class for students without one, the log in pages, sorted and cleaned up; cleanup tab', async () => {
+  const db = new pg.Client({ connectionString: DB });
+  await db.connect();
+  const a = await login('Sara Skrbnik');
+  // filter first, then search, then the button, in one row
+  await a.goto(`${APP}/admin`);
+  const order = await a.locator('form.user-filter > *:not([type=hidden])').evaluateAll((els) => els.map((e) => e.className || e.id || e.tagName));
+  assert.deepEqual(order.filter((x) => x !== 'sr'), ['sorter', 'q', 'btn ghost']);
+  // a student without a class gets one right here (Bor was left without a class at the end of the year)
+  await a.click('.sorter a:text-is("brez razreda")');
+  assert.deepEqual(await a.locator('tbody td strong').allTextContents(), ['Bor Novak']);
+  const bor = (await db.query(`SELECT id FROM users WHERE oid='u-bor'`)).rows[0].id;
+  await a.selectOption(`#cl${bor}`, { label: 'R3A (3. letnik)' });
+  await a.click('text=Shrani razrede');
+  await a.waitForLoadState();
+  assert.match(await a.textContent('.notice'), /Dijakov, dodanih v razred: 1\./);
+  assert.equal((await db.query('SELECT c.name FROM class_members m JOIN classes c ON c.id=m.class_id WHERE m.user_id=$1', [bor])).rows[0].name, 'R3A');
+  assert.equal(await a.locator('tbody tr').count(), 0);
+  // deleting inactive students has its own tab
+  await a.click('.tabs a:text-is("Čiščenje")');
+  assert.equal(await a.locator('#days').count(), 1);
+  await a.goto(`${APP}/admin`);
+  assert.equal(await a.locator('#days').count(), 0);
+
+  // the log in pages, sorted by any column with Slovenian letters in place
+  await db.query(`UPDATE audit_log SET created_at = created_at - interval '6 months'`);
+  for (const [i, name] of ['Žan', 'Ana', 'Črt', 'Cvetka'].entries()) {
+    await db.query(`INSERT INTO audit_log(actor_name, action, detail, created_at) VALUES($1,'Preizkus',$2, now() - make_interval(days => $3))`, [name, String(i), 70 + i]);
+  }
+  for (let i = 0; i < 60; i++) await db.query(`INSERT INTO audit_log(actor_name, action, detail) VALUES('Polnilo','Preizkus',$1)`, [String(i)]);
+  const total = (await db.query('SELECT count(*)::int AS n FROM audit_log')).rows[0].n;
+  await a.goto(`${APP}/admin/dnevnik`);
+  assert.equal(await a.locator('tbody tr').count(), 50);
+  assert.equal((await a.textContent('.list-pager .dim')).trim(), `1–50 od ${total}`);
+  await a.click('.list-pager .per a:text-is("20")');
+  assert.equal(await a.locator('tbody tr').count(), 20);
+  await a.click('.list-pager a[aria-label="Naslednja stran"]');
+  assert.equal((await a.textContent('.list-pager .dim')).trim(), `21–40 od ${total}`);
+  await a.click('th a:text-is("Kdo")');
+  const who = (await a.locator('tbody td:nth-child(2)').allTextContents()).filter((n) => ['Žan', 'Ana', 'Črt', 'Cvetka'].includes(n));
+  assert.deepEqual(who, ['Ana', 'Cvetka', 'Črt']); // Žan is further down, on a later page
+  assert.equal(await a.getAttribute('th[aria-sort]', 'aria-sort'), 'ascending');
+  await a.click('th a:has-text("Kdo")');
+  assert.equal(await a.getAttribute('th[aria-sort]', 'aria-sort'), 'descending');
+  assert.equal(await a.textContent('tbody tr:first-child td:nth-child(2)'), 'Žan');
+
+  // deleting old entries keeps the last backup and the last end of the school year
+  await a.goto(`${APP}/admin/dnevnik`);
+  await a.click('summary:text-is("Izbriši stare zapise")');
+  await a.selectOption('#months', '2');
+  await a.check('.log-clean input[name=confirm]');
+  await a.click('.log-clean button:text-is("Izbriši")');
+  await a.waitForLoadState();
+  const left = (await db.query(`SELECT action, actor_name FROM audit_log WHERE created_at < now() - interval '2 months' ORDER BY action`)).rows;
+  assert.deepEqual(left.map((r) => r.action), ['Prenesel varnostno kopijo', 'Zaključil šolsko leto']);
+  assert.equal((await db.query(`SELECT count(*)::int AS n FROM audit_log WHERE action='Preizkus'`)).rows[0].n, 60); // only the recent ones stay
+  assert.match(await a.textContent('.notice'), /Izbrisanih zapisov: \d+\./);
+  assert.match(await a.textContent('tbody tr:first-child'), /Izbrisal stare zapise dnevnika.*starejših od 2 mesecev/);
+  await a.context().close();
+  await db.end();
+  assert.deepEqual(errors, []);
+});

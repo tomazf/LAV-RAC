@@ -75,7 +75,7 @@ Vaja je ena HTML datoteka (`content/exercises/<id>.html`), seznam nalog in stran
 
 ## 8. Skrbnik
 
-Strani: Uporabniki (iskanje, vloge, izbris), Vaje (pregled), Razredi, Šolsko leto (samo z letniki), Kopije, Dnevnik. Dnevnik dejanj beleži, kdo je kaj naredil (slovenska imena dejanj).
+Strani: Uporabniki (filter, iskanje, vloge, izbris; dijakom brez razreda skrbnik izbere razred in shrani vse naenkrat), Vaje (pregled), Razredi, Šolsko leto (samo z letniki), Kopije, Dnevnik (razvrščanje po stolpcih, brisanje zapisov, starejših od 1, 2 ali 3 mesecev; zadnji zapis o kopiji in o zaključku šolskega leta vedno ostaneta), Čiščenje (izbris neaktivnih dijakov). Dolgi seznami (Uporabniki, Dnevnik) so po straneh, 20, 50 ali 100 na stran, privzeto 50 (8. 11. 2026). Dnevnik dejanj beleži, kdo je kaj naredil (slovenska imena dejanj).
 
 **Kopije** (Administracija > Kopije):
 - Prenos: `pg_dump` (zapis `custom`, brez sej), datoteka se ne shrani na strežnik, ampak samo na skrbnikov računalnik. Zadnja kopija se zabeleži v dnevnik.

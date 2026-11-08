@@ -2,10 +2,11 @@ import express from 'express';
 import { checkCsrf, isAdmin, requireAdmin } from '../auth.js';
 import { pastLabel, plannedIn, plannedModules, standardGroups, YEARS, yearsOn } from '../catalog.js';
 import { audit, eraseUser, many, one, q, tx } from '../db.js';
-import { backupWarning } from '../backup.js';
+import { ACTION_BACKUP, backupWarning } from '../backup.js';
 import { byName } from '../format.js';
+import { paging } from '../paging.js';
 import { backupRouter } from './backup.js';
-import { yearRouter } from './year.js';
+import { ACTION_YEAR, yearRouter } from './year.js';
 
 export const adminRouter = express.Router();
 adminRouter.use(requireAdmin);
@@ -32,8 +33,13 @@ adminRouter.get('/', async (req, res, next) => {
        FROM users u WHERE ($1='' OR u.name ILIKE '%'||$1||'%' OR u.username ILIKE '%'||$1||'%' OR coalesce(u.email,'') ILIKE '%'||$1||'%')
        ORDER BY u.name`, [search],
     );
-    const users = rows.map((u) => ({ ...u, kind: roleOf(u) })).filter((u) => !kind || u.kind === kind).sort(byName);
-    res.render('admin/users', { users, search, kind, ROLES, message: req.query.sporocilo || null, tab: 'users' });
+    const all = rows.map((u) => ({ ...u, kind: roleOf(u) })).filter((u) => !kind || u.kind === kind).sort(byName);
+    const pg = paging(req.query, all.length);
+    const users = all.slice(pg.offset, pg.offset + pg.per);
+    // Students without a class can be put into one right here.
+    const classes = kind === 'waiting' ? await many('SELECT id, name, year FROM classes ORDER BY year NULLS LAST, name') : [];
+    const params = { vloga: kind, q: search, na: pg.per === 50 ? '' : pg.per };
+    res.render('admin/users', { users, search, kind, ROLES, pg, params, classes, message: req.query.sporocilo || null, tab: 'users' });
   } catch (e) { next(e); }
 });
 adminRouter.post('/uporabniki/:id/vloga', checkCsrf, async (req, res, next) => {
@@ -62,15 +68,39 @@ adminRouter.post('/uporabniki/:id/izbrisi', checkCsrf, async (req, res, next) =>
     flash(res, '/admin', 'Uporabnik in vsi njegovi podatki so izbrisani.');
   } catch (e) { next(e); }
 });
+adminRouter.post('/uporabniki/razredi', checkCsrf, async (req, res, next) => {
+  try {
+    const picks = Object.entries(req.body)
+      .map(([k, v]) => [Number(k.match(/^class_(\d+)$/)?.[1]), Number(v)])
+      .filter(([uid, cid]) => uid && cid);
+    const added = new Map();
+    await tx(async (c) => {
+      for (const [uid, cid] of picks) {
+        // Only students who still have no class; a student has one class.
+        const r = await c.query(
+          `INSERT INTO class_members(class_id, user_id, added_by) SELECT $1, u.id, $3 FROM users u
+           WHERE u.id=$2 AND u.role='user' AND EXISTS (SELECT 1 FROM classes WHERE id=$1)
+             AND NOT EXISTS (SELECT 1 FROM class_members m WHERE m.user_id=u.id)`, [cid, uid, req.user.id],
+        );
+        if (r.rowCount) added.set(cid, (added.get(cid) ?? 0) + 1);
+      }
+    });
+    const names = new Map((await many('SELECT id, name FROM classes WHERE id = ANY($1)', [[...added.keys()]])).map((x) => [Number(x.id), x.name]));
+    for (const [cid, n] of added) await audit(req.user, 'Dodal dijake v razred', `${names.get(cid)}: ${n}`);
+    const total = [...added.values()].reduce((a, b) => a + b, 0);
+    flash(res, '/admin?vloga=waiting', total ? `Dijakov, dodanih v razred: ${total}.` : 'Nobenemu dijaku ni bil izbran razred.');
+  } catch (e) { next(e); }
+});
+adminRouter.get('/ciscenje', (req, res) => res.render('admin/cleanup', { tab: 'cleanup', message: req.query.sporocilo || null }));
 adminRouter.post('/ciscenje', checkCsrf, async (req, res, next) => {
   try {
     const days = Number(req.body.days);
-    if (!Number.isInteger(days) || days < 30 || req.body.confirm !== 'da') return flash(res, '/admin', 'Vpiši vsaj 30 dni in potrdi brisanje.');
+    if (!Number.isInteger(days) || days < 30 || req.body.confirm !== 'da') return flash(res, '/admin/ciscenje', 'Vpiši vsaj 30 dni in potrdi brisanje.');
     const old = await many(`SELECT * FROM users WHERE role='user' AND last_login_at < now() - make_interval(days => $1)`, [days]);
     const gone = old.filter((u) => !isAdmin(u));
     for (const u of gone) await eraseUser(u);
     await audit(req.user, 'Izbrisal neaktivne uporabnike', `${gone.length} (brez prijave ${days} dni)`);
-    flash(res, '/admin', `Izbrisanih uporabnikov: ${gone.length}.`);
+    flash(res, '/admin/ciscenje', `Izbrisanih uporabnikov: ${gone.length}.`);
   } catch (e) { next(e); }
 });
 adminRouter.get('/vaje', (req, res) => {
@@ -148,8 +178,36 @@ adminRouter.post('/razredi/:id/ucitelji/:uid/odstrani', checkCsrf, async (req, r
     res.redirect('/admin/razredi');
   } catch (e) { next(e); }
 });
+// The log: newest first by default; any column sorts, on the server, so it works with paging.
+const LOG_SORT = { cas: 'created_at', kdo: 'actor_name', dejanje: 'action', podrobnost: 'detail' };
+const LOG_KEEP_MONTHS = [1, 2, 3];
 adminRouter.get('/dnevnik', async (req, res, next) => {
   try {
-    res.render('admin/log', { log: await many('SELECT * FROM audit_log ORDER BY created_at DESC LIMIT 300'), tab: 'log', message: null });
+    const by = LOG_SORT[req.query.uredi] ? req.query.uredi : 'cas';
+    const dir = req.query.smer === 'nar' ? 'nar' : req.query.smer === 'pad' ? 'pad' : by === 'cas' ? 'pad' : 'nar';
+    const total = (await one('SELECT count(*)::int AS n FROM audit_log')).n;
+    const pg = paging(req.query, total);
+    // Text columns sort by Slovenian rules; ties keep the newest first.
+    const col = by === 'cas' ? 'created_at' : `${LOG_SORT[by]} COLLATE "sl-SI-x-icu"`;
+    const log = await many(
+      `SELECT * FROM audit_log ORDER BY ${col} ${dir === 'nar' ? 'ASC' : 'DESC'} NULLS LAST, id DESC LIMIT $1 OFFSET $2`, [pg.per, pg.offset],
+    );
+    const params = { uredi: by === 'cas' ? '' : by, smer: req.query.smer === 'nar' || req.query.smer === 'pad' ? dir : '', na: pg.per === 50 ? '' : pg.per };
+    res.render('admin/log', { log, pg, params, by, dir, months: LOG_KEEP_MONTHS, tab: 'log', message: req.query.sporocilo || null });
+  } catch (e) { next(e); }
+});
+adminRouter.post('/dnevnik/ciscenje', checkCsrf, async (req, res, next) => {
+  try {
+    const months = Number(req.body.months);
+    if (!LOG_KEEP_MONTHS.includes(months) || req.body.confirm !== 'da') return flash(res, '/admin/dnevnik', 'Izberi obdobje in potrdi brisanje.');
+    // The portal reads the last backup and the last end of the school year from the log, so those two always stay.
+    const r = await q(
+      `DELETE FROM audit_log WHERE created_at < now() - make_interval(months => $1)
+         AND id NOT IN (SELECT DISTINCT ON (action) id FROM audit_log WHERE action = ANY($2) ORDER BY action, created_at DESC)`,
+      [months, [ACTION_BACKUP, ACTION_YEAR]],
+    );
+    const label = { 1: '1 meseca', 2: '2 mesecev', 3: '3 mesecev' }[months];
+    await audit(req.user, 'Izbrisal stare zapise dnevnika', `${r.rowCount}, starejših od ${label}`);
+    flash(res, '/admin/dnevnik', `Izbrisanih zapisov: ${r.rowCount}.`);
   } catch (e) { next(e); }
 });

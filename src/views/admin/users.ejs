@@ -1,15 +1,20 @@
 <%- include('../partials/head', { pageTitle: 'Uporabniki', mainClass: 'wide' }) %>
 <% const f = fmt; %>
 <%- include('../partials/adminnav') %>
-<form class="inline" method="get" action="/admin"><label class="sr" for="q">Išči</label><input id="q" type="search" name="q" value="<%= search %>" placeholder="Ime ali račun"><button class="btn ghost">Išči</button></form>
-<p class="sorter">Prikaži: <a href="/admin" <%- !kind ? 'aria-current="true"' : '' %>>vse</a><% Object.entries(ROLES).forEach(([k, label]) => { %> <a href="/admin?vloga=<%= k %>" <%- kind === k ? 'aria-current="true"' : '' %>><%= label.toLowerCase() %></a><% }) %></p>
+<form class="inline user-filter" method="get" action="/admin">
+  <p class="sorter">Prikaži: <a href="<%= listUrl('/admin', { ...params, vloga: '' }) %>" <%- !kind ? 'aria-current="true"' : '' %>>vse</a><% Object.entries(ROLES).forEach(([k, label]) => { %> <a href="<%= listUrl('/admin', { ...params, vloga: k }) %>" <%- kind === k ? 'aria-current="true"' : '' %>><%= label.toLowerCase() %></a><% }) %></p>
+  <% if (kind) { %><input type="hidden" name="vloga" value="<%= kind %>"><% } %><% if (params.na) { %><input type="hidden" name="na" value="<%= params.na %>"><% } %>
+  <label class="sr" for="q">Išči</label><input id="q" type="search" name="q" value="<%= search %>" placeholder="Ime ali račun"><button class="btn ghost">Išči</button>
+</form>
+<% const assign = kind === 'waiting' && classes.length && users.length; %>
 <div class="scroll"><table class="data">
-  <thead><tr><th class="l">Uporabnik</th><th class="l">Vloga</th><th class="l">Razredi</th><th class="l">Zadnja prijava</th><th class="l">Dejanja</th></tr></thead>
+  <thead><tr><th class="l">Uporabnik</th><th class="l">Vloga</th><th class="l">Razredi</th><th class="l">Zadnja prijava</th><% if (assign) { %><th class="l">Dodaj v razred</th><% } %><th class="l">Dejanja</th></tr></thead>
   <tbody><% users.forEach((u) => { %><tr>
     <td class="l"><strong><%= u.name %></strong><br><span class="dim"><%= u.username %></span></td>
     <td class="l nw"><span class="tag t-<%= u.kind %>"><%= ROLES[u.kind] %></span></td>
     <td class="l"><%= u.teaching || u.class_names || '' %></td>
     <td class="l nw"><%= f.ago(u.last_login_at) %></td>
+    <% if (assign) { %><td class="l"><label class="sr" for="cl<%= u.id %>">Razred za <%= u.name %></label><select id="cl<%= u.id %>" name="class_<%= u.id %>" form="assign"><option value="">–</option><% classes.forEach((c) => { %><option value="<%= c.id %>"><%= c.name %><%= c.year ? ` (${c.year}. letnik)` : '' %></option><% }) %></select></td><% } %>
     <td class="l"><div class="row">
       <% if (u.kind !== 'admin') { %>
       <form method="post" action="/admin/uporabniki/<%= u.id %>/vloga"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="role" value="<%= u.role === 'teacher' ? 'user' : 'teacher' %>"><button class="btn ghost small"><%= u.role === 'teacher' ? 'Odvzemi vlogo učitelja' : 'Določi za učitelja' %></button></form>
@@ -18,12 +23,6 @@
     </div></td>
   </tr><% }) %></tbody>
 </table></div>
-<section class="block">
-  <h2>Izbriši neaktivne dijake za vedno</h2>
-  <p>Trajno izbriše račune in vse podatke dijakov, ki se dolgo niso prijavili, npr. ob koncu šolskega leta. Učitelji in skrbniki ostanejo.</p>
-  <form class="inline" method="post" action="/admin/ciscenje"><input type="hidden" name="_csrf" value="<%= csrf %>">
-    <label for="days">Brez prijave dni</label><input id="days" type="number" name="days" min="30" value="365" required>
-    <label><input type="checkbox" name="confirm" value="da" required> Razumem, da brisanja ni mogoče razveljaviti</label>
-    <button class="btn danger">Izbriši neaktivne</button></form>
-</section>
+<% if (assign) { %><form id="assign" class="assign-bar" method="post" action="/admin/uporabniki/razredi"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn">Shrani razrede</button><span class="dim">Dijaki brez izbranega razreda ostanejo, kjer so.</span></form><% } %>
+<%- include('../partials/listpager', { path: '/admin', params }) %>
 <%- include('../partials/foot') %>

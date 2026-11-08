@@ -1,0 +1,11 @@
+<%# Paging for long admin lists: page links and the page size. Needs pg (paging()), path and params. %>
+<% const link = (change) => listUrl(path, params, change); %>
+<nav class="list-pager" aria-label="Strani">
+  <span class="dim"><%= pg.total ? `${pg.from}–${pg.to} od ${pg.total}` : '0 zapisov' %></span>
+  <% if (pg.pages > 1) { %><span class="pages">
+    <% if (pg.page > 1) { %><a href="<%= link({ stran: pg.page - 1 }) %>" aria-label="Prejšnja stran">‹</a><% } %>
+    <% pageNumbers(pg).forEach((n) => { %><% if (n === null) { %><span class="gap">…</span><% } else if (n === pg.page) { %><span aria-current="page"><%= n %></span><% } else { %><a href="<%= link({ stran: n }) %>"><%= n %></a><% } %><% }) %>
+    <% if (pg.page < pg.pages) { %><a href="<%= link({ stran: pg.page + 1 }) %>" aria-label="Naslednja stran">›</a><% } %>
+  </span><% } %>
+  <span class="per">Na stran:<% PER_PAGE.forEach((n) => { %> <% if (n === pg.per) { %><span aria-current="true"><%= n %></span><% } else { %><a href="<%= link({ na: n, stran: '' }) %>"><%= n %></a><% } %><% }) %></span>
+</nav>

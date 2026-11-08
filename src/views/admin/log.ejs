@@ -1,8 +1,19 @@
 <%- include('../partials/head', { pageTitle: 'Dnevnik', mainClass: 'wide' }) %>
 <% const f = fmt; %>
 <%- include('../partials/adminnav') %>
-<% if (!log.length) { %><p class="empty">V dnevniku še ni zapisov. Tu se zabeležijo spremembe vlog, razredov in brisanja.</p><% } else { %>
-<div class="scroll"><table class="data"><thead><tr><th class="l">Čas</th><th class="l">Kdo</th><th class="l">Dejanje</th><th class="l">Podrobnost</th></tr></thead><tbody>
+<details class="danger-zone log-clean"><summary>Izbriši stare zapise</summary>
+  <p>Izbriše zapise dnevnika, starejše od izbranega obdobja. Zadnji zapis o prenosu kopije in zadnji o zaključku šolskega leta ostaneta, ker ju portal potrebuje.</p>
+  <form class="inline" method="post" action="/admin/dnevnik/ciscenje"><input type="hidden" name="_csrf" value="<%= csrf %>">
+    <label for="months">Starejše od</label><select id="months" name="months"><% months.forEach((m) => { %><option value="<%= m %>"><%= m === 1 ? '1 meseca' : `${m} mesecev` %></option><% }) %></select>
+    <label><input type="checkbox" name="confirm" value="da" required> Razumem, da brisanja ni mogoče razveljaviti</label>
+    <button class="btn danger small">Izbriši</button></form>
+</details>
+<% if (!pg.total) { %><p class="empty">V dnevniku še ni zapisov. Tu se zabeležijo spremembe vlog, razredov in brisanja.</p><% } else { %>
+<% const head = (key, label) => { const on = by === key; const next = on ? (dir === 'nar' ? 'pad' : 'nar') : (key === 'cas' ? 'pad' : 'nar');
+     return `<th class="l" ${on ? `aria-sort="${dir === 'nar' ? 'ascending' : 'descending'}"` : ''}><a class="sort-head" href="${listUrl('/admin/dnevnik', { ...params, uredi: key === 'cas' ? '' : key, smer: next })}">${label}${on ? (dir === 'nar' ? ' ▲' : ' ▼') : ''}</a></th>`; }; %>
+<div class="scroll"><table class="data"><thead><tr><%- head('cas', 'Čas') %><%- head('kdo', 'Kdo') %><%- head('dejanje', 'Dejanje') %><%- head('podrobnost', 'Podrobnost') %></tr></thead><tbody>
 <% log.forEach((l) => { %><tr><td class="l nw"><%= f.dateTime(l.created_at) %></td><td class="l"><%= l.actor_name %></td><td class="l"><%= l.action %></td><td class="l"><%= l.detail %></td></tr><% }) %>
-</tbody></table></div><% } %>
+</tbody></table></div>
+<%- include('../partials/listpager', { path: '/admin/dnevnik', params }) %>
+<% } %>
 <%- include('../partials/foot') %>

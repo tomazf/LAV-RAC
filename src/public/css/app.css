@@ -202,3 +202,16 @@ form.add-teacher{display:grid;grid-template-columns:minmax(0,1fr) auto;width:100
 form.add-teacher select{width:100%;min-width:0}
 form.year-form{display:flex;width:100%;min-width:20rem}
 form.year-form > button{margin-left:auto}
+/* Admin lists: filter, search and button in one row; paging below */
+form.user-filter{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+form.user-filter .sorter{margin:0 8px 0 0}
+.list-pager{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px;margin:14px 0;font-size:.95rem}
+.list-pager .pages{display:flex;flex-wrap:wrap;gap:4px}
+.list-pager .pages a,.list-pager .pages span{min-width:34px;min-height:34px;display:inline-grid;place-items:center;padding:0 6px;border-radius:6px}
+.list-pager .pages a{border:1px solid var(--line);text-decoration:none}
+.list-pager .pages a:hover{border-color:var(--acc)}
+.list-pager .pages [aria-current]{background:var(--acc);color:#fff;font-weight:700}
+.list-pager .per{color:var(--mut)}.list-pager .per a{margin-left:6px}.list-pager .per [aria-current]{margin-left:6px;font-weight:700;color:var(--ink)}
+.assign-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:12px 0}
+.sort-head{color:inherit;text-decoration:none;white-space:nowrap}.sort-head:hover{text-decoration:underline}
+.log-clean{margin:0 0 14px}
