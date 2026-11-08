@@ -522,7 +522,14 @@ test('a class works on its year; lower years open for revision; the admin closes
   assert.ok(anaBefore);
   await a.goto(`${APP}/admin/solsko-leto`);
   assert.match(await a.textContent('main'), /prenesi svežo varnostno kopijo/);
-  assert.deepEqual(await a.locator('.year-class legend strong').allTextContents(), ['R4A', 'R3A', 'R2A']);
+  assert.deepEqual((await a.locator('.year-card h3').allTextContents()).map((t) => t.replace('→', '').trim()), ['R4A', 'R3A', 'R2A']);
+  assert.match((await a.textContent('.year-sum')).replace(/\s+/g, ' '), /Izbris: 1 razred 4\. letnika, 1 dijak.*Napredovanje: 2 razreda, 3 dijaki, odstranjeni učitelji: 2/);
+  // all / none per class, with the count beside
+  const r2card = a.locator('.year-card', { hasText: 'R2A' });
+  await r2card.locator('button:text-is("nobeden")').click();
+  assert.equal(await r2card.locator('[data-count]').textContent(), '0 od 2 označenih');
+  await r2card.locator('button:text-is("vsi")').click();
+  assert.equal(await r2card.locator('input[type=checkbox]:checked').count(), 2);
   assert.equal(await a.inputValue(`#name_${r3}`), 'R4A');
   assert.equal(await a.inputValue(`#name_${r2}`), 'R3A');
   await a.fill('#potrdi', 'PREHOD');
@@ -533,7 +540,7 @@ test('a class works on its year; lower years open for revision; the admin closes
   const csrf = await a.inputValue('input[name=_csrf]');
   assert.equal((await a.request.post(`${APP}/admin/kopije/prenesi`, { form: { _csrf: csrf } })).status(), 200);
   await a.goto(`${APP}/admin/solsko-leto`);
-  await a.locator('.year-class', { hasText: 'R2A' }).locator('label', { hasText: 'Bor Novak' }).locator('input[type=checkbox]').uncheck();
+  await a.locator('.year-card', { hasText: 'R2A' }).locator('label', { hasText: 'Bor Novak' }).locator('input[type=checkbox]').uncheck();
   await a.fill('#potrdi', 'prehod');
   await a.click('text=Zaključi šolsko leto');
   await a.waitForURL(/admin\/razredi/);

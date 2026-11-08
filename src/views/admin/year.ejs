@@ -1,49 +1,59 @@
 <%- include('../partials/head', { pageTitle: 'Šolsko leto', mainClass: 'wide' }) %>
-<% const f = fmt; const people = (n) => f.count(n, f.DIJAKOV); %>
+<% const f = fmt; const people = (n) => f.count(n, f.DIJAKOV);
+   const sum = (list) => list.reduce((a, c) => a + c.students.length, 0);
+   const teachersOut = moving.reduce((a, c) => a + c.teachers.length, 0); %>
 <%- include('../partials/adminnav') %>
 <% if (error) { %><p class="notice-warn" role="alert"><%= error %></p><% } %>
-<section class="block">
+<section class="block year-intro">
   <h2>Zaključek šolskega leta</h2>
-  <p>Ob koncu šolskega leta se <%= finalYear %>. letniki poslovijo od portala, drugi razredi pa napredujejo v višji letnik. Spodaj je predogled. Podatki se spremenijo šele, ko potrdiš na dnu strani.</p>
-  <ul>
-    <li>Dijaki <%= finalYear %>. letnikov se <strong>trajno izbrišejo</strong> z napredkom, opombami in vsemi zapisi, njihovi razredi pa tudi. Tega ni mogoče razveljaviti, razen z obnovitvijo kopije, ki jo preneseš zdaj.</li>
-    <li>Drugi razredi preidejo v višji letnik in dobijo novo ime. Poglavja novega letnika so zaprta, dokler jih učitelj ne odpre. Razredi zagledajo prejšnje letnike za ponavljanje.</li>
-    <li>Učitelji se odstranijo iz razredov, ki napredujejo. Po prehodu jih dodeliš na strani Razredi.</li>
-    <li>Napredek dijakov ostane. Dijak, ki ga odznačiš, ostane brez razreda in ga pozneje dodaš v ustrezen razred.</li>
+  <% const RAZREDOV = ['razred', 'razreda', 'razredi', 'razredov']; %>
+  <ul class="year-sum">
+    <li>Izbris: <b><%= f.count(leaving.length, RAZREDOV) %></b> <%= finalYear %>. letnika, <%= people(sum(leaving)) %></li>
+    <li>Napredovanje: <b><%= f.count(moving.length, RAZREDOV) %></b>, <%= people(sum(moving)) %><%= teachersOut ? `, odstranjeni učitelji: ${teachersOut}` : '' %></li>
+    <% if (other.length) { %><li>Ostane brez spremembe: <b><%= f.count(other.length, RAZREDOV) %></b> brez letnika (<%= other.map((c) => c.name).join(', ') %>)</li><% } %>
   </ul>
+  <details class="year-what"><summary>Kaj se zgodi ob potrditvi</summary><ul>
+    <li>Označeni dijaki <%= finalYear %>. letnikov se <strong>trajno izbrišejo</strong> z napredkom, opombami in vsemi zapisi, njihovi razredi tudi. Odznačeni ostanejo brez razreda. Razveljaviti je mogoče samo z obnovitvijo kopije.</li>
+    <li>Drugi razredi preidejo v višji letnik in dobijo novo ime. Poglavja novega letnika so zaprta, dokler jih učitelj ne odpre. Razredi vidijo prejšnje letnike za ponavljanje.</li>
+    <li>Učitelji se odstranijo iz razredov, ki napredujejo; po prehodu jih dodeliš na strani Razredi.</li>
+    <li>Napredek dijakov ostane. Odznačeni dijaki ostanejo brez razreda.</li>
+  </ul></details>
   <% if (lastRun) { %><p class="dim">Zadnji zaključek šolskega leta: <%= f.dateTime(lastRun) %> (<%= f.ago(lastRun) %>).</p><% } %>
 </section>
 <form method="post" action="/admin/solsko-leto" class="year-end">
 <input type="hidden" name="_csrf" value="<%= csrf %>">
-<section class="block">
-  <h2><%= finalYear %>. letnik: izbris</h2>
-  <% if (!leaving.length) { %><p class="empty">Ni razredov <%= finalYear %>. letnika.</p><% } %>
-  <% leaving.forEach((c) => { %>
-  <fieldset class="year-class">
-    <legend><strong><%= c.name %></strong>: razred se izbriše, <%= people(c.students.length) %></legend>
-    <% if (c.students.length) { %><p class="dim">Označeni dijaki se trajno izbrišejo. Odznačeni ostanejo brez razreda.</p>
-    <ul class="checks"><% c.students.forEach((s) => { %><li><label title="<%= s.email || s.username %>"><input type="hidden" name="leaving" value="<%= s.id %>"><input type="checkbox" name="erase" value="<%= s.id %>" checked> <%= s.name %></label></li><% }) %></ul><% } %>
-  </fieldset>
-  <% }) %>
-</section>
-<section class="block">
-  <h2>Napredovanje v višji letnik</h2>
-  <% if (!moving.length) { %><p class="empty">Ni razredov, ki bi napredovali.</p><% } %>
-  <% moving.forEach((c) => { %>
-  <fieldset class="year-class">
-    <legend><strong><%= c.name %></strong>: iz <%= c.year %>. v <%= c.year + 1 %>. letnik, <%= people(c.students.length) %></legend>
-    <p class="inline"><label for="name_<%= c.id %>">Novo ime razreda</label> <input id="name_<%= c.id %>" name="name_<%= c.id %>" value="<%= c.next %>" required maxlength="80"></p>
+<% const students = (c, field, hidden) => { %>
+  <% if (c.students.length) { %>
+  <div class="year-tools"><span class="dim" data-count><%= people(c.students.length) %></span><button type="button" class="year-pick" data-check="all">vsi</button><button type="button" class="year-pick" data-check="none">nobeden</button></div>
+  <ul class="checks"><% c.students.forEach((s) => { %><li><label title="<%= s.email || s.username %>"><input type="hidden" name="<%= hidden %>" value="<%= s.id %>"><input type="checkbox" name="<%= field %>" value="<%= s.id %>" checked> <%= s.name %></label></li><% }) %></ul>
+  <% } else { %><p class="dim">Brez dijakov.</p><% } %>
+<% } %>
+<h2 class="year-h"><%= finalYear %>. letnik: izbris</h2>
+<p class="dim">Označeni dijaki se trajno izbrišejo, odznačeni ostanejo brez razreda.</p>
+<% if (!leaving.length) { %><p class="empty">Ni razredov <%= finalYear %>. letnika.</p><% } %>
+<div class="year-grid">
+<% leaving.forEach((c) => { %>
+  <article class="year-card leave">
+    <header><h3><%= c.name %></h3><span class="tag year-bad">izbriše se</span></header>
+    <% students(c, 'erase', 'leaving') %>
+  </article>
+<% }) %>
+</div>
+<h2 class="year-h">Napredovanje v višji letnik</h2>
+<p class="dim">Označeni dijaki gredo z razredom, odznačeni ostanejo brez razreda.</p>
+<% if (!moving.length) { %><p class="empty">Ni razredov, ki bi napredovali.</p><% } %>
+<div class="year-grid">
+<% moving.forEach((c) => { %>
+  <article class="year-card">
+    <header><h3><%= c.name %> <span aria-hidden="true">→</span></h3>
+      <label class="sr" for="name_<%= c.id %>">Novo ime razreda <%= c.name %></label><input id="name_<%= c.id %>" class="year-name" name="name_<%= c.id %>" value="<%= c.next %>" required maxlength="80">
+      <span class="tag"><%= c.year %>. → <%= c.year + 1 %>. letnik</span></header>
     <% if (c.teachers.length) { %><p class="dim">Odstranjeni učitelji: <%= c.teachers.join(', ') %></p><% } %>
-    <% if (c.students.length) { %><p class="dim">Označeni dijaki napredujejo z razredom. Odznačeni ostanejo brez razreda.</p>
-    <ul class="checks"><% c.students.forEach((s) => { %><li><label title="<%= s.email || s.username %>"><input type="hidden" name="moving" value="<%= s.id %>"><input type="checkbox" name="keep" value="<%= s.id %>" checked> <%= s.name %></label></li><% }) %></ul><% } %>
-  </fieldset>
-  <% }) %>
-</section>
-<% if (other.length) { %><section class="block">
-  <h2>Razredi brez letnika</h2>
-  <p>Ti razredi ostanejo nespremenjeni: <%= other.map((c) => c.name).join(', ') %>. Letnik jim lahko nastaviš na strani Razredi.</p>
-</section><% } %>
-<section class="block">
+    <% students(c, 'keep', 'moving') %>
+  </article>
+<% }) %>
+</div>
+<section class="block year-confirm">
   <h2>Potrditev</h2>
   <% if (fresh) { %><p class="dim">Trenutno stanje je bilo pred kratkim preneseno, zato ga lahko vrneš z obnovitvijo.</p>
   <% } else { %><p class="notice-warn">Najprej <a href="/admin/kopije">prenesi svežo varnostno kopijo</a>. Brez nje prehoda ni mogoče potrditi.</p><% } %>
@@ -56,4 +66,5 @@
   </div>
 </section>
 </form>
+<script src="<%= asset('js/year.js') %>"></script>
 <%- include('../partials/foot') %>

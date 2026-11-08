@@ -193,9 +193,23 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 /* Lower years, open for revision */
 .past-years{margin-top:44px;padding-top:6px;border-top:2px dashed var(--line)}
 .past-years > p{margin:4px 0 0}
-/* End of the school year */
-.year-class{border:1px solid var(--line);border-radius:8px;padding:10px 16px;margin:12px 0;background:var(--card)}
-.year-class legend{padding:0 6px}
+/* End of the school year: a summary, then class cards side by side */
+.year-sum{list-style:none;padding:0;margin:8px 0 12px;display:flex;flex-wrap:wrap;gap:8px 28px}
+.year-sum b{font-size:1.15rem}
+.year-what{margin:4px 0 8px}
+.year-h{margin:28px 0 2px}
+.year-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,22rem),1fr));gap:14px;margin:12px 0}
+.year-card{border:1px solid var(--line);border-radius:10px;padding:12px 16px;background:var(--card)}
+.year-card.leave{border-left:4px solid var(--bad)}
+.year-card header{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.year-card h3{margin:0;font-size:1.1rem}
+.year-card .year-name{width:8rem}
+.year-card header .tag{margin-left:auto}
+.year-card p{margin:8px 0 0}
+.year-card .checks{columns:2 9rem;margin:6px 0 0}
+.year-bad{background:var(--badbg);color:var(--bad)}
+.year-tools{display:flex;align-items:center;gap:12px;margin-top:8px;font-size:.92rem}
+.year-pick{background:none;border:0;padding:0;color:var(--acc);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font:inherit}
 .year-end div.stack{display:grid;gap:10px;max-width:34rem;margin:14px 0}
 /* Admin classes: the Add button stays in one place, however long the teacher's name */
 form.add-teacher{display:grid;grid-template-columns:minmax(0,1fr) auto;width:100%;min-width:14rem}
