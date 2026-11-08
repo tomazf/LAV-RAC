@@ -638,3 +638,21 @@ test('admin lists: filter row, class for students without one, the log in pages,
   await db.end();
   assert.deepEqual(errors, []);
 });
+
+test('Za doma: two more tasks per chapter, added in the portal, unscored', async () => {
+  const want = { '2.1': [9, 'Barve na spletu', 'Prekoračitev v 8 bitih'], '2.2': [8, 'Glasovalna naprava', 'Samo vrata NEALI'], '2.3': [9, 'Naslovni prostor', 'Množenje z 10 s pomiki'] };
+  const a = await login('Sara Skrbnik');
+  for (const [id, [n, ...titles]] of Object.entries(want)) {
+    await a.goto(`${APP}/vaje/${id}`);
+    await go(a, 'doma');
+    const heads = await a.locator('.page.on .tnum').allTextContents();
+    assert.equal(heads.filter((t) => /^D\d+\./.test(t)).length, n, id);
+    for (const t of titles) assert.ok(heads.some((h) => h.endsWith(t)), `${id}: ${t}`);
+    await a.locator('.page.on article', { hasText: titles[1] }).locator('button:text-is("Prikaži rešitev")').click();
+    assert.ok(await a.locator('.page.on article', { hasText: titles[1] }).locator('.sol').isVisible());
+  }
+  // unscored: the catalog has the same tasks and points as before
+  assert.deepEqual(catalog.exercises.map((e) => [e.id, e.tasks.length, e.maxPoints]), [['2.1', 98, 216], ['2.2', 85, 164], ['2.3', 129, 237]]);
+  await a.context().close();
+  assert.deepEqual(errors, []);
+});

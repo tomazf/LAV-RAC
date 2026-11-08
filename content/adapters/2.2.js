@@ -15,6 +15,22 @@ const GROUPS = [
 const TITLE = 'Logične funkcije – utrjevanje';
 const KICKER = 'LAV-RAČ2 · 2. poglavje';
 
+// Two more home tasks, added in the portal (8. 11. 2026); the artifact stays as it is.
+const HOME_PLUS = [
+ {
+  "id": "d7",
+  "title": "Glasovalna naprava",
+  "q": "Trije sodniki (A, B, C) glasujejo s tipko. Lučka naj zasveti, ko sta za vsaj dva. Zapiši pravilnostno tabelo in PDNO, funkcijo poenostavi z Veitchevim diagramom in nariši vezje.",
+  "sol": "Enice so pri ABC = 011, 101, 110 in 111. PDNO: ¬A·B·C + A·¬B·C + A·B·¬C + A·B·C. V Veitchevem diagramu tvorijo tri pare, zato je Q = A·B + A·C + B·C. Vezje: troje vrat IN z dvema vhodoma in vrata ALI s tremi vhodi."
+ },
+ {
+  "id": "d8",
+  "title": "Samo vrata NEALI",
+  "q": "Na voljo imaš samo vrata NEALI z dvema vhodoma. Pokaži, kako z njimi izvedeš NE, ALI in IN. Koliko vrat potrebuješ za vsako?",
+  "sol": "NE: ena vrata NEALI z združenima vhodoma, ¬A = ¬(A+A).\nALI: dvoje vrat, A+B = ¬(¬(A+B)): za NEALI dodaš še negacijo.\nIN: troje vrat, A·B = ¬(¬A+¬B) po De Morganu: dvoje vrat za ¬A in ¬B, tretja vrata NEALI na koncu."
+ }
+];
+
 export default {
   module: 'LAV-RAČ2',
   title: TITLE,
@@ -24,6 +40,7 @@ export default {
   --seen:var(--lr-seen);--seen-soft:var(--lr-seen-bg);--f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}
   body{padding-left:0;padding-right:0}`,
   patches: [
+    ['HOME.forEach((h,k)=>{', `HOME.push(...${JSON.stringify(HOME_PLUS)});\nHOME.forEach((h,k)=>{`],
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
     // Storage: the portal's state for this student; the artifact's own account sync is not used.
     [`const STORE = "logicne-funkcije-scnm-v1";

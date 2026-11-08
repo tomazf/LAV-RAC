@@ -2779,6 +2779,7 @@ function wire(el,t){
 
 /* ---------- za doma ---------- */
 const homeEl = $("#home");
+HOME.push(...[{"id":"d7","title":"Glasovalna naprava","q":"Trije sodniki (A, B, C) glasujejo s tipko. Lučka naj zasveti, ko sta za vsaj dva. Zapiši pravilnostno tabelo in PDNO, funkcijo poenostavi z Veitchevim diagramom in nariši vezje.","sol":"Enice so pri ABC = 011, 101, 110 in 111. PDNO: ¬A·B·C + A·¬B·C + A·B·¬C + A·B·C. V Veitchevem diagramu tvorijo tri pare, zato je Q = A·B + A·C + B·C. Vezje: troje vrat IN z dvema vhodoma in vrata ALI s tremi vhodi."},{"id":"d8","title":"Samo vrata NEALI","q":"Na voljo imaš samo vrata NEALI z dvema vhodoma. Pokaži, kako z njimi izvedeš NE, ALI in IN. Koliko vrat potrebuješ za vsako?","sol":"NE: ena vrata NEALI z združenima vhodoma, ¬A = ¬(A+A).\nALI: dvoje vrat, A+B = ¬(¬(A+B)): za NEALI dodaš še negacijo.\nIN: troje vrat, A·B = ¬(¬A+¬B) po De Morganu: dvoje vrat za ¬A in ¬B, tretja vrata NEALI na koncu."}]);
 HOME.forEach((h,k)=>{
   const el = document.createElement("article"); el.className = "task";
   el.innerHTML = `<div class="thead"><span class="tnum">D${k+1}. ${esc(h.title)}</span><div class="tags"><span class="tag">Za doma</span></div></div>

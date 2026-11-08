@@ -2106,6 +2106,7 @@ function renderAll(){
 }
 
 /* za doma */
+HOME.push(...[{"title":"Barve na spletu","q":"Barva #FF8000 (oranžna) je na spletu zapisana šestnajstiško: po en bajt za rdečo, zeleno in modro (R, G, B). Vsako komponento zapiši desetiško in dvojiško. Koliko različnih barv lahko zapišemo s 24 biti?","sol":"<p>R = FF₁₆ = 255₁₀ = 11111111₂</p><p>G = 80₁₆ = 128₁₀ = 10000000₂</p><p>B = 00₁₆ = 0₁₀ = 00000000₂</p><p>Z 24 biti zapišemo 2²⁴ = 16 777 216 različnih barv.</p>"},{"title":"Prekoračitev v 8 bitih","q":"Števili 100 in 50 zapiši v 8-bitnem dvojiškem komplementu in ju seštej. Je rezultat pravilen? Nato izračunaj še 100 + (−50) in razloži razliko.","sol":"<p>100 = 01100100, 50 = 00110010. Vsota je 10010110, kar je v dvojiškem komplementu −106 namesto 150: prišlo je do prekoračitve, saj je največje 8-bitno predznačeno število 127. Vsota dveh pozitivnih števil ne sme biti negativna.</p><p>−50 = 11001110. 01100100 + 11001110 = 1 00110010; prenos iz najvišjega bita zavržemo in dobimo 00110010 = 50, kar je pravilno.</p>"}]);
 HOME.forEach((h,k)=>{
   const el = document.createElement("article"); el.className="task";
   el.innerHTML = `<div class="thead"><span class="tnum">D${k+1}. ${esc(h.title)}</span><div class="tags"><span class="tag">Za doma</span></div></div>

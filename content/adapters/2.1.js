@@ -11,6 +11,20 @@ const ICONS = {
 };
 const GROUP_IDS = ['pretvorbe', 'racunanje', 'kodiranje', 'pariteta'];
 
+// Two more home tasks, added in the portal (8. 11. 2026); the artifact stays as it is.
+const HOME_PLUS = [
+ {
+  "title": "Barve na spletu",
+  "q": "Barva #FF8000 (oranžna) je na spletu zapisana šestnajstiško: po en bajt za rdečo, zeleno in modro (R, G, B). Vsako komponento zapiši desetiško in dvojiško. Koliko različnih barv lahko zapišemo s 24 biti?",
+  "sol": "<p>R = FF₁₆ = 255₁₀ = 11111111₂</p><p>G = 80₁₆ = 128₁₀ = 10000000₂</p><p>B = 00₁₆ = 0₁₀ = 00000000₂</p><p>Z 24 biti zapišemo 2²⁴ = 16 777 216 različnih barv.</p>"
+ },
+ {
+  "title": "Prekoračitev v 8 bitih",
+  "q": "Števili 100 in 50 zapiši v 8-bitnem dvojiškem komplementu in ju seštej. Je rezultat pravilen? Nato izračunaj še 100 + (−50) in razloži razliko.",
+  "sol": "<p>100 = 01100100, 50 = 00110010. Vsota je 10010110, kar je v dvojiškem komplementu −106 namesto 150: prišlo je do prekoračitve, saj je največje 8-bitno predznačeno število 127. Vsota dveh pozitivnih števil ne sme biti negativna.</p><p>−50 = 11001110. 01100100 + 11001110 = 1 00110010; prenos iz najvišjega bita zavržemo in dobimo 00110010 = 50, kar je pravilno.</p>"
+ }
+];
+
 export default {
   module: 'LAV-RAČ2',
   title: 'Številski sistemi, kodiranje in pariteta',
@@ -22,6 +36,7 @@ export default {
   --seen:var(--lr-seen);--seen-soft:var(--lr-seen-bg);--f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}
   body{padding-left:0;padding-right:0}`,
   patches: [
+    ['HOME.forEach((h,k)=>{', `HOME.push(...${JSON.stringify(HOME_PLUS)});\nHOME.forEach((h,k)=>{`],
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
     // The portal does not let pages run text as code, so the arithmetic tasks compute their answer directly
     // (multiplication first, then addition and subtraction from the left, as before).

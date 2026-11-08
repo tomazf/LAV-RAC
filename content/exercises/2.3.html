@@ -3653,6 +3653,7 @@ function wire(el,t){
 
 /* ---------- za doma ---------- */
 const homeEl = $("#home");
+HOME.push(...[{"id":"d8","title":"Naslovni prostor","q":"Procesor ima 16-bitno naslovno vodilo in 8-bitno podatkovno vodilo. Koliko bajtov pomnilnika lahko naslovi? Koliko naslovnih bitov bi potreboval za 4 GB? Poišči, ali je tvoj računalnik 32- ali 64-biten.","sol":"16 naslovnih bitov da 2¹⁶ = 65 536 naslovov, pri 8-bitnem podatkovnem vodilu je to 64 KB.\nZa 4 GB = 2³² B potrebuješ 32 naslovnih bitov.\nDanašnji računalniki so večinoma 64-bitni (Windows: Nastavitve > Sistem > Vizitka, Linux: ukaz uname -m vrne x86_64)."},{"id":"d9","title":"Množenje z 10 s pomiki","q":"V simulatorju napiši program, ki število z naslova $20 (največ 25) pomnoži z 10 samo s pomiki in seštevanjem ter rezultat zapiše na $30. Namig: 10·x = 8·x + 2·x.","sol":"LDAA $20\nASLA        ; 2x\nSTAA $31    ; shrani 2x\nASLA        ; 4x\nASLA        ; 8x\nADDA $31    ; 8x + 2x\nSTAA $30\nWAI\nPri x = 7 dobimo 70 ($46). Pomik v levo za en bit pomnoži z 2, zato je program hitrejši od zaporednega seštevanja."}]);
 HOME.forEach((h,k)=>{
   const el = document.createElement("article"); el.className="task";
   el.innerHTML = `<div class="thead"><span class="tnum">D${k+1}. ${esc(h.title)}</span><div class="tags"><span class="tag">Za doma</span></div></div>

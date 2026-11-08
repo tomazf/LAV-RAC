@@ -21,6 +21,22 @@ const ZAGON = "renderAll();\nmountWidgets();\n{\n  const title = id => (PAGES.fi
   .replace('TITLE_', JSON.stringify(TITLE)).replace('KICKER_', JSON.stringify(KICKER))
   .replace('GROUPS_', JSON.stringify(GROUPS.map((g) => ({ ...g, icon: ICONS[g.id] }))));
 
+// Two more home tasks, added in the portal (8. 11. 2026); the artifact stays as it is.
+const HOME_PLUS = [
+ {
+  "id": "d8",
+  "title": "Naslovni prostor",
+  "q": "Procesor ima 16-bitno naslovno vodilo in 8-bitno podatkovno vodilo. Koliko bajtov pomnilnika lahko naslovi? Koliko naslovnih bitov bi potreboval za 4 GB? Poišči, ali je tvoj računalnik 32- ali 64-biten.",
+  "sol": "16 naslovnih bitov da 2¹⁶ = 65 536 naslovov, pri 8-bitnem podatkovnem vodilu je to 64 KB.\nZa 4 GB = 2³² B potrebuješ 32 naslovnih bitov.\nDanašnji računalniki so večinoma 64-bitni (Windows: Nastavitve > Sistem > Vizitka, Linux: ukaz uname -m vrne x86_64)."
+ },
+ {
+  "id": "d9",
+  "title": "Množenje z 10 s pomiki",
+  "q": "V simulatorju napiši program, ki število z naslova $20 (največ 25) pomnoži z 10 samo s pomiki in seštevanjem ter rezultat zapiše na $30. Namig: 10·x = 8·x + 2·x.",
+  "sol": "LDAA $20\nASLA        ; 2x\nSTAA $31    ; shrani 2x\nASLA        ; 4x\nASLA        ; 8x\nADDA $31    ; 8x + 2x\nSTAA $30\nWAI\nPri x = 7 dobimo 70 ($46). Pomik v levo za en bit pomnoži z 2, zato je program hitrejši od zaporednega seštevanja."
+ }
+];
+
 export default {
   module: 'LAV-RAČ2',
   title: TITLE,
@@ -30,6 +46,7 @@ export default {
   --seen:var(--lr-seen);--seen-soft:var(--lr-seen-bg);--f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}
   body{padding-left:0;padding-right:0}`,
   patches: [
+    ['HOME.forEach((h,k)=>{', `HOME.push(...${JSON.stringify(HOME_PLUS)});\nHOME.forEach((h,k)=>{`],
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
     // Set I is mixed revision; not all of its tasks come from the matura (agreed 8. 11. 2026).
     ['title:"Še več maturitetnih nalog", note:"Mešane naloge za ponavljanje. Preverjaš jih enako kot v sklopih A–H."',
