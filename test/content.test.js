@@ -151,7 +151,7 @@ test('parts without exercises wait for staff; a closed class shows a clear messa
   assert.match(await s.textContent('.gate-fig'), /Šolski račun = 1[\s\S]*Razred = 0[\s\S]*Vaje = 0/);
   const a = await login('Sara Skrbnik');
   await a.goto(`${APP}/admin/vaje`);
-  assert.deepEqual(await a.locator('.group.planned h2').allTextContents(), ['LAV-RAČ3 V pripravi', 'LAV-RAČ4 V pripravi']);
+  assert.deepEqual(await a.locator('.group.planned h2').allTextContents(), ['LAV-RAČ4 V pripravi']);
   // the empty 4th chapter of LAV-RAČ2 has its place
   assert.deepEqual(await a.locator('.planned-ex td:first-child').allTextContents(), ['4 V pripravi']);
   await a.goto(`${APP}/admin/razredi`);
@@ -399,13 +399,13 @@ test('a reset starts a new attempt that the teacher sees; read pages stay read',
   await p.context().close();
 });
 
-test('2.2 and 2.3: every page opens without errors, with their theory groups', async () => {
-  const want = { '2.2': [85, ['Logična vrata', 'Funkcije in poenostavljanje', 'Aritmetična vezja', 'Vaje']], '2.3': [129, ['Podatki in procesor', 'Zbirnik', 'Prekinitve in pomnilniki', 'Vhod, izhod in cevovod', 'Vaje']] };
+test('2.2, 2.3 and 3.1: every page opens without errors, with their theory groups', async () => {
+  const want = { '2.2': [85, ['Logična vrata', 'Funkcije in poenostavljanje', 'Aritmetična vezja', 'Vaje']], '2.3': [129, ['Podatki in procesor', 'Zbirnik', 'Prekinitve in pomnilniki', 'Vhod, izhod in cevovod', 'Vaje']], '3.1': [52, ['Jezik in prevajanje', 'Orodja, zagon in napake', 'Vaje']] };
   for (const [id, [n, groups]] of Object.entries(want)) {
     const ex = catalog.exercises.find((e) => e.id === id);
-    assert.equal(ex.module, 'LAV-RAČ2');
+    assert.equal(ex.module, id === '3.1' ? 'LAV-RAČ3' : 'LAV-RAČ2');
     assert.equal(ex.tasks.length, n);
-    if (id === '2.3') assert.equal(ex.tasks.at(-1).section, 'Ponavljanje'); // mixed revision, not only matura tasks
+    if (id !== '2.2') assert.equal(ex.tasks.at(-1).section, 'Ponavljanje'); // the revision set is graded, last among the sets
     const a = await login('Sara Skrbnik');
     await a.goto(`${APP}/vaje/${id}`);
     assert.deepEqual(await a.locator('.lr-grp b').allTextContents(), groups);
@@ -508,12 +508,12 @@ test('a class works on its year; lower years open for revision; the admin closes
 
   // the teacher sees only the class's year: not its progress in lower years, not their results
   await a.goto(`${APP}/ucitelj/razredi/${r3}`);
-  assert.match(await a.textContent('.title-row'), /Vaje razreda \(0 od 0\)/);
+  assert.match(await a.textContent('.title-row'), /Vaje razreda \(0 od 1\)/);
   assert.match(await a.textContent('.team'), /3\. letnik, dijaki vidijo tudi 2\. letnik/);
   assert.equal((await a.goto(`${APP}/ucitelj/razredi/${r3}/rezultati/2.1`)).status(), 404);
   assert.doesNotMatch(await (await a.request.get(`${APP}/ucitelj/razredi/${r3}/izvoz.csv`)).text(), /2\.1/);
   await a.goto(`${APP}/ucitelj/razredi/${r3}/vaje`);
-  assert.deepEqual(await a.locator('.group h2').allTextContents(), ['LAV-RAČ3 V pripravi']);
+  assert.deepEqual(await a.locator('.group h2').allTextContents(), ['LAV-RAČ3 3. letnik']);
   await a.goto(`${APP}/ucitelj/razredi/${r2}/vaje`);
   assert.equal(await a.locator('.ex-table tbody tr:not(.planned-ex)').count(), 3);
 
@@ -652,7 +652,38 @@ test('Za doma: two more tasks per chapter, added in the portal, unscored', async
     assert.ok(await a.locator('.page.on article', { hasText: titles[1] }).locator('.sol').isVisible());
   }
   // unscored: the catalog has the same tasks and points as before
-  assert.deepEqual(catalog.exercises.map((e) => [e.id, e.tasks.length, e.maxPoints]), [['2.1', 98, 216], ['2.2', 85, 164], ['2.3', 129, 237]]);
+  assert.deepEqual(catalog.exercises.map((e) => [e.id, e.tasks.length, e.maxPoints]), [['2.1', 98, 216], ['2.2', 85, 164], ['2.3', 129, 237], ['3.1', 52, 79]]);
+  await a.context().close();
+  assert.deepEqual(errors, []);
+});
+
+test('3.1: program output is the answer and stays after a reload; an empty blank is not an answer', async () => {
+  const ex = catalog.exercises.find((e) => e.id === '3.1');
+  const a = await login('Sara Skrbnik');
+  await a.goto(`${APP}/vaje/3.1#naloge-c`);
+  await at(a, 'naloge-c');
+  const k = await a.evaluate(() => [...document.querySelectorAll('.page.on .lr-task')].findIndex((c) => c.querySelector('textarea.out') && !c.querySelector('textarea.editor')));
+  assert.ok(k >= 0);
+  await go(a, `naloge-c/${k + 1}`);
+  assert.match(await card(a).textContent(), /poljubnem okolju|Programiz/);
+  await card(a).locator('textarea.out').fill('napačen izpis');
+  await card(a).locator('.lr-check').click();
+  assert.equal(await card(a).getAttribute('data-lr'), 'bad');
+  await a.reload();
+  await at(a, `naloge-c/${k + 1}`);
+  assert.equal(await card(a).locator('textarea.out').inputValue(), 'napačen izpis');
+  assert.equal(await card(a).getAttribute('data-lr'), 'bad');
+  // a blank left empty is not an answer yet
+  await a.goto(`${APP}/vaje/3.1#naloge-a`);
+  await at(a, 'naloge-a');
+  const j = await a.evaluate(() => [...document.querySelectorAll('.page.on .lr-task')].findIndex((c) => c.querySelector('.blank input[type=text]')));
+  await go(a, `naloge-a/${j + 1}`);
+  await card(a).locator('.lr-check').click();
+  assert.match(await card(a).locator('.lr-left .feedback').textContent(), /Najprej vpiši odgovor/);
+  assert.equal(await card(a).getAttribute('data-lr'), 'open');
+  // the revision set is the last graded set; no »od 12« from the artifact
+  assert.equal(ex.tasks.filter((t) => t.section === 'Ponavljanje').length, 7);
+  assert.doesNotMatch(await a.locator('body').innerText(), /od 12/);
   await a.context().close();
   assert.deepEqual(errors, []);
 });

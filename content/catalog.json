@@ -3,6 +3,10 @@
   {
    "id": "LAV-RAČ2",
    "title": "2. letnik"
+  },
+  {
+   "id": "LAV-RAČ3",
+   "title": "3. letnik"
   }
  ],
  "exercises": [
@@ -2592,6 +2596,464 @@
     "hierarhija",
     "vi",
     "cevovod"
+   ]
+  },
+  {
+   "id": "3.1",
+   "no": "1",
+   "module": "LAV-RAČ3",
+   "title": "Java in delovanje JVM",
+   "fullTitle": "Java in delovanje JVM",
+   "key": "scnm_lavrac_3_1_v1",
+   "version": 1,
+   "format": "short",
+   "maxPoints": 79,
+   "tasks": [
+    {
+     "i": 0,
+     "level": "lažja",
+     "max": 1,
+     "section": "Programski jeziki in vrste kode",
+     "q": "Programski jezik Java spada v kategorijo"
+    },
+    {
+     "i": 1,
+     "level": "lažja",
+     "max": 1,
+     "section": "Programski jeziki in vrste kode",
+     "q": "Med katere programske jezike uvrščamo programski jezik Java?"
+    },
+    {
+     "i": 2,
+     "level": "srednja",
+     "max": 2,
+     "section": "Programski jeziki in vrste kode",
+     "q": "Programski jezik Java je"
+    },
+    {
+     "i": 3,
+     "level": "srednja",
+     "max": 2,
+     "section": "Programski jeziki in vrste kode",
+     "q": "Uvrstite naštete programske jezike med nižje in višje programske jezike."
+    },
+    {
+     "i": 4,
+     "level": "lažja",
+     "max": 1,
+     "section": "Programski jeziki in vrste kode",
+     "q": "Programski jezik Java sodi v skupino"
+    },
+    {
+     "i": 5,
+     "level": "lažja",
+     "max": 1,
+     "section": "Programski jeziki in vrste kode",
+     "q": "Program, napisan v programskem jeziku Java, smo prevedli in dobili datoteko s končnico class. Datoteko takšne vrste imenujemo:"
+    },
+    {
+     "i": 6,
+     "level": "lažja",
+     "max": 1,
+     "section": "Programski jeziki in vrste kode",
+     "q": "Kaj predstavlja datotečna končnica .class?"
+    },
+    {
+     "i": 7,
+     "level": "lažja",
+     "max": 1,
+     "section": "Programski jeziki in vrste kode",
+     "q": "Da bi se javanski program lahko izvajal, ga je treba prevesti v vmesno (byte) kodo. Končnica imena programske datoteke z vmesno kodo je ___."
+    },
+    {
+     "i": 8,
+     "level": "srednja",
+     "max": 2,
+     "section": "Programski jeziki in vrste kode",
+     "q": "Napisali smo program v programskem jeziku Java. Datoteka z napisanim programom ima končnico java. Programu v taki obliki pravimo (1) ___. S prevajalnikom preved"
+    },
+    {
+     "i": 9,
+     "level": "srednja",
+     "max": 2,
+     "section": "Programski jeziki in vrste kode",
+     "q": "Kateremu jeziku pripada opis?"
+    },
+    {
+     "i": 10,
+     "level": "lažja",
+     "max": 1,
+     "section": "Programski jeziki in vrste kode",
+     "q": "Kateri trditvi o prevajalniku in tolmaču sta resnični? (2 pravilni)"
+    },
+    {
+     "i": 11,
+     "level": "lažja",
+     "max": 1,
+     "section": "JDK, JRE in JVM",
+     "q": "Java Virtual Machine (JVM) se uporablja za"
+    },
+    {
+     "i": 12,
+     "level": "lažja",
+     "max": 1,
+     "section": "JDK, JRE in JVM",
+     "q": "Ime programske datoteke, ki jo izvaja JVM (Java Virtual Machine), je:"
+    },
+    {
+     "i": 13,
+     "level": "lažja",
+     "max": 1,
+     "section": "JDK, JRE in JVM",
+     "q": "Da bi na računalniku izvajali javanske programe, moramo namestiti vsaj"
+    },
+    {
+     "i": 14,
+     "level": "lažja",
+     "max": 1,
+     "section": "JDK, JRE in JVM",
+     "q": "Kaj vsebuje Java Development Kit?"
+    },
+    {
+     "i": 15,
+     "level": "lažja",
+     "max": 1,
+     "section": "JDK, JRE in JVM",
+     "q": "Programsko okolje, namenjeno razvoju in preizkušanju javanskih programov, se imenuje"
+    },
+    {
+     "i": 16,
+     "level": "lažja",
+     "max": 1,
+     "section": "JDK, JRE in JVM",
+     "q": "Obkrožite črko pred resnično trditvijo."
+    },
+    {
+     "i": 17,
+     "level": "lažja",
+     "max": 1,
+     "section": "JDK, JRE in JVM",
+     "q": "Izvorna koda javanskega programa se"
+    },
+    {
+     "i": 18,
+     "level": "lažja",
+     "max": 1,
+     "section": "JDK, JRE in JVM",
+     "q": "Obkrožite črko pred trditvijo, ki je resnična za programski jezik Java."
+    },
+    {
+     "i": 19,
+     "level": "lažja",
+     "max": 1,
+     "section": "JDK, JRE in JVM",
+     "q": "Kateri operacijski sistem mora biti nameščen, da lahko izvajamo javanski program?"
+    },
+    {
+     "i": 20,
+     "level": "težja",
+     "max": 3,
+     "section": "JDK, JRE in JVM",
+     "q": "Program Igra.java smo prevedli na Windows z JDK 21. Datoteko Igra.class kopiramo na druge računalnike. Ali trditev drži?"
+    },
+    {
+     "i": 21,
+     "level": "lažja",
+     "max": 1,
+     "section": "Prevajanje in zagon programa",
+     "q": "S katerim ukazom izvedemo program, ki je preveden v vmesno kodo v Javi?"
+    },
+    {
+     "i": 22,
+     "level": "srednja",
+     "max": 2,
+     "section": "Prevajanje in zagon programa",
+     "q": "Kako iz operacijskega sistema pokličemo izvajanje prevedenega javanskega programa, shranjenega v datoteki Naloga.class?"
+    },
+    {
+     "i": 23,
+     "level": "lažja",
+     "max": 1,
+     "section": "Prevajanje in zagon programa",
+     "q": "Na disku v mapi c:\\demo je shranjen program Primer.class. S katerim ukazom izvedemo program Primer.class?"
+    },
+    {
+     "i": 24,
+     "level": "srednja",
+     "max": 2,
+     "section": "Prevajanje in zagon programa",
+     "q": "Da bi uspešno prevedli datoteko z izvorno kodo, ki vsebuje public class Primer, mora le-ta:"
+    },
+    {
+     "i": 25,
+     "level": "srednja",
+     "max": 2,
+     "section": "Prevajanje in zagon programa",
+     "q": "V urejevalniku imamo zapisano programsko kodo (zgoraj). Zapišite ukaz, s katerim prevedemo program v vmesno kodo, in ime ter končnico dobljene datoteke."
+    },
+    {
+     "i": 26,
+     "level": "srednja",
+     "max": 2,
+     "section": "Prevajanje in zagon programa",
+     "q": "V urejevalniku je zapisan javanski program (zgoraj). Zapišite ime in končnico datoteke, v katero je treba shraniti program, in ukaz, s katerim iz konzole preved"
+    },
+    {
+     "i": 27,
+     "level": "lažja",
+     "max": 1,
+     "section": "Prevajanje in zagon programa",
+     "q": "S katerim ukazom v operacijskem sistemu preverimo, katera različica programskega jezika Java je nameščena na našem računalniku?"
+    },
+    {
+     "i": 28,
+     "level": "težja",
+     "max": 3,
+     "section": "Prevajanje in zagon programa",
+     "q": "V mapi C:\\vaje je samo datoteka Pozdrav.java. Zapiši ukaz za prevajanje, ukaz za zagon in imena VSEH datotek, ki so v mapi po prevajanju (ločene z vejico)."
+    },
+    {
+     "i": 29,
+     "level": "srednja",
+     "max": 2,
+     "section": "Prevajanje in zagon programa",
+     "q": "Datoteko Dva.java (zgoraj) prevedemo z javac Dva.java. Koliko datotek .class nastane in kako se imenujejo? Kaj izpiše java Dva?"
+    },
+    {
+     "i": 30,
+     "level": "srednja",
+     "max": 2,
+     "section": "Prevajanje in zagon programa",
+     "q": "Napiši program Matura.java, ki izpiše natanko ti dve vrstici:"
+    },
+    {
+     "i": 31,
+     "level": "srednja",
+     "max": 2,
+     "section": "Prevajanje in zagon programa",
+     "q": "Kaj izpiše program? Zapiši natančen izpis, vrstico za vrstico."
+    },
+    {
+     "i": 32,
+     "level": "srednja",
+     "max": 2,
+     "section": "Prevajanje in zagon programa",
+     "q": "Program zaženemo z ukazom java Argumenti Ana 17 \"Novo mesto\" . Kaj izpiše?"
+    },
+    {
+     "i": 33,
+     "level": "srednja",
+     "max": 2,
+     "section": "Prevajanje in zagon programa",
+     "q": "Prvih osem bajtov neke datoteke .class je CA FE BA BE 00 00 00 34. S katero različico Jave je bila prevedena? Ali jo lahko zaženemo na Javi 21 (da/ne)?"
+    },
+    {
+     "i": 34,
+     "level": "lažja",
+     "max": 1,
+     "section": "Sintaksa, semantika in napake",
+     "q": "Kako imenujemo pravila programskega jezika, ki določajo pomen stavkov tega jezika?"
+    },
+    {
+     "i": 35,
+     "level": "lažja",
+     "max": 1,
+     "section": "Sintaksa, semantika in napake",
+     "q": "Kaj določa semantika programskega jezika?"
+    },
+    {
+     "i": 36,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sintaksa, semantika in napake",
+     "q": "Katera izmed spodnjih trditev je resnična za sintakso in katera za semantiko programskega jezika Java? (2 pravilni)"
+    },
+    {
+     "i": 37,
+     "level": "lažja",
+     "max": 1,
+     "section": "Sintaksa, semantika in napake",
+     "q": "Programer je naredil napako v programu. Med postopkom prevajanja prevajalnik ni javil napake. Ob izvajanju programa so bili pričakovani rezultati napačni. Je pr"
+    },
+    {
+     "i": 38,
+     "level": "lažja",
+     "max": 1,
+     "section": "Sintaksa, semantika in napake",
+     "q": "Ali je trditev za programski jezik Java resnična ali neresnična? »Vsak stavek programskega jezika Java predstavlja natanko en ukaz strojnega jezika procesorja.«"
+    },
+    {
+     "i": 39,
+     "level": "lažja",
+     "max": 1,
+     "section": "Sintaksa, semantika in napake",
+     "q": "Katera trditev velja za povezovalnik programskega jezika?"
+    },
+    {
+     "i": 40,
+     "level": "težja",
+     "max": 3,
+     "section": "Sintaksa, semantika in napake",
+     "q": "Katero sporočilo izpiše prevajalnik (javac) in katero JVM med zagonom ali izvajanjem? Vsa sporočila so iz Jave 21."
+    },
+    {
+     "i": 41,
+     "level": "težja",
+     "max": 3,
+     "section": "Sintaksa, semantika in napake",
+     "q": "Razvrsti napake."
+    },
+    {
+     "i": 42,
+     "level": "lažja",
+     "max": 1,
+     "section": "Sintaksa, semantika in napake",
+     "q": "Zgornjo kodo shranimo v datoteko Test.java in izvedemo javac Test.java. Kaj se zgodi?"
+    },
+    {
+     "i": 43,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sintaksa, semantika in napake",
+     "q": "Pri prevajanju prevajalnik javi napake: Syntax error, insert \";\" to complete Statement (line 5); x cannot be resolved to a variable (line 9); x cannot be resolv"
+    },
+    {
+     "i": 44,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sintaksa, semantika in napake",
+     "q": "Program naj izpiše povprečje števil 4 in 5, a izpiše Povprečje: 6.0. Popravi semantično napako, da bo izpis natanko:"
+    },
+    {
+     "i": 45,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Končnica imena datoteke, v kateri je shranjena izvorna koda programa, napisanega v Javi, je ___."
+    },
+    {
+     "i": 46,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Program, ki izvorno kodo, napisano v programskem jeziku, prevede v vmesno kodo ali v izvršljivo obliko, se imenuje ___."
+    },
+    {
+     "i": 47,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Programer je naredil napako v programu. Med postopkom prevajanja prevajalnik ni javil napake. Ob izvajanju programa so bili pričakovani rezultati napačni. Ali j"
+    },
+    {
+     "i": 48,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Napisali smo program v programskem jeziku Java, ki deluje na operacijskem sistemu Windows. Program bo enako dobro deloval"
+    },
+    {
+     "i": 49,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Zakaj je metoda main() posebna za programe, napisane v programskem jeziku Java?"
+    },
+    {
+     "i": 50,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Katere izmed naštetih so ključne besede programskega jezika Java: logical, boolean, jar, break, java, class, extends, ram? Napiši jih, ločene z vejico."
+    },
+    {
+     "i": 51,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "V programskem jeziku imamo rezervirane besede. Obkroži črki pred rezerviranimi besedami programskega jezika Java."
+    }
+   ],
+   "pages": [
+    {
+     "id": "pregled",
+     "chapter": "Teorija",
+     "label": "Pregled"
+    },
+    {
+     "id": "jezik",
+     "chapter": "Teorija",
+     "label": "Kaj je Java"
+    },
+    {
+     "id": "prevajanje",
+     "chapter": "Teorija",
+     "label": "Prevajanje in tolmačenje"
+    },
+    {
+     "id": "pot",
+     "chapter": "Teorija",
+     "label": "Od .java do izvajanja"
+    },
+    {
+     "id": "jdk",
+     "chapter": "Teorija",
+     "label": "JDK, JRE in JVM"
+    },
+    {
+     "id": "ukazi",
+     "chapter": "Teorija",
+     "label": "Ukazna vrstica"
+    },
+    {
+     "id": "class",
+     "chapter": "Teorija",
+     "label": "Notranjost .class"
+    },
+    {
+     "id": "napake",
+     "chapter": "Teorija",
+     "label": "Vrste napak"
+    },
+    {
+     "id": "naloge-a",
+     "chapter": "Naloge",
+     "label": "Vaje A · Programski jeziki in vrste kode"
+    },
+    {
+     "id": "naloge-b",
+     "chapter": "Naloge",
+     "label": "Vaje B · JDK, JRE in JVM"
+    },
+    {
+     "id": "naloge-c",
+     "chapter": "Naloge",
+     "label": "Vaje C · Prevajanje in zagon programa"
+    },
+    {
+     "id": "naloge-d",
+     "chapter": "Naloge",
+     "label": "Vaje D · Sintaksa, semantika in napake"
+    },
+    {
+     "id": "doma-mat",
+     "chapter": "Naloge",
+     "label": "Vaje E · Ponavljanje"
+    },
+    {
+     "id": "doma",
+     "chapter": "Naloge",
+     "label": "Za doma"
+    }
+   ],
+   "gate": [
+    "jezik",
+    "prevajanje",
+    "pot",
+    "jdk",
+    "ukazi",
+    "class",
+    "napake"
    ]
   }
  ],

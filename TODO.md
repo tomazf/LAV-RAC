@@ -23,6 +23,15 @@
   - naslov razreda (»T4A: razred se izbriše, 0 dijakov«) je v robu okvirja, na sredini črte, in izgleda zamaknjeno; naj bo znotraj kartice kot naslov,
   - seznam razredov je preširok; kartice razredov v dveh (ali več) stolpcih,
   - bolj pregledno in hitreje za delo: strnjen prikaz (razred, novo ime in dijaki v eni vrstici), povzetek na vrhu (koliko razredov se izbriše, koliko napreduje, koliko dijakov), pri razredih z dijaki »izberi vse / nobenega«.
+- [x] 3.1 Java in delovanje JVM uvožena (9. 11. 2026).
+- [ ] LAV-RAČ3: uvoz 3.2–3.6, po eno poglavje, vsako pokažem pred naslednjim. Dogovorjeno 8. 11. 2026, velja za vsa poglavja 3. letnika:
+  - skupine teorije: 3.2 Algoritem in zapis (Kaj je algoritem, Načini zapisa, Simboli) · Gradniki in sled (Zaporedje/vejitev/ponavljanje, Sled) · Od diagrama do programa (Od diagrama do Jave, Kako rešiš nalogo); 3.3 Program in podatki (Struktura, Spremenljivke in tipi) · Izpis in vnos · Računanje in potek programa (Aritmetika, Zaporedje/vejitev/zanka, Pogoste napake); 3.4 Tipi in pretvorbe (Območja, Pretvarjanje) · Znaki in nizi (Znak in ASCII, Integer/Double/niz) · Operatorji (Operatorji, Pogoste napake); 3.5 Stavek if (if, if–else in bloki, Gnezdenje) · Več možnosti (else if in ?:, switch, Pogoste napake); 3.6 Vrste zank (while, for, do-while, Izbira in pretvorba) · Gnezdenje, break in continue · Vzorci (Vzorci in algoritmi, Pogoste napake),
+  - sklop »Še več maturitetnih nalog« iz strani Za doma gre med Vaje kot zadnji sklop »Ponavljanje« in se točkuje,
+  - stikalo »Napisi v diagramih« (Flowgorithm/Matura) v 3.2 in 3.3 ostane,
+  - naloge s programom: »Zaženi program v poljubnem okolju (Eclipse, VS Code, Programiz …) in prilepi njegov izpis«; preveri se izpis; koda in izpis se hranita v portalu,
+  - 3.4: sklop E Operatorji (41 nalog) v dva dela: E »Operatorji in izrazi« (prvih 23) in F »Računanje s programi in logični izrazi« (ostalih 18); ponavljanje postane G,
+  - laboratorijske vaje se ne omenjajo več: 3.5 sklop E in 3.6 sklop F postaneta »Naloge za utrjevanje«, 3.6 sklop G »Dodatne vaje«; v 3.4 »Laboratorijska vaja N (program X):« postane »Program X:«; brez oznak »RAČ-LAV 3 · vaja N« na nalogah, v opisih sklopov in na dnu strani,
+  - »Poglavje N od 12« se ne kaže; sklicevanja na poglavja 7–12 v besedilu ostanejo.
 - [x] Ikona strani povsod (6. 11. 2026): `/favicon.ico` (izdelan iz `favicon.svg` z `node scripts/make-favicon.js`) in povezava na vseh straneh, tudi v vajah.
 
 ## Letnik razreda in prehod v naslednji letnik

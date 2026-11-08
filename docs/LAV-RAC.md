@@ -4,7 +4,7 @@ Splošni dogovor je v `NACRT_PORTALA.md`. Tukaj je samo, kar velja za ta portal.
 
 ## Stanje
 
-Postavljena je osnova: prijava, vloge, oblika, vstopna stran in struktura z deli LAV-RAČ2, LAV-RAČ3 in LAV-RAČ4. Uvožene so vaje 2.1 Številski sistemi, kodiranje in pariteta, 2.2 Logične funkcije – utrjevanje in 2.3 Arhitektura računalniških sistemov.
+Postavljena je osnova: prijava, vloge, oblika, vstopna stran in struktura z deli LAV-RAČ2, LAV-RAČ3 in LAV-RAČ4. Uvožene so vaje 2.1 Številski sistemi, kodiranje in pariteta, 2.2 Logične funkcije – utrjevanje, 2.3 Arhitektura računalniških sistemov in 3.1 Java in delovanje JVM (LAV-RAČ3, 1. poglavje).
 
 Razpored (od učitelja, popravljen 6. 11. 2026). Poglavja se v vsakem letniku štejejo od 1 in tako jih vidijo dijaki in učitelji (`no`); tehnična oznaka vaje (`id`, v povezavah in bazi) je letnik.poglavje, da je enolična:
 - LAV-RAČ2 (prazno mesto 4 je za učitelje »V pripravi«, `planned` v `content/sources.json`): 2.1 Številski sistemi, kodiranje in pariteta, 2.2 Logične funkcije – utrjevanje, 2.3 Arhitektura računalniških sistemov, 2.4 (prosto, dodamo kasneje), 2.5 Operacijski sistemi in Linux lupina
@@ -14,6 +14,7 @@ Razpored (od učitelja, popravljen 6. 11. 2026). Poglavja se v vsakem letniku š
 
 ## Odločitve
 
+- LAV-RAČ3 (8. 11. 2026): pravila za uvoz poglavij 3. letnika so v `TODO.md` (skupine teorije, »Ponavljanje«, naloge s programom v poljubnem okolju, brez omemb laboratorijskih vaj). Pri nalogah z izpisom ali programom portal hrani tudi vpisani izpis in kodo.
 - Točkovanje (6. 11. 2026): naloge »Za doma« se ne točkujejo. Maturitetne naloge se točkujejo smiselno glede na nalogo, kot v maturitetnih polah.
 - Letniki in stran Šolsko leto so samo za ta portal; LAV-ELS jih ne dobi (6. 11. 2026).
 - Kopije baze (6. 11. 2026): skrbnik jih hrani na svojem računalniku, dokler jih sam ne izbriše; drugi do njih nimajo dostopa.

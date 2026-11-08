@@ -1,0 +1,1187 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Java in delovanje JVM</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: sticky chapter rail (desktop) + single reading column; theory first, then graded task cards, then homework. */
+:root{
+  --bg:#f4f6f8; --surface:#ffffff; --sunk:#e9edf1; --line:#d3dae1;
+  --fg:#18202b; --muted:#5a6675;
+  --accent:#8b4a1f; --accent-soft:#f3e4d8;
+  --ok:#11775f; --ok-soft:#dcf1ea; --bad:#b4372b; --bad-soft:#f8e1de; --seen:#8a6a00; --seen-soft:#f6edcc;
+  --code-bg:#1d2430; --code-fg:#e5e9f0; --k:#f0a868; --s:#9fd39a; --c:#8a96a8; --n:#d6a5f0;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11151b; --surface:#181e26; --sunk:#0d1116; --line:#2b3440;
+  --fg:#e4e8ee; --muted:#9aa5b3;
+  --accent:#e8a26f; --accent-soft:#3a2a1f;
+  --ok:#53c9a6; --ok-soft:#14322a; --bad:#f08578; --bad-soft:#3a1e1b; --seen:#e2c25a; --seen-soft:#352d12;
+  --code-bg:#0b0f14; --code-fg:#e5e9f0;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11151b; --surface:#181e26; --sunk:#0d1116; --line:#2b3440;
+  --fg:#e4e8ee; --muted:#9aa5b3;
+  --accent:#e8a26f; --accent-soft:#3a2a1f;
+  --ok:#53c9a6; --ok-soft:#14322a; --bad:#f08578; --bad-soft:#3a1e1b; --seen:#e2c25a; --seen-soft:#352d12;
+  --code-bg:#0b0f14; --code-fg:#e5e9f0;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:17px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:48px;padding-block:32px 80px}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr);gap:24px;padding-block:20px 60px}.wrap > .rail{display:none}}
+[hidden]{display:none!important}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(2rem,4.5vw,3rem);font-weight:700;letter-spacing:-.02em}
+h2{font-size:1.65rem;font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.2rem;font-weight:700}
+p{margin:0}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.eyebrow{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+main{min-width:0;display:flex;flex-direction:column;gap:56px}
+section{display:flex;flex-direction:column;gap:18px;scroll-margin-top:24px}
+.prose{max-width:68ch;display:flex;flex-direction:column;gap:14px}
+p.prose{display:block}
+.prose ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--sunk);padding:.08em .35em;border-radius:4px}
+pre{margin:0}
+.code{background:var(--code-bg);color:var(--code-fg);font-family:var(--f-mono);font-size:.84rem;line-height:1.55;padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.code .k{color:var(--k)} .code .s{color:var(--s)} .code .c{color:var(--c);font-style:italic} .code .n{color:var(--n)}
+.term .p{color:var(--k);user-select:none} .term .o{color:#a9b4c4}
+
+/* rail */
+.rail{position:sticky;top:max(24px,env(safe-area-inset-top,0px));align-self:start;display:flex;flex-direction:column;gap:20px;font-size:.93rem}
+.rail nav{display:flex;flex-direction:column;gap:2px}
+.rail nav a{color:var(--muted);text-decoration:none;padding:4px 10px;border-left:2px solid var(--line)}
+.rail nav a:hover{color:var(--fg);border-left-color:var(--accent)}
+.rail .grp{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 0 4px 12px}
+
+/* hero */
+.hero{display:flex;flex-direction:column;gap:16px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.hero .lead{font-size:1.15rem;color:var(--muted);max-width:62ch}
+.magic{font-family:var(--f-mono);font-size:clamp(.8rem,2.4vw,1rem);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.magic span{padding:3px 7px;border-radius:4px;background:var(--sunk);color:var(--muted)}
+.magic span.hi{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.magic small{color:var(--muted);font-family:var(--f-body);font-size:.85rem;margin-left:6px}
+
+/* progress */
+.progress{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.progress .row{display:flex;justify-content:space-between;gap:8px;font-variant-numeric:tabular-nums;font-size:.92rem}
+.bar{height:8px;background:var(--sunk);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.progress .tools{display:flex;gap:8px;flex-wrap:wrap}
+
+/* diagram + tables */
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;overflow-x:auto}
+.fig svg{display:block;min-width:640px;width:100%;height:auto}
+.fig figcaption{font-size:.88rem;color:var(--muted);margin-top:8px}
+figure{margin:0}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.95rem;min-width:520px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
+.note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 14px;border-radius:0 8px 8px 0;max-width:68ch;font-size:.97rem}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.two > *{min-width:0}
+
+/* task list */
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:inherit;font-size:.88rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:5px 12px;border-radius:99px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.level{display:flex;flex-direction:column;gap:14px}
+.level > header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding-top:8px}
+.level > header p{color:var(--muted);font-size:.95rem}
+.task{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px;scroll-margin-top:24px}
+.task[data-state="ok"]{border-color:var(--ok)}
+.task[data-state="seen"]{border-color:var(--seen)}
+.thead{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.tnum{font-family:var(--f-display);font-weight:700;font-size:1.05rem}
+.tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.tag{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.04em;padding:2px 8px;border-radius:4px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.tag.mat{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.tag.st-ok{background:var(--ok-soft);color:var(--ok)}
+.tag.st-seen{background:var(--seen-soft);color:var(--seen)}
+.q{display:flex;flex-direction:column;gap:10px;max-width:72ch}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 12px;border:1px solid var(--line);border-radius:8px;cursor:pointer;background:var(--bg)}
+.opt:hover{border-color:var(--muted)}
+.opt input{margin-top:5px;accent-color:var(--accent)}
+.opt b{font-family:var(--f-mono);font-weight:600;min-width:1.2em}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.blank{display:flex;flex-direction:column;gap:4px}
+.blank label{font-size:.93rem;color:var(--muted)}
+input[type="text"],textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 10px;width:100%}
+input.mono,textarea.mono{font-family:var(--f-mono);font-size:.86rem}
+textarea.editor{font-family:var(--f-mono);font-size:.84rem;line-height:1.5;min-height:180px;tab-size:4;white-space:pre;overflow:auto;resize:vertical}
+textarea.out{min-height:90px}
+input.right,textarea.right{border-color:var(--ok);background:var(--ok-soft)}
+input.wrong,textarea.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.cls{display:flex;flex-direction:column;gap:6px}
+.crow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.crow.right{border-color:var(--ok);background:var(--ok-soft)} .crow.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.crow .txt{min-width:0;font-size:.96rem}
+.seg{display:inline-flex;justify-self:start;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex-wrap:wrap}
+.seg button{font:inherit;font-size:.84rem;border:0;background:var(--surface);color:var(--fg);padding:4px 10px;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+@media (max-width:560px){.crow{grid-template-columns:minmax(0,1fr)}}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;font-size:.92rem;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:6px 14px;border-radius:6px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.feedback{font-weight:600;font-size:.95rem}
+.feedback.ok{color:var(--ok)} .feedback.bad{color:var(--bad)}
+.hints{display:flex;flex-direction:column;gap:6px}
+.hint{background:var(--sunk);border-radius:8px;padding:8px 12px;font-size:.95rem;max-width:72ch}
+.hint b{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);margin-right:6px}
+.sol{border-top:1px dashed var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px}
+.sol .ans{font-weight:700}
+.sol .why{max-width:72ch;color:var(--fg)}
+.editorbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.editorbar span{font-size:.85rem;color:var(--muted)}
+.confirm{display:inline-flex;gap:8px;align-items:center;font-size:.9rem}
+/* paging */
+.rail nav a[aria-current="page"]{color:var(--fg);border-left-color:var(--accent);font-weight:600;background:var(--surface)}
+.rail nav a{display:flex;justify-content:space-between;gap:8px}
+.rail nav a .cnt{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:400}
+.rail nav a .cnt.full{color:var(--ok)}
+.rprog{display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:.86rem;font-variant-numeric:tabular-nums}
+.sync{display:flex;gap:6px;align-items:flex-start;color:var(--muted);font-size:.8rem;line-height:1.35}
+.sync::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;margin-top:4px;background:var(--seen)}
+.sync[data-s="cloud"]::before{background:var(--ok)}
+.mtop{display:none;flex-direction:column;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.mtop select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 10px;width:100%}
+.mtop .row{display:flex;justify-content:space-between;gap:8px;font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+@media (max-width:900px){.mtop{display:flex}}
+.crumb{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-top:1px solid var(--line);padding-top:20px}
+.pager a{display:flex;flex-direction:column;gap:2px;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);text-decoration:none;min-width:0}
+.pager a:hover{border-color:var(--accent)}
+.pager a.next{text-align:right;grid-column:2}
+.pager a .t{font-family:var(--f-display);font-weight:700;font-size:1.05rem}
+.pager a.next .t::after{content:" \2192"} .pager a.prev .t::before{content:"\2190  "}
+.pager .eyebrow{font-size:.7rem}
+@media (max-width:560px){.pager{grid-template-columns:1fr}.pager a.next{grid-column:1}}
+.lvl-empty{color:var(--muted);font-style:italic}
+main{gap:40px}
+footer{color:var(--muted);font-size:.88rem;border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <aside class="rail" aria-label="Vsebina poglavja">
+    <div class="eyebrow">Poglavje 1 od 12</div>
+    <nav>
+      <div class="grp">Razlaga</div>
+      <a href="#jezik">Kaj je Java</a>
+      <a href="#prevajanje">Prevajanje in tolmačenje</a>
+      <a href="#pot">Od .java do izvajanja</a>
+      <a href="#jdk">JDK, JRE, JVM</a>
+      <a href="#ukazi">Ukazna vrstica</a>
+      <a href="#class">Notranjost .class</a>
+      <a href="#napake">Vrste napak</a>
+      <div class="grp">Vaje</div>
+      <a href="#naloge-a">A · Jeziki in koda <span class="cnt" data-lv="A"></span></a>
+      <a href="#naloge-b">B · JDK, JRE, JVM <span class="cnt" data-lv="B"></span></a>
+      <a href="#naloge-c">C · Prevajanje in zagon <span class="cnt" data-lv="C"></span></a>
+      <a href="#naloge-d">D · Napake <span class="cnt" data-lv="D"></span></a>
+      <a href="#doma">Za doma <span class="cnt" data-lv="E"></span></a>
+    </nav>
+    <div class="rprog" aria-live="polite">
+      <strong>Tvoj napredek</strong>
+      <div class="bar"><i class="js-bar"></i></div>
+      <span class="js-progtxt"></span>
+      <span class="sync js-sync" data-s="local">Napredek se shranjuje v tem brskalniku.</span>
+    </div>
+  </aside>
+
+  <main>
+    <div class="mtop">
+      <label class="eyebrow" for="pageSel">Poglavje 1 · stran</label>
+      <select id="pageSel"></select>
+      <div class="bar"><i class="js-bar"></i></div>
+      <div class="row"><span class="js-progtxt"></span></div>
+      <span class="sync js-sync" data-s="local">Napredek se shranjuje v tem brskalniku.</span>
+    </div>
+    <div class="crumb" id="crumb"><span class="eyebrow">Poglavje 1 · Java in delovanje JVM</span><span class="eyebrow" id="crumbN"></span></div>
+    <header class="hero" id="hero">
+      <div class="eyebrow">Splošna matura · Računalništvo · Izpitna pola 1</div>
+      <h1>Java in delovanje JVM</h1>
+      <p class="lead">Kako pride program iz datoteke <code>.java</code> do procesorja, zakaj isti <code>.class</code> teče na Windows, Linuxu in macOS, in kaj je vloga JDK, JRE in JVM.</p>
+      <div class="magic" aria-label="Prvih osem bajtov datoteke Pozdrav.class">
+        <span class="hi">CA</span><span class="hi">FE</span><span class="hi">BA</span><span class="hi">BE</span><span>00</span><span>00</span><span>00</span><span class="hi">41</span>
+        <small>prvih 8 bajtov vsake datoteke .class (0x41 = 65 → Java 21)</small>
+      </div>
+    </header>
+
+    <!-- ===================== RAZLAGA ===================== -->
+    <section id="jezik">
+      <div class="eyebrow">Razlaga 1</div>
+      <h2>Kaj je Java</h2>
+      <div class="prose">
+        <p>Java je <strong>višji, objektno usmerjen programski jezik</strong>. Leta 1995 ga je izdalo podjetje Sun Microsystems, danes ga razvija Oracle skupaj s skupnostjo OpenJDK. Geslo jezika je <em>»Write once, run anywhere«</em>: program enkrat prevedemo in ga poganjamo na vsakem sistemu, ki ima javanski navidezni stroj.</p>
+        <p>Programske jezike delimo na <strong>nižje</strong> in <strong>višje</strong>. Nižji so blizu strojni opremi, višji so blizu človeku in neodvisni od procesorja.</p>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr><th>Skupina</th><th>Vrsta jezika</th><th>Primer</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="3">Nižji</td><td>strojni jezik (1. generacija)</td><td><code>10110000 01100001</code></td></tr>
+          <tr><td>zbirni jezik (2. generacija)</td><td><code>MOV AL, 61h</code></td></tr>
+          <tr><td>makrozbirni jezik</td><td>zbirnik z makroukazi</td></tr>
+          <tr><td rowspan="3">Višji</td><td>postopkovni (proceduralni, 3. generacija)</td><td>C, Pascal</td></tr>
+          <tr><td>objektno usmerjeni</td><td>Java, C#, C++</td></tr>
+          <tr><td>povpraševalni (poizvedovalni, 4. generacija)</td><td>SQL</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Objektno usmerjeni jeziki so nadgradnja postopkovnih: metoda v Javi je še vedno zaporedje ukazov. Zato je pri nalogi, kjer izbiraš med <em>deklarativni / postopkovni / nižji / skriptni</em>, pravilna izbira <strong>postopkovni</strong>.</p>
+    </section>
+
+    <section id="prevajanje">
+      <div class="eyebrow">Razlaga 2</div>
+      <h2>Prevajanje in tolmačenje</h2>
+      <div class="prose">
+        <p>Procesor razume samo <strong>strojno kodo</strong>. Izvorno kodo višjega jezika je treba pretvoriti, in to na dva načina:</p>
+        <ul>
+          <li><strong>Prevajalnik</strong> (compiler) prevede celoten program <em>pred</em> izvajanjem. Nastane nova datoteka. Če je v programu sintaktična napaka, prevod ne nastane.</li>
+          <li><strong>Tolmač</strong> (interpreter) bere program med izvajanjem in vsak ukaz takoj izvede. Ločene datoteke ni. Napaka se pokaže šele, ko pride izvajanje do nje.</li>
+        </ul>
+        <p>Pri jezikih, kot je C, sodeluje še <strong>povezovalnik</strong> (linker): prevajalnik naredi <em>objektne datoteke</em>, povezovalnik pa jih združi s knjižnicami v eno <em>izvršljivo datoteko</em> (npr. <code>.exe</code>).</p>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr><th></th><th>C</th><th>Python</th><th>Java</th></tr></thead>
+        <tbody>
+          <tr><td>Način</td><td>prevajanje</td><td>tolmačenje</td><td><strong>oboje</strong>: prevajanje v bajtno kodo, nato izvajanje v JVM</td></tr>
+          <tr><td>Kaj nastane</td><td><code>program.exe</code> (strojna koda)</td><td>nič, teče <code>program.py</code></td><td><code>Program.class</code> (bajtna koda)</td></tr>
+          <tr><td>Drug OS ali procesor</td><td>ponovno prevajanje</td><td>potreben tolmač</td><td>isti <code>.class</code>, potreben JVM</td></tr>
+          <tr><td>Hitrost</td><td>zelo hitro</td><td>počasneje</td><td>hitro (JIT)</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note"><strong>JIT</strong> (Just-In-Time) je del JVM. Dele programa, ki se izvajajo pogosto, med izvajanjem prevede v strojno kodo in jih shrani. Zato je Java skoraj tako hitra kot C. Matura opiše JVM preprosto: <em>bajtno kodo interpretira oziroma jo prevede v izvršno.</em> Oba zapisa sta pravilna.</p>
+    </section>
+
+    <section id="pot">
+      <div class="eyebrow">Razlaga 3</div>
+      <h2>Od .java do izvajanja</h2>
+      <figure class="fig">
+        <svg viewBox="0 0 760 250" role="img" aria-label="Izvorna koda Pozdrav.java se z javac prevede v Pozdrav.class, ki ga JVM izvede na Windows, Linux in macOS">
+          <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker></defs>
+          <g font-family="var(--f-mono)" font-size="13">
+            <rect x="10" y="85" width="150" height="74" rx="8" fill="var(--sunk)" stroke="var(--line)"/>
+            <text x="85" y="114" text-anchor="middle" fill="var(--fg)" font-weight="600">Pozdrav.java</text>
+            <text x="85" y="136" text-anchor="middle" fill="var(--muted)" font-size="11">izvorna koda</text>
+            <text x="85" y="150" text-anchor="middle" fill="var(--muted)" font-size="11">besedilo</text>
+
+            <line x1="162" y1="122" x2="248" y2="122" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ar)"/>
+            <text x="205" y="112" text-anchor="middle" fill="var(--accent)" font-weight="600">javac</text>
+            <text x="205" y="142" text-anchor="middle" fill="var(--muted)" font-size="11">prevajalnik</text>
+
+            <rect x="250" y="85" width="150" height="74" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+            <text x="325" y="114" text-anchor="middle" fill="var(--fg)" font-weight="600">Pozdrav.class</text>
+            <text x="325" y="136" text-anchor="middle" fill="var(--muted)" font-size="11">vmesna (bajtna) koda</text>
+            <text x="325" y="150" text-anchor="middle" fill="var(--muted)" font-size="11">enaka za vse OS</text>
+
+            <line x1="402" y1="122" x2="470" y2="40" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ar)"/>
+            <line x1="402" y1="122" x2="470" y2="122" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ar)"/>
+            <line x1="402" y1="122" x2="470" y2="204" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ar)"/>
+            <text x="420" y="98" fill="var(--accent)" font-weight="600">java</text>
+
+            <g>
+              <rect x="472" y="12" width="276" height="56" rx="8" fill="var(--surface)" stroke="var(--line)"/>
+              <text x="488" y="36" fill="var(--fg)" font-weight="600">JVM za Windows</text>
+              <text x="488" y="56" fill="var(--muted)" font-size="11">→ strojna koda x86-64</text>
+              <rect x="472" y="94" width="276" height="56" rx="8" fill="var(--surface)" stroke="var(--line)"/>
+              <text x="488" y="118" fill="var(--fg)" font-weight="600">JVM za Linux</text>
+              <text x="488" y="138" fill="var(--muted)" font-size="11">→ strojna koda x86-64 ali ARM</text>
+              <rect x="472" y="176" width="276" height="56" rx="8" fill="var(--surface)" stroke="var(--line)"/>
+              <text x="488" y="200" fill="var(--fg)" font-weight="600">JVM za macOS</text>
+              <text x="488" y="220" fill="var(--muted)" font-size="11">→ strojna koda ARM (Apple M)</text>
+            </g>
+          </g>
+        </svg>
+        <figcaption>Izvorna koda in bajtna koda sta enaki na vseh sistemih. Različen je samo JVM, ki ga namestimo za posamezen OS in procesor.</figcaption>
+      </figure>
+      <div class="tbl"><table>
+        <thead><tr><th>Pojem</th><th>Datoteka</th><th>Kdo jo bere</th><th>Odvisna od OS?</th></tr></thead>
+        <tbody>
+          <tr><td><strong>izvorna koda</strong></td><td><code>Pozdrav.java</code></td><td>človek, prevajalnik <code>javac</code></td><td>ne</td></tr>
+          <tr><td><strong>vmesna / bajtna koda</strong> (byte code)</td><td><code>Pozdrav.class</code></td><td>JVM</td><td>ne</td></tr>
+          <tr><td><strong>izvršljiva / strojna koda</strong></td><td>v pomnilniku (ali <code>.exe</code> pri C)</td><td>procesor</td><td>da</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="jdk">
+      <div class="eyebrow">Razlaga 4</div>
+      <h2>JDK, JRE in JVM</h2>
+      <div class="two">
+        <figure class="fig" style="overflow:visible">
+          <svg viewBox="0 0 340 240" role="img" aria-label="JDK vsebuje JRE, JRE vsebuje JVM" style="min-width:0">
+            <g font-family="var(--f-mono)" font-size="13">
+              <rect x="4" y="4" width="332" height="232" rx="10" fill="var(--sunk)" stroke="var(--line)"/>
+              <text x="18" y="28" fill="var(--fg)" font-weight="600">JDK · Java Development Kit</text>
+              <text x="18" y="48" fill="var(--muted)" font-size="11">javac, javap, jar, javadoc, razhroščevalnik</text>
+              <rect x="22" y="64" width="296" height="158" rx="8" fill="var(--surface)" stroke="var(--line)"/>
+              <text x="36" y="88" fill="var(--fg)" font-weight="600">JRE · Java Runtime Environment</text>
+              <text x="36" y="108" fill="var(--muted)" font-size="11">knjižnice (API): String, Math, Scanner …</text>
+              <rect x="40" y="124" width="260" height="82" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+              <text x="54" y="150" fill="var(--fg)" font-weight="600">JVM · Java Virtual Machine</text>
+              <text x="54" y="172" fill="var(--muted)" font-size="11">nalaga .class, preverja,</text>
+              <text x="54" y="190" fill="var(--muted)" font-size="11">izvaja bajtno kodo (+ JIT)</text>
+            </g>
+          </svg>
+        </figure>
+        <div class="prose">
+          <ul>
+            <li><strong>JVM</strong> je navidezni stroj, ki <strong>izvaja</strong> bajtno kodo. Ne prevaja izvorne kode.</li>
+            <li><strong>JRE</strong> = JVM + standardne knjižnice. Za <strong>izvajanje</strong> programov je dovolj JRE.</li>
+            <li><strong>JDK</strong> = JRE + razvojna orodja. Za <strong>prevajanje</strong> potrebujemo JDK, ker vsebuje <code>javac</code>.</li>
+            <li><strong>IDE</strong> (Integrated Development Environment, integrirano razvojno okolje: Eclipse, VS Code, IntelliJ, NetBeans) je programsko okolje za razvoj in preizkušanje programov: urejevalnik, gumb »Run«, razhroščevalnik. V ozadju kliče <code>javac</code> in <code>java</code> iz nameščenega JDK. Na maturi je »programsko okolje, namenjeno razvoju in preizkušanju programov« prav IDE.</li>
+          </ul>
+          <p class="note">Oracle od Jave 11 ne izdaja več ločenega JRE (nekateri drugi ponudniki ga še), zato običajno namestimo kar JDK. Na maturi velja klasični model: JDK ⊃ JRE ⊃ JVM.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="ukazi">
+      <div class="eyebrow">Razlaga 5</div>
+      <h2>Prevajanje in zagon v ukazni vrstici</h2>
+      <div class="two">
+        <div class="prose" style="gap:10px">
+          <h3>Pozdrav.java</h3>
+          <pre class="code js-hl">// Ime javnega razreda = ime datoteke
+public class Pozdrav {
+    // Tu se izvajanje začne
+    public static void main(String[] args) {
+        System.out.println("Pozdravljen, svet!");
+    }
+}</pre>
+        </div>
+        <div class="prose" style="gap:10px">
+          <h3>Ukazi in njihov izpis</h3>
+<pre class="code term"><span class="p">C:\vaje&gt; </span>javac Pozdrav.java
+<span class="p">C:\vaje&gt; </span>dir /b
+<span class="o">Pozdrav.class
+Pozdrav.java</span>
+<span class="p">C:\vaje&gt; </span>java Pozdrav
+<span class="o">Pozdravljen, svet!</span>
+<span class="p">C:\vaje&gt; </span>java -version
+<span class="o">openjdk version "21.0.12.1" 2026-08-18</span></pre>
+        </div>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr><th>Ukaz</th><th>Kaj naredi</th><th>Pozor</th></tr></thead>
+        <tbody>
+          <tr><td><code>javac Pozdrav.java</code></td><td>prevede izvorno kodo v <code>Pozdrav.class</code></td><td>s končnico <code>.java</code></td></tr>
+          <tr><td><code>java Pozdrav</code></td><td>zažene JVM, ta naloži <code>Pozdrav.class</code> in izvede <code>main</code></td><td><strong>brez</strong> končnice; <code>java Pozdrav.class</code> javi <em>Could not find or load main class</em></td></tr>
+          <tr><td><code>java Pozdrav Ana 17</code></td><td>zažene program z argumenti, ki pridejo v <code>args</code></td><td><code>args[0]</code> je <code>"Ana"</code></td></tr>
+          <tr><td><code>java -version</code></td><td>izpiše nameščeno različico Jave</td><td><code>javac -version</code> izpiše različico prevajalnika</td></tr>
+          <tr><td><code>javap -c Pozdrav</code></td><td>izpiše bajtno kodo v berljivi obliki</td><td>orodje iz JDK</td></tr>
+          <tr><td><code>java Pozdrav.java</code></td><td>prevede v pomnilnik in takoj zažene (od Jave 11)</td><td>datoteka <code>.class</code> ne nastane</td></tr>
+        </tbody>
+      </table></div>
+      <div class="prose">
+        <h3>Pravila, ki jih matura rada preverja</h3>
+        <ul>
+          <li>Javni razred <code>public class Primer</code> mora biti v datoteki <code>Primer.java</code>, sicer <code>javac</code> javi napako.</li>
+          <li>Java razlikuje velike in male črke: <code>system.out</code> ni isto kot <code>System.out</code>.</li>
+          <li>Vsak razred dobi svojo datoteko <code>.class</code>. Če sta v <code>Dva.java</code> razreda <code>Dva</code> in <code>Pomocnik</code>, nastaneta <code>Dva.class</code> in <code>Pomocnik.class</code>.</li>
+          <li>Program se začne v metodi <code>public static void main(String[] args)</code>. Brez nje se prevede, ne zažene pa se. Ni je treba imeti v vsakem razredu, dovolj je v tistem, ki ga zaženemo.</li>
+          <li><strong>Ključne (rezervirane) besede</strong> so besede jezika, ki jih ne smemo uporabiti za imena: <code>class</code>, <code>public</code>, <code>static</code>, <code>void</code>, <code>int</code>, <code>boolean</code>, <code>if</code>, <code>for</code>, <code>break</code>, <code>extends</code> … Besedi <code>java</code> in <code>javac</code> sta imeni ukazov, ne ključni besedi.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="class">
+      <div class="eyebrow">Razlaga 6</div>
+      <h2>Kaj je v datoteki .class</h2>
+      <div class="prose">
+        <p>Bajtna koda je zaporedje ukazov za navidezni stroj, ne za pravi procesor. Z ukazom <code>javap -c Pozdrav</code> vidimo, da se metoda <code>main</code> prevede v štiri ukaze JVM:</p>
+      </div>
+<pre class="code term"><span class="o">public static void main(java.lang.String[]);
+  Code:</span>
+     0: getstatic     #7    <span class="o">// System.out</span>
+     3: ldc           #13   <span class="o">// String Pozdravljen, svet!</span>
+     5: invokevirtual #15   <span class="o">// PrintStream.println</span>
+     8: return</pre>
+      <div class="prose">
+        <p>Vsaka datoteka <code>.class</code> se začne z »magično« številko <code>CA FE BA BE</code>. Nato sledi različica formata, po kateri JVM ugotovi, ali datoteko zna izvesti.</p>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr><th>Različica Jave</th><th>Različica .class</th><th>Bajt 8 (hex)</th></tr></thead>
+        <tbody>
+          <tr><td>Java 8</td><td class="num">52</td><td class="num">34</td></tr>
+          <tr><td>Java 11</td><td class="num">55</td><td class="num">37</td></tr>
+          <tr><td>Java 17</td><td class="num">61</td><td class="num">3D</td></tr>
+          <tr><td>Java 21</td><td class="num">65</td><td class="num">41</td></tr>
+        </tbody>
+      </table></div>
+      <div class="prose">
+        <h3>Prenosljivost in združljivost</h3>
+        <ul>
+          <li><strong>Med operacijskimi sistemi:</strong> <code>.class</code>, preveden na Windows, teče na Linuxu in macOS brez ponovnega prevajanja. Izvorna koda ni potrebna.</li>
+          <li><strong>Novejši JVM, starejša koda:</strong> program, preveden z Javo 8, teče na Javi 21.</li>
+          <li><strong>Starejši JVM, novejša koda:</strong> program, preveden z Javo 21, se na Javi 8 ne zažene in javi <code>UnsupportedClassVersionError</code>. Pomaga <code>javac --release 8</code>.</li>
+          <li><strong>Za primerjavo C:</strong> <code>program.exe</code> za Windows na Linuxu ne teče. Izvorno kodo je treba prevesti znova, z ustreznim prevajalnikom.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="napake">
+      <div class="eyebrow">Razlaga 7</div>
+      <h2>Sintaksa, semantika in vrste napak</h2>
+      <div class="prose">
+        <p><strong>Sintaksa</strong> so pravila, <em>kako</em> stavek zapišemo: podpičja, oklepaji, ključne besede. <strong>Semantika</strong> so pravila, <em>kaj</em> zapisani stavek pomeni in kaj naredi.</p>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr><th>Vrsta napake</th><th>Kdo jo odkrije</th><th>Primer (preverjeno z Javo 21)</th></tr></thead>
+        <tbody>
+          <tr><td><strong>sintaktična</strong> (napaka pri prevajanju)</td><td>prevajalnik <code>javac</code>; <code>.class</code> ne nastane</td><td><code>System.out.println("x")</code> brez <code>;</code> → <code>error: ';' expected</code></td></tr>
+          <tr><td><strong>napaka med izvajanjem</strong> (izjema)</td><td>JVM med izvajanjem; program se ustavi</td><td><code>10 / 0</code> → <code>ArithmeticException: / by zero</code></td></tr>
+          <tr><td><strong>semantična / logična</strong></td><td>nihče samodejno; rezultat je napačen</td><td><code>a + b / 2</code> za povprečje 4 in 5 izpiše <code>6.0</code> namesto <code>4.5</code></td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Ukazni <code>javac</code> se pri sintaktični napaki ustavi in pokaže samo njo. Druge napake (npr. nedeklarirano spremenljivko) pokaže šele, ko prvo popraviš. Eclipse prikaže vse naenkrat, zato so v nalogi M182/10 naštete tri napake.</p>
+    </section>
+
+    <!-- ===================== NALOGE ===================== -->
+    <section id="naloge" style="gap:24px">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="eyebrow">Vaje</div>
+        <h2>Naloge od lažjih do težjih</h2>
+        <p class="prose" style="color:var(--muted)">Naloge z oznako <span class="tag mat">Matura</span> so iz izpitnih pol 1 iz let 2012–2026. Več jih najdeš še na strani Za doma, z enakim številom točk kot na izpitu. Odgovor preveri sam, če se zatakne, odpri namig. Če si ogledaš rešitev, preden nalogo pravilno rešiš, se ti točke ne štejejo.</p>
+        <div class="filters" role="group" aria-label="Prikaži naloge">
+          <button class="chip" data-f="all" aria-pressed="true" type="button">Vse</button>
+          <button class="chip" data-f="mat" aria-pressed="false" type="button">Samo maturitetne</button>
+          <button class="chip" data-f="own" aria-pressed="false" type="button">Samo dodatne</button>
+          <button class="chip" data-f="open" aria-pressed="false" type="button">Še nerešene</button>
+        </div>
+      </div>
+      <div id="levels" style="display:flex;flex-direction:column;gap:40px"></div>
+    </section>
+
+    <section id="doma">
+      <div class="eyebrow">Za doma</div>
+      <h2>Vaje za doma</h2>
+      <p class="prose" style="color:var(--muted)">Najprej še nekaj maturitetnih nalog za ponavljanje, nato vaje, ki jih narediš na svojem računalniku (Eclipse ali VS Code z JDK) ali v Programizu.</p>
+      <div id="homeMat"></div>
+      <div class="level"><header><span class="eyebrow">Praktične vaje</span><h3 style="font-size:1.35rem">Na svojem računalniku</h3></header><div id="home" class="level"></div></div>
+    </section>
+
+    <nav class="pager" id="pager" aria-label="Listanje po straneh"></nav>
+
+    <footer>
+      <span>Viri nalog: Državni izpitni center (RIC), izpitne pole 1 iz računalništva 2012–2026. Predmetni izpitni katalog za splošno maturo – računalništvo 2023 (velja do 2028).</span>
+      <span>Vsi programi in izpisi na tej strani so preverjeni z OpenJDK 21.</span>
+      <span id="resetWrap"></span>
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+const PROGRAMIZ = "https://www.programiz.com/java-programming/online-compiler/";
+const STORE = "java-matura-p1-v1";
+
+/* ---------- data ---------- */
+const LEVELS = [
+ {id:"naloge-a", tag:"A", title:"Programski jeziki in vrste kode", note:"Pojmi iz razlage 1–3."},
+ {id:"naloge-b", tag:"B", title:"JDK, JRE in JVM", note:"Kdo prevaja, kdo izvaja in kaj moramo namestiti."},
+ {id:"naloge-c", tag:"C", title:"Prevajanje in zagon programa", note:"Ukazi javac in java, imena datotek, prvi programi."},
+ {id:"naloge-d", tag:"D", title:"Sintaksa, semantika in napake", note:"Prepoznaj, kdo javi napako, in jo popravi."},
+ {id:"doma-mat", tag:"E", title:"Še več maturitetnih nalog", note:"Naloge iz drugih rokov za ponavljanje. Preverjaš jih enako kot v sklopih A–D.", home:true}
+];
+
+const T = [
+/* ----- A ----- */
+{lv:"A", src:"M251/1", pts:1, type:"mc",
+ q:"Programski jezik Java spada v kategorijo",
+ o:["poizvedovalnih jezikov.","hipertekstnih jezikov.","višjih programskih jezikov.","nižjih programskih jezikov."], a:[2],
+ h:["Nižji jeziki so strojni in zbirni. Je Java blizu procesorju ali blizu človeku?"],
+ why:"Java je višji programski jezik: neodvisna je od procesorja, ukazi so blizu človeškemu jeziku. Poizvedovalni jezik je npr. SQL, hipertekstni pa HTML."},
+{lv:"A", src:"M252/1", pts:1, type:"mc",
+ q:"Med katere programske jezike uvrščamo programski jezik Java?",
+ o:["Med nižje programske jezike.","Med zbirne jezike.","Med logične jezike.","Med objektno orientirane jezike."], a:[3],
+ h:["V Javi je vsak program zapisan v razredu (class)."],
+ why:"Java je objektno orientiran (objektno usmerjen) jezik. Program je sestavljen iz razredov, iz razredov ustvarjamo objekte. Logični jezik je npr. Prolog."},
+{lv:"A", src:"M122/1", pts:2, type:"mc",
+ q:"Programski jezik Java je",
+ o:["programski jezik prve generacije.","programski jezik druge generacije.","nižji programski jezik.","objektno orientirani programski jezik.","poizvedovalni jezik."], a:[3],
+ h:["Prva generacija je strojni jezik, druga zbirni jezik."],
+ why:"Prva generacija je strojni jezik, druga zbirni. Oba sta nižja. Java je višji, objektno orientiran jezik."},
+{lv:"A", src:"M172/1", pts:2, type:"cls", cats:["Nižji","Višji"],
+ q:"Uvrstite naštete programske jezike med nižje in višje programske jezike.",
+ items:[["strojni",0],["objektni",1],["povpraševalni",1],["zbirni",0],["makrozbirni",0],["postopkovni",1]],
+ h:["Nižji jeziki so odvisni od procesorja: ukaz približno ustreza enemu strojnemu ukazu.","Makrozbirni jezik je zbirni jezik z makroukazi, torej še vedno blizu strojne kode."],
+ why:"Nižji: strojni, zbirni, makrozbirni. Višji: postopkovni (C, Pascal), objektni (Java), povpraševalni (SQL)."},
+{lv:"A", src:"M232/3", pts:1, type:"mc",
+ q:"Programski jezik Java sodi v skupino",
+ o:["deklarativnih jezikov.","postopkovnih jezikov.","nižjih programskih jezikov.","skriptnih jezikov."], a:[1],
+ h:["Med ponujenimi odgovori ni »objektno usmerjen«. Kateri je najbližji?","Pri deklarativnem jeziku (npr. SQL) napišemo, KAJ želimo, ne pa KAKO. V Javi napišemo zaporedje korakov."],
+ why:"Objektno usmerjeni jeziki so nadgradnja postopkovnih (imperativnih). V metodah v Javi pišemo zaporedje ukazov, kako pridemo do rezultata. Deklarativen je npr. SQL. Skriptni jeziki (JavaScript, Python) se praviloma tolmačijo brez prevajanja."},
+{lv:"A", src:"M162/1", pts:1, type:"mc",
+ q:"Program, napisan v programskem jeziku Java, smo prevedli in dobili datoteko s končnico class. Datoteko takšne vrste imenujemo:",
+ o:["izvorna koda.","izvršljiva koda.","prenosljiva koda.","vmesna koda."], a:[3],
+ h:["Datoteke .class procesor ne izvede neposredno. Kaj jo izvaja?"],
+ why:"Datoteka .class vsebuje vmesno (bajtno) kodo. Ta je med izvorno kodo (.java) in strojno kodo, ki jo izvede procesor."},
+{lv:"A", src:"M241/2", pts:1, type:"mc",
+ q:"Kaj predstavlja datotečna končnica .class?",
+ o:["Izvorno kodo programa.","Vmesno kodo javanskega programa.","Izvršno kodo javanskega programa.","Izvorno kodo javanske knjižnice."], a:[1], alt:[2],
+ h:["Izvršno kodo razume procesor. Ali procesor razume .class neposredno?"],
+ why:"V .class je vmesna (bajtna) koda, zato je to najbolj natančen odgovor (B). Uradna navodila sprejmejo tudi C, ker .class izvaja JVM. Izvršna koda v ožjem pomenu (strojna koda za procesor) pa nastane šele med izvajanjem v JVM."},
+{lv:"A", src:"M142/2", pts:1, type:"blanks",
+ q:"Da bi se javanski program lahko izvajal, ga je treba prevesti v vmesno (byte) kodo. Končnica imena programske datoteke z vmesno kodo je ___.",
+ b:[{l:"Končnica", acc:[".class","class"]}],
+ h:["Isto ime kot ključna beseda, s katero začnemo razred."],
+ why:"Končnica je .class. Iz Pozdrav.java nastane Pozdrav.class."},
+{lv:"A", src:"M181/3", pts:2, type:"blanks",
+ q:"Napisali smo program v programskem jeziku Java. Datoteka z napisanim programom ima končnico java. Programu v taki obliki pravimo (1) ___. S prevajalnikom prevedemo program in dobimo datoteko s končnico class. Programu v taki obliki pravimo (2) ___.",
+ b:[{l:"(1)", acc:["izvorna koda","izvorni program","izvorna","izvorna koda programa","source code"]},
+    {l:"(2)", acc:["vmesna koda","bajtna koda","byte koda","vmesna (byte) koda","vmesna","bajtna","bytecode","byte code","zložna koda"]}],
+ h:["Prvi pojem: iz česa izvira vse ostalo?","Drugi pojem: koda, ki je »vmes« med človekom in procesorjem."],
+ why:"(1) izvorna koda, (2) vmesna oziroma bajtna (byte) koda."},
+{lv:"A", own:true, pts:2, type:"cls", cats:["C","Python","Java"],
+ q:"Kateremu jeziku pripada opis?",
+ items:[["Izvorno kodo pred zagonom prevede v strojno kodo za določen procesor in OS.",0],
+        ["Izvorno kodo tolmač izvaja sproti, ločenega prevajanja ni.",1],
+        ["Izvorno kodo prevede v bajtno kodo, ki jo izvaja navidezni stroj.",2],
+        ["Za drug operacijski sistem je treba program ponovno prevesti.",0],
+        ["Isto prevedeno datoteko lahko kopiramo na Windows, Linux ali macOS.",2]],
+ h:["Pomagaj si s preglednico v razlagi 2."],
+ why:"C se prevede v strojno kodo za en sistem. Python se tolmači. Java se prevede v bajtno kodo in izvaja v JVM, zato je .class prenosljiv."},
+{lv:"A", own:true, pts:1, type:"mc",
+ q:"Kateri trditvi o prevajalniku in tolmaču sta resnični? (2 pravilni)",
+ o:["Prevajalnik ustvari novo datoteko s prevedenim programom.","Tolmač pred izvajanjem preveri celoten program in javi vse sintaktične napake.","Pri tolmačenju se napaka v vrstici 50 pokaže šele, ko izvajanje pride do vrstice 50.","Prevajalnik izvaja program vrstico za vrstico."], a:[0,2],
+ h:["Kdaj pri vsakem od njiju nastane napaka?"],
+ why:"Prevajalnik prevede celoten program vnaprej in ustvari novo datoteko. Tolmač vsak ukaz izvede sproti, zato napako odkrije šele, ko pride do nje."},
+
+/* ----- B ----- */
+{lv:"B", src:"M251/2", pts:1, type:"mc",
+ q:"Java Virtual Machine (JVM) se uporablja za",
+ o:["izvajanje javanskih programov.","prevajanje javanskih programov.","razhroščevanje javanskih programov.","spreminjanje oziroma vzdrževanje javanskih programov."], a:[0],
+ h:["Prevaja javac. Kaj naredi JVM?"],
+ why:"JVM izvaja bajtno kodo. Prevajanje izvorne kode opravi javac, ki je del JDK."},
+{lv:"B", src:"M171/1", pts:1, type:"mc",
+ q:"Ime programske datoteke, ki jo izvaja JVM (Java Virtual Machine), je:",
+ o:["Program.class","Program.bin","Program.exe","Program.java"], a:[0],
+ h:["JVM izvaja prevedeno, vmesno kodo."],
+ why:"JVM naloži in izvede Program.class. Program.java je izvorna koda za prevajalnik, .exe je strojna koda za Windows."},
+{lv:"B", src:"M191/1", pts:1, type:"mc",
+ q:"Da bi na računalniku izvajali javanske programe, moramo namestiti vsaj",
+ o:["JDK (Java Development Kit).","Netbeans.","JDBC (Java Database Connectivity).","JRE (Java Runtime Environment)."], a:[3],
+ h:["Pomembna je beseda »vsaj«: kaj je najmanj, kar potrebujemo?","Runtime = čas izvajanja."],
+ why:"Za izvajanje je dovolj JRE (JVM + knjižnice). JDK vsebuje tudi prevajalnik in je potreben za razvoj. Netbeans je IDE, JDBC pa knjižnica za delo s podatkovnimi bazami."},
+{lv:"B", src:"M261/1", pts:1, type:"mc",
+ q:"Kaj vsebuje Java Development Kit?",
+ o:["Sodoben urejevalnik za pisanje in urejanje kode v Javi.","Grafični urejevalnik kode, napisane v jeziku Java.","Samo prevajalnik za programski jezik Java.","Java Runtime Environment (JRE) in Java Virtual Machine (JVM)."], a:[3],
+ h:["Nariši si tri škatle, eno v drugi."],
+ why:"JDK ⊃ JRE ⊃ JVM. JDK vsebuje JRE (z JVM) in razvojna orodja (javac, javap …). Urejevalnika ne vsebuje, ta je del IDE."},
+{lv:"B", src:"M181/2", pts:1, type:"mc",
+ q:"Programsko okolje, namenjeno razvoju in preizkušanju javanskih programov, se imenuje",
+ o:["Java JDK.","Java API.","Java VM.","Java IDE."], a:[3],
+ h:["Programsko okolje za razvoj ima urejevalnik, gumb za zagon in razhroščevalnik: Eclipse, NetBeans, VS Code.","JDK je komplet orodij (javac, JRE), API zbirka knjižnic, VM pa navidezni stroj. Nobeden od njih ni »okolje za razvoj in preizkušanje«."],
+ why:"Pravilen odgovor je Java IDE (Integrated Development Environment, integrirano razvojno okolje): v njem programe pišemo, prevajamo, zaganjamo in preizkušamo (Eclipse, NetBeans, VS Code, IntelliJ). JDK je komplet orodij za razvoj, API je zbirka knjižnic, VM pa navidezni stroj, ki izvaja bajtno kodo."},
+{lv:"B", src:"M231/2", pts:1, type:"mc",
+ q:"Obkrožite črko pred resnično trditvijo.",
+ o:["JVM prevede vmesno (Byte) kodo v izvršno.","JVM prevede izvorno kodo programa v vmesno kodo.","JRE ne vsebuje JVM.","Za prevajanje javanskih programov potrebujemo JRE."], a:[0],
+ h:["Izločaj: kdo prevede izvorno kodo v vmesno?","Ali je JVM znotraj JRE ali zunaj?"],
+ why:"JVM pretvori bajtno kodo v izvršno (s tolmačenjem in JIT). B ne drži, ker to naredi javac. C ne drži, ker JRE vsebuje JVM. D ne drži, ker za prevajanje potrebujemo JDK."},
+{lv:"B", src:"M161/1", pts:1, type:"mc",
+ q:"Izvorna koda javanskega programa se",
+ o:["interpretira.","prevede v izvršno kodo in potem izvaja.","prevede v vmesno (byte) kodo in potem interpretira.","lahko takoj izvaja."], a:[2],
+ h:["Java uporablja oba načina, enega za drugim."],
+ why:"Najprej javac prevede izvorno kodo v bajtno kodo, nato jo JVM interpretira (in z JIT prevaja). B ne drži, ker javac ne ustvari strojne kode."},
+{lv:"B", src:"M222/5", pts:1, type:"mc",
+ q:"Obkrožite črko pred trditvijo, ki je resnična za programski jezik Java.",
+ o:["Javanska izvorna koda se interpretira v vmesno kodo, ki jo za potrebe izvajanja prevede JVM.","Javanska izvorna koda se prevede v vmesno kodo, ki jo za potrebe izvajanja interpretira JVM.","Javanske vmesne kode, ustvarjene v operacijskem sistemu Windows, ne moremo uporabiti v operacijskem sistemu Linux.","Javanska vmesna koda je odvisna od strojnega jezika uporabljene arhitekture."], a:[1],
+ h:["A in B se razlikujeta samo v vrstnem redu besed »prevede« in »interpretira«."],
+ why:"Izvorna koda se prevede (javac), vmesno kodo JVM interpretira. C in D ne držita, ker je bajtna koda neodvisna od OS in procesorja."},
+{lv:"B", src:"M242/3", pts:1, type:"mc",
+ q:"Kateri operacijski sistem mora biti nameščen, da lahko izvajamo javanski program?",
+ o:["MS Windows.","Linux.","MAC OS.","Katerikoli od navedenih OS."], a:[3],
+ h:["Write once, run anywhere."],
+ why:"JVM obstaja za vse naštete sisteme, zato lahko isti javanski program izvajamo na katerem koli od njih."},
+{lv:"B", own:true, pts:3, type:"cls", cats:["Resnično","Neresnično"],
+ q:"Program Igra.java smo prevedli na Windows z JDK 21. Datoteko Igra.class kopiramo na druge računalnike. Ali trditev drži?",
+ items:[["Na Linuxu z Javo 21 se Igra.class zažene brez ponovnega prevajanja.",0],
+        ["Za zagon na Linuxu potrebujemo tudi Igra.java.",1],
+        ["Na računalniku, kjer je samo Java 8, se Igra.class zažene.",1],
+        ["Program, preveden z Javo 8, se zažene na Javi 21.",0],
+        ["Program v C, preveden v program.exe na Windows, se zažene na Linuxu.",1],
+        ["Na macOS mora biti nameščen JVM za macOS.",0]],
+ h:["Prenosljivost velja med operacijskimi sistemi. Kaj pa med različicami Jave?","Poglej preglednico različic v razlagi 6: Java 21 = 65, Java 8 = 52."],
+ why:"Bajtna koda je neodvisna od OS, potreben je le JVM za ta sistem. Izvorna koda za zagon ni potrebna. Novejši JVM izvaja starejše datoteke .class, starejši JVM pa novejše zavrne (UnsupportedClassVersionError). Prevedena koda v C je vezana na OS."},
+
+/* ----- C ----- */
+{lv:"C", src:"M172/2", pts:1, type:"mc",
+ q:"S katerim ukazom izvedemo program, ki je preveden v vmesno kodo v Javi?",
+ o:["java","run","exec","javac"], a:[0],
+ h:["Črka c v javac pomeni compiler."],
+ why:"java zažene JVM, ki izvede vmesno kodo. javac je prevajalnik."},
+{lv:"C", src:"M131/3", pts:2, type:"mc",
+ q:"Kako iz operacijskega sistema pokličemo izvajanje prevedenega javanskega programa, shranjenega v datoteki Naloga.class?",
+ o:["C:\\...>java Naloga","C:\\...>javac Naloga.java","C:\\...>execute Naloga.class","Javanskih programov ne moremo klicati iz konzole operacijskega sistema."], a:[0],
+ h:["Ukazu java podamo ime razreda, ne imena datoteke."],
+ why:"java Naloga. Ukaz javac Naloga.java program samo prevede."},
+{lv:"C", src:"M261/2", pts:1, type:"mc",
+ q:"Na disku v mapi c:\\demo je shranjen program Primer.class. S katerim ukazom izvedemo program Primer.class?",
+ o:["java Primer","javac Primer","Primer","Primer.class"], a:[0],
+ h:["Primer.class ni .exe, zato ga OS sam ne zna zagnati."],
+ why:"java Primer. Ukaz javac Primer ne deluje (javac zahteva datoteko .java), Primer in Primer.class pa OS ne zna izvesti."},
+{lv:"C", src:"M122/2", pts:2, type:"mc",
+ q:"Da bi uspešno prevedli datoteko z izvorno kodo, ki vsebuje public class Primer, mora le-ta:",
+ o:["biti shranjena pod imenom Primer.java","biti shranjena pod imenom Primer.class","vsebovati stavek import java.lang","vsebovati stavek package","vsebovati metodo main(String[] args)"], a:[0],
+ h:["Pazi: »prevesti«, ne »zagnati«. Ali je main potreben že za prevajanje?"],
+ why:"Javni razred mora biti v datoteki z enakim imenom: Primer.java. Metoda main je potrebna za zagon, ne za prevajanje. java.lang se uvozi samodejno."},
+{lv:"C", src:"M182/2", pts:2, type:"blanks",
+ code:"public class MojProgram {\n    public static void main(String []args) {\n        //koda programa\n    }\n}",
+ q:"V urejevalniku imamo zapisano programsko kodo (zgoraj). Zapišite ukaz, s katerim prevedemo program v vmesno kodo, in ime ter končnico dobljene datoteke.",
+ b:[{l:"C:\\...(pot)...>", acc:["javac MojProgram.java"], cs:true},
+    {l:"Ime in končnica dobljene datoteke", acc:["MojProgram.class"], cs:true}],
+ h:["Prevajalniku podamo ime datoteke z izvorno kodo, s končnico.","Pazi na velike in male črke."],
+ why:"javac MojProgram.java, nastane MojProgram.class."},
+{lv:"C", src:"M192/4", pts:2, type:"blanks",
+ code:"class Matura {\n    public static void main (String args[])\n    {\n        System.out.print(\"Matura\");\n    }\n}",
+ q:"V urejevalniku je zapisan javanski program (zgoraj). Zapišite ime in končnico datoteke, v katero je treba shraniti program, in ukaz, s katerim iz konzole prevedemo program v vmesno kodo.",
+ b:[{l:"Ime in končnica datoteke", acc:["Matura.java"], cs:true},
+    {l:"Ukaz za prevajanje", acc:["javac Matura.java"], cs:true}],
+ h:["Razred ni javen (ni public), vendar je običajno, da je datoteka poimenovana po razredu."],
+ why:"Matura.java in javac Matura.java. Ker razred ni public, bi se prevedel tudi v datoteki z drugim imenom, a .class bi se vseeno imenoval Matura.class. Na maturi pričakujejo Matura.java."},
+{lv:"C", src:"M242/2", pts:1, type:"blanks",
+ q:"S katerim ukazom v operacijskem sistemu preverimo, katera različica programskega jezika Java je nameščena na našem računalniku?",
+ b:[{l:"Ukaz", acc:["java -version","java --version","javac -version","javac --version"], cs:true}],
+ h:["Ukaz java z možnostjo (stikalom) v angleščini."],
+ why:"java -version (ali java --version). Ukaz javac -version izpiše različico prevajalnika, ki je enaka, če je nameščen JDK."},
+{lv:"C", own:true, pts:3, type:"blanks",
+ q:"V mapi C:\\vaje je samo datoteka Pozdrav.java. Zapiši ukaz za prevajanje, ukaz za zagon in imena VSEH datotek, ki so v mapi po prevajanju (ločene z vejico).",
+ b:[{l:"Prevajanje", acc:["javac Pozdrav.java"], cs:true},
+    {l:"Zagon", acc:["java Pozdrav"], cs:true},
+    {l:"Datoteke v mapi", acc:["Pozdrav.java, Pozdrav.class","Pozdrav.class, Pozdrav.java"], cs:true, list:true}],
+ h:["Prevajanje izvorne datoteke ne izbriše."],
+ why:"javac Pozdrav.java, nato java Pozdrav. V mapi sta Pozdrav.java in Pozdrav.class."},
+{lv:"C", own:true, pts:2, type:"blanks",
+ code:"class Pomocnik {\n    static int dvakrat(int x) { return 2 * x; }\n}\npublic class Dva {\n    public static void main(String[] args) {\n        System.out.println(Pomocnik.dvakrat(21));\n    }\n}",
+ q:"Datoteko Dva.java (zgoraj) prevedemo z javac Dva.java. Koliko datotek .class nastane in kako se imenujejo? Kaj izpiše java Dva?",
+ b:[{l:"Datoteke .class (ločene z vejico)", acc:["Dva.class, Pomocnik.class","Pomocnik.class, Dva.class"], cs:true, list:true},
+    {l:"Izpis programa", acc:["42"]}],
+ h:["Vsak razred dobi svojo datoteko .class, ne glede na to, v kateri datoteki .java je."],
+ why:"Nastaneta dve datoteki, Dva.class in Pomocnik.class. Program izpiše 42."},
+{lv:"C", own:true, pts:2, type:"code",
+ q:"Napiši program Matura.java, ki izpiše natanko ti dve vrstici:",
+ expected:"Pozdravljen, svet!\nPripravljam se na maturo.",
+ starter:"public class Matura {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}",
+ sol:"public class Matura {\n    public static void main(String[] args) {\n        System.out.println(\"Pozdravljen, svet!\");\n        System.out.println(\"Pripravljam se na maturo.\");\n    }\n}",
+ h:["System.out.println izpiše besedilo in skoči v novo vrstico.","V Programizu je datoteka vedno Main.java: preimenuj razred v Main ali odstrani besedo public."],
+ why:"Vsak klic println izpiše eno vrstico. Pazi na pike in velike črke, izpis primerjamo natančno."},
+{lv:"C", own:true, pts:2, type:"output",
+ code:"public class Izpis {\n    public static void main(String[] args) {\n        System.out.print(\"Java \");\n        System.out.println(\"je\");\n        System.out.println(\"prenosljiva\" + 2 + 1);\n        System.out.println(2 + 1 + \"x\");\n        // System.out.println(\"komentar\");\n        System.out.print(\"konec\");\n    }\n}",
+ q:"Kaj izpiše program? Zapiši natančen izpis, vrstico za vrstico.",
+ expected:"Java je\nprenosljiva21\n3x\nkonec",
+ h:["print ne skoči v novo vrstico, println skoči.","Seštevanje gre od leve proti desni: niz + število da niz.","Vrstica, ki se začne z //, je komentar."],
+ why:"\"Java \" in \"je\" sta v isti vrstici. \"prenosljiva\" + 2 je niz \"prenosljiva2\", nato + 1 da \"prenosljiva21\". 2 + 1 je najprej 3, nato \"3x\". Komentar se ne izvede."},
+{lv:"C", own:true, pts:2, type:"output",
+ code:"public class Argumenti {\n    public static void main(String[] args) {\n        System.out.println(\"Število argumentov: \" + args.length);\n        for (int i = 0; i < args.length; i++)\n            System.out.println(i + \": \" + args[i]);\n    }\n}",
+ q:"Program zaženemo z ukazom  java Argumenti Ana 17 \"Novo mesto\"  . Kaj izpiše?",
+ expected:"Število argumentov: 3\n0: Ana\n1: 17\n2: Novo mesto",
+ h:["Argumenti so ločeni s presledki, razen če so v narekovajih.","Ime razreda (Argumenti) ni argument."],
+ why:"Argumenti so \"Ana\", \"17\" in \"Novo mesto\", torej trije. Narekovaji združijo dve besedi v en argument, indeksi se začnejo z 0."},
+{lv:"C", own:true, pts:2, type:"blanks",
+ q:"Prvih osem bajtov neke datoteke .class je  CA FE BA BE 00 00 00 34. S katero različico Jave je bila prevedena? Ali jo lahko zaženemo na Javi 21 (da/ne)?",
+ b:[{l:"Java", acc:["8","java 8","1.8"]},{l:"Zažene se na Javi 21?", acc:["da"]}],
+ h:["0x34 pretvori v desetiški sistem: 3·16 + 4.","Poglej preglednico v razlagi 6."],
+ why:"0x34 = 52, kar je Java 8. Novejši JVM izvaja starejše datoteke .class, zato se zažene."},
+
+/* ----- D ----- */
+{lv:"D", src:"M241/1", pts:1, type:"blanks",
+ q:"Kako imenujemo pravila programskega jezika, ki določajo pomen stavkov tega jezika?",
+ b:[{l:"Ta pravila imenujemo", acc:["semantika","semantika jezika","semantika programskega jezika","pomenoslovje"]}],
+ h:["Pravila o obliki zapisa so sintaksa. Kaj pa pravila o pomenu?"],
+ why:"Semantika. Sintaksa določa obliko zapisa, semantika pomen."},
+{lv:"D", src:"M242/1", pts:1, type:"mc",
+ q:"Kaj določa semantika programskega jezika?",
+ o:["Semantika določa nabor osnovnih podatkovnih tipov.","Semantika določa pomen stavkov, zapisanih v programskem jeziku.","Semantika določa, da aritmetične operatorje zapišemo med dvema operandoma.","Semantika določa, da je izvorna koda zapisana v besedilni datoteki."], a:[1],
+ h:["Odgovor C govori o obliki zapisa. Je to sintaksa ali semantika?"],
+ why:"Semantika določa pomen stavkov. C opisuje sintakso (kako zapišemo izraz)."},
+{lv:"D", src:"M191/6", pts:2, type:"mc",
+ q:"Katera izmed spodnjih trditev je resnična za sintakso in katera za semantiko programskega jezika Java? (2 pravilni)",
+ o:["Semantika programskega jezika Java določa pomen zapisanih stavkov.","Semantika programskega jezika Java določa, kako moramo neki stavek zapisati.","Semantika programskega jezika Java določa, da se program izvaja s pomočjo tolmača.","Sintaksa programskega jezika Java določa pomen zapisanih stavkov.","Sintaksa programskega jezika Java določa, kako moramo neki stavek zapisati.","Sintaksa programskega jezika Java določa, da se program izvaja s pomočjo tolmača."], a:[0,4],
+ h:["Ena pravilna trditev je o semantiki, ena o sintaksi.","Trditvi o tolmaču nista povezani ne s sintakso ne s semantiko."],
+ why:"Semantika določa pomen (A), sintaksa obliko zapisa (E)."},
+{lv:"D", src:"M192/6", pts:1, type:"blanks",
+ q:"Programer je naredil napako v programu. Med postopkom prevajanja prevajalnik ni javil napake. Ob izvajanju programa so bili pričakovani rezultati napačni. Je programer naredil sintaktično ali semantično napako?",
+ b:[{l:"Napaka je", acc:["semantično","semantična","semanticno","semanticna","semantično napako","semantična napaka","logična","logično"]}],
+ h:["Sintaktične napake odkrije prevajalnik."],
+ why:"Semantično (logično) napako. Program je pravilno zapisan, zato se prevede, a ne dela tega, kar želimo."},
+{lv:"D", src:"M192/1", pts:1, type:"mc",
+ q:"Ali je trditev za programski jezik Java resnična ali neresnična? »Vsak stavek programskega jezika Java predstavlja natanko en ukaz strojnega jezika procesorja.« (1. del naloge)",
+ o:["resnična","neresnična"], a:[1],
+ h:["Poglej, v koliko ukazov JVM se prevede en sam println (razlaga 6)."],
+ why:"Neresnična. Že System.out.println(\"…\") se prevede v več ukazov JVM, ti pa v še več strojnih ukazov. Ena vrstica višjega jezika ustreza več strojnim ukazom."},
+{lv:"D", src:"M232/2", pts:1, type:"mc",
+ q:"Katera trditev velja za povezovalnik programskega jezika?",
+ o:["Poveže več objektnih datotek in jih združi v izvršljivo datoteko.","Poveže več besedilnih datotek in jih združi v objektno datoteko.","Poveže več izvršljivih datotek in jih združi v eno izvršljivo datoteko.","Poveže več objektnih datotek in jih združi v eno objektno datoteko."], a:[0],
+ h:["Vrstni red pri C: izvorna koda → prevajalnik → objektne datoteke → povezovalnik → ?"],
+ why:"Povezovalnik (linker) združi objektne datoteke in knjižnice v eno izvršljivo datoteko (npr. .exe). Pri Javi ločenega povezovanja ni, razrede JVM naloži med izvajanjem."},
+{lv:"D", own:true, pts:3, type:"cls", cats:["javac","JVM (java)"],
+ q:"Katero sporočilo izpiše prevajalnik (javac) in katero JVM med zagonom ali izvajanjem? Vsa sporočila so iz Jave 21.",
+ items:[["Test.java:1: error: ';' expected",0],
+        ["Exception in thread \"main\" java.lang.ArithmeticException: / by zero",1],
+        ["error: class Primer is public, should be declared in a file named Primer.java",0],
+        ["Error: Main method not found in class BrezMain",1],
+        ["Error: Could not find or load main class Pozdrav.class",1],
+        ["error: cannot find symbol  symbol: variable x",0]],
+ h:["Sporočila prevajalnika imajo obliko Datoteka.java:vrstica: error: …","Napako Main method not found je mogoče javiti šele ob zagonu, ker se razred brez main prevede."],
+ why:"javac: manjkajoče podpičje, napačno ime datoteke, nedeklarirana spremenljivka. JVM: deljenje z 0 (izjema med izvajanjem), manjkajoča metoda main in napačno podano ime razreda (java Pozdrav.class)."},
+{lv:"D", own:true, pts:3, type:"cls", cats:["sintaktična","med izvajanjem","semantična"],
+ q:"Razvrsti napake.",
+ items:[["Na koncu stavka manjka podpičje.",0],
+        ["Napišemo system.out.println z malim s.",0],
+        ["Program deli z nič.",1],
+        ["Povprečje izračunamo kot a + b / 2.",2],
+        ["Dostopamo do tab[10] v tabeli z 10 elementi.",1],
+        ["Zanka sešteje števila od 1 do 99 namesto do 100.",2]],
+ h:["Vprašaj se: ali se program prevede? Ali se ustavi z izjemo? Ali se konča, a z napačnim rezultatom?"],
+ why:"Sintaktični: podpičje, system z malo (prevajalnik). Med izvajanjem: deljenje z 0 (ArithmeticException), tab[10] (ArrayIndexOutOfBoundsException). Semantični: napačna formula in napačna meja zanke."},
+{lv:"D", own:true, pts:1, type:"mc",
+ code:"public class Primer {\n    public static void main(String[] args) {\n        System.out.println(\"x\");\n    }\n}",
+ q:"Zgornjo kodo shranimo v datoteko Test.java in izvedemo javac Test.java. Kaj se zgodi?",
+ o:["Nastane Test.class.","Nastane Primer.class.","Prevajalnik javi napako, datoteka .class ne nastane.","Prevede se, napako javi JVM ob zagonu."], a:[2],
+ h:["Pravilo o imenu javnega razreda in imenu datoteke."],
+ why:"javac javi: class Primer is public, should be declared in a file named Primer.java. Datoteko je treba preimenovati v Primer.java ali odstraniti public."},
+{lv:"D", src:"M182/10", pts:2, type:"blanks",
+ code:"1  import java.util.Random;\n2  public class Naloga {\n3      public static void main(String[] args) {\n4          Random r = new Random();\n5          System.out.println(\"Izbrana števila so: \")\n6          for(int i=0; i<10; i++) {\n7              // določi naključno celo število\n8              // med -10 in 10 vključno z mejama\n9              x = r.nextInt(21)-10;\n10             System.out.print(x+\" \");\n11         }\n12     }\n13 }",
+ q:"Pri prevajanju prevajalnik javi napake: Syntax error, insert \";\" to complete Statement (line 5); x cannot be resolved to a variable (line 9); x cannot be resolved to a variable (line 10). Napake lahko odpravimo, če pravilno dopolnimo vrstici 5 in 9. Napišite celotni dopolnjeni vrstici. (Številke vrstic niso del kode.)",
+ b:[{l:"Vrstica 5", acc:["System.out.println(\"Izbrana števila so: \");"], cs:true, code:true},
+    {l:"Vrstica 9", acc:["int x = r.nextInt(21)-10;"], cs:true, code:true}],
+ h:["Prvo sporočilo pove, kaj manjka.","Spremenljivke v Javi je treba pred uporabo deklarirati, s tipom."],
+ why:"V vrstici 5 dodamo podpičje, v vrstici 9 deklariramo spremenljivko: int x = r.nextInt(21)-10;. Spremenljivka je deklarirana znotraj zanke, zato jo vrstica 10 vidi. Preverjeno: po popravku se program prevede in izpiše 10 naključnih števil med -10 in 10."},
+{lv:"D", own:true, pts:2, type:"code",
+ q:"Program naj izpiše povprečje števil 4 in 5, a izpiše Povprečje: 6.0. Popravi semantično napako, da bo izpis natanko:",
+ expected:"Povprečje: 4.5",
+ starter:"public class Povprecje {\n    public static void main(String[] args) {\n        int a = 4, b = 5;\n        double p = a + b / 2;\n        System.out.println(\"Povprečje: \" + p);\n    }\n}",
+ sol:"public class Povprecje {\n    public static void main(String[] args) {\n        int a = 4, b = 5;\n        double p = (a + b) / 2.0;\n        System.out.println(\"Povprečje: \" + p);\n    }\n}",
+ h:["Deljenje ima prednost pred seštevanjem: kaj se izračuna najprej?","Celo število / celo število da celo število: 9 / 2 = 4."],
+ why:"Potrebna sta dva popravka: oklepaj (a + b) in deljenje z realnim številom 2.0, sicer dobimo 4.0. Prevajalnik napake ne javi, ker je zapis pravilen, napačen je le pomen."}
+,
+/* ----- E: dodatne maturitetne (za doma) ----- */
+{lv:"E", src:"M201/1", pts:1, type:"blanks",
+ q:"Končnica imena datoteke, v kateri je shranjena izvorna koda programa, napisanega v Javi, je ___.",
+ b:[{l:"Končnica", acc:[".java","java"]}],
+ h:["Izvorna koda je besedilo, ki ga napiše programer, ne prevajalnik."],
+ why:"Izvorna koda je v datoteki .java, prevedena (vmesna) koda pa v .class."},
+{lv:"E", src:"M221/3", pts:1, type:"blanks",
+ q:"Program, ki izvorno kodo, napisano v programskem jeziku, prevede v vmesno kodo ali v izvršljivo obliko, se imenuje ___.",
+ b:[{l:"Odgovor", acc:["prevajalnik","compiler","prevajalnik (compiler)","javac"]}],
+ h:["V Javi se ta program imenuje javac."],
+ why:"Prevajalnik (compiler). Pri Javi je to javac, ki ustvari vmesno kodo, pri C pa prevajalnik ustvari strojno (izvršljivo) kodo."},
+{lv:"E", src:"M211/2", pts:1, type:"blanks",
+ q:"Programer je naredil napako v programu. Med postopkom prevajanja prevajalnik ni javil napake. Ob izvajanju programa so bili pričakovani rezultati napačni. Ali je programer naredil sintaktično ali semantično napako?",
+ b:[{l:"Napaka je", acc:["semantično","semantična","semanticno","semanticna","semantično napako","semantična napaka","logična","logično"]}],
+ h:["Isto vprašanje je bilo na maturi že leta 2019. Kdo odkrije sintaktične napake?"],
+ why:"Semantično. Program je pravilno zapisan, zato se prevede, vendar ne dela tega, kar želimo."},
+{lv:"E", src:"M202/4", pts:1, type:"mc",
+ q:"Napisali smo program v programskem jeziku Java, ki deluje na operacijskem sistemu Windows. Program bo enako dobro deloval",
+ o:["samo na operacijskem sistemu Unix.","samo na operacijskem sistemu Linux.","na obeh operacijskih sistemih Unix in Linux.","na nobenem drugem operacijskem sistemu."], a:[2],
+ h:["Pazi na besedo »samo«."],
+ why:"Bajtna koda je neodvisna od OS, zato program teče na vsakem sistemu z JVM, torej na Unixu in na Linuxu."},
+{lv:"E", src:"M132/7", pts:2, type:"mc",
+ q:"Zakaj je metoda main() posebna za programe, napisane v programskem jeziku Java?",
+ o:["Z metodo main() se začne izvajanje programa.","Vsak razred mora vsebovati metodo main().","Samo metoda main() ima lahko dostopno določilo public.","Novi objekti se lahko ustvarijo samo v metodi main()."], a:[0],
+ h:["Spomni se naloge z razredoma Dva in Pomocnik: ali ima Pomocnik metodo main?"],
+ why:"JVM začne izvajanje v metodi public static void main(String[] args). Ni je treba imeti v vsakem razredu (Pomocnik je nima), public imajo lahko tudi druge metode, objekte ustvarjamo kjer koli."},
+{lv:"E", src:"M141/2", pts:2, type:"blanks",
+ q:"Katere izmed naštetih so ključne besede programskega jezika Java: logical, boolean, jar, break, java, class, extends, ram? Napiši jih, ločene z vejico.",
+ b:[{l:"Ključne besede", acc:["boolean, break, class, extends"], cs:true, list:true}],
+ h:["java in jar sta imeni orodij (ukazov), ne besedi jezika.","Ena označuje logični tip, ena prekine zanko, dve uporabljamo pri razredih."],
+ why:"boolean (logični tip), break (prekine zanko ali switch), class (definicija razreda), extends (dedovanje). java in jar sta orodji iz JDK, logical in ram nista del Jave."}
+,{lv:"E", src:"M212/4", pts:2, type:"mc",
+ q:"V programskem jeziku imamo rezervirane besede. Obkroži črki pred rezerviranimi besedami programskega jezika Java.",
+ o:["while","student","begin","static","old"], a:[0,3],
+ h:["Rezervirane besede so tiste, ki jih jezik že uporablja in jih ne smeš uporabiti za imena.","Ena je zanka, ena je določilo, ki ga poznaš iz metode main."],
+ why:"while (zanka) in static (določilo) sta rezervirani besedi. student, begin in old so lahko imena spremenljivk (begin je beseda iz Pascala, ne Jave)."}
+];
+
+const HOME = [
+ {id:"h1", title:"Namesti JDK in preveri različico",
+  q:"Doma namesti JDK (npr. Temurin 21 z adoptium.net). Odpri ukazni poziv ali terminal in izvedi java -version in javac -version. Zapiši različici. Ali sta enaki?",
+  sol:"Izpis je npr. openjdk version \"21.0.12.1\" in javac 21.0.12.1. Če javac ni najden, je nameščen samo JRE ali pa mapa bin iz JDK ni v spremenljivki PATH."},
+ {id:"h2", title:"Isti program, različni sistemi",
+  q:"Zaženi spodnji program v Programizu in nato v Eclipse ali VS Code na svojem računalniku. Primerjaj izpisa. Kaj se je spremenilo in kaj ne? Zakaj nisi rabil spreminjati kode?",
+  code:"public class Sistem {\n    public static void main(String[] args) {\n        System.out.println(\"OS: \" + System.getProperty(\"os.name\"));\n        System.out.println(\"Java: \" + System.getProperty(\"java.version\"));\n    }\n}",
+  sol:"Programiz izvaja kodo na strežniku z Linuxom (OS: Linux), doma dobiš npr. OS: Windows 11. Izvorna koda in bajtna koda sta enaki, spremeni se samo JVM, ki program izvaja. To je prenosljivost Jave."},
+ {id:"h3", title:"Pogled v bajtno kodo",
+  q:"V ukazni vrstici prevedi Pozdrav.java in izvedi javap -c Pozdrav. Koliko ukazov ima metoda main? Nato dodaj še en println in ponovi. Koliko ukazov je zdaj?",
+  sol:"Prvotna metoda main ima 4 ukaze (getstatic, ldc, invokevirtual, return). Vsak dodatni println doda 3 ukaze (getstatic, ldc, invokevirtual), zato jih je potem 7."},
+ {id:"h4", title:"Prevajalnik in tolmač s svojimi besedami",
+  q:"V 3–4 povedih razloži razliko med prevajalnikom in tolmačem in zakaj pravimo, da Java uporablja oboje.",
+  sol:"Prevajalnik pred izvajanjem prevede celoten program in ustvari novo datoteko. Če je v kodi sintaktična napaka, prevod ne nastane. Tolmač ukaze bere in izvaja sproti, brez ločene datoteke. Java najprej s prevajalnikom javac ustvari bajtno kodo (.class), nato jo JVM tolmači in pogosto uporabljene dele z JIT prevede v strojno kodo."},
+ {id:"h5", title:"Shema na papir",
+  q:"Brez pogleda na razlago nariši pot programa od datoteke .java do izvajanja na Windows, Linuxu in macOS. Označi orodja (javac, java/JVM), vrste kode in kateri deli so odvisni od OS.",
+  sol:"Pozdrav.java (izvorna koda) → javac → Pozdrav.class (bajtna koda, ista za vse) → JVM za Windows / JVM za Linux / JVM za macOS → strojna koda. Od OS je odvisen samo JVM (in strojna koda, ki jo ustvari)."},
+ {id:"h6", title:"Izziv: različica .class",
+  q:"Prevedi Pozdrav.java z ukazom javac --release 8 Pozdrav.java. Kako bi brez dodatnih orodij preveril, za katero različico je prevedena? (Namig: javap -v Pozdrav | findstr major na Windows ali grep major na Linuxu.)",
+  sol:"javap -v izpiše vrstico major version: 52, kar je Java 8. Brez --release je major version: 65 (Java 21). Takšen .class zažene tudi starejša Java 8."}
+];
+
+/* ---------- storage: browser always, user account when available ---------- */
+let S = {}, localT = 0;
+try { S = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; localT = +localStorage.getItem(STORE+"-t") || 0; } catch(e) { S = {}; }
+let remote = null, pushTimer = null, pushing = false, dirty = false;
+function saveLocal(){ try { localStorage.setItem(STORE, JSON.stringify(S)); localStorage.setItem(STORE+"-t", String(localT)); } catch(e){} }
+function save(){ localT = Date.now(); saveLocal(); if(remote){ dirty = true; clearTimeout(pushTimer); pushTimer = setTimeout(push, 1500); } }
+function st(id){ return S[id] || (S[id] = {}); }
+const RANK = {ok:2, seen:1};
+function summary(){
+  const r = {resenih:0, tock:0, vseh:T.length, vsehTock:T.reduce((a,t)=>a+t.pts,0), sklopi:{}};
+  T.forEach(t=>{ const k=t.lv; r.sklopi[k] = r.sklopi[k] || {resenih:0, vseh:0}; r.sklopi[k].vseh++;
+    if(S[t.id] && S[t.id].state==="ok"){ r.resenih++; r.tock+=t.pts; r.sklopi[k].resenih++; } });
+  return r;
+}
+async function push(){
+  if(!remote || pushing || !dirty) return;
+  pushing = true; dirty = false;
+  try { await remote.ref.set({poglavje:1, naloge:S, povzetek:summary(), posodobljeno:localT}); setSync("cloud"); }
+  catch(e){ if(e && e.code==="invalid_argument"){ remote = null; setSync("local"); } else { setSync("err"); dirty = true; } }
+  pushing = false;
+  if(dirty && remote){ clearTimeout(pushTimer); pushTimer = setTimeout(push, 4000); }
+}
+function merge(R, rT){
+  let changed = false;
+  const newer = rT > localT;
+  Object.keys(R).forEach(id=>{
+    const r = R[id] || {}, l = S[id];
+    if(!l){ S[id] = r; changed = true; return; }
+    const base = newer ? Object.assign({}, l, r) : Object.assign({}, r, l);
+    const rs = Math.max(RANK[l.state]||0, RANK[r.state]||0);
+    base.state = rs===2 ? "ok" : rs===1 ? "seen" : undefined;
+    base.h = Math.max(l.h||0, r.h||0);
+    if(JSON.stringify(base)!==JSON.stringify(l)){ S[id] = base; changed = true; }
+  });
+  if(newer) localT = rT;
+  return changed;
+}
+const SYNC_TXT = {
+  local:"Napredek se shranjuje v tem brskalniku. Na drugem računalniku ga ne boš videl.",
+  cloud:"Napredek se shranjuje v tvojem računu in je na voljo na vseh napravah.",
+  err:"Shranjevanje v račun trenutno ne deluje. Napredek je varen v tem brskalniku."
+};
+function setSync(k){ document.querySelectorAll(".js-sync").forEach(e=>{ e.dataset.s=k; e.textContent=SYNC_TXT[k]; }); }
+
+/* ---------- helpers ---------- */
+const $ = (s,el=document)=>el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const KW = new Set("abstract boolean break byte case catch char class continue default do double else extends final finally float for if implements import instanceof int interface long new null package private protected public return short static super switch this throw throws try void while true false var String System".split(" "));
+function hl(code){
+  const re = /(\/\/[^\n]*)|("(?:\\.|[^"\\])*")|('(?:\\.|[^'\\])')|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_]\w*)\b/g;
+  let out="", last=0, m;
+  while((m=re.exec(code))){
+    out += esc(code.slice(last, m.index));
+    if(m[1]) out += '<span class="c">'+esc(m[1])+'</span>';
+    else if(m[2]||m[3]) out += '<span class="s">'+esc(m[2]||m[3])+'</span>';
+    else if(m[4]) out += '<span class="n">'+m[4]+'</span>';
+    else if(KW.has(m[5])) out += '<span class="k">'+m[5]+'</span>';
+    else out += esc(m[5]);
+    last = re.lastIndex;
+  }
+  return out + esc(code.slice(last));
+}
+const fold = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+function norm(s, o){
+  let x = String(s).trim();
+  if(o.code) return x.replace(/\s+/g,"");
+  x = x.replace(/\s+/g," ");
+  if(!o.cs) x = fold(x.toLowerCase()).replace(/[.]$/,"");
+  if(o.list) x = x.split(/\s*,\s*/).sort().join(",");
+  return x;
+}
+function matchBlank(val, b){ const v = norm(val,b); return b.acc.some(a => norm(a,b) === v); }
+const normOut = s => String(s).replace(/\r/g,"").split("\n").map(l=>l.replace(/\s+$/,"")).join("\n").replace(/\n+$/,"");
+const srcLabel = s => { const m = /^M(\d\d)(\d)\/(\d+)$/.exec(s); return m ? `Matura 20${m[1]} · ${m[2]==="1"?"spomladi":"jeseni"} · ${m[3]}. nal.` : s; };
+const ptsLabel = p => p===1 ? "1 točka" : p===2 ? "2 točki" : (p<5 ? p+" točke" : p+" točk");
+
+/* ---------- render tasks ---------- */
+T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });
+const levelsEl = $("#levels");
+let counter = 0;
+function renderAll(){
+levelsEl.innerHTML = ""; $("#homeMat").innerHTML = ""; counter = 0;
+LEVELS.forEach(L=>{
+  const wrap = document.createElement("div");
+  wrap.className = "level"; wrap.id = L.id;
+  wrap.innerHTML = `<header><span class="eyebrow">Sklop ${L.tag}</span><h3 style="font-size:1.35rem">${esc(L.title)}</h3><p>${esc(L.note)}</p></header>`;
+  T.filter(t=>t.lv===L.tag).forEach(t=>{ counter++; t.n = counter; wrap.appendChild(card(t)); });
+  const em = document.createElement("p"); em.className = "lvl-empty"; em.hidden = true; em.textContent = "V tem sklopu ni nalog za izbrani filter.";
+  wrap.appendChild(em);
+  (L.home ? $("#homeMat") : levelsEl).appendChild(wrap);
+});
+applyFilter(); showPage(cur, true);
+}
+
+function card(t){
+  const el = document.createElement("article");
+  el.className = "task"; el.id = "t-"+t.id; el.dataset.kind = t.own ? "own" : "mat";
+  const tags = (t.own ? `<span class="tag">Dodatna</span>` : `<span class="tag mat">${esc(srcLabel(t.src))}</span>`) + `<span class="tag">${ptsLabel(t.pts)}</span><span class="tag js-st" hidden></span>`;
+  let body = "";
+  if(t.code) body += `<pre class="code">${hl(t.code)}</pre>`;
+  if(t.code && t.type!=="output") body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="code">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`;
+  body += `<p>${esc(t.q)}</p>`;
+  if(t.type==="mc"){
+    const multi = t.a.length>1;
+    body += `<div class="opts">` + t.o.map((o,k)=>`<label class="opt"><input type="${multi?"checkbox":"radio"}" name="r-${t.id}" id="r-${t.id}-${k}" value="${k}"><b>${"ABCDEF"[k]}</b><span>${esc(o)}</span></label>`).join("") + `</div>`;
+  } else if(t.type==="blanks"){
+    body += t.b.map((b,k)=>`<div class="blank"><label for="b-${t.id}-${k}">${esc(b.l)}</label><input type="text" id="b-${t.id}-${k}" class="${b.code||b.cs?"mono":""}" autocomplete="off" spellcheck="false"></div>`).join("");
+  } else if(t.type==="cls"){
+    body += `<div class="cls">` + t.items.map((it,k)=>`<div class="crow" data-k="${k}"><span class="txt">${esc(it[0])}</span><div class="seg" role="group" aria-label="Izberi">${t.cats.map((c,ci)=>`<button type="button" data-ci="${ci}" aria-pressed="false">${esc(c)}</button>`).join("")}</div></div>`).join("") + `</div>`;
+  } else if(t.type==="output"){
+    body += `<div class="blank"><label for="o-${t.id}">Tvoj odgovor (izpis)</label><textarea id="o-${t.id}" class="mono out" spellcheck="false"></textarea></div>`;
+    body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="code">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`;
+  } else if(t.type==="code"){
+    body += `<pre class="code">${esc(t.expected)}</pre>`;
+    body += `<div class="blank"><div class="editorbar"><label for="e-${t.id}">Tvoja koda</label><span>Zaženi v Eclipse, VS Code ali Programizu (tam razred preimenuj v Main), izpis prilepi spodaj.</span></div><textarea id="e-${t.id}" class="editor" spellcheck="false"></textarea></div>`;
+    body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="editor">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a><button class="btn ghost js-restore" type="button">Ponastavi kodo</button></div>`;
+    body += `<div class="blank"><label for="o-${t.id}">Izpis tvojega programa</label><textarea id="o-${t.id}" class="mono out" spellcheck="false"></textarea></div>`;
+  }
+  el.innerHTML = `
+    <div class="thead"><span class="tnum">${t.n}. naloga</span><div class="tags">${tags}</div></div>
+    <div class="q">${body}</div>
+    <div class="actions">
+      <button class="btn primary js-check" type="button">Preveri</button>
+      <button class="btn js-hint" type="button">Namig</button>
+      <button class="btn ghost js-sol" type="button">Pokaži rešitev</button>
+      <span class="feedback" aria-live="polite"></span>
+    </div>
+    <div class="hints"></div>
+    <div class="sol" hidden></div>`;
+  wire(el,t);
+  return el;
+}
+
+function wire(el,t){
+  const s = st(t.id);
+  const fb = $(".feedback",el), hintsEl = $(".hints",el), solEl = $(".sol",el);
+  // restore inputs
+  if(t.type==="mc" && s.v) s.v.forEach(k=>{ const i=$(`#r-${t.id}-${k}`,el); if(i) i.checked=true; });
+  if(t.type==="blanks" && s.v) s.v.forEach((v,k)=>{ const i=$(`#b-${t.id}-${k}`,el); if(i) i.value=v; });
+  if(t.type==="cls"){
+    el.querySelectorAll(".crow").forEach(row=>{
+      const k = +row.dataset.k;
+      row.querySelectorAll("button").forEach(b=>{
+        if(s.v && s.v[k]===+b.dataset.ci) b.setAttribute("aria-pressed","true");
+        b.addEventListener("click",()=>{ row.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed","false")); b.setAttribute("aria-pressed","true"); row.classList.remove("right","wrong"); collect(); });
+      });
+    });
+  }
+  const ed = $(`#e-${t.id}`,el), out = $(`#o-${t.id}`,el);
+  if(ed){ ed.value = s.code != null ? s.code : t.starter;
+    ed.addEventListener("keydown",e=>{ if(e.key==="Tab" && !e.shiftKey){ e.preventDefault(); const a=ed.selectionStart,b=ed.selectionEnd; ed.value=ed.value.slice(0,a)+"    "+ed.value.slice(b); ed.selectionStart=ed.selectionEnd=a+4; collect(); }});
+    ed.addEventListener("input",collect);
+    $(".js-restore",el).addEventListener("click",()=>{ ed.value=t.starter; collect(); });
+  }
+  if(out){ if(s.out) out.value=s.out; out.addEventListener("input",collect); }
+  el.querySelectorAll("input").forEach(i=>i.addEventListener("input",()=>{ i.classList.remove("right","wrong"); collect(); }));
+  el.querySelectorAll("input[type=radio],input[type=checkbox]").forEach(i=>i.addEventListener("change",()=>{ el.querySelectorAll(".opt").forEach(o=>o.classList.remove("right","wrong")); collect(); }));
+
+  function collect(){
+    if(t.type==="mc") s.v = [...el.querySelectorAll(`input[name="r-${t.id}"]:checked`)].map(i=>+i.value);
+    if(t.type==="blanks") s.v = t.b.map((_,k)=>$(`#b-${t.id}-${k}`,el).value);
+    if(t.type==="cls") s.v = [...el.querySelectorAll(".crow")].map(r=>{ const p=r.querySelector('button[aria-pressed="true"]'); return p ? +p.dataset.ci : null; });
+    if(ed) s.code = ed.value;
+    if(out) s.out = out.value;
+    save();
+  }
+
+  el.querySelectorAll(".js-copy").forEach(btn=>btn.addEventListener("click",()=>{
+    const text = btn.dataset.copy==="editor" ? ed.value : t.code;
+    const done = ()=>{ const o=btn.textContent; btn.textContent="Kopirano"; setTimeout(()=>btn.textContent=o,1400); };
+    try { navigator.clipboard.writeText(text).then(done, ()=>fallback(text,done)); } catch(e){ fallback(text,done); }
+  }));
+
+  $(".js-check",el).addEventListener("click",()=>{
+    collect();
+    let ok=false, msg="";
+    if(t.type==="mc"){
+      const v = new Set(s.v||[]);
+      if(!v.size){ show(false,"Najprej izberi odgovor."); return; }
+      const altOk = !!t.alt && v.size===t.alt.length && t.alt.every(k=>v.has(k));
+      ok = (v.size===t.a.length && t.a.every(k=>v.has(k))) || altOk;
+      const good = altOk ? t.alt : t.a;
+      el.querySelectorAll(".opt").forEach((o,k)=>{ o.classList.remove("right","wrong"); if(v.has(k)) o.classList.add(good.includes(k)?"right":"wrong"); });
+      if(!ok && t.a.length>1 && v.size!==t.a.length) msg = `Pravilnih odgovorov je ${t.a.length}.`;
+    }
+    if(t.type==="blanks"){
+      let all=true;
+      t.b.forEach((b,k)=>{ const i=$(`#b-${t.id}-${k}`,el); const good = matchBlank(i.value,b); i.classList.remove("right","wrong"); if(i.value.trim()) i.classList.add(good?"right":"wrong"); if(!good) all=false; });
+      ok = all;
+    }
+    if(t.type==="cls"){
+      let all=true, any=false;
+      el.querySelectorAll(".crow").forEach(r=>{ const k=+r.dataset.k; r.classList.remove("right","wrong"); if(s.v[k]==null){ all=false; return; } any=true; const good = s.v[k]===t.items[k][1]; r.classList.add(good?"right":"wrong"); if(!good) all=false; });
+      if(!any){ show(false,"Najprej razvrsti vsaj eno trditev."); return; }
+      ok = all; if(!ok && s.v.includes(null)) msg="Razvrsti vse trditve.";
+    }
+    if(t.type==="output" || t.type==="code"){
+      if(!out.value.trim()){ show(false, t.type==="code" ? "Zaženi program in prilepi njegov izpis." : "Napiši izpis."); return; }
+      ok = normOut(out.value)===normOut(t.expected);
+      out.classList.remove("right","wrong"); out.classList.add(ok?"right":"wrong");
+      if(!ok){ const a=normOut(out.value).split("\n"), b=normOut(t.expected).split("\n"); const k=b.findIndex((l,j)=>a[j]!==l); msg = k<0 ? "Izpis ima preveč vrstic." : `Razlika v ${k+1}. vrstici.`; }
+    }
+    if(ok){ if(s.state!=="seen") s.state="ok"; save(); }
+    show(ok, ok ? (s.state==="seen" ? "Pravilno. Točke se ne štejejo, ker si si ogledal rešitev." : `Pravilno. +${ptsLabel(t.pts)}`) : ("Ni še pravilno. "+msg).trim());
+    paint(); progress();
+  });
+
+  let hi = s.h || 0;
+  const drawHints = ()=>{ hintsEl.innerHTML = t.h.slice(0,hi).map((h,k)=>`<div class="hint"><b>NAMIG ${k+1}/${t.h.length}</b>${esc(h)}</div>`).join(""); const b=$(".js-hint",el); b.disabled = hi>=t.h.length; b.textContent = hi>=t.h.length ? "Ni več namigov" : (hi? "Naslednji namig":"Namig"); };
+  drawHints();
+  $(".js-hint",el).addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h=hi; save(); drawHints(); }});
+
+  function drawSol(){
+    let ans="";
+    if(t.type==="mc") ans = "Pravilno: " + t.a.map(k=>"ABCDEF"[k]).join(", ") + (t.alt ? " (na maturi sprejeto tudi " + t.alt.map(k=>"ABCDEF"[k]).join(", ") + ")" : "");
+    if(t.type==="blanks") ans = t.b.map(b=>`${b.l} ${b.acc[0]}`).join(" · ");
+    if(t.type==="cls") ans = t.items.map(it=>`${it[0]} → ${t.cats[it[1]]}`).join("\n");
+    let html = "";
+    if(t.type==="cls") html += `<div class="ans" style="white-space:pre-line;font-weight:400">${esc(ans)}</div>`;
+    else if(ans) html += `<div class="ans">${esc(ans)}</div>`;
+    if(t.type==="output") html += `<div><div class="eyebrow">Pravilen izpis</div><pre class="code">${esc(t.expected)}</pre></div>`;
+    if(t.type==="code") html += `<div><div class="eyebrow">Ena od možnih rešitev</div><pre class="code">${hl(t.sol)}</pre></div>`;
+    html += `<p class="why">${esc(t.why)}</p>`;
+    solEl.innerHTML = html;
+  }
+  $(".js-sol",el).addEventListener("click",()=>{
+    if(solEl.hidden){ drawSol(); solEl.hidden=false; if(s.state!=="ok"){ s.state="seen"; save(); paint(); progress(); } $(".js-sol",el).textContent="Skrij rešitev"; }
+    else { solEl.hidden=true; $(".js-sol",el).textContent="Pokaži rešitev"; }
+  });
+
+  function show(ok,m){ fb.textContent=m; fb.className="feedback "+(ok?"ok":"bad"); }
+  function paint(){
+    el.dataset.state = s.state||"";
+    const tg = $(".js-st",el);
+    if(s.state==="ok"){ tg.hidden=false; tg.className="tag js-st st-ok"; tg.textContent="Rešeno"; }
+    else if(s.state==="seen"){ tg.hidden=false; tg.className="tag js-st st-seen"; tg.textContent="Rešitev ogledana"; }
+    else tg.hidden=true;
+  }
+  paint();
+}
+
+function fallback(text,done){
+  const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); done(); }catch(e){} ta.remove();
+}
+
+/* ---------- home ---------- */
+const homeEl = $("#home");
+HOME.forEach((h,k)=>{
+  const el = document.createElement("article"); el.className="task";
+  el.innerHTML = `<div class="thead"><span class="tnum">D${k+1}. ${esc(h.title)}</span><div class="tags"><span class="tag">Za doma</span></div></div>
+   <div class="q">${h.code?`<pre class="code">${hl(h.code)}</pre>`:""}<p>${esc(h.q)}</p>
+   ${h.code?`<div class="actions"><button class="btn js-c" type="button">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`:""}</div>
+   <div class="actions"><button class="btn ghost js-s" type="button">Pokaži rešitev</button></div>
+   <div class="sol" hidden><p class="why">${esc(h.sol)}</p></div>`;
+  const sol=$(".sol",el), b=$(".js-s",el);
+  b.addEventListener("click",()=>{ sol.hidden=!sol.hidden; b.textContent= sol.hidden?"Pokaži rešitev":"Skrij rešitev"; });
+  const c=$(".js-c",el); if(c) c.addEventListener("click",()=>{ const done=()=>{c.textContent="Kopirano";setTimeout(()=>c.textContent="Kopiraj kodo",1400)}; try{navigator.clipboard.writeText(h.code).then(done,()=>fallback(h.code,done));}catch(e){fallback(h.code,done);} });
+  homeEl.appendChild(el);
+});
+
+/* ---------- static highlighting ---------- */
+document.querySelectorAll(".js-hl").forEach(p=>{ p.innerHTML = hl(p.textContent); });
+
+/* ---------- progress ---------- */
+function progress(){
+  const r = summary();
+  const txt = `${r.resenih} / ${r.vseh} nalog · ${r.tock} / ${r.vsehTock} točk`;
+  document.querySelectorAll(".js-progtxt").forEach(e=>e.textContent=txt);
+  document.querySelectorAll(".js-bar").forEach(e=>e.style.width=(100*r.tock/r.vsehTock)+"%");
+  document.querySelectorAll(".cnt[data-lv]").forEach(e=>{ const k=r.sklopi[e.dataset.lv]; if(!k) return; e.textContent=`${k.resenih}/${k.vseh}`; e.classList.toggle("full", k.resenih===k.vseh); });
+  const nm = T.filter(t=>!t.own).length, ps = $("#progSrc"); if(ps) ps.textContent = `${nm} maturitetnih · ${T.length-nm} dodatnih nalog`;
+}
+
+/* ---------- filters ---------- */
+let curFilter = "all";
+function applyFilter(){
+  document.querySelectorAll("#levels .task, #homeMat .task").forEach(el=>{
+    const s = S[el.id.slice(2)] || {};
+    el.hidden = (curFilter==="mat" && el.dataset.kind!=="mat") || (curFilter==="own" && el.dataset.kind!=="own") || (curFilter==="open" && s.state==="ok");
+  });
+  document.querySelectorAll("#levels .level, #homeMat .level").forEach(l=>{ const e=l.querySelector(".lvl-empty"); if(e) e.hidden = !!l.querySelector(".task:not([hidden])"); });
+}
+document.querySelectorAll(".chip").forEach(c=>c.addEventListener("click",()=>{
+  document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed","false"));
+  c.setAttribute("aria-pressed","true");
+  curFilter = c.dataset.f; applyFilter();
+}));
+
+/* ---------- pages ---------- */
+const PAGES = [["jezik","Kaj je Java"],["prevajanje","Prevajanje in tolmačenje"],["pot","Od .java do izvajanja"],["jdk","JDK, JRE in JVM"],["ukazi","Ukazna vrstica"],["class","Notranjost .class"],["napake","Vrste napak"],
+  ["naloge-a","Naloge A · Jeziki in koda"],["naloge-b","Naloge B · JDK, JRE, JVM"],["naloge-c","Naloge C · Prevajanje in zagon"],["naloge-d","Naloge D · Napake"],["doma","Vaje za doma"]];
+const sel = $("#pageSel");
+sel.innerHTML = PAGES.map((p,k)=>`<option value="${p[0]}">${k+1}. ${esc(p[1])}</option>`).join("");
+sel.addEventListener("change",()=>{ location.hash = sel.value; });
+let cur = PAGES[0][0];
+function showPage(id, quiet){
+  const k0 = PAGES.findIndex(p=>p[0]===id); const k = k0<0 ? 0 : k0; cur = PAGES[k][0];
+  document.querySelectorAll("main > section").forEach(sec=>{ sec.hidden = sec.id==="naloge" ? !cur.startsWith("naloge-") : sec.id!==cur; });
+  document.querySelectorAll("#levels > .level").forEach(l=>{ l.hidden = l.id!==cur; });
+  $("#hero").hidden = k!==0; $("#crumb").hidden = k===0;
+  $("#crumbN").textContent = `Stran ${k+1} od ${PAGES.length}`;
+  document.querySelectorAll(".rail nav a").forEach(a=>{ if(a.getAttribute("href")==="#"+cur) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
+  sel.value = cur;
+  const pv = PAGES[k-1], nx = PAGES[k+1];
+  $("#pager").innerHTML = (pv?`<a class="prev" href="#${pv[0]}"><span class="eyebrow">Nazaj</span><span class="t">${esc(pv[1])}</span></a>`:"") + (nx?`<a class="next" href="#${nx[0]}"><span class="eyebrow">Naprej</span><span class="t">${esc(nx[1])}</span></a>`:"");
+  if(!quiet) window.scrollTo(0,0);
+}
+window.addEventListener("hashchange",()=>showPage(location.hash.slice(1)));
+
+/* ---------- reset with inline confirm ---------- */
+const rw = $("#resetWrap");
+function resetIdle(){ rw.innerHTML = `<button class="btn ghost" id="resetBtn" type="button" style="padding-left:0">Počisti ves napredek v tem poglavju</button>`; $("#resetBtn").addEventListener("click",resetAsk); }
+function resetAsk(){ rw.innerHTML = `<span class="confirm">Res izbrišem vse odgovore? <button class="btn" id="rY" type="button">Da, počisti</button><button class="btn ghost" id="rN" type="button">Prekliči</button></span>`;
+  $("#rY").addEventListener("click", async ()=>{ S = {}; localT = Date.now(); saveLocal();
+    if(remote){ try { await remote.ref.set({poglavje:1, naloge:{}, povzetek:summary(), posodobljeno:localT}); } catch(e){} }
+    location.hash = "jezik"; location.reload(); });
+  $("#rN").addEventListener("click",resetIdle); }
+resetIdle();
+
+/* ---------- start ---------- */
+cur = location.hash.slice(1) || "jezik";
+renderAll();
+progress();
+if(location.hash) setTimeout(()=>window.scrollTo(0,0), 0);
+
+/* ---------- account sync (db) ---------- */
+(async ()=>{
+  try {
+    if(!window.claude || !window.claude.use) return;
+    const user = await window.claude.use("user");
+    const db = await window.claude.use("db");
+    if(!user || !db) return;
+    const id = await user.id(); if(!id) return;
+    if(await user.can("data.write") === false) return;
+    const ref = db.doc("napredek/" + id);
+    const snap = await ref.get();
+    remote = { ref };
+    if(snap.exists){
+      const d = snap.data() || {};
+      if(merge(d.naloge || {}, +d.posodobljeno || 0)){ saveLocal(); renderAll(); progress(); }
+    }
+    setSync("cloud");
+    dirty = true; push();
+    document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden" && dirty){ clearTimeout(pushTimer); push(); } });
+  } catch(e){ remote = null; setSync("local"); }
+})();
+})();
+</script>
+
+</body></html>
