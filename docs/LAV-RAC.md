@@ -38,7 +38,7 @@ Oblika vaje (dogovor 6. 11. 2026):
 - levo navigacija s poudarjenimi naslovi skupin in kljukico pri pregledanih razlagah, na telefonu izbirni seznam,
 - levo pri vsakem sklopu vaj majhen krog kot tortni graf v barvah stanj (pravilno, z namigom, napačno, ogledana rešitev, še neodgovorjeno) in števec ob desnem robu; Za doma dobi kljukico, ko je odprt (dogovor 9. 11. 2026, velja za vse vaje, tudi nove),
 - v levem stolpcu je oznaka (»A ·«, »1 ·«) v svojem stolpcu, pri prelomu se druga vrstica poravna z začetkom besedila, ne z oznako (dogovor 9. 11. 2026),
-- Za doma ima naslednjo črko za zadnjim sklopom vaj (npr. A–E, nato F · Za doma); črke sklopov si sledijo brez vrzeli (dogovor 9. 11. 2026),
+- Za doma ima naslednjo črko za zadnjim sklopom vaj (npr. A–E, nato F · Za doma); črke sklopov si sledijo brez vrzeli (dogovor 9. 11. 2026); črko za Za doma doda skupna oblika sama, uvoz pa se ustavi, če v črkah sklopov nastane vrzel,
 - zgoraj vedno viden skupni napredek (naloge in točke, barvni trak),
 - Vaje so zadnje poglavje in se odklenejo, ko dijak odpre vsako stran razlage (preveri tudi strežnik),
 - v sklopu vaj ena naloga naenkrat, oštevilčeni gumbi v barvi stanja, »rešenih x / n«, legenda (desno poravnana, dogovor 9. 11. 2026), Prejšnja/Naslednja naloga,
@@ -51,6 +51,8 @@ Oblika vaje (dogovor 6. 11. 2026):
 - naloge z zbirnikom (2.3): Zaženi teste pokaže rezultate testov in se ne točkuje, Oddaj točkuje in zaklene, tudi če testi ne uspejo,
 - skupine razlag: 2.1 Pretvorbe, Računanje, Kodiranje, Pariteta (iz artifacta); 2.2 Logična vrata, Funkcije in poenostavljanje, Aritmetična vezja; 2.3 Podatki in procesor, Zbirnik, Prekinitve in pomnilniki, Vhod, izhod in cevovod,
 - barve stanj so enake kot v učiteljevem pregledu: pravilno zeleno, pravilno z namigom jantarno, napačno rdeče, ogledana rešitev sivo.
+
+Ob vsakem uvozu novega poglavja preveri na zaslonu: levi stolpec (oznake, krogi, števci, zamik pri prelomu), legenda pod gumbi nalog in črko za Za doma; vse to dela skupna oblika vaje (`content/shell/`), v adapterju ni treba ničesar nastavljati.
 
 Pri spremembi artifacta: prenesi novo različico v `content/sources/<id>.html`, popravi adapter, če kaka zamenjava ne najde več mesta, poženi `npm run import` in `npm test`. Če se spremeni vrstni red ali število nalog, povečaj `version` v `content/sources.json` (dijaki začnejo nov poskus).
 

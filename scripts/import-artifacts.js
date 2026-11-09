@@ -100,6 +100,8 @@ for (const src of sources.exercises) {
   if (errors.length) throw new Error(`${src.id}: page error: ${errors[0]}`);
   if (!data || !data.tasks.length) throw new Error(`${src.id}: the shell found no tasks`);
   if (data.tasks.some((t, k) => t.i !== k || !(t.max > 0))) throw new Error(`${src.id}: tasks are not numbered 0..n-1 with points`);
+  // The sets are lettered A, B, C … without a gap, and Za doma takes the next letter (the shell does that itself).
+  if (!data.tags || data.tags.some((t, k) => t !== String.fromCharCode(65 + k))) throw new Error(`${src.id}: set letters have a gap or do not start with A: ${(data.tags || []).join(' ')}`);
   const key = `scnm_lavrac_${src.id.replace('.', '_')}_v${src.version}`;
   const maxPoints = data.tasks.reduce((a, t) => a + t.max, 0);
   fs.writeFileSync(C('exercises', `${src.id}.html`), html);

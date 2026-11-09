@@ -161,9 +161,11 @@
     const theory = groups.flatMap((g) => g.pages);
     gate = theory.map((p) => p.id);
     const sets = c.sets.map((s) => ({ ...s, kind: 'set' }));
+    // Za doma follows the last set in the alphabet; the importer checks that the letters have no gap.
+    if (c.extra) c.extra.tag = nextTag(sets);
     pages = [{ id: 'pregled', kind: 'overview', title: 'Pregled' }, ...theory, ...sets];
     if (c.extra) pages.push({ ...c.extra, kind: 'extra' });
-    if (STAFF) { gate.forEach((id) => { if (!state.seen.includes(id)) state.seen.push(id); }); }
+    if (STAFF) { gate.concat(c.extra ? [c.extra.id] : []).forEach((id) => { if (!state.seen.includes(id)) state.seen.push(id); }); }
 
     const main = h('main', { class: 'lr-main', id: 'lrMain' });
     const top = buildTop(c);
@@ -228,20 +230,29 @@
     setTimeout(wait, 150);
   }
 
+  // The letter after the last set's letter ('' gives A).
+  const nextTag = (sets) => (sets.length ? String.fromCharCode(String(sets[sets.length - 1].tag).charCodeAt(0) + 1) : 'A');
+  const setLabel = (p) => p.tag + ' · ' + p.title;
   function buildRail(groups, sets, c) {
     const nav = h('nav', { class: 'lr-rail', 'aria-label': 'Vsebina vaje' });
+    // The tag column (»3 ·«, »B ·«) is as wide as the longest number, so every text starts at the same place
+    // and a wrapped line hangs under the text, not under the tag.
+    nav.style.setProperty('--lr-tgd', String(String(groups.reduce((a, g) => a + g.pages.length, 0)).length));
+    const lab = (tag, text) => h('span', { class: 'lr-lab' }, h('span', { class: 'lr-tg', text: tag + ' ·' }), h('span', { class: 'lr-tx', text }));
     nav.append(h('a', { class: 'lr-ov', href: '#pregled', 'data-page': 'pregled', text: 'Pregled' }));
     let n = 0;
     groups.forEach((g) => {
       nav.append(h('div', { class: 'lr-grp' }, h('span', { class: 'lr-gi', html: g.icon || '' }), h('b', { text: g.title }), h('small', { class: 'lr-gc', 'data-gc': g.id })));
       g.pages.forEach((p) => {
         n++;
-        nav.append(h('a', { href: '#' + p.id, 'data-page': p.id, class: 'lr-pg' }, h('i', { class: 'lr-dot', html: ICON.check }), h('span', { text: n + ' · ' + p.title })));
+        nav.append(h('a', { href: '#' + p.id, 'data-page': p.id, class: 'lr-pg' }, h('i', { class: 'lr-dot', html: ICON.check }), lab(n, p.title)));
       });
     });
     nav.append(h('div', { class: 'lr-grp lr-vaje' }, h('span', { class: 'lr-gi', html: ICON.vaje }), h('b', { text: 'Vaje' }), h('span', { class: 'lr-lock', html: ICON.lock, title: 'Odklene se, ko pregledaš vse razlage' })));
-    sets.forEach((s) => nav.append(h('a', { href: '#' + s.id, 'data-page': s.id, class: 'lr-pg lr-gated' }, h('span', { text: s.tag + ' · ' + s.title }), h('small', { class: 'lr-cnt', 'data-cnt': s.id }))));
-    if (c.extra) nav.append(h('a', { href: '#' + c.extra.id, 'data-page': c.extra.id, class: 'lr-pg lr-gated' }, h('span', { text: c.extra.title })));
+    // A set shows its state as a small pie in the task colours (paintProgress); Za doma gets a tick once it is opened.
+    sets.forEach((s) => nav.append(h('a', { href: '#' + s.id, 'data-page': s.id, class: 'lr-pg lr-gated' },
+      h('i', { class: 'lr-pie', 'data-pie': s.id, 'aria-hidden': 'true' }), lab(s.tag, s.title), h('small', { class: 'lr-cnt', 'data-cnt': s.id }))));
+    if (c.extra) nav.append(h('a', { href: '#' + c.extra.id, 'data-page': c.extra.id, class: 'lr-pg lr-gated' }, h('i', { class: 'lr-dot', html: ICON.check }), lab(c.extra.tag, c.extra.title)));
     return nav;
   }
   function buildMobileNav() {
@@ -250,7 +261,7 @@
     pages.forEach((p) => {
       const label = p.kind === 'theory' ? p.group.title : p.kind === 'overview' ? null : 'Vaje';
       if (label && (!grp || grp.label !== label)) { grp = h('optgroup', { label }); sel.append(grp); }
-      const o = h('option', { value: p.id, text: p.kind === 'set' ? p.tag + ' · ' + p.title : p.title });
+      const o = h('option', { value: p.id, text: p.kind === 'set' || p.kind === 'extra' ? setLabel(p) : p.title });
       (label ? grp : sel).append(o);
     });
     sel.addEventListener('change', () => { location.hash = sel.value; });
@@ -274,7 +285,7 @@
         h('span', { class: 'lr-tf', 'data-tf': g.id })));
     });
     const setList = h('ul', {}, ...sets.map((s) => h('li', { text: s.tag + ' · ' + s.title + ' (' + s.tasks.length + ')' })));
-    if (c.extra) setList.append(h('li', { text: c.extra.title }));
+    if (c.extra) setList.append(h('li', { text: setLabel(c.extra) }));
     grid.append(h('a', { class: 'lr-tile lr-tile-vaje', href: '#' + sets[0].id, 'data-tile': 'vaje' },
       h('span', { class: 'lr-ti', html: ICON.vaje }),
       h('span', { class: 'lr-tt', text: 'Vaje' }),
@@ -399,7 +410,7 @@
   }
   function buildExtra(p) {
     p.page.append(h('header', { class: 'lr-shead' }, h('span', { class: 'lr-gi', html: ICON.home }),
-      h('div', {}, h('span', { class: 'lr-kick', text: 'Vaje' }), h('h2', { text: p.title }), p.note ? h('p', { class: 'lr-just', text: p.note }) : null)));
+      h('div', {}, h('span', { class: 'lr-kick', text: 'Vaje · sklop ' + p.tag }), h('h2', { text: p.title }), p.note ? h('p', { class: 'lr-just', text: p.note }) : null)));
     p.page.append(h('div', { class: 'lr-locked', role: 'note' }));
     const el = p.el;
     el.hidden = false;
@@ -411,7 +422,7 @@
     const k = pages.indexOf(p);
     const nav = h('nav', { class: 'lr-pager', 'aria-label': 'Listanje po straneh' });
     const prev = pages[k - 1], next = pages[k + 1];
-    const label = (x) => x.kind === 'set' ? 'Vaje ' + x.tag + ' · ' + x.title : x.title;
+    const label = (x) => x.kind === 'set' || x.kind === 'extra' ? 'Vaje ' + setLabel(x) : x.title;
     // The arrow and the side say the direction; screen readers still hear it.
     if (prev) nav.append(h('a', { class: 'lr-prevp', href: '#' + prev.id, 'aria-label': 'Nazaj: ' + label(prev) }, h('span', { text: label(prev) })));
     if (next) nav.append(h('a', { class: 'lr-nextp', href: '#' + next.id, 'data-to': next.id, 'aria-label': 'Naprej: ' + label(next) }, h('span', { text: label(next) })));
@@ -448,11 +459,33 @@
     });
     pages.filter((p) => p.kind === 'set').forEach((s) => {
       const d = s.tasks.filter((x) => !['open', 'hinted'].includes(status(x.idx))).length;
+      paintPie(s);
       document.querySelectorAll('[data-done="' + s.id + '"]').forEach((e) => { e.textContent = 'rešenih ' + d + ' / ' + s.tasks.length; });
       document.querySelectorAll('[data-cnt="' + s.id + '"]').forEach((e) => { e.textContent = d + '/' + s.tasks.length; e.classList.toggle('full', d === s.tasks.length); });
     });
     const vt = document.querySelector('[data-tf="vaje"]');
     if (vt && gateOpen()) vt.textContent = 'Rešenih ' + r.done + ' / ' + r.n + ', ' + String(r.points).replace('.', ',') + ' / ' + r.max + ' točk';
+  }
+  // The set's pie in the rail: one slice per state, clockwise from the top, in the order of the legend.
+  const PIE = [['ok', '--lr-ok', 'pravilno'], ['half', '--lr-half', 'pravilno z namigom'], ['bad', '--lr-bad', 'napačno'], ['seen', '--lr-seen', 'ogledana rešitev'], ['none', '--lr-none', 'brez odgovora']];
+  function paintPie(s) {
+    const n = s.tasks.length;
+    if (!n) return;
+    const c = { ok: 0, half: 0, bad: 0, seen: 0, none: 0 };
+    s.tasks.forEach((x) => { const st = status(x.idx); c[c[st] === undefined ? 'none' : st]++; });
+    let cum = 0;
+    const parts = [];
+    PIE.forEach(([k, v]) => {
+      if (!c[k]) return;
+      const from = cum;
+      cum += c[k];
+      parts.push('var(' + v + ') ' + (100 * from / n).toFixed(2) + '% ' + (100 * cum / n).toFixed(2) + '%');
+    });
+    const text = PIE.filter(([k]) => c[k]).map(([k, , t]) => t + ' ' + c[k]).join(', ');
+    document.querySelectorAll('[data-pie="' + s.id + '"]').forEach((e) => {
+      e.style.background = 'conic-gradient(' + parts.join(',') + ')';
+      if (e.parentElement) e.parentElement.title = text;
+    });
   }
   function paintSeen() {
     const open = gateOpen();
@@ -473,7 +506,7 @@
     }
     document.querySelectorAll('#lrSel option').forEach((o) => {
       const p = pages.find((x) => x.id === o.value);
-      if (p && (p.kind === 'set' || p.kind === 'extra')) o.textContent = (p.kind === 'set' ? p.tag + ' · ' + p.title : p.title) + (open ? '' : ' (zaklenjeno)');
+      if (p && (p.kind === 'set' || p.kind === 'extra')) o.textContent = setLabel(p) + (open ? '' : ' (zaklenjeno)');
     });
     paintProgress();
   }
@@ -492,7 +525,7 @@
   }
   function show(p, k) {
     pages.forEach((x) => { const on = x === p; x.page.classList.toggle('on', on); x.page.hidden = !on; });
-    if (p.kind === 'theory' && !state.seen.includes(p.id)) { state.seen.push(p.id); persist(); }
+    if ((p.kind === 'theory' || p.kind === 'extra') && !state.seen.includes(p.id)) { state.seen.push(p.id); persist(); }
     const locked = (p.kind === 'set' || p.kind === 'extra') && !gateOpen();
     if (p.kind === 'set' || p.kind === 'extra') paintLock(p, locked);
     if (p.kind === 'set' && !locked) {
@@ -542,7 +575,7 @@
     const p = pages.find((x) => x.id === state.at);
     box.hidden = !p || p.kind === 'overview';
     if (!p) return;
-    box.replaceChildren(h('span', { text: 'Nazadnje si bil pri: ' }), h('a', { href: '#' + p.id, text: p.kind === 'set' ? 'Vaje ' + p.tag + ' · ' + p.title : p.title }));
+    box.replaceChildren(h('span', { text: 'Nazadnje si bil pri: ' }), h('a', { href: '#' + p.id, text: p.kind === 'set' || p.kind === 'extra' ? 'Vaje ' + setLabel(p) : p.title }));
   }
 
   // ---------- for the importer ----------
@@ -555,9 +588,10 @@
     }));
     tasks.sort((a, b) => a.i - b.i);
     return {
-      pages: pages.map((p) => ({ id: p.id, chapter: p.kind === 'theory' || p.kind === 'overview' ? 'Teorija' : 'Naloge', label: p.kind === 'set' ? 'Vaje ' + p.tag + ' · ' + p.title : p.title })),
+      pages: pages.map((p) => ({ id: p.id, chapter: p.kind === 'theory' || p.kind === 'overview' ? 'Teorija' : 'Naloge', label: p.kind === 'set' || p.kind === 'extra' ? 'Vaje ' + setLabel(p) : p.title })),
       tasks,
       gate: gate.slice(),
+      tags: pages.filter((p) => p.kind === 'set' || p.kind === 'extra').map((p) => p.tag),
     };
   }
 })();

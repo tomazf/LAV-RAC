@@ -4,6 +4,7 @@ import { after, before, test } from 'node:test';
 import { spawn } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import pg from 'pg';
 import { chromium } from 'playwright';
 import { startMockOidc, TENANT } from './mock-oidc.js';
@@ -377,6 +378,77 @@ test('staff see the tasks without reading the theory first', async () => {
   const next = await a.locator('.page.on .lr-nextp').boundingBox();
   assert.ok(Math.abs(prev.x - bar.x) < 2 && Math.abs(next.x + next.width - bar.x - bar.width) < 2);
   await a.context().close();
+});
+
+test('the rail: counters at the right edge, a pie of states per set, text hangs under text, Za doma has the next letter; the legend sits right', async () => {
+  // The shell on its own, without the portal: the state stays in this browser and nothing is saved on the server.
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 1400 } });
+  const p = await ctx.newPage();
+  p.on('pageerror', (e) => errors.push(e.message));
+  let wrapped = false;
+  for (const [id, letter] of [['2.1', 'E'], ['2.2', 'G'], ['2.3', 'J'], ['3.1', 'F']]) {
+    const ex = catalog.exercises.find((e) => e.id === id);
+    await p.goto(pathToFileURL(path.join(root, 'content/exercises', `${id}.html`)).href);
+    await p.evaluate((seen) => localStorage.setItem('lavrac_local_' + location.pathname, JSON.stringify({ t: {}, seen })), ex.gate);
+    await p.reload();
+    await p.waitForSelector('.lr-rail');
+    // the sets are lettered A, B, C … and Za doma takes the next letter
+    const tags = await p.locator('.lr-rail a.lr-gated .lr-tg').allTextContents();
+    assert.deepEqual(tags, [...tags.keys()].map((k) => `${String.fromCharCode(65 + k)} ·`), id);
+    assert.equal(tags.at(-1), `${letter} ·`, id);
+    assert.equal(await p.locator('.lr-rail a[data-page=doma] .lr-tx').textContent(), 'Za doma');
+    assert.match(await p.locator('.lr-tile-vaje li').last().textContent(), new RegExp(`^${letter} · Za doma`), id);
+    // Za doma gets its tick once it is opened
+    assert.equal(await p.locator('.lr-rail a[data-page=doma]').evaluate((a) => a.classList.contains('seen')), false);
+    await go(p, 'doma');
+    assert.equal(await p.locator('.lr-rail a[data-page=doma]').evaluate((a) => a.classList.contains('seen')), true);
+    assert.equal(await p.textContent('.page.on .lr-kick'), `Vaje · sklop ${letter}`);
+    assert.match(await p.locator('.page.on .lr-pager .lr-prevp').getAttribute('aria-label'), /^Nazaj: Vaje /);
+    // counters end at the right edge of their row, whatever the name; every text starts in the same column
+    const rows = await p.evaluate(() => ({
+      gaps: [...document.querySelectorAll('.lr-rail .lr-cnt')].map((c) => Math.round(c.closest('a').getBoundingClientRect().right - c.getBoundingClientRect().right)),
+      lefts: [...document.querySelectorAll('.lr-rail .lr-tx')].map((t) => Math.round(t.getBoundingClientRect().left)),
+      tall: [...document.querySelectorAll('.lr-rail .lr-tx')].some((t) => t.getBoundingClientRect().height > 1.7 * parseFloat(getComputedStyle(t).lineHeight)),
+    }));
+    assert.ok(rows.gaps.length > 3);
+    assert.equal(new Set(rows.gaps).size, 1, `${id}: counters ${rows.gaps}`);
+    assert.equal(new Set(rows.lefts).size, 1, `${id}: text columns ${[...new Set(rows.lefts)]}`);
+    wrapped ||= rows.tall;
+    // the pie of a set follows the states of its tasks
+    const first = await p.evaluate(() => {
+      const a = document.querySelector('.lr-rail a.lr-gated');
+      return { page: a.dataset.page, i: [...document.querySelectorAll(`#${a.dataset.page} .lr-num`)].map((b) => Number(b.dataset.i)) };
+    });
+    const link = p.locator(`.lr-rail a[data-page=${first.page}]`);
+    assert.equal(await link.getAttribute('title'), `brez odgovora ${first.i.length}`);
+    await p.evaluate(([i]) => {
+      window.LavRac.answered(i[0], true);
+      window.LavRac.hinted(i[1]); window.LavRac.answered(i[1], true);
+      window.LavRac.answered(i[2], false, '');
+      window.LavRac.solution(i[3]);
+    }, [first.i]);
+    assert.equal(await link.getAttribute('title'), `pravilno 1, pravilno z namigom 1, napačno 1, ogledana rešitev 1, brez odgovora ${first.i.length - 4}`);
+    assert.match(await link.locator('.lr-pie').evaluate((e) => getComputedStyle(e).backgroundImage), /^conic-gradient/);
+    assert.equal(await link.locator('.lr-cnt').textContent(), `4/${first.i.length}`);
+    // the legend under the task buttons sits at the right, also when it wraps on a phone
+    for (const [w, h] of [[1280, 1400], [390, 844]]) {
+      await p.setViewportSize({ width: w, height: h });
+      await go(p, `${first.page}/1`);
+      const l = await p.evaluate(() => {
+        const box = document.querySelector('.page.on .lr-legend');
+        const right = box.getBoundingClientRect().right;
+        const rows = {};
+        [...box.children].forEach((c) => { const r = c.getBoundingClientRect(); const k = Math.round(r.top); rows[k] = Math.max(rows[k] || 0, r.right); });
+        return { rows: Object.values(rows).map((x) => Math.round(right - x)), room: Math.round(box.children[0].getBoundingClientRect().left - box.getBoundingClientRect().left) };
+      });
+      assert.ok(l.rows.every((x) => x <= 1), `${id} ${w}px: ${l.rows}`);
+      if (w > 900) assert.ok(l.room > 20, `${id}: the legend does not fill the row`);
+    }
+    await p.setViewportSize({ width: 1280, height: 1400 });
+  }
+  assert.ok(wrapped, 'a wrapped label was checked');
+  await ctx.close();
+  assert.deepEqual(errors, []);
 });
 
 test('a reset starts a new attempt that the teacher sees; read pages stay read', async () => {
