@@ -4007,6 +4007,636 @@
     "gradniki",
     "napake"
    ]
+  },
+  {
+   "id": "3.4",
+   "no": "4",
+   "module": "LAV-RAČ3",
+   "title": "Podatkovni tipi v Javi",
+   "fullTitle": "Podatkovni tipi v Javi",
+   "key": "scnm_lavrac_3_4_v1",
+   "version": 1,
+   "format": "short",
+   "maxPoints": 105,
+   "tasks": [
+    {
+     "i": 0,
+     "level": "lažja",
+     "max": 1,
+     "section": "Območja tipov in prekoračitev",
+     "q": "Spremenljivko potrebujemo za vrednost 5 000 000 000 (pet milijard). Kateri tip izberemo?"
+    },
+    {
+     "i": 1,
+     "level": "srednja",
+     "max": 2,
+     "section": "Območja tipov in prekoračitev",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 2,
+     "level": "lažja",
+     "max": 1,
+     "section": "Območja tipov in prekoračitev",
+     "q": "Kaj izpiše program? Vpiši izpis."
+    },
+    {
+     "i": 3,
+     "level": "lažja",
+     "max": 1,
+     "section": "Območja tipov in prekoračitev",
+     "q": "Kolikšna je največja vrednost tipa short? Vpiši število."
+    },
+    {
+     "i": 4,
+     "level": "lažja",
+     "max": 1,
+     "section": "Območja tipov in prekoračitev",
+     "q": "Kolikšna je največja vrednost tipa int? Vpiši število."
+    },
+    {
+     "i": 5,
+     "level": "lažja",
+     "max": 1,
+     "section": "Območja tipov in prekoračitev",
+     "q": "Kateri prireditveni stavek se uspešno izvede?"
+    },
+    {
+     "i": 6,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pretvarjanje tipov",
+     "q": "Razvrsti pretvorbe: ali jih Java opravi sama, ali moramo zapisati pretvorbo z oklepajem?"
+    },
+    {
+     "i": 7,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pretvarjanje tipov",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 8,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pretvarjanje tipov",
+     "q": "Kaj izpiše program? Vpiši izpis."
+    },
+    {
+     "i": 9,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pretvarjanje tipov",
+     "q": "Kaj izpiše stavek System.out.println((int) -2.5)? Vpiši izpis."
+    },
+    {
+     "i": 10,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pretvarjanje tipov",
+     "q": "Spremenljivki a in b sta tipa int, a = 7 in b = 2. Kateri izraz da rezultat 3.5?"
+    },
+    {
+     "i": 11,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pretvarjanje tipov",
+     "q": "Začetek metode public int pretvori(double x) pomeni, da"
+    },
+    {
+     "i": 12,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pretvarjanje tipov",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 13,
+     "level": "lažja",
+     "max": 1,
+     "section": "Znak in ASCII",
+     "q": "Deklarirana je spremenljivka char z='B';. Kaj vrne stavek return (int)z;?"
+    },
+    {
+     "i": 14,
+     "level": "lažja",
+     "max": 1,
+     "section": "Znak in ASCII",
+     "q": "Kaj izpiše stavek System.out.println('A' + 1)?"
+    },
+    {
+     "i": 15,
+     "level": "lažja",
+     "max": 1,
+     "section": "Znak in ASCII",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 16,
+     "level": "lažja",
+     "max": 1,
+     "section": "Znak in ASCII",
+     "q": "Kateri znak izpiše stavek System.out.println((char) ('A' + 2))? Vpiši en znak."
+    },
+    {
+     "i": 17,
+     "level": "lažja",
+     "max": 1,
+     "section": "Znak in ASCII",
+     "q": "Kakšna je koda ASCII za znak '0' (ničla)? Vpiši število."
+    },
+    {
+     "i": 18,
+     "level": "lažja",
+     "max": 1,
+     "section": "Znak in ASCII",
+     "q": "Kaj izpiše program? char z = '7'; System.out.println(z - '0');"
+    },
+    {
+     "i": 19,
+     "level": "srednja",
+     "max": 2,
+     "section": "Znak in ASCII",
+     "q": "Napiši program, ki v spremenljivko c tipa char shrani znak 'a' in izpiše naslednjo črko v abecedi (b)."
+    },
+    {
+     "i": 20,
+     "level": "lažja",
+     "max": 1,
+     "section": "Znak in ASCII",
+     "q": "Kaj izpiše izsek programa?"
+    },
+    {
+     "i": 21,
+     "level": "lažja",
+     "max": 1,
+     "section": "Znak in ASCII",
+     "q": "Deklarirani in inicializirani sta naslednji spremenljivki: int x=5; char y='3'; Da bi se stavek z=x+y; uspešno izvedel, mora biti spremenljivka z tipa"
+    },
+    {
+     "i": 22,
+     "level": "lažja",
+     "max": 1,
+     "section": "Integer, Double in pretvorba niz ↔ število",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 23,
+     "level": "lažja",
+     "max": 1,
+     "section": "Integer, Double in pretvorba niz ↔ število",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 24,
+     "level": "lažja",
+     "max": 1,
+     "section": "Integer, Double in pretvorba niz ↔ število",
+     "q": "Pri katerem klicu nastane izjema NumberFormatException?"
+    },
+    {
+     "i": 25,
+     "level": "lažja",
+     "max": 1,
+     "section": "Integer, Double in pretvorba niz ↔ število",
+     "q": "Katera vrstica pretvori niz \"3.5\" v realno število?"
+    },
+    {
+     "i": 26,
+     "level": "lažja",
+     "max": 1,
+     "section": "Integer, Double in pretvorba niz ↔ število",
+     "q": "Zapiši klic, ki število 42 pretvori v niz \"42\". Vpiši samo klic."
+    },
+    {
+     "i": 27,
+     "level": "lažja",
+     "max": 1,
+     "section": "Integer, Double in pretvorba niz ↔ število",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 28,
+     "level": "srednja",
+     "max": 2,
+     "section": "Integer, Double in pretvorba niz ↔ število",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 29,
+     "level": "srednja",
+     "max": 2,
+     "section": "Integer, Double in pretvorba niz ↔ število",
+     "q": "Napiši program, ki v kodi definira niz \"17\", ga pretvori v int, prišteje 3 in izpiše rezultat. Izpis naj bo samo število."
+    },
+    {
+     "i": 30,
+     "level": "lažja",
+     "max": 1,
+     "section": "Integer, Double in pretvorba niz ↔ število",
+     "q": "Kateri izmed naslednjih blokov stavkov se prevede in izvede uspešno?"
+    },
+    {
+     "i": 31,
+     "level": "lažja",
+     "max": 1,
+     "section": "Operatorji in izrazi",
+     "q": "Koliko je vrednost izraza 5 + 2 * 3?"
+    },
+    {
+     "i": 32,
+     "level": "srednja",
+     "max": 2,
+     "section": "Operatorji in izrazi",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 33,
+     "level": "srednja",
+     "max": 2,
+     "section": "Operatorji in izrazi",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 34,
+     "level": "srednja",
+     "max": 2,
+     "section": "Operatorji in izrazi",
+     "q": "Kaj izpiše program? Vpiši izpis."
+    },
+    {
+     "i": 35,
+     "level": "lažja",
+     "max": 1,
+     "section": "Operatorji in izrazi",
+     "q": "Program vsebuje: int d = 0; if (d != 0 && 10 / d > 1) { ... }. Kaj se zgodi?"
+    },
+    {
+     "i": 36,
+     "level": "lažja",
+     "max": 1,
+     "section": "Operatorji in izrazi",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 37,
+     "level": "lažja",
+     "max": 1,
+     "section": "Operatorji in izrazi",
+     "q": "Kaj izpiše program? Vpiši izpis."
+    },
+    {
+     "i": 38,
+     "level": "lažja",
+     "max": 1,
+     "section": "Operatorji in izrazi",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 39,
+     "level": "lažja",
+     "max": 1,
+     "section": "Operatorji in izrazi",
+     "q": "Katera trditev je enakovredna stavku x += 3;?"
+    },
+    {
+     "i": 40,
+     "level": "srednja",
+     "max": 2,
+     "section": "Operatorji in izrazi",
+     "q": "Kakšne vrednosti so v spremenljivkah po izvedbi stavkov? int x = 1; int a = x++; int b = ++x; Vpiši vrednosti po drugem stavku (x in a) in po tretjem (x in b)."
+    },
+    {
+     "i": 41,
+     "level": "lažja",
+     "max": 1,
+     "section": "Operatorji in izrazi",
+     "q": "Kaj izpiše izsek programa?"
+    },
+    {
+     "i": 42,
+     "level": "lažja",
+     "max": 1,
+     "section": "Operatorji in izrazi",
+     "q": "Kaj izpiše izsek programa? int stevilka = 18; System.out.println(~stevilka); Vpiši izpis."
+    },
+    {
+     "i": 43,
+     "level": "lažja",
+     "max": 1,
+     "section": "Operatorji in izrazi",
+     "q": "V programu imamo celoštevilski neničelni spremenljivki x in y. Zapiši logični izraz, ki je true natanko tedaj, ko je x večkratnik števila y."
+    },
+    {
+     "i": 44,
+     "level": "lažja",
+     "max": 1,
+     "section": "Operatorji in izrazi",
+     "q": "Kakšna je vrednost spremenljivke b po izvedbi? boolean b; b = 3 > 2 && 12 < 7 || 5 > 3; Vpiši true ali false."
+    },
+    {
+     "i": 45,
+     "level": "lažja",
+     "max": 1,
+     "section": "Operatorji in izrazi",
+     "q": "Kaj se izpiše na zaslonu po izvedbi izseka programa?"
+    },
+    {
+     "i": 46,
+     "level": "lažja",
+     "max": 1,
+     "section": "Operatorji in izrazi",
+     "q": "Kateri izmed izrazov se ovrednoti na true, če je x celo število z vrednostjo 10?"
+    },
+    {
+     "i": 47,
+     "level": "lažja",
+     "max": 1,
+     "section": "Operatorji in izrazi",
+     "q": "Deklarirani in inicializirani sta spremenljivki int x=5; String y=\"3\";. Da se uspešno izvede stavek z=x+y;, mora biti spremenljivka z tipa"
+    },
+    {
+     "i": 48,
+     "level": "lažja",
+     "max": 1,
+     "section": "Operatorji in izrazi",
+     "q": "Po izvedbi zaporedja stavkov int a=8; int b=16; logični izraz ((a/b==0) || (b/a==0)) vrne"
+    },
+    {
+     "i": 49,
+     "level": "srednja",
+     "max": 2,
+     "section": "Operatorji in izrazi",
+     "q": "Poveži imena operatorjev s simboli. Vsako vrstico razvrsti v ustrezno skupino."
+    },
+    {
+     "i": 50,
+     "level": "lažja",
+     "max": 1,
+     "section": "Operatorji in izrazi",
+     "q": "Kateri zapis primerja vsebino dveh nizov a in b?"
+    },
+    {
+     "i": 51,
+     "level": "lažja",
+     "max": 1,
+     "section": "Operatorji in izrazi",
+     "q": "Kaj izpiše program? String A = new String(\"Java\"); String B = \"Java\"; System.out.println(A == B);"
+    },
+    {
+     "i": 52,
+     "level": "lažja",
+     "max": 1,
+     "section": "Operatorji in izrazi",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 53,
+     "level": "lažja",
+     "max": 1,
+     "section": "Operatorji in izrazi",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 54,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje s programi in logični izrazi",
+     "q": "Program Obrni: napiši program, ki obrne štirimestno naravno število. Iz števila 1234 sestavi 4321 in ga izpiši. Števke izlušči z operatorjema / in %."
+    },
+    {
+     "i": 55,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje s programi in logični izrazi",
+     "q": "Program Stirimestno: napiši program, ki za število 1234 zamenja prvo in zadnjo števko, drugo in tretjo pa kvadrira in ohrani samo enice kvadrata. Izpiši dobljen"
+    },
+    {
+     "i": 56,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje s programi in logični izrazi",
+     "q": "Program Zlitje: za trimestni števili 123 in 456 sestavi šestmestno število. Prva števka naj bo stotica prvega, druga stotica drugega, tretja in četrta desetici "
+    },
+    {
+     "i": 57,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje s programi in logični izrazi",
+     "q": "Program VsotaKotov: kota 45° 30′ 40″ in 100° 50′ 35″ seštej. Rezultat izpiši kot tri števila: stopinje, minute, sekunde, ločena s presledki."
+    },
+    {
+     "i": 58,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje s programi in logični izrazi",
+     "q": "Program CasPotovanja: vlak odpelje ob 8:15 in prispe ob 10:40 istega dne. Izpiši čas potovanja v obliki »2 h 25 min«."
+    },
+    {
+     "i": 59,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje s programi in logični izrazi",
+     "q": "Program CasPrihoda: vlak odpelje ob 8:50 in potuje 3 h 35 min. Kaj izpiše program, če čas prihoda izpišemo v obliki hh:mm?"
+    },
+    {
+     "i": 60,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje s programi in logični izrazi",
+     "q": "Temperatura je 25 °C. Napiši program, ki temperaturo pretvori v stopinje Fahrenheita po formuli F = C · 9 / 5 + 32 in izpiše rezultat."
+    },
+    {
+     "i": 61,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje s programi in logični izrazi",
+     "q": "Napiši program, ki izpiše vsoto vseh štirih števk štirimestnega števila 4821."
+    },
+    {
+     "i": 62,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje s programi in logični izrazi",
+     "q": "Napiši program, ki 1234 mm pretvori v metre, centimetre in milimetre. Izpiši »1 m 23 cm 4 mm«."
+    },
+    {
+     "i": 63,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje s programi in logični izrazi",
+     "q": "Napiši program, ki 3725 sekund pretvori v ure, minute in sekunde. Izpiši »1 h 2 min 5 s«."
+    },
+    {
+     "i": 64,
+     "level": "lažja",
+     "max": 1,
+     "section": "Računanje s programi in logični izrazi",
+     "q": "V programu imamo celoštevilsko spremenljivko x. Kateri logični izraz se ovrednoti na true natanko tedaj, ko je v spremenljivki x zadnja števka enaka 0?"
+    },
+    {
+     "i": 65,
+     "level": "lažja",
+     "max": 1,
+     "section": "Računanje s programi in logični izrazi",
+     "q": "V programu imamo celoštevilsko spremenljivko x. Kateri logični izraz je enakovreden izrazu !(0 <= x && x <= 10)?"
+    },
+    {
+     "i": 66,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje s programi in logični izrazi",
+     "q": "Katera pogoja vrneta true natanko takrat, ko je vrednost celoštevilske spremenljivke x sodo število?"
+    },
+    {
+     "i": 67,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje s programi in logični izrazi",
+     "q": "Katera pogoja bi vrnila vrednost true, če je vrednost celoštevilske spremenljivke x sodo število?"
+    },
+    {
+     "i": 68,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje s programi in logični izrazi",
+     "q": "V programu je x celoštevilska spremenljivka. Za vsakega izmed navedenih logičnih izrazov zapiši enakovreden logični izraz, pri čemer ne smeš uporabiti negacije."
+    },
+    {
+     "i": 69,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje s programi in logični izrazi",
+     "q": "Kaj izpiše izsek programa?"
+    },
+    {
+     "i": 70,
+     "level": "lažja",
+     "max": 1,
+     "section": "Računanje s programi in logični izrazi",
+     "q": "V programu imamo celoštevilsko spremenljivko x. Zapiši logični izraz, ki se ovrednoti na true natanko tedaj, ko je vrednost spremenljivke x iz intervala [−10, 1"
+    },
+    {
+     "i": 71,
+     "level": "srednja",
+     "max": 2,
+     "section": "Računanje s programi in logični izrazi",
+     "q": "Dan je logični izraz !(x>0 && x<10). Zapiši enakovreden pogoj, pri čemer ne smeš uporabiti negacije."
+    },
+    {
+     "i": 72,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Naj velja int a=4, b=8;. Koliko je vrednost izraza (a % b) v programskem jeziku Java?"
+    },
+    {
+     "i": 73,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "V programu je zapisano zaporedje stavkov (zanka): int a=3; int b=5; int c=7; while ((a>5) || (c>5)) { a=b; b=c; c=a;} Kolikokrat se izvedejo stavki v zanki whil"
+    },
+    {
+     "i": 74,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Deklarirani sta spremenljivki: int x=1; Integer y=new Integer(0); Izvedba katerega stavka sproži izjemo med izvajanjem?"
+    },
+    {
+     "i": 75,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Kaj izpiše izsek kode?"
+    }
+   ],
+   "pages": [
+    {
+     "id": "pregled",
+     "chapter": "Teorija",
+     "label": "Pregled"
+    },
+    {
+     "id": "obmocja",
+     "chapter": "Teorija",
+     "label": "Območja tipov in prekoračitev"
+    },
+    {
+     "id": "pretvarjanje",
+     "chapter": "Teorija",
+     "label": "Pretvarjanje tipov"
+    },
+    {
+     "id": "znaki",
+     "chapter": "Teorija",
+     "label": "Znak in ASCII"
+    },
+    {
+     "id": "razredi",
+     "chapter": "Teorija",
+     "label": "Integer, Double in niz"
+    },
+    {
+     "id": "operatorji",
+     "chapter": "Teorija",
+     "label": "Operatorji"
+    },
+    {
+     "id": "napake",
+     "chapter": "Teorija",
+     "label": "Pogoste napake"
+    },
+    {
+     "id": "naloge-a",
+     "chapter": "Naloge",
+     "label": "Vaje A · Območja tipov in prekoračitev"
+    },
+    {
+     "id": "naloge-b",
+     "chapter": "Naloge",
+     "label": "Vaje B · Pretvarjanje tipov"
+    },
+    {
+     "id": "naloge-c",
+     "chapter": "Naloge",
+     "label": "Vaje C · Znak in ASCII"
+    },
+    {
+     "id": "naloge-d",
+     "chapter": "Naloge",
+     "label": "Vaje D · Integer, Double in pretvorba niz ↔ število"
+    },
+    {
+     "id": "naloge-e",
+     "chapter": "Naloge",
+     "label": "Vaje E · Operatorji in izrazi"
+    },
+    {
+     "id": "naloge-f",
+     "chapter": "Naloge",
+     "label": "Vaje F · Računanje s programi in logični izrazi"
+    },
+    {
+     "id": "doma-mat",
+     "chapter": "Naloge",
+     "label": "Vaje G · Ponavljanje"
+    },
+    {
+     "id": "doma",
+     "chapter": "Naloge",
+     "label": "Vaje H · Za doma"
+    }
+   ],
+   "gate": [
+    "obmocja",
+    "pretvarjanje",
+    "znaki",
+    "razredi",
+    "operatorji",
+    "napake"
+   ]
   }
  ],
  "planned": [
