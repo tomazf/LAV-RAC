@@ -3516,6 +3516,497 @@
     "java",
     "nacrtovanje"
    ]
+  },
+  {
+   "id": "3.3",
+   "no": "3",
+   "module": "LAV-RAČ3",
+   "title": "Temeljni gradniki programa",
+   "fullTitle": "Temeljni gradniki programa",
+   "key": "scnm_lavrac_3_3_v1",
+   "version": 1,
+   "format": "short",
+   "maxPoints": 91,
+   "tasks": [
+    {
+     "i": 0,
+     "level": "srednja",
+     "max": 2,
+     "section": "Struktura programa in komentarji",
+     "q": "Dopolni najmanjši program v Javi. Manjkajoča mesta so označena s tremi podčrtaji, po vrsti od zgoraj navzdol."
+    },
+    {
+     "i": 1,
+     "level": "srednja",
+     "max": 2,
+     "section": "Struktura programa in komentarji",
+     "q": "Ali je zapis veljaven komentar v Javi?"
+    },
+    {
+     "i": 2,
+     "level": "lažja",
+     "max": 1,
+     "section": "Struktura programa in komentarji",
+     "q": "Kako v urejevalniku programske kode za Javo besedi »moj komentar« zapišemo kot večvrstični komentar?"
+    },
+    {
+     "i": 3,
+     "level": "lažja",
+     "max": 1,
+     "section": "Struktura programa in komentarji",
+     "q": "Kaj izpiše program? Vsako vrstico izpisa napiši v svojo vrstico."
+    },
+    {
+     "i": 4,
+     "level": "srednja",
+     "max": 2,
+     "section": "Struktura programa in komentarji",
+     "q": "Obkrožite vse pravilne trditve. (Razred se je v izvirniku imenoval DosegSpremenljivk.)"
+    },
+    {
+     "i": 5,
+     "level": "srednja",
+     "max": 2,
+     "section": "Spremenljivke in primitivni tipi",
+     "q": "Ali je to primitivni podatkovni tip v Javi?"
+    },
+    {
+     "i": 6,
+     "level": "lažja",
+     "max": 1,
+     "section": "Spremenljivke in primitivni tipi",
+     "q": "Kateri izmed navedenih podatkovnih tipov v Javi ne spada med primitivne?"
+    },
+    {
+     "i": 7,
+     "level": "težja",
+     "max": 3,
+     "section": "Spremenljivke in primitivni tipi",
+     "q": "Kateri tip je najprimernejši za shranjevanje vsake od teh vrednosti?"
+    },
+    {
+     "i": 8,
+     "level": "srednja",
+     "max": 2,
+     "section": "Spremenljivke in primitivni tipi",
+     "q": "Poleg vsakega izmed podatkov napišite ime podatkovnega tipa, ki bi bil najprimernejši za njegovo predstavitev."
+    },
+    {
+     "i": 9,
+     "level": "lažja",
+     "max": 1,
+     "section": "Spremenljivke in primitivni tipi",
+     "q": "Katera deklaracija spremenljivke tipa float se prevede?"
+    },
+    {
+     "i": 10,
+     "level": "srednja",
+     "max": 2,
+     "section": "Spremenljivke in primitivni tipi",
+     "q": "Vpiši tip, ki ga zahteva vsaka deklaracija."
+    },
+    {
+     "i": 11,
+     "level": "srednja",
+     "max": 2,
+     "section": "Spremenljivke in primitivni tipi",
+     "q": "Naštejte najmanj pet primitivnih (osnovnih) podatkovnih tipov v programskem jeziku Java. Tipe loči z vejicami."
+    },
+    {
+     "i": 12,
+     "level": "srednja",
+     "max": 2,
+     "section": "Spremenljivke in primitivni tipi",
+     "q": "Za deklaracijo konstant v programskem jeziku Java uporabljamo rezervirano besedo:"
+    },
+    {
+     "i": 13,
+     "level": "srednja",
+     "max": 2,
+     "section": "Spremenljivke in primitivni tipi",
+     "q": "Katera od navedenih niso veljavna imena spremenljivk v programskem jeziku Java?"
+    },
+    {
+     "i": 14,
+     "level": "srednja",
+     "max": 2,
+     "section": "Spremenljivke in primitivni tipi",
+     "q": "Obkrožite neveljavni oziroma nepravilni deklaraciji spremenljivk."
+    },
+    {
+     "i": 15,
+     "level": "srednja",
+     "max": 2,
+     "section": "Spremenljivke in primitivni tipi",
+     "q": "Dana je deklaracija int x;. Kateri prireditvi sta veljavni?"
+    },
+    {
+     "i": 16,
+     "level": "srednja",
+     "max": 2,
+     "section": "Spremenljivke in primitivni tipi",
+     "q": "Vsakemu pojmu ustreza natanko en opis. Opisi: A – ime spremenljivke, B – znakovna vrednost, C – celoštevilska vrednost, D – poljuben podatkovni tip, E – niz, F "
+    },
+    {
+     "i": 17,
+     "level": "srednja",
+     "max": 2,
+     "section": "Spremenljivke in primitivni tipi",
+     "q": "Katera trditev opisuje dogajanje med prevajanjem oziroma izvajanjem programa? (Razred se je v izvirniku imenoval primer1.)"
+    },
+    {
+     "i": 18,
+     "level": "lažja",
+     "max": 1,
+     "section": "Izpis in vnos",
+     "q": "Obkrožite črko pred programskim stavkom, ki izpiše ime spremenljivke in njeno vrednost."
+    },
+    {
+     "i": 19,
+     "level": "lažja",
+     "max": 1,
+     "section": "Izpis in vnos",
+     "q": "Kaj izpiše program? Vrstice napiši natanko tako, kot se izpišejo."
+    },
+    {
+     "i": 20,
+     "level": "srednja",
+     "max": 2,
+     "section": "Izpis in vnos",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 21,
+     "level": "srednja",
+     "max": 2,
+     "section": "Izpis in vnos",
+     "q": "Kateri format uporabimo v ukazu printf za vrednost?"
+    },
+    {
+     "i": 22,
+     "level": "srednja",
+     "max": 2,
+     "section": "Izpis in vnos",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 23,
+     "level": "srednja",
+     "max": 2,
+     "section": "Izpis in vnos",
+     "q": "Napiši izsek programa, ki ustvari konstanto konst z vrednostjo 1.23456 in jo izpiše na dve decimalni mesti. Pričakovan izpis: 1.23 (na računalniku s slovenskimi"
+    },
+    {
+     "i": 24,
+     "level": "srednja",
+     "max": 2,
+     "section": "Izpis in vnos",
+     "q": "S katero metodo Scannerja preberemo vsako od teh vrednosti?"
+    },
+    {
+     "i": 25,
+     "level": "lažja",
+     "max": 1,
+     "section": "Izpis in vnos",
+     "q": "Dopolnite manjkajočo kodo tako, da bo izsek programa omogočal vnos s tipkovnice. (V izvirniku sledi še prestrezanje izjeme, ki ga spoznaš v poglavju 10.)"
+    },
+    {
+     "i": 26,
+     "level": "lažja",
+     "max": 1,
+     "section": "Izpis in vnos",
+     "q": "Kateri od teh stavkov se NE prevede?"
+    },
+    {
+     "i": 27,
+     "level": "srednja",
+     "max": 2,
+     "section": "Izpis in vnos",
+     "q": "Namesto vnosa s Scannerjem so vrednosti zapisane v kodi. Kaj izpiše program?"
+    },
+    {
+     "i": 28,
+     "level": "lažja",
+     "max": 1,
+     "section": "Izpis in vnos",
+     "q": "Uporabnik vtipka 5 in pritisne Enter. Kaj je po teh stavkih v spremenljivki s?"
+    },
+    {
+     "i": 29,
+     "level": "srednja",
+     "max": 2,
+     "section": "Izpis in vnos",
+     "q": "Ana, rojena leta 2008, je visoka 1.68 m. Shrani podatke v spremenljivke ustreznih tipov (ime je String, leto int, višina double; vrednosti zapiši kar v kodo) in"
+    },
+    {
+     "i": 30,
+     "level": "lažja",
+     "max": 1,
+     "section": "Aritmetika",
+     "q": "Koliko je vrednost navedenega javanskega izraza?"
+    },
+    {
+     "i": 31,
+     "level": "lažja",
+     "max": 1,
+     "section": "Aritmetika",
+     "q": "Koliko je vrednost spremenljivke x po izvedbi stavka x=5+2/3?"
+    },
+    {
+     "i": 32,
+     "level": "srednja",
+     "max": 2,
+     "section": "Aritmetika",
+     "q": "Kaj izpiše program? Vsako vrednost napiši v svojo vrstico."
+    },
+    {
+     "i": 33,
+     "level": "srednja",
+     "max": 2,
+     "section": "Aritmetika",
+     "q": "Spremenljivka x je deklarirana in inicializirana s stavkom int x = 36;. Če želimo vrednost spremenljivke x spremeniti na 12, lahko uporabimo stavek:"
+    },
+    {
+     "i": 34,
+     "level": "lažja",
+     "max": 1,
+     "section": "Aritmetika",
+     "q": "V programu imamo celoštevilsko spremenljivko stevilo. Zapišite stavek, ki vrednosti v spremenljivki stevilo odreže najbolj desno števko (števko, ki predstavlja "
+    },
+    {
+     "i": 35,
+     "level": "lažja",
+     "max": 1,
+     "section": "Aritmetika",
+     "q": "V programu imamo celoštevilsko spremenljivko x. Zapišite logični izraz, ki se ovrednoti na true natanko tedaj, ko je vrednost spremenljivke x večkratnik števila"
+    },
+    {
+     "i": 36,
+     "level": "srednja",
+     "max": 2,
+     "section": "Aritmetika",
+     "q": "Kakšne vrednosti so v spremenljivkah x, a in b po izvedbi naslednjih stavkov?"
+    },
+    {
+     "i": 37,
+     "level": "srednja",
+     "max": 2,
+     "section": "Aritmetika",
+     "q": "Podani sta deklaraciji int a = 10; in int b;. Zapišite vrednosti obeh spremenljivk po izvedbi vsakega od stavkov b = a++; in b = ++a; (stavka se izvedeta drug z"
+    },
+    {
+     "i": 38,
+     "level": "težja",
+     "max": 3,
+     "section": "Aritmetika",
+     "q": "Kakšne vrednosti so v spremenljivkah x, a in b po izvršitvi naslednjih stavkov?"
+    },
+    {
+     "i": 39,
+     "level": "srednja",
+     "max": 2,
+     "section": "Aritmetika",
+     "q": "Napišite naslednji izraz v programskem jeziku Java: x = (b + √(b² − 4ac)) / (2a). Izračunaj ga za a = 2, b = 6, c = 4. Pričakovan izpis: 2.0. Korenjenje: Math.s"
+    },
+    {
+     "i": 40,
+     "level": "srednja",
+     "max": 2,
+     "section": "Prvi stik z vejitvijo in zanko",
+     "q": "Kateri gradnik programa predstavlja ta stavek?"
+    },
+    {
+     "i": 41,
+     "level": "lažja",
+     "max": 1,
+     "section": "Prvi stik z vejitvijo in zanko",
+     "q": "Koliko je vrednost spremenljivke stevilo po izvedbi spodnjih stavkov?"
+    },
+    {
+     "i": 42,
+     "level": "lažja",
+     "max": 1,
+     "section": "Prvi stik z vejitvijo in zanko",
+     "q": "Koliko je vrednost spremenljivke x po izvedbi naslednje kode?"
+    },
+    {
+     "i": 43,
+     "level": "srednja",
+     "max": 2,
+     "section": "Prvi stik z vejitvijo in zanko",
+     "q": "Kaj izpiše naslednja zanka?"
+    },
+    {
+     "i": 44,
+     "level": "srednja",
+     "max": 2,
+     "section": "Prvi stik z vejitvijo in zanko",
+     "q": "Kaj izpiše program? Vsak izpis napiši v svojo vrstico."
+    },
+    {
+     "i": 45,
+     "level": "težja",
+     "max": 3,
+     "section": "Prvi stik z vejitvijo in zanko",
+     "q": "Zapiši program za ta diagram poteka (n, st in i so tipa int) in ga zaženi. Kaj izpiše?"
+    },
+    {
+     "i": 46,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Kateri izmed naslednjih stavkov deklarira spremenljivko znak in jo inicializira na znak A?"
+    },
+    {
+     "i": 47,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Deklarirana je spremenljivka char Ime. Kakšen tip podatkov se lahko shrani v to spremenljivko?"
+    },
+    {
+     "i": 48,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Kateri izmed naštetih tipov ne predstavlja primitivnega podatkovnega tipa programskega jezika Java?"
+    },
+    {
+     "i": 49,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Kateri izmed naštetih podatkovnih tipov spada med osnovne/primitivne podatkovne tipe programskega jezika Java? Obkrožite črko pred pravilnim odgovorom."
+    },
+    {
+     "i": 50,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Kateri podatkovni tip je primitivni tip programskega jezika Java?"
+    },
+    {
+     "i": 51,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Ali je treba pri deklaraciji vseh spremenljivk opredeliti podatkovni tip?"
+    },
+    {
+     "i": 52,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Pri prevajanju navedenega programa se zazna napaka. Zakaj? (V izvirniku je odgovor prosto besedilo, tu izberi ustrezno razlago.)"
+    },
+    {
+     "i": 53,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Deklarirani sta spremenljivki x in y. Po kateri izmed prireditev imata spremenljivki x in y enako vrednost, kot po izvedbi stavka y = x+1;?"
+    },
+    {
+     "i": 54,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Naj velja int a=5, b=2;. Koliko je vrednost izraza (a / b) v programskem jeziku Java?"
+    },
+    {
+     "i": 55,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Naj bo x celoštevilska spremenljivka. Kateri izmed naslednjih izrazov se ovrednoti na vrednost true natanko tedaj, ko je vrednost spremenljivke x večkratnik šte"
+    }
+   ],
+   "pages": [
+    {
+     "id": "pregled",
+     "chapter": "Teorija",
+     "label": "Pregled"
+    },
+    {
+     "id": "struktura",
+     "chapter": "Teorija",
+     "label": "Struktura programa"
+    },
+    {
+     "id": "tipi",
+     "chapter": "Teorija",
+     "label": "Spremenljivke in tipi"
+    },
+    {
+     "id": "izpis",
+     "chapter": "Teorija",
+     "label": "Izpis"
+    },
+    {
+     "id": "vnos",
+     "chapter": "Teorija",
+     "label": "Vnos s Scannerjem"
+    },
+    {
+     "id": "aritmetika",
+     "chapter": "Teorija",
+     "label": "Aritmetika"
+    },
+    {
+     "id": "gradniki",
+     "chapter": "Teorija",
+     "label": "Zaporedje, vejitev, zanka"
+    },
+    {
+     "id": "napake",
+     "chapter": "Teorija",
+     "label": "Pogoste napake"
+    },
+    {
+     "id": "naloge-a",
+     "chapter": "Naloge",
+     "label": "Vaje A · Struktura programa in komentarji"
+    },
+    {
+     "id": "naloge-b",
+     "chapter": "Naloge",
+     "label": "Vaje B · Spremenljivke in primitivni tipi"
+    },
+    {
+     "id": "naloge-c",
+     "chapter": "Naloge",
+     "label": "Vaje C · Izpis in vnos"
+    },
+    {
+     "id": "naloge-d",
+     "chapter": "Naloge",
+     "label": "Vaje D · Aritmetika"
+    },
+    {
+     "id": "naloge-e",
+     "chapter": "Naloge",
+     "label": "Vaje E · Prvi stik z vejitvijo in zanko"
+    },
+    {
+     "id": "doma-mat",
+     "chapter": "Naloge",
+     "label": "Vaje F · Ponavljanje"
+    },
+    {
+     "id": "doma",
+     "chapter": "Naloge",
+     "label": "Vaje G · Za doma"
+    }
+   ],
+   "gate": [
+    "struktura",
+    "tipi",
+    "izpis",
+    "vnos",
+    "aritmetika",
+    "gradniki",
+    "napake"
+   ]
   }
  ],
  "planned": [
