@@ -1,0 +1,1384 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Algoritmi in diagram poteka</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: sticky chapter rail (desktop) + single reading column; theory first, then graded task cards, then homework. */
+:root{
+  --bg:#f4f6f8; --surface:#ffffff; --sunk:#e9edf1; --line:#d3dae1;
+  --fg:#18202b; --muted:#5a6675;
+  --accent:#8b4a1f; --accent-soft:#f3e4d8;
+  --ok:#11775f; --ok-soft:#dcf1ea; --bad:#b4372b; --bad-soft:#f8e1de; --seen:#8a6a00; --seen-soft:#f6edcc;
+  --code-bg:#1d2430; --code-fg:#e5e9f0; --k:#f0a868; --s:#9fd39a; --c:#8a96a8; --n:#d6a5f0;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11151b; --surface:#181e26; --sunk:#0d1116; --line:#2b3440;
+  --fg:#e4e8ee; --muted:#9aa5b3;
+  --accent:#e8a26f; --accent-soft:#3a2a1f;
+  --ok:#53c9a6; --ok-soft:#14322a; --bad:#f08578; --bad-soft:#3a1e1b; --seen:#e2c25a; --seen-soft:#352d12;
+  --code-bg:#0b0f14; --code-fg:#e5e9f0;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11151b; --surface:#181e26; --sunk:#0d1116; --line:#2b3440;
+  --fg:#e4e8ee; --muted:#9aa5b3;
+  --accent:#e8a26f; --accent-soft:#3a2a1f;
+  --ok:#53c9a6; --ok-soft:#14322a; --bad:#f08578; --bad-soft:#3a1e1b; --seen:#e2c25a; --seen-soft:#352d12;
+  --code-bg:#0b0f14; --code-fg:#e5e9f0;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:17px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:48px;padding-block:32px 80px}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr);gap:24px;padding-block:20px 60px}.wrap > .rail{display:none}}
+[hidden]{display:none!important}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(2rem,4.5vw,3rem);font-weight:700;letter-spacing:-.02em}
+h2{font-size:1.65rem;font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.2rem;font-weight:700}
+p{margin:0}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.eyebrow{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+main{min-width:0;display:flex;flex-direction:column;gap:56px}
+section{display:flex;flex-direction:column;gap:18px;scroll-margin-top:24px}
+.prose{max-width:68ch;display:flex;flex-direction:column;gap:14px}
+p.prose{display:block}
+.prose ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--sunk);padding:.08em .35em;border-radius:4px}
+pre{margin:0}
+.code{background:var(--code-bg);color:var(--code-fg);font-family:var(--f-mono);font-size:.84rem;line-height:1.55;padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.code .k{color:var(--k)} .code .s{color:var(--s)} .code .c{color:var(--c);font-style:italic} .code .n{color:var(--n)}
+.term .p{color:var(--k);user-select:none} .term .o{color:#a9b4c4}
+
+/* rail */
+.rail{position:sticky;top:max(24px,env(safe-area-inset-top,0px));align-self:start;display:flex;flex-direction:column;gap:20px;font-size:.93rem}
+.rail nav{display:flex;flex-direction:column;gap:2px}
+.rail nav a{color:var(--muted);text-decoration:none;padding:4px 10px;border-left:2px solid var(--line)}
+.rail nav a:hover{color:var(--fg);border-left-color:var(--accent)}
+.rail .grp{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 0 4px 12px}
+
+/* hero */
+.hero{display:flex;flex-direction:column;gap:16px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.hero .lead{font-size:1.15rem;color:var(--muted);max-width:62ch}
+.magic{font-family:var(--f-mono);font-size:clamp(.8rem,2.4vw,1rem);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.magic span{padding:3px 7px;border-radius:4px;background:var(--sunk);color:var(--muted)}
+.magic span.hi{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.magic small{color:var(--muted);font-family:var(--f-body);font-size:.85rem;margin-left:6px}
+
+/* progress */
+.progress{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.progress .row{display:flex;justify-content:space-between;gap:8px;font-variant-numeric:tabular-nums;font-size:.92rem}
+.bar{height:8px;background:var(--sunk);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.progress .tools{display:flex;gap:8px;flex-wrap:wrap}
+
+/* diagram + tables */
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;overflow-x:auto}
+.fig svg{display:block;min-width:640px;width:100%;height:auto}
+.fig figcaption{font-size:.88rem;color:var(--muted);margin-top:8px}
+figure{margin:0}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.95rem;min-width:520px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
+.note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 14px;border-radius:0 8px 8px 0;max-width:68ch;font-size:.97rem}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.two > *{min-width:0}
+
+/* task list */
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:inherit;font-size:.88rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:5px 12px;border-radius:99px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.level{display:flex;flex-direction:column;gap:14px}
+.level > header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding-top:8px}
+.level > header p{color:var(--muted);font-size:.95rem}
+.task{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px;scroll-margin-top:24px}
+.task[data-state="ok"]{border-color:var(--ok)}
+.task[data-state="seen"]{border-color:var(--seen)}
+.thead{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.tnum{font-family:var(--f-display);font-weight:700;font-size:1.05rem}
+.tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.tag{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.04em;padding:2px 8px;border-radius:4px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.tag.mat{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.tag.st-ok{background:var(--ok-soft);color:var(--ok)}
+.tag.st-seen{background:var(--seen-soft);color:var(--seen)}
+.q{display:flex;flex-direction:column;gap:10px;max-width:72ch}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 12px;border:1px solid var(--line);border-radius:8px;cursor:pointer;background:var(--bg)}
+.opt:hover{border-color:var(--muted)}
+.opt input{margin-top:5px;accent-color:var(--accent)}
+.opt b{font-family:var(--f-mono);font-weight:600;min-width:1.2em}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.blank{display:flex;flex-direction:column;gap:4px}
+.blank label{font-size:.93rem;color:var(--muted)}
+input[type="text"],textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 10px;width:100%}
+input.mono,textarea.mono{font-family:var(--f-mono);font-size:.86rem}
+textarea.editor{font-family:var(--f-mono);font-size:.84rem;line-height:1.5;min-height:180px;tab-size:4;white-space:pre;overflow:auto;resize:vertical}
+textarea.out{min-height:90px}
+input.right,textarea.right{border-color:var(--ok);background:var(--ok-soft)}
+input.wrong,textarea.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.cls{display:flex;flex-direction:column;gap:6px}
+.crow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.crow.right{border-color:var(--ok);background:var(--ok-soft)} .crow.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.crow .txt{min-width:0;font-size:.96rem}
+.seg{display:inline-flex;justify-self:start;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex-wrap:wrap}
+.seg button{font:inherit;font-size:.84rem;border:0;background:var(--surface);color:var(--fg);padding:4px 10px;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+@media (max-width:560px){.crow{grid-template-columns:minmax(0,1fr)}}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;font-size:.92rem;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:6px 14px;border-radius:6px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.feedback{font-weight:600;font-size:.95rem}
+.feedback.ok{color:var(--ok)} .feedback.bad{color:var(--bad)}
+.hints{display:flex;flex-direction:column;gap:6px}
+.hint{background:var(--sunk);border-radius:8px;padding:8px 12px;font-size:.95rem;max-width:72ch}
+.hint b{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);margin-right:6px}
+.sol{border-top:1px dashed var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px}
+.sol .ans{font-weight:700}
+.sol .why{max-width:72ch;color:var(--fg)}
+.editorbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.editorbar span{font-size:.85rem;color:var(--muted)}
+.confirm{display:inline-flex;gap:8px;align-items:center;font-size:.9rem}
+/* paging */
+.rail nav a[aria-current="page"]{color:var(--fg);border-left-color:var(--accent);font-weight:600;background:var(--surface)}
+.rail nav a{display:flex;justify-content:space-between;gap:8px}
+.rail nav a .cnt{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:400}
+.rail nav a .cnt.full{color:var(--ok)}
+.rprog{display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:.86rem;font-variant-numeric:tabular-nums}
+.sync{display:flex;gap:6px;align-items:flex-start;color:var(--muted);font-size:.8rem;line-height:1.35}
+.sync::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;margin-top:4px;background:var(--seen)}
+.sync[data-s="cloud"]::before{background:var(--ok)}
+.mtop{display:none;flex-direction:column;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.mtop select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 10px;width:100%}
+.mtop .row{display:flex;justify-content:space-between;gap:8px;font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+@media (max-width:900px){.mtop{display:flex}}
+.crumb{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-top:1px solid var(--line);padding-top:20px}
+.pager a{display:flex;flex-direction:column;gap:2px;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);text-decoration:none;min-width:0}
+.pager a:hover{border-color:var(--accent)}
+.pager a.next{text-align:right;grid-column:2}
+.pager a .t{font-family:var(--f-display);font-weight:700;font-size:1.05rem}
+.pager a.next .t::after{content:" \2192"} .pager a.prev .t::before{content:"\2190  "}
+.pager .eyebrow{font-size:.7rem}
+@media (max-width:560px){.pager{grid-template-columns:1fr}.pager a.next{grid-column:1}}
+.lvl-empty{color:var(--muted);font-style:italic}
+main{gap:40px}
+footer{color:var(--muted);font-size:.88rem;border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.fc{display:block;max-width:100%;height:auto;margin:0 auto}
+.fc .fn{fill:var(--surface);stroke:var(--fg);stroke-width:1.5}
+.fc .fl{fill:none;stroke:var(--fg);stroke-width:1.5}
+.fc .fa{fill:var(--fg);stroke:none}
+.fc .ft{font-family:var(--f-mono);font-size:13px;fill:var(--fg);text-anchor:middle;dominant-baseline:central}
+.fc .fl2{font-family:var(--f-body);font-size:12px;font-weight:600;fill:var(--muted)}
+.fc.sym{margin:0}
+.fc .fb{fill:var(--accent);stroke:var(--surface);stroke-width:1.5}
+.fc .fbt{font-family:var(--f-body);font-size:11px;font-weight:700;fill:var(--surface);text-anchor:middle;dominant-baseline:central}
+p.prose{display:block}
+.langsw{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.mtop .langsw{flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap}
+
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+
+<div class="wrap">
+  <aside class="rail" aria-label="Vsebina poglavja">
+    <div class="eyebrow">Poglavje 2 od 12</div>
+    <nav>
+      <div class="grp">Razlaga</div>
+      <a href="#algoritem">Kaj je algoritem</a>
+      <a href="#zapis">Načini zapisa</a>
+      <a href="#simboli">Simboli diagrama poteka</a>
+      <a href="#gradniki">Zaporedje, vejitev, ponavljanje</a>
+      <a href="#sled">Sled algoritma</a>
+      <a href="#java">Od diagrama do Jave</a>
+      <a href="#nacrtovanje">Kako rešiš nalogo</a>
+      <div class="grp">Vaje</div>
+      <a href="#naloge-a">A · Algoritem <span class="cnt" data-lv="A"></span></a>
+      <a href="#naloge-b">B · Zapis <span class="cnt" data-lv="B"></span></a>
+      <a href="#naloge-c">C · Simboli in gradniki <span class="cnt" data-lv="C"></span></a>
+      <a href="#naloge-d">D · Sled <span class="cnt" data-lv="D"></span></a>
+      <a href="#naloge-e">E · Rišem diagrame <span class="cnt" data-lv="E"></span></a>
+      <a href="#naloge-f">F · Diagram v Javo <span class="cnt" data-lv="F"></span></a>
+      <a href="#doma">Za doma <span class="cnt" data-lv="G"></span></a>
+    </nav>
+    <div class="rprog" aria-live="polite">
+      <strong>Tvoj napredek</strong>
+      <div class="bar"><i class="js-bar"></i></div>
+      <span class="js-progtxt"></span>
+      <span class="sync js-sync" data-s="local">Napredek se shranjuje v tem brskalniku.</span>
+    </div>
+      <div class="langsw" role="group" aria-label="Napisi v diagramih">
+        <span class="eyebrow">Napisi v diagramih</span>
+        <div class="seg"><button type="button" class="js-lang" data-lang="en" aria-pressed="true">Flowgorithm</button><button type="button" class="js-lang" data-lang="sl" aria-pressed="false">Matura</button></div>
+      </div>
+  </aside>
+
+  <main>
+    <div class="mtop">
+      <label class="eyebrow" for="pageSel">Poglavje 2 · stran</label>
+      <select id="pageSel"></select>
+      <div class="bar"><i class="js-bar"></i></div>
+      <div class="row"><span class="js-progtxt"></span></div>
+      <span class="sync js-sync" data-s="local">Napredek se shranjuje v tem brskalniku.</span>
+      <div class="langsw" role="group" aria-label="Napisi v diagramih">
+        <span class="eyebrow">Napisi v diagramih</span>
+        <div class="seg"><button type="button" class="js-lang" data-lang="en" aria-pressed="true">Flowgorithm</button><button type="button" class="js-lang" data-lang="sl" aria-pressed="false">Matura</button></div>
+      </div>
+    </div>
+    <div class="crumb" id="crumb"><span class="eyebrow">Poglavje 2 · Algoritmi in diagram poteka</span><span class="eyebrow" id="crumbN"></span></div>
+    <header class="hero" id="hero">
+      <div class="eyebrow">Splošna matura · Računalništvo · Izpitna pola 1</div>
+      <h1>Algoritmi in diagram poteka</h1>
+      <p class="lead">Preden napišemo program, moramo vedeti, kakšen postopek bo izvajal. Naučil se boš, kaj je algoritem, kako ga zapišemo z diagramom poteka, kako po korakih sledimo njegovemu izvajanju in kako ga prevedemo v Javo.</p>
+      <div class="magic" aria-label="Pot od ideje do programa">
+        <span class="hi">algoritem</span><span>→</span><span class="hi">diagram poteka</span><span>→</span><span class="hi">program v Javi</span>
+        <small>isti postopek, trije zapisi</small>
+      </div>
+    </header>
+
+    <!-- ===================== RAZLAGA ===================== -->
+    <section id="algoritem">
+      <div class="eyebrow">Razlaga 1</div>
+      <h2>Kaj je algoritem</h2>
+      <div class="prose">
+        <p><strong>Algoritem</strong> je postopek, sestavljen iz končnega zaporedja jasnih korakov, ki iz vhodnih podatkov pripelje do rešitve problema. Recept za palačinke je algoritem, navodilo za zamenjavo kolesne zračnice je algoritem in tudi postopek za izračun povprečja treh števil je algoritem.</p>
+        <p>Algoritem je <em>zamisel</em>, program pa je <em>zapis te zamisli</em> v programskem jeziku. Isti algoritem lahko napišemo v Javi, Pythonu ali C-ju. Algoritem lahko izvede tudi človek s svinčnikom in papirjem.</p>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr><th>Lastnost</th><th>Kaj pomeni</th><th>Protiprimer</th></tr></thead>
+        <tbody>
+          <tr><td><strong>nedvoumen</strong></td><td>vsak korak ima natanko en pomen, vsak izvajalec razume enako</td><td>»dodaj malo soli«</td></tr>
+          <tr><td><strong>končen</strong></td><td>po končnem številu korakov se postopek ustavi</td><td>»ponavljaj: i = i + 1« brez pogoja za konec</td></tr>
+          <tr><td><strong>ima vhod in izhod</strong></td><td>iz začetnih podatkov (lahko jih ni) dobimo rezultat</td><td>postopek, ki ničesar ne vrne</td></tr>
+          <tr><td><strong>izvedljiv in splošen</strong></td><td>vsak korak je mogoče izvesti, algoritem pa deluje za vse dovoljene vhode, ne samo za en primer</td><td>»izpiši 12« kot algoritem za vsoto</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Na maturi se ponavlja vprašanje o lastnostih algoritma. Obvezni sta predvsem <strong>nedvoumnost</strong> in <strong>končnost</strong>. Algoritem <em>ni</em> nujno zapisan v programskem jeziku in ne vsebuje nujno zanke.</p>
+    </section>
+
+    <section id="zapis">
+      <div class="eyebrow">Razlaga 2</div>
+      <h2>Načini zapisa algoritma</h2>
+      <div class="prose">
+        <p>Isti algoritem lahko zapišemo na več načinov. Spodaj je algoritem »izpiši večje od dveh števil« na štiri načine.</p>
+      </div>
+      <div class="two">
+        <div class="note" style="max-width:none"><strong>1. Besedni opis</strong><br>Preberi števili a in b. Če je a večje od b, izpiši a, sicer izpiši b.</div>
+        <div class="note" style="max-width:none"><strong>2. Psevdokoda</strong><br><code>preberi a, b</code><br><code>če a &gt; b potem izpiši a</code><br><code>sicer izpiši b</code></div>
+      </div>
+      <div class="two">
+        <figure class="fig"><div data-fc="maxd"></div><figcaption>3. Diagram poteka</figcaption></figure>
+        <figure>
+          <pre class="code js-hl">import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int a = sc.nextInt();
+        int b = sc.nextInt();
+        if (a &gt; b) {
+            System.out.println(a);
+        } else {
+            System.out.println(b);
+        }
+    }
+}</pre>
+          <figcaption class="eyebrow" style="margin-top:8px">4. Program v Javi</figcaption>
+        </figure>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr><th>Zapis</th><th>Prednost</th><th>Slabost</th></tr></thead>
+        <tbody>
+          <tr><td>besedni opis</td><td>razumljiv vsakomur</td><td>lahko je dvoumen</td></tr>
+          <tr><td>psevdokoda</td><td>kratka, blizu programa, ni vezana na jezik</td><td>ni enotnih pravil</td></tr>
+          <tr><td>diagram poteka</td><td>pregleden, vidimo vejitve in zanke</td><td>velik pri dolgih algoritmih</td></tr>
+          <tr><td>program</td><td>ga računalnik izvede</td><td>vezan na programski jezik</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Diagrami <strong>UML</strong> (razredni diagram, diagram primera uporabe) in <strong>diagram ER</strong> niso zapisi algoritma: prvi opisujejo zgradbo programske opreme, drugi podatke v bazah. To so najpogostejše napačne možnosti pri maturitetnih nalogah.</p>
+    </section>
+
+    <section id="simboli">
+      <div class="eyebrow">Razlaga 3</div>
+      <h2>Simboli diagrama poteka</h2>
+      <div class="prose">
+        <p>Diagram poteka sestavlja nekaj simbolov, povezanih s puščicami. Puščice kažejo, kako teče izvajanje, običajno od zgoraj navzdol.</p>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr><th>Simbol</th><th>Flowgorithm</th><th>Matura (slovensko)</th><th>Kaj zapišemo vanj</th></tr></thead>
+        <tbody>
+          <tr><td><span data-sym="start"></span></td><td><code>Main</code>, <code>End</code></td><td><code>začetek</code>, <code>konec</code></td><td>samo ti dve besedi; algoritem ima en začetek</td></tr>
+          <tr><td><span data-sym="p"></span></td><td><code>Assign</code>: <code>s = s + x</code></td><td><code>s = s + x</code></td><td>prireditev, izračun</td></tr>
+          <tr><td><span data-sym="io"></span></td><td><code>Input x</code>, <code>Output s</code></td><td><code>preberi x</code>, <code>izpiši s</code></td><td>branje podatkov, izpis</td></tr>
+          <tr><td><span data-sym="if"></span></td><td><code>If</code>, <code>While</code>, <code>Do</code>: pogoj <code>x &gt; 0</code>, izhoda <code>True</code> in <code>False</code></td><td>pogoj <code>x &gt; 0</code>, izhoda <code>da</code> in <code>ne</code></td><td>primerjava, na katero je odgovor <em>da</em> ali <em>ne</em></td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Na tej strani so diagrami privzeto v <strong>slogu Flowgorithma</strong> (angleški napisi), ker ga uporabljamo pri pouku. Na maturi so napisi slovenski (<em>začetek, konec, preberi, izpiši, da, ne</em>), zato lahko s stikalom »Napisi v diagramih« v levem stolpcu preklopiš med obema. Pomen simbolov je enak.</p>
+      <ul class="prose">
+        <li>Iz vsakega simbola gre ena puščica, iz <strong>pogoja pa dve</strong>, označeni z <em>True</em> in <em>False</em> (na maturi <em>da</em> in <em>ne</em>).</li>
+        <li>V pravokotnik pišemo prireditve (<code>s = s + x</code>). Enačaj pomeni »shrani«, ne »je enako«.</li>
+        <li>Primerjavo napišemo v romb, npr. <code>x &gt; 0</code> ali <code>x % 2 == 0</code>.</li>
+        <li>Po vejitvi se obe poti spet združita, preden algoritem nadaljuje.</li>
+      </ul>
+      <p class="note"><strong>Flowgorithm</strong> (brezplačno) diagram nariše in ga tudi izvede korak za korakom. Pazi na dve razliki: Flowgorithm zahteva, da spremenljivko pred uporabo deklarirate (simbol <code>Declare</code>, npr. <code>Integer s</code>), in vsak simbol <code>Input</code> prebere samo eno spremenljivko. Zaradi preglednosti deklaracij v diagramih na tej strani ne rišemo.</p>
+    </section>
+
+    <section id="gradniki">
+      <div class="eyebrow">Razlaga 4</div>
+      <h2>Zaporedje, vejitev, ponavljanje</h2>
+      <div class="prose">
+        <p>Vsak algoritem sestavimo iz treh gradnikov. Zaporedje izvede korake drug za drugim, vejitev izbere eno izmed poti, ponavljanje (zanka) isto zaporedje korakov izvaja, dokler je pogoj izpolnjen.</p>
+      </div>
+      <div class="two">
+        <figure class="fig"><div data-fc="zap"></div><figcaption><strong>Zaporedje</strong>: koraki drug za drugim. V Javi: stavki drug pod drugim.</figcaption></figure>
+        <figure class="fig"><div data-fc="vej"></div><figcaption><strong>Vejitev</strong>: če je pogoj izpolnjen, se izvede veja <em>da</em>. V Javi: <code>if</code> (z vejo <code>else</code> ali brez).</figcaption></figure>
+        <figure class="fig"><div data-fc="pon"></div><figcaption><strong>Ponavljanje</strong>: pogoj je na začetku, puščica se vrača k pogoju. V Javi: <code>while</code> ali <code>for</code>.</figcaption></figure>
+        <figure class="fig"><div data-fc="zanka2"></div><figcaption><strong>Ponavljanje s pogojem na koncu</strong>: telo se izvede vsaj enkrat. V Javi: <code>do ... while</code>.</figcaption></figure>
+      </div>
+      <p class="note">Pri zanki si vedno odgovori na tri vprašanja: <strong>s čim se začne</strong> (začetna vrednost števca), <strong>kdaj se konča</strong> (pogoj) in <strong>kaj se spremeni v vsakem krogu</strong> (povečanje števca). Če se v telesu zanke nič ne spremeni, se zanka nikoli ne konča.</p>
+    </section>
+
+    <section id="sled">
+      <div class="eyebrow">Razlaga 5</div>
+      <h2>Sled algoritma</h2>
+      <div class="prose">
+        <p><strong>Sled algoritma</strong> je tabela, v katero po korakih zapisujemo vrednosti spremenljivk in izpisov, med tem ko po diagramu izvajamo algoritem. Tako preverimo, ali algoritem dela, kar smo mislili, in ugotovimo, kaj izpiše. Na maturi je sled pogosta naloga.</p>
+        <p>Da je jasno, <em>kateri</em> blok izvajamo, bloke oštevilčimo od zgoraj navzdol (v krogcih). Vsaka vrstica sledi je en izveden blok. Zanka blok ponovi, zato se številka v tabeli ponovi.</p>
+      </div>
+      <div class="two">
+        <figure class="fig"><div data-fc="sum" data-num="1"></div><figcaption>Vsota števil od 1 do 4 z oštevilčenimi bloki.</figcaption></figure>
+        <div class="tbl"><table style="min-width:0">
+          <thead><tr><th>korak</th><th>blok</th><th>i</th><th>s</th><th>pogoj</th><th>izpis</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1</td><td class="num">1</td><td class="num">–</td><td class="num">0</td><td></td><td></td></tr>
+            <tr><td class="num">2</td><td class="num">2</td><td class="num">1</td><td class="num">0</td><td></td><td></td></tr>
+            <tr><td class="num">3</td><td class="num">3</td><td class="num">1</td><td class="num">0</td><td>da</td><td></td></tr>
+            <tr><td class="num">4</td><td class="num">4</td><td class="num">1</td><td class="num">1</td><td></td><td></td></tr>
+            <tr><td class="num">5</td><td class="num">5</td><td class="num">2</td><td class="num">1</td><td></td><td></td></tr>
+            <tr><td class="num">6</td><td class="num">3</td><td class="num">2</td><td class="num">1</td><td>da</td><td></td></tr>
+            <tr><td class="num">7</td><td class="num">4</td><td class="num">2</td><td class="num">3</td><td></td><td></td></tr>
+            <tr><td class="num">8</td><td class="num">5</td><td class="num">3</td><td class="num">3</td><td></td><td></td></tr>
+            <tr><td class="num">9</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td>da</td><td></td></tr>
+            <tr><td class="num">10</td><td class="num">4</td><td class="num">3</td><td class="num">6</td><td></td><td></td></tr>
+            <tr><td class="num">11</td><td class="num">5</td><td class="num">4</td><td class="num">6</td><td></td><td></td></tr>
+            <tr><td class="num">12</td><td class="num">3</td><td class="num">4</td><td class="num">6</td><td>da</td><td></td></tr>
+            <tr><td class="num">13</td><td class="num">4</td><td class="num">4</td><td class="num">10</td><td></td><td></td></tr>
+            <tr><td class="num">14</td><td class="num">5</td><td class="num">5</td><td class="num">10</td><td></td><td></td></tr>
+            <tr><td class="num">15</td><td class="num">3</td><td class="num">5</td><td class="num">10</td><td>ne</td><td></td></tr>
+            <tr><td class="num">16</td><td class="num">6</td><td class="num">5</td><td class="num">10</td><td></td><td class="num">10</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <p class="prose">V vsaki vrstici so vrednosti <em>po</em> izvedbi bloka. Poglej bloke 3, 4 in 5: zanka se ponavlja v ritmu 3 → 4 → 5, dokler pogoj v bloku 3 ne pove <em>ne</em>. Takrat se izvede blok 6 (izpis).</p>
+      <ul class="prose">
+        <li>Stolpec naredi za vsako spremenljivko, ki se spreminja, in za vsak pogoj.</li>
+        <li>Vrednosti prepiši iz prejšnje vrstice in popravi samo tisto, ki jo blok spremeni.</li>
+        <li>Ne preskakuj korakov v glavi: napake se skrivajo ravno tam.</li>
+        <li>Če algoritem bere podatke, zraven zapiši, katero vhodno vrednost je prebral.</li>
+        <li>Na maturi dobiš pogosto <em>skrajšano</em> sled: samo vrstica ob vsakem preverjanju pogoja (npr. i, pogoj, s). Za razumevanje je dobro začeti s polno sledjo po blokih.</li>
+      </ul>
+      <p class="note">Sled je na papirju enako kot razhroščevalnik (debugger) v Eclipse ali VS Code: tam z gumbom »Step« izvajaš program vrstico za vrstico in v oknu s spremenljivkami vidiš iste vrednosti.</p>
+    </section>
+
+    <section id="java">
+      <div class="eyebrow">Razlaga 6</div>
+      <h2>Od diagrama do Jave</h2>
+      <div class="prose">
+        <p>Vsak simbol v diagramu ustreza natanko določenemu delu programa. Ko to znaš, diagram v nekaj minutah prepišeš v Javo in obratno.</p>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr><th>Simbol</th><th>Java</th></tr></thead>
+        <tbody>
+          <tr><td>začetek in konec</td><td>metoda <code>public static void main(String[] args) { ... }</code></td></tr>
+          <tr><td>procesiranje <code>s = s + i</code></td><td>prireditev <code>s = s + i;</code> (spremenljivko je treba prej deklarirati: <code>int s = 0;</code>)</td></tr>
+          <tr><td>vhod <code>preberi a</code></td><td><code>int a = sc.nextInt();</code> (z objektom <code>Scanner sc</code>)</td></tr>
+          <tr><td>izhod <code>izpiši s</code></td><td><code>System.out.println(s);</code></td></tr>
+          <tr><td>pogoj (vejitev)</td><td><code>if (pogoj) { ... } else { ... }</code></td></tr>
+          <tr><td>pogoj (zanka, začetek)</td><td><code>while (pogoj) { ... }</code></td></tr>
+          <tr><td>pogoj (zanka, konec)</td><td><code>do { ... } while (pogoj);</code></td></tr>
+        </tbody>
+      </table></div>
+      <div class="two">
+        <figure class="fig"><div data-fc="sum"></div><figcaption>Diagram iz prejšnje razlage.</figcaption></figure>
+        <figure>
+          <pre class="code js-hl">public class Main {
+    public static void main(String[] args) {
+        int s = 0;
+        int i = 1;
+        while (i &lt;= 4) {
+            s = s + i;
+            i = i + 1;
+        }
+        System.out.println(s);
+    }
+}</pre>
+          <figcaption class="eyebrow" style="margin-top:8px">Isti algoritem v Javi: izpiše 10</figcaption>
+        </figure>
+      </div>
+      <p class="note">V Programizu običajno ni vnosa prek <code>Scanner</code>. Zato v nalogah »Iz diagrama v Javo« vrednosti vpišemo kar v kodo (<code>int n = 100;</code>). V Eclipse ali VS Code lahko uporabiš <code>Scanner</code> in vnos v konzoli.</p>
+    </section>
+
+    <section id="nacrtovanje">
+      <div class="eyebrow">Razlaga 7</div>
+      <h2>Kako rešiš nalogo »Nariši diagram poteka«</h2>
+      <div class="prose">
+        <ol style="margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px">
+          <li>Ugotovi <strong>vhod</strong> (kaj prebereš) in <strong>izhod</strong> (kaj izpišeš).</li>
+          <li>Reši primer <strong>na roke</strong>: kako bi sam prišel do rezultata?</li>
+          <li>Ugotovi, ali potrebuješ <strong>odločanje</strong> (vejitev) ali <strong>ponavljanje</strong> (zanka).</li>
+          <li>Določi <strong>spremenljivke</strong> in njihove začetne vrednosti (vsota začne pri 0, števec pri 0 ali 1).</li>
+          <li>Nariši diagram: začetek, vhod, priprava, zanka ali vejitev, izpis, konec.</li>
+          <li>Preizkusi s <strong>sledjo</strong> na enem navadnem in enem robnem primeru (0, negativno število, N = 1).</li>
+        </ol>
+      </div>
+      <p class="prose"><strong>Primer:</strong> izpiši prvih N sodih števil (2, 4, 6, ...). Vhod je N. Prvi člen je 2 · 1, drugi 2 · 2, torej je i-ti člen 2 · i. Zanka teče za i od 1 do N.</p>
+      <figure class="fig" style="max-width:420px"><div data-fc="sodi"></div></figure>
+      <div class="tbl"><table>
+        <thead><tr><th>Pogosta napaka</th><th>Posledica</th><th>Kako jo preprečiš</th></tr></thead>
+        <tbody>
+          <tr><td>pozabljena začetna vrednost (<code>s</code> ni nastavljen na 0)</td><td>napačna vsota</td><td>vse spremenljivke nastavi pred zanko</td></tr>
+          <tr><td>v zanki se števec ne spremeni</td><td>neskončna zanka</td><td>vedno dodaj <code>i = i + 1</code></td></tr>
+          <tr><td>pogoj <code>i &lt; N</code> namesto <code>i &lt;= N</code></td><td>zanka je en krog prekratka</td><td>preizkusi s sledjo za N = 1</td></tr>
+          <tr><td>puščici iz pogoja nista označeni z da in ne</td><td>diagram je dvoumen</td><td>oznaki dopiši vedno</td></tr>
+          <tr><td>izpis v zanki namesto za njo (ali obratno)</td><td>preveč ali premalo izpisov</td><td>vprašaj se: kolikokrat želim izpis?</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ===================== NALOGE ===================== -->
+    <section id="naloge" style="gap:24px">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="eyebrow">Vaje</div>
+        <h2>Naloge od lažjih do težjih</h2>
+        <p class="prose" style="color:var(--muted)">Naloge z oznako <span class="tag mat">Matura</span> so iz izpitnih pol 1 iz let 2012–2026, z enakim številom točk kot na izpitu. Na maturi diagrame rišeš s peresom, tu pa ga nariši na papir ali v Flowgorithm, nato odgovori na testna vprašanja in odpri rešitev za primerjavo. Če si ogledaš rešitev, preden nalogo pravilno rešiš, se ti točke ne štejejo.</p>
+        <div class="filters" role="group" aria-label="Prikaži naloge">
+          <button class="chip" data-f="all" aria-pressed="true" type="button">Vse</button>
+          <button class="chip" data-f="mat" aria-pressed="false" type="button">Samo maturitetne</button>
+          <button class="chip" data-f="own" aria-pressed="false" type="button">Samo dodatne</button>
+          <button class="chip" data-f="open" aria-pressed="false" type="button">Še nerešene</button>
+        </div>
+      </div>
+      <div id="levels" style="display:flex;flex-direction:column;gap:40px"></div>
+    </section>
+
+    <section id="doma">
+      <div class="eyebrow">Za doma</div>
+      <h2>Vaje za doma</h2>
+      <p class="prose" style="color:var(--muted)">Najprej še dve maturitetni nalogi za ponavljanje, nato vaje, ki jih narediš na računalniku: v Flowgorithmu, v razhroščevalniku in z Javo.</p>
+      <div id="homeMat"></div>
+      <div class="level"><header><span class="eyebrow">Praktične vaje</span><h3 style="font-size:1.35rem">Na svojem računalniku</h3></header><div id="home" class="level"></div></div>
+    </section>
+
+    <nav class="pager" id="pager" aria-label="Listanje po straneh"></nav>
+
+    <footer>
+      <span>Viri nalog: Državni izpitni center (RIC), izpitne pole 1 iz računalništva 2012–2026. Predmetni izpitni katalog za splošno maturo – računalništvo 2023 (velja do 2028).</span>
+      <span>Diagrami poteka pri nalogah z oznako »Diagram prerisan« so za to stran na novo narisani po izvirni nalogi. Vsi programi in izpisi so preverjeni z OpenJDK 21.</span>
+      <span id="resetWrap"></span>
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+const PROGRAMIZ = "https://www.programiz.com/java-programming/online-compiler/";
+const STORE = "java-matura-p1-poglavje2-v1";
+
+/* ---------- diagrami poteka ---------- */
+/* ---------- diagram poteka: preprost samodejni razpored ---------- */
+const FLOW = (function(){
+  const CW = 7.8, GAP = 24, ST = 14, MIN = 110;
+  const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const tw = s => String(s).length * CW;
+  const lw = s => String(s).length * 7 + 6;   // širina oznak da/ne (True/False)
+  const LBL = {
+    en:{start:"Main", end:"End", yes:"True", no:"False"},
+    sl:{start:"začetek", end:"konec", yes:"da", no:"ne"}
+  };
+  let LANG = "en";
+  const B = {
+    start:t=>({t:"start",x:t||null}), end:t=>({t:"end",x:t||null}),
+    p:x=>({t:"p",x}),
+    inp:(...v)=>({t:"io",k:"in",v}), out:(...v)=>({t:"io",k:"out",v}),
+    if:(c,y,n)=>({t:"if",c,y:y||[],n:n||[]}),
+    wh:(c,b)=>({t:"wh",c,b:b||[]}), dw:(c,b)=>({t:"dw",c,b:b||[]})
+  };
+  function poly(pts, cls){ return `<polygon class="${cls||"fn"}" points="${pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")}"/>`; }
+  function line(pts){ return `<polyline class="fl" points="${pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")}"/>`; }
+  function head(x,y,dir){ // arrowhead whose tip is at (x,y)
+    const a=5.5, b=4;
+    const P = dir==="d" ? [[x,y],[x-b,y-a],[x+b,y-a]] : dir==="r" ? [[x,y],[x-a,y-b],[x-a,y+b]] : dir==="l" ? [[x,y],[x+a,y-b],[x+a,y+b]] : [[x,y],[x-b,y+a],[x+b,y+a]];
+    return `<polygon class="fa" points="${P.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")}"/>`;
+  }
+  function text(x,y,s,cls,anchor){ return `<text class="${cls||"ft"}" x="${x.toFixed(1)}" y="${y.toFixed(1)}"${anchor?` text-anchor="${anchor}"`:""}>${esc(s)}</text>`; }
+  const DH = 54;
+  function dwOf(c){ return Math.max(MIN, tw(c)*1.45 + 44); }
+
+  let NUM = null;
+  function shape(kind, s, x, y, out){
+    const m = shape0(kind, s, x, y, out);
+    if(NUM && kind!=="start" && kind!=="end"){
+      const bx = kind==="p" ? x-m.w/2 : kind==="io" ? x-m.w/2+12 : x-m.w/4-6, by = kind==="if" ? y+m.h/4-6 : y;
+      NUM.n++;
+      out.push(`<circle class="fb" cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="9"/><text class="fbt" x="${bx.toFixed(1)}" y="${by.toFixed(1)}">${NUM.n}</text>`);
+    }
+    return m;
+  }
+  function shape0(kind, s, x, y, out){ // top-centre at (x,y); returns {w,h}
+    const t = s==null ? "" : s;
+    if(kind==="start"||kind==="end"){ const w=Math.max(90,tw(t)+34), h=30;
+      out.push(`<rect class="fn" x="${(x-w/2).toFixed(1)}" y="${y}" width="${w}" height="${h}" rx="15"/>`+text(x,y+h/2,t)); return {w,h}; }
+    if(kind==="p"){ const w=Math.max(100,tw(t)+28), h=34;
+      out.push(`<rect class="fn" x="${(x-w/2).toFixed(1)}" y="${y}" width="${w}" height="${h}"/>`+text(x,y+h/2,t)); return {w,h}; }
+    if(kind==="io"){ const w=Math.max(110,tw(t)+48), h=34, k=12;
+      out.push(poly([[x-w/2+k,y],[x+w/2,y],[x+w/2-k,y+h],[x-w/2,y+h]])+text(x,y+h/2,t)); return {w,h}; }
+    if(kind==="if"){ const w=dwOf(t), h=DH;
+      out.push(poly([[x,y],[x+w/2,y+h/2],[x,y+h],[x-w/2,y+h/2]])+text(x,y+h/2,t)); return {w,h}; }
+  }
+  function ioText(n){
+    if(n.k==="in") return LANG==="en" ? "Input "+n.v[0] : "preberi "+n.v.join(", ");
+    const lit = n.v.some(a=>String(a).trim().charAt(0)==='"');
+    return LANG==="en" ? "Output "+n.v.join(lit ? " & " : ' & " " & ') : "izpiši "+n.v.join(", ");
+  }
+  function prep(list){
+    const out=[];
+    list.forEach(n=>{
+      if(n.t==="io" && n.k==="in" && LANG==="en" && n.v.length>1){ n.v.forEach(v=>out.push({t:"io",k:"in",v:[v]})); }
+      else if(n.t==="if") out.push({t:"if",c:n.c,y:prep(n.y),n:prep(n.n)});
+      else if(n.t==="wh"||n.t==="dw") out.push({t:n.t,c:n.c,b:prep(n.b)});
+      else out.push(n);
+    });
+    return out;
+  }
+  function simple(kind, s){
+    const o=[]; const m = shape0(kind,s,0,0,[]);
+    return {l:m.w/2, r:m.w/2, h:m.h, draw(x,y,out){ shape(kind,s,x,y,out); }};
+  }
+  function seq(list){
+    const items = list.map(layout);
+    let l=0,r=0,h=0;
+    items.forEach((it,i)=>{ l=Math.max(l,it.l); r=Math.max(r,it.r); h+=it.h+(i?GAP:0); });
+    return {l,r,h,n:items.length, draw(x,y,out){
+      let cy=y;
+      items.forEach((it,i)=>{
+        if(i){ out.push(line([[x,cy-GAP],[x,cy]])+head(x,cy,"d")); }
+        it.draw(x,cy,out); cy+=it.h+GAP;
+      });
+    }};
+  }
+  function layout(n){
+    if(n.t==="if") return ifL(n);
+    if(n.t==="wh") return whL(n);
+    if(n.t==="dw") return dwL(n);
+    if(n.t==="io") return simple("io", ioText(n));
+    if(n.t==="start"||n.t==="end") return simple(n.t, n.x || LBL[LANG][n.t]);
+    return simple(n.t, n.x);
+  }
+  function ifL(n){
+    const dw = dwOf(n.c), cy = DH/2;
+    const L = seq(n.y), R = seq(n.n);
+    const xL = -Math.max(dw/2+4, L.r+22), xR = Math.max(dw/2+4, R.l+22);
+    const yb = DH + 8;
+    const yj = yb + Math.max(L.h, R.h) + 22;
+    return {l:Math.max(dw/2+4+lw(LBL[LANG].yes), L.l-xL), r:Math.max(dw/2+4+lw(LBL[LANG].no), xR+R.r), h:yj, draw(x,y,out){
+      shape("if",n.c,x,y,out);
+      out.push(text(x-dw/2-4,y+cy-7,LBL[LANG].yes,"fl2","end")+text(x+dw/2+4,y+cy-7,LBL[LANG].no,"fl2","start"));
+      [[xL,L],[xR,R]].forEach(([dx,B])=>{
+        const bx=x+dx, sx = dx<0 ? x-dw/2 : x+dw/2;
+        if(B.n){
+          out.push(line([[sx,y+cy],[bx,y+cy],[bx,y+yb]])+head(bx,y+yb,"d"));
+          B.draw(bx,y+yb,out);
+          out.push(line([[bx,y+yb+B.h],[bx,y+yj],[x,y+yj]]));
+        } else out.push(line([[sx,y+cy],[bx,y+cy],[bx,y+yj],[x,y+yj]]));
+      });
+    }};
+  }
+  function whL(n){
+    const dw = dwOf(n.c), cy = DH/2, Bd = seq(n.b);
+    const y0 = DH + 26;
+    const xb = -(Math.max(Bd.l, dw/2) + 26), xe = Math.max(Bd.r, dw/2) + 26;
+    const ybot = y0 + Bd.h, yEnd = ybot + 44;
+    return {l:-xb, r:Math.max(xe, dw/2+4+lw(LBL[LANG].no)), h:yEnd, draw(x,y,out){
+      shape("if",n.c,x,y,out);
+      out.push(text(x+8,y+DH+17,LBL[LANG].yes,"fl2","start")+text(x+dw/2+4,y+cy-7,LBL[LANG].no,"fl2","start"));
+      out.push(line([[x,y+DH],[x,y+y0]])+head(x,y+y0,"d"));
+      Bd.draw(x,y+y0,out);
+      out.push(line([[x,y+ybot],[x,y+ybot+20],[x+xb,y+ybot+20],[x+xb,y+cy],[x-dw/2,y+cy]])+head(x-dw/2,y+cy,"r"));
+      out.push(line([[x+dw/2,y+cy],[x+xe,y+cy],[x+xe,y+yEnd],[x,y+yEnd]]));
+    }};
+  }
+  function dwL(n){
+    const dw = dwOf(n.c), cy = DH/2, Bd = seq(n.b);
+    const gap = Math.max(26, lw(LBL[LANG].yes)+8);
+    const yd = Bd.h + 26, xb = -(Math.max(Bd.l, dw/2) + gap), yEnd = yd + DH + 26;
+    return {l:-xb, r:Math.max(Bd.r, dw/2), h:yEnd, draw(x,y,out){
+      Bd.draw(x,y,out);
+      out.push(line([[x,y+Bd.h],[x,y+yd]])+head(x,y+yd,"d"));
+      shape("if",n.c,x,y+yd,out);
+      out.push(text(x-dw/2-4,y+yd+cy-7,LBL[LANG].yes,"fl2","end")+text(x+8,y+yd+DH+17,LBL[LANG].no,"fl2","start"));
+      out.push(line([[x-dw/2,y+yd+cy],[x+xb,y+yd+cy],[x+xb,y-12],[x,y-12]])+head(x,y-12,"r"));
+      out.push(line([[x,y+yd+DH],[x,y+yEnd]]));
+    }};
+  }
+  function svg(blocks, o){
+    o = o||{};
+    const list = (o.bare ? [] : [B.start(o.start)]).concat(prep(blocks), o.bare ? [] : [B.end(o.end)]);
+    const S = seq(list); const out=[]; NUM = o.num ? {n:0} : null;
+    const P = 14, pad = 12, w = S.l+S.r+2*P, h = S.h+2*P+ST;
+    S.draw(S.l+P, P+ST, out); NUM = null;
+    return `<svg class="fc" viewBox="0 0 ${w.toFixed(0)} ${h.toFixed(0)}" style="width:${Math.ceil(w)}px;max-width:100%;min-width:0;height:auto" role="img" aria-label="${esc(o.label||"Diagram poteka")}">${out.join("")}</svg>`;
+  }
+  function sym(kind){ // prazen simbol za izbiro
+    const out=[]; const m=shape(kind==="if"?"if":kind,"",50,6,out);
+    const w=Math.max(100,m.w+12), h=m.h+12;
+    const o2=[]; shape(kind==="if"?"if":kind,"",w/2,6,o2);
+    return `<svg class="fc sym" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true">${o2.join("")}</svg>`;
+  }
+  return {B, svg, sym, setLang:l=>{ LANG = l==="sl" ? "sl" : "en"; }, getLang:()=>LANG};
+})();
+
+const J = {"e1": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        System.out.println(a + b);\n        System.out.println(a * b);\n    }\n}", "e10": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int vsota = 0;\n        int n = 0;\n        do {\n            int a = sc.nextInt();\n            int b = sc.nextInt();\n            n = n + 1;\n            if (a > b) {\n                vsota = vsota + a + b;\n            }\n        } while (vsota <= 50);\n        System.out.println(n);\n    }\n}", "e11": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int s = 0;\n        int n = 0;\n        int x = sc.nextInt();\n        while (x != 0) {\n            s = s + x;\n            n = n + 1;\n            x = sc.nextInt();\n        }\n        System.out.println((double) s / n);\n    }\n}", "e12": "public class Main {\n    public static void main(String[] args) {\n        int x = 3;\n        int y = x + 7;\n        x++;\n        while (x < 9) {\n            y = x + 7;\n            System.out.println(x);\n            x++;\n        }\n        System.out.println(x);\n    }\n}", "e13": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        while (b != 0) {\n            int t = a % b;\n            a = b;\n            b = t;\n        }\n        System.out.println(a);\n    }\n}", "e2": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        if (a > b) {\n            System.out.println(a);\n        } else {\n            System.out.println(b);\n        }\n    }\n}", "e3": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int x = sc.nextInt();\n        if (x > 0) {\n            System.out.println(\"pozitivno\");\n        } else if (x < 0) {\n            System.out.println(\"negativno\");\n        } else {\n            System.out.println(\"nic\");\n        }\n    }\n}", "e4": "public class Main {\n    public static void main(String[] args) {\n        int i = 1;\n        while (i <= 10) {\n            System.out.println(i);\n            i = i + 1;\n        }\n        System.out.println(\"i = \" + i);\n    }\n}", "e5": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int clen = 1;\n        int i = 1;\n        while (i <= n) {\n            System.out.println(clen);\n            clen = clen * 2;\n            i = i + 1;\n        }\n    }\n}", "e6": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        int k;\n        if (a < 0) {\n            k = -a;\n        } else {\n            k = a;\n        }\n        int i = 0;\n        while (i < k) {\n            System.out.println(b);\n            i = i + 1;\n        }\n    }\n}", "e7": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        char z = sc.next().charAt(0);\n        int k;\n        if (a > b) {\n            k = a - b;\n        } else {\n            k = b - a;\n        }\n        int i = 0;\n        while (i < k) {\n            System.out.print(z);\n            i = i + 1;\n        }\n        System.out.println();\n    }\n}", "e8": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int s = 0;\n        int i = 1;\n        while (i <= n) {\n            s = s + i;\n            i = i + 1;\n        }\n        System.out.println(s);\n    }\n}", "e9": "public class Main {\n    public static void main(String[] args) {\n        int a = 3;\n        int i = 1;\n        while (i <= 30) {\n            System.out.println(a);\n            a = 2 * a + 1;\n            i = i + 1;\n        }\n    }\n}", "f1": "public class Main {\n    public static void main(String[] args) {\n        int a = 17;\n        int b = 5;\n        int d = a / b;\n        int c = a % b;\n        System.out.println(d + \" \" + c);\n    }\n}", "f2": "public class Main {\n    public static void main(String[] args) {\n        int s = 0;\n        int i = 1;\n        while (i <= 4) {\n            s = s + i * i;\n            i = i + 1;\n        }\n        System.out.println(s);\n    }\n}", "f3": "public class Main {\n    public static void main(String[] args) {\n        double x = 1.5;\n        int y = 1;\n        int i = 0;\n        while (x >= 1) {\n            y++;\n            i += 2 * y;\n            x -= 0.5;\n        }\n        System.out.println(i + \" \" + y);\n    }\n}", "f4": "public class Main {\n    public static void main(String[] args) {\n        int s = 0;\n        int i = 1;\n        while (i <= 10) {\n            if (i % 2 == 0) {\n                s = s + i;\n            }\n            i = i + 1;\n        }\n        System.out.println(s);\n    }\n}", "f5": "public class Main {\n    public static void main(String[] args) {\n        int n = 4721;\n        int s = 0;\n        while (n > 0) {\n            s = s + n % 10;\n            n = n / 10;\n        }\n        System.out.println(s);\n    }\n}", "h3": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        int c = sc.nextInt();\n        int m = a;\n        if (b > m) {\n            m = b;\n        }\n        if (c > m) {\n            m = c;\n        }\n        System.out.println(m);\n    }\n}", "h4": "public class Main {\n    public static void main(String[] args) {\n        int n = 4721;\n        int st = 0;\n        while (n > 0) {\n            st = st + 1;\n            n = n / 10;\n        }\n        System.out.println(st);\n    }\n}", "h5": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int d = 2;\n        while (d * d <= n && n % d != 0) {\n            d = d + 1;\n        }\n        if (n >= 2 && d * d > n) {\n            System.out.println(\"prastevilo\");\n        } else {\n            System.out.println(\"ni prastevilo\");\n        }\n    }\n}"};
+/* ---------- data ---------- */
+const {B} = FLOW;
+const p=B.p, inp=B.inp, out=B.out, IF=B.if, wh=B.wh, dw=B.dw;
+const sp = (...v) => [v.join(" "), v.join(", ")];
+const ST = "public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}";
+
+const FLOWS = {
+  maxd:[inp("a", "b"), IF("a > b",[out("a")],[out("b")])],
+  zap:[p("a = 5"), p("b = a + 2"), out("b")],
+  vej:[inp("x"), IF("x < 0",[p("x = -x")]), out("x")],
+  pon:[p("i = 1"), wh("i <= 3",[out("i"), p("i = i + 1")])],
+  zanka2:[p("i = 0"), dw("i < 3",[p("i = i + 1"), out("i")])],
+  sum:[p("s = 0"), p("i = 1"), wh("i <= 4",[p("s = s + i"), p("i = i + 1")]), out("s")],
+  sodi:[inp("N"), p("i = 1"), wh("i <= N",[out("2 * i"), p("i = i + 1")])],
+  napaka:[p("s = 0"), p("i = 1"), wh("i <= 5",[p("s = s + i")]), out("s")]
+};
+
+const LEVELS = [
+ {id:"naloge-a", tag:"A", title:"Kaj je algoritem", note:"Pojem in lastnosti algoritma (razlaga 1)."},
+ {id:"naloge-b", tag:"B", title:"Načini zapisa algoritma", note:"Besedni opis, psevdokoda, diagram poteka in program (razlaga 2)."},
+ {id:"naloge-c", tag:"C", title:"Simboli in gradniki", note:"Simboli v diagramu poteka ter zaporedje, vejitev in ponavljanje (razlagi 3 in 4)."},
+ {id:"naloge-d", tag:"D", title:"Sled algoritma", note:"Preberi diagram in z računanjem po korakih ugotovi, kaj izpiše. Bloki so oštevilčeni od zgoraj navzdol, da lahko v sledi zapišeš, kateri blok se izvaja (razlaga 5)."},
+ {id:"naloge-e", tag:"E", title:"Narišem diagram poteka", note:"Diagram najprej nariši na papir ali v Flowgorithm, nato odgovori na testna vprašanja. Rešitev pokaže diagram in kodo v Javi."},
+ {id:"naloge-f", tag:"F", title:"Iz diagrama v Javo", note:"Zapiši program, ga zaženi in v okence prilepi izpis (razlaga 6)."},
+ {id:"doma-mat", tag:"G", title:"Še več maturitetnih nalog", note:"Naloge iz drugih rokov za ponavljanje.", home:true}
+];
+
+const T = [
+/* ----- A: Kaj je algoritem ----- */
+{lv:"A", own:true, pts:1, type:"mc",
+ q:"Kateri opis predstavlja algoritem?",
+ o:["Seznam imen učencev v razredu.","Postopek: preberi tri ocene, jih seštej, vsoto deli s 3 in izpiši rezultat.","Program Eclipse, v katerem pišemo kodo.","Datoteka .class, ki jo izvaja JVM."], a:[1],
+ h:["Algoritem je zaporedje korakov, ki iz vhodnih podatkov pripelje do rezultata."],
+ why:"Algoritem je postopek, sestavljen iz korakov. Seznam je podatek, Eclipse je orodje, .class pa je vmesna koda."},
+{lv:"A", src:"M221/1", pts:1, type:"mc",
+ q:"Obkroži črko pred trditvijo, ki je resnična za algoritem.",
+ o:["Algoritem je postopek, ki vodi do rešitve nekega problema.","Algoritem je problem, ki ga rešimo z nekim programom.","Program, ki ga za rešitev problema zaženemo na računalniku, imenujemo algoritem.","Algoritem je funkcija, če vrača neko vrednost."], a:[0],
+ h:["Problem je naloga, algoritem je pot do rešitve te naloge."],
+ why:"Algoritem je postopek, ki vodi do rešitve problema. Program je zapis algoritma v programskem jeziku. Funkcija je pojem iz programiranja, ne definicija algoritma."},
+{lv:"A", src:"M252/2", pts:1, type:"mc",
+ q:"Katera trditev je resnična?",
+ o:["Algoritem mora biti zapisan v kodi programskega jezika.","Algoritem opredeljuje postopek, ki se po določenem številu korakov konča.","Algoritem je lahko dvoumen.","Algoritem zapišemo z diagramom razreda."], a:[1],
+ h:["Algoritem lahko zapišemo tudi v besedah ali z diagramom poteka.","Lastnosti algoritma: nedvoumen in končen."],
+ why:"Algoritem se mora končati v končnem številu korakov. Ni vezan na programski jezik, ne sme biti dvoumen, diagram razreda (UML) pa ni zapis algoritma."},
+{lv:"A", src:"M212/1", pts:1, type:"mc",
+ q:"Katera trditev je za algoritem resnična?",
+ o:["Algoritem mora biti zapisan v jeziku, ki je razumljiv računalniku.","Algoritem mora biti nedvoumen.","Algoritem je postopek, ki za izbrano kombinacijo vhodnih podatkov vrne pravilno vrednost.","Algoritem je orodje, ki pomaga pri vzdrževanju programske opreme."], a:[1],
+ h:["Eden od odgovorov je lastnost, ki jo mora imeti vsak algoritem."],
+ why:"Obvezna lastnost algoritma je nedvoumnost: vsak korak mora imeti natanko en pomen. Zapis v jeziku za računalnik ni obvezen (algoritem lahko izvede tudi človek), algoritem pa mora delovati za vse dovoljene vhode, ne za eno kombinacijo."},
+{lv:"A", own:true, pts:1, type:"mc",
+ q:"Kateri korak ni primeren za algoritem?",
+ o:["Preberi število n.","Dodaj malo soli.","Če je n > 0, izpiši n.","Ponavljaj, dokler je x < 10, in x povečaj za 1."], a:[1],
+ h:["Vsak korak mora biti jasen vsem, ki ga izvajajo. Koliko je »malo«?"],
+ why:"»Malo soli« je dvoumno: vsak izvajalec razume nekaj drugega. Algoritem mora biti nedvoumen."},
+{lv:"A", own:true, pts:1, type:"mc",
+ q:"Zakaj postopek »nastavi i = 1; ponavljaj: i = i + 1« ni algoritem?",
+ o:["Ker uporablja spremenljivko.","Ker se nikoli ne konča.","Ker ni zapisan v Javi.","Ker nima vhodnih podatkov."], a:[1],
+ h:["Katera lastnost algoritma je kršena, če postopek teče v neskončnost?"],
+ why:"Algoritem se mora končati v končnem številu korakov. Ta postopek povečuje i brez konca. Vhodnih podatkov algoritem ne potrebuje nujno, zapis v Javi pa ni obvezen."},
+{lv:"A", own:true, pts:2, type:"cls", cats:["Drži","Ne drži"],
+ q:"Ali trditev drži za algoritem?",
+ items:[["Algoritem mora biti nedvoumen.",0],["Algoritem mora biti zapisan v programskem jeziku Java.",1],["Algoritem se mora končati v končnem številu korakov.",0],["Algoritem mora vsebovati zanko.",1],["Algoritem lahko zapišemo z diagramom poteka.",0],["Algoritem lahko izvede tudi človek.",0]],
+ h:["Zanke ni treba imeti vsak algoritem: zaporedje korakov je tudi algoritem.","Recept za kuhanje je algoritem, čeprav ga ne izvaja računalnik."],
+ why:"Obvezni lastnosti sta nedvoumnost in končnost. Programski jezik in zanka nista obvezna. Algoritem lahko zapišemo na več načinov in ga lahko izvede tudi človek."},
+{lv:"A", src:"M142/1", pts:2, type:"mc",
+ q:"Kateri trditvi veljata za algoritem?",
+ o:["Algoritem mora biti končen.","Algoritem je lahko dvoumen.","Algoritem mora biti nedvoumen, lahko pa je neskončen.","Algoritem določa, kako korak za korakom pridemo do rešitve problema."], a:[0,3],
+ h:["Pravilna sta dva odgovora.","Odgovor C je napol pravilen: ena njegova polovica drži, druga pa ne."],
+ why:"Algoritem je končen in korak za korakom vodi do rešitve. Dvoumen ne sme biti, neskončen pa tudi ne."},
+{lv:"A", src:"M211/1", pts:2, type:"mc",
+ q:"Kateri izmed naštetih trditev sta resnični za algoritem?",
+ o:["Algoritem mora biti zapisan v programskem jeziku.","Algoritem mora v končnem številu korakov privesti do rešitve problema.","Algoritem ne sme vsebovati zank.","Algoritem mora vsebovati aritmetične operacije.","Algoritem je lahko podan v slovenskem jeziku, vendar mora biti nedvoumen."], a:[1,4],
+ h:["Algoritem ni vezan na programski jezik. Kaj pa to pomeni za odgovor E?"],
+ why:"Algoritem se v končnem številu korakov konča z rešitvijo in je lahko zapisan tudi v naravnem jeziku, če je nedvoumen. Zanke in računske operacije niso obvezne."},
+{lv:"A", src:"M231/1", pts:2, type:"mc",
+ q:"Kateri od naštetih trditev sta resnični za algoritme? Obkroži črki pred resničnima trditvama.",
+ o:["Algoritem mora biti nedvoumen.","Algoritem je enak rešitvi problema.","Algoritem mora biti zapisan v programskem jeziku.","Algoritmov ne moremo izvajati z računalnikom.","Algoritem se mora končati."], a:[0,4],
+ h:["Rešitev problema je rezultat, algoritem pa pot do njega.","Algoritme, zapisane kot programe, računalniki ves čas izvajajo."],
+ why:"Algoritem je nedvoumen in končen. Rešitev problema je rezultat izvajanja algoritma, zapis v programskem jeziku ni obvezen, računalnik pa algoritme zelo dobro izvaja."},
+
+/* ----- B: Načini zapisa ----- */
+{lv:"B", own:true, pts:1, type:"mc",
+ q:"Kaj od naštetega ni način zapisa algoritma?",
+ o:["diagram poteka","psevdokoda","diagram ER","program v Javi"], a:[2],
+ h:["Diagram ER (entiteta-razmerje) se uporablja pri načrtovanju podatkovnih baz."],
+ why:"Diagram ER prikazuje podatke in njihova razmerja. Algoritem zapišemo z besedami, psevdokodo, diagramom poteka ali programom."},
+{lv:"B", src:"M162/2", pts:2, type:"mc",
+ q:"Algoritem lahko zapišemo:",
+ o:["s psevdokodo.","z diagramom entiteta-razmerje.","z diagramom class.","z diagramom poteka.","z diagramom use-case."], a:[0,3],
+ h:["Pravilna sta dva odgovora. Diagrami UML (class, use-case) opisujejo zgradbo programske opreme, ne postopka."],
+ why:"Algoritem zapišemo s psevdokodo in z diagramom poteka. Diagram class in use-case sta diagrama UML, diagram entiteta-razmerje pa se uporablja za podatkovne baze."},
+{lv:"B", src:"M241/3", pts:2, type:"mc",
+ q:"Kako lahko predstavimo algoritem? Obkroži črki pred pravilnima odgovoroma.",
+ o:["Z diagramom primera uporabe (angl. Use Case).","Z diagramom poteka.","S psevdokodo.","Z razrednim diagramom (angl. Class Diagram).","Z diagramom ER."], a:[1,2],
+ h:["Ista vprašanja se na maturi ponavljajo. Poišči dva zapisa, ki opisujeta korake."],
+ why:"Diagram poteka in psevdokoda prikazujeta korake algoritma. Ostali trije so diagrami za modeliranje sistemov in podatkov."},
+{lv:"B", own:true, pts:1, type:"blanks",
+ q:"Algoritem, zapisan v programskem jeziku, imenujemo ___.",
+ b:[{l:"Odgovor", acc:["program","računalniški program","racunalniski program"]}],
+ h:["Zapis, ki ga računalnik lahko izvede."],
+ why:"Program je zapis algoritma v programskem jeziku. Isti algoritem lahko zapišemo v več jezikih."},
+{lv:"B", own:true, pts:2, type:"cls", cats:["Besedni opis","Psevdokoda","Diagram poteka","Java"],
+ q:"Kateri zapis je to?",
+ items:[["Preberi dve števili. Če je prvo večje, ga izpiši, sicer izpiši drugo.",0],
+        ["če a > b potem izpiši a sicer izpiši b",1],
+        ["if (a > b) System.out.println(a);",3],
+        ["Romb s pogojem a > b in dve puščici, označeni z da in ne.",2],
+        ["Vzemi lonec, nalij vodo in jo segrevaj, dokler ne zavre.",0]],
+ h:["Psevdokoda je kratka, uporablja besede kot so če, potem, sicer, dokler, vendar ni zapisana po pravilih nobenega jezika.","Java ima podpičja in oklepaje, ki jih zahteva prevajalnik."],
+ why:"Besedni opis je običajen jezik. Psevdokoda je strukturiran zapis z ključnimi besedami. Diagram poteka je slika s simboli. Java je program, ki ga razume prevajalnik."},
+
+/* ----- C: Simboli in gradniki ----- */
+{lv:"C", src:"M221/2", pts:1, type:"mc", adapt:true,
+ q:"Kateri simbol v diagramih poteka uporabimo za vhodno-izhodne operacije? (V izvirni nalogi je treba simbol narisati.)",
+ o:["procesiranje","pogoj","vhod/izhod","začetek/konec"], osym:["p","if","io","start"], a:[2],
+ h:["Vhod in izhod ima poševni pravokotnik, ki spominja na črko, zapisano s poševno pisavo."],
+ why:"Vhodno-izhodne operacije (preberi, izpiši) zapišemo v paralelogram (poševni pravokotnik)."},
+{lv:"C", src:"M222/1", pts:1, type:"mc", adapt:true,
+ q:"Obkroži črko pred simbolom, ki ga v diagramu poteka uporabimo za predstavitev preverjanja nekega pogoja. (Izvirna naloga ima drugačen vrstni red simbolov.)",
+ o:["vhod/izhod","začetek/konec","pogoj","procesiranje"], osym:["io","start","if","p"], a:[2],
+ h:["Pogoj ima dva izhoda: da in ne."],
+ why:"Preverjanje pogoja je romb (diamant) z dvema izhodoma, da in ne."},
+{lv:"C", own:true, pts:2, type:"cls", cats:["Začetek/konec","Procesiranje","Vhod/izhod","Pogoj"],
+ q:"V kateri simbol zapišemo vsak korak?",
+ items:[["začetek",0],["preberi x",2],["s = s + x",1],["x > 0",3],["izpiši s",2],["i = i + 1",1],["i < 10",3],["konec",0]],
+ h:["Računanje in prireditev gre v pravokotnik. Primerjava, ki ima odgovor da ali ne, gre v romb."],
+ why:"Začetek in konec: zaobljen pravokotnik. Prireditve (s = s + x): pravokotnik. Preberi in izpiši: paralelogram. Pogoji (x > 0, i < 10): romb."},
+{lv:"C", own:true, pts:1, type:"blanks",
+ q:"Koliko izhodnih puščic ima simbol za pogoj (romb)?",
+ b:[{l:"Število puščic", acc:["2","dve","dva"]}],
+ h:["Ob puščicah piše da in ne."],
+ why:"Pogoj ima vedno natanko dva izhoda: da (pogoj je izpolnjen) in ne (ni izpolnjen)."},
+{lv:"C", own:true, pts:2, type:"cls", cats:["Zaporedje","Vejitev","Ponavljanje"],
+ q:"Kateri gradnik algoritma opisuje vsak korak?",
+ items:[["Najprej preberi a, nato preberi b, nato izpiši a + b.",0],["Če je a > b, izpiši a, sicer izpiši b.",1],["Dokler je i <= 10, izpiši i in povečaj i za 1.",2],["Če je x negativen, ga pomnoži z −1.",1],["Ponavljaj branje števil, dokler ne vnesemo 0.",2],["s = 0, nato i = 1, nato s = s + i.",0]],
+ h:["Zaporedje se izvede brez odločanja. Vejitev izbere eno pot. Ponavljanje vrača izvajanje nazaj."],
+ why:"Trije osnovni gradniki so zaporedje (korak za korakom), vejitev (odločitev: če ... sicer) in ponavljanje (zanka: dokler)."},
+{lv:"C", own:true, pts:1, type:"blanks",
+ fcq:[p("i = 0"), wh("i < 5",[out("i"), p("i = i + 1")])],
+ q:"Kolikokrat se izvede korak »izpiši i«?",
+ b:[{l:"Število izpisov", acc:["5","petkrat","pet"]}],
+ h:["Zapiši vrednosti i pri vsakem preverjanju pogoja: 0, 1, ...","Zanka se konča, ko pogoj i < 5 ni več izpolnjen."],
+ why:"i je 0, 1, 2, 3, 4: za vsako vrednost je pogoj izpolnjen, zato se izpis izvede petkrat. Pri i = 5 pogoj ne drži in zanka se konča."},
+
+/* ----- D: Sled algoritma ----- */
+{lv:"D", own:true, pts:1, type:"blanks",
+ fcq:[p("a = 5"), p("b = 3"), p("c = a + b"), p("a = c * 2"), out("a", "c")],
+ q:"Kaj izpiše algoritem? Vpiši vrednosti a in c, ločeni s presledkom.",
+ b:[{l:"Izpis", acc:sp(16,8)}],
+ h:["Korake izvajaj enega za drugim in si pri vsaki spremenljivki zapiši novo vrednost.","Pozor: a se spremeni, preden ga izpišeš."],
+ why:"a = 5, b = 3, c = 8, nato a = 8 · 2 = 16. Izpiše se 16 8."},
+{lv:"D", own:true, pts:1, type:"blanks",
+ fcq:[p("x = 4"), p("y = 9"), p("t = x"), p("x = y"), p("y = t"), out("x", "y")],
+ q:"Kaj izpiše algoritem? Vpiši vrednosti x in y, ločeni s presledkom.",
+ b:[{l:"Izpis", acc:sp(9,4)}],
+ h:["Spremenljivka t si zapomni staro vrednost x, preden jo prepišemo."],
+ why:"Algoritem zamenja vrednosti x in y s pomočjo pomožne spremenljivke t: t = 4, x = 9, y = 4. Izpiše se 9 4."},
+{lv:"D", own:true, pts:1, type:"blanks",
+ fcq:[inp("x"), IF("x % 2 == 0",[out('"sodo"')],[out('"liho"')])],
+ q:"Kaj izpiše algoritem za podani vhod?",
+ b:[{l:"Za x = 7", acc:["liho"]},{l:"Za x = 12", acc:["sodo"]}],
+ h:["Operator % vrne ostanek pri deljenju. 7 % 2 = 1."],
+ why:"Če je ostanek pri deljenju z 2 enak 0, je število sodo. Za 7 je ostanek 1 (liho), za 12 je 0 (sodo)."},
+{lv:"D", own:true, pts:2, type:"blanks",
+ fcq:[p("i = 1"), wh("i <= 3",[out("i"), p("i = i + 1")])],
+ q:"Bloki so oštevilčeni od zgoraj navzdol: 1 je i = 1, 2 je pogoj i <= 3, 3 je izpis vrednosti i, 4 je i = i + 1. Zapiši zaporedje blokov, ki se izvedejo (številke ločene s presledki). Pogoj šteje kot blok vsakič, ko ga preverimo.",
+ b:[{l:"Zaporedje blokov", acc:["1 2 3 4 2 3 4 2 3 4 2","1, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2"], code:true},{l:"Koliko jih je skupaj", acc:["11"]}],
+ h:["Blok 1 se izvede samo enkrat, na začetku. Nato se ponavlja trojica 2, 3, 4.","Zanka se konča, ko pogoj (blok 2) ne drži: to je zadnji blok v zaporedju."],
+ why:"Najprej blok 1 (i = 1). Nato pogoj 2 preverimo štirikrat: za i = 1, 2, 3 drži (izvedeta se bloka 3 in 4), za i = 4 ne drži. Zaporedje je 1 2 3 4 2 3 4 2 3 4 2, torej 11 blokov. Izpiše se 1, 2, 3."},
+{lv:"D", own:true, pts:2, type:"blanks",
+ fcq:[p("s = 0"), p("i = 1"), wh("i <= 5",[p("s = s + i"), p("i = i + 1")]), out("s")],
+ q:"Sledi algoritmu in odgovori. Pomagaj si s tabelo z i, s in pogojem.",
+ b:[{l:"Izpis (s)", acc:["15"]},{l:"Vrednost i, ko se zanka konča", acc:["6"]}],
+ h:["Pri vsakem preverjanju pogoja si zapiši par (i, s): (1, 0), (2, 1), (3, 3), ...","Zanka se konča, ko je i = 6."],
+ why:"s = 1 + 2 + 3 + 4 + 5 = 15. Zanka se konča, ko je i enak 6, ker takrat pogoj i <= 5 ne drži več."},
+{lv:"D", own:true, pts:2, type:"blanks",
+ fcq:[p("s = 0"), p("i = 1"), wh("i <= 6",[IF("i % 2 == 0",[p("s = s + i")]), p("i = i + 1")]), out("s")],
+ q:"Kaj izpiše algoritem?",
+ b:[{l:"Izpis (s)", acc:["12"]}],
+ h:["V vsaki izvedbi zanke preveri, ali je i sodo. Če ni, se s ne spremeni."],
+ why:"Prištejejo se samo sodi i: 2 + 4 + 6 = 12."},
+{lv:"D", src:"M212/12", pts:2, type:"blanks", redr:true,
+ fcq:[p("a = 14"), p("b = 4"), p("c = a"), p("k = 0"), wh("c >= b",[p("c = c - b"), p("k = k + 1")]), out("c", "k")],
+ q:"Kaj izpiše algoritem, predstavljen s tem diagramom poteka? Vpiši vrednosti c in k.",
+ b:[{l:"c", acc:["2"]},{l:"k", acc:["3"]}],
+ h:["Zapiši si vrednosti c in k pri vsakem preverjanju pogoja c >= b.","Začetek: c = 14, k = 0. Po prvem odštevanju: c = 10, k = 1."],
+ why:"c: 14 → 10 → 6 → 2, k: 0 → 1 → 2 → 3. Pri c = 2 pogoj 2 >= 4 ne drži. Izpiše se c = 2, k = 3. Algoritem deli z ostankom: 14 = 3 · 4 + 2 (k je količnik, c je ostanek)."},
+{lv:"D", own:true, pts:2, type:"blanks",
+ fcq:[p("a = 1"), p("b = 1"), p("i = 1"), wh("i < 6",[p("c = a + b"), p("a = b"), p("b = c"), p("i = i + 1")]), out("b")],
+ q:"Kaj izpiše algoritem? Kaj po tvojem računa?",
+ b:[{l:"Izpis (b)", acc:["13"]}],
+ h:["Zapisuj vrednosti a, b, c in i po vsakem krogu zanke. Zanka se izvede za i = 1, 2, 3, 4, 5.","Po prvem krogu: c = 2, a = 1, b = 2."],
+ why:"Po krogih je b: 2, 3, 5, 8, 13. Algoritem računa člene Fibonaccijevega zaporedja (1, 1, 2, 3, 5, 8, 13, ...)."},
+{lv:"D", src:"M242/4", pts:2, type:"blanks", redr:true,
+ fcq:[p("st = 0"), p("vs = 0"), dw("x > 0",[inp("x"), p("st = st + 1"), p("vs = vs + x")]), out('"Povprečje je "', "vs/st")],
+ q:"Napiši sled diagrama poteka. Števila na vhodu so 2, 5, 6, 4, −7, 0, 12, 20 in jih beremo v tem vrstnem redu.",
+ b:[{l:"Vrednosti vs po vsakem branju (z vejicami)", acc:["2, 7, 13, 17, 10","2 7 13 17 10"], code:true},
+    {l:"Koliko števil je bilo prebranih (st)", acc:["5"]},
+    {l:"Izpis", acc:["Povprečje je 2","Povprečje je 2.0","Povprečje je 2,0"]}],
+ h:["Zanka se ponavlja, dokler je prebrani x večji od 0. Prvo število, ki ni večje od 0, je −7.","Branje 2: st = 1, vs = 2. Branje 5: st = 2, vs = 7."],
+ why:"Prebrana so števila 2, 5, 6, 4 in −7, nato se zanka ustavi. vs je po branjih 2, 7, 13, 17 in 10, st = 5. Izpiše se Povprečje je 2 (10 / 5)."},
+{lv:"D", own:true, pts:1, type:"mc",
+ fcq:FLOWS.napaka,
+ q:"Zakaj se ta algoritem nikoli ne konča?",
+ o:["Ker spremenljivka s ni deklarirana.","Ker se i v zanki ne spreminja, zato je pogoj i <= 5 vedno izpolnjen.","Ker pogoj i <= 5 ni dovoljen.","Ker manjka vejitev."], a:[1],
+ h:["Katera spremenljivka nastopa v pogoju? Se spreminja v telesu zanke?"],
+ why:"V telesu zanke se spreminja samo s. Pogoj uporablja i, ki ostane 1, zato je pogoj vedno resničen. Popravek: dodaj korak i = i + 1."},
+
+/* ----- E: Narišem diagram poteka ----- */
+{lv:"E", own:true, pts:1, type:"blanks", draw:true,
+ q:"Nariši diagram poteka, ki prebere dve celi števili ter izpiše njuno vsoto in nato njun zmnožek.",
+ b:[{l:"Za vhod 6 in 7 se izpiše (vsota in zmnožek, ločena s presledkom)", acc:sp(13,42)}],
+ h:["Potrebuješ simbol za vhod in simbola za izhod. Pravokotnik ni nujen: izraz a + b lahko zapišeš kar v izpisu."],
+ fc:[inp("a", "b"), out("a + b"), out("a * b")], jsol:"e1",
+ why:"Algoritem je samo zaporedje: vhod, izračun, izpis. Pri vhodu 6 in 7 se izpiše 13 in 42."},
+{lv:"E", own:true, pts:1, type:"blanks", draw:true,
+ q:"Nariši diagram poteka, ki prebere dve celi števili in izpiše večje.",
+ b:[{l:"Za vhod 15 in 9 se izpiše", acc:["15"]},{l:"Za vhod 3 in 8 se izpiše", acc:["8"]}],
+ h:["Za odločanje potrebuješ romb s pogojem, npr. a > b.","Pri vejitvi z dvema izhodoma se obe poti na koncu spet združita."],
+ fc:[inp("a", "b"), IF("a > b",[out("a")],[out("b")])], jsol:"e2",
+ why:"Vejitev: če je a > b, izpišemo a, sicer b. Za 15 in 9 se izpiše 15, za 3 in 8 pa 8."},
+{lv:"E", own:true, pts:2, type:"blanks", draw:true,
+ q:"Nariši diagram poteka, ki prebere celo število x in izpiše pozitivno, negativno ali nic. Uporabi dve vejitvi, eno v drugi.",
+ b:[{l:"Za x = −4", acc:["negativno"]},{l:"Za x = 0", acc:["nic","nič"]},{l:"Za x = 12", acc:["pozitivno"]}],
+ h:["Najprej preveri x > 0. Če ne drži, moraš ločiti med negativnim številom in ničlo.","Drugi pogoj postavi na pot ne prvega pogoja."],
+ fc:[inp("x"), IF("x > 0",[out('"pozitivno"')],[IF("x < 0",[out('"negativno"')],[out('"nic"')])])], jsol:"e3",
+ why:"Z enim pogojem dobimo samo dve poti, zato pogoj vgnezdimo: najprej x > 0, v drugi veji pa še x < 0. Če ne drži nobeden, je x enak 0."},
+{lv:"E", own:true, pts:2, type:"blanks", draw:true,
+ q:"Nariši diagram poteka, ki izpiše števila od 1 do 10, vsako v svoji vrstici. Pogoj zanke naj bo i <= 10.",
+ b:[{l:"Koliko vrednosti se izpiše", acc:["10"]},{l:"Vrednost i, ko se algoritem konča", acc:["11"]}],
+ h:["Potrebuješ števec i z začetno vrednostjo 1. Nastavi ga pred zanko.","V telesu zanke izpiši i in ga povečaj za 1. Brez povečanja bi bila zanka neskončna."],
+ fc:[p("i = 1"), wh("i <= 10",[out("i"), p("i = i + 1")])], jsol:"e4",
+ why:"Zanka se izvaja za i od 1 do 10. Ko i postane 11, pogoj ne drži več in algoritem se konča z i = 11."},
+{lv:"E", own:true, pts:2, type:"blanks", draw:true,
+ q:"Nariši diagram poteka, ki prebere naravno število N in izpiše vsoto števil od 1 do N.",
+ b:[{l:"Za N = 100 se izpiše", acc:["5050"]},{l:"Za N = 1 se izpiše", acc:["1"]}],
+ h:["Spremenljivka za vsoto mora imeti začetno vrednost 0.","V zanki prištej i vsoti in povečaj i."],
+ fc:[inp("N"), p("s = 0"), p("i = 1"), wh("i <= N",[p("s = s + i"), p("i = i + 1")]), out("s")], jsol:"e8",
+ why:"Vsota 1 + 2 + ... + 100 = 5050. Pomembni so začetna vrednost s = 0 in števec i, ki se v zanki povečuje."},
+{lv:"E", src:"M222/2", pts:2, type:"blanks", draw:true,
+ q:"Nariši diagram poteka, ki izpiše prvih N členov zaporedja 1, 2, 4, 8, 16, 32, ... N je vhodni podatek.",
+ b:[{l:"Za N = 10 je zadnji izpisani člen", acc:["512"]},{l:"Za N = 1 se izpiše", acc:["1"]}],
+ h:["Vsak člen je dvakrat večji od prejšnjega. Potrebuješ spremenljivko za člen in števec izpisanih členov.","Začetni člen je 1. Pred ponovitvijo ga pomnožiš z 2."],
+ fc:[inp("N"), p("c = 1"), p("i = 1"), wh("i <= N",[out("c"), p("c = c * 2"), p("i = i + 1")])], jsol:"e5",
+ why:"Zanka teče N-krat. V vsakem krogu izpišemo člen c in ga podvojimo. Za N = 10 je 10. člen enak 2⁹ = 512."},
+{lv:"E", src:"M252/3", pts:2, type:"blanks", draw:true,
+ q:"Nariši diagram poteka, ki prebere dve celi števili in nato drugo število izpiše tolikokrat, kot je absolutna vrednost prvega števila.",
+ b:[{l:"Za vhod −6 in 2 se število 2 izpiše ... krat", acc:["6"]},{l:"Za vhod 0 in 5 se število 5 izpiše ... krat", acc:["0"]}],
+ h:["Najprej izračunaj absolutno vrednost prvega števila: če je negativno, ga pomnoži z −1.","Nato uporabi števec i in zanko, ki se ponovi |a|-krat."],
+ fc:[inp("a", "b"), IF("a < 0",[p("k = -a")],[p("k = a")]), p("i = 0"), wh("i < k",[out("b"), p("i = i + 1")])], jsol:"e6",
+ why:"k je absolutna vrednost prvega števila. Zanka izpiše b natanko k-krat. Pri a = −6 je k = 6, pri a = 0 pa se ne izpiše nič."},
+{lv:"E", src:"M211/5", pts:2, type:"blanks", draw:true,
+ q:"Nariši diagram poteka, s katerim prebereš 2 naravni števili in znak. Algoritem naj izpiše prebrani znak tolikokrat, kot je razlika med manjšo in večjo prebrano vrednostjo. Primer: če je vrednost prvega prebranega števila 5, drugega 8 in prebrani znak G, algoritem izpiše GGG.",
+ b:[{l:"Za 12, 4 in * se znak izpiše ... krat", acc:["8"]},{l:"Za 7, 7 in X se znak izpiše ... krat", acc:["0"]}],
+ h:["Razlika mora biti vedno pozitivna, ne glede na to, katero število je večje. Uporabi vejitev.","Ko imaš razliko k, je preostanek enak kot pri prejšnji nalogi: zanka s števcem."],
+ fc:[inp("a", "b", "z"), IF("a > b",[p("k = a - b")],[p("k = b - a")]), p("i = 0"), wh("i < k",[out("z"), p("i = i + 1")])], jsol:"e7",
+ why:"Razlika |a − b| je število ponovitev. Pri 12 in 4 je 8, pri 7 in 7 pa 0, zato se znak ne izpiše."},
+{lv:"E", src:"M251/3", pts:3, type:"blanks", draw:true,
+ q:"Nariši diagram poteka, ki izpiše prvih 30 elementov zaporedja s prvim členom 3 in splošnim členom aₙ = 2 · aₙ₋₁ + 1.",
+ b:[{l:"Peti izpisani člen", acc:["63"]},{l:"Trideseti izpisani člen", acc:["2147483647"]}],
+ h:["Prvi člen je 3, naslednji 2 · 3 + 1 = 7. Člen, ki ga izpišeš, nato nadomestiš z naslednjim.","Zanka se ponovi 30-krat. Uporabi števec."],
+ fc:[p("a = 3"), p("i = 1"), wh("i <= 30",[out("a"), p("a = 2 * a + 1"), p("i = i + 1")])], jsol:"e9",
+ why:"Členi so 3, 7, 15, 31, 63, ... in aₙ = 2ⁿ⁺¹ − 1. Trideseti člen je 2³¹ − 1 = 2147483647, kar je ravno največja vrednost tipa int."},
+{lv:"E", own:true, pts:2, type:"blanks", draw:true,
+ q:"Nariši diagram poteka, ki bere cela števila, dokler ne vnesemo 0, in nato izpiše povprečje vnesenih števil (ničle ne štejemo).",
+ b:[{l:"Za vhod 4, 8, 6, 0 se izpiše", acc:["6","6.0","6,0"]},{l:"Za vhod 10, 5, 0 se izpiše", acc:["7.5","7,5"]}],
+ h:["Potrebuješ vsoto s in število števil n. Obe začneta pri 0.","Prvo število preberi pred zanko, naslednje pa na koncu vsakega kroga."],
+ fc:[p("s = 0"), p("n = 0"), inp("x"), wh("x != 0",[p("s = s + x"), p("n = n + 1"), inp("x")]), out("s / n")], jsol:"e11",
+ why:"Branje naredimo pred zanko in še enkrat na koncu vsakega kroga, tako da pogoj vedno preverja zadnje prebrano število. Povprečje je s / n. Pazi, da pri celih številih deljenje v Javi zaokroži navzdol: za 7,5 mora biti vsaj eno število realno."},
+{lv:"E", src:"M212/2", pts:3, type:"blanks", draw:true,
+ q:"Uporabnik vnaša pare celih števil. Program vsoti prišteje obe števili iz para le, če je prvo število v paru večje kot drugo. Postopek se konča, ko je dobljena vsota večja kot 50. Nato program izpiše, koliko parov števil je bilo vpisanih. Nariši diagram poteka za ta program.",
+ b:[{l:"Za pare (5, 2), (1, 9), (30, 10), (40, 3) izpiše", acc:["4"]},{l:"Če je prvi par (60, 1), izpiše", acc:["1"]}],
+ h:["Potrebuješ vsoto in števec parov. Vsak par prebereš in prešteješ, ne glede na to, ali ga prišteješ vsoti.","Pogoj za konec (vsota > 50) preveriš po vsakem prebranem paru. Primerna je zanka s pogojem na koncu."],
+ fc:[p("vsota = 0"), p("n = 0"), dw("vsota <= 50",[inp("a", "b"), p("n = n + 1"), IF("a > b",[p("vsota = vsota + a + b")])]), out("n")], jsol:"e10",
+ why:"Vsota po parih: 7, 7 (drugi par se ne prišteje), 47, 90. Po četrtem paru je vsota večja od 50, zato se izpiše 4. Prvi par (60, 1) takoj da vsoto 61."},
+{lv:"E", src:"M162/5", pts:3, type:"blanks", draw:true, adapt:true,
+ code:"public class Main {\n    public static void main(String[] args) {\n        int x = 3;\n        int y = x + 7;\n        x++;\n        while (x < 9) {\n            y = x + 7;\n            System.out.println(x);\n            x++;\n        }\n        System.out.println(x);\n    }\n}",
+ q:"Za naslednji program nariši diagram poteka. Nato preštej simbole v svojem diagramu (vsak stavek zapiši v svoj simbol, začetek in konec ne štejeta).",
+ b:[{l:"Število pravokotnikov (procesiranje)", acc:["5"]},{l:"Število rombov (pogoj)", acc:["1"]},{l:"Število paralelogramov (izpis)", acc:["2"]}],
+ h:["Pravokotniki: x = 3, y = x + 7, x++, in v zanki še y = x + 7 ter x++.","Izpisa sta dva: enega v zanki in enega za njo."],
+ fc:[p("x = 3"), p("y = x + 7"), p("x = x + 1"), wh("x < 9",[p("y = x + 7"), out("x"), p("x = x + 1")]), out("x")], jsol:"e12",
+ why:"Zanka while postane romb s pogojem x < 9. Program izpiše 4, 5, 6, 7, 8 (v zanki) in nato še 9 (za zanko)."},
+{lv:"E", own:true, pts:3, type:"blanks", draw:true,
+ q:"Nariši diagram poteka Evklidovega algoritma: prebere dve naravni števili a in b in izpiše njun največji skupni delitelj. Postopek: dokler b ni 0, izračunaj ostanek t = a % b, nato a postane b in b postane t. Rezultat je a.",
+ b:[{l:"Za 48 in 36 se izpiše", acc:["12"]},{l:"Za 17 in 5 se izpiše", acc:["1"]}],
+ h:["Pogoj zanke je b != 0.","V telesu zanke potrebuješ pomožno spremenljivko t, da ne izgubiš stare vrednosti."],
+ fc:[inp("a", "b"), wh("b != 0",[p("t = a % b"), p("a = b"), p("b = t")]), out("a")], jsol:"e13",
+ why:"Za 48 in 36: (48, 36) → (36, 12) → (12, 0), zato je rezultat 12. Za 17 in 5: (17, 5) → (5, 2) → (2, 1) → (1, 0), rezultat 1."},
+
+/* ----- F: Iz diagrama v Javo ----- */
+{lv:"F", own:true, pts:1, type:"code", hideExp:true,
+ fcq:[p("a = 17"), p("b = 5"), p("d = a / b"), p("c = a % b"), out("d", "c")],
+ q:"Zapiši program za ta diagram poteka (a, b, c in d so tipa int). Izpiši vrednosti d in c v isti vrstici, ločeni s presledkom.",
+ starter:ST, expected:"3 2", sol:null, solKey:"f1",
+ h:["Vsak pravokotnik postane prireditev, npr. int d = a / b;","Izpis v isti vrstici: System.out.println(d + \" \" + c);"],
+ why:"Deljenje celih števil da celoštevilski količnik (17 / 5 = 3), operator % pa ostanek (17 % 5 = 2)."},
+{lv:"F", own:true, pts:2, type:"code", hideExp:true,
+ fcq:[p("s = 0"), p("i = 1"), wh("i <= 4",[p("s = s + i * i"), p("i = i + 1")]), out("s")],
+ q:"Zapiši program za ta diagram poteka in ga zaženi.",
+ starter:ST, expected:"30", solKey:"f2",
+ h:["Romb z zanko postane stavek while (pogoj) { ... }.","Telo zanke so stavki, ki so v diagramu v pravokotnikih pod rombom, na poti da."],
+ why:"Zanka while izvede telo za i = 1, 2, 3, 4. Vsota kvadratov je 1 + 4 + 9 + 16 = 30."},
+{lv:"F", src:"M191/4", pts:3, type:"code", hideExp:true, redr:true,
+ fcq:[p("x = 1.5"), p("y = 1"), p("i = 0"), wh("x >= 1",[p("y++"), p("i += 2 * y"), p("x -= 0.5")]), out("i", "y")],
+ q:"Pretvori diagram poteka v program v Javi (x je tipa double, i in y sta tipa int). Izpiši i in y v isti vrstici, ločena s presledkom.",
+ starter:ST, expected:"10 3", solKey:"f3",
+ h:["Spremenljivka x je realna: double x = 1.5;","Zapis y++ poveča y za 1, i += 2 * y pa i poveča za 2 · y."],
+ why:"Prvi krog: x = 1,5 → y = 2, i = 4, x = 1. Drugi krog: x = 1 → y = 3, i = 10, x = 0,5. Pogoj nato ne drži. Izpiše se 10 3."},
+{lv:"F", own:true, pts:2, type:"code", hideExp:true,
+ fcq:[p("s = 0"), p("i = 1"), wh("i <= 10",[IF("i % 2 == 0",[p("s = s + i")]), p("i = i + 1")]), out("s")],
+ q:"Zapiši program za ta diagram poteka in ga zaženi.",
+ starter:ST, expected:"30", solKey:"f4",
+ h:["Romb v zanki je stavek if brez veje sicer.","Znotraj zanke je torej if, ki mu sledi i = i + 1."],
+ why:"Vsota sodih števil od 1 do 10: 2 + 4 + 6 + 8 + 10 = 30."},
+{lv:"F", own:true, pts:3, type:"code", hideExp:true,
+ fcq:[p("n = 4721"), p("s = 0"), wh("n > 0",[p("s = s + n % 10"), p("n = n / 10")]), out("s")],
+ q:"Zapiši program za ta diagram poteka (vse spremenljivke so tipa int) in ga zaženi. Kaj računa ta algoritem?",
+ starter:ST, expected:"14", solKey:"f5",
+ h:["n % 10 je zadnja števka števila. n / 10 (celoštevilsko deljenje) zadnjo števko odreže.","Zanka se konča, ko je n enak 0."],
+ why:"Algoritem sešteje števke števila: 1 + 2 + 7 + 4 = 14. Zadnjo števko vzamemo z % 10, nato jo z / 10 odrežemo."},
+
+/* ----- G: doma, maturitetne ----- */
+{lv:"G", src:"M202/1", pts:2, type:"mc",
+ q:"Algoritem lahko zapišemo z",
+ o:["diagramom poteka.","diagramom UML.","psevdokodo.","diagramom ER."], a:[0,2],
+ h:["Pravilna sta dva odgovora."],
+ why:"Algoritem zapišemo z diagramom poteka in psevdokodo. UML in ER sta za modeliranje sistemov in podatkov."},
+{lv:"G", src:"M181/1", pts:2, type:"mc",
+ q:"Kako lahko zapišemo algoritme?",
+ o:["Z UML-diagrami.","Z diagramom poteka.","Z modelom ER.","S psevdokodo."], a:[1,3],
+ h:["Isti pari odgovorov se ponavljajo na več maturah."],
+ why:"Algoritme zapišemo z diagramom poteka in psevdokodo."}
+];
+
+const HOME = [
+ {id:"h1", title:"Flowgorithm: prvi diagram",
+  q:"Namesti brezplačni program Flowgorithm (flowgorithm.org). Nariši diagram poteka za vsoto števil od 1 do N in ga zaženi za N = 100. Poišči še pogled »Source Code Viewer« in primerjaj izpisano kodo v Javi s svojo.",
+  fc:[inp("N"), p("s = 0"), p("i = 1"), wh("i <= N",[p("s = s + i"), p("i = i + 1")]), out("s")],
+  sol:"Pravilen rezultat je 5050. Flowgorithm vsak simbol zapiše kot ukaz v Javi. Primerjaj, kje se tvoja koda razlikuje od njegove: razlike so običajno samo v imenih spremenljivk in v oblikovanju."},
+ {id:"h2", title:"Sled z razhroščevalnikom",
+  q:"V Eclipse ali VS Code odpri program iz razlage 6 (vsota 1 + 2 + 3 + 4). Postavi prekinitveno točko (breakpoint) na vrstico z while in program zaženi v razhroščevalniku. Po korakih si zapiši vrednosti i in s ob vsakem preverjanju pogoja ter jih primerjaj s sledjo, ki si jo izračunal na papirju.",
+  code:"public class Main {\n    public static void main(String[] args) {\n        int s = 0;\n        int i = 1;\n        while (i <= 4) {\n            s = s + i;\n            i = i + 1;\n        }\n        System.out.println(s);\n    }\n}",
+  sol:"Ob preverjanju pogoja so pari (i, s): (1, 0), (2, 1), (3, 3), (4, 6), (5, 10). Pri i = 5 se zanka konča in program izpiše 10. Razhroščevalnik prikaže iste vrednosti v oknu s spremenljivkami (Variables)."},
+ {id:"h3", title:"Največje od treh števil",
+  q:"Nariši diagram poteka, ki prebere tri cela števila in izpiše največje. Nato ga zapiši v Javi. Preizkusi ga za vhode: 4 9 6, 9 4 6, 6 4 9 in 5 5 5.",
+  fc:[inp("a", "b", "c"), p("m = a"), IF("b > m",[p("m = b")]), IF("c > m",[p("m = c")]), out("m")], jsol:"h3",
+  sol:"Predpostavimo, da je največje a, in ga nato primerjamo z b in c. Rešitev deluje tudi, če so števila enaka (5 5 5 → 5). Tvoj diagram je lahko drugačen (npr. z gnezdenimi vejitvami), če daje pravilne rezultate."},
+ {id:"h4", title:"Koliko števk ima število",
+  q:"Nariši diagram poteka, ki za naravno število n izpiše število njegovih števk (npr. 4721 → 4). Zapiši ga še v Javi.",
+  fc:[p("n = 4721"), p("st = 0"), wh("n > 0",[p("st = st + 1"), p("n = n / 10")]), out("st")], jsol:"h4",
+  sol:"V vsakem krogu odrežemo zadnjo števko (n = n / 10) in povečamo števec. Zanka se ponovi štirikrat. Pozor: za n = 0 ta rešitev izpiše 0, čeprav ima 0 eno števko. Kako bi to popravil?"},
+ {id:"h5", title:"Izziv: praštevilo",
+  q:"Nariši diagram poteka, ki za naravno število n izpiše, ali je praštevilo. Namig: preizkušaj delitelje od 2 naprej, dokler d · d ni večji od n ali dokler ne najdeš delitelja. Preizkusi za n = 29, 9, 2, 1 in 4.",
+  fc:[inp("n"), p("d = 2"), wh("d * d <= n && n % d != 0",[p("d = d + 1")]), IF("n >= 2 && d * d > n",[out('"prastevilo"')],[out('"ni prastevilo"')])], jsol:"h5",
+  sol:"Če je n sestavljeno število, ima delitelj, manjši ali enak √n, zato je dovolj preizkusiti d do √n. Izpisi: 29 → prastevilo, 9 → ni prastevilo, 2 → prastevilo, 1 → ni prastevilo, 4 → ni prastevilo."},
+ {id:"h6", title:"Isti algoritem na štiri načine",
+  q:"Izberi algoritem: povprečje treh števil. Zapiši ga z besedami, s psevdokodo, z diagramom poteka in v Javi. Pri vsakem zapisu preveri, ali je enak ostalim trem.",
+  sol:"Besedno: preberi tri števila, jih seštej, vsoto deli s 3 in izpiši rezultat. Psevdokoda: preberi a, b, c; p = (a + b + c) / 3; izpiši p. Diagram: vhod → procesiranje → izpis. Java: double p = (a + b + c) / 3.0; (pozor: če so a, b, c tipa int, mora biti deljenec ali delitelj realen, sicer se rezultat zaokroži)."}
+];
+
+T.forEach(t=>{ if(t.solKey) t.sol = J[t.solKey]; if(t.jsol) t.jsolCode = J[t.jsol]; });
+HOME.forEach(h=>{ if(h.jsol) h.jsolCode = J[h.jsol]; });
+
+
+/* ---------- storage: browser always, user account when available ---------- */
+let S = {}, localT = 0;
+try { S = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; localT = +localStorage.getItem(STORE+"-t") || 0; } catch(e) { S = {}; }
+let remote = null, pushTimer = null, pushing = false, dirty = false;
+function saveLocal(){ try { localStorage.setItem(STORE, JSON.stringify(S)); localStorage.setItem(STORE+"-t", String(localT)); } catch(e){} }
+function save(){ localT = Date.now(); saveLocal(); if(remote){ dirty = true; clearTimeout(pushTimer); pushTimer = setTimeout(push, 1500); } }
+function st(id){ return S[id] || (S[id] = {}); }
+const RANK = {ok:2, seen:1};
+function summary(){
+  const r = {resenih:0, tock:0, vseh:T.length, vsehTock:T.reduce((a,t)=>a+t.pts,0), sklopi:{}};
+  T.forEach(t=>{ const k=t.lv; r.sklopi[k] = r.sklopi[k] || {resenih:0, vseh:0}; r.sklopi[k].vseh++;
+    if(S[t.id] && S[t.id].state==="ok"){ r.resenih++; r.tock+=t.pts; r.sklopi[k].resenih++; } });
+  return r;
+}
+async function push(){
+  if(!remote || pushing || !dirty) return;
+  pushing = true; dirty = false;
+  try { await remote.ref.set({poglavje:2, naloge:S, povzetek:summary(), posodobljeno:localT}); setSync("cloud"); }
+  catch(e){ if(e && e.code==="invalid_argument"){ remote = null; setSync("local"); } else { setSync("err"); dirty = true; } }
+  pushing = false;
+  if(dirty && remote){ clearTimeout(pushTimer); pushTimer = setTimeout(push, 4000); }
+}
+function merge(R, rT){
+  let changed = false;
+  const newer = rT > localT;
+  Object.keys(R).forEach(id=>{
+    const r = R[id] || {}, l = S[id];
+    if(!l){ S[id] = r; changed = true; return; }
+    const base = newer ? Object.assign({}, l, r) : Object.assign({}, r, l);
+    const rs = Math.max(RANK[l.state]||0, RANK[r.state]||0);
+    base.state = rs===2 ? "ok" : rs===1 ? "seen" : undefined;
+    base.h = Math.max(l.h||0, r.h||0);
+    if(JSON.stringify(base)!==JSON.stringify(l)){ S[id] = base; changed = true; }
+  });
+  if(newer) localT = rT;
+  return changed;
+}
+const SYNC_TXT = {
+  local:"Napredek se shranjuje v tem brskalniku. Na drugem računalniku ga ne boš videl.",
+  cloud:"Napredek se shranjuje v tvojem računu in je na voljo na vseh napravah.",
+  err:"Shranjevanje v račun trenutno ne deluje. Napredek je varen v tem brskalniku."
+};
+function setSync(k){ document.querySelectorAll(".js-sync").forEach(e=>{ e.dataset.s=k; e.textContent=SYNC_TXT[k]; }); }
+
+/* ---------- helpers ---------- */
+const $ = (s,el=document)=>el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const KW = new Set("abstract boolean break byte case catch char class continue default do double else extends final finally float for if implements import instanceof int interface long new null package private protected public return short static super switch this throw throws try void while true false var String System".split(" "));
+function hl(code){
+  const re = /(\/\/[^\n]*)|("(?:\\.|[^"\\])*")|('(?:\\.|[^'\\])')|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_]\w*)\b/g;
+  let out="", last=0, m;
+  while((m=re.exec(code))){
+    out += esc(code.slice(last, m.index));
+    if(m[1]) out += '<span class="c">'+esc(m[1])+'</span>';
+    else if(m[2]||m[3]) out += '<span class="s">'+esc(m[2]||m[3])+'</span>';
+    else if(m[4]) out += '<span class="n">'+m[4]+'</span>';
+    else if(KW.has(m[5])) out += '<span class="k">'+m[5]+'</span>';
+    else out += esc(m[5]);
+    last = re.lastIndex;
+  }
+  return out + esc(code.slice(last));
+}
+const fold = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+function norm(s, o){
+  let x = String(s).trim();
+  if(o.code) return x.replace(/\s+/g,"");
+  x = x.replace(/\s+/g," ");
+  if(!o.cs) x = fold(x.toLowerCase()).replace(/[.]$/,"");
+  if(o.list) x = x.split(/\s*,\s*/).sort().join(",");
+  return x;
+}
+function matchBlank(val, b){ const v = norm(val,b); return b.acc.some(a => norm(a,b) === v); }
+const normOut = s => String(s).replace(/\r/g,"").split("\n").map(l=>l.replace(/\s+$/,"")).join("\n").replace(/\n+$/,"");
+const srcLabel = s => { const m = /^M(\d\d)(\d)\/(\d+)$/.exec(s); return m ? `Matura 20${m[1]} · ${m[2]==="1"?"spomladi":"jeseni"} · ${m[3]}. nal.` : s; };
+const ptsLabel = p => p===1 ? "1 točka" : p===2 ? "2 točki" : (p<5 ? p+" točke" : p+" točk");
+
+/* ---------- render tasks ---------- */
+T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });
+const levelsEl = $("#levels");
+let counter = 0;
+function renderAll(){
+levelsEl.innerHTML = ""; $("#homeMat").innerHTML = ""; counter = 0;
+LEVELS.forEach(L=>{
+  const wrap = document.createElement("div");
+  wrap.className = "level"; wrap.id = L.id;
+  wrap.innerHTML = `<header><span class="eyebrow">Sklop ${L.tag}</span><h3 style="font-size:1.35rem">${esc(L.title)}</h3><p>${esc(L.note)}</p></header>`;
+  T.filter(t=>t.lv===L.tag).forEach(t=>{ counter++; t.n = counter; wrap.appendChild(card(t)); });
+  const em = document.createElement("p"); em.className = "lvl-empty"; em.hidden = true; em.textContent = "V tem sklopu ni nalog za izbrani filter.";
+  wrap.appendChild(em);
+  (L.home ? $("#homeMat") : levelsEl).appendChild(wrap);
+});
+applyFilter(); showPage(cur, true);
+}
+
+function card(t){
+  const el = document.createElement("article");
+  el.className = "task"; el.id = "t-"+t.id; el.dataset.kind = t.own ? "own" : "mat";
+  const tags = (t.own ? `<span class="tag">Dodatna</span>` : `<span class="tag mat">${esc(srcLabel(t.src))}</span>`) + (t.adapt?`<span class="tag">Prirejeno</span>`:"") + (t.redr?`<span class="tag">Diagram prerisan</span>`:"") + (t.draw?`<span class="tag">Nariši diagram</span>`:"") + `<span class="tag">${ptsLabel(t.pts)}</span><span class="tag js-st" hidden></span>`;
+  let body = "";
+  if(t.code) body += `<pre class="code">${hl(t.code)}</pre>`;
+  if(t.code && t.type!=="output") body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="code">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`;
+  body += `<p>${esc(t.q)}</p>`;
+  if(t.fcq) body += `<div class="fig">${FLOW.svg(t.fcq,{num:t.lv==="D"||(t.lv==="C")})}</div>`;
+  if(t.type==="mc"){
+    const multi = t.a.length>1;
+    body += `<div class="opts">` + t.o.map((o,k)=>`<label class="opt"><input type="${multi?"checkbox":"radio"}" name="r-${t.id}" id="r-${t.id}-${k}" value="${k}"><b>${"ABCDEF"[k]}</b><span>${t.osym ? FLOW.sym(t.osym[k]) : esc(o)}</span></label>`).join("") + `</div>`;
+  } else if(t.type==="blanks"){
+    body += t.b.map((b,k)=>`<div class="blank"><label for="b-${t.id}-${k}">${esc(b.l)}</label><input type="text" id="b-${t.id}-${k}" class="${b.code||b.cs?"mono":""}" autocomplete="off" spellcheck="false"></div>`).join("");
+  } else if(t.type==="cls"){
+    body += `<div class="cls">` + t.items.map((it,k)=>`<div class="crow" data-k="${k}"><span class="txt">${esc(it[0])}</span><div class="seg" role="group" aria-label="Izberi">${t.cats.map((c,ci)=>`<button type="button" data-ci="${ci}" aria-pressed="false">${esc(c)}</button>`).join("")}</div></div>`).join("") + `</div>`;
+  } else if(t.type==="output"){
+    body += `<div class="blank"><label for="o-${t.id}">Tvoj odgovor (izpis)</label><textarea id="o-${t.id}" class="mono out" spellcheck="false"></textarea></div>`;
+    body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="code">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`;
+  } else if(t.type==="code"){
+    if(!t.hideExp) body += `<pre class="code">${esc(t.expected)}</pre>`;
+    body += `<div class="blank"><div class="editorbar"><label for="e-${t.id}">Tvoja koda</label><span>Zaženi v Eclipse, VS Code ali Programizu (tam razred preimenuj v Main), izpis prilepi spodaj.</span></div><textarea id="e-${t.id}" class="editor" spellcheck="false"></textarea></div>`;
+    body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="editor">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a><button class="btn ghost js-restore" type="button">Ponastavi kodo</button></div>`;
+    body += `<div class="blank"><label for="o-${t.id}">Izpis tvojega programa</label><textarea id="o-${t.id}" class="mono out" spellcheck="false"></textarea></div>`;
+  }
+  el.innerHTML = `
+    <div class="thead"><span class="tnum">${t.n}. naloga</span><div class="tags">${tags}</div></div>
+    <div class="q">${body}</div>
+    <div class="actions">
+      <button class="btn primary js-check" type="button">Preveri</button>
+      <button class="btn js-hint" type="button">Namig</button>
+      <button class="btn ghost js-sol" type="button">Pokaži rešitev</button>
+      <span class="feedback" aria-live="polite"></span>
+    </div>
+    <div class="hints"></div>
+    <div class="sol" hidden></div>`;
+  wire(el,t);
+  return el;
+}
+
+function wire(el,t){
+  const s = st(t.id);
+  const fb = $(".feedback",el), hintsEl = $(".hints",el), solEl = $(".sol",el);
+  // restore inputs
+  if(t.type==="mc" && s.v) s.v.forEach(k=>{ const i=$(`#r-${t.id}-${k}`,el); if(i) i.checked=true; });
+  if(t.type==="blanks" && s.v) s.v.forEach((v,k)=>{ const i=$(`#b-${t.id}-${k}`,el); if(i) i.value=v; });
+  if(t.type==="cls"){
+    el.querySelectorAll(".crow").forEach(row=>{
+      const k = +row.dataset.k;
+      row.querySelectorAll("button").forEach(b=>{
+        if(s.v && s.v[k]===+b.dataset.ci) b.setAttribute("aria-pressed","true");
+        b.addEventListener("click",()=>{ row.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed","false")); b.setAttribute("aria-pressed","true"); row.classList.remove("right","wrong"); collect(); });
+      });
+    });
+  }
+  const ed = $(`#e-${t.id}`,el), out = $(`#o-${t.id}`,el);
+  if(ed){ ed.value = s.code != null ? s.code : t.starter;
+    ed.addEventListener("keydown",e=>{ if(e.key==="Tab" && !e.shiftKey){ e.preventDefault(); const a=ed.selectionStart,b=ed.selectionEnd; ed.value=ed.value.slice(0,a)+"    "+ed.value.slice(b); ed.selectionStart=ed.selectionEnd=a+4; collect(); }});
+    ed.addEventListener("input",collect);
+    $(".js-restore",el).addEventListener("click",()=>{ ed.value=t.starter; collect(); });
+  }
+  if(out){ if(s.out) out.value=s.out; out.addEventListener("input",collect); }
+  el.querySelectorAll("input").forEach(i=>i.addEventListener("input",()=>{ i.classList.remove("right","wrong"); collect(); }));
+  el.querySelectorAll("input[type=radio],input[type=checkbox]").forEach(i=>i.addEventListener("change",()=>{ el.querySelectorAll(".opt").forEach(o=>o.classList.remove("right","wrong")); collect(); }));
+
+  function collect(){
+    if(t.type==="mc") s.v = [...el.querySelectorAll(`input[name="r-${t.id}"]:checked`)].map(i=>+i.value);
+    if(t.type==="blanks") s.v = t.b.map((_,k)=>$(`#b-${t.id}-${k}`,el).value);
+    if(t.type==="cls") s.v = [...el.querySelectorAll(".crow")].map(r=>{ const p=r.querySelector('button[aria-pressed="true"]'); return p ? +p.dataset.ci : null; });
+    if(ed) s.code = ed.value;
+    if(out) s.out = out.value;
+    save();
+  }
+
+  el.querySelectorAll(".js-copy").forEach(btn=>btn.addEventListener("click",()=>{
+    const text = btn.dataset.copy==="editor" ? ed.value : t.code;
+    const done = ()=>{ const o=btn.textContent; btn.textContent="Kopirano"; setTimeout(()=>btn.textContent=o,1400); };
+    try { navigator.clipboard.writeText(text).then(done, ()=>fallback(text,done)); } catch(e){ fallback(text,done); }
+  }));
+
+  $(".js-check",el).addEventListener("click",()=>{
+    collect();
+    let ok=false, msg="";
+    if(t.type==="mc"){
+      const v = new Set(s.v||[]);
+      if(!v.size){ show(false,"Najprej izberi odgovor."); return; }
+      const altOk = !!t.alt && v.size===t.alt.length && t.alt.every(k=>v.has(k));
+      ok = (v.size===t.a.length && t.a.every(k=>v.has(k))) || altOk;
+      const good = altOk ? t.alt : t.a;
+      el.querySelectorAll(".opt").forEach((o,k)=>{ o.classList.remove("right","wrong"); if(v.has(k)) o.classList.add(good.includes(k)?"right":"wrong"); });
+      if(!ok && t.a.length>1 && v.size!==t.a.length) msg = `Pravilnih odgovorov je ${t.a.length}.`;
+    }
+    if(t.type==="blanks"){
+      let all=true;
+      t.b.forEach((b,k)=>{ const i=$(`#b-${t.id}-${k}`,el); const good = matchBlank(i.value,b); i.classList.remove("right","wrong"); if(i.value.trim()) i.classList.add(good?"right":"wrong"); if(!good) all=false; });
+      ok = all;
+    }
+    if(t.type==="cls"){
+      let all=true, any=false;
+      el.querySelectorAll(".crow").forEach(r=>{ const k=+r.dataset.k; r.classList.remove("right","wrong"); if(s.v[k]==null){ all=false; return; } any=true; const good = s.v[k]===t.items[k][1]; r.classList.add(good?"right":"wrong"); if(!good) all=false; });
+      if(!any){ show(false,"Najprej razvrsti vsaj eno trditev."); return; }
+      ok = all; if(!ok && s.v.includes(null)) msg="Razvrsti vse trditve.";
+    }
+    if(t.type==="output" || t.type==="code"){
+      if(!out.value.trim()){ show(false, t.type==="code" ? "Zaženi program in prilepi njegov izpis." : "Napiši izpis."); return; }
+      ok = normOut(out.value)===normOut(t.expected);
+      out.classList.remove("right","wrong"); out.classList.add(ok?"right":"wrong");
+      if(!ok){ const a=normOut(out.value).split("\n"), b=normOut(t.expected).split("\n"); const k=b.findIndex((l,j)=>a[j]!==l); msg = k<0 ? "Izpis ima preveč vrstic." : `Razlika v ${k+1}. vrstici.`; }
+    }
+    if(ok){ if(s.state!=="seen") s.state="ok"; save(); }
+    show(ok, ok ? (s.state==="seen" ? "Pravilno. Točke se ne štejejo, ker si si ogledal rešitev." : `Pravilno. +${ptsLabel(t.pts)}`) : ("Ni še pravilno. "+msg).trim());
+    paint(); progress();
+  });
+
+  let hi = s.h || 0;
+  const drawHints = ()=>{ hintsEl.innerHTML = t.h.slice(0,hi).map((h,k)=>`<div class="hint"><b>NAMIG ${k+1}/${t.h.length}</b>${esc(h)}</div>`).join(""); const b=$(".js-hint",el); b.disabled = hi>=t.h.length; b.textContent = hi>=t.h.length ? "Ni več namigov" : (hi? "Naslednji namig":"Namig"); };
+  drawHints();
+  $(".js-hint",el).addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h=hi; save(); drawHints(); }});
+
+  function drawSol(){
+    let ans="";
+    if(t.type==="mc") ans = "Pravilno: " + t.a.map(k=>"ABCDEF"[k]).join(", ") + (t.alt ? " (na maturi sprejeto tudi " + t.alt.map(k=>"ABCDEF"[k]).join(", ") + ")" : "");
+    if(t.type==="blanks") ans = t.b.map(b=>`${b.l} ${b.acc[0]}`).join(" · ");
+    if(t.type==="cls") ans = t.items.map(it=>`${it[0]} → ${t.cats[it[1]]}`).join("\n");
+    let html = "";
+    if(t.type==="cls") html += `<div class="ans" style="white-space:pre-line;font-weight:400">${esc(ans)}</div>`;
+    else if(ans) html += `<div class="ans">${esc(ans)}</div>`;
+    if(t.fc) html += `<div class="fig"><div class="eyebrow" style="margin-bottom:8px">Diagram poteka</div>${FLOW.svg(t.fc)}</div>`;
+    if(t.jsolCode) html += `<div><div class="eyebrow">Primer v Javi</div><pre class="code">${hl(t.jsolCode)}</pre></div>`;
+    if(t.type==="output") html += `<div><div class="eyebrow">Pravilen izpis</div><pre class="code">${esc(t.expected)}</pre></div>`;
+    if(t.type==="code") html += `<div><div class="eyebrow">Ena od možnih rešitev</div><pre class="code">${hl(t.sol)}</pre></div>`;
+    html += `<p class="why">${esc(t.why)}</p>`;
+    solEl.innerHTML = html;
+  }
+  $(".js-sol",el).addEventListener("click",()=>{
+    if(solEl.hidden){ drawSol(); solEl.hidden=false; if(s.state!=="ok"){ s.state="seen"; save(); paint(); progress(); } $(".js-sol",el).textContent="Skrij rešitev"; }
+    else { solEl.hidden=true; $(".js-sol",el).textContent="Pokaži rešitev"; }
+  });
+
+  function show(ok,m){ fb.textContent=m; fb.className="feedback "+(ok?"ok":"bad"); }
+  function paint(){
+    el.dataset.state = s.state||"";
+    const tg = $(".js-st",el);
+    if(s.state==="ok"){ tg.hidden=false; tg.className="tag js-st st-ok"; tg.textContent="Rešeno"; }
+    else if(s.state==="seen"){ tg.hidden=false; tg.className="tag js-st st-seen"; tg.textContent="Rešitev ogledana"; }
+    else tg.hidden=true;
+  }
+  paint();
+}
+
+function fallback(text,done){
+  const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); done(); }catch(e){} ta.remove();
+}
+
+/* ---------- home ---------- */
+const homeEl = $("#home");
+HOME.forEach((h,k)=>{
+  const el = document.createElement("article"); el.className="task";
+  el.innerHTML = `<div class="thead"><span class="tnum">D${k+1}. ${esc(h.title)}</span><div class="tags"><span class="tag">Za doma</span></div></div>
+   <div class="q">${h.code?`<pre class="code">${hl(h.code)}</pre>`:""}<p>${esc(h.q)}</p>
+   ${h.code?`<div class="actions"><button class="btn js-c" type="button">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`:""}</div>
+   <div class="actions"><button class="btn ghost js-s" type="button">Pokaži rešitev</button></div>
+   <div class="sol" hidden>${h.fc?`<div class="fig">${FLOW.svg(h.fc)}</div>`:""}${h.jsolCode?`<pre class="code">${hl(h.jsolCode)}</pre>`:""}<p class="why">${esc(h.sol)}</p></div>`;
+  const sol=$(".sol",el), b=$(".js-s",el);
+  b.addEventListener("click",()=>{ sol.hidden=!sol.hidden; b.textContent= sol.hidden?"Pokaži rešitev":"Skrij rešitev"; });
+  const c=$(".js-c",el); if(c) c.addEventListener("click",()=>{ const done=()=>{c.textContent="Kopirano";setTimeout(()=>c.textContent="Kopiraj kodo",1400)}; try{navigator.clipboard.writeText(h.code).then(done,()=>fallback(h.code,done));}catch(e){fallback(h.code,done);} });
+  homeEl.appendChild(el);
+});
+
+/* ---------- static highlighting ---------- */
+document.querySelectorAll(".js-hl").forEach(p=>{ p.innerHTML = hl(p.textContent); });
+
+/* ---------- progress ---------- */
+function progress(){
+  const r = summary();
+  const txt = `${r.resenih} / ${r.vseh} nalog · ${r.tock} / ${r.vsehTock} točk`;
+  document.querySelectorAll(".js-progtxt").forEach(e=>e.textContent=txt);
+  document.querySelectorAll(".js-bar").forEach(e=>e.style.width=(100*r.tock/r.vsehTock)+"%");
+  document.querySelectorAll(".cnt[data-lv]").forEach(e=>{ const k=r.sklopi[e.dataset.lv]; if(!k) return; e.textContent=`${k.resenih}/${k.vseh}`; e.classList.toggle("full", k.resenih===k.vseh); });
+  const nm = T.filter(t=>!t.own).length, ps = $("#progSrc"); if(ps) ps.textContent = `${nm} maturitetnih · ${T.length-nm} dodatnih nalog`;
+}
+
+/* ---------- filters ---------- */
+let curFilter = "all";
+function applyFilter(){
+  document.querySelectorAll("#levels .task, #homeMat .task").forEach(el=>{
+    const s = S[el.id.slice(2)] || {};
+    el.hidden = (curFilter==="mat" && el.dataset.kind!=="mat") || (curFilter==="own" && el.dataset.kind!=="own") || (curFilter==="open" && s.state==="ok");
+  });
+  document.querySelectorAll("#levels .level, #homeMat .level").forEach(l=>{ const e=l.querySelector(".lvl-empty"); if(e) e.hidden = !!l.querySelector(".task:not([hidden])"); });
+}
+document.querySelectorAll(".chip").forEach(c=>c.addEventListener("click",()=>{
+  document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed","false"));
+  c.setAttribute("aria-pressed","true");
+  curFilter = c.dataset.f; applyFilter();
+}));
+
+/* ---------- pages ---------- */
+const PAGES = [["algoritem","Kaj je algoritem"],["zapis","Načini zapisa"],["simboli","Simboli diagrama poteka"],["gradniki","Zaporedje, vejitev, ponavljanje"],["sled","Sled algoritma"],["java","Od diagrama do Jave"],["nacrtovanje","Kako rešiš nalogo"],
+  ["naloge-a","Naloge A · Algoritem"],["naloge-b","Naloge B · Zapis"],["naloge-c","Naloge C · Simboli in gradniki"],["naloge-d","Naloge D · Sled"],["naloge-e","Naloge E · Rišem diagrame"],["naloge-f","Naloge F · Diagram v Javo"],["doma","Vaje za doma"]];
+const sel = $("#pageSel");
+sel.innerHTML = PAGES.map((p,k)=>`<option value="${p[0]}">${k+1}. ${esc(p[1])}</option>`).join("");
+sel.addEventListener("change",()=>{ location.hash = sel.value; });
+let cur = PAGES[0][0];
+function showPage(id, quiet){
+  const k0 = PAGES.findIndex(p=>p[0]===id); const k = k0<0 ? 0 : k0; cur = PAGES[k][0];
+  document.querySelectorAll("main > section").forEach(sec=>{ sec.hidden = sec.id==="naloge" ? !cur.startsWith("naloge-") : sec.id!==cur; });
+  document.querySelectorAll("#levels > .level").forEach(l=>{ l.hidden = l.id!==cur; });
+  $("#hero").hidden = k!==0; $("#crumb").hidden = k===0;
+  $("#crumbN").textContent = `Stran ${k+1} od ${PAGES.length}`;
+  document.querySelectorAll(".rail nav a").forEach(a=>{ if(a.getAttribute("href")==="#"+cur) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
+  sel.value = cur;
+  const pv = PAGES[k-1], nx = PAGES[k+1];
+  $("#pager").innerHTML = (pv?`<a class="prev" href="#${pv[0]}"><span class="eyebrow">Nazaj</span><span class="t">${esc(pv[1])}</span></a>`:"") + (nx?`<a class="next" href="#${nx[0]}"><span class="eyebrow">Naprej</span><span class="t">${esc(nx[1])}</span></a>`:"");
+  if(!quiet) window.scrollTo(0,0);
+}
+window.addEventListener("hashchange",()=>showPage(location.hash.slice(1)));
+
+/* ---------- reset with inline confirm ---------- */
+const rw = $("#resetWrap");
+function resetIdle(){ rw.innerHTML = `<button class="btn ghost" id="resetBtn" type="button" style="padding-left:0">Počisti ves napredek v tem poglavju</button>`; $("#resetBtn").addEventListener("click",resetAsk); }
+function resetAsk(){ rw.innerHTML = `<span class="confirm">Res izbrišem vse odgovore? <button class="btn" id="rY" type="button">Da, počisti</button><button class="btn ghost" id="rN" type="button">Prekliči</button></span>`;
+  $("#rY").addEventListener("click", async ()=>{ S = {}; localT = Date.now(); saveLocal();
+    if(remote){ try { await remote.ref.set({poglavje:2, naloge:{}, povzetek:summary(), posodobljeno:localT}); } catch(e){} }
+    location.hash = "jezik"; location.reload(); });
+  $("#rN").addEventListener("click",resetIdle); }
+resetIdle();
+
+/* ---------- start ---------- */
+cur = location.hash.slice(1) || "jezik";
+try{ FLOW.setLang(localStorage.getItem("java-matura-diagram-lang")||"en"); }catch(e){ FLOW.setLang("en"); }
+function paintLang(){ document.querySelectorAll(".js-lang").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.lang===FLOW.getLang()))); }
+function fillFigs(){
+  document.querySelectorAll("[data-fc]").forEach(e=>{ e.innerHTML = FLOW.svg(FLOWS[e.dataset.fc],{num:!!e.dataset.num}); });
+  document.querySelectorAll("[data-sym]").forEach(e=>{ e.innerHTML = FLOW.sym(e.dataset.sym); });
+}
+document.querySelectorAll(".js-lang").forEach(b=>b.addEventListener("click",()=>{
+  FLOW.setLang(b.dataset.lang);
+  try{ localStorage.setItem("java-matura-diagram-lang", b.dataset.lang); }catch(e){}
+  paintLang(); fillFigs(); renderAll();
+}));
+paintLang(); fillFigs();
+renderAll();
+progress();
+if(location.hash) setTimeout(()=>window.scrollTo(0,0), 0);
+
+/* ---------- account sync (db) ---------- */
+(async ()=>{
+  try {
+    if(!window.claude || !window.claude.use) return;
+    const user = await window.claude.use("user");
+    const db = await window.claude.use("db");
+    if(!user || !db) return;
+    const id = await user.id(); if(!id) return;
+    if(await user.can("data.write") === false) return;
+    const ref = db.doc("napredek/" + id);
+    const snap = await ref.get();
+    remote = { ref };
+    if(snap.exists){
+      const d = snap.data() || {};
+      if(merge(d.naloge || {}, +d.posodobljeno || 0)){ saveLocal(); renderAll(); progress(); }
+    }
+    setSync("cloud");
+    dirty = true; push();
+    document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden" && dirty){ clearTimeout(pushTimer); push(); } });
+  } catch(e){ remote = null; setSync("local"); }
+})();
+})();
+</script>
+
+</body></html>

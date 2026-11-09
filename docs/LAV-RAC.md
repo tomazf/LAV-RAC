@@ -4,7 +4,7 @@ Splošni dogovor je v `NACRT_PORTALA.md`. Tukaj je samo, kar velja za ta portal.
 
 ## Stanje
 
-Postavljena je osnova: prijava, vloge, oblika, vstopna stran in struktura z deli LAV-RAČ2, LAV-RAČ3 in LAV-RAČ4. Uvožene so vaje 2.1 Številski sistemi, kodiranje in pariteta, 2.2 Logične funkcije – utrjevanje, 2.3 Arhitektura računalniških sistemov in 3.1 Java in delovanje JVM (LAV-RAČ3, 1. poglavje).
+Postavljena je osnova: prijava, vloge, oblika, vstopna stran in struktura z deli LAV-RAČ2, LAV-RAČ3 in LAV-RAČ4. Uvožene so vaje 2.1 Številski sistemi, kodiranje in pariteta, 2.2 Logične funkcije – utrjevanje, 2.3 Arhitektura računalniških sistemov, 3.1 Java in delovanje JVM (LAV-RAČ3, 1. poglavje) in 3.2 Algoritmi in diagram poteka (LAV-RAČ3, 2. poglavje).
 
 Razpored (od učitelja, popravljen 6. 11. 2026). Poglavja se v vsakem letniku štejejo od 1 in tako jih vidijo dijaki in učitelji (`no`); tehnična oznaka vaje (`id`, v povezavah in bazi) je letnik.poglavje, da je enolična:
 - LAV-RAČ2 (prazno mesto 4 je za učitelje »V pripravi«, `planned` v `content/sources.json`): 2.1 Številski sistemi, kodiranje in pariteta, 2.2 Logične funkcije – utrjevanje, 2.3 Arhitektura računalniških sistemov, 2.4 (prosto, dodamo kasneje), 2.5 Operacijski sistemi in Linux lupina
@@ -49,8 +49,10 @@ Oblika vaje (dogovor 6. 11. 2026):
 - naloga, ki je dijak ni izpolnil do konca ali je izraza ni mogoče prebrati, ni oddana (samo opozorilo); vsak drug odgovor jo zaklene, z razlago artifacta, zakaj je napačen (potrjeno 6. 11. 2026),
 - Za doma so načeloma naloge brez točkovanja; točkovane naloge, ki jih ima artifact na strani za doma, postanejo svoj sklop med Vajami (2.3: sklop I Ponavljanje; v artifactu »Še več maturitetnih nalog«, preimenovan 8. 11. 2026, ker niso vse naloge iz mature),
 - naloge z zbirnikom (2.3): Zaženi teste pokaže rezultate testov in se ne točkuje, Oddaj točkuje in zaklene, tudi če testi ne uspejo,
-- skupine razlag: 2.1 Pretvorbe, Računanje, Kodiranje, Pariteta (iz artifacta); 2.2 Logična vrata, Funkcije in poenostavljanje, Aritmetična vezja; 2.3 Podatki in procesor, Zbirnik, Prekinitve in pomnilniki, Vhod, izhod in cevovod,
+- skupine razlag: 2.1 Pretvorbe, Računanje, Kodiranje, Pariteta (iz artifacta); 2.2 Logična vrata, Funkcije in poenostavljanje, Aritmetična vezja; 2.3 Podatki in procesor, Zbirnik, Prekinitve in pomnilniki, Vhod, izhod in cevovod; 3.1 Jezik in prevajanje, Orodja, zagon in napake; 3.2 Algoritem in zapis, Gradniki in sled, Od diagrama do programa,
 - barve stanj so enake kot v učiteljevem pregledu: pravilno zeleno, pravilno z namigom jantarno, napačno rdeče, ogledana rešitev sivo.
+
+Stikalo »Napisi v diagramih« (Flowgorithm ali Matura, 3.2 in 3.3) je del vaje, ne lupine: adapter ga sestavi in preda lupini (`tools`), ta ga vstavi v levi stolpec in v seznam na telefonu. Menjava napisov diagrame prerisuje na mestu, kartic ne gradi znova (zato ostane vpisano). Izbira se hrani v brskalniku.
 
 Ob vsakem uvozu novega poglavja preveri na zaslonu: levi stolpec (oznake, krogi, števci, zamik pri prelomu), legenda pod gumbi nalog in črko za Za doma; vse to dela skupna oblika vaje (`content/shell/`), v adapterju ni treba ničesar nastavljati.
 

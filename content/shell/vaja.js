@@ -253,6 +253,8 @@
     sets.forEach((s) => nav.append(h('a', { href: '#' + s.id, 'data-page': s.id, class: 'lr-pg lr-gated' },
       h('i', { class: 'lr-pie', 'data-pie': s.id, 'aria-hidden': 'true' }), lab(s.tag, s.title), h('small', { class: 'lr-cnt', 'data-cnt': s.id }))));
     if (c.extra) nav.append(h('a', { href: '#' + c.extra.id, 'data-page': c.extra.id, class: 'lr-pg lr-gated' }, h('i', { class: 'lr-dot', html: ICON.check }), lab(c.extra.tag, c.extra.title)));
+    // c.tools() gives a fresh element each time, so the rail and the phone list each get their own copy.
+    if (c.tools) nav.append(h('div', { class: 'lr-tools' }, c.tools()));
     return nav;
   }
   function buildMobileNav() {
@@ -265,7 +267,9 @@
       (label ? grp : sel).append(o);
     });
     sel.addEventListener('change', () => { location.hash = sel.value; });
-    return h('label', { class: 'lr-mnav' }, h('span', { text: 'Stran' }), sel);
+    const box = h('div', { class: 'lr-mnav' }, h('label', { class: 'lr-msel' }, h('span', { text: 'Stran' }), sel));
+    if (cfg.tools) box.append(h('div', { class: 'lr-tools' }, cfg.tools()));
+    return box;
   }
 
   function buildOverview(p, groups, sets, c) {

@@ -260,6 +260,8 @@
     sets.forEach((s) => nav.append(h('a', { href: '#' + s.id, 'data-page': s.id, class: 'lr-pg lr-gated' },
       h('i', { class: 'lr-pie', 'data-pie': s.id, 'aria-hidden': 'true' }), lab(s.tag, s.title), h('small', { class: 'lr-cnt', 'data-cnt': s.id }))));
     if (c.extra) nav.append(h('a', { href: '#' + c.extra.id, 'data-page': c.extra.id, class: 'lr-pg lr-gated' }, h('i', { class: 'lr-dot', html: ICON.check }), lab(c.extra.tag, c.extra.title)));
+    // c.tools() gives a fresh element each time, so the rail and the phone list each get their own copy.
+    if (c.tools) nav.append(h('div', { class: 'lr-tools' }, c.tools()));
     return nav;
   }
   function buildMobileNav() {
@@ -272,7 +274,9 @@
       (label ? grp : sel).append(o);
     });
     sel.addEventListener('change', () => { location.hash = sel.value; });
-    return h('label', { class: 'lr-mnav' }, h('span', { text: 'Stran' }), sel);
+    const box = h('div', { class: 'lr-mnav' }, h('label', { class: 'lr-msel' }, h('span', { text: 'Stran' }), sel));
+    if (cfg.tools) box.append(h('div', { class: 'lr-tools' }, cfg.tools()));
+    return box;
   }
 
   function buildOverview(p, groups, sets, c) {
@@ -1028,6 +1032,7 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr-gi svg text,.lr-ti svg text{fill:var(--lr-acc);stroke:none;font-family:var(--lr-fm);font-weight:600}
 .lr-gi svg .fill,.lr-ti svg .fill{fill:var(--lr-acc);stroke:none}
 .lr-mnav{display:none}
+.lr-rail .lr-tools{margin-top:18px;padding:0 10px}
 .lr-main{min-width:0}
 .lr-main .prose,.lr-main .note,.lr-main .q,.lr-main .qtext,.lr-main .hint,.lr-main .sol .why,.lr-main .wnote,.lr-main .think,.lr-main .lead,.lr-main p,.lr-main ul,.lr-main ol,.lr-shead>div{max-width:none}
 .lr-page{display:flex;flex-direction:column;gap:22px;scroll-margin-top:140px}
@@ -1144,7 +1149,8 @@ html body .lvs-bar{background:var(--lr-hdr)}
 @media (max-width:900px){
   .lr-body{grid-template-columns:minmax(0,1fr);gap:16px;padding-top:14px}
   .lr-rail{display:none}
-  .lr-mnav{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--lr-mut)}
+  .lr-mnav{display:flex;flex-direction:column;gap:12px;font-size:.85rem;color:var(--lr-mut)}
+  .lr-msel{display:flex;flex-direction:column;gap:4px}
   .lr-mnav select{font:inherit;font-size:.95rem;color:var(--lr-ink);background:var(--lr-card);border:1px solid var(--lr-line);border-radius:7px;padding:6px 10px;min-height:38px}
   .lr-top{position:sticky}
   .lr-reset{flex:1 1 100%}

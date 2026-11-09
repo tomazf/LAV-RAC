@@ -3055,6 +3055,467 @@
     "class",
     "napake"
    ]
+  },
+  {
+   "id": "3.2",
+   "no": "2",
+   "module": "LAV-RAČ3",
+   "title": "Algoritmi in diagram poteka",
+   "fullTitle": "Algoritmi in diagram poteka",
+   "key": "scnm_lavrac_3_2_v1",
+   "version": 1,
+   "format": "short",
+   "maxPoints": 89,
+   "tasks": [
+    {
+     "i": 0,
+     "level": "lažja",
+     "max": 1,
+     "section": "Kaj je algoritem",
+     "q": "Kateri opis predstavlja algoritem?"
+    },
+    {
+     "i": 1,
+     "level": "lažja",
+     "max": 1,
+     "section": "Kaj je algoritem",
+     "q": "Obkroži črko pred trditvijo, ki je resnična za algoritem."
+    },
+    {
+     "i": 2,
+     "level": "lažja",
+     "max": 1,
+     "section": "Kaj je algoritem",
+     "q": "Katera trditev je resnična?"
+    },
+    {
+     "i": 3,
+     "level": "lažja",
+     "max": 1,
+     "section": "Kaj je algoritem",
+     "q": "Katera trditev je za algoritem resnična?"
+    },
+    {
+     "i": 4,
+     "level": "lažja",
+     "max": 1,
+     "section": "Kaj je algoritem",
+     "q": "Kateri korak ni primeren za algoritem?"
+    },
+    {
+     "i": 5,
+     "level": "lažja",
+     "max": 1,
+     "section": "Kaj je algoritem",
+     "q": "Zakaj postopek »nastavi i = 1; ponavljaj: i = i + 1« ni algoritem?"
+    },
+    {
+     "i": 6,
+     "level": "srednja",
+     "max": 2,
+     "section": "Kaj je algoritem",
+     "q": "Ali trditev drži za algoritem?"
+    },
+    {
+     "i": 7,
+     "level": "srednja",
+     "max": 2,
+     "section": "Kaj je algoritem",
+     "q": "Kateri trditvi veljata za algoritem?"
+    },
+    {
+     "i": 8,
+     "level": "srednja",
+     "max": 2,
+     "section": "Kaj je algoritem",
+     "q": "Kateri izmed naštetih trditev sta resnični za algoritem?"
+    },
+    {
+     "i": 9,
+     "level": "srednja",
+     "max": 2,
+     "section": "Kaj je algoritem",
+     "q": "Kateri od naštetih trditev sta resnični za algoritme? Obkroži črki pred resničnima trditvama."
+    },
+    {
+     "i": 10,
+     "level": "lažja",
+     "max": 1,
+     "section": "Načini zapisa algoritma",
+     "q": "Kaj od naštetega ni način zapisa algoritma?"
+    },
+    {
+     "i": 11,
+     "level": "srednja",
+     "max": 2,
+     "section": "Načini zapisa algoritma",
+     "q": "Algoritem lahko zapišemo:"
+    },
+    {
+     "i": 12,
+     "level": "srednja",
+     "max": 2,
+     "section": "Načini zapisa algoritma",
+     "q": "Kako lahko predstavimo algoritem? Obkroži črki pred pravilnima odgovoroma."
+    },
+    {
+     "i": 13,
+     "level": "lažja",
+     "max": 1,
+     "section": "Načini zapisa algoritma",
+     "q": "Algoritem, zapisan v programskem jeziku, imenujemo ___."
+    },
+    {
+     "i": 14,
+     "level": "srednja",
+     "max": 2,
+     "section": "Načini zapisa algoritma",
+     "q": "Kateri zapis je to?"
+    },
+    {
+     "i": 15,
+     "level": "lažja",
+     "max": 1,
+     "section": "Simboli in gradniki",
+     "q": "Kateri simbol v diagramih poteka uporabimo za vhodno-izhodne operacije? (V izvirni nalogi je treba simbol narisati.)"
+    },
+    {
+     "i": 16,
+     "level": "lažja",
+     "max": 1,
+     "section": "Simboli in gradniki",
+     "q": "Obkroži črko pred simbolom, ki ga v diagramu poteka uporabimo za predstavitev preverjanja nekega pogoja. (Izvirna naloga ima drugačen vrstni red simbolov.)"
+    },
+    {
+     "i": 17,
+     "level": "srednja",
+     "max": 2,
+     "section": "Simboli in gradniki",
+     "q": "V kateri simbol zapišemo vsak korak?"
+    },
+    {
+     "i": 18,
+     "level": "lažja",
+     "max": 1,
+     "section": "Simboli in gradniki",
+     "q": "Koliko izhodnih puščic ima simbol za pogoj (romb)?"
+    },
+    {
+     "i": 19,
+     "level": "srednja",
+     "max": 2,
+     "section": "Simboli in gradniki",
+     "q": "Kateri gradnik algoritma opisuje vsak korak?"
+    },
+    {
+     "i": 20,
+     "level": "lažja",
+     "max": 1,
+     "section": "Simboli in gradniki",
+     "q": "Kolikokrat se izvede korak »izpiši i«?"
+    },
+    {
+     "i": 21,
+     "level": "lažja",
+     "max": 1,
+     "section": "Sled algoritma",
+     "q": "Kaj izpiše algoritem? Vpiši vrednosti a in c, ločeni s presledkom."
+    },
+    {
+     "i": 22,
+     "level": "lažja",
+     "max": 1,
+     "section": "Sled algoritma",
+     "q": "Kaj izpiše algoritem? Vpiši vrednosti x in y, ločeni s presledkom."
+    },
+    {
+     "i": 23,
+     "level": "lažja",
+     "max": 1,
+     "section": "Sled algoritma",
+     "q": "Kaj izpiše algoritem za podani vhod?"
+    },
+    {
+     "i": 24,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sled algoritma",
+     "q": "Bloki so oštevilčeni od zgoraj navzdol: 1 je i = 1, 2 je pogoj i <= 3, 3 je izpis vrednosti i, 4 je i = i + 1. Zapiši zaporedje blokov, ki se izvedejo (številke"
+    },
+    {
+     "i": 25,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sled algoritma",
+     "q": "Sledi algoritmu in odgovori. Pomagaj si s tabelo z i, s in pogojem."
+    },
+    {
+     "i": 26,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sled algoritma",
+     "q": "Kaj izpiše algoritem?"
+    },
+    {
+     "i": 27,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sled algoritma",
+     "q": "Kaj izpiše algoritem, predstavljen s tem diagramom poteka? Vpiši vrednosti c in k."
+    },
+    {
+     "i": 28,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sled algoritma",
+     "q": "Kaj izpiše algoritem? Kaj po tvojem računa?"
+    },
+    {
+     "i": 29,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sled algoritma",
+     "q": "Napiši sled diagrama poteka. Števila na vhodu so 2, 5, 6, 4, −7, 0, 12, 20 in jih beremo v tem vrstnem redu."
+    },
+    {
+     "i": 30,
+     "level": "lažja",
+     "max": 1,
+     "section": "Sled algoritma",
+     "q": "Zakaj se ta algoritem nikoli ne konča?"
+    },
+    {
+     "i": 31,
+     "level": "lažja",
+     "max": 1,
+     "section": "Narišem diagram poteka",
+     "q": "Nariši diagram poteka, ki prebere dve celi števili ter izpiše njuno vsoto in nato njun zmnožek."
+    },
+    {
+     "i": 32,
+     "level": "lažja",
+     "max": 1,
+     "section": "Narišem diagram poteka",
+     "q": "Nariši diagram poteka, ki prebere dve celi števili in izpiše večje."
+    },
+    {
+     "i": 33,
+     "level": "srednja",
+     "max": 2,
+     "section": "Narišem diagram poteka",
+     "q": "Nariši diagram poteka, ki prebere celo število x in izpiše pozitivno, negativno ali nic. Uporabi dve vejitvi, eno v drugi."
+    },
+    {
+     "i": 34,
+     "level": "srednja",
+     "max": 2,
+     "section": "Narišem diagram poteka",
+     "q": "Nariši diagram poteka, ki izpiše števila od 1 do 10, vsako v svoji vrstici. Pogoj zanke naj bo i <= 10."
+    },
+    {
+     "i": 35,
+     "level": "srednja",
+     "max": 2,
+     "section": "Narišem diagram poteka",
+     "q": "Nariši diagram poteka, ki prebere naravno število N in izpiše vsoto števil od 1 do N."
+    },
+    {
+     "i": 36,
+     "level": "srednja",
+     "max": 2,
+     "section": "Narišem diagram poteka",
+     "q": "Nariši diagram poteka, ki izpiše prvih N členov zaporedja 1, 2, 4, 8, 16, 32, ... N je vhodni podatek."
+    },
+    {
+     "i": 37,
+     "level": "srednja",
+     "max": 2,
+     "section": "Narišem diagram poteka",
+     "q": "Nariši diagram poteka, ki prebere dve celi števili in nato drugo število izpiše tolikokrat, kot je absolutna vrednost prvega števila."
+    },
+    {
+     "i": 38,
+     "level": "srednja",
+     "max": 2,
+     "section": "Narišem diagram poteka",
+     "q": "Nariši diagram poteka, s katerim prebereš 2 naravni števili in znak. Algoritem naj izpiše prebrani znak tolikokrat, kot je razlika med manjšo in večjo prebrano "
+    },
+    {
+     "i": 39,
+     "level": "težja",
+     "max": 3,
+     "section": "Narišem diagram poteka",
+     "q": "Nariši diagram poteka, ki izpiše prvih 30 elementov zaporedja s prvim členom 3 in splošnim členom aₙ = 2 · aₙ₋₁ + 1."
+    },
+    {
+     "i": 40,
+     "level": "srednja",
+     "max": 2,
+     "section": "Narišem diagram poteka",
+     "q": "Nariši diagram poteka, ki bere cela števila, dokler ne vnesemo 0, in nato izpiše povprečje vnesenih števil (ničle ne štejemo)."
+    },
+    {
+     "i": 41,
+     "level": "težja",
+     "max": 3,
+     "section": "Narišem diagram poteka",
+     "q": "Uporabnik vnaša pare celih števil. Program vsoti prišteje obe števili iz para le, če je prvo število v paru večje kot drugo. Postopek se konča, ko je dobljena v"
+    },
+    {
+     "i": 42,
+     "level": "težja",
+     "max": 3,
+     "section": "Narišem diagram poteka",
+     "q": "Za naslednji program nariši diagram poteka. Nato preštej simbole v svojem diagramu (vsak stavek zapiši v svoj simbol, začetek in konec ne štejeta)."
+    },
+    {
+     "i": 43,
+     "level": "težja",
+     "max": 3,
+     "section": "Narišem diagram poteka",
+     "q": "Nariši diagram poteka Evklidovega algoritma: prebere dve naravni števili a in b in izpiše njun največji skupni delitelj. Postopek: dokler b ni 0, izračunaj osta"
+    },
+    {
+     "i": 44,
+     "level": "lažja",
+     "max": 1,
+     "section": "Iz diagrama v Javo",
+     "q": "Zapiši program za ta diagram poteka (a, b, c in d so tipa int). Izpiši vrednosti d in c v isti vrstici, ločeni s presledkom."
+    },
+    {
+     "i": 45,
+     "level": "srednja",
+     "max": 2,
+     "section": "Iz diagrama v Javo",
+     "q": "Zapiši program za ta diagram poteka in ga zaženi."
+    },
+    {
+     "i": 46,
+     "level": "težja",
+     "max": 3,
+     "section": "Iz diagrama v Javo",
+     "q": "Pretvori diagram poteka v program v Javi (x je tipa double, i in y sta tipa int). Izpiši i in y v isti vrstici, ločena s presledkom."
+    },
+    {
+     "i": 47,
+     "level": "srednja",
+     "max": 2,
+     "section": "Iz diagrama v Javo",
+     "q": "Zapiši program za ta diagram poteka in ga zaženi."
+    },
+    {
+     "i": 48,
+     "level": "težja",
+     "max": 3,
+     "section": "Iz diagrama v Javo",
+     "q": "Zapiši program za ta diagram poteka (vse spremenljivke so tipa int) in ga zaženi. Kaj računa ta algoritem?"
+    },
+    {
+     "i": 49,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Algoritem lahko zapišemo z"
+    },
+    {
+     "i": 50,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Kako lahko zapišemo algoritme?"
+    }
+   ],
+   "pages": [
+    {
+     "id": "pregled",
+     "chapter": "Teorija",
+     "label": "Pregled"
+    },
+    {
+     "id": "algoritem",
+     "chapter": "Teorija",
+     "label": "Kaj je algoritem"
+    },
+    {
+     "id": "zapis",
+     "chapter": "Teorija",
+     "label": "Načini zapisa"
+    },
+    {
+     "id": "simboli",
+     "chapter": "Teorija",
+     "label": "Simboli diagrama poteka"
+    },
+    {
+     "id": "gradniki",
+     "chapter": "Teorija",
+     "label": "Zaporedje, vejitev, ponavljanje"
+    },
+    {
+     "id": "sled",
+     "chapter": "Teorija",
+     "label": "Sled algoritma"
+    },
+    {
+     "id": "java",
+     "chapter": "Teorija",
+     "label": "Od diagrama do Jave"
+    },
+    {
+     "id": "nacrtovanje",
+     "chapter": "Teorija",
+     "label": "Kako rešiš nalogo"
+    },
+    {
+     "id": "naloge-a",
+     "chapter": "Naloge",
+     "label": "Vaje A · Kaj je algoritem"
+    },
+    {
+     "id": "naloge-b",
+     "chapter": "Naloge",
+     "label": "Vaje B · Načini zapisa algoritma"
+    },
+    {
+     "id": "naloge-c",
+     "chapter": "Naloge",
+     "label": "Vaje C · Simboli in gradniki"
+    },
+    {
+     "id": "naloge-d",
+     "chapter": "Naloge",
+     "label": "Vaje D · Sled algoritma"
+    },
+    {
+     "id": "naloge-e",
+     "chapter": "Naloge",
+     "label": "Vaje E · Narišem diagram poteka"
+    },
+    {
+     "id": "naloge-f",
+     "chapter": "Naloge",
+     "label": "Vaje F · Iz diagrama v Javo"
+    },
+    {
+     "id": "doma-mat",
+     "chapter": "Naloge",
+     "label": "Vaje G · Ponavljanje"
+    },
+    {
+     "id": "doma",
+     "chapter": "Naloge",
+     "label": "Vaje H · Za doma"
+    }
+   ],
+   "gate": [
+    "algoritem",
+    "zapis",
+    "simboli",
+    "gradniki",
+    "sled",
+    "java",
+    "nacrtovanje"
+   ]
   }
  ],
  "planned": [
