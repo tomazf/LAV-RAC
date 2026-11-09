@@ -93,12 +93,15 @@ main.stage{display:flex;align-items:center;justify-content:center;max-width:none
 .module{margin-top:30px}
 .module h2{display:flex;gap:10px;align-items:baseline}
 .m-no{font:600 1.25rem var(--fm);color:var(--acc)}
-.rail{list-style:none;margin:0;padding:0 0 0 26px;position:relative}
+/* --cx: the middle of the wire, from the left edge of a node; the circle is centred on it */
+.rail{list-style:none;margin:0;padding:0 0 0 30px;position:relative;--cx:-17.5px}
 .node{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto 112px;gap:8px 24px;align-items:center;padding:14px 0;border-top:1px solid var(--line)}
 .node:first-child{border-top:0}
 /* the wire: grey until an exercise is finished, then logic 1 */
-.node::before{content:"";position:absolute;left:-19px;top:0;bottom:0;width:3px;background:var(--wire)}
-.node::after{content:"";position:absolute;left:-26px;top:50%;margin-top:-9px;width:17px;height:17px;border-radius:50%;background:var(--bg);border:3px solid var(--wire)}
+/* top:-1px closes the gap the separator line above would leave in the wire */
+.node::before{content:"";position:absolute;left:calc(var(--cx) - 1.5px);top:-1px;bottom:0;width:3px;background:var(--wire)}
+/* pseudo-elements do not get the page's border-box sizing, so it is set here */
+.node::after{content:"";position:absolute;left:calc(var(--cx) - 10.5px);top:calc(50% - 10.5px);width:21px;height:21px;box-sizing:border-box;border-radius:50%;background:var(--bg);border:3px solid var(--wire)}
 .node.half::after{border-color:var(--sig)}
 .node.lit::before{background:var(--sig)}
 .node.lit::after{background:var(--sig);border-color:var(--sig)}

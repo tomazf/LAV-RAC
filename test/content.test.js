@@ -538,6 +538,47 @@ test('the exercise fits a phone, in both colour schemes', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('the dashboard timeline: the wire runs through the middle of every circle, on whole pixels, on a phone and a desktop, in both colour schemes', async () => {
+  // all of the class's exercises open for the check, then put back as they were
+  const db = new pg.Client({ connectionString: DB });
+  await db.connect();
+  const before = (await db.query('SELECT class_id, exercise_id, visible FROM class_exercises')).rows;
+  await db.query('UPDATE class_exercises SET visible = true');
+  try {
+    await timelineGeometry();
+  } finally {
+    for (const r of before) await db.query('UPDATE class_exercises SET visible=$3 WHERE class_id=$1 AND exercise_id=$2', [r.class_id, r.exercise_id, r.visible]);
+    await db.end();
+  }
+});
+async function timelineGeometry() {
+  for (const [width, colorScheme] of [[343, 'light'], [1100, 'light'], [343, 'dark']]) {
+    const ctx = await browser.newContext({ viewport: { width, height: 800 }, colorScheme });
+    const p = await ctx.newPage();
+    await p.goto(APP);
+    await p.click('a.btn:text-is("Prijava")');
+    await p.click('a:text-is("Ana Kovač")');
+    await p.waitForURL(`${APP}/**`);
+    await p.goto(`${APP}/vaje`);
+    const nodes = await p.evaluate(() => [...document.querySelectorAll('.rail .node')].map((n) => {
+      const wire = getComputedStyle(n, '::before');
+      const dot = getComputedStyle(n, '::after');
+      return {
+        wire: { left: parseFloat(wire.left), width: parseFloat(wire.width) },
+        dot: { left: parseFloat(dot.left), width: parseFloat(dot.width), box: dot.boxSizing, transform: dot.transform },
+      };
+    }));
+    assert.ok(nodes.length >= 3, `${width} ${colorScheme}: nodes`);
+    for (const { wire, dot } of nodes) {
+      assert.equal(wire.left + wire.width / 2, dot.left + dot.width / 2, `${width} ${colorScheme}: same middle`);
+      // a transform would put the circle half a pixel off the wire on some screens; edges stay on whole pixels
+      assert.equal(dot.transform, 'none', `${width} ${colorScheme}: no transform`);
+      assert.equal(dot.box, 'border-box', `${width} ${colorScheme}: the width is the outer width`);
+      assert.ok(Number.isInteger(wire.left) && Number.isInteger(dot.left), `${width} ${colorScheme}: whole pixels`);
+    }
+    await ctx.close();
+  }
+}
 test('a class works on its year; lower years open for revision; the admin closes the school year', async () => {
   const db = new pg.Client({ connectionString: DB });
   await db.connect();
