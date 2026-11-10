@@ -66,6 +66,11 @@ export default {
   patches: [
     ['HOME.forEach((h,k)=>{', `HOME.push(...${JSON.stringify(HOME_PLUS)});\nHOME.forEach((h,k)=>{`],
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
+    // Titles of the Pretvorbe pages, corrected wording (10. 11. 2026).
+    ['t:"Pozicijski številski sistemi"', 't:"Številski sistemi"'],
+    ['t:"Desetiško v drugi sistem"', 't:"Desetiško v druge sisteme"'],
+    ['t:"Drugi sistem v desetiško"', 't:"Drugi sistemi v desetiški"'],
+    ['t:"Dvojiško, osmiško in šestnajstiško med seboj"', 't:"Dvojiško, osmiško in šestnajstiško"'],
     // Subtraction (agreed 10. 11. 2026): the page about borrowing is removed, and every subtraction is shown as the sum of a
     // complement with the carries drawn from column to column.
     ["function calcBlock(A, B, base, op){\n  const va = parseInt(A,base), vb = parseInt(B,base), s = sub(base);\n",

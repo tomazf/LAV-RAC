@@ -1231,7 +1231,7 @@ html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-ti
     <!-- ===================== RAZLAGA ===================== -->
     <section id="stavek-if">
       <div class="eyebrow">Razlaga 1</div>
-      <h2>Pogojni stavek if</h2>
+      <h2>Pogojni stavek IF</h2>
       <div class="prose">
         <p>Pogojni stavek uporabimo, kadar želimo nek stavek izvesti <strong>samo takrat, ko je izpolnjen pogoj</strong>. Zapišemo ga z besedo <code>if</code>, za njo v oklepaju pogoj, nato stavek, ki se izvede, če ima pogoj vrednost <code>true</code>.</p>
         <p><strong>Pogoj</strong> je vedno izraz tipa <code>boolean</code>: primerjava (<code>x &lt; 0</code>, <code>n % 2 == 0</code>), logična spremenljivka ali več pogojev, povezanih z <code>&amp;&amp;</code>, <code>||</code> in <code>!</code> (poglavje 4).</p>
@@ -1261,7 +1261,7 @@ System.out.println(x);   // 7</pre>
 
     <section id="if-else">
       <div class="eyebrow">Razlaga 2</div>
-      <h2>if – else in blok stavkov</h2>
+      <h2>IF – ELSE in blok stavkov</h2>
       <div class="prose">
         <p>Če želimo v primeru, ko pogoj <strong>ni</strong> izpolnjen, izvesti kakšen drug stavek, dodamo besedo <code>else</code> in stavek za ta primer. Izvede se natanko ena od obeh vej.</p>
         <p>Kadar mora veja vsebovati več stavkov, jih obdamo z zavitimi oklepaji <code>{ }</code>. Tak stavek imenujemo <strong>sestavljeni stavek</strong> ali <strong>blok</strong>.</p>
@@ -1298,7 +1298,7 @@ System.out.println(z);            // 1</pre>
 
     <section id="gnezdenje">
       <div class="eyebrow">Razlaga 3</div>
-      <h2>Gnezdenje in »viseči« else</h2>
+      <h2>Gnezdenje in 'ELSE'</h2>
       <div class="prose">
         <p>Pogojni stavek je navaden stavek, zato ga lahko zapišemo znotraj drugega pogojnega stavka. Temu rečemo <strong>gnezdenje</strong>. Notranji pogoj se preverja samo, če je zunanji izpolnjen.</p>
         <p>Težava nastane, če napišemo dva pogojna stavka in samo en <code>else</code>. Pravilo prevajalnika je jasno: <strong><code>else</code> pripada zadnjemu (najbližjemu) stavku <code>if</code>, ki še nima svojega <code>else</code></strong>. Zamik vrstic tega ne spremeni.</p>
@@ -1332,7 +1332,7 @@ System.out.println(x + " " + y);   // 4 -2</pre>
 
     <section id="veriga">
       <div class="eyebrow">Razlaga 4</div>
-      <h2>Veriga else if in pogojni operator</h2>
+      <h2>Veriga ELSE IF in pogojni operator</h2>
       <div class="prose">
         <p>Kadar je možnosti več kot dve, uporabimo posebno obliko gnezdenja: za vsakim <code>else</code> takoj sledi nov <code>if</code>. Pogoji se preverjajo <strong>od zgoraj navzdol</strong>. Izvede se veja <strong>prvega</strong> izpolnjenega pogoja, ostali se ne preverjajo več. Zadnji <code>else</code> velja za vse ostale primere.</p>
       </div>
@@ -1661,9 +1661,9 @@ const FLOWS = (function(){ const B = FLOW.B; return {
 const ST = "public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}";
 
 const LEVELS = [
- {id:"naloge-a", tag:"A", title:"Pogoji in stavek if", note:"Kaj je pogoj, kako zapišemo interval, sodost in sestavljene pogoje (razlaga 1)."},
- {id:"naloge-b", tag:"B", title:"if – else, bloki in gnezdenje", note:"Sledenje izvajanju, zaviti oklepaji, viseči else in doseg spremenljivk (razlagi 2 in 3)."},
- {id:"naloge-c", tag:"C", title:"Veriga else if in pogojni operator", note:"Več možnosti, vrstni red pogojev in pretvorba med ?: in if (razlaga 4)."},
+ {id:"naloge-a", tag:"A", title:"Pogoji in stavek IF", note:"Kaj je pogoj, kako zapišemo interval, sodost in sestavljene pogoje (razlaga 1)."},
+ {id:"naloge-b", tag:"B", title:"IF – ELSE, bloki in gnezdenje", note:"Sledenje izvajanju, zaviti oklepaji, viseči else in doseg spremenljivk (razlagi 2 in 3)."},
+ {id:"naloge-c", tag:"C", title:"Veriga ELSE IF in pogojni operator", note:"Več možnosti, vrstni red pogojev in pretvorba med ?: in if (razlaga 4)."},
  {id:"naloge-d", tag:"D", title:"Stavek switch", note:"Oznake case, break, default, nadaljevanje brez break in pretvorba if v switch (razlaga 5)."},
  {id:"naloge-e", tag:"E", title:"Naloge za utrjevanje", note:"Programi s pogojnimi stavki. Vrednosti so zapisane v kodi, Scannerja ne potrebuješ."},
  {id:"doma-mat", tag:"F", title:"Ponavljanje", note:"Maturitetne naloge iz drugih rokov za ponavljanje. Preverjaš jih enako kot v sklopih A–E.", home:true}
@@ -2289,7 +2289,7 @@ document.querySelectorAll(".chip").forEach(c=>c.addEventListener("click",()=>{
 }));
 
 /* ---------- pages ---------- */
-const PAGES = [["stavek-if","Pogojni stavek if"],["if-else","if – else in blok stavkov"],["gnezdenje","Gnezdenje in viseči else"],["veriga","Veriga else if in ?:"],["switch","Stavek switch"],["napake","Pogoste napake"],
+const PAGES = [["stavek-if","Pogojni stavek IF"],["if-else","IF – ELSE in blok stavkov"],["gnezdenje","Gnezdenje in 'ELSE'"],["veriga","Veriga ELSE IF in ?:"],["switch","Stavek switch"],["napake","Pogoste napake"],
   ["naloge-a","Naloge A · Pogoji in if"],["naloge-b","Naloge B · if – else"],["naloge-c","Naloge C · else if in ?:"],["naloge-d","Naloge D · switch"],["naloge-e","Naloge E · Utrjevanje"],["doma","Vaje za doma"]];
 const sel = $("#pageSel");
 sel.innerHTML = PAGES.map((p,k)=>`<option value="${p[0]}">${k+1}. ${esc(p[1])}</option>`).join("");
@@ -2341,7 +2341,7 @@ renderAll();
     hero: document.querySelector("#hero .magic"),
     source: [...document.querySelectorAll("footer > span:not(#resetWrap)")].map(e=>e.textContent.trim()).join(" "),
     vajeNote: document.querySelector("#naloge .prose").innerHTML,
-    groups: [{"id":"g-if","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><path d=\"M24 5l12 10-12 10-12-10z\"/><path d=\"M12 15H6v21M36 15h6v21\"/><rect x=\"1.5\" y=\"36\" width=\"9\" height=\"8\" rx=\"1.5\" class=\"fill\" opacity=\".35\"/><rect x=\"37.5\" y=\"36\" width=\"9\" height=\"8\" rx=\"1.5\"/></svg>","title":"Stavek if","pages":["stavek-if","if-else","gnezdenje"]},{"id":"g-vec","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><path d=\"M24 4v12\"/><path d=\"M24 16L8 30M24 16v14M24 16l16 14\"/><rect x=\"2\" y=\"30\" width=\"12\" height=\"9\" rx=\"1.5\"/><rect x=\"18\" y=\"30\" width=\"12\" height=\"9\" rx=\"1.5\" class=\"fill\" opacity=\".35\"/><rect x=\"34\" y=\"30\" width=\"12\" height=\"9\" rx=\"1.5\"/></svg>","title":"Več možnosti","pages":["veriga","switch","napake"]}].map(g=>({ ...g, pages: g.pages.map(id=>({ id, title: title(id), el: document.getElementById(id) })) })),
+    groups: [{"id":"g-if","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><path d=\"M24 5l12 10-12 10-12-10z\"/><path d=\"M12 15H6v21M36 15h6v21\"/><rect x=\"1.5\" y=\"36\" width=\"9\" height=\"8\" rx=\"1.5\" class=\"fill\" opacity=\".35\"/><rect x=\"37.5\" y=\"36\" width=\"9\" height=\"8\" rx=\"1.5\"/></svg>","title":"Stavek IF","pages":["stavek-if","if-else","gnezdenje"]},{"id":"g-vec","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><path d=\"M24 4v12\"/><path d=\"M24 16L8 30M24 16v14M24 16l16 14\"/><rect x=\"2\" y=\"30\" width=\"12\" height=\"9\" rx=\"1.5\"/><rect x=\"18\" y=\"30\" width=\"12\" height=\"9\" rx=\"1.5\" class=\"fill\" opacity=\".35\"/><rect x=\"34\" y=\"30\" width=\"12\" height=\"9\" rx=\"1.5\"/></svg>","title":"Več možnosti","pages":["veriga","switch","napake"]}].map(g=>({ ...g, pages: g.pages.map(id=>({ id, title: title(id), el: document.getElementById(id) })) })),
     sets,
     extra: { id: "doma", title: "Za doma", note: home.querySelector(":scope > .prose").textContent.trim().replace(/^Najprej .*?, nato praktične vaje/, "Vaje"), el: home },
     sel: { head: ".thead", num: ".tnum", tags: ".tags", q: ".q", check: ".js-check", hint: ".js-hint", sol: ".js-sol", fb: ".feedback", actions: ":scope > .actions" },

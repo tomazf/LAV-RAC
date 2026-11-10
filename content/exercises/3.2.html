@@ -744,7 +744,7 @@
 <link href="/static/fonts/fonts.css" rel="stylesheet">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
-<title>Algoritmi in diagram poteka</title>
+<title>Algoritmi in diagrami poteka</title>
 <style>
 /* Layout: sticky chapter rail (desktop) + single reading column; theory first, then graded task cards, then homework. */
 :root{
@@ -1225,10 +1225,10 @@ html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-ti
         <div class="seg"><button type="button" class="js-lang" data-lang="en" aria-pressed="true">Flowgorithm</button><button type="button" class="js-lang" data-lang="sl" aria-pressed="false">Matura</button></div>
       </div>
     </div>
-    <div class="crumb" id="crumb"><span class="eyebrow">Poglavje 2 · Algoritmi in diagram poteka</span><span class="eyebrow" id="crumbN"></span></div>
+    <div class="crumb" id="crumb"><span class="eyebrow">Poglavje 2 · Algoritmi in diagrami poteka</span><span class="eyebrow" id="crumbN"></span></div>
     <header class="hero" id="hero">
       <div class="eyebrow">Splošna matura · Računalništvo · Izpitna pola 1</div>
-      <h1>Algoritmi in diagram poteka</h1>
+      <h1>Algoritmi in diagrami poteka</h1>
       <p class="lead">Preden napišemo program, moramo vedeti, kakšen postopek bo izvajal. Naučil se boš, kaj je algoritem, kako ga zapišemo z diagramom poteka, kako po korakih sledimo njegovemu izvajanju in kako ga prevedemo v Javo.</p>
       <div class="magic" aria-label="Pot od ideje do programa">
         <span class="hi">algoritem</span><span>→</span><span class="hi">diagram poteka</span><span>→</span><span class="hi">program v Javi</span>
@@ -2312,7 +2312,7 @@ document.querySelectorAll(".chip").forEach(c=>c.addEventListener("click",()=>{
 }));
 
 /* ---------- pages ---------- */
-const PAGES = [["algoritem","Kaj je algoritem"],["zapis","Načini zapisa"],["simboli","Simboli diagrama poteka"],["gradniki","Zaporedje, vejitev, ponavljanje"],["sled","Sled algoritma"],["java","Od diagrama do Jave"],["nacrtovanje","Kako rešiš nalogo"],
+const PAGES = [["algoritem","Kaj je algoritem"],["zapis","Načini zapisa"],["simboli","Simboli diagrama poteka"],["gradniki","Zaporedje, vejitev, ponavljanje"],["sled","Sled algoritma"],["java","Od diagrama do Jave"],["nacrtovanje","Kako rešiš nalogo?"],
   ["naloge-a","Naloge A · Algoritem"],["naloge-b","Naloge B · Zapis"],["naloge-c","Naloge C · Simboli in gradniki"],["naloge-d","Naloge D · Sled"],["naloge-e","Naloge E · Rišem diagrame"],["naloge-f","Naloge F · Diagram v Javo"],["doma","Vaje za doma"]];
 const sel = $("#pageSel");
 sel.innerHTML = PAGES.map((p,k)=>`<option value="${p[0]}">${k+1}. ${esc(p[1])}</option>`).join("");
@@ -2357,7 +2357,7 @@ renderAll();
   const sets = LEVELS.map(L=>({ id: L.id, tag: L.tag, title: L.title, note: L.note, el: document.getElementById(L.id),
     tasks: T.filter(t=>t.lv===L.tag).map(t=>({ idx: t.idx, el: document.getElementById("t-"+t.id) })) }));
   LavRac.mount({
-    title: "Algoritmi in diagram poteka",
+    title: "Algoritmi in diagrami poteka",
     kicker: "LAV-RAČ3 · 2. poglavje",
     root: ".wrap",
     lead: document.querySelector("#hero .lead").textContent.trim(),

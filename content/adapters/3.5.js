@@ -9,7 +9,7 @@ const ICONS = {
 };
 // Theory groups agreed with the teacher (8. 11. 2026).
 const GROUPS = [
-  { id: 'g-if', icon: 'if', title: 'Stavek if', pages: ['stavek-if', 'if-else', 'gnezdenje'] },
+  { id: 'g-if', icon: 'if', title: 'Stavek IF', pages: ['stavek-if', 'if-else', 'gnezdenje'] },
   { id: 'g-vec', icon: 'vec', title: 'Več možnosti', pages: ['veriga', 'switch', 'napake'] },
 ];
 // The teacher's task names (set letter and place in the set as the portal shows it, 10. 11. 2026): the tasks that only
@@ -74,6 +74,18 @@ export default {
   body{padding-left:0;padding-right:0}`,
   patches: [
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
+    // IF and ELSE are written in capitals in titles (corrected 10. 11. 2026); the code keeps them lowercase.
+    ['["stavek-if","Pogojni stavek if"]', '["stavek-if","Pogojni stavek IF"]'],
+    ['<h2>Pogojni stavek if</h2>', '<h2>Pogojni stavek IF</h2>'],
+    ['["if-else","if – else in blok stavkov"]', '["if-else","IF – ELSE in blok stavkov"]'],
+    ['<h2>if – else in blok stavkov</h2>', '<h2>IF – ELSE in blok stavkov</h2>'],
+    ['["gnezdenje","Gnezdenje in viseči else"]', "[\"gnezdenje\",\"Gnezdenje in 'ELSE'\"]"],
+    ['<h2>Gnezdenje in »viseči« else</h2>', "<h2>Gnezdenje in 'ELSE'</h2>"],
+    ['["veriga","Veriga else if in ?:"]', '["veriga","Veriga ELSE IF in ?:"]'],
+    ['<h2>Veriga else if in pogojni operator</h2>', '<h2>Veriga ELSE IF in pogojni operator</h2>'],
+    ['title:"Pogoji in stavek if"', 'title:"Pogoji in stavek IF"'],
+    ['title:"if – else, bloki in gnezdenje"', 'title:"IF – ELSE, bloki in gnezdenje"'],
+    ['title:"Veriga else if in pogojni operator"', 'title:"Veriga ELSE IF in pogojni operator"'],
     // The laboratory exercises are no longer mentioned (agreed 8. 11. 2026): set E becomes "Naloge za utrjevanje", the
     // tags "RAČ-LAV 3 · vaja 4 · N" go, and the matura revision set is "Ponavljanje", graded among the others.
     ['{id:"naloge-e", tag:"E", title:"Laboratorijske vaje RAČ-LAV 3 · vaja 4", note:"Naloge iz laboratorijske vaje 4 (pogojni stavki). Vrednosti so zapisane v kodi, Scannerja ne potrebuješ."},',

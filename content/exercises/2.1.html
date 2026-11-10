@@ -1795,7 +1795,7 @@ function pgFlipStatic(){
 const NOVO = [..."NOVO"].map(a7).map(s=>[...s].map(Number));
 const tbit = (s)=>[...s].map(Number);
 const THEORY = [
- {id:"sistemi", g:0, t:"Pozicijski številski sistemi", h:()=>`
+ {id:"sistemi", g:0, t:"Številski sistemi", h:()=>`
   ${prose(`<p>Računalnik pozna samo <strong>dvojiški (binarni) sistem</strong>, ki ima dve števki: 0 in 1. Ljudje računamo v <strong>desetiškem</strong>, v računalništvu pa se pogosto srečamo tudi z <strong>osmiškim</strong> in <strong>šestnajstiškim</strong>, ker sta krajša zapisa dvojiškega. Vsi štirje so <strong>pozicijski</strong>: vrednost števke je odvisna od mesta, na katerem stoji. Mesto ima težo, to je potenca osnove sistema.</p>`)}
   <h3>Teže bitov v enem bajtu</h3>
   <div class="mem8">${W8.map((w,i)=>`<div class="mc${i%2?"":" on"}"><small>2<sup>${7-i}</sup></small><b>${w}</b></div>`).join("")}</div>
@@ -1804,7 +1804,7 @@ const THEORY = [
   ${note("Osnova 2 uporablja števki 0 in 1, osnova 8 števke 0 do 7, osnova 16 pa števke 0 do 9 in črke A do F (A = 10, B = 11, C = 12, D = 13, E = 14, F = 15).")}
   <h3>Preizkusi sam</h3>
   ${wData("bits")}`},
- {id:"dec-v-drugi", g:0, t:"Desetiško v drugi sistem", h:()=>`
+ {id:"dec-v-drugi", g:0, t:"Desetiško v druge sisteme", h:()=>`
   ${prose(`<p>Število ponavljajoče <strong>deliš z osnovo</strong> (2, 8 ali 16) in pri vsakem koraku zapišeš celoštevilčni rezultat in ostanek. Postopek ponavljaš, dokler ne dobiš rezultata 0. Število zapišeš kot zapis ostankov, pri čemer začneš pri <strong>zadnjem koraku</strong> (od spodaj navzgor). Pri šestnajstiškem sistemu ostanke 10 do 15 zapišeš s črkami A do F.</p>`)}
   <h3>Dvojiški sistem</h3>
   <div class="two wide">${divBlock(23,2)}${divBlock(52,2)}${divBlock(115,2)}</div>
@@ -1813,7 +1813,7 @@ const THEORY = [
   <h3>Osmiški sistem</h3>
   <div class="two wide">${divBlock(75,8)}</div>
   ${note("Preveri se vedno vrne nazaj: 47856₁₀ = BAF0₁₆ pomeni 11·4096 + 10·256 + 15·16 + 0 = 47856. Spodnji bit (korak 0) je najmanj pomemben, zato je v zapisu na desni.")}`},
- {id:"drugi-v-dec", g:0, t:"Drugi sistem v desetiško", h:()=>`
+ {id:"drugi-v-dec", g:0, t:"Drugi sistemi v desetiški", h:()=>`
   ${prose(`<p>Število zapišemo kot niz števk. Vsaka števka ima težo, ki je potenca osnove. Števko pomnožiš s težo mesta in vse produkte <strong>seštej</strong>. Potence štejemo od desne in začnemo z 0. Pri šestnajstiškem sistemu najprej zamenjaj črke z vrednostmi (A = 10, …, F = 15).</p>`)}
   <h3>Dvojiško v desetiško</h3>
   ${posTbl("10111",2)}${posTbl("110100",2)}${posTbl("1110011",2)}
@@ -1821,7 +1821,7 @@ const THEORY = [
   ${posTbl("17",16)}${posTbl("BAF0",16)}
   <h3>Osmiško v desetiško</h3>
   ${posTbl("237",8)}`},
- {id:"med-sistemi", g:0, t:"Dvojiško, osmiško in šestnajstiško med seboj", h:()=>`
+ {id:"med-sistemi", g:0, t:"Dvojiško, osmiško in šestnajstiško", h:()=>`
   ${prose(`<p>Ena osmiška števka je natanko <strong>3 biti</strong>, ena šestnajstiška natanko <strong>4 biti</strong>. Zato med njimi ne potrebuješ deljenja. Bite razdeliš v skupine od desne in vsako skupino pretvoriš posebej. Če je skupina na levi prekratka, jo dopolniš z ničlami.</p>`)}
   <h3>Dvojiško v šestnajstiško (skupine po 4)</h3>
   ${gline("11010110",4)}<p>1101 = D, 0110 = 6, torej 11010110₂ = <b>D6</b>₁₆</p>

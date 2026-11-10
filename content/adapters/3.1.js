@@ -49,6 +49,8 @@ export default {
   body{padding-left:0;padding-right:0}`,
   patches: [
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
+    // Set A title shortened (corrected 10. 11. 2026).
+    ['title:"Programski jeziki in vrste kode"', 'title:"Programski jeziki"'],
     // The matura revision set is graded among the others (agreed 8. 11. 2026).
     ['title:"Še več maturitetnih nalog", note:"Naloge iz drugih rokov za ponavljanje. Preverjaš jih enako kot v sklopih A–D.", home:true',
       'title:"Ponavljanje", note:"Maturitetne naloge iz drugih rokov za ponavljanje. Preverjaš jih enako kot v sklopih A–D.", home:true'],

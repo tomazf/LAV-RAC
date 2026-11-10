@@ -724,22 +724,22 @@
     {
      "id": "sistemi",
      "chapter": "Teorija",
-     "label": "Pozicijski številski sistemi"
+     "label": "Številski sistemi"
     },
     {
      "id": "dec-v-drugi",
      "chapter": "Teorija",
-     "label": "Desetiško v drugi sistem"
+     "label": "Desetiško v druge sisteme"
     },
     {
      "id": "drugi-v-dec",
      "chapter": "Teorija",
-     "label": "Drugi sistem v desetiško"
+     "label": "Drugi sistemi v desetiški"
     },
     {
      "id": "med-sistemi",
      "chapter": "Teorija",
-     "label": "Dvojiško, osmiško in šestnajstiško med seboj"
+     "label": "Dvojiško, osmiško in šestnajstiško"
     },
     {
      "id": "sestevanje",
@@ -2614,77 +2614,77 @@
      "i": 0,
      "level": "lažja",
      "max": 1,
-     "section": "Programski jeziki in vrste kode",
+     "section": "Programski jeziki",
      "q": "Programski jezik Java spada v kategorijo"
     },
     {
      "i": 1,
      "level": "lažja",
      "max": 1,
-     "section": "Programski jeziki in vrste kode",
+     "section": "Programski jeziki",
      "q": "Med katere programske jezike uvrščamo programski jezik Java?"
     },
     {
      "i": 2,
      "level": "srednja",
      "max": 2,
-     "section": "Programski jeziki in vrste kode",
+     "section": "Programski jeziki",
      "q": "Programski jezik Java je"
     },
     {
      "i": 3,
      "level": "srednja",
      "max": 2,
-     "section": "Programski jeziki in vrste kode",
+     "section": "Programski jeziki",
      "q": "Uvrstite naštete programske jezike med nižje in višje programske jezike."
     },
     {
      "i": 4,
      "level": "lažja",
      "max": 1,
-     "section": "Programski jeziki in vrste kode",
+     "section": "Programski jeziki",
      "q": "Programski jezik Java sodi v skupino"
     },
     {
      "i": 5,
      "level": "lažja",
      "max": 1,
-     "section": "Programski jeziki in vrste kode",
+     "section": "Programski jeziki",
      "q": "Program, napisan v programskem jeziku Java, smo prevedli in dobili datoteko s končnico class. Datoteko takšne vrste imenujemo:"
     },
     {
      "i": 6,
      "level": "lažja",
      "max": 1,
-     "section": "Programski jeziki in vrste kode",
+     "section": "Programski jeziki",
      "q": "Kaj predstavlja datotečna končnica .class?"
     },
     {
      "i": 7,
      "level": "lažja",
      "max": 1,
-     "section": "Programski jeziki in vrste kode",
+     "section": "Programski jeziki",
      "q": "Da bi se javanski program lahko izvajal, ga je treba prevesti v vmesno (byte) kodo. Končnica imena programske datoteke z vmesno kodo je ___."
     },
     {
      "i": 8,
      "level": "srednja",
      "max": 2,
-     "section": "Programski jeziki in vrste kode",
+     "section": "Programski jeziki",
      "q": "Napisali smo program v programskem jeziku Java. Datoteka z napisanim programom ima končnico java. Programu v taki obliki pravimo (1) ___. S prevajalnikom preved"
     },
     {
      "i": 9,
      "level": "srednja",
      "max": 2,
-     "section": "Programski jeziki in vrste kode",
+     "section": "Programski jeziki",
      "q": "Kateremu jeziku pripada opis?"
     },
     {
      "i": 10,
      "level": "lažja",
      "max": 1,
-     "section": "Programski jeziki in vrste kode",
+     "section": "Programski jeziki",
      "q": "Kateri trditvi o prevajalniku in tolmaču sta resnični? (2 pravilni)"
     },
     {
@@ -3021,7 +3021,7 @@
     {
      "id": "naloge-a",
      "chapter": "Naloge",
-     "label": "Vaje A · Programski jeziki in vrste kode"
+     "label": "Vaje A · Programski jeziki"
     },
     {
      "id": "naloge-b",
@@ -3063,8 +3063,8 @@
    "id": "3.2",
    "no": "2",
    "module": "LAV-RAČ3",
-   "title": "Algoritmi in diagram poteka",
-   "fullTitle": "Algoritmi in diagram poteka",
+   "title": "Algoritmi in diagrami poteka",
+   "fullTitle": "Algoritmi in diagrami poteka",
    "key": "scnm_lavrac_3_2_v2",
    "version": 2,
    "format": "short",
@@ -3496,7 +3496,7 @@
     {
      "id": "nacrtovanje",
      "chapter": "Teorija",
-     "label": "Kako rešiš nalogo"
+     "label": "Kako rešiš nalogo?"
     },
     {
      "id": "naloge-a",
@@ -4692,126 +4692,126 @@
      "i": 0,
      "level": "lažja",
      "max": 1,
-     "section": "Pogoji in stavek if",
+     "section": "Pogoji in stavek IF",
      "q": "Kateri izmed opisov velja za stavek if?"
     },
     {
      "i": 1,
      "level": "lažja",
      "max": 1,
-     "section": "Pogoji in stavek if",
+     "section": "Pogoji in stavek IF",
      "q": "Kakšnega tipa mora biti vrednost pogoja v stavku if (pogoj)?"
     },
     {
      "i": 2,
      "level": "lažja",
      "max": 1,
-     "section": "Pogoji in stavek if",
+     "section": "Pogoji in stavek IF",
      "q": "Kaj izpiše program?"
     },
     {
      "i": 3,
      "level": "srednja",
      "max": 2,
-     "section": "Pogoji in stavek if",
+     "section": "Pogoji in stavek IF",
      "q": "V katerem stavku je zanesljivo vrednost pogoja true, če je vrednost spremenljivke a v intervalu [20..40]?"
     },
     {
      "i": 4,
      "level": "srednja",
      "max": 2,
-     "section": "Pogoji in stavek if",
+     "section": "Pogoji in stavek IF",
      "q": "Naj bo x celoštevilska spremenljivka. Obkrožite črko pred pogojema, ki se ovrednotita na true, če je x sodo število."
     },
     {
      "i": 5,
      "level": "srednja",
      "max": 2,
-     "section": "Pogoji in stavek if",
+     "section": "Pogoji in stavek IF",
      "q": "Katera pogoja bi vrnila vrednost true, če je vrednost celoštevilske spremenljivke x sodo število?"
     },
     {
      "i": 6,
      "level": "lažja",
      "max": 1,
-     "section": "Pogoji in stavek if",
+     "section": "Pogoji in stavek IF",
      "q": "Dani imamo deklaraciji: boolean a=true, b=false; boolean c=true, d=false; Kakšna je vrednost pogoja ((a||b)&&(!c||!d))? Vpiši true ali false."
     },
     {
      "i": 7,
      "level": "lažja",
      "max": 1,
-     "section": "Pogoji in stavek if",
+     "section": "Pogoji in stavek IF",
      "q": "Deklarirani sta spremenljivki a in b tipa boolean in dan je stavek if (!a && !b) {/*…*/}. Zapišite ekvivalentni stavek if brez uporabe operatorja &&. Vpiši samo"
     },
     {
      "i": 8,
      "level": "srednja",
      "max": 2,
-     "section": "Pogoji in stavek if",
+     "section": "Pogoji in stavek IF",
      "q": "Dan je logični izraz: !(x>0 && x<10). Zapišite enakovreden pogoj, pri čemer ne smete uporabiti negacije."
     },
     {
      "i": 9,
      "level": "srednja",
      "max": 2,
-     "section": "Pogoji in stavek if",
+     "section": "Pogoji in stavek IF",
      "q": "Dan je izsek programa: int z=65; double d1=65.0; Integer i=65; String s=\"A\"; Obkrožite veljavni primerjavi."
     },
     {
      "i": 10,
      "level": "lažja",
      "max": 1,
-     "section": "Pogoji in stavek if",
+     "section": "Pogoji in stavek IF",
      "q": "Kaj izpiše program? Pozorno poglej prvo vrstico s pogojem."
     },
     {
      "i": 11,
      "level": "lažja",
      "max": 1,
-     "section": "if – else, bloki in gnezdenje",
+     "section": "IF – ELSE, bloki in gnezdenje",
      "q": "Izračunajte vrednost spremenljivke x po izvedbi tega dela programa:"
     },
     {
      "i": 12,
      "level": "srednja",
      "max": 2,
-     "section": "if – else, bloki in gnezdenje",
+     "section": "IF – ELSE, bloki in gnezdenje",
      "q": "Po izvedbi naslednjega dela programa je vrednost spremenljivke x:"
     },
     {
      "i": 13,
      "level": "srednja",
      "max": 2,
-     "section": "if – else, bloki in gnezdenje",
+     "section": "IF – ELSE, bloki in gnezdenje",
      "q": "Izračunajte vrednost spremenljivk x in y po izvedbi tega dela programa:"
     },
     {
      "i": 14,
      "level": "srednja",
      "max": 2,
-     "section": "if – else, bloki in gnezdenje",
+     "section": "IF – ELSE, bloki in gnezdenje",
      "q": "Izračunajte vrednost spremenljivk x in y, ko se izvede program."
     },
     {
      "i": 15,
      "level": "lažja",
      "max": 1,
-     "section": "if – else, bloki in gnezdenje",
+     "section": "IF – ELSE, bloki in gnezdenje",
      "q": "Kaj izpiše program?"
     },
     {
      "i": 16,
      "level": "srednja",
      "max": 2,
-     "section": "if – else, bloki in gnezdenje",
+     "section": "IF – ELSE, bloki in gnezdenje",
      "q": "Kaj izpiše program pri danih vrednostih? Če program ne izpiše ničesar, vpiši nic."
     },
     {
      "i": 17,
      "level": "lažja",
      "max": 1,
-     "section": "if – else, bloki in gnezdenje",
+     "section": "IF – ELSE, bloki in gnezdenje",
      "q": "Kaj se zgodi s programom? int x = 3; if (x > 0) { int y = x * 2; } System.out.println(y);"
     },
     {
@@ -4819,7 +4819,7 @@
      "level": "srednja",
      "max": 0,
      "self": true,
-     "section": "if – else, bloki in gnezdenje",
+     "section": "IF – ELSE, bloki in gnezdenje",
      "q": "Napiši program, ki za število n = 14 izpiše sodo, če je število sodo, in liho, če je liho. Nato preizkusi še z n = 7 in n = -3."
     },
     {
@@ -4827,56 +4827,56 @@
      "level": "srednja",
      "max": 0,
      "self": true,
-     "section": "if – else, bloki in gnezdenje",
+     "section": "IF – ELSE, bloki in gnezdenje",
      "q": "Spremenljivkama x in y tipa double smo že določili neničelne vrednosti. Zapišite pogojne stavke, s katerimi izpišemo, v katerem kvadrantu se nahaja točka s koor"
     },
     {
      "i": 20,
      "level": "lažja",
      "max": 1,
-     "section": "Veriga else if in pogojni operator",
+     "section": "Veriga ELSE IF in pogojni operator",
      "q": "Kaj izpiše program?"
     },
     {
      "i": 21,
      "level": "srednja",
      "max": 2,
-     "section": "Veriga else if in pogojni operator",
+     "section": "Veriga ELSE IF in pogojni operator",
      "q": "Program ima pogoje v napačnem vrstnem redu. Kaj izpiše?"
     },
     {
      "i": 22,
      "level": "lažja",
      "max": 1,
-     "section": "Veriga else if in pogojni operator",
+     "section": "Veriga ELSE IF in pogojni operator",
      "q": "Kaj izpiše spodnji diagram poteka (in z njim zapisana koda), če je tocke = 30?"
     },
     {
      "i": 23,
      "level": "lažja",
      "max": 1,
-     "section": "Veriga else if in pogojni operator",
+     "section": "Veriga ELSE IF in pogojni operator",
      "q": "Spremenljivki a in b sta tipa int. Z enim prireditvenim stavkom in pogojnim operatorjem ?: v spremenljivko max shrani večjo od obeh vrednosti. Vpiši celoten sta"
     },
     {
      "i": 24,
      "level": "srednja",
      "max": 2,
-     "section": "Veriga else if in pogojni operator",
+     "section": "Veriga ELSE IF in pogojni operator",
      "q": "V programu imamo naslednja stavka: int a=10, b=20, c=30; int x = a>b && a>c ? a : (b>c ? b : c); Zapišite drugi stavek z uporabo stavka if, torej brez operatorj"
     },
     {
      "i": 25,
      "level": "srednja",
      "max": 2,
-     "section": "Veriga else if in pogojni operator",
+     "section": "Veriga ELSE IF in pogojni operator",
      "q": "Kateri metodi sprejmeta celo število x in vrneta logično vrednost?"
     },
     {
      "i": 26,
      "level": "lažja",
      "max": 1,
-     "section": "Veriga else if in pogojni operator",
+     "section": "Veriga ELSE IF in pogojni operator",
      "q": "Kaj izpiše program?"
     },
     {
@@ -5059,22 +5059,22 @@
     {
      "id": "stavek-if",
      "chapter": "Teorija",
-     "label": "Pogojni stavek if"
+     "label": "Pogojni stavek IF"
     },
     {
      "id": "if-else",
      "chapter": "Teorija",
-     "label": "if – else in blok stavkov"
+     "label": "IF – ELSE in blok stavkov"
     },
     {
      "id": "gnezdenje",
      "chapter": "Teorija",
-     "label": "Gnezdenje in viseči else"
+     "label": "Gnezdenje in 'ELSE'"
     },
     {
      "id": "veriga",
      "chapter": "Teorija",
-     "label": "Veriga else if in ?:"
+     "label": "Veriga ELSE IF in ?:"
     },
     {
      "id": "switch",
@@ -5089,17 +5089,17 @@
     {
      "id": "naloge-a",
      "chapter": "Naloge",
-     "label": "Vaje A · Pogoji in stavek if"
+     "label": "Vaje A · Pogoji in stavek IF"
     },
     {
      "id": "naloge-b",
      "chapter": "Naloge",
-     "label": "Vaje B · if – else, bloki in gnezdenje"
+     "label": "Vaje B · IF – ELSE, bloki in gnezdenje"
     },
     {
      "id": "naloge-c",
      "chapter": "Naloge",
-     "label": "Vaje C · Veriga else if in pogojni operator"
+     "label": "Vaje C · Veriga ELSE IF in pogojni operator"
     },
     {
      "id": "naloge-d",

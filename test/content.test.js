@@ -501,8 +501,29 @@ test('a reset starts a new attempt that the teacher sees; read pages stay read',
   await p.context().close();
 });
 
+test('corrected chapter and topic titles (10. 11. 2026) are the same in the catalog and on the page', async () => {
+  const labels = (id) => catalog.exercises.find((e) => e.id === id).pages.map((x) => x.label);
+  assert.deepEqual(labels('2.1').slice(1, 5), ['Številski sistemi', 'Desetiško v druge sisteme', 'Drugi sistemi v desetiški', 'Dvojiško, osmiško in šestnajstiško']);
+  assert.equal(catalog.exercises.find((e) => e.id === '3.2').title, 'Algoritmi in diagrami poteka');
+  assert.ok(labels('3.2').includes('Kako rešiš nalogo?'));
+  assert.ok(catalog.exercises.find((e) => e.id === '3.1').tasks.some((t) => t.section === 'Programski jeziki'));
+  assert.deepEqual(labels('3.5').slice(1, 7), ['Pogojni stavek IF', 'IF – ELSE in blok stavkov', "Gnezdenje in 'ELSE'", 'Veriga ELSE IF in ?:', 'Stavek switch', 'Pogoste napake']);
+  const a = await login('Sara Skrbnik');
+  await a.goto(`${APP}/vaje/3.2#pregled`);
+  await a.waitForSelector('.lr-top-in');
+  assert.match(await a.textContent('.lr-top .lr-name'), /Algoritmi in diagrami poteka/);
+  await a.goto(`${APP}/vaje/2.1#pregled`);
+  await a.waitForSelector('.lr-rail');
+  assert.deepEqual((await a.locator('.lr-rail a.lr-pg .lr-tx').allTextContents()).slice(0, 4), ['Številski sistemi', 'Desetiško v druge sisteme', 'Drugi sistemi v desetiški', 'Dvojiško, osmiško in šestnajstiško']);
+  await a.goto(`${APP}/vaje/3.5#gnezdenje`);
+  await a.waitForSelector('.page.on h2');
+  assert.equal(await a.textContent('.page.on h2'), "Gnezdenje in 'ELSE'");
+  await a.context().close();
+  assert.deepEqual(errors, []);
+});
+
 test('2.2, 2.3 and 3.1 to 3.5: every page opens without errors, with their theory groups', async () => {
-  const want = { '2.2': [85, ['Logična vrata', 'Funkcije in poenostavljanje', 'Aritmetična vezja', 'Vaje']], '2.3': [129, ['Podatki in procesor', 'Zbirnik', 'Prekinitve in pomnilniki', 'Vhod, izhod in cevovod', 'Vaje']], '3.1': [52, ['Jezik in prevajanje', 'Orodja, zagon in napake', 'Vaje']], '3.2': [53, ['Algoritem in zapis', 'Gradniki in sled', 'Od diagrama do programa', 'Vaje']], '3.3': [55, ['Program in podatki', 'Izpis in vnos', 'Računanje in potek programa', 'Vaje']], '3.4': [76, ['Tipi in pretvorbe', 'Znaki in nizi', 'Operatorji', 'Vaje']], '3.5': [50, ['Stavek if', 'Več možnosti', 'Vaje']] };
+  const want = { '2.2': [85, ['Logična vrata', 'Funkcije in poenostavljanje', 'Aritmetična vezja', 'Vaje']], '2.3': [129, ['Podatki in procesor', 'Zbirnik', 'Prekinitve in pomnilniki', 'Vhod, izhod in cevovod', 'Vaje']], '3.1': [52, ['Jezik in prevajanje', 'Orodja, zagon in napake', 'Vaje']], '3.2': [53, ['Algoritem in zapis', 'Gradniki in sled', 'Od diagrama do programa', 'Vaje']], '3.3': [55, ['Program in podatki', 'Izpis in vnos', 'Računanje in potek programa', 'Vaje']], '3.4': [76, ['Tipi in pretvorbe', 'Znaki in nizi', 'Operatorji', 'Vaje']], '3.5': [50, ['Stavek IF', 'Več možnosti', 'Vaje']] };
   for (const [id, [n, groups]] of Object.entries(want)) {
     const ex = catalog.exercises.find((e) => e.id === id);
     assert.equal(ex.module, id.startsWith('3.') ? 'LAV-RAČ3' : 'LAV-RAČ2');
@@ -1311,9 +1332,9 @@ test('3.5: two theory groups, laboratory exercises are not mentioned, set E is "
   const a = await login('Sara Skrbnik');
   await a.goto(`${APP}/vaje/3.5#pregled`);
   await at(a, 'pregled');
-  assert.deepEqual(await a.locator('.lr-rail .lr-grp b').allTextContents(), ['Stavek if', 'Več možnosti', 'Vaje']);
+  assert.deepEqual(await a.locator('.lr-rail .lr-grp b').allTextContents(), ['Stavek IF', 'Več možnosti', 'Vaje']);
   const sections = [...new Set(ex.tasks.map((t) => t.section))];
-  assert.deepEqual(sections, ['Pogoji in stavek if', 'if – else, bloki in gnezdenje', 'Veriga else if in pogojni operator', 'Stavek switch', 'Naloge za utrjevanje', 'Ponavljanje']);
+  assert.deepEqual(sections, ['Pogoji in stavek IF', 'IF – ELSE, bloki in gnezdenje', 'Veriga ELSE IF in pogojni operator', 'Stavek switch', 'Naloge za utrjevanje', 'Ponavljanje']);
   assert.deepEqual(sections.map((n) => ex.tasks.filter((t) => t.section === n).length), [11, 9, 7, 9, 10, 4]);
   // 82 points of the artifact minus the 11 self-checked programs (B8, B9, E1-E6, E8-E10), which carry no points
   assert.equal(ex.maxPoints, 58);

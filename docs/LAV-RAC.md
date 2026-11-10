@@ -4,11 +4,11 @@ Splošni dogovor je v `NACRT_PORTALA.md`. Tukaj je samo, kar velja za ta portal.
 
 ## Stanje
 
-Postavljena je osnova: prijava, vloge, oblika, vstopna stran in struktura z deli LAV-RAČ2, LAV-RAČ3 in LAV-RAČ4. Uvožene so vaje 2.1 Številski sistemi, kodiranje in pariteta, 2.2 Logične funkcije, 2.3 Arhitektura računalniških sistemov, 3.1 Java in delovanje JVM (LAV-RAČ3, 1. poglavje), 3.2 Algoritmi in diagram poteka (LAV-RAČ3, 2. poglavje), 3.3 Temeljni gradniki programa (LAV-RAČ3, 3. poglavje), 3.4 Podatkovni tipi v Javi (LAV-RAČ3, 4. poglavje) in 3.5 Pogojni stavki v Javi (LAV-RAČ3, 5. poglavje).
+Postavljena je osnova: prijava, vloge, oblika, vstopna stran in struktura z deli LAV-RAČ2, LAV-RAČ3 in LAV-RAČ4. Uvožene so vaje 2.1 Številski sistemi, kodiranje in pariteta, 2.2 Logične funkcije, 2.3 Arhitektura računalniških sistemov, 3.1 Java in delovanje JVM (LAV-RAČ3, 1. poglavje), 3.2 Algoritmi in diagrami poteka (LAV-RAČ3, 2. poglavje), 3.3 Temeljni gradniki programa (LAV-RAČ3, 3. poglavje), 3.4 Podatkovni tipi v Javi (LAV-RAČ3, 4. poglavje) in 3.5 Pogojni stavki v Javi (LAV-RAČ3, 5. poglavje).
 
 Razpored (od učitelja, popravljen 6. 11. 2026). Poglavja se v vsakem letniku štejejo od 1 in tako jih vidijo dijaki in učitelji (`no`); tehnična oznaka vaje (`id`, v povezavah in bazi) je letnik.poglavje, da je enolična:
 - LAV-RAČ2 (prazno mesto 4 je za učitelje »V pripravi«, `planned` v `content/sources.json`): 2.1 Številski sistemi, kodiranje in pariteta, 2.2 Logične funkcije, 2.3 Arhitektura računalniških sistemov, 2.4 (prosto, dodamo kasneje), 2.5 Operacijski sistemi in Linux lupina
-- LAV-RAČ3: 3.1 Java in delovanje JVM, 3.2 Algoritmi in diagram poteka, 3.3 Temeljni gradniki programa, 3.4 Podatkovni tipi v Javi, 3.5 Pogojni stavki v Javi, 3.6 Zanke v Javi
+- LAV-RAČ3: 3.1 Java in delovanje JVM, 3.2 Algoritmi in diagrami poteka, 3.3 Temeljni gradniki programa, 3.4 Podatkovni tipi v Javi, 3.5 Pogojni stavki v Javi, 3.6 Zanke v Javi
 - LAV-RAČ4: še ni določeno
 
 

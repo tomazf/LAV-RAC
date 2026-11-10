@@ -43,7 +43,7 @@ const J_NEW = {
 // Za doma 6 (the same algorithm in four ways): its solution gets the diagram and the program, not only a sentence.
 const H6_JAVA = 'import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        int c = sc.nextInt();\n        double p = (a + b + c) / 3.0;\n        System.out.println(p);\n    }\n}';
 const H6_SOL = 'Besedno: preberi tri števila, jih seštej, vsoto deli s 3 in izpiši rezultat. Psevdokoda: preberi a, b, c; p = (a + b + c) / 3; izpiši p. Diagram in program sta zgoraj. Pozor: če so a, b, c tipa int, mora biti deljenec ali delitelj realen (3.0), sicer se rezultat zaokroži.';
-const TITLE = 'Algoritmi in diagram poteka';
+const TITLE = 'Algoritmi in diagrami poteka';
 const KICKER = 'LAV-RAČ3 · 2. poglavje';
 
 const ZAGON = `fillFigs();
@@ -78,6 +78,9 @@ export default {
   body{padding-left:0;padding-right:0}`,
   patches: [
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
+    // Corrected titles (10. 11. 2026): the chapter is plural, the planning page is a question.
+    ['Algoritmi in diagram poteka', 'Algoritmi in diagrami poteka', 'all'],
+    ['["nacrtovanje","Kako rešiš nalogo"]', '["nacrtovanje","Kako rešiš nalogo?"]'],
     // The matura revision set is graded among the others (agreed 8. 11. 2026).
     ['title:"Še več maturitetnih nalog", note:"Naloge iz drugih rokov za ponavljanje.", home:true',
       'title:"Ponavljanje", note:"Maturitetne naloge iz drugih rokov za ponavljanje. Preverjaš jih enako kot v sklopih A–F.", home:true'],
