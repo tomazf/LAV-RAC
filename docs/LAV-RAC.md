@@ -60,6 +60,13 @@ Prilagoditve posameznih nalog (10. 11. 2026): adapter pred oštevilčenjem pokli
 
 Ko se vsebina nalog spremeni tako, da se spremeni število ali vrstni red nalog, se `version` poveča (dijaki začnejo nov poskus): 3.1, 3.2, 3.3 in 3.5 imajo od 10. 11. 2026 različico 2.
 
+Vrste nalog pri uvozu (odločeno 10. 11. 2026 po pregledu 3.1–3.5; velja za vsako novo poglavje že ob prvem uvozu, ne šele po pregledu učitelja). Ob uvozu vsako nalogo s programom uvrstim v eno vrsto in uvrstitev pokažem skupaj s poglavjem:
+1. **Samo izpis**: program je dan v nalogi, dijak napiše izpis (sledenje, kaj izpiše). Možnost `nobtn`: brez »Kopiraj kodo« in »Odpri Programiz«; izgine tudi vrstica z navodilom v istem redu. Naloga ostane točkovana.
+2. **Dijak napiše program in izpis ni smiseln za primerjavo** (gre za vajo programiranja, dijak program napiše in požene drugje): možnost `self` (Sam preveri, brez točk). Okno »Tvoja koda« ostane, da dijak kodo shrani; polja za izpis ni; nad oknom je okvir »Pravilen izpis za preverjanje« (`hideExp:true`, `expected` ostane v nalogi); rešitev je prosta. Besedilo naloge ne sme več prositi, naj se izpis prilepi (po potrebi zamenjava v adapterju, najti vse stavke s »prilepi«).
+3. **Točkovana naloga, kjer mora imeti koda določeno zgradbo** (npr. stavek `if` brez `?:`, `switch` s `case` in `default`, zanka določene vrste): točke ostanejo in dodamo `need` (seznam parov [izraz, sporočilo]; preizkus na kodi brez komentarjev in nizov). Manjkajoč del je samo sporočilo, naloga ostane odprta; šele nato se primerja izpis.
+4. Preostalo: naloge z vrzelmi v kodi, polji v stolpcih ali seznamom v vprašanju (`inline`, `same`, `cols`, `list`), rešen primer (`example`), odstranjena naloga (`remove`).
+Skupaj z njimi velja: Za doma ostane z oznakami »D1.« itd. (odločeno 10. 11. 2026, preimenovanja ni); rešitve Za doma so programi v barvah Jave, preizkušeni z `javac`; sprememba, ki ne spremeni števila ali vrstnega reda nalog (npr. gumbi), različice ne poveča. Ko je poglavje uvoženo, se nalogam z gumbi Kopiraj/Programiz, ki ostanejo pri vrsti 2 (okno s kodo), gumbi ne odvzamejo, ker jih dijak za pisanje programa potrebuje.
+
 Ob vsakem uvozu novega poglavja preveri na zaslonu: levi stolpec (oznake, krogi, števci, zamik pri prelomu), legenda pod gumbi nalog in črko za Za doma; vse to dela skupna oblika vaje (`content/shell/`), v adapterju ni treba ničesar nastavljati.
 
 Pri spremembi artifacta: prenesi novo različico v `content/sources/<id>.html`, popravi adapter, če kaka zamenjava ne najde več mesta, poženi `npm run import` in `npm test`. Če se spremeni vrstni red ali število nalog, povečaj `version` v `content/sources.json` (dijaki začnejo nov poskus).
