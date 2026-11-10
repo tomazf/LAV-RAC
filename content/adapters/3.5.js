@@ -17,7 +17,7 @@ const GROUPS = [
 const PREP = {
   // Programs the student writes elsewhere: ticked by the student, the code stays to be saved, the right output is shown.
   self: ['B8', 'B9', 'E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E8', 'E9', 'E10'],
-  nobtn: ['B5', 'C1', 'C2', 'C3', 'C7', 'D1', 'D2', 'D3', 'D4', 'D7'],
+  nobtn: ['A3', 'A11', 'B5', 'C1', 'C2', 'C3', 'C7', 'D1', 'D2', 'D3', 'D4', 'D7'],
 };
 // C5 and D9 (matura tasks with points) check the written code as well as the output: what the task asks for must be in
 // the code (comments and strings do not count). A missing part is a message, not an answer: the task stays open.

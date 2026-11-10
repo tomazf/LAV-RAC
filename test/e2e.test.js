@@ -522,10 +522,12 @@ test('varied numbers: own numbers per student, stable until reset, all answers c
   await openTasks(b, '2.1');
   await b.click('#resetBtn');
   const done = b.waitForResponse((r) => r.url().includes('/api/progress/') && r.request().postDataJSON().reset === true);
+  // a new attempt has new numbers, which the page only gets by loading again: wait for that load, not for the answer to the save
+  const reloaded = b.waitForEvent('load');
   await b.click('#resetYes');
   await done;
+  await reloaded;
   await b.waitForFunction(() => document.getElementById('sc')?.textContent === '0');
-  await b.waitForLoadState();
   assert.notDeepEqual(await questions(b, variants['2.1']), qb, 'new numbers after a reset');
   // a teacher's reset also gives new numbers on the next opening
   const qb2 = await questions(b, variants['2.1']);

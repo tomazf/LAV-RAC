@@ -47,11 +47,16 @@ export default {
   /* IEC gate labels inside the rectangles; comparison table of symbol systems */
   .circ .gl{stroke:none;font-weight:700;font-size:14px}
   .vfig svg.g{width:150px;height:75px;color:var(--accent);flex:none}
+  /* the visually hidden texts (.sr) inside wide tables are absolutely positioned; without a positioned frame they escape its scrolling and widen the page on a phone */
+  .tbl{position:relative}
   .symcmp th small{font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0}
   .symcmp td{vertical-align:middle}`,
   patches: [
     ['HOME.forEach((h,k)=>{', `HOME.push(...${JSON.stringify(HOME_PLUS)});\nHOME.forEach((h,k)=>{`],
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
+    // The table of gate expressions on the first page sits in a scrolling frame like every other table, so a phone does not widen the page.
+    ['<table class="eqtab" style="margin-top:6px">', '<div class="tbl"><table class="eqtab">'],
+    ['je vhod 0</td></tr>\n          </tbody>\n        </table>', 'je vhod 0</td></tr>\n          </tbody>\n        </table></div>'],
     // Gate symbols (agreed 10. 11. 2026): everything is drawn as IEC rectangles; the introduction compares them with ANSI/IEEE
     // (content/adapters/2.2/iec.js, symcmp.js) and the texts that described the old shapes are rewritten.
     ["function gateSvg(t, cls){",

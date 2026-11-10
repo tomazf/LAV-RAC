@@ -736,6 +736,23 @@ test('the exercise fits a phone, in both colour schemes', async () => {
   assert.deepEqual(errors, []);
 });
 
+test('no theory page of 2.1 and 2.2 is wider than a phone: wide tables scroll inside their frame', async () => {
+  const a = await login('Sara Skrbnik');
+  await a.setViewportSize({ width: 360, height: 740 });
+  for (const id of ['2.1', '2.2']) {
+    const ex = catalog.exercises.find((e) => e.id === id);
+    await a.goto(`${APP}/vaje/${id}`);
+    await a.waitForSelector('.page.on');
+    for (const pg of ex.pages.filter((x) => x.chapter === 'Teorija')) {
+      await go(a, pg.id);
+      const w = await a.evaluate(() => ({ sw: document.documentElement.scrollWidth, iw: window.innerWidth }));
+      assert.ok(w.sw <= w.iw + 1, `${id} ${pg.id}: page is ${w.sw}px wide on a ${w.iw}px screen`);
+    }
+  }
+  await a.context().close();
+  assert.deepEqual(errors, []);
+});
+
 test('the dashboard timeline: the wire runs through the middle of every circle, on whole pixels, on a phone and a desktop, in both colour schemes', async () => {
   // all of the class's exercises open for the check, then put back as they were
   const db = new pg.Client({ connectionString: DB });
@@ -1276,7 +1293,7 @@ test('3.5: two theory groups, laboratory exercises are not mentioned, set E is "
   assert.match(fig, /začetek.*preberi tocke.*izpiši "odlicno".*konec/);
   assert.doesNotMatch(fig, /Main|Input|Output/);
   // the tasks that only ask for an output have no copy / Programiz buttons
-  for (const hash of ['naloge-b/5', 'naloge-c/1', 'naloge-c/2', 'naloge-c/3', 'naloge-c/7', 'naloge-d/1', 'naloge-d/2', 'naloge-d/3', 'naloge-d/4', 'naloge-d/7']) {
+  for (const hash of ['naloge-a/3', 'naloge-a/11', 'naloge-b/5', 'naloge-c/1', 'naloge-c/2', 'naloge-c/3', 'naloge-c/7', 'naloge-d/1', 'naloge-d/2', 'naloge-d/3', 'naloge-d/4', 'naloge-d/7']) {
     await go(a, hash);
     assert.equal(await card(a).locator('.js-copy, a[href*=programiz]').count(), 0, hash);
   }

@@ -1341,6 +1341,8 @@ html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-ti
   /* IEC gate labels inside the rectangles; comparison table of symbol systems */
   .circ .gl{stroke:none;font-weight:700;font-size:14px}
   .vfig svg.g{width:150px;height:75px;color:var(--accent);flex:none}
+  /* the visually hidden texts (.sr) inside wide tables are absolutely positioned; without a positioned frame they escape its scrolling and widen the page on a phone */
+  .tbl{position:relative}
   .symcmp th small{font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0}
   .symcmp td{vertical-align:middle}
 </style>
@@ -1443,14 +1445,14 @@ html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-ti
       </div>
       <div class="cmp" style="gap:16px"><div data-w="timing" data-g="AND"></div><div data-w="timing" data-g="OR"></div></div>
       <div class="prose">
-        <table class="eqtab" style="margin-top:6px">
+        <div class="tbl"><table class="eqtab">
           <thead><tr><th>Vrata</th><th>Izraz</th><th>Beremo</th><th>Q = 1, kadar</th></tr></thead>
           <tbody>
             <tr><td>IN (AND)</td><td><code>A·B</code></td><td>A in B</td><td>sta oba vhoda 1</td></tr>
             <tr><td>ALI (OR)</td><td><code>A+B</code></td><td>A ali B</td><td>je vsaj en vhod 1</td></tr>
             <tr><td>NE (NOT)</td><td><code>¬A</code></td><td>ne A</td><td>je vhod 0</td></tr>
           </tbody>
-        </table>
+        </table></div>
       </div>
       <p class="note">Simboli v tem gradivu so po standardu IEC: vrata so pravokotniki z oznako v notranjosti, <code>&amp;</code> za IN, <code>≥1</code> za ALI, <code>1</code> za NE, <code>=1</code> za XOR in <code>=</code> za XNOR. Krožec na izhodu ali vhodu pomeni negacijo.</p>
     </section>
