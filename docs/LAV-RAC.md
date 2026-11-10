@@ -43,6 +43,7 @@ Oblika vaje (dogovor 6. 11. 2026):
 - Vaje so zadnje poglavje in se odklenejo, ko dijak odpre vsako stran razlage (preveri tudi strežnik),
 - v sklopu vaj ena naloga naenkrat, oštevilčeni gumbi v barvi stanja, »rešenih x / n«, legenda (desno poravnana, dogovor 9. 11. 2026), Prejšnja/Naslednja naloga,
 - pod nalogo levo Preveri, desno obrobljena Namig (−50 %) in Prikaži rešitev (0 točk, z vprašanjem pred ogledom),
+- naloge »Sam preveri« (10. 11. 2026, pravila v razdelku 4 načrta): gumb »Preveril sem«, brez točk, rešitev prosto; oznaka »Sam preveri · brez točk«, v seznamu gumbov in legendi svoja barva (modrozelena), v pregledu pravil vrstica »Sam preveri«. Naloga s programom izgubi polje za izpis, naloga z vpisom (3.2 sklop E) namesto polj kaže okvir »Pravilni rezultati za preverjanje«,
 - besedilo razlag in nalog obojestransko poravnano z deljenjem besed,
 - ozadje vaje je svetlo oranžno (#fffaf4), besedilo in gumbi v vijolični barvi portala,
 - besedilo razlag in nalog sega čez vso širino vsebine; gumbi za listanje so majhni,
@@ -52,7 +53,11 @@ Oblika vaje (dogovor 6. 11. 2026):
 - skupine razlag: 2.1 Pretvorbe, Računanje, Kodiranje, Pariteta (iz artifacta); 2.2 Logična vrata, Funkcije in poenostavljanje, Aritmetična vezja; 2.3 Podatki in procesor, Zbirnik, Prekinitve in pomnilniki, Vhod, izhod in cevovod; 3.1 Jezik in prevajanje, Orodja, zagon in napake; 3.2 Algoritem in zapis, Gradniki in sled, Od diagrama do programa; 3.3 Program in podatki, Izpis in vnos, Računanje in potek programa; 3.4 Tipi in pretvorbe, Znaki in nizi, Operatorji,
 - barve stanj so enake kot v učiteljevem pregledu: pravilno zeleno, pravilno z namigom jantarno, napačno rdeče, ogledana rešitev sivo.
 
-Stikalo »Napisi v diagramih« (Flowgorithm ali Matura, 3.2 in 3.3) je del vaje, ne lupine: adapter ga sestavi in preda lupini (`tools`), ta ga vstavi v levi stolpec in v seznam na telefonu. Menjava napisov diagrame prerisuje na mestu, kartic ne gradi znova (zato ostane vpisano). Izbira se hrani v brskalniku.
+Napisi v diagramih (10. 11. 2026): stikala »Napisi v diagramih« ni več. Diagrami imajo povsod napise iz mature (začetek, preberi, izpiši, konec), kot v teoriji; adapter v kodi artifacta namesto branja izbire iz brskalnika postavi `FLOW.setLang("sl")`, zato se izbira, ki jo je artifact nekoč shranil v brskalniku, ne upošteva.
+
+Prilagoditve posameznih nalog (10. 11. 2026): adapter pred oštevilčenjem pokliče `LavRac.prepare(T, LEVELS, { ... })`. Naloge se imenujejo tako, kot jih vidi učitelj v artifactu: črka sklopa in mesto v njem (`C9`), prebrano pred odstranitvami, zato se imena ne premaknejo, ko se naloga odstrani; neznano ime ustavi uvoz. Možnosti: `self` (Sam preveri), `nobtn` (brez »Kopiraj kodo« in »Odpri Programiz«), `inline` (vrzeli `___` se vpišejo kar v kodo; število vrzeli mora biti enako številu polj), `same` (vsa polja v kodi enako široka), `cols` (polja v dveh stolpcih), `list` (vrstice `- …` v vprašanju postanejo seznam), `example` (rešen primer, rešitev odprta od začetka), `remove` (naloga se izloči, ostale se preštevilčijo). Za doma se imenuje z mestom v seznamu, številke (»D1.«) se računajo na novo. Nalogi z gumbom Kopiraj/Programiz, ki ji gumbov ne odvzameš, ju obdrži.
+
+Ko se vsebina nalog spremeni tako, da se spremeni število ali vrstni red nalog, se `version` poveča (dijaki začnejo nov poskus): 3.1, 3.2 in 3.3 imajo od 10. 11. 2026 različico 2.
 
 Ob vsakem uvozu novega poglavja preveri na zaslonu: levi stolpec (oznake, krogi, števci, zamik pri prelomu), legenda pod gumbi nalog in črko za Za doma; vse to dela skupna oblika vaje (`content/shell/`), v adapterju ni treba ničesar nastavljati.
 

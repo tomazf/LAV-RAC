@@ -1,6 +1,6 @@
 // Algoritmi in diagram poteka. Connects the published artifact to the exercise shell: the portal's storage (also for
 // answers typed as program output), one answer per task, three theory groups, the matura revision set moved among
-// the graded sets as "Ponavljanje" (agreed 8. 11. 2026), and the diagram label switch (Flowgorithm / Matura) kept.
+// the graded sets as "Ponavljanje" (agreed 8. 11. 2026), and the matura's diagram labels only (the switch was dropped 10. 11. 2026).
 
 const ICONS = {
   zapis: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="10" y="5" width="28" height="38" rx="3"/><path d="M16 15h16M16 22h16M16 29h16M16 36h9"/></svg>',
@@ -13,31 +13,40 @@ const GROUPS = [
   { id: 'g-gradniki', icon: 'gradniki', title: 'Gradniki in sled', pages: ['gradniki', 'sled'] },
   { id: 'g-program', icon: 'program', title: 'Od diagrama do programa', pages: ['java', 'nacrtovanje'] },
 ];
+// Set E (10. 11. 2026): the student draws the diagram in Flowgorithm, runs it on known test cases and ticks the task
+// (no points: a drawing cannot be checked by the portal). The solution shows the diagram and the program. E1 is a worked
+// example with its solution open, and two tasks are new (even or odd, a product). The names are those of the artifact
+// with the new tasks put in: E3 and E7 are new, and the artifact's E12 (symbols to count) is E14.
+const PREP = {
+  self: Array.from({ length: 15 }, (_, k) => 'E' + (k + 1)),
+  example: ['E1'],
+  nobtn: ['E14'],
+};
+const NEW_EVEN = `{lv:"E", own:true, pts:1, type:"blanks", draw:true,
+ q:"Nariši diagram poteka, ki prebere celo število n in izpiše, ali je sodo ali liho.",
+ b:[{l:"Za n = 7 se izpiše", acc:["liho"]},{l:"Za n = 10 se izpiše", acc:["sodo"]},{l:"Za n = 0 se izpiše", acc:["sodo"]}],
+ h:["Število je sodo, če je ostanek pri deljenju z 2 enak 0. Ostanek zapišeš kot n % 2."],
+ fc:[inp("n"), IF("n % 2 == 0",[out('"sodo"')],[out('"liho"')])], jsol:"e14",
+ why:"Pogoj n % 2 == 0 loči sode in lihe. Za 7 je ostanek 1 (liho), za 10 in za 0 je ostanek 0 (sodo)."},
+`;
+const NEW_PRODUCT = `{lv:"E", own:true, pts:2, type:"blanks", draw:true,
+ q:"Nariši diagram poteka, ki prebere naravno število N in izpiše zmnožek števil od 1 do N (1 · 2 · … · N).",
+ b:[{l:"Za N = 5 se izpiše", acc:["120"]},{l:"Za N = 1 se izpiše", acc:["1"]},{l:"Za N = 6 se izpiše", acc:["720"]}],
+ h:["Zmnožek mora imeti začetno vrednost 1, ne 0: z ničlo bi bil rezultat vedno 0.","V zanki zmnožek pomnoži s števcem i in števec poveča za 1."],
+ fc:[inp("N"), p("f = 1"), p("i = 1"), wh("i <= N",[p("f = f * i"), p("i = i + 1")]), out("f")], jsol:"e15",
+ why:"Zmnožek se začne z 1 in se v vsakem krogu pomnoži z i. Za N = 5 je 1 · 2 · 3 · 4 · 5 = 120, za N = 1 je rezultat 1."},
+`;
+const J_NEW = {
+  e14: 'import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        if (n % 2 == 0) {\n            System.out.println("sodo");\n        } else {\n            System.out.println("liho");\n        }\n    }\n}',
+  e15: 'import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int f = 1;\n        int i = 1;\n        while (i <= n) {\n            f = f * i;\n            i = i + 1;\n        }\n        System.out.println(f);\n    }\n}',
+};
+// Za doma 6 (the same algorithm in four ways): its solution gets the diagram and the program, not only a sentence.
+const H6_JAVA = 'import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        int c = sc.nextInt();\n        double p = (a + b + c) / 3.0;\n        System.out.println(p);\n    }\n}';
+const H6_SOL = 'Besedno: preberi tri števila, jih seštej, vsoto deli s 3 in izpiši rezultat. Psevdokoda: preberi a, b, c; p = (a + b + c) / 3; izpiši p. Diagram in program sta zgoraj. Pozor: če so a, b, c tipa int, mora biti deljenec ali delitelj realen (3.0), sicer se rezultat zaokroži.';
 const TITLE = 'Algoritmi in diagram poteka';
 const KICKER = 'LAV-RAČ3 · 2. poglavje';
 
-// The label switch: the artifact built it into its own left column, which the shell replaces. The shell asks for one
-// fresh copy per place (rail, phone list); a change redraws the diagrams in place, because the cards are already
-// in the shell's pages and must not be rebuilt.
-const TOOLS = `const langBox = () => {
-  const d = document.createElement("div");
-  d.className = "langsw"; d.setAttribute("role", "group"); d.setAttribute("aria-label", "Napisi v diagramih");
-  d.innerHTML = '<span class="eyebrow">Napisi v diagramih</span><div class="seg"><button type="button" class="js-lang" data-lang="en" aria-pressed="true">Flowgorithm</button><button type="button" class="js-lang" data-lang="sl" aria-pressed="false">Matura</button></div>';
-  d.querySelectorAll(".js-lang").forEach(b=>b.addEventListener("click",()=>{
-    FLOW.setLang(b.dataset.lang);
-    try{ localStorage.setItem("java-matura-diagram-lang", b.dataset.lang); }catch(e){}
-    paintLang(); fillFigs(); redrawFigs();
-  }));
-  paintLang();
-  return d;
-};
-function redrawFigs(){
-  document.querySelectorAll("[data-ft]").forEach(e=>{ const t = T.find(x=>x.id===e.dataset.ft); if(t) e.innerHTML = FLOW.svg(t.fcq,{num:t.lv==="D"||t.lv==="C"}); });
-  document.querySelectorAll("[data-fs]").forEach(e=>{ const t = T.find(x=>x.id===e.dataset.fs); if(t) e.innerHTML = FLOW.svg(t.fc); });
-  document.querySelectorAll("[data-fh]").forEach(e=>{ const h = HOME.find(x=>x.id===e.dataset.fh); if(h) e.innerHTML = FLOW.svg(h.fc); });
-}
-`;
-const ZAGON = `${TOOLS}fillFigs();
+const ZAGON = `fillFigs();
 renderAll();
 {
   const title = id => (PAGES.find(p=>p[0]===id) || [id, id])[1];
@@ -55,7 +64,6 @@ renderAll();
     groups: ${JSON.stringify(GROUPS.map((g) => ({ ...g, icon: ICONS[g.icon] })))}.map(g=>({ ...g, pages: g.pages.map(id=>({ id, title: title(id), el: document.getElementById(id) })) })),
     sets,
     extra: { id: "doma", title: "Za doma", note: home.querySelector(":scope > .prose").textContent.trim().replace(/^Najprej .*?, nato vaje/, "Vaje"), el: home },
-    tools: langBox,
     sel: { head: ".thead", num: ".tnum", tags: ".tags", q: ".q", check: ".js-check", hint: ".js-hint", sol: ".js-sol", fb: ".feedback", actions: ":scope > .actions" },
   });
 }`;
@@ -67,8 +75,7 @@ export default {
   css: `html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-tile);--line:var(--lr-line);--fg:var(--lr-ink);--muted:var(--lr-mut);
   --accent:var(--lr-acc);--accent-soft:var(--lr-acc-soft);--ok:var(--lr-ok);--ok-soft:var(--lr-ok-bg);--bad:var(--lr-bad);--bad-soft:var(--lr-bad-bg);
   --seen:var(--lr-seen);--seen-soft:var(--lr-seen-bg);--f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}
-  body{padding-left:0;padding-right:0}
-  .lr-mnav .langsw{flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap}`,
+  body{padding-left:0;padding-right:0}`,
   patches: [
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
     // The matura revision set is graded among the others (agreed 8. 11. 2026).
@@ -77,12 +84,6 @@ export default {
     // Programs can run anywhere, not only in Programiz (agreed 8. 11. 2026).
     ['<span>Zaženi v Eclipse, VS Code ali Programizu (tam razred preimenuj v Main), izpis prilepi spodaj.</span>',
       '<span>Zaženi program v poljubnem okolju (Eclipse, VS Code, Programiz …) in prilepi njegov izpis. V Programizu razred preimenuj v Main.</span>'],
-    // Diagrams can be redrawn in place when the label switch changes: every place that draws one names its task.
-    ['if(t.fcq) body += `<div class="fig">${FLOW.svg(t.fcq,{num:t.lv==="D"||(t.lv==="C")})}</div>`;',
-      'if(t.fcq) body += `<div class="fig" data-ft="${t.id}">${FLOW.svg(t.fcq,{num:t.lv==="D"||(t.lv==="C")})}</div>`;'],
-    ['if(t.fc) html += `<div class="fig"><div class="eyebrow" style="margin-bottom:8px">Diagram poteka</div>${FLOW.svg(t.fc)}</div>`;',
-      'if(t.fc) html += `<div class="fig"><div class="eyebrow" style="margin-bottom:8px">Diagram poteka</div><div data-fs="${t.id}">${FLOW.svg(t.fc)}</div></div>`;'],
-    ['${h.fc?`<div class="fig">${FLOW.svg(h.fc)}</div>`:""}', '${h.fc?`<div class="fig" data-fh="${h.id}">${FLOW.svg(h.fc)}</div>`:""}'],
     // Storage: the portal's state for this student; the artifact's own account sync is not used.
     [`let S = {}, localT = 0;
 try { S = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; localT = +localStorage.getItem(STORE+"-t") || 0; } catch(e) { S = {}; }
@@ -95,7 +96,20 @@ function saveLocal(){ LavRac.saveUi(S); }
 function save(){ LavRac.saveUi(S); }`],
     // Task ids exist only from here on, so the shell learns the tasks here.
     ['T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });',
-      'T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });\nLavRac.tasks(LEVELS.flatMap(L=>T.filter(t=>t.lv===L.tag)), { level: (t) => t.pts });\nS = LavRac.loadUi();'],
+      `LavRac.prepare(T, LEVELS, ${JSON.stringify(PREP)});
+HOME[5].fc = [inp("a", "b", "c"), p("p = (a + b + c) / 3"), out("p")]; HOME[5].jsolCode = ${JSON.stringify(H6_JAVA)}; HOME[5].sol = ${JSON.stringify(H6_SOL)};
+T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });
+LavRac.tasks(LEVELS.flatMap(L=>T.filter(t=>t.lv===L.tag)), { level: (t) => t.pts });
+S = LavRac.loadUi();`],
+    // Set E: the way of working, the worked example, and two new tasks (a diagram and a program for each).
+    ['note:"Diagram najprej nariši na papir ali v Flowgorithm, nato odgovori na testna vprašanja. Rešitev pokaže diagram in kodo v Javi."',
+      'note:"Diagram nariši v programu Flowgorithm (ali na papir) in ga zaženi. Delovanje preveri sam na nekaj testnih primerih z znanim rezultatom: pri vsaki nalogi so navedeni vhodni podatki in pravilni izpis. Točk ni. Ko diagram deluje, nalogo označi s »Preveril sem«. Rešitev (diagram poteka in program v Javi) si lahko ogledaš kadar koli, brez posledic. Prva naloga je rešen primer."'],
+    ['q:"Nariši diagram poteka, ki prebere dve celi števili ter izpiše njuno vsoto in nato njun zmnožek.",',
+      'q:"Rešen primer: diagram poteka za program, ki prebere dve celi števili ter izpiše njuno vsoto in nato njun zmnožek, je spodaj. Nariši ga v Flowgorithm in preveri, ali za vhod 6 in 7 izpiše pravilno.",'],
+    ['{lv:"E", own:true, pts:2, type:"blanks", draw:true,\n q:"Nariši diagram poteka, ki prebere celo število x in izpiše pozitivno',
+      NEW_EVEN + '{lv:"E", own:true, pts:2, type:"blanks", draw:true,\n q:"Nariši diagram poteka, ki prebere celo število x in izpiše pozitivno'],
+    ['{lv:"E", src:"M222/2", pts:2, type:"blanks", draw:true,', NEW_PRODUCT + '{lv:"E", src:"M222/2", pts:2, type:"blanks", draw:true,'],
+    ['const J = {"e1": ', 'const J = {"e14": ' + JSON.stringify(J_NEW.e14) + ', "e15": ' + JSON.stringify(J_NEW.e15) + ', "e1": '],
     ['if(!window.claude || !window.claude.use) return;', 'return;'],
     // Program output and code are the answer too, so they are kept with the portal.
     ['if(ed){ ed.value = s.code != null ? s.code : t.starter;',
@@ -118,8 +132,11 @@ function save(){ LavRac.saveUi(S); }`],
     // The shell does the paging.
     ['applyFilter(); showPage(cur, true);\n}', 'applyFilter();\n}'],
     ['window.addEventListener("hashchange",()=>showPage(location.hash.slice(1)));', ''],
-    // Start: the label switch is built by the shell (tools), so the artifact's own buttons and its re-render are dropped.
+    // Start. The diagrams use the matura's labels, as the students meet them there (agreed 10. 11. 2026): no switch.
     ['cur = location.hash.slice(1) || "jezik";\n', ''],
+    // The matura's labels from the start: the Za doma figures are drawn before the start code runs.
+    ['let LANG = "en";', 'let LANG = "sl";'],
+    ['try{ FLOW.setLang(localStorage.getItem("java-matura-diagram-lang")||"en"); }catch(e){ FLOW.setLang("en"); }', 'FLOW.setLang("sl");'],
     [`document.querySelectorAll(".js-lang").forEach(b=>b.addEventListener("click",()=>{
   FLOW.setLang(b.dataset.lang);
   try{ localStorage.setItem("java-matura-diagram-lang", b.dataset.lang); }catch(e){}

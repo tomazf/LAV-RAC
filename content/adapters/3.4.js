@@ -13,6 +13,23 @@ const GROUPS = [
   { id: 'g-znaki', icon: 'znaki', title: 'Znaki in nizi', pages: ['znaki', 'razredi'] },
   { id: 'g-operatorji', icon: 'operatorji', title: 'Operatorji', pages: ['operatorji', 'napake'] },
 ];
+// The teacher's task names (10. 11. 2026): the set letter and the place in the set as the portal shows it (the split of
+// set E is already made when the names are read). E10 gets its statements as code, which would bring the buttons, so it has none.
+const PREP = {
+  nobtn: ['A3', 'B3', 'B7', 'D1', 'E4', 'E7', 'E10'],
+};
+// Za doma: the program of every solution is a block of code (Java colours), the sentence keeps the explanation.
+const HOME_CODE = [
+  { code: 'public class Main {\n    public static void main(String[] args) {\n        short s = 32765;\n        for (int i = 0; i < 5; i++) {\n            s++;\n            System.out.println(s);\n        }\n    }\n}' },
+  { code: 'public class Main {\n    public static void main(String[] args) {\n        String niz = "19.95";\n        double d = Double.parseDouble(niz);\n        System.out.println(d * 2);        // 39.9\n        int n = Integer.parseInt(niz);    // NumberFormatException\n        System.out.println(n);\n    }\n}' },
+  { code: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println(0.1 + 0.2);       // 0.30000000000000004\n        int centi = 10 + 20;                 // 30 centov\n        System.out.println(centi / 100.0);   // 0.3\n    }\n}' },
+  { code: 'public class Main {\n    public static void main(String[] args) {\n        for (char c = \'A\'; c <= \'E\'; c++) {\n            System.out.println(c + " = " + (int) c);\n        }\n    }\n}',
+    sol: 'Izpis je A = 65, B = 66, C = 67, D = 68, E = 69. Z (int) c se znak pretvori v svojo kodo ASCII.' },
+  { code: 'public class Main {\n    public static String intToBinaryString(int n) {\n        if (n == 0) {\n            return "0";\n        }\n        String r = "";\n        while (n > 0) {\n            r = (n % 2) + r;\n            n = n / 2;\n        }\n        return r;\n    }\n\n    public static boolean primerjaj(int n) {\n        return intToBinaryString(n).equals(Integer.toBinaryString(n));\n    }\n\n    public static void main(String[] args) {\n        System.out.println(intToBinaryString(10));   // 1010\n        System.out.println(primerjaj(10));           // true\n    }\n}',
+    sol: 'Za 10 dobimo 1010 in primerjaj(10) vrne true. Niza primerjamo z equals, ne z ==.' },
+  { code: 'public class Main {\n    public static void main(String[] args) {\n        for (int i = 32; i <= 127; i++) {\n            System.out.print((char) i);\n        }\n    }\n}',
+    sol: 'Spremenljivka i je tipa int, zato jo za izpis znaka pretvorimo z (char). Znak s kodo 127 je kontrolni znak in se ne vidi. Če uporabiš spremenljivko tipa char, z zanko for (char c = \' \'; c <= \'~\'; c++) izpišeš samo vidne znake do kode 126.' },
+];
 const TITLE = 'Podatkovni tipi v Javi';
 const KICKER = 'LAV-RAČ3 · 4. poglavje';
 const ZAGON = `renderAll();
@@ -86,7 +103,14 @@ function saveLocal(){ LavRac.saveUi(S); }
 function save(){ LavRac.saveUi(S); }`],
     // Task ids exist only from here on, so the shell learns the tasks here.
     ['T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });',
-      'T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });\nLavRac.tasks(LEVELS.flatMap(L=>T.filter(t=>t.lv===L.tag)), { level: (t) => t.pts });\nS = LavRac.loadUi();'],
+      `LavRac.prepare(T, LEVELS, ${JSON.stringify(PREP)});
+${JSON.stringify(HOME_CODE)}.forEach((f, k) => { HOME[k].jsolCode = f.code; if (f.sol) HOME[k].sol = f.sol; });
+T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });
+LavRac.tasks(LEVELS.flatMap(L=>T.filter(t=>t.lv===L.tag)), { level: (t) => t.pts });
+S = LavRac.loadUi();`],
+    // E10: the statements are code, not a sentence.
+    ['q:"Kakšne vrednosti so v spremenljivkah po izvedbi stavkov? int x = 1; int a = x++; int b = ++x; Vpiši vrednosti po drugem stavku (x in a) in po tretjem (x in b).",',
+      'code:"int x = 1;\\nint a = x++;\\nint b = ++x;",\n q:"Kakšne vrednosti so v spremenljivkah po izvedbi teh stavkov? Vpiši vrednosti po drugem stavku (x in a) in po tretjem (x in b).",'],
     ['if(!window.claude || !window.claude.use) return;', 'return;'],
     // Program output and code are the answer too, so they are kept with the portal.
     ['if(ed){ ed.value = s.code != null ? s.code : t.starter;',
@@ -109,8 +133,11 @@ function save(){ LavRac.saveUi(S); }`],
     // The shell does the paging.
     ['applyFilter(); showPage(cur, true);\n}', 'applyFilter();\n}'],
     ['window.addEventListener("hashchange",()=>showPage(location.hash.slice(1)));', ''],
-    // Start: the label switch is built by the shell (tools), so the artifact's own buttons and its re-render are dropped.
+    // Start. The diagrams use the matura's labels, as the students meet them there (agreed 10. 11. 2026): no switch.
     ['cur = location.hash.slice(1) || "jezik";\n', ''],
+    // The matura's labels from the start: the Za doma figures are drawn before the start code runs.
+    ['let LANG = "en";', 'let LANG = "sl";'],
+    ['try{ FLOW.setLang(localStorage.getItem("java-matura-diagram-lang")||"en"); }catch(e){ FLOW.setLang("en"); }', 'FLOW.setLang("sl");'],
     [`document.querySelectorAll(".js-lang").forEach(b=>b.addEventListener("click",()=>{
   FLOW.setLang(b.dataset.lang);
   try{ localStorage.setItem("java-matura-diagram-lang", b.dataset.lang); }catch(e){}

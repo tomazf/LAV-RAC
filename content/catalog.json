@@ -2604,10 +2604,10 @@
    "module": "LAV-RAČ3",
    "title": "Java in delovanje JVM",
    "fullTitle": "Java in delovanje JVM",
-   "key": "scnm_lavrac_3_1_v1",
-   "version": 1,
+   "key": "scnm_lavrac_3_1_v2",
+   "version": 2,
    "format": "short",
-   "maxPoints": 79,
+   "maxPoints": 75,
    "tasks": [
     {
      "i": 0,
@@ -2822,7 +2822,8 @@
     {
      "i": 30,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Prevajanje in zagon programa",
      "q": "Napiši program Matura.java, ki izpiše natanko ti dve vrstici:"
     },
@@ -2920,7 +2921,8 @@
     {
      "i": 44,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Sintaksa, semantika in napake",
      "q": "Program naj izpiše povprečje števil 4 in 5, a izpiše Povprečje: 6.0. Popravi semantično napako, da bo izpis natanko:"
     },
@@ -3062,10 +3064,10 @@
    "module": "LAV-RAČ3",
    "title": "Algoritmi in diagram poteka",
    "fullTitle": "Algoritmi in diagram poteka",
-   "key": "scnm_lavrac_3_2_v1",
-   "version": 1,
+   "key": "scnm_lavrac_3_2_v2",
+   "version": 2,
    "format": "short",
-   "maxPoints": 89,
+   "maxPoints": 61,
    "tasks": [
     {
      "i": 0,
@@ -3287,114 +3289,129 @@
     {
      "i": 31,
      "level": "lažja",
-     "max": 1,
+     "max": 0,
+     "self": true,
      "section": "Narišem diagram poteka",
-     "q": "Nariši diagram poteka, ki prebere dve celi števili ter izpiše njuno vsoto in nato njun zmnožek."
+     "q": "Rešen primer: diagram poteka za program, ki prebere dve celi števili ter izpiše njuno vsoto in nato njun zmnožek, je spodaj. Nariši ga v Flowgorithm in preveri,"
     },
     {
      "i": 32,
      "level": "lažja",
-     "max": 1,
+     "max": 0,
+     "self": true,
      "section": "Narišem diagram poteka",
      "q": "Nariši diagram poteka, ki prebere dve celi števili in izpiše večje."
     },
     {
      "i": 33,
-     "level": "srednja",
-     "max": 2,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
      "section": "Narišem diagram poteka",
-     "q": "Nariši diagram poteka, ki prebere celo število x in izpiše pozitivno, negativno ali nic. Uporabi dve vejitvi, eno v drugi."
+     "q": "Nariši diagram poteka, ki prebere celo število n in izpiše, ali je sodo ali liho."
     },
     {
      "i": 34,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Narišem diagram poteka",
-     "q": "Nariši diagram poteka, ki izpiše števila od 1 do 10, vsako v svoji vrstici. Pogoj zanke naj bo i <= 10."
+     "q": "Nariši diagram poteka, ki prebere celo število x in izpiše pozitivno, negativno ali nic. Uporabi dve vejitvi, eno v drugi."
     },
     {
      "i": 35,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Narišem diagram poteka",
-     "q": "Nariši diagram poteka, ki prebere naravno število N in izpiše vsoto števil od 1 do N."
+     "q": "Nariši diagram poteka, ki izpiše števila od 1 do 10, vsako v svoji vrstici. Pogoj zanke naj bo i <= 10."
     },
     {
      "i": 36,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Narišem diagram poteka",
-     "q": "Nariši diagram poteka, ki izpiše prvih N členov zaporedja 1, 2, 4, 8, 16, 32, ... N je vhodni podatek."
+     "q": "Nariši diagram poteka, ki prebere naravno število N in izpiše vsoto števil od 1 do N."
     },
     {
      "i": 37,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Narišem diagram poteka",
-     "q": "Nariši diagram poteka, ki prebere dve celi števili in nato drugo število izpiše tolikokrat, kot je absolutna vrednost prvega števila."
+     "q": "Nariši diagram poteka, ki prebere naravno število N in izpiše zmnožek števil od 1 do N (1 · 2 · … · N)."
     },
     {
      "i": 38,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Narišem diagram poteka",
-     "q": "Nariši diagram poteka, s katerim prebereš 2 naravni števili in znak. Algoritem naj izpiše prebrani znak tolikokrat, kot je razlika med manjšo in večjo prebrano "
+     "q": "Nariši diagram poteka, ki izpiše prvih N členov zaporedja 1, 2, 4, 8, 16, 32, ... N je vhodni podatek."
     },
     {
      "i": 39,
-     "level": "težja",
-     "max": 3,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
      "section": "Narišem diagram poteka",
-     "q": "Nariši diagram poteka, ki izpiše prvih 30 elementov zaporedja s prvim členom 3 in splošnim členom aₙ = 2 · aₙ₋₁ + 1."
+     "q": "Nariši diagram poteka, ki prebere dve celi števili in nato drugo število izpiše tolikokrat, kot je absolutna vrednost prvega števila."
     },
     {
      "i": 40,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Narišem diagram poteka",
-     "q": "Nariši diagram poteka, ki bere cela števila, dokler ne vnesemo 0, in nato izpiše povprečje vnesenih števil (ničle ne štejemo)."
+     "q": "Nariši diagram poteka, s katerim prebereš 2 naravni števili in znak. Algoritem naj izpiše prebrani znak tolikokrat, kot je razlika med manjšo in večjo prebrano "
     },
     {
      "i": 41,
      "level": "težja",
-     "max": 3,
+     "max": 0,
+     "self": true,
      "section": "Narišem diagram poteka",
-     "q": "Uporabnik vnaša pare celih števil. Program vsoti prišteje obe števili iz para le, če je prvo število v paru večje kot drugo. Postopek se konča, ko je dobljena v"
+     "q": "Nariši diagram poteka, ki izpiše prvih 30 elementov zaporedja s prvim členom 3 in splošnim členom aₙ = 2 · aₙ₋₁ + 1."
     },
     {
      "i": 42,
-     "level": "težja",
-     "max": 3,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
      "section": "Narišem diagram poteka",
-     "q": "Za naslednji program nariši diagram poteka. Nato preštej simbole v svojem diagramu (vsak stavek zapiši v svoj simbol, začetek in konec ne štejeta)."
+     "q": "Nariši diagram poteka, ki bere cela števila, dokler ne vnesemo 0, in nato izpiše povprečje vnesenih števil (ničle ne štejemo)."
     },
     {
      "i": 43,
      "level": "težja",
-     "max": 3,
+     "max": 0,
+     "self": true,
+     "section": "Narišem diagram poteka",
+     "q": "Uporabnik vnaša pare celih števil. Program vsoti prišteje obe števili iz para le, če je prvo število v paru večje kot drugo. Postopek se konča, ko je dobljena v"
+    },
+    {
+     "i": 44,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Narišem diagram poteka",
+     "q": "Za naslednji program nariši diagram poteka. Nato preštej simbole v svojem diagramu (vsak stavek zapiši v svoj simbol, začetek in konec ne štejeta)."
+    },
+    {
+     "i": 45,
+     "level": "težja",
+     "max": 0,
+     "self": true,
      "section": "Narišem diagram poteka",
      "q": "Nariši diagram poteka Evklidovega algoritma: prebere dve naravni števili a in b in izpiše njun največji skupni delitelj. Postopek: dokler b ni 0, izračunaj osta"
     },
     {
-     "i": 44,
+     "i": 46,
      "level": "lažja",
      "max": 1,
      "section": "Iz diagrama v Javo",
      "q": "Zapiši program za ta diagram poteka (a, b, c in d so tipa int). Izpiši vrednosti d in c v isti vrstici, ločeni s presledkom."
-    },
-    {
-     "i": 45,
-     "level": "srednja",
-     "max": 2,
-     "section": "Iz diagrama v Javo",
-     "q": "Zapiši program za ta diagram poteka in ga zaženi."
-    },
-    {
-     "i": 46,
-     "level": "težja",
-     "max": 3,
-     "section": "Iz diagrama v Javo",
-     "q": "Pretvori diagram poteka v program v Javi (x je tipa double, i in y sta tipa int). Izpiši i in y v isti vrstici, ločena s presledkom."
     },
     {
      "i": 47,
@@ -3408,17 +3425,31 @@
      "level": "težja",
      "max": 3,
      "section": "Iz diagrama v Javo",
-     "q": "Zapiši program za ta diagram poteka (vse spremenljivke so tipa int) in ga zaženi. Kaj računa ta algoritem?"
+     "q": "Pretvori diagram poteka v program v Javi (x je tipa double, i in y sta tipa int). Izpiši i in y v isti vrstici, ločena s presledkom."
     },
     {
      "i": 49,
+     "level": "srednja",
+     "max": 2,
+     "section": "Iz diagrama v Javo",
+     "q": "Zapiši program za ta diagram poteka in ga zaženi."
+    },
+    {
+     "i": 50,
+     "level": "težja",
+     "max": 3,
+     "section": "Iz diagrama v Javo",
+     "q": "Zapiši program za ta diagram poteka (vse spremenljivke so tipa int) in ga zaženi. Kaj računa ta algoritem?"
+    },
+    {
+     "i": 51,
      "level": "srednja",
      "max": 2,
      "section": "Ponavljanje",
      "q": "Algoritem lahko zapišemo z"
     },
     {
-     "i": 50,
+     "i": 52,
      "level": "srednja",
      "max": 2,
      "section": "Ponavljanje",
@@ -3523,17 +3554,17 @@
    "module": "LAV-RAČ3",
    "title": "Temeljni gradniki programa",
    "fullTitle": "Temeljni gradniki programa",
-   "key": "scnm_lavrac_3_3_v1",
-   "version": 1,
+   "key": "scnm_lavrac_3_3_v2",
+   "version": 2,
    "format": "short",
-   "maxPoints": 91,
+   "maxPoints": 83,
    "tasks": [
     {
      "i": 0,
      "level": "srednja",
      "max": 2,
      "section": "Struktura programa in komentarji",
-     "q": "Dopolni najmanjši program v Javi. Manjkajoča mesta so označena s tremi podčrtaji, po vrsti od zgoraj navzdol."
+     "q": "Dopolni najmanjši program v Javi: manjkajoče dele vpiši kar v kodo. Vrzeli so po vrsti od zgoraj navzdol: 1. ključna beseda, ki uvede razred, 2. ime metode, v k"
     },
     {
      "i": 1,
@@ -3603,318 +3634,314 @@
      "level": "srednja",
      "max": 2,
      "section": "Spremenljivke in primitivni tipi",
-     "q": "Vpiši tip, ki ga zahteva vsaka deklaracija."
+     "q": "Vpiši v kodo tip, ki ga zahteva vsaka deklaracija."
     },
     {
      "i": 11,
      "level": "srednja",
      "max": 2,
      "section": "Spremenljivke in primitivni tipi",
-     "q": "Naštejte najmanj pet primitivnih (osnovnih) podatkovnih tipov v programskem jeziku Java. Tipe loči z vejicami."
+     "q": "Za deklaracijo konstant v programskem jeziku Java uporabljamo rezervirano besedo:"
     },
     {
      "i": 12,
      "level": "srednja",
      "max": 2,
      "section": "Spremenljivke in primitivni tipi",
-     "q": "Za deklaracijo konstant v programskem jeziku Java uporabljamo rezervirano besedo:"
+     "q": "Katera od navedenih niso veljavna imena spremenljivk v programskem jeziku Java?"
     },
     {
      "i": 13,
      "level": "srednja",
      "max": 2,
      "section": "Spremenljivke in primitivni tipi",
-     "q": "Katera od navedenih niso veljavna imena spremenljivk v programskem jeziku Java?"
+     "q": "Obkrožite neveljavni oziroma nepravilni deklaraciji spremenljivk."
     },
     {
      "i": 14,
      "level": "srednja",
      "max": 2,
      "section": "Spremenljivke in primitivni tipi",
-     "q": "Obkrožite neveljavni oziroma nepravilni deklaraciji spremenljivk."
+     "q": "Dana je deklaracija int x;. Kateri prireditvi sta veljavni?"
     },
     {
      "i": 15,
      "level": "srednja",
      "max": 2,
      "section": "Spremenljivke in primitivni tipi",
-     "q": "Dana je deklaracija int x;. Kateri prireditvi sta veljavni?"
+     "q": "Vsakemu pojmu ustreza natanko en opis. Opisi: - A – ime spremenljivke - B – znakovna vrednost - C – celoštevilska vrednost - D – poljuben podatkovni tip - E – n"
     },
     {
      "i": 16,
      "level": "srednja",
      "max": 2,
      "section": "Spremenljivke in primitivni tipi",
-     "q": "Vsakemu pojmu ustreza natanko en opis. Opisi: A – ime spremenljivke, B – znakovna vrednost, C – celoštevilska vrednost, D – poljuben podatkovni tip, E – niz, F "
-    },
-    {
-     "i": 17,
-     "level": "srednja",
-     "max": 2,
-     "section": "Spremenljivke in primitivni tipi",
      "q": "Katera trditev opisuje dogajanje med prevajanjem oziroma izvajanjem programa? (Razred se je v izvirniku imenoval primer1.)"
     },
     {
-     "i": 18,
+     "i": 17,
      "level": "lažja",
      "max": 1,
      "section": "Izpis in vnos",
      "q": "Obkrožite črko pred programskim stavkom, ki izpiše ime spremenljivke in njeno vrednost."
     },
     {
-     "i": 19,
+     "i": 18,
      "level": "lažja",
      "max": 1,
      "section": "Izpis in vnos",
      "q": "Kaj izpiše program? Vrstice napiši natanko tako, kot se izpišejo."
     },
     {
-     "i": 20,
+     "i": 19,
      "level": "srednja",
      "max": 2,
      "section": "Izpis in vnos",
      "q": "Kaj izpiše program?"
     },
     {
-     "i": 21,
+     "i": 20,
      "level": "srednja",
      "max": 2,
      "section": "Izpis in vnos",
      "q": "Kateri format uporabimo v ukazu printf za vrednost?"
     },
     {
-     "i": 22,
+     "i": 21,
      "level": "srednja",
      "max": 2,
      "section": "Izpis in vnos",
      "q": "Kaj izpiše program?"
     },
     {
-     "i": 23,
+     "i": 22,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Izpis in vnos",
      "q": "Napiši izsek programa, ki ustvari konstanto konst z vrednostjo 1.23456 in jo izpiše na dve decimalni mesti. Pričakovan izpis: 1.23 (na računalniku s slovenskimi"
     },
     {
-     "i": 24,
+     "i": 23,
      "level": "srednja",
      "max": 2,
      "section": "Izpis in vnos",
      "q": "S katero metodo Scannerja preberemo vsako od teh vrednosti?"
     },
     {
-     "i": 25,
+     "i": 24,
      "level": "lažja",
      "max": 1,
      "section": "Izpis in vnos",
      "q": "Dopolnite manjkajočo kodo tako, da bo izsek programa omogočal vnos s tipkovnice. (V izvirniku sledi še prestrezanje izjeme, ki ga spoznaš v poglavju 10.)"
     },
     {
-     "i": 26,
+     "i": 25,
      "level": "lažja",
      "max": 1,
      "section": "Izpis in vnos",
      "q": "Kateri od teh stavkov se NE prevede?"
     },
     {
-     "i": 27,
+     "i": 26,
      "level": "srednja",
      "max": 2,
      "section": "Izpis in vnos",
      "q": "Namesto vnosa s Scannerjem so vrednosti zapisane v kodi. Kaj izpiše program?"
     },
     {
-     "i": 28,
+     "i": 27,
      "level": "lažja",
      "max": 1,
      "section": "Izpis in vnos",
      "q": "Uporabnik vtipka 5 in pritisne Enter. Kaj je po teh stavkih v spremenljivki s?"
     },
     {
-     "i": 29,
+     "i": 28,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Izpis in vnos",
      "q": "Ana, rojena leta 2008, je visoka 1.68 m. Shrani podatke v spremenljivke ustreznih tipov (ime je String, leto int, višina double; vrednosti zapiši kar v kodo) in"
     },
     {
-     "i": 30,
+     "i": 29,
      "level": "lažja",
      "max": 1,
      "section": "Aritmetika",
      "q": "Koliko je vrednost navedenega javanskega izraza?"
     },
     {
-     "i": 31,
+     "i": 30,
      "level": "lažja",
      "max": 1,
      "section": "Aritmetika",
      "q": "Koliko je vrednost spremenljivke x po izvedbi stavka x=5+2/3?"
     },
     {
-     "i": 32,
+     "i": 31,
      "level": "srednja",
      "max": 2,
      "section": "Aritmetika",
      "q": "Kaj izpiše program? Vsako vrednost napiši v svojo vrstico."
     },
     {
-     "i": 33,
+     "i": 32,
      "level": "srednja",
      "max": 2,
      "section": "Aritmetika",
      "q": "Spremenljivka x je deklarirana in inicializirana s stavkom int x = 36;. Če želimo vrednost spremenljivke x spremeniti na 12, lahko uporabimo stavek:"
     },
     {
-     "i": 34,
+     "i": 33,
      "level": "lažja",
      "max": 1,
      "section": "Aritmetika",
      "q": "V programu imamo celoštevilsko spremenljivko stevilo. Zapišite stavek, ki vrednosti v spremenljivki stevilo odreže najbolj desno števko (števko, ki predstavlja "
     },
     {
-     "i": 35,
+     "i": 34,
      "level": "lažja",
      "max": 1,
      "section": "Aritmetika",
      "q": "V programu imamo celoštevilsko spremenljivko x. Zapišite logični izraz, ki se ovrednoti na true natanko tedaj, ko je vrednost spremenljivke x večkratnik števila"
     },
     {
-     "i": 36,
+     "i": 35,
      "level": "srednja",
      "max": 2,
      "section": "Aritmetika",
      "q": "Kakšne vrednosti so v spremenljivkah x, a in b po izvedbi naslednjih stavkov?"
     },
     {
-     "i": 37,
+     "i": 36,
      "level": "srednja",
      "max": 2,
      "section": "Aritmetika",
      "q": "Podani sta deklaraciji int a = 10; in int b;. Zapišite vrednosti obeh spremenljivk po izvedbi vsakega od stavkov b = a++; in b = ++a; (stavka se izvedeta drug z"
     },
     {
-     "i": 38,
+     "i": 37,
      "level": "težja",
      "max": 3,
      "section": "Aritmetika",
      "q": "Kakšne vrednosti so v spremenljivkah x, a in b po izvršitvi naslednjih stavkov?"
     },
     {
-     "i": 39,
+     "i": 38,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Aritmetika",
      "q": "Napišite naslednji izraz v programskem jeziku Java: x = (b + √(b² − 4ac)) / (2a). Izračunaj ga za a = 2, b = 6, c = 4. Pričakovan izpis: 2.0. Korenjenje: Math.s"
     },
     {
-     "i": 40,
+     "i": 39,
      "level": "srednja",
      "max": 2,
      "section": "Prvi stik z vejitvijo in zanko",
      "q": "Kateri gradnik programa predstavlja ta stavek?"
     },
     {
-     "i": 41,
+     "i": 40,
      "level": "lažja",
      "max": 1,
      "section": "Prvi stik z vejitvijo in zanko",
      "q": "Koliko je vrednost spremenljivke stevilo po izvedbi spodnjih stavkov?"
     },
     {
-     "i": 42,
+     "i": 41,
      "level": "lažja",
      "max": 1,
      "section": "Prvi stik z vejitvijo in zanko",
      "q": "Koliko je vrednost spremenljivke x po izvedbi naslednje kode?"
     },
     {
-     "i": 43,
+     "i": 42,
      "level": "srednja",
      "max": 2,
      "section": "Prvi stik z vejitvijo in zanko",
      "q": "Kaj izpiše naslednja zanka?"
     },
     {
-     "i": 44,
+     "i": 43,
      "level": "srednja",
      "max": 2,
      "section": "Prvi stik z vejitvijo in zanko",
      "q": "Kaj izpiše program? Vsak izpis napiši v svojo vrstico."
     },
     {
-     "i": 45,
+     "i": 44,
      "level": "težja",
      "max": 3,
      "section": "Prvi stik z vejitvijo in zanko",
      "q": "Zapiši program za ta diagram poteka (n, st in i so tipa int) in ga zaženi. Kaj izpiše?"
     },
     {
-     "i": 46,
+     "i": 45,
      "level": "lažja",
      "max": 1,
      "section": "Ponavljanje",
      "q": "Kateri izmed naslednjih stavkov deklarira spremenljivko znak in jo inicializira na znak A?"
     },
     {
-     "i": 47,
+     "i": 46,
      "level": "lažja",
      "max": 1,
      "section": "Ponavljanje",
      "q": "Deklarirana je spremenljivka char Ime. Kakšen tip podatkov se lahko shrani v to spremenljivko?"
     },
     {
-     "i": 48,
+     "i": 47,
      "level": "lažja",
      "max": 1,
      "section": "Ponavljanje",
      "q": "Kateri izmed naštetih tipov ne predstavlja primitivnega podatkovnega tipa programskega jezika Java?"
     },
     {
-     "i": 49,
+     "i": 48,
      "level": "lažja",
      "max": 1,
      "section": "Ponavljanje",
      "q": "Kateri izmed naštetih podatkovnih tipov spada med osnovne/primitivne podatkovne tipe programskega jezika Java? Obkrožite črko pred pravilnim odgovorom."
     },
     {
-     "i": 50,
+     "i": 49,
      "level": "lažja",
      "max": 1,
      "section": "Ponavljanje",
      "q": "Kateri podatkovni tip je primitivni tip programskega jezika Java?"
     },
     {
-     "i": 51,
+     "i": 50,
      "level": "srednja",
      "max": 2,
      "section": "Ponavljanje",
      "q": "Ali je treba pri deklaraciji vseh spremenljivk opredeliti podatkovni tip?"
     },
     {
-     "i": 52,
+     "i": 51,
      "level": "lažja",
      "max": 1,
      "section": "Ponavljanje",
      "q": "Pri prevajanju navedenega programa se zazna napaka. Zakaj? (V izvirniku je odgovor prosto besedilo, tu izberi ustrezno razlago.)"
     },
     {
-     "i": 53,
+     "i": 52,
      "level": "lažja",
      "max": 1,
      "section": "Ponavljanje",
      "q": "Deklarirani sta spremenljivki x in y. Po kateri izmed prireditev imata spremenljivki x in y enako vrednost, kot po izvedbi stavka y = x+1;?"
     },
     {
-     "i": 54,
+     "i": 53,
      "level": "lažja",
      "max": 1,
      "section": "Ponavljanje",
      "q": "Naj velja int a=5, b=2;. Koliko je vrednost izraza (a / b) v programskem jeziku Java?"
     },
     {
-     "i": 55,
+     "i": 54,
      "level": "lažja",
      "max": 1,
      "section": "Ponavljanje",
@@ -4304,7 +4331,7 @@
      "level": "srednja",
      "max": 2,
      "section": "Operatorji in izrazi",
-     "q": "Kakšne vrednosti so v spremenljivkah po izvedbi stavkov? int x = 1; int a = x++; int b = ++x; Vpiši vrednosti po drugem stavku (x in a) in po tretjem (x in b)."
+     "q": "Kakšne vrednosti so v spremenljivkah po izvedbi teh stavkov? Vpiši vrednosti po drugem stavku (x in a) in po tretjem (x in b)."
     },
     {
      "i": 41,

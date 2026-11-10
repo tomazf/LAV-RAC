@@ -9,6 +9,8 @@
 // The artifact keeps its content and answer checks; the shell owns the layout, the paging, the gate
 // before the tasks, and the scoring state in the portal's format ({ t: { <index>: { d, p, h, sol } }, seen }).
 // Rules are the portal's: one answer per task, a hint halves the points, the solution gives 0 points.
+// A task marked self (»Sam preveri«) has no points: the student runs the work elsewhere, compares it with the known
+// results and ticks »Preveril sem«. The solution may be opened without locking anything.
 (function () {
   'use strict';
   const B = window.__LAVELS || null;
@@ -20,6 +22,7 @@
   const notes = new Map();     // index -> why the answer was wrong (only until the page is reloaded)
   let state = read();
   let cfg = null;
+  let quiet = false;           // true while the shell itself opens a solution at the start: nothing is recorded
   let pages = [];              // every page in order: { id, kind, title, group, el, set }
   let gate = [];               // theory page ids that open the tasks
   const setPos = new Map();    // set id -> shown task position
@@ -42,6 +45,7 @@
   function status(i) {
     const r = state.t[i] || {};
     if (!r.d) return r.h ? 'hinted' : 'open';
+    if (TASKS[i] && TASKS[i].self) return 'self';
     if (r.sol) return 'seen';
     if (r.p > 0) return r.h ? 'half' : 'ok';
     return 'bad';
@@ -59,11 +63,12 @@
     half: (r) => 'Pravilno z namigom: ' + pts(r.p) + '.',
     bad: (r, note) => 'Napačno: 0 točk.' + (note ? ' ' + note : '') + ' Naloga je zaklenjena, rešitev si lahko ogledaš.',
     seen: () => 'Rešitev prikazana: 0 točk. Naloga je zaklenjena.',
+    self: () => 'Označeno: sam si preveril delovanje. Naloga nima točk.',
   };
-  const LABEL = { ok: 'Pravilno', half: 'Pravilno z namigom', bad: 'Napačno', seen: 'Rešitev ogledana' };
+  const LABEL = { ok: 'Pravilno', half: 'Pravilno z namigom', bad: 'Napačno', seen: 'Rešitev ogledana', self: 'Sam preveril' };
 
   function totals() {
-    const r = { ok: 0, half: 0, bad: 0, seen: 0, done: 0, points: 0, max: 0, n: TASKS.length };
+    const r = { ok: 0, half: 0, bad: 0, seen: 0, self: 0, done: 0, points: 0, max: 0, n: TASKS.length };
     TASKS.forEach((t, i) => {
       const s = status(i);
       r.max += t.max;
@@ -77,9 +82,23 @@
   // ---------- calls from the artifact ----------
   const api = {
     // list: the artifact's tasks in the order they are shown; level(t) gives 1, 2 or 3 for the teacher's list.
+    // A self task has no points (max 0); its pts only say how hard it is.
     tasks(list, opts) {
       const level = (opts && opts.level) || ((t) => t.lv);
-      list.forEach((t, i) => { t.idx = i; TASKS.push({ id: t.id, max: Number(t.pts) || 1, task: t, level: level(t) }); byId.set(t.id, i); });
+      list.forEach((t, i) => { t.idx = i; TASKS.push({ id: t.id, max: t.self ? 0 : Number(t.pts) || 1, self: !!t.self, task: t, level: level(t) }); byId.set(t.id, i); });
+    },
+    // Before the tasks are numbered: the teacher's task names (set letter and the place in the artifact's own list,
+    // e.g. »C9«) get their options, and removed tasks leave the list. The names are read before anything is removed,
+    // so they keep the numbers the teacher sees in the artifact. A name that does not exist stops the import.
+    //   self: no points, ticked by the student   nobtn: no »Kopiraj kodo« / »Odpri Programiz«
+    //   inline: the blanks (___) are typed in the code (same: all as wide as the widest)   cols: the blanks in two columns
+    //   list: lines »- …« of the question become bullets   example: the solution is open from the start   remove: leave the list
+    prepare(list, levels, o) {
+      const ref = new Map();
+      levels.forEach((L) => list.filter((t) => t.lv === L.tag).forEach((t, k) => ref.set(L.tag + (k + 1), t)));
+      const get = (r) => { const t = ref.get(r); if (!t) throw new Error('LavRac.prepare: no task ' + r); return t; };
+      ['self', 'nobtn', 'inline', 'same', 'cols', 'list', 'example'].forEach((flag) => (o[flag] || []).forEach((r) => { get(r)[flag] = true; }));
+      (o.remove || []).map(get).forEach((t) => { list.splice(list.indexOf(t), 1); });
     },
     // The artifact's own memory of what was typed and how many hints are open.
     loadUi() {
@@ -127,9 +146,20 @@
       persist();
       paintTask(i);
     },
+    // »Preveril sem«: the student ticks a self task. No points, and nothing about it can be wrong.
+    checked(i) {
+      const r = rec(i);
+      if (r.d || !TASKS[i].self) return;
+      r.d = true; r.p = 0;
+      persist();
+      paintTask(i, true);
+      paintProgress();
+    },
     solution(i) {
       const r = rec(i);
-      if (r.d) { if (!r.v) { r.v = true; persist(); } return; }
+      // Looking at the solution of a self task costs nothing and locks nothing.
+      if (quiet) return;
+      if (r.d || TASKS[i].self) { if (!r.v) { r.v = true; persist(); } return; }
       r.d = true; r.p = 0; r.sol = true;
       persist();
       paintTask(i, true);
@@ -200,7 +230,7 @@
   }
 
   function buildTop(c) {
-    const bar = h('div', { class: 'lr-stack', 'aria-hidden': 'true' }, ...['ok', 'half', 'bad', 'seen'].map((k) => h('i', { class: 'lr-' + k })));
+    const bar = h('div', { class: 'lr-stack', 'aria-hidden': 'true' }, ...['ok', 'half', 'bad', 'seen', 'self'].map((k) => h('i', { class: 'lr-' + k })));
     const reset = h('div', { class: 'lr-reset', id: 'lrReset' });
     const idle = () => {
       reset.replaceChildren(h('button', { type: 'button', class: 'lr-btn lr-ghost', id: 'resetBtn', text: 'Ponastavi vajo' }));
@@ -310,6 +340,7 @@
         h('li', { text: 'Najprej preglej vse razlage. Vaje se odklenejo, ko odpreš vsako stran razlage.' }),
         h('li', { text: 'Pri vsaki nalogi oddaš en odgovor. Pravilen odgovor prinese vse točke, napačen 0 točk.' }),
         h('li', { text: 'Namig odbije polovico točk naloge. Ogled rešitve prinese 0 točk in nalogo zaklene.' }),
+        TASKS.some((t) => t.self) ? h('li', { text: 'Naloge z oznako »Sam preveri« nimajo točk: rešitev narediš sam, jo preizkusiš in nalogo označiš s »Preveril sem«. Rešitev si lahko ogledaš brez posledic.' }) : null,
         h('li', { text: 'Napredek se shranjuje v tvoj račun, zato lahko nadaljuješ na katerem koli računalniku.' })));
     if (c.vajeNote) rules.append(h('p', { class: 'lr-just', html: c.vajeNote }));
     p.page.append(rules);
@@ -344,8 +375,10 @@
       b.addEventListener('click', () => { location.hash = s.id + '/' + (k + 1); });
       nums.append(b);
     });
+    // A set of self tasks has only that state in its legend; a mixed set has both.
+    const allSelf = s.tasks.every((t) => TASKS[t.idx].self), anySelf = s.tasks.some((t) => TASKS[t.idx].self);
     const legend = h('div', { class: 'lr-legend' },
-      ...[['ok', 'pravilno'], ['half', 'pravilno z namigom (50 %)'], ['bad', 'napačno'], ['seen', 'ogledana rešitev (0 točk)']]
+      ...[...(allSelf ? [] : [['ok', 'pravilno'], ['half', 'pravilno z namigom (50 %)'], ['bad', 'napačno'], ['seen', 'ogledana rešitev (0 točk)']]), ...(anySelf ? [['self', 'sam preveril (brez točk)']] : [])]
         .map(([k, t]) => h('span', {}, h('i', { class: 'lr-sw lr-' + k }), t)));
     const board = h('div', { class: 'lr-board' },
       h('div', { class: 'lr-bh' }, h('b', { text: s.title }), h('span', { class: 'lr-done', 'data-done': s.id })),
@@ -368,20 +401,37 @@
     if (s.el) s.el.remove();
   }
   function prepareCard(card, i, k, n, sel) {
+    const task = TASKS[i].task;
     card.hidden = false;
     card.id = 't' + i;
     card.classList.add('lr-task');
+    if (task.self) card.dataset.self = task.type;
     const head = card.querySelector(sel.head);
     if (head) {
       head.classList.add('crumb');
       const num = head.querySelector(sel.num);
       if (num) num.textContent = 'Naloga ' + (k + 1) + ' od ' + n;
       const tags = head.querySelector(sel.tags);
-      if (tags) { tags.classList.add('lv'); tags.prepend(h('span', { class: 'tag lr-st', hidden: true })); }
+      if (tags) {
+        tags.classList.add('lv');
+        tags.prepend(h('span', { class: 'tag lr-st', hidden: true }));
+        // The points tag is the only one that names points: a self task has none.
+        if (task.self) tags.querySelectorAll('.tag:not(.lr-st)').forEach((t) => { if (/točk/.test(t.textContent)) t.textContent = 'Sam preveri · brez točk'; });
+        if (task.example) tags.append(h('span', { class: 'tag', text: 'Rešen primer' }));
+      }
     }
     const q = card.querySelector(sel.q);
     if (q) q.classList.add('lr-q');
-    const check = card.querySelector(sel.check);
+    if (q) shapeTask(card, q, task);
+    let check = card.querySelector(sel.check);
+    if (task.self && check) {
+      // The artifact's own check goes away with its listener; ticking is the shell's.
+      const tick = check.cloneNode(false);
+      tick.textContent = 'Preveril sem';
+      tick.addEventListener('click', () => api.checked(i));
+      check.replaceWith(tick);
+      check = tick;
+    }
     const hint = card.querySelector(sel.hint);
     const sol = card.querySelector(sel.sol);
     const fb = card.querySelector(sel.fb);
@@ -404,7 +454,7 @@
       actions.after(ask);
       if (sol) {
         sol.addEventListener('click', (e) => {
-          if (status(i) !== 'open' && status(i) !== 'hinted') return;
+          if (task.self || (status(i) !== 'open' && status(i) !== 'hinted')) return;
           if (card.dataset.solOk) return;
           e.stopImmediatePropagation();
           e.preventDefault();
@@ -416,8 +466,85 @@
           no.addEventListener('click', () => { ask.hidden = true; sol.focus(); });
           no.focus();
         }, true);
+        if (task.example) { quiet = true; sol.click(); quiet = false; }
       }
     }
+  }
+
+  // The options of a task (LavRac.prepare) shape the artifact's card.
+  function shapeTask(card, q, task) {
+    if (task.nobtn) {
+      q.querySelectorAll('.js-copy, a[href*="programiz"]').forEach((x) => x.remove());
+      q.querySelectorAll('.actions').forEach((a) => { if (!a.children.length) a.remove(); });
+    }
+    if (task.self && task.type === 'code') {
+      // The program is written elsewhere and the answer is already told: there is no output to type.
+      const out = q.querySelector('[id^="o-"]');
+      if (out) (out.closest('.blank') || out).remove();
+      const bar = q.querySelector('.editorbar span');
+      if (bar) bar.textContent = 'Program zaženi v poljubnem okolju (Eclipse, VS Code, Programiz …) in primerjaj njegov izpis s pričakovanim. V Programizu razred preimenuj v Main. Kodo lahko shraniš tu.';
+    }
+    if (task.self && task.type === 'blanks') {
+      // No inputs: the known results are what the student compares with.
+      const rows = [...q.querySelectorAll(':scope > .blank')];
+      if (rows.length) {
+        const text = (b) => String(Array.isArray(b.acc) ? b.acc[0] : b.acc);
+        const box = h('div', { class: 'lr-tests' }, h('b', { text: 'Pravilni rezultati za preverjanje' }),
+          h('ul', {}, ...task.b.map((b) => h('li', {}, b.l + ': ', h('code', { text: text(b) })))));
+        rows[0].before(box);
+        rows.forEach((r) => r.remove());
+      }
+    }
+    if (task.cols) {
+      const rows = [...q.querySelectorAll(':scope > .blank')];
+      if (rows.length) { const g = h('div', { class: 'lr-cols' }); rows[0].before(g); rows.forEach((r) => g.append(r)); }
+    }
+    if (task.inline) gapFill(q, task);
+    if (task.list) {
+      const p = q.querySelector(':scope > p');
+      if (p) {
+        const out = [];
+        let ul = null;
+        p.textContent.split('\n').forEach((line) => {
+          if (line.startsWith('- ')) { if (!ul) { ul = h('ul', { class: 'lr-bul' }); out.push(ul); } ul.append(h('li', { text: line.slice(2) })); }
+          else { ul = null; out.push(h('p', { text: line })); }
+        });
+        p.replaceWith(...out);
+      }
+    }
+  }
+  // The blanks (___) of a code snippet become inputs in the code itself; the artifact still finds them by their ids.
+  function gapFill(q, task) {
+    const pre = q.querySelector('pre.code');
+    const rows = [...q.querySelectorAll(':scope > .blank')];
+    const inputs = rows.map((r) => r.querySelector('input'));
+    if (!pre || !inputs.length || inputs.some((x) => !x)) throw new Error('inline: no code or blanks in ' + task.id);
+    let k = 0;
+    const walker = document.createTreeWalker(pre, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach((n) => {
+      if (!n.nodeValue.includes('___')) return;
+      const frag = document.createDocumentFragment();
+      n.nodeValue.split('___').forEach((part, j) => {
+        if (j) {
+          const inp = inputs[k], b = task.b[k];
+          k++;
+          if (!inp) throw new Error('inline: more gaps than blanks in ' + task.id);
+          inp.classList.add('lr-gap');
+          inp.placeholder = String(k);
+          inp.setAttribute('aria-label', 'Vrzel ' + k + ': ' + b.l);
+          inp.title = b.l;
+          const len = Math.max(...(task.same ? task.b : [b]).flatMap((x) => [].concat(x.acc).map((a) => String(a).length)));
+          inp.style.width = Math.max(3, len + 2) + 'ch';
+          frag.append(inp);
+        }
+        if (part) frag.append(part);
+      });
+      n.replaceWith(frag);
+    });
+    if (k !== inputs.length) throw new Error('inline: ' + k + ' gaps for ' + inputs.length + ' blanks in ' + task.id);
+    rows.forEach((r) => r.remove());
   }
   function buildExtra(p) {
     p.page.append(h('header', { class: 'lr-shead' }, h('span', { class: 'lr-gi', html: ICON.home }),
@@ -453,7 +580,7 @@
     const fb = card.lrFb;
     if (done) {
       card.querySelectorAll('.lr-q input, .lr-q select, .lr-q textarea, .lr-q button, .lr-check, .lr-extra').forEach((x) => { x.disabled = true; });
-      if (fb) { fb.textContent = MESSAGE[s](state.t[i], notes.get(i)); fb.className = 'feedback lr-fb ' + (s === 'ok' || s === 'half' ? 'ok' : 'bad'); }
+      if (fb) { fb.textContent = MESSAGE[s](state.t[i], notes.get(i)); fb.className = 'feedback lr-fb ' + (s === 'ok' || s === 'half' || s === 'self' ? 'ok' : 'bad'); }
     }
     if (announce) {
       const sb = card.querySelector('.lr-solask');
@@ -464,7 +591,7 @@
     const r = totals();
     const t = document.getElementById('lrPtxt');
     if (t) t.textContent = r.done + ' / ' + r.n + ' nalog · ' + String(r.points).replace('.', ',') + ' / ' + r.max + ' točk';
-    ['ok', 'half', 'bad', 'seen'].forEach((k) => {
+    ['ok', 'half', 'bad', 'seen', 'self'].forEach((k) => {
       const el = document.querySelector('.lr-stack .lr-' + k);
       if (el) el.style.width = (r.n ? 100 * r[k] / r.n : 0) + '%';
     });
@@ -478,11 +605,11 @@
     if (vt && gateOpen()) vt.textContent = 'Rešenih ' + r.done + ' / ' + r.n + ', ' + String(r.points).replace('.', ',') + ' / ' + r.max + ' točk';
   }
   // The set's pie in the rail: one slice per state, clockwise from the top, in the order of the legend.
-  const PIE = [['ok', '--lr-ok', 'pravilno'], ['half', '--lr-half', 'pravilno z namigom'], ['bad', '--lr-bad', 'napačno'], ['seen', '--lr-seen', 'ogledana rešitev'], ['none', '--lr-none', 'brez odgovora']];
+  const PIE = [['ok', '--lr-ok', 'pravilno'], ['half', '--lr-half', 'pravilno z namigom'], ['bad', '--lr-bad', 'napačno'], ['seen', '--lr-seen', 'ogledana rešitev'], ['self', '--lr-self', 'sam preveril'], ['none', '--lr-none', 'brez odgovora']];
   function paintPie(s) {
     const n = s.tasks.length;
     if (!n) return;
-    const c = { ok: 0, half: 0, bad: 0, seen: 0, none: 0 };
+    const c = { ok: 0, half: 0, bad: 0, seen: 0, self: 0, none: 0 };
     s.tasks.forEach((x) => { const st = status(x.idx); c[c[st] === undefined ? 'none' : st]++; });
     let cum = 0;
     const parts = [];
@@ -595,7 +722,7 @@
     const tasks = [];
     pages.filter((p) => p.kind === 'set').forEach((s) => s.tasks.forEach((t) => {
       const src = TASKS[t.idx].task;
-      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
+      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
     }));
     tasks.sort((a, b) => a.i - b.i);
     return {
@@ -807,6 +934,7 @@ p.prose{display:block}
   --lr-bg:#fffaf4;--lr-card:#fff;--lr-ink:#241433;--lr-mut:#5f5470;--lr-acc:#6b2a7a;--lr-acc-soft:#fdeedd;--lr-line:#f0e3d3;--lr-tile:#faf0e3;
   --lr-hdr:#2e1a40;--lr-lamp:#ffc45c;
   --lr-ok:#2b8a3e;--lr-ok-bg:#e3f5e8;--lr-half:#9a6416;--lr-half-bg:#f8eed9;--lr-bad:#c92a2a;--lr-bad-bg:#fde8e8;--lr-seen:#5f5470;--lr-seen-bg:#ece6f2;
+  --lr-self:#1f6f8b;--lr-self-bg:#e1f0f5;
   --lr-none:#e6dccf;--lr-ring:#c3b5a3;
   --lr-fb:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;--lr-fm:"IBM Plex Mono",ui-monospace,Consolas,monospace;
 }
@@ -814,6 +942,7 @@ p.prose{display:block}
   --lr-bg:#171021;--lr-card:#231833;--lr-ink:#efe9f5;--lr-mut:#a99cba;--lr-acc:#d5a6e6;--lr-acc-soft:#3a2a4a;--lr-line:#3a2c4d;--lr-tile:#2f2242;
   --lr-hdr:#1f1130;
   --lr-ok:#6fd48a;--lr-ok-bg:#17352a;--lr-half:#f1b95a;--lr-half-bg:#3a2e17;--lr-bad:#ff8080;--lr-bad-bg:#3d2230;--lr-seen:#a99cba;--lr-seen-bg:#2f2242;
+  --lr-self:#6cc1dd;--lr-self-bg:#16313b;
   --lr-none:#4a3a60;--lr-ring:#76648f;
 }}
 html body{background:var(--lr-bg);color:var(--lr-ink);font-family:var(--lr-fb);padding:0}
@@ -838,7 +967,7 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr-ptxt{font:500 .9rem var(--lr-fm);color:var(--lr-mut);font-variant-numeric:tabular-nums}
 .lr-reset{display:flex;align-items:center}
 .lr-confirm{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:.92rem;max-width:560px}
-.lr-ok{background:var(--lr-ok)}.lr-half{background:var(--lr-half)}.lr-bad{background:var(--lr-bad)}.lr-seen{background:var(--lr-seen)}
+.lr-ok{background:var(--lr-ok)}.lr-half{background:var(--lr-half)}.lr-bad{background:var(--lr-bad)}.lr-seen{background:var(--lr-seen)}.lr-self{background:var(--lr-self)}
 
 /* body: rail + page */
 .lr-body{max-width:1240px;margin:auto;display:grid;grid-template-columns:272px minmax(0,1fr);gap:40px;padding:24px max(16px,env(safe-area-inset-left,0px)) 80px}
@@ -938,6 +1067,7 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr-num[data-s=half]{background:var(--lr-half-bg);border-color:var(--lr-half);color:var(--lr-half)}
 .lr-num[data-s=bad]{background:var(--lr-bad-bg);border-color:var(--lr-bad);color:var(--lr-bad)}
 .lr-num[data-s=seen]{background:var(--lr-seen-bg);border-color:var(--lr-seen);color:var(--lr-seen)}
+.lr-num[data-s=self]{background:var(--lr-self-bg);border-color:var(--lr-self);color:var(--lr-self)}
 .lr-num[aria-current=step]{box-shadow:0 0 0 3px var(--lr-acc);border-color:var(--lr-acc)}
 .lr-legend{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px 18px;font-size:.88rem;color:var(--lr-mut)}
 .lr-legend span{display:inline-flex;align-items:center;gap:6px}
@@ -973,11 +1103,32 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr-task[data-lr=half]{border-color:var(--lr-half)!important}
 .lr-task[data-lr=bad]{border-color:var(--lr-bad)!important}
 .lr-task[data-lr=seen]{border-color:var(--lr-seen)!important}
+.lr-task[data-lr=self]{border-color:var(--lr-self)!important}
 .tag.lr-st{font-weight:700}
 .tag.lr-st.lr-ok{background:var(--lr-ok-bg);color:var(--lr-ok)}
 .tag.lr-st.lr-half{background:var(--lr-half-bg);color:var(--lr-half)}
 .tag.lr-st.lr-bad{background:var(--lr-bad-bg);color:var(--lr-bad)}
 .tag.lr-st.lr-seen{background:var(--lr-seen-bg);color:var(--lr-seen)}
+.tag.lr-st.lr-self{background:var(--lr-self-bg);color:var(--lr-self)}
+
+/* self tasks: no points, so the hint and the solution carry no price tag; the known results replace the inputs */
+.lr-task[data-self][data-lr] .lr-hint::after,.lr-task[data-self][data-lr] .lr-sol::after{content:none}
+.lr-task[data-self=blanks] .sol .ans{display:none}
+.lr-tests{margin:10px 0;padding:10px 14px;border-radius:10px;background:var(--lr-self-bg);border-left:4px solid var(--lr-self)}
+.lr-tests b{display:block;margin-bottom:4px}
+.lr-tests ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:2px}
+.lr-tests code{font-family:var(--lr-fm);font-weight:700}
+
+/* options of single tasks: bullets in a question, blanks in two columns, blanks typed in the code */
+.lr-q ul.lr-bul{margin:6px 0 10px;padding-left:22px;display:flex;flex-direction:column;gap:2px}
+.lr-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 28px;margin:6px 0}
+@media (max-width:640px){.lr-cols{grid-template-columns:minmax(0,1fr)}}
+/* the blanks typed in the code: they must beat the artifact's own input style (padding, border, width) */
+.lr-q input.lr-gap{font:inherit;font-family:var(--lr-fm);font-size:inherit;color:var(--lr-ink);background:var(--lr-acc-soft);border:0;border-bottom:2px solid var(--lr-acc);border-radius:4px 4px 0 0;padding:0 .3em;margin:0 .1em;height:1.45em;line-height:1.2;text-align:center;box-sizing:content-box;min-width:3ch;vertical-align:baseline}
+.lr-q input.lr-gap::placeholder{color:var(--lr-mut);opacity:.7}
+.lr-q input.lr-gap.right{border-bottom-color:var(--lr-ok);background:var(--lr-ok-bg)}
+.lr-q input.lr-gap.wrong{border-bottom-color:var(--lr-bad);background:var(--lr-bad-bg)}
+.lr-q input.lr-gap:disabled{opacity:1;color:var(--lr-ink);-webkit-text-fill-color:var(--lr-ink)}
 
 /* pager between pages, bottom right */
 .lr-pager{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--lr-line);padding-top:14px;margin-top:4px;flex-wrap:wrap}
@@ -1295,7 +1446,7 @@ const FLOW = (function(){
     en:{start:"Main", end:"End", yes:"True", no:"False"},
     sl:{start:"začetek", end:"konec", yes:"da", no:"ne"}
   };
-  let LANG = "en";
+  let LANG = "sl";
   const B = {
     start:t=>({t:"start",x:t||null}), end:t=>({t:"end",x:t||null}),
     p:x=>({t:"p",x}),
@@ -1663,7 +1814,8 @@ const T = [
  h:["Prireditveni operator += prišteje vrednost in shrani nazaj.","Prva možnost prepiše vrednost x."],
  why:"x += 3 je krajši zapis za x = x + 3."},
 {src:"M162/6", pts:2, lv:"E", type:"blanks",
- q:"Kakšne vrednosti so v spremenljivkah po izvedbi stavkov? int x = 1; int a = x++; int b = ++x; Vpiši vrednosti po drugem stavku (x in a) in po tretjem (x in b).",
+ code:"int x = 1;\nint a = x++;\nint b = ++x;",
+ q:"Kakšne vrednosti so v spremenljivkah po izvedbi teh stavkov? Vpiši vrednosti po drugem stavku (x in a) in po tretjem (x in b).",
  b:[{l:"Po drugem stavku: x", acc:["2"]},{l:"Po drugem stavku: a", acc:["1"]},{l:"Po tretjem stavku: x", acc:["3"]},{l:"Po tretjem stavku: b", acc:["3"]}],
  h:["x++ najprej vrne staro vrednost.","++x najprej poveča x in šele nato vrne vrednost."],
  why:"x++ vrne 1, zato je a = 1, x postane 2. ++x naredi x = 3 in vrne 3, zato je b = 3."},
@@ -1991,6 +2143,8 @@ const srcLabel = s => { const r = /^MRAC\/(\d+)$/.exec(s); if(r) return `Katalog
 const ptsLabel = p => p===1 ? "1 točka" : p===2 ? "2 točki" : (p<5 ? p+" točke" : p+" točk");
 
 /* ---------- render tasks ---------- */
+LavRac.prepare(T, LEVELS, {"nobtn":["A3","B3","B7","D1","E4","E7","E10"]});
+[{"code":"public class Main {\n    public static void main(String[] args) {\n        short s = 32765;\n        for (int i = 0; i < 5; i++) {\n            s++;\n            System.out.println(s);\n        }\n    }\n}"},{"code":"public class Main {\n    public static void main(String[] args) {\n        String niz = \"19.95\";\n        double d = Double.parseDouble(niz);\n        System.out.println(d * 2);        // 39.9\n        int n = Integer.parseInt(niz);    // NumberFormatException\n        System.out.println(n);\n    }\n}"},{"code":"public class Main {\n    public static void main(String[] args) {\n        System.out.println(0.1 + 0.2);       // 0.30000000000000004\n        int centi = 10 + 20;                 // 30 centov\n        System.out.println(centi / 100.0);   // 0.3\n    }\n}"},{"code":"public class Main {\n    public static void main(String[] args) {\n        for (char c = 'A'; c <= 'E'; c++) {\n            System.out.println(c + \" = \" + (int) c);\n        }\n    }\n}","sol":"Izpis je A = 65, B = 66, C = 67, D = 68, E = 69. Z (int) c se znak pretvori v svojo kodo ASCII."},{"code":"public class Main {\n    public static String intToBinaryString(int n) {\n        if (n == 0) {\n            return \"0\";\n        }\n        String r = \"\";\n        while (n > 0) {\n            r = (n % 2) + r;\n            n = n / 2;\n        }\n        return r;\n    }\n\n    public static boolean primerjaj(int n) {\n        return intToBinaryString(n).equals(Integer.toBinaryString(n));\n    }\n\n    public static void main(String[] args) {\n        System.out.println(intToBinaryString(10));   // 1010\n        System.out.println(primerjaj(10));           // true\n    }\n}","sol":"Za 10 dobimo 1010 in primerjaj(10) vrne true. Niza primerjamo z equals, ne z ==."},{"code":"public class Main {\n    public static void main(String[] args) {\n        for (int i = 32; i <= 127; i++) {\n            System.out.print((char) i);\n        }\n    }\n}","sol":"Spremenljivka i je tipa int, zato jo za izpis znaka pretvorimo z (char). Znak s kodo 127 je kontrolni znak in se ne vidi. Če uporabiš spremenljivko tipa char, z zanko for (char c = ' '; c <= '~'; c++) izpišeš samo vidne znake do kode 126."}].forEach((f, k) => { HOME[k].jsolCode = f.code; if (f.sol) HOME[k].sol = f.sol; });
 T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });
 LavRac.tasks(LEVELS.flatMap(L=>T.filter(t=>t.lv===L.tag)), { level: (t) => t.pts });
 S = LavRac.loadUi();
@@ -2240,7 +2394,7 @@ function resetAsk(){ rw.innerHTML = `<span class="confirm">Res izbrišem vse odg
 resetIdle();
 
 /* ---------- start ---------- */
-try{ FLOW.setLang(localStorage.getItem("java-matura-diagram-lang")||"en"); }catch(e){ FLOW.setLang("en"); }
+FLOW.setLang("sl");
 function paintLang(){ document.querySelectorAll(".js-lang").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.lang===FLOW.getLang()))); }
 function fillFigs(){
   document.querySelectorAll("[data-fc]").forEach(e=>{ e.innerHTML = FLOW.svg(FLOWS[e.dataset.fc],{num:!!e.dataset.num}); });

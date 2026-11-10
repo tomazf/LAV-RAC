@@ -3,9 +3,10 @@ import { many } from './db.js';
 import { readTask } from './progress.js';
 import { num } from './format.js';
 
-const STATUS = { correct: 'pravilno', partial: 'pravilno z namigom', wrong: 'napačno', solution: 'ogledana rešitev', hint: 'uporabljen namig, še ni odgovora', open: 'še ni rešeno' };
-export function taskStatus(t) {
+const STATUS = { correct: 'pravilno', partial: 'pravilno z namigom', wrong: 'napačno', solution: 'ogledana rešitev', self: 'sam preveril', hint: 'uporabljen namig, še ni odgovora', open: 'še ni rešeno' };
+export function taskStatus(t, task) {
   if (t.done) {
+    if (task?.self) return 'self';
     if (t.solution) return 'solution';
     if (t.points <= 0) return 'wrong';
     return t.hinted ? 'partial' : 'correct';
@@ -17,9 +18,9 @@ export function strip(ex, state) {
   const tasks = state?.t ?? {};
   return ex.tasks.map((task, n) => {
     const t = readTask(ex, tasks[task.i]);
-    const status = taskStatus(t);
-    return { n: n + 1, i: task.i, status, points: t.points, max: task.max, level: task.level, q: task.q, section: task.section, varied: task.varied,
-      label: `Naloga ${n + 1}: ${STATUS[status]}${t.done ? `, ${num(t.points)} od ${task.max} t` : ''}` };
+    const status = taskStatus(t, task);
+    return { n: n + 1, i: task.i, status, points: t.points, max: task.max, self: !!task.self, level: task.level, q: task.q, section: task.section, varied: task.varied,
+      label: `Naloga ${n + 1}: ${STATUS[status]}${t.done && !task.self ? `, ${num(t.points)} od ${task.max} t` : ''}` };
   });
 }
 export const statusText = STATUS;

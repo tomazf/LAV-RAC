@@ -2,6 +2,8 @@
 // The artifact keeps its content and answer checks; the shell owns the layout, the paging, the gate
 // before the tasks, and the scoring state in the portal's format ({ t: { <index>: { d, p, h, sol } }, seen }).
 // Rules are the portal's: one answer per task, a hint halves the points, the solution gives 0 points.
+// A task marked self (»Sam preveri«) has no points: the student runs the work elsewhere, compares it with the known
+// results and ticks »Preveril sem«. The solution may be opened without locking anything.
 (function () {
   'use strict';
   const B = window.__LAVELS || null;
@@ -13,6 +15,7 @@
   const notes = new Map();     // index -> why the answer was wrong (only until the page is reloaded)
   let state = read();
   let cfg = null;
+  let quiet = false;           // true while the shell itself opens a solution at the start: nothing is recorded
   let pages = [];              // every page in order: { id, kind, title, group, el, set }
   let gate = [];               // theory page ids that open the tasks
   const setPos = new Map();    // set id -> shown task position
@@ -35,6 +38,7 @@
   function status(i) {
     const r = state.t[i] || {};
     if (!r.d) return r.h ? 'hinted' : 'open';
+    if (TASKS[i] && TASKS[i].self) return 'self';
     if (r.sol) return 'seen';
     if (r.p > 0) return r.h ? 'half' : 'ok';
     return 'bad';
@@ -52,11 +56,12 @@
     half: (r) => 'Pravilno z namigom: ' + pts(r.p) + '.',
     bad: (r, note) => 'Napačno: 0 točk.' + (note ? ' ' + note : '') + ' Naloga je zaklenjena, rešitev si lahko ogledaš.',
     seen: () => 'Rešitev prikazana: 0 točk. Naloga je zaklenjena.',
+    self: () => 'Označeno: sam si preveril delovanje. Naloga nima točk.',
   };
-  const LABEL = { ok: 'Pravilno', half: 'Pravilno z namigom', bad: 'Napačno', seen: 'Rešitev ogledana' };
+  const LABEL = { ok: 'Pravilno', half: 'Pravilno z namigom', bad: 'Napačno', seen: 'Rešitev ogledana', self: 'Sam preveril' };
 
   function totals() {
-    const r = { ok: 0, half: 0, bad: 0, seen: 0, done: 0, points: 0, max: 0, n: TASKS.length };
+    const r = { ok: 0, half: 0, bad: 0, seen: 0, self: 0, done: 0, points: 0, max: 0, n: TASKS.length };
     TASKS.forEach((t, i) => {
       const s = status(i);
       r.max += t.max;
@@ -70,9 +75,23 @@
   // ---------- calls from the artifact ----------
   const api = {
     // list: the artifact's tasks in the order they are shown; level(t) gives 1, 2 or 3 for the teacher's list.
+    // A self task has no points (max 0); its pts only say how hard it is.
     tasks(list, opts) {
       const level = (opts && opts.level) || ((t) => t.lv);
-      list.forEach((t, i) => { t.idx = i; TASKS.push({ id: t.id, max: Number(t.pts) || 1, task: t, level: level(t) }); byId.set(t.id, i); });
+      list.forEach((t, i) => { t.idx = i; TASKS.push({ id: t.id, max: t.self ? 0 : Number(t.pts) || 1, self: !!t.self, task: t, level: level(t) }); byId.set(t.id, i); });
+    },
+    // Before the tasks are numbered: the teacher's task names (set letter and the place in the artifact's own list,
+    // e.g. »C9«) get their options, and removed tasks leave the list. The names are read before anything is removed,
+    // so they keep the numbers the teacher sees in the artifact. A name that does not exist stops the import.
+    //   self: no points, ticked by the student   nobtn: no »Kopiraj kodo« / »Odpri Programiz«
+    //   inline: the blanks (___) are typed in the code (same: all as wide as the widest)   cols: the blanks in two columns
+    //   list: lines »- …« of the question become bullets   example: the solution is open from the start   remove: leave the list
+    prepare(list, levels, o) {
+      const ref = new Map();
+      levels.forEach((L) => list.filter((t) => t.lv === L.tag).forEach((t, k) => ref.set(L.tag + (k + 1), t)));
+      const get = (r) => { const t = ref.get(r); if (!t) throw new Error('LavRac.prepare: no task ' + r); return t; };
+      ['self', 'nobtn', 'inline', 'same', 'cols', 'list', 'example'].forEach((flag) => (o[flag] || []).forEach((r) => { get(r)[flag] = true; }));
+      (o.remove || []).map(get).forEach((t) => { list.splice(list.indexOf(t), 1); });
     },
     // The artifact's own memory of what was typed and how many hints are open.
     loadUi() {
@@ -120,9 +139,20 @@
       persist();
       paintTask(i);
     },
+    // »Preveril sem«: the student ticks a self task. No points, and nothing about it can be wrong.
+    checked(i) {
+      const r = rec(i);
+      if (r.d || !TASKS[i].self) return;
+      r.d = true; r.p = 0;
+      persist();
+      paintTask(i, true);
+      paintProgress();
+    },
     solution(i) {
       const r = rec(i);
-      if (r.d) { if (!r.v) { r.v = true; persist(); } return; }
+      // Looking at the solution of a self task costs nothing and locks nothing.
+      if (quiet) return;
+      if (r.d || TASKS[i].self) { if (!r.v) { r.v = true; persist(); } return; }
       r.d = true; r.p = 0; r.sol = true;
       persist();
       paintTask(i, true);
@@ -193,7 +223,7 @@
   }
 
   function buildTop(c) {
-    const bar = h('div', { class: 'lr-stack', 'aria-hidden': 'true' }, ...['ok', 'half', 'bad', 'seen'].map((k) => h('i', { class: 'lr-' + k })));
+    const bar = h('div', { class: 'lr-stack', 'aria-hidden': 'true' }, ...['ok', 'half', 'bad', 'seen', 'self'].map((k) => h('i', { class: 'lr-' + k })));
     const reset = h('div', { class: 'lr-reset', id: 'lrReset' });
     const idle = () => {
       reset.replaceChildren(h('button', { type: 'button', class: 'lr-btn lr-ghost', id: 'resetBtn', text: 'Ponastavi vajo' }));
@@ -303,6 +333,7 @@
         h('li', { text: 'Najprej preglej vse razlage. Vaje se odklenejo, ko odpreš vsako stran razlage.' }),
         h('li', { text: 'Pri vsaki nalogi oddaš en odgovor. Pravilen odgovor prinese vse točke, napačen 0 točk.' }),
         h('li', { text: 'Namig odbije polovico točk naloge. Ogled rešitve prinese 0 točk in nalogo zaklene.' }),
+        TASKS.some((t) => t.self) ? h('li', { text: 'Naloge z oznako »Sam preveri« nimajo točk: rešitev narediš sam, jo preizkusiš in nalogo označiš s »Preveril sem«. Rešitev si lahko ogledaš brez posledic.' }) : null,
         h('li', { text: 'Napredek se shranjuje v tvoj račun, zato lahko nadaljuješ na katerem koli računalniku.' })));
     if (c.vajeNote) rules.append(h('p', { class: 'lr-just', html: c.vajeNote }));
     p.page.append(rules);
@@ -337,8 +368,10 @@
       b.addEventListener('click', () => { location.hash = s.id + '/' + (k + 1); });
       nums.append(b);
     });
+    // A set of self tasks has only that state in its legend; a mixed set has both.
+    const allSelf = s.tasks.every((t) => TASKS[t.idx].self), anySelf = s.tasks.some((t) => TASKS[t.idx].self);
     const legend = h('div', { class: 'lr-legend' },
-      ...[['ok', 'pravilno'], ['half', 'pravilno z namigom (50 %)'], ['bad', 'napačno'], ['seen', 'ogledana rešitev (0 točk)']]
+      ...[...(allSelf ? [] : [['ok', 'pravilno'], ['half', 'pravilno z namigom (50 %)'], ['bad', 'napačno'], ['seen', 'ogledana rešitev (0 točk)']]), ...(anySelf ? [['self', 'sam preveril (brez točk)']] : [])]
         .map(([k, t]) => h('span', {}, h('i', { class: 'lr-sw lr-' + k }), t)));
     const board = h('div', { class: 'lr-board' },
       h('div', { class: 'lr-bh' }, h('b', { text: s.title }), h('span', { class: 'lr-done', 'data-done': s.id })),
@@ -361,20 +394,37 @@
     if (s.el) s.el.remove();
   }
   function prepareCard(card, i, k, n, sel) {
+    const task = TASKS[i].task;
     card.hidden = false;
     card.id = 't' + i;
     card.classList.add('lr-task');
+    if (task.self) card.dataset.self = task.type;
     const head = card.querySelector(sel.head);
     if (head) {
       head.classList.add('crumb');
       const num = head.querySelector(sel.num);
       if (num) num.textContent = 'Naloga ' + (k + 1) + ' od ' + n;
       const tags = head.querySelector(sel.tags);
-      if (tags) { tags.classList.add('lv'); tags.prepend(h('span', { class: 'tag lr-st', hidden: true })); }
+      if (tags) {
+        tags.classList.add('lv');
+        tags.prepend(h('span', { class: 'tag lr-st', hidden: true }));
+        // The points tag is the only one that names points: a self task has none.
+        if (task.self) tags.querySelectorAll('.tag:not(.lr-st)').forEach((t) => { if (/točk/.test(t.textContent)) t.textContent = 'Sam preveri · brez točk'; });
+        if (task.example) tags.append(h('span', { class: 'tag', text: 'Rešen primer' }));
+      }
     }
     const q = card.querySelector(sel.q);
     if (q) q.classList.add('lr-q');
-    const check = card.querySelector(sel.check);
+    if (q) shapeTask(card, q, task);
+    let check = card.querySelector(sel.check);
+    if (task.self && check) {
+      // The artifact's own check goes away with its listener; ticking is the shell's.
+      const tick = check.cloneNode(false);
+      tick.textContent = 'Preveril sem';
+      tick.addEventListener('click', () => api.checked(i));
+      check.replaceWith(tick);
+      check = tick;
+    }
     const hint = card.querySelector(sel.hint);
     const sol = card.querySelector(sel.sol);
     const fb = card.querySelector(sel.fb);
@@ -397,7 +447,7 @@
       actions.after(ask);
       if (sol) {
         sol.addEventListener('click', (e) => {
-          if (status(i) !== 'open' && status(i) !== 'hinted') return;
+          if (task.self || (status(i) !== 'open' && status(i) !== 'hinted')) return;
           if (card.dataset.solOk) return;
           e.stopImmediatePropagation();
           e.preventDefault();
@@ -409,8 +459,85 @@
           no.addEventListener('click', () => { ask.hidden = true; sol.focus(); });
           no.focus();
         }, true);
+        if (task.example) { quiet = true; sol.click(); quiet = false; }
       }
     }
+  }
+
+  // The options of a task (LavRac.prepare) shape the artifact's card.
+  function shapeTask(card, q, task) {
+    if (task.nobtn) {
+      q.querySelectorAll('.js-copy, a[href*="programiz"]').forEach((x) => x.remove());
+      q.querySelectorAll('.actions').forEach((a) => { if (!a.children.length) a.remove(); });
+    }
+    if (task.self && task.type === 'code') {
+      // The program is written elsewhere and the answer is already told: there is no output to type.
+      const out = q.querySelector('[id^="o-"]');
+      if (out) (out.closest('.blank') || out).remove();
+      const bar = q.querySelector('.editorbar span');
+      if (bar) bar.textContent = 'Program zaženi v poljubnem okolju (Eclipse, VS Code, Programiz …) in primerjaj njegov izpis s pričakovanim. V Programizu razred preimenuj v Main. Kodo lahko shraniš tu.';
+    }
+    if (task.self && task.type === 'blanks') {
+      // No inputs: the known results are what the student compares with.
+      const rows = [...q.querySelectorAll(':scope > .blank')];
+      if (rows.length) {
+        const text = (b) => String(Array.isArray(b.acc) ? b.acc[0] : b.acc);
+        const box = h('div', { class: 'lr-tests' }, h('b', { text: 'Pravilni rezultati za preverjanje' }),
+          h('ul', {}, ...task.b.map((b) => h('li', {}, b.l + ': ', h('code', { text: text(b) })))));
+        rows[0].before(box);
+        rows.forEach((r) => r.remove());
+      }
+    }
+    if (task.cols) {
+      const rows = [...q.querySelectorAll(':scope > .blank')];
+      if (rows.length) { const g = h('div', { class: 'lr-cols' }); rows[0].before(g); rows.forEach((r) => g.append(r)); }
+    }
+    if (task.inline) gapFill(q, task);
+    if (task.list) {
+      const p = q.querySelector(':scope > p');
+      if (p) {
+        const out = [];
+        let ul = null;
+        p.textContent.split('\n').forEach((line) => {
+          if (line.startsWith('- ')) { if (!ul) { ul = h('ul', { class: 'lr-bul' }); out.push(ul); } ul.append(h('li', { text: line.slice(2) })); }
+          else { ul = null; out.push(h('p', { text: line })); }
+        });
+        p.replaceWith(...out);
+      }
+    }
+  }
+  // The blanks (___) of a code snippet become inputs in the code itself; the artifact still finds them by their ids.
+  function gapFill(q, task) {
+    const pre = q.querySelector('pre.code');
+    const rows = [...q.querySelectorAll(':scope > .blank')];
+    const inputs = rows.map((r) => r.querySelector('input'));
+    if (!pre || !inputs.length || inputs.some((x) => !x)) throw new Error('inline: no code or blanks in ' + task.id);
+    let k = 0;
+    const walker = document.createTreeWalker(pre, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach((n) => {
+      if (!n.nodeValue.includes('___')) return;
+      const frag = document.createDocumentFragment();
+      n.nodeValue.split('___').forEach((part, j) => {
+        if (j) {
+          const inp = inputs[k], b = task.b[k];
+          k++;
+          if (!inp) throw new Error('inline: more gaps than blanks in ' + task.id);
+          inp.classList.add('lr-gap');
+          inp.placeholder = String(k);
+          inp.setAttribute('aria-label', 'Vrzel ' + k + ': ' + b.l);
+          inp.title = b.l;
+          const len = Math.max(...(task.same ? task.b : [b]).flatMap((x) => [].concat(x.acc).map((a) => String(a).length)));
+          inp.style.width = Math.max(3, len + 2) + 'ch';
+          frag.append(inp);
+        }
+        if (part) frag.append(part);
+      });
+      n.replaceWith(frag);
+    });
+    if (k !== inputs.length) throw new Error('inline: ' + k + ' gaps for ' + inputs.length + ' blanks in ' + task.id);
+    rows.forEach((r) => r.remove());
   }
   function buildExtra(p) {
     p.page.append(h('header', { class: 'lr-shead' }, h('span', { class: 'lr-gi', html: ICON.home }),
@@ -446,7 +573,7 @@
     const fb = card.lrFb;
     if (done) {
       card.querySelectorAll('.lr-q input, .lr-q select, .lr-q textarea, .lr-q button, .lr-check, .lr-extra').forEach((x) => { x.disabled = true; });
-      if (fb) { fb.textContent = MESSAGE[s](state.t[i], notes.get(i)); fb.className = 'feedback lr-fb ' + (s === 'ok' || s === 'half' ? 'ok' : 'bad'); }
+      if (fb) { fb.textContent = MESSAGE[s](state.t[i], notes.get(i)); fb.className = 'feedback lr-fb ' + (s === 'ok' || s === 'half' || s === 'self' ? 'ok' : 'bad'); }
     }
     if (announce) {
       const sb = card.querySelector('.lr-solask');
@@ -457,7 +584,7 @@
     const r = totals();
     const t = document.getElementById('lrPtxt');
     if (t) t.textContent = r.done + ' / ' + r.n + ' nalog · ' + String(r.points).replace('.', ',') + ' / ' + r.max + ' točk';
-    ['ok', 'half', 'bad', 'seen'].forEach((k) => {
+    ['ok', 'half', 'bad', 'seen', 'self'].forEach((k) => {
       const el = document.querySelector('.lr-stack .lr-' + k);
       if (el) el.style.width = (r.n ? 100 * r[k] / r.n : 0) + '%';
     });
@@ -471,11 +598,11 @@
     if (vt && gateOpen()) vt.textContent = 'Rešenih ' + r.done + ' / ' + r.n + ', ' + String(r.points).replace('.', ',') + ' / ' + r.max + ' točk';
   }
   // The set's pie in the rail: one slice per state, clockwise from the top, in the order of the legend.
-  const PIE = [['ok', '--lr-ok', 'pravilno'], ['half', '--lr-half', 'pravilno z namigom'], ['bad', '--lr-bad', 'napačno'], ['seen', '--lr-seen', 'ogledana rešitev'], ['none', '--lr-none', 'brez odgovora']];
+  const PIE = [['ok', '--lr-ok', 'pravilno'], ['half', '--lr-half', 'pravilno z namigom'], ['bad', '--lr-bad', 'napačno'], ['seen', '--lr-seen', 'ogledana rešitev'], ['self', '--lr-self', 'sam preveril'], ['none', '--lr-none', 'brez odgovora']];
   function paintPie(s) {
     const n = s.tasks.length;
     if (!n) return;
-    const c = { ok: 0, half: 0, bad: 0, seen: 0, none: 0 };
+    const c = { ok: 0, half: 0, bad: 0, seen: 0, self: 0, none: 0 };
     s.tasks.forEach((x) => { const st = status(x.idx); c[c[st] === undefined ? 'none' : st]++; });
     let cum = 0;
     const parts = [];
@@ -588,7 +715,7 @@
     const tasks = [];
     pages.filter((p) => p.kind === 'set').forEach((s) => s.tasks.forEach((t) => {
       const src = TASKS[t.idx].task;
-      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
+      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
     }));
     tasks.sort((a, b) => a.i - b.i);
     return {

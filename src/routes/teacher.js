@@ -249,7 +249,7 @@ teacherRouter.get('/razredi/:id/rezultati/:eid', loadClass, async (req, res, nex
       return { ...m, c, strip: strip(ex, c.state) };
     });
     const tasks = ex.tasks.map((t, n) => {
-      const r = { n: n + 1, ...t, answered: 0, right: 0, hints: 0, solutions: 0 };
+      const r = { n: n + 1, ...t, self: !!t.self, answered: 0, right: 0, hints: 0, solutions: 0 };
       for (const s of students) {
         const x = readTask(ex, s.c.state?.t?.[t.i]);
         if (x.hinted) r.hints++;

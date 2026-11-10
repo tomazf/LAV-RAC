@@ -9,14 +9,16 @@ export function readTask(ex, raw) {
   const r = raw && typeof raw === 'object' ? raw : {};
   return { done: r[f.done] === true, points: Number(r[f.points]) || 0, hinted: r[f.hinted] === true, solution: r.sol === true };
 }
+// A self task (»Sam preveri«) has no points and nothing in it can be wrong; the student only ticks it.
 function legalPoints(task, t) {
-  if (!t.done || t.solution) return 0;
+  if (task.self || !t.done || t.solution) return 0;
   const cap = t.hinted ? task.max / 2 : task.max;
   if (t.points >= cap) return cap;
   if (t.points >= task.max / 2) return task.max / 2;
   return 0;
 }
 function kindOf(task, t) {
+  if (task.self) return 'self';
   if (t.solution) return 'solution';
   if (t.points <= 0) return 'wrong';
   return t.points >= task.max ? 'correct' : 'partial';
@@ -27,7 +29,7 @@ export function summarize(ex, state) {
   for (const task of ex.tasks) {
     const t = readTask(ex, tasks[task.i]);
     if (t.hinted) out.hints++;
-    if (t.done) { out.done++; out.score += t.points; if (t.solution) out.solutions++; }
+    if (t.done) { out.done++; out.score += task.self ? 0 : t.points; if (t.solution && !task.self) out.solutions++; }
   }
   return out;
 }

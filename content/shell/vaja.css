@@ -4,6 +4,7 @@
   --lr-bg:#fffaf4;--lr-card:#fff;--lr-ink:#241433;--lr-mut:#5f5470;--lr-acc:#6b2a7a;--lr-acc-soft:#fdeedd;--lr-line:#f0e3d3;--lr-tile:#faf0e3;
   --lr-hdr:#2e1a40;--lr-lamp:#ffc45c;
   --lr-ok:#2b8a3e;--lr-ok-bg:#e3f5e8;--lr-half:#9a6416;--lr-half-bg:#f8eed9;--lr-bad:#c92a2a;--lr-bad-bg:#fde8e8;--lr-seen:#5f5470;--lr-seen-bg:#ece6f2;
+  --lr-self:#1f6f8b;--lr-self-bg:#e1f0f5;
   --lr-none:#e6dccf;--lr-ring:#c3b5a3;
   --lr-fb:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;--lr-fm:"IBM Plex Mono",ui-monospace,Consolas,monospace;
 }
@@ -11,6 +12,7 @@
   --lr-bg:#171021;--lr-card:#231833;--lr-ink:#efe9f5;--lr-mut:#a99cba;--lr-acc:#d5a6e6;--lr-acc-soft:#3a2a4a;--lr-line:#3a2c4d;--lr-tile:#2f2242;
   --lr-hdr:#1f1130;
   --lr-ok:#6fd48a;--lr-ok-bg:#17352a;--lr-half:#f1b95a;--lr-half-bg:#3a2e17;--lr-bad:#ff8080;--lr-bad-bg:#3d2230;--lr-seen:#a99cba;--lr-seen-bg:#2f2242;
+  --lr-self:#6cc1dd;--lr-self-bg:#16313b;
   --lr-none:#4a3a60;--lr-ring:#76648f;
 }}
 html body{background:var(--lr-bg);color:var(--lr-ink);font-family:var(--lr-fb);padding:0}
@@ -35,7 +37,7 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr-ptxt{font:500 .9rem var(--lr-fm);color:var(--lr-mut);font-variant-numeric:tabular-nums}
 .lr-reset{display:flex;align-items:center}
 .lr-confirm{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:.92rem;max-width:560px}
-.lr-ok{background:var(--lr-ok)}.lr-half{background:var(--lr-half)}.lr-bad{background:var(--lr-bad)}.lr-seen{background:var(--lr-seen)}
+.lr-ok{background:var(--lr-ok)}.lr-half{background:var(--lr-half)}.lr-bad{background:var(--lr-bad)}.lr-seen{background:var(--lr-seen)}.lr-self{background:var(--lr-self)}
 
 /* body: rail + page */
 .lr-body{max-width:1240px;margin:auto;display:grid;grid-template-columns:272px minmax(0,1fr);gap:40px;padding:24px max(16px,env(safe-area-inset-left,0px)) 80px}
@@ -135,6 +137,7 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr-num[data-s=half]{background:var(--lr-half-bg);border-color:var(--lr-half);color:var(--lr-half)}
 .lr-num[data-s=bad]{background:var(--lr-bad-bg);border-color:var(--lr-bad);color:var(--lr-bad)}
 .lr-num[data-s=seen]{background:var(--lr-seen-bg);border-color:var(--lr-seen);color:var(--lr-seen)}
+.lr-num[data-s=self]{background:var(--lr-self-bg);border-color:var(--lr-self);color:var(--lr-self)}
 .lr-num[aria-current=step]{box-shadow:0 0 0 3px var(--lr-acc);border-color:var(--lr-acc)}
 .lr-legend{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px 18px;font-size:.88rem;color:var(--lr-mut)}
 .lr-legend span{display:inline-flex;align-items:center;gap:6px}
@@ -170,11 +173,32 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr-task[data-lr=half]{border-color:var(--lr-half)!important}
 .lr-task[data-lr=bad]{border-color:var(--lr-bad)!important}
 .lr-task[data-lr=seen]{border-color:var(--lr-seen)!important}
+.lr-task[data-lr=self]{border-color:var(--lr-self)!important}
 .tag.lr-st{font-weight:700}
 .tag.lr-st.lr-ok{background:var(--lr-ok-bg);color:var(--lr-ok)}
 .tag.lr-st.lr-half{background:var(--lr-half-bg);color:var(--lr-half)}
 .tag.lr-st.lr-bad{background:var(--lr-bad-bg);color:var(--lr-bad)}
 .tag.lr-st.lr-seen{background:var(--lr-seen-bg);color:var(--lr-seen)}
+.tag.lr-st.lr-self{background:var(--lr-self-bg);color:var(--lr-self)}
+
+/* self tasks: no points, so the hint and the solution carry no price tag; the known results replace the inputs */
+.lr-task[data-self][data-lr] .lr-hint::after,.lr-task[data-self][data-lr] .lr-sol::after{content:none}
+.lr-task[data-self=blanks] .sol .ans{display:none}
+.lr-tests{margin:10px 0;padding:10px 14px;border-radius:10px;background:var(--lr-self-bg);border-left:4px solid var(--lr-self)}
+.lr-tests b{display:block;margin-bottom:4px}
+.lr-tests ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:2px}
+.lr-tests code{font-family:var(--lr-fm);font-weight:700}
+
+/* options of single tasks: bullets in a question, blanks in two columns, blanks typed in the code */
+.lr-q ul.lr-bul{margin:6px 0 10px;padding-left:22px;display:flex;flex-direction:column;gap:2px}
+.lr-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 28px;margin:6px 0}
+@media (max-width:640px){.lr-cols{grid-template-columns:minmax(0,1fr)}}
+/* the blanks typed in the code: they must beat the artifact's own input style (padding, border, width) */
+.lr-q input.lr-gap{font:inherit;font-family:var(--lr-fm);font-size:inherit;color:var(--lr-ink);background:var(--lr-acc-soft);border:0;border-bottom:2px solid var(--lr-acc);border-radius:4px 4px 0 0;padding:0 .3em;margin:0 .1em;height:1.45em;line-height:1.2;text-align:center;box-sizing:content-box;min-width:3ch;vertical-align:baseline}
+.lr-q input.lr-gap::placeholder{color:var(--lr-mut);opacity:.7}
+.lr-q input.lr-gap.right{border-bottom-color:var(--lr-ok);background:var(--lr-ok-bg)}
+.lr-q input.lr-gap.wrong{border-bottom-color:var(--lr-bad);background:var(--lr-bad-bg)}
+.lr-q input.lr-gap:disabled{opacity:1;color:var(--lr-ink);-webkit-text-fill-color:var(--lr-ink)}
 
 /* pager between pages, bottom right */
 .lr-pager{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--lr-line);padding-top:14px;margin-top:4px;flex-wrap:wrap}

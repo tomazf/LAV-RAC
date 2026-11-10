@@ -11,6 +11,11 @@ const GROUPS = [
   { id: 'jezik', title: 'Jezik in prevajanje', pages: ['jezik', 'prevajanje', 'pot'] },
   { id: 'orodja', title: 'Orodja, zagon in napake', pages: ['jdk', 'ukazi', 'class', 'napake'] },
 ];
+// The teacher's task names: the set letter and the place in the set as the artifact shows it (10. 11. 2026).
+const PREP = {
+  self: ['C10', 'D11'],
+  nobtn: ['C5', 'C6', 'C9', 'C11', 'C12', 'D9', 'D10'],
+};
 const TITLE = 'Java in delovanje JVM';
 const KICKER = 'LAV-RAČ3 · 1. poglavje';
 const ZAGON = `renderAll();
@@ -61,8 +66,10 @@ let remote = null, pushTimer = null, pushing = false, dirty = false;
 function saveLocal(){ LavRac.saveUi(S); }
 function save(){ LavRac.saveUi(S); }`],
     // Task ids exist only from here on, so the shell learns the tasks here.
+    // Corrections of 10. 11. 2026: the programs the student writes are checked by the student (no output to type),
+    // the tasks named by the teacher have no copy / Programiz buttons, and Za doma loses D3 and D6 (the rest is renumbered).
     ['T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });',
-      'T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });\nLavRac.tasks(LEVELS.flatMap(L=>T.filter(t=>t.lv===L.tag)), { level: (t) => t.pts });\nS = LavRac.loadUi();'],
+      `LavRac.prepare(T, LEVELS, ${JSON.stringify(PREP)});\nHOME.splice(5, 1); HOME.splice(2, 1);\nT.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });\nLavRac.tasks(LEVELS.flatMap(L=>T.filter(t=>t.lv===L.tag)), { level: (t) => t.pts });\nS = LavRac.loadUi();`],
     ['if(!window.claude || !window.claude.use) return;', 'return;'],
     // Program output and code are the answer too, so they are kept with the portal.
     ['if(ed){ ed.value = s.code != null ? s.code : t.starter;',

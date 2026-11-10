@@ -9,6 +9,8 @@
 // The artifact keeps its content and answer checks; the shell owns the layout, the paging, the gate
 // before the tasks, and the scoring state in the portal's format ({ t: { <index>: { d, p, h, sol } }, seen }).
 // Rules are the portal's: one answer per task, a hint halves the points, the solution gives 0 points.
+// A task marked self (»Sam preveri«) has no points: the student runs the work elsewhere, compares it with the known
+// results and ticks »Preveril sem«. The solution may be opened without locking anything.
 (function () {
   'use strict';
   const B = window.__LAVELS || null;
@@ -20,6 +22,7 @@
   const notes = new Map();     // index -> why the answer was wrong (only until the page is reloaded)
   let state = read();
   let cfg = null;
+  let quiet = false;           // true while the shell itself opens a solution at the start: nothing is recorded
   let pages = [];              // every page in order: { id, kind, title, group, el, set }
   let gate = [];               // theory page ids that open the tasks
   const setPos = new Map();    // set id -> shown task position
@@ -42,6 +45,7 @@
   function status(i) {
     const r = state.t[i] || {};
     if (!r.d) return r.h ? 'hinted' : 'open';
+    if (TASKS[i] && TASKS[i].self) return 'self';
     if (r.sol) return 'seen';
     if (r.p > 0) return r.h ? 'half' : 'ok';
     return 'bad';
@@ -59,11 +63,12 @@
     half: (r) => 'Pravilno z namigom: ' + pts(r.p) + '.',
     bad: (r, note) => 'Napačno: 0 točk.' + (note ? ' ' + note : '') + ' Naloga je zaklenjena, rešitev si lahko ogledaš.',
     seen: () => 'Rešitev prikazana: 0 točk. Naloga je zaklenjena.',
+    self: () => 'Označeno: sam si preveril delovanje. Naloga nima točk.',
   };
-  const LABEL = { ok: 'Pravilno', half: 'Pravilno z namigom', bad: 'Napačno', seen: 'Rešitev ogledana' };
+  const LABEL = { ok: 'Pravilno', half: 'Pravilno z namigom', bad: 'Napačno', seen: 'Rešitev ogledana', self: 'Sam preveril' };
 
   function totals() {
-    const r = { ok: 0, half: 0, bad: 0, seen: 0, done: 0, points: 0, max: 0, n: TASKS.length };
+    const r = { ok: 0, half: 0, bad: 0, seen: 0, self: 0, done: 0, points: 0, max: 0, n: TASKS.length };
     TASKS.forEach((t, i) => {
       const s = status(i);
       r.max += t.max;
@@ -77,9 +82,23 @@
   // ---------- calls from the artifact ----------
   const api = {
     // list: the artifact's tasks in the order they are shown; level(t) gives 1, 2 or 3 for the teacher's list.
+    // A self task has no points (max 0); its pts only say how hard it is.
     tasks(list, opts) {
       const level = (opts && opts.level) || ((t) => t.lv);
-      list.forEach((t, i) => { t.idx = i; TASKS.push({ id: t.id, max: Number(t.pts) || 1, task: t, level: level(t) }); byId.set(t.id, i); });
+      list.forEach((t, i) => { t.idx = i; TASKS.push({ id: t.id, max: t.self ? 0 : Number(t.pts) || 1, self: !!t.self, task: t, level: level(t) }); byId.set(t.id, i); });
+    },
+    // Before the tasks are numbered: the teacher's task names (set letter and the place in the artifact's own list,
+    // e.g. »C9«) get their options, and removed tasks leave the list. The names are read before anything is removed,
+    // so they keep the numbers the teacher sees in the artifact. A name that does not exist stops the import.
+    //   self: no points, ticked by the student   nobtn: no »Kopiraj kodo« / »Odpri Programiz«
+    //   inline: the blanks (___) are typed in the code (same: all as wide as the widest)   cols: the blanks in two columns
+    //   list: lines »- …« of the question become bullets   example: the solution is open from the start   remove: leave the list
+    prepare(list, levels, o) {
+      const ref = new Map();
+      levels.forEach((L) => list.filter((t) => t.lv === L.tag).forEach((t, k) => ref.set(L.tag + (k + 1), t)));
+      const get = (r) => { const t = ref.get(r); if (!t) throw new Error('LavRac.prepare: no task ' + r); return t; };
+      ['self', 'nobtn', 'inline', 'same', 'cols', 'list', 'example'].forEach((flag) => (o[flag] || []).forEach((r) => { get(r)[flag] = true; }));
+      (o.remove || []).map(get).forEach((t) => { list.splice(list.indexOf(t), 1); });
     },
     // The artifact's own memory of what was typed and how many hints are open.
     loadUi() {
@@ -127,9 +146,20 @@
       persist();
       paintTask(i);
     },
+    // »Preveril sem«: the student ticks a self task. No points, and nothing about it can be wrong.
+    checked(i) {
+      const r = rec(i);
+      if (r.d || !TASKS[i].self) return;
+      r.d = true; r.p = 0;
+      persist();
+      paintTask(i, true);
+      paintProgress();
+    },
     solution(i) {
       const r = rec(i);
-      if (r.d) { if (!r.v) { r.v = true; persist(); } return; }
+      // Looking at the solution of a self task costs nothing and locks nothing.
+      if (quiet) return;
+      if (r.d || TASKS[i].self) { if (!r.v) { r.v = true; persist(); } return; }
       r.d = true; r.p = 0; r.sol = true;
       persist();
       paintTask(i, true);
@@ -200,7 +230,7 @@
   }
 
   function buildTop(c) {
-    const bar = h('div', { class: 'lr-stack', 'aria-hidden': 'true' }, ...['ok', 'half', 'bad', 'seen'].map((k) => h('i', { class: 'lr-' + k })));
+    const bar = h('div', { class: 'lr-stack', 'aria-hidden': 'true' }, ...['ok', 'half', 'bad', 'seen', 'self'].map((k) => h('i', { class: 'lr-' + k })));
     const reset = h('div', { class: 'lr-reset', id: 'lrReset' });
     const idle = () => {
       reset.replaceChildren(h('button', { type: 'button', class: 'lr-btn lr-ghost', id: 'resetBtn', text: 'Ponastavi vajo' }));
@@ -310,6 +340,7 @@
         h('li', { text: 'Najprej preglej vse razlage. Vaje se odklenejo, ko odpreš vsako stran razlage.' }),
         h('li', { text: 'Pri vsaki nalogi oddaš en odgovor. Pravilen odgovor prinese vse točke, napačen 0 točk.' }),
         h('li', { text: 'Namig odbije polovico točk naloge. Ogled rešitve prinese 0 točk in nalogo zaklene.' }),
+        TASKS.some((t) => t.self) ? h('li', { text: 'Naloge z oznako »Sam preveri« nimajo točk: rešitev narediš sam, jo preizkusiš in nalogo označiš s »Preveril sem«. Rešitev si lahko ogledaš brez posledic.' }) : null,
         h('li', { text: 'Napredek se shranjuje v tvoj račun, zato lahko nadaljuješ na katerem koli računalniku.' })));
     if (c.vajeNote) rules.append(h('p', { class: 'lr-just', html: c.vajeNote }));
     p.page.append(rules);
@@ -344,8 +375,10 @@
       b.addEventListener('click', () => { location.hash = s.id + '/' + (k + 1); });
       nums.append(b);
     });
+    // A set of self tasks has only that state in its legend; a mixed set has both.
+    const allSelf = s.tasks.every((t) => TASKS[t.idx].self), anySelf = s.tasks.some((t) => TASKS[t.idx].self);
     const legend = h('div', { class: 'lr-legend' },
-      ...[['ok', 'pravilno'], ['half', 'pravilno z namigom (50 %)'], ['bad', 'napačno'], ['seen', 'ogledana rešitev (0 točk)']]
+      ...[...(allSelf ? [] : [['ok', 'pravilno'], ['half', 'pravilno z namigom (50 %)'], ['bad', 'napačno'], ['seen', 'ogledana rešitev (0 točk)']]), ...(anySelf ? [['self', 'sam preveril (brez točk)']] : [])]
         .map(([k, t]) => h('span', {}, h('i', { class: 'lr-sw lr-' + k }), t)));
     const board = h('div', { class: 'lr-board' },
       h('div', { class: 'lr-bh' }, h('b', { text: s.title }), h('span', { class: 'lr-done', 'data-done': s.id })),
@@ -368,20 +401,37 @@
     if (s.el) s.el.remove();
   }
   function prepareCard(card, i, k, n, sel) {
+    const task = TASKS[i].task;
     card.hidden = false;
     card.id = 't' + i;
     card.classList.add('lr-task');
+    if (task.self) card.dataset.self = task.type;
     const head = card.querySelector(sel.head);
     if (head) {
       head.classList.add('crumb');
       const num = head.querySelector(sel.num);
       if (num) num.textContent = 'Naloga ' + (k + 1) + ' od ' + n;
       const tags = head.querySelector(sel.tags);
-      if (tags) { tags.classList.add('lv'); tags.prepend(h('span', { class: 'tag lr-st', hidden: true })); }
+      if (tags) {
+        tags.classList.add('lv');
+        tags.prepend(h('span', { class: 'tag lr-st', hidden: true }));
+        // The points tag is the only one that names points: a self task has none.
+        if (task.self) tags.querySelectorAll('.tag:not(.lr-st)').forEach((t) => { if (/točk/.test(t.textContent)) t.textContent = 'Sam preveri · brez točk'; });
+        if (task.example) tags.append(h('span', { class: 'tag', text: 'Rešen primer' }));
+      }
     }
     const q = card.querySelector(sel.q);
     if (q) q.classList.add('lr-q');
-    const check = card.querySelector(sel.check);
+    if (q) shapeTask(card, q, task);
+    let check = card.querySelector(sel.check);
+    if (task.self && check) {
+      // The artifact's own check goes away with its listener; ticking is the shell's.
+      const tick = check.cloneNode(false);
+      tick.textContent = 'Preveril sem';
+      tick.addEventListener('click', () => api.checked(i));
+      check.replaceWith(tick);
+      check = tick;
+    }
     const hint = card.querySelector(sel.hint);
     const sol = card.querySelector(sel.sol);
     const fb = card.querySelector(sel.fb);
@@ -404,7 +454,7 @@
       actions.after(ask);
       if (sol) {
         sol.addEventListener('click', (e) => {
-          if (status(i) !== 'open' && status(i) !== 'hinted') return;
+          if (task.self || (status(i) !== 'open' && status(i) !== 'hinted')) return;
           if (card.dataset.solOk) return;
           e.stopImmediatePropagation();
           e.preventDefault();
@@ -416,8 +466,85 @@
           no.addEventListener('click', () => { ask.hidden = true; sol.focus(); });
           no.focus();
         }, true);
+        if (task.example) { quiet = true; sol.click(); quiet = false; }
       }
     }
+  }
+
+  // The options of a task (LavRac.prepare) shape the artifact's card.
+  function shapeTask(card, q, task) {
+    if (task.nobtn) {
+      q.querySelectorAll('.js-copy, a[href*="programiz"]').forEach((x) => x.remove());
+      q.querySelectorAll('.actions').forEach((a) => { if (!a.children.length) a.remove(); });
+    }
+    if (task.self && task.type === 'code') {
+      // The program is written elsewhere and the answer is already told: there is no output to type.
+      const out = q.querySelector('[id^="o-"]');
+      if (out) (out.closest('.blank') || out).remove();
+      const bar = q.querySelector('.editorbar span');
+      if (bar) bar.textContent = 'Program zaženi v poljubnem okolju (Eclipse, VS Code, Programiz …) in primerjaj njegov izpis s pričakovanim. V Programizu razred preimenuj v Main. Kodo lahko shraniš tu.';
+    }
+    if (task.self && task.type === 'blanks') {
+      // No inputs: the known results are what the student compares with.
+      const rows = [...q.querySelectorAll(':scope > .blank')];
+      if (rows.length) {
+        const text = (b) => String(Array.isArray(b.acc) ? b.acc[0] : b.acc);
+        const box = h('div', { class: 'lr-tests' }, h('b', { text: 'Pravilni rezultati za preverjanje' }),
+          h('ul', {}, ...task.b.map((b) => h('li', {}, b.l + ': ', h('code', { text: text(b) })))));
+        rows[0].before(box);
+        rows.forEach((r) => r.remove());
+      }
+    }
+    if (task.cols) {
+      const rows = [...q.querySelectorAll(':scope > .blank')];
+      if (rows.length) { const g = h('div', { class: 'lr-cols' }); rows[0].before(g); rows.forEach((r) => g.append(r)); }
+    }
+    if (task.inline) gapFill(q, task);
+    if (task.list) {
+      const p = q.querySelector(':scope > p');
+      if (p) {
+        const out = [];
+        let ul = null;
+        p.textContent.split('\n').forEach((line) => {
+          if (line.startsWith('- ')) { if (!ul) { ul = h('ul', { class: 'lr-bul' }); out.push(ul); } ul.append(h('li', { text: line.slice(2) })); }
+          else { ul = null; out.push(h('p', { text: line })); }
+        });
+        p.replaceWith(...out);
+      }
+    }
+  }
+  // The blanks (___) of a code snippet become inputs in the code itself; the artifact still finds them by their ids.
+  function gapFill(q, task) {
+    const pre = q.querySelector('pre.code');
+    const rows = [...q.querySelectorAll(':scope > .blank')];
+    const inputs = rows.map((r) => r.querySelector('input'));
+    if (!pre || !inputs.length || inputs.some((x) => !x)) throw new Error('inline: no code or blanks in ' + task.id);
+    let k = 0;
+    const walker = document.createTreeWalker(pre, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach((n) => {
+      if (!n.nodeValue.includes('___')) return;
+      const frag = document.createDocumentFragment();
+      n.nodeValue.split('___').forEach((part, j) => {
+        if (j) {
+          const inp = inputs[k], b = task.b[k];
+          k++;
+          if (!inp) throw new Error('inline: more gaps than blanks in ' + task.id);
+          inp.classList.add('lr-gap');
+          inp.placeholder = String(k);
+          inp.setAttribute('aria-label', 'Vrzel ' + k + ': ' + b.l);
+          inp.title = b.l;
+          const len = Math.max(...(task.same ? task.b : [b]).flatMap((x) => [].concat(x.acc).map((a) => String(a).length)));
+          inp.style.width = Math.max(3, len + 2) + 'ch';
+          frag.append(inp);
+        }
+        if (part) frag.append(part);
+      });
+      n.replaceWith(frag);
+    });
+    if (k !== inputs.length) throw new Error('inline: ' + k + ' gaps for ' + inputs.length + ' blanks in ' + task.id);
+    rows.forEach((r) => r.remove());
   }
   function buildExtra(p) {
     p.page.append(h('header', { class: 'lr-shead' }, h('span', { class: 'lr-gi', html: ICON.home }),
@@ -453,7 +580,7 @@
     const fb = card.lrFb;
     if (done) {
       card.querySelectorAll('.lr-q input, .lr-q select, .lr-q textarea, .lr-q button, .lr-check, .lr-extra').forEach((x) => { x.disabled = true; });
-      if (fb) { fb.textContent = MESSAGE[s](state.t[i], notes.get(i)); fb.className = 'feedback lr-fb ' + (s === 'ok' || s === 'half' ? 'ok' : 'bad'); }
+      if (fb) { fb.textContent = MESSAGE[s](state.t[i], notes.get(i)); fb.className = 'feedback lr-fb ' + (s === 'ok' || s === 'half' || s === 'self' ? 'ok' : 'bad'); }
     }
     if (announce) {
       const sb = card.querySelector('.lr-solask');
@@ -464,7 +591,7 @@
     const r = totals();
     const t = document.getElementById('lrPtxt');
     if (t) t.textContent = r.done + ' / ' + r.n + ' nalog · ' + String(r.points).replace('.', ',') + ' / ' + r.max + ' točk';
-    ['ok', 'half', 'bad', 'seen'].forEach((k) => {
+    ['ok', 'half', 'bad', 'seen', 'self'].forEach((k) => {
       const el = document.querySelector('.lr-stack .lr-' + k);
       if (el) el.style.width = (r.n ? 100 * r[k] / r.n : 0) + '%';
     });
@@ -478,11 +605,11 @@
     if (vt && gateOpen()) vt.textContent = 'Rešenih ' + r.done + ' / ' + r.n + ', ' + String(r.points).replace('.', ',') + ' / ' + r.max + ' točk';
   }
   // The set's pie in the rail: one slice per state, clockwise from the top, in the order of the legend.
-  const PIE = [['ok', '--lr-ok', 'pravilno'], ['half', '--lr-half', 'pravilno z namigom'], ['bad', '--lr-bad', 'napačno'], ['seen', '--lr-seen', 'ogledana rešitev'], ['none', '--lr-none', 'brez odgovora']];
+  const PIE = [['ok', '--lr-ok', 'pravilno'], ['half', '--lr-half', 'pravilno z namigom'], ['bad', '--lr-bad', 'napačno'], ['seen', '--lr-seen', 'ogledana rešitev'], ['self', '--lr-self', 'sam preveril'], ['none', '--lr-none', 'brez odgovora']];
   function paintPie(s) {
     const n = s.tasks.length;
     if (!n) return;
-    const c = { ok: 0, half: 0, bad: 0, seen: 0, none: 0 };
+    const c = { ok: 0, half: 0, bad: 0, seen: 0, self: 0, none: 0 };
     s.tasks.forEach((x) => { const st = status(x.idx); c[c[st] === undefined ? 'none' : st]++; });
     let cum = 0;
     const parts = [];
@@ -595,7 +722,7 @@
     const tasks = [];
     pages.filter((p) => p.kind === 'set').forEach((s) => s.tasks.forEach((t) => {
       const src = TASKS[t.idx].task;
-      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
+      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
     }));
     tasks.sort((a, b) => a.i - b.i);
     return {
@@ -807,6 +934,7 @@ p.prose{display:block}
   --lr-bg:#fffaf4;--lr-card:#fff;--lr-ink:#241433;--lr-mut:#5f5470;--lr-acc:#6b2a7a;--lr-acc-soft:#fdeedd;--lr-line:#f0e3d3;--lr-tile:#faf0e3;
   --lr-hdr:#2e1a40;--lr-lamp:#ffc45c;
   --lr-ok:#2b8a3e;--lr-ok-bg:#e3f5e8;--lr-half:#9a6416;--lr-half-bg:#f8eed9;--lr-bad:#c92a2a;--lr-bad-bg:#fde8e8;--lr-seen:#5f5470;--lr-seen-bg:#ece6f2;
+  --lr-self:#1f6f8b;--lr-self-bg:#e1f0f5;
   --lr-none:#e6dccf;--lr-ring:#c3b5a3;
   --lr-fb:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;--lr-fm:"IBM Plex Mono",ui-monospace,Consolas,monospace;
 }
@@ -814,6 +942,7 @@ p.prose{display:block}
   --lr-bg:#171021;--lr-card:#231833;--lr-ink:#efe9f5;--lr-mut:#a99cba;--lr-acc:#d5a6e6;--lr-acc-soft:#3a2a4a;--lr-line:#3a2c4d;--lr-tile:#2f2242;
   --lr-hdr:#1f1130;
   --lr-ok:#6fd48a;--lr-ok-bg:#17352a;--lr-half:#f1b95a;--lr-half-bg:#3a2e17;--lr-bad:#ff8080;--lr-bad-bg:#3d2230;--lr-seen:#a99cba;--lr-seen-bg:#2f2242;
+  --lr-self:#6cc1dd;--lr-self-bg:#16313b;
   --lr-none:#4a3a60;--lr-ring:#76648f;
 }}
 html body{background:var(--lr-bg);color:var(--lr-ink);font-family:var(--lr-fb);padding:0}
@@ -838,7 +967,7 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr-ptxt{font:500 .9rem var(--lr-fm);color:var(--lr-mut);font-variant-numeric:tabular-nums}
 .lr-reset{display:flex;align-items:center}
 .lr-confirm{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:.92rem;max-width:560px}
-.lr-ok{background:var(--lr-ok)}.lr-half{background:var(--lr-half)}.lr-bad{background:var(--lr-bad)}.lr-seen{background:var(--lr-seen)}
+.lr-ok{background:var(--lr-ok)}.lr-half{background:var(--lr-half)}.lr-bad{background:var(--lr-bad)}.lr-seen{background:var(--lr-seen)}.lr-self{background:var(--lr-self)}
 
 /* body: rail + page */
 .lr-body{max-width:1240px;margin:auto;display:grid;grid-template-columns:272px minmax(0,1fr);gap:40px;padding:24px max(16px,env(safe-area-inset-left,0px)) 80px}
@@ -938,6 +1067,7 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr-num[data-s=half]{background:var(--lr-half-bg);border-color:var(--lr-half);color:var(--lr-half)}
 .lr-num[data-s=bad]{background:var(--lr-bad-bg);border-color:var(--lr-bad);color:var(--lr-bad)}
 .lr-num[data-s=seen]{background:var(--lr-seen-bg);border-color:var(--lr-seen);color:var(--lr-seen)}
+.lr-num[data-s=self]{background:var(--lr-self-bg);border-color:var(--lr-self);color:var(--lr-self)}
 .lr-num[aria-current=step]{box-shadow:0 0 0 3px var(--lr-acc);border-color:var(--lr-acc)}
 .lr-legend{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px 18px;font-size:.88rem;color:var(--lr-mut)}
 .lr-legend span{display:inline-flex;align-items:center;gap:6px}
@@ -973,11 +1103,32 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr-task[data-lr=half]{border-color:var(--lr-half)!important}
 .lr-task[data-lr=bad]{border-color:var(--lr-bad)!important}
 .lr-task[data-lr=seen]{border-color:var(--lr-seen)!important}
+.lr-task[data-lr=self]{border-color:var(--lr-self)!important}
 .tag.lr-st{font-weight:700}
 .tag.lr-st.lr-ok{background:var(--lr-ok-bg);color:var(--lr-ok)}
 .tag.lr-st.lr-half{background:var(--lr-half-bg);color:var(--lr-half)}
 .tag.lr-st.lr-bad{background:var(--lr-bad-bg);color:var(--lr-bad)}
 .tag.lr-st.lr-seen{background:var(--lr-seen-bg);color:var(--lr-seen)}
+.tag.lr-st.lr-self{background:var(--lr-self-bg);color:var(--lr-self)}
+
+/* self tasks: no points, so the hint and the solution carry no price tag; the known results replace the inputs */
+.lr-task[data-self][data-lr] .lr-hint::after,.lr-task[data-self][data-lr] .lr-sol::after{content:none}
+.lr-task[data-self=blanks] .sol .ans{display:none}
+.lr-tests{margin:10px 0;padding:10px 14px;border-radius:10px;background:var(--lr-self-bg);border-left:4px solid var(--lr-self)}
+.lr-tests b{display:block;margin-bottom:4px}
+.lr-tests ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:2px}
+.lr-tests code{font-family:var(--lr-fm);font-weight:700}
+
+/* options of single tasks: bullets in a question, blanks in two columns, blanks typed in the code */
+.lr-q ul.lr-bul{margin:6px 0 10px;padding-left:22px;display:flex;flex-direction:column;gap:2px}
+.lr-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 28px;margin:6px 0}
+@media (max-width:640px){.lr-cols{grid-template-columns:minmax(0,1fr)}}
+/* the blanks typed in the code: they must beat the artifact's own input style (padding, border, width) */
+.lr-q input.lr-gap{font:inherit;font-family:var(--lr-fm);font-size:inherit;color:var(--lr-ink);background:var(--lr-acc-soft);border:0;border-bottom:2px solid var(--lr-acc);border-radius:4px 4px 0 0;padding:0 .3em;margin:0 .1em;height:1.45em;line-height:1.2;text-align:center;box-sizing:content-box;min-width:3ch;vertical-align:baseline}
+.lr-q input.lr-gap::placeholder{color:var(--lr-mut);opacity:.7}
+.lr-q input.lr-gap.right{border-bottom-color:var(--lr-ok);background:var(--lr-ok-bg)}
+.lr-q input.lr-gap.wrong{border-bottom-color:var(--lr-bad);background:var(--lr-bad-bg)}
+.lr-q input.lr-gap:disabled{opacity:1;color:var(--lr-ink);-webkit-text-fill-color:var(--lr-ink)}
 
 /* pager between pages, bottom right */
 .lr-pager{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--lr-line);padding-top:14px;margin-top:4px;flex-wrap:wrap}
@@ -1005,7 +1156,6 @@ html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-ti
   --accent:var(--lr-acc);--accent-soft:var(--lr-acc-soft);--ok:var(--lr-ok);--ok-soft:var(--lr-ok-bg);--bad:var(--lr-bad);--bad-soft:var(--lr-bad-bg);
   --seen:var(--lr-seen);--seen-soft:var(--lr-seen-bg);--f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}
   body{padding-left:0;padding-right:0}
-  .lr-mnav .langsw{flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap}
 </style>
 </head><body>
 <div class="wrap">
@@ -1324,7 +1474,7 @@ const FLOW = (function(){
     en:{start:"Main", end:"End", yes:"True", no:"False"},
     sl:{start:"začetek", end:"konec", yes:"da", no:"ne"}
   };
-  let LANG = "en";
+  let LANG = "sl";
   const B = {
     start:t=>({t:"start",x:t||null}), end:t=>({t:"end",x:t||null}),
     p:x=>({t:"p",x}),
@@ -1466,7 +1616,7 @@ const FLOW = (function(){
   return {B, svg, sym, setLang:l=>{ LANG = l==="sl" ? "sl" : "en"; }, getLang:()=>LANG};
 })();
 
-const J = {"e1": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        System.out.println(a + b);\n        System.out.println(a * b);\n    }\n}", "e10": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int vsota = 0;\n        int n = 0;\n        do {\n            int a = sc.nextInt();\n            int b = sc.nextInt();\n            n = n + 1;\n            if (a > b) {\n                vsota = vsota + a + b;\n            }\n        } while (vsota <= 50);\n        System.out.println(n);\n    }\n}", "e11": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int s = 0;\n        int n = 0;\n        int x = sc.nextInt();\n        while (x != 0) {\n            s = s + x;\n            n = n + 1;\n            x = sc.nextInt();\n        }\n        System.out.println((double) s / n);\n    }\n}", "e12": "public class Main {\n    public static void main(String[] args) {\n        int x = 3;\n        int y = x + 7;\n        x++;\n        while (x < 9) {\n            y = x + 7;\n            System.out.println(x);\n            x++;\n        }\n        System.out.println(x);\n    }\n}", "e13": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        while (b != 0) {\n            int t = a % b;\n            a = b;\n            b = t;\n        }\n        System.out.println(a);\n    }\n}", "e2": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        if (a > b) {\n            System.out.println(a);\n        } else {\n            System.out.println(b);\n        }\n    }\n}", "e3": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int x = sc.nextInt();\n        if (x > 0) {\n            System.out.println(\"pozitivno\");\n        } else if (x < 0) {\n            System.out.println(\"negativno\");\n        } else {\n            System.out.println(\"nic\");\n        }\n    }\n}", "e4": "public class Main {\n    public static void main(String[] args) {\n        int i = 1;\n        while (i <= 10) {\n            System.out.println(i);\n            i = i + 1;\n        }\n        System.out.println(\"i = \" + i);\n    }\n}", "e5": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int clen = 1;\n        int i = 1;\n        while (i <= n) {\n            System.out.println(clen);\n            clen = clen * 2;\n            i = i + 1;\n        }\n    }\n}", "e6": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        int k;\n        if (a < 0) {\n            k = -a;\n        } else {\n            k = a;\n        }\n        int i = 0;\n        while (i < k) {\n            System.out.println(b);\n            i = i + 1;\n        }\n    }\n}", "e7": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        char z = sc.next().charAt(0);\n        int k;\n        if (a > b) {\n            k = a - b;\n        } else {\n            k = b - a;\n        }\n        int i = 0;\n        while (i < k) {\n            System.out.print(z);\n            i = i + 1;\n        }\n        System.out.println();\n    }\n}", "e8": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int s = 0;\n        int i = 1;\n        while (i <= n) {\n            s = s + i;\n            i = i + 1;\n        }\n        System.out.println(s);\n    }\n}", "e9": "public class Main {\n    public static void main(String[] args) {\n        int a = 3;\n        int i = 1;\n        while (i <= 30) {\n            System.out.println(a);\n            a = 2 * a + 1;\n            i = i + 1;\n        }\n    }\n}", "f1": "public class Main {\n    public static void main(String[] args) {\n        int a = 17;\n        int b = 5;\n        int d = a / b;\n        int c = a % b;\n        System.out.println(d + \" \" + c);\n    }\n}", "f2": "public class Main {\n    public static void main(String[] args) {\n        int s = 0;\n        int i = 1;\n        while (i <= 4) {\n            s = s + i * i;\n            i = i + 1;\n        }\n        System.out.println(s);\n    }\n}", "f3": "public class Main {\n    public static void main(String[] args) {\n        double x = 1.5;\n        int y = 1;\n        int i = 0;\n        while (x >= 1) {\n            y++;\n            i += 2 * y;\n            x -= 0.5;\n        }\n        System.out.println(i + \" \" + y);\n    }\n}", "f4": "public class Main {\n    public static void main(String[] args) {\n        int s = 0;\n        int i = 1;\n        while (i <= 10) {\n            if (i % 2 == 0) {\n                s = s + i;\n            }\n            i = i + 1;\n        }\n        System.out.println(s);\n    }\n}", "f5": "public class Main {\n    public static void main(String[] args) {\n        int n = 4721;\n        int s = 0;\n        while (n > 0) {\n            s = s + n % 10;\n            n = n / 10;\n        }\n        System.out.println(s);\n    }\n}", "h3": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        int c = sc.nextInt();\n        int m = a;\n        if (b > m) {\n            m = b;\n        }\n        if (c > m) {\n            m = c;\n        }\n        System.out.println(m);\n    }\n}", "h4": "public class Main {\n    public static void main(String[] args) {\n        int n = 4721;\n        int st = 0;\n        while (n > 0) {\n            st = st + 1;\n            n = n / 10;\n        }\n        System.out.println(st);\n    }\n}", "h5": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int d = 2;\n        while (d * d <= n && n % d != 0) {\n            d = d + 1;\n        }\n        if (n >= 2 && d * d > n) {\n            System.out.println(\"prastevilo\");\n        } else {\n            System.out.println(\"ni prastevilo\");\n        }\n    }\n}"};
+const J = {"e14": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        if (n % 2 == 0) {\n            System.out.println(\"sodo\");\n        } else {\n            System.out.println(\"liho\");\n        }\n    }\n}", "e15": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int f = 1;\n        int i = 1;\n        while (i <= n) {\n            f = f * i;\n            i = i + 1;\n        }\n        System.out.println(f);\n    }\n}", "e1": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        System.out.println(a + b);\n        System.out.println(a * b);\n    }\n}", "e10": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int vsota = 0;\n        int n = 0;\n        do {\n            int a = sc.nextInt();\n            int b = sc.nextInt();\n            n = n + 1;\n            if (a > b) {\n                vsota = vsota + a + b;\n            }\n        } while (vsota <= 50);\n        System.out.println(n);\n    }\n}", "e11": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int s = 0;\n        int n = 0;\n        int x = sc.nextInt();\n        while (x != 0) {\n            s = s + x;\n            n = n + 1;\n            x = sc.nextInt();\n        }\n        System.out.println((double) s / n);\n    }\n}", "e12": "public class Main {\n    public static void main(String[] args) {\n        int x = 3;\n        int y = x + 7;\n        x++;\n        while (x < 9) {\n            y = x + 7;\n            System.out.println(x);\n            x++;\n        }\n        System.out.println(x);\n    }\n}", "e13": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        while (b != 0) {\n            int t = a % b;\n            a = b;\n            b = t;\n        }\n        System.out.println(a);\n    }\n}", "e2": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        if (a > b) {\n            System.out.println(a);\n        } else {\n            System.out.println(b);\n        }\n    }\n}", "e3": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int x = sc.nextInt();\n        if (x > 0) {\n            System.out.println(\"pozitivno\");\n        } else if (x < 0) {\n            System.out.println(\"negativno\");\n        } else {\n            System.out.println(\"nic\");\n        }\n    }\n}", "e4": "public class Main {\n    public static void main(String[] args) {\n        int i = 1;\n        while (i <= 10) {\n            System.out.println(i);\n            i = i + 1;\n        }\n        System.out.println(\"i = \" + i);\n    }\n}", "e5": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int clen = 1;\n        int i = 1;\n        while (i <= n) {\n            System.out.println(clen);\n            clen = clen * 2;\n            i = i + 1;\n        }\n    }\n}", "e6": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        int k;\n        if (a < 0) {\n            k = -a;\n        } else {\n            k = a;\n        }\n        int i = 0;\n        while (i < k) {\n            System.out.println(b);\n            i = i + 1;\n        }\n    }\n}", "e7": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        char z = sc.next().charAt(0);\n        int k;\n        if (a > b) {\n            k = a - b;\n        } else {\n            k = b - a;\n        }\n        int i = 0;\n        while (i < k) {\n            System.out.print(z);\n            i = i + 1;\n        }\n        System.out.println();\n    }\n}", "e8": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int s = 0;\n        int i = 1;\n        while (i <= n) {\n            s = s + i;\n            i = i + 1;\n        }\n        System.out.println(s);\n    }\n}", "e9": "public class Main {\n    public static void main(String[] args) {\n        int a = 3;\n        int i = 1;\n        while (i <= 30) {\n            System.out.println(a);\n            a = 2 * a + 1;\n            i = i + 1;\n        }\n    }\n}", "f1": "public class Main {\n    public static void main(String[] args) {\n        int a = 17;\n        int b = 5;\n        int d = a / b;\n        int c = a % b;\n        System.out.println(d + \" \" + c);\n    }\n}", "f2": "public class Main {\n    public static void main(String[] args) {\n        int s = 0;\n        int i = 1;\n        while (i <= 4) {\n            s = s + i * i;\n            i = i + 1;\n        }\n        System.out.println(s);\n    }\n}", "f3": "public class Main {\n    public static void main(String[] args) {\n        double x = 1.5;\n        int y = 1;\n        int i = 0;\n        while (x >= 1) {\n            y++;\n            i += 2 * y;\n            x -= 0.5;\n        }\n        System.out.println(i + \" \" + y);\n    }\n}", "f4": "public class Main {\n    public static void main(String[] args) {\n        int s = 0;\n        int i = 1;\n        while (i <= 10) {\n            if (i % 2 == 0) {\n                s = s + i;\n            }\n            i = i + 1;\n        }\n        System.out.println(s);\n    }\n}", "f5": "public class Main {\n    public static void main(String[] args) {\n        int n = 4721;\n        int s = 0;\n        while (n > 0) {\n            s = s + n % 10;\n            n = n / 10;\n        }\n        System.out.println(s);\n    }\n}", "h3": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        int c = sc.nextInt();\n        int m = a;\n        if (b > m) {\n            m = b;\n        }\n        if (c > m) {\n            m = c;\n        }\n        System.out.println(m);\n    }\n}", "h4": "public class Main {\n    public static void main(String[] args) {\n        int n = 4721;\n        int st = 0;\n        while (n > 0) {\n            st = st + 1;\n            n = n / 10;\n        }\n        System.out.println(st);\n    }\n}", "h5": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int d = 2;\n        while (d * d <= n && n % d != 0) {\n            d = d + 1;\n        }\n        if (n >= 2 && d * d > n) {\n            System.out.println(\"prastevilo\");\n        } else {\n            System.out.println(\"ni prastevilo\");\n        }\n    }\n}"};
 /* ---------- data ---------- */
 const {B} = FLOW;
 const p=B.p, inp=B.inp, out=B.out, IF=B.if, wh=B.wh, dw=B.dw;
@@ -1489,7 +1639,7 @@ const LEVELS = [
  {id:"naloge-b", tag:"B", title:"Načini zapisa algoritma", note:"Besedni opis, psevdokoda, diagram poteka in program (razlaga 2)."},
  {id:"naloge-c", tag:"C", title:"Simboli in gradniki", note:"Simboli v diagramu poteka ter zaporedje, vejitev in ponavljanje (razlagi 3 in 4)."},
  {id:"naloge-d", tag:"D", title:"Sled algoritma", note:"Preberi diagram in z računanjem po korakih ugotovi, kaj izpiše. Bloki so oštevilčeni od zgoraj navzdol, da lahko v sledi zapišeš, kateri blok se izvaja (razlaga 5)."},
- {id:"naloge-e", tag:"E", title:"Narišem diagram poteka", note:"Diagram najprej nariši na papir ali v Flowgorithm, nato odgovori na testna vprašanja. Rešitev pokaže diagram in kodo v Javi."},
+ {id:"naloge-e", tag:"E", title:"Narišem diagram poteka", note:"Diagram nariši v programu Flowgorithm (ali na papir) in ga zaženi. Delovanje preveri sam na nekaj testnih primerih z znanim rezultatom: pri vsaki nalogi so navedeni vhodni podatki in pravilni izpis. Točk ni. Ko diagram deluje, nalogo označi s »Preveril sem«. Rešitev (diagram poteka in program v Javi) si lahko ogledaš kadar koli, brez posledic. Prva naloga je rešen primer."},
  {id:"naloge-f", tag:"F", title:"Iz diagrama v Javo", note:"Zapiši program, ga zaženi in v okence prilepi izpis (razlaga 6)."},
  {id:"doma-mat", tag:"G", title:"Ponavljanje", note:"Maturitetne naloge iz drugih rokov za ponavljanje. Preverjaš jih enako kot v sklopih A–F.", home:true}
 ];
@@ -1677,7 +1827,7 @@ const T = [
 
 /* ----- E: Narišem diagram poteka ----- */
 {lv:"E", own:true, pts:1, type:"blanks", draw:true,
- q:"Nariši diagram poteka, ki prebere dve celi števili ter izpiše njuno vsoto in nato njun zmnožek.",
+ q:"Rešen primer: diagram poteka za program, ki prebere dve celi števili ter izpiše njuno vsoto in nato njun zmnožek, je spodaj. Nariši ga v Flowgorithm in preveri, ali za vhod 6 in 7 izpiše pravilno.",
  b:[{l:"Za vhod 6 in 7 se izpiše (vsota in zmnožek, ločena s presledkom)", acc:sp(13,42)}],
  h:["Potrebuješ simbol za vhod in simbola za izhod. Pravokotnik ni nujen: izraz a + b lahko zapišeš kar v izpisu."],
  fc:[inp("a", "b"), out("a + b"), out("a * b")], jsol:"e1",
@@ -1688,6 +1838,12 @@ const T = [
  h:["Za odločanje potrebuješ romb s pogojem, npr. a > b.","Pri vejitvi z dvema izhodoma se obe poti na koncu spet združita."],
  fc:[inp("a", "b"), IF("a > b",[out("a")],[out("b")])], jsol:"e2",
  why:"Vejitev: če je a > b, izpišemo a, sicer b. Za 15 in 9 se izpiše 15, za 3 in 8 pa 8."},
+{lv:"E", own:true, pts:1, type:"blanks", draw:true,
+ q:"Nariši diagram poteka, ki prebere celo število n in izpiše, ali je sodo ali liho.",
+ b:[{l:"Za n = 7 se izpiše", acc:["liho"]},{l:"Za n = 10 se izpiše", acc:["sodo"]},{l:"Za n = 0 se izpiše", acc:["sodo"]}],
+ h:["Število je sodo, če je ostanek pri deljenju z 2 enak 0. Ostanek zapišeš kot n % 2."],
+ fc:[inp("n"), IF("n % 2 == 0",[out('"sodo"')],[out('"liho"')])], jsol:"e14",
+ why:"Pogoj n % 2 == 0 loči sode in lihe. Za 7 je ostanek 1 (liho), za 10 in za 0 je ostanek 0 (sodo)."},
 {lv:"E", own:true, pts:2, type:"blanks", draw:true,
  q:"Nariši diagram poteka, ki prebere celo število x in izpiše pozitivno, negativno ali nic. Uporabi dve vejitvi, eno v drugi.",
  b:[{l:"Za x = −4", acc:["negativno"]},{l:"Za x = 0", acc:["nic","nič"]},{l:"Za x = 12", acc:["pozitivno"]}],
@@ -1706,6 +1862,12 @@ const T = [
  h:["Spremenljivka za vsoto mora imeti začetno vrednost 0.","V zanki prištej i vsoti in povečaj i."],
  fc:[inp("N"), p("s = 0"), p("i = 1"), wh("i <= N",[p("s = s + i"), p("i = i + 1")]), out("s")], jsol:"e8",
  why:"Vsota 1 + 2 + ... + 100 = 5050. Pomembni so začetna vrednost s = 0 in števec i, ki se v zanki povečuje."},
+{lv:"E", own:true, pts:2, type:"blanks", draw:true,
+ q:"Nariši diagram poteka, ki prebere naravno število N in izpiše zmnožek števil od 1 do N (1 · 2 · … · N).",
+ b:[{l:"Za N = 5 se izpiše", acc:["120"]},{l:"Za N = 1 se izpiše", acc:["1"]},{l:"Za N = 6 se izpiše", acc:["720"]}],
+ h:["Zmnožek mora imeti začetno vrednost 1, ne 0: z ničlo bi bil rezultat vedno 0.","V zanki zmnožek pomnoži s števcem i in števec poveča za 1."],
+ fc:[inp("N"), p("f = 1"), p("i = 1"), wh("i <= N",[p("f = f * i"), p("i = i + 1")]), out("f")], jsol:"e15",
+ why:"Zmnožek se začne z 1 in se v vsakem krogu pomnoži z i. Za N = 5 je 1 · 2 · 3 · 4 · 5 = 120, za N = 1 je rezultat 1."},
 {lv:"E", src:"M222/2", pts:2, type:"blanks", draw:true,
  q:"Nariši diagram poteka, ki izpiše prvih N členov zaporedja 1, 2, 4, 8, 16, 32, ... N je vhodni podatek.",
  b:[{l:"Za N = 10 je zadnji izpisani člen", acc:["512"]},{l:"Za N = 1 se izpiše", acc:["1"]}],
@@ -1907,6 +2069,8 @@ const srcLabel = s => { const m = /^M(\d\d)(\d)\/(\d+)$/.exec(s); return m ? `Ma
 const ptsLabel = p => p===1 ? "1 točka" : p===2 ? "2 točki" : (p<5 ? p+" točke" : p+" točk");
 
 /* ---------- render tasks ---------- */
+LavRac.prepare(T, LEVELS, {"self":["E1","E2","E3","E4","E5","E6","E7","E8","E9","E10","E11","E12","E13","E14","E15"],"example":["E1"],"nobtn":["E14"]});
+HOME[5].fc = [inp("a", "b", "c"), p("p = (a + b + c) / 3"), out("p")]; HOME[5].jsolCode = "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        int c = sc.nextInt();\n        double p = (a + b + c) / 3.0;\n        System.out.println(p);\n    }\n}"; HOME[5].sol = "Besedno: preberi tri števila, jih seštej, vsoto deli s 3 in izpiši rezultat. Psevdokoda: preberi a, b, c; p = (a + b + c) / 3; izpiši p. Diagram in program sta zgoraj. Pozor: če so a, b, c tipa int, mora biti deljenec ali delitelj realen (3.0), sicer se rezultat zaokroži.";
 T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });
 LavRac.tasks(LEVELS.flatMap(L=>T.filter(t=>t.lv===L.tag)), { level: (t) => t.pts });
 S = LavRac.loadUi();
@@ -1934,7 +2098,7 @@ function card(t){
   if(t.code) body += `<pre class="code">${hl(t.code)}</pre>`;
   if(t.code && t.type!=="output") body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="code">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`;
   body += `<p>${esc(t.q)}</p>`;
-  if(t.fcq) body += `<div class="fig" data-ft="${t.id}">${FLOW.svg(t.fcq,{num:t.lv==="D"||(t.lv==="C")})}</div>`;
+  if(t.fcq) body += `<div class="fig">${FLOW.svg(t.fcq,{num:t.lv==="D"||(t.lv==="C")})}</div>`;
   if(t.type==="mc"){
     const multi = t.a.length>1;
     body += `<div class="opts">` + t.o.map((o,k)=>`<label class="opt"><input type="${multi?"checkbox":"radio"}" name="r-${t.id}" id="r-${t.id}-${k}" value="${k}"><b>${"ABCDEF"[k]}</b><span>${t.osym ? FLOW.sym(t.osym[k]) : esc(o)}</span></label>`).join("") + `</div>`;
@@ -2054,7 +2218,7 @@ function wire(el,t){
     let html = "";
     if(t.type==="cls") html += `<div class="ans" style="white-space:pre-line;font-weight:400">${esc(ans)}</div>`;
     else if(ans) html += `<div class="ans">${esc(ans)}</div>`;
-    if(t.fc) html += `<div class="fig"><div class="eyebrow" style="margin-bottom:8px">Diagram poteka</div><div data-fs="${t.id}">${FLOW.svg(t.fc)}</div></div>`;
+    if(t.fc) html += `<div class="fig"><div class="eyebrow" style="margin-bottom:8px">Diagram poteka</div>${FLOW.svg(t.fc)}</div>`;
     if(t.jsolCode) html += `<div><div class="eyebrow">Primer v Javi</div><pre class="code">${hl(t.jsolCode)}</pre></div>`;
     if(t.type==="output") html += `<div><div class="eyebrow">Pravilen izpis</div><pre class="code">${esc(t.expected)}</pre></div>`;
     if(t.type==="code") html += `<div><div class="eyebrow">Ena od možnih rešitev</div><pre class="code">${hl(t.sol)}</pre></div>`;
@@ -2090,7 +2254,7 @@ HOME.forEach((h,k)=>{
    <div class="q">${h.code?`<pre class="code">${hl(h.code)}</pre>`:""}<p>${esc(h.q)}</p>
    ${h.code?`<div class="actions"><button class="btn js-c" type="button">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`:""}</div>
    <div class="actions"><button class="btn ghost js-s" type="button">Prikaži rešitev</button></div>
-   <div class="sol" hidden>${h.fc?`<div class="fig" data-fh="${h.id}">${FLOW.svg(h.fc)}</div>`:""}${h.jsolCode?`<pre class="code">${hl(h.jsolCode)}</pre>`:""}<p class="why">${esc(h.sol)}</p></div>`;
+   <div class="sol" hidden>${h.fc?`<div class="fig">${FLOW.svg(h.fc)}</div>`:""}${h.jsolCode?`<pre class="code">${hl(h.jsolCode)}</pre>`:""}<p class="why">${esc(h.sol)}</p></div>`;
   const sol=$(".sol",el), b=$(".js-s",el);
   b.addEventListener("click",()=>{ sol.hidden=!sol.hidden; b.textContent= sol.hidden?"Prikaži rešitev":"Skrij rešitev"; });
   const c=$(".js-c",el); if(c) c.addEventListener("click",()=>{ const done=()=>{c.textContent="Kopirano";setTimeout(()=>c.textContent="Kopiraj kodo",1400)}; try{navigator.clipboard.writeText(h.code).then(done,()=>fallback(h.code,done));}catch(e){fallback(h.code,done);} });
@@ -2157,28 +2321,11 @@ function resetAsk(){ rw.innerHTML = `<span class="confirm">Res izbrišem vse odg
 resetIdle();
 
 /* ---------- start ---------- */
-try{ FLOW.setLang(localStorage.getItem("java-matura-diagram-lang")||"en"); }catch(e){ FLOW.setLang("en"); }
+FLOW.setLang("sl");
 function paintLang(){ document.querySelectorAll(".js-lang").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.lang===FLOW.getLang()))); }
 function fillFigs(){
   document.querySelectorAll("[data-fc]").forEach(e=>{ e.innerHTML = FLOW.svg(FLOWS[e.dataset.fc],{num:!!e.dataset.num}); });
   document.querySelectorAll("[data-sym]").forEach(e=>{ e.innerHTML = FLOW.sym(e.dataset.sym); });
-}
-const langBox = () => {
-  const d = document.createElement("div");
-  d.className = "langsw"; d.setAttribute("role", "group"); d.setAttribute("aria-label", "Napisi v diagramih");
-  d.innerHTML = '<span class="eyebrow">Napisi v diagramih</span><div class="seg"><button type="button" class="js-lang" data-lang="en" aria-pressed="true">Flowgorithm</button><button type="button" class="js-lang" data-lang="sl" aria-pressed="false">Matura</button></div>';
-  d.querySelectorAll(".js-lang").forEach(b=>b.addEventListener("click",()=>{
-    FLOW.setLang(b.dataset.lang);
-    try{ localStorage.setItem("java-matura-diagram-lang", b.dataset.lang); }catch(e){}
-    paintLang(); fillFigs(); redrawFigs();
-  }));
-  paintLang();
-  return d;
-};
-function redrawFigs(){
-  document.querySelectorAll("[data-ft]").forEach(e=>{ const t = T.find(x=>x.id===e.dataset.ft); if(t) e.innerHTML = FLOW.svg(t.fcq,{num:t.lv==="D"||t.lv==="C"}); });
-  document.querySelectorAll("[data-fs]").forEach(e=>{ const t = T.find(x=>x.id===e.dataset.fs); if(t) e.innerHTML = FLOW.svg(t.fc); });
-  document.querySelectorAll("[data-fh]").forEach(e=>{ const h = HOME.find(x=>x.id===e.dataset.fh); if(h) e.innerHTML = FLOW.svg(h.fc); });
 }
 fillFigs();
 renderAll();
@@ -2198,7 +2345,6 @@ renderAll();
     groups: [{"id":"g-zapis","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><rect x=\"10\" y=\"5\" width=\"28\" height=\"38\" rx=\"3\"/><path d=\"M16 15h16M16 22h16M16 29h16M16 36h9\"/></svg>","title":"Algoritem in zapis","pages":["algoritem","zapis","simboli"]},{"id":"g-gradniki","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><rect x=\"14\" y=\"4\" width=\"20\" height=\"9\" rx=\"2\"/><path d=\"M24 13v5\"/><path d=\"M24 18l10 8-10 8-10-8z\"/><path d=\"M24 34v4\"/><rect x=\"14\" y=\"38\" width=\"20\" height=\"7\" rx=\"2\" class=\"fill\" opacity=\".35\"/></svg>","title":"Gradniki in sled","pages":["gradniki","sled"]},{"id":"g-program","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><path d=\"M24 4l10 8-10 8-10-8z\"/><path d=\"M24 20v9M19 25l5 5 5-5\"/><rect x=\"9\" y=\"33\" width=\"30\" height=\"11\" rx=\"2\"/><path d=\"M17 38.5h14\" opacity=\".6\"/></svg>","title":"Od diagrama do programa","pages":["java","nacrtovanje"]}].map(g=>({ ...g, pages: g.pages.map(id=>({ id, title: title(id), el: document.getElementById(id) })) })),
     sets,
     extra: { id: "doma", title: "Za doma", note: home.querySelector(":scope > .prose").textContent.trim().replace(/^Najprej .*?, nato vaje/, "Vaje"), el: home },
-    tools: langBox,
     sel: { head: ".thead", num: ".tnum", tags: ".tags", q: ".q", check: ".js-check", hint: ".js-hint", sol: ".js-sol", fb: ".feedback", actions: ":scope > .actions" },
   });
 }

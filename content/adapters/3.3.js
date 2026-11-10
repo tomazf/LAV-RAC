@@ -1,6 +1,6 @@
 // Temeljni gradniki programa. Connects the published artifact to the exercise shell: the portal's storage (also for
 // answers typed as program output), one answer per task, three theory groups, the matura revision set moved among
-// the graded sets as "Ponavljanje" (agreed 8. 11. 2026), and the diagram label switch (Flowgorithm / Matura) kept.
+// the graded sets as "Ponavljanje" (agreed 8. 11. 2026), and the matura's diagram labels only (the switch was dropped 10. 11. 2026).
 
 const ICONS = {
   podatki: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17 7c-4 0-5 2-5 5v5c0 3-2 5-5 7 3 2 5 4 5 7v5c0 3 1 5 5 5"/><path d="M31 7c4 0 5 2 5 5v5c0 3 2 5 5 7-3 2-5 4-5 7v5c0 3-1 5-5 5"/><rect x="19.5" y="19.5" width="9" height="9" rx="1.5" class="fill" opacity=".35"/></svg>',
@@ -13,31 +13,29 @@ const GROUPS = [
   { id: 'g-izpis', icon: 'izpis', title: 'Izpis in vnos', pages: ['izpis', 'vnos'] },
   { id: 'g-racunanje', icon: 'racunanje', title: 'Računanje in potek programa', pages: ['aritmetika', 'gradniki', 'napake'] },
 ];
+// The teacher's task names: the set letter and the place in the set as the artifact shows it (10. 11. 2026); B7 is
+// removed, so B8 onwards move up by one in the portal. The program tasks C6, C12 and D10 are checked by the student.
+const PREP = {
+  self: ['C6', 'C12', 'D10'],
+  nobtn: ['A4', 'A5', 'B13', 'C2', 'C3', 'C5', 'C10', 'D3', 'E5', 'F7'],
+  inline: ['A1', 'B6', 'C8'],
+  same: ['B6'],
+  cols: ['B4'],
+  list: ['B12'],
+  remove: ['B7'],
+};
+// Za doma 5 (debugger): no buttons, and the worked trace is code, not a sentence.
+const H5_TRACE = [
+  'int x = 1;           // x = 1',
+  'int a = 5;           // x = 1, a = 5',
+  'int b = ++x + a--;   // ++x: x = 2 (vrednost 2); a--: vrednost 5, nato a = 4; b = 2 + 5 = 7',
+  'System.out.println(x + " " + a + " " + b);   // izpis: 2 4 7',
+].join('\n');
+const H5_SOL = 'Razhroščevalnik v oknu s spremenljivkami (Variables) prikaže iste vrednosti kot sled v kodi. Po zadnjem stavku je x = 2, a = 4, b = 7 in program izpiše »2 4 7«.';
 const TITLE = 'Temeljni gradniki programa';
 const KICKER = 'LAV-RAČ3 · 3. poglavje';
 
-// The label switch: the artifact built it into its own left column, which the shell replaces. The shell asks for one
-// fresh copy per place (rail, phone list); a change redraws the diagrams in place, because the cards are already
-// in the shell's pages and must not be rebuilt.
-const TOOLS = `const langBox = () => {
-  const d = document.createElement("div");
-  d.className = "langsw"; d.setAttribute("role", "group"); d.setAttribute("aria-label", "Napisi v diagramih");
-  d.innerHTML = '<span class="eyebrow">Napisi v diagramih</span><div class="seg"><button type="button" class="js-lang" data-lang="en" aria-pressed="true">Flowgorithm</button><button type="button" class="js-lang" data-lang="sl" aria-pressed="false">Matura</button></div>';
-  d.querySelectorAll(".js-lang").forEach(b=>b.addEventListener("click",()=>{
-    FLOW.setLang(b.dataset.lang);
-    try{ localStorage.setItem("java-matura-diagram-lang", b.dataset.lang); }catch(e){}
-    paintLang(); fillFigs(); redrawFigs();
-  }));
-  paintLang();
-  return d;
-};
-function redrawFigs(){
-  document.querySelectorAll("[data-ft]").forEach(e=>{ const t = T.find(x=>x.id===e.dataset.ft); if(t) e.innerHTML = FLOW.svg(t.fcq); });
-  document.querySelectorAll("[data-fs]").forEach(e=>{ const t = T.find(x=>x.id===e.dataset.fs); if(t) e.innerHTML = FLOW.svg(t.fc); });
-  document.querySelectorAll("[data-fh]").forEach(e=>{ const h = HOME.find(x=>x.id===e.dataset.fh); if(h) e.innerHTML = FLOW.svg(h.fc); });
-}
-`;
-const ZAGON = `${TOOLS}fillFigs();
+const ZAGON = `fillFigs();
 renderAll();
 {
   const title = id => (PAGES.find(p=>p[0]===id) || [id, id])[1];
@@ -55,7 +53,6 @@ renderAll();
     groups: ${JSON.stringify(GROUPS.map((g) => ({ ...g, icon: ICONS[g.icon] })))}.map(g=>({ ...g, pages: g.pages.map(id=>({ id, title: title(id), el: document.getElementById(id) })) })),
     sets,
     extra: { id: "doma", title: "Za doma", note: home.querySelector(":scope > .prose").textContent.trim().replace(/^Najprej .*?, nato vaje/, "Vaje"), el: home },
-    tools: langBox,
     sel: { head: ".thead", num: ".tnum", tags: ".tags", q: ".q", check: ".js-check", hint: ".js-hint", sol: ".js-sol", fb: ".feedback", actions: ":scope > .actions" },
   });
 }`;
@@ -67,8 +64,7 @@ export default {
   css: `html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-tile);--line:var(--lr-line);--fg:var(--lr-ink);--muted:var(--lr-mut);
   --accent:var(--lr-acc);--accent-soft:var(--lr-acc-soft);--ok:var(--lr-ok);--ok-soft:var(--lr-ok-bg);--bad:var(--lr-bad);--bad-soft:var(--lr-bad-bg);
   --seen:var(--lr-seen);--seen-soft:var(--lr-seen-bg);--f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}
-  body{padding-left:0;padding-right:0}
-  .lr-mnav .langsw{flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap}`,
+  body{padding-left:0;padding-right:0}`,
   patches: [
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
     // The matura revision set is graded among the others (agreed 8. 11. 2026).
@@ -77,12 +73,6 @@ export default {
     // Programs can run anywhere, not only in Programiz (agreed 8. 11. 2026).
     ['<span>Zaženi v Eclipse, VS Code ali Programizu (tam razred preimenuj v Main), izpis prilepi spodaj.</span>',
       '<span>Zaženi program v poljubnem okolju (Eclipse, VS Code, Programiz …) in prilepi njegov izpis. V Programizu razred preimenuj v Main.</span>'],
-    // Diagrams can be redrawn in place when the label switch changes: every place that draws one names its task.
-    ['if(t.fcq) body += `<div class="fig">${FLOW.svg(t.fcq)}</div>`;',
-      'if(t.fcq) body += `<div class="fig" data-ft="${t.id}">${FLOW.svg(t.fcq)}</div>`;'],
-    ['if(t.fc) html += `<div class="fig"><div class="eyebrow" style="margin-bottom:8px">Diagram poteka</div>${FLOW.svg(t.fc)}</div>`;',
-      'if(t.fc) html += `<div class="fig"><div class="eyebrow" style="margin-bottom:8px">Diagram poteka</div><div data-fs="${t.id}">${FLOW.svg(t.fc)}</div></div>`;'],
-    ['${h.fc?`<div class="fig">${FLOW.svg(h.fc)}</div>`:""}', '${h.fc?`<div class="fig" data-fh="${h.id}">${FLOW.svg(h.fc)}</div>`:""}'],
     // Storage: the portal's state for this student; the artifact's own account sync is not used.
     [`let S = {}, localT = 0;
 try { S = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; localT = +localStorage.getItem(STORE+"-t") || 0; } catch(e) { S = {}; }
@@ -95,7 +85,19 @@ function saveLocal(){ LavRac.saveUi(S); }
 function save(){ LavRac.saveUi(S); }`],
     // Task ids exist only from here on, so the shell learns the tasks here.
     ['T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });',
-      'T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });\nLavRac.tasks(LEVELS.flatMap(L=>T.filter(t=>t.lv===L.tag)), { level: (t) => t.pts });\nS = LavRac.loadUi();'],
+      `LavRac.prepare(T, LEVELS, ${JSON.stringify(PREP)});
+HOME[4].nobtn = true; HOME[4].jsolCode = ${JSON.stringify(H5_TRACE)}; HOME[4].sol = ${JSON.stringify(H5_SOL)};
+T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });
+LavRac.tasks(LEVELS.flatMap(L=>T.filter(t=>t.lv===L.tag)), { level: (t) => t.pts });
+S = LavRac.loadUi();`],
+    // The home tasks that carry code show no copy / Programiz buttons when they say so (nobtn).
+    ['${h.code?`<div class="actions"><button class="btn js-c" type="button">Kopiraj kodo</button>', '${h.code&&!h.nobtn?`<div class="actions"><button class="btn js-c" type="button">Kopiraj kodo</button>'],
+    // Questions: the blanks are typed in the code (A1, B6) and the descriptions of B12 are a list.
+    ['q:"Dopolni najmanjši program v Javi. Manjkajoča mesta so označena s tremi podčrtaji, po vrsti od zgoraj navzdol.",',
+      'q:"Dopolni najmanjši program v Javi: manjkajoče dele vpiši kar v kodo. Vrzeli so po vrsti od zgoraj navzdol: 1. ključna beseda, ki uvede razred, 2. ime metode, v kateri se izvajanje začne, 3. znak na koncu stavka.",'],
+    ['q:"Vpiši tip, ki ga zahteva vsaka deklaracija.",', 'q:"Vpiši v kodo tip, ki ga zahteva vsaka deklaracija.",'],
+    ['q:"Vsakemu pojmu ustreza natanko en opis. Opisi: A – ime spremenljivke, B – znakovna vrednost, C – celoštevilska vrednost, D – poljuben podatkovni tip, E – niz, F – ključna beseda programskega jezika Java. Vpiši črko opisa.",',
+      'q:"Vsakemu pojmu ustreza natanko en opis. Opisi:\\n- A – ime spremenljivke\\n- B – znakovna vrednost\\n- C – celoštevilska vrednost\\n- D – poljuben podatkovni tip\\n- E – niz\\n- F – ključna beseda programskega jezika Java\\nVpiši črko opisa.",'],
     ['if(!window.claude || !window.claude.use) return;', 'return;'],
     // Program output and code are the answer too, so they are kept with the portal.
     ['if(ed){ ed.value = s.code != null ? s.code : t.starter;',
@@ -118,8 +120,11 @@ function save(){ LavRac.saveUi(S); }`],
     // The shell does the paging.
     ['applyFilter(); showPage(cur, true);\n}', 'applyFilter();\n}'],
     ['window.addEventListener("hashchange",()=>showPage(location.hash.slice(1)));', ''],
-    // Start: the label switch is built by the shell (tools), so the artifact's own buttons and its re-render are dropped.
+    // Start. The diagrams use the matura's labels, as the students meet them there (agreed 10. 11. 2026): no switch.
     ['cur = location.hash.slice(1) || "jezik";\n', ''],
+    // The matura's labels from the start: the Za doma figures are drawn before the start code runs.
+    ['let LANG = "en";', 'let LANG = "sl";'],
+    ['try{ FLOW.setLang(localStorage.getItem("java-matura-diagram-lang")||"en"); }catch(e){ FLOW.setLang("en"); }', 'FLOW.setLang("sl");'],
     [`document.querySelectorAll(".js-lang").forEach(b=>b.addEventListener("click",()=>{
   FLOW.setLang(b.dataset.lang);
   try{ localStorage.setItem("java-matura-diagram-lang", b.dataset.lang); }catch(e){}
