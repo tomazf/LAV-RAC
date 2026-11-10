@@ -43,7 +43,8 @@ Oblika vaje (dogovor 6. 11. 2026):
 - Vaje so zadnje poglavje in se odklenejo, ko dijak odpre vsako stran razlage (preveri tudi strežnik),
 - v sklopu vaj ena naloga naenkrat, oštevilčeni gumbi v barvi stanja, »rešenih x / n«, legenda (desno poravnana, dogovor 9. 11. 2026), Prejšnja/Naslednja naloga,
 - pod nalogo levo Preveri, desno obrobljena Namig (−50 %) in Prikaži rešitev (0 točk, z vprašanjem pred ogledom),
-- naloge »Sam preveri« (10. 11. 2026, pravila v razdelku 4 načrta): gumb »Preveril sem«, brez točk, rešitev prosto; oznaka »Sam preveri · brez točk«, v seznamu gumbov in legendi svoja barva (modrozelena), v pregledu pravil vrstica »Sam preveri«. Naloga s programom izgubi polje za izpis, naloga z vpisom (3.2 sklop E) namesto polj kaže okvir »Pravilni rezultati za preverjanje«,
+- naloge »Sam preveri« (10. 11. 2026, pravila v razdelku 4 načrta): gumb »Preveril sem«, brez točk, rešitev prosto; oznaka »Sam preveri · brez točk«, v seznamu gumbov in legendi svoja barva (modrozelena), v pregledu pravil vrstica »Sam preveri«. Naloga s programom izgubi polje za izpis, okno s kodo ostane (da dijak kodo shrani; šolski računalniki so skupni) in nad njim je okvir »Pravilen izpis za preverjanje« (`hideExp`); naloga z vpisom (3.2 sklop E) namesto polj kaže okvir »Pravilni rezultati za preverjanje«,
+- preverjanje kode (10. 11. 2026): naloga s programom ima lahko polje `need`, seznam parov [izraz, sporočilo]; izrazi se preizkusijo na kodi brez komentarjev in nizov. Manjkajoč del je samo sporočilo (»V kodi manjka stavek if.«), naloga ostane odprta in se ne zaklene; šele ko je koda polna, se preveri izpis. Uporabljeno v 3.5 C5 (stavek if, brez ?:) in D9 (switch (dan), case 1–7, default, break). Program se na strežniku ne izvaja; za to bi bil potreben izoliran izvajalnik, zato ni načrtovan,
 - besedilo razlag in nalog obojestransko poravnano z deljenjem besed,
 - ozadje vaje je svetlo oranžno (#fffaf4), besedilo in gumbi v vijolični barvi portala,
 - besedilo razlag in nalog sega čez vso širino vsebine; gumbi za listanje so majhni,
@@ -57,7 +58,7 @@ Napisi v diagramih (10. 11. 2026): stikala »Napisi v diagramih« ni več. Diagr
 
 Prilagoditve posameznih nalog (10. 11. 2026): adapter pred oštevilčenjem pokliče `LavRac.prepare(T, LEVELS, { ... })`. Naloge se imenujejo tako, kot jih vidi učitelj v artifactu: črka sklopa in mesto v njem (`C9`), prebrano pred odstranitvami, zato se imena ne premaknejo, ko se naloga odstrani; neznano ime ustavi uvoz. Možnosti: `self` (Sam preveri), `nobtn` (brez »Kopiraj kodo« in »Odpri Programiz«), `inline` (vrzeli `___` se vpišejo kar v kodo; število vrzeli mora biti enako številu polj), `same` (vsa polja v kodi enako široka), `cols` (polja v dveh stolpcih), `list` (vrstice `- …` v vprašanju postanejo seznam), `example` (rešen primer, rešitev odprta od začetka), `remove` (naloga se izloči, ostale se preštevilčijo). Za doma se imenuje z mestom v seznamu, številke (»D1.«) se računajo na novo. Nalogi z gumbom Kopiraj/Programiz, ki ji gumbov ne odvzameš, ju obdrži.
 
-Ko se vsebina nalog spremeni tako, da se spremeni število ali vrstni red nalog, se `version` poveča (dijaki začnejo nov poskus): 3.1, 3.2 in 3.3 imajo od 10. 11. 2026 različico 2.
+Ko se vsebina nalog spremeni tako, da se spremeni število ali vrstni red nalog, se `version` poveča (dijaki začnejo nov poskus): 3.1, 3.2, 3.3 in 3.5 imajo od 10. 11. 2026 različico 2.
 
 Ob vsakem uvozu novega poglavja preveri na zaslonu: levi stolpec (oznake, krogi, števci, zamik pri prelomu), legenda pod gumbi nalog in črko za Za doma; vse to dela skupna oblika vaje (`content/shell/`), v adapterju ni treba ničesar nastavljati.
 

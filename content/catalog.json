@@ -4671,10 +4671,10 @@
    "module": "LAV-RAČ3",
    "title": "Pogojni stavki v Javi",
    "fullTitle": "Pogojni stavki v Javi",
-   "key": "scnm_lavrac_3_5_v1",
-   "version": 1,
+   "key": "scnm_lavrac_3_5_v2",
+   "version": 2,
    "format": "short",
-   "maxPoints": 82,
+   "maxPoints": 58,
    "tasks": [
     {
      "i": 0,
@@ -4805,14 +4805,16 @@
     {
      "i": 18,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "if – else, bloki in gnezdenje",
-     "q": "Napiši program, ki za število n = 14 izpiše sodo, če je število sodo, in liho, če je liho. Nato preizkusi še z n = 7 in n = -3. Prilepi izpis za n = 14."
+     "q": "Napiši program, ki za število n = 14 izpiše sodo, če je število sodo, in liho, če je liho. Nato preizkusi še z n = 7 in n = -3."
     },
     {
      "i": 19,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "if – else, bloki in gnezdenje",
      "q": "Spremenljivkama x in y tipa double smo že določili neničelne vrednosti. Zapišite pogojne stavke, s katerimi izpišemo, v katerem kvadrantu se nahaja točka s koor"
     },
@@ -4931,42 +4933,48 @@
     {
      "i": 36,
      "level": "težja",
-     "max": 3,
+     "max": 0,
+     "self": true,
      "section": "Naloge za utrjevanje",
      "q": "Sestavi program, ki ugotovi, ali se premici y1 = k1·x + n1 in y2 = k2·x + n2 sečeta. Možnosti so tri: premici sta vzporedni (se ne sečeta), se ujemata (neskončn"
     },
     {
      "i": 37,
      "level": "težja",
-     "max": 3,
+     "max": 0,
+     "self": true,
      "section": "Naloge za utrjevanje",
      "q": "Določi, ali točka leži znotraj, zunaj ali na robu pravokotnika. Pravokotnik je podan z nasprotnima ogliščema (5, 4) in (1, 1), stranice so vzporedne koordinatni"
     },
     {
      "i": 38,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Naloge za utrjevanje",
      "q": "Sestavi program Interval: dani sta celi števili a = 7 in b = 2 ter realno število x = 4.5. Preveri, ali x leži na zaprtem intervalu, ki ga določata a in b (spod"
     },
     {
      "i": 39,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Naloge za utrjevanje",
      "q": "Sestavi program Kipci: Indiana Jones najde tri zlate kipce, vzame pa lahko le dva. Vrednosti kipcev so 120, 75 in 300. Izpiši, katera dva kipca se najbolj splač"
     },
     {
      "i": 40,
      "level": "težja",
-     "max": 3,
+     "max": 0,
+     "self": true,
      "section": "Naloge za utrjevanje",
      "q": "Sestavi program Datum: dana sta letnica 2024 in zaporedna številka dneva v letu 61. Izpiši, kateri dan in mesec je to, v obliki »1. 3. 2024«. Upoštevaj prestopn"
     },
     {
      "i": 41,
      "level": "lažja",
-     "max": 1,
+     "max": 0,
+     "self": true,
      "section": "Naloge za utrjevanje",
      "q": "Izmed treh števil 7, 12 in 9 poišči in izpiši največje."
     },
@@ -4980,21 +4988,24 @@
     {
      "i": 43,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Naloge za utrjevanje",
      "q": "Napiši program, ki izpiše, koliko dni ima mesec. Upoštevaj prestopno leto. V kodi nastavi mesec = 2 in leto = 2024. Uporabi stavek switch."
     },
     {
      "i": 44,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Naloge za utrjevanje",
      "q": "Napiši preprost kalkulator z operacijami +, -, * in /. V kodi nastavi a = 12.0, b = 4.0 in znak op = '/'. Izpiši »12.0 / 4.0 = 3.0«. Pri deljenju z nič izpiši »"
     },
     {
      "i": 45,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Naloge za utrjevanje",
      "q": "Napiši program, ki za dano leto pove, ali je prestopno. Leto je prestopno, če je deljivo s 400 ali če je deljivo s 4 in ni deljivo s 100. V kodi nastavi leto = "
     },

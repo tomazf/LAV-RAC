@@ -15,8 +15,19 @@ const GROUPS = [
 // The teacher's task names (set letter and place in the set as the portal shows it, 10. 11. 2026): the tasks that only
 // ask for an output have no copy / Programiz buttons.
 const PREP = {
-  nobtn: ['C1', 'C2', 'C3', 'C7', 'D1', 'D2', 'D3', 'D4', 'D7'],
+  // Programs the student writes elsewhere: ticked by the student, the code stays to be saved, the right output is shown.
+  self: ['B8', 'B9', 'E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E8', 'E9', 'E10'],
+  nobtn: ['B5', 'C1', 'C2', 'C3', 'C7', 'D1', 'D2', 'D3', 'D4', 'D7'],
 };
+// C5 and D9 (matura tasks with points) check the written code as well as the output: what the task asks for must be in
+// the code (comments and strings do not count). A missing part is a message, not an answer: the task stays open.
+const NEED_C5 = [['\\bif\\b', 'V kodi manjka stavek if.'], ['^[^?]*$', 'V kodi ne sme biti operatorja ?:, nalogo reši s stavkom if.']];
+const NEED_D9 = [
+  ['\\bswitch\\s*\\(\\s*dan\\s*\\)', 'V kodi manjka stavek switch (dan).'],
+  ...[1, 2, 3, 4, 5, 6, 7].map((n) => ['\\bcase\\s+' + n + '\\s*(?::|->)', 'Manjka oznaka case ' + n + '.']),
+  ['\\bdefault\\s*(?::|->)', 'Manjka veja default za dan, ki ne obstaja.'],
+  ['->|(?:\\bbreak\\b[\\s\\S]*){7}', 'Vsaka možnost case se mora končati z break, sicer se izvedejo tudi naslednje.'],
+];
 // Za doma: the program of every solution is a block of code (Java colours), the sentence keeps the explanation
 // (as asked for the other chapters on 10. 11. 2026). Every program was compiled and run with the values below.
 const HOME_CODE = [
@@ -79,6 +90,8 @@ export default {
     // Programs can run anywhere, not only in Programiz (agreed 8. 11. 2026).
     ['<span>Zaženi v Eclipse, VS Code ali Programizu (tam razred preimenuj v Main), izpis prilepi spodaj.</span>',
       '<span>Zaženi program v poljubnem okolju (Eclipse, VS Code, Programiz …) in prilepi njegov izpis. V Programizu razred preimenuj v Main.</span>'],
+    // B8 is self-checked and has no output field, so it must not ask to paste the output.
+    ['Nato preizkusi še z n = 7 in n = -3. Prilepi izpis za n = 14.', 'Nato preizkusi še z n = 7 in n = -3.'],
     // Storage: the portal's state for this student; the artifact's own account sync is not used.
     [`let S = {}, localT = 0;
 try { S = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; localT = +localStorage.getItem(STORE+"-t") || 0; } catch(e) { S = {}; }
@@ -96,6 +109,17 @@ ${JSON.stringify(HOME_CODE)}.forEach((f, k) => { HOME[k].jsolCode = f.code; if (
 T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });
 LavRac.tasks(LEVELS.flatMap(L=>T.filter(t=>t.lv===L.tag)), { level: (t) => t.pts });
 S = LavRac.loadUi();`],
+    // The tasks that check the code (see NEED_C5, NEED_D9): the code without comments and strings must have the parts.
+    ['{src:"M192/8", pts:2, lv:"C", type:"code",', '{src:"M192/8", pts:2, lv:"C", type:"code", need:' + JSON.stringify(NEED_C5) + ','],
+    ['{src:"M181/18", pts:3, lv:"D", type:"code", adapt:true,', '{src:"M181/18", pts:3, lv:"D", type:"code", adapt:true, need:' + JSON.stringify(NEED_D9) + ','],
+    ['      if(!out.value.trim()){ show(false, t.type==="code" ? "Zaženi program in prilepi njegov izpis." : "Napiši izpis."); return; }',
+      String.raw`      if(t.type==="code" && t.need){
+        const code = ed.value.replace(/\/\*[\s\S]*?\*\//g,"").replace(/\/\/.*$/gm,"").replace(/"(?:\\.|[^"\\])*"/g,'""').replace(/'(?:\\.|[^'\\])*'/g,"''");
+        if(!code.trim()){ show(false,"Najprej zapiši program v okno."); return; }
+        const miss = t.need.find(n=>!new RegExp(n[0]).test(code));
+        if(miss){ show(false, miss[1]); return; }
+      }
+      if(!out.value.trim()){ show(false, t.type==="code" ? "Zaženi program in prilepi njegov izpis." : "Napiši izpis."); return; }`],
     ['if(!window.claude || !window.claude.use) return;', 'return;'],
     // Program output and code are the answer too, so they are kept with the portal.
     ['if(ed){ ed.value = s.code != null ? s.code : t.starter;',

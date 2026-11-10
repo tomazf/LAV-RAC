@@ -476,6 +476,12 @@
       if (out) (out.closest('.blank') || out).remove();
       const bar = q.querySelector('.editorbar span');
       if (bar) bar.textContent = 'Program zaženi v poljubnem okolju (Eclipse, VS Code, Programiz …) in primerjaj njegov izpis s pričakovanim. V Programizu razred preimenuj v Main. Kodo lahko shraniš tu.';
+      // An output the artifact keeps hidden (it checked the typed output) is what the student compares with now.
+      if (task.hideExp && task.expected != null && task.expected !== '') {
+        const box = h('div', { class: 'lr-tests' }, h('b', { text: 'Pravilen izpis za preverjanje' }), h('pre', { class: 'code', text: String([].concat(task.expected)[0]) }));
+        const row = q.querySelector(':scope > .blank');
+        if (row) row.before(box); else q.append(box);
+      }
     }
     if (task.self && task.type === 'blanks') {
       // No inputs: the known results are what the student compares with.

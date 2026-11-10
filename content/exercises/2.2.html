@@ -483,6 +483,12 @@
       if (out) (out.closest('.blank') || out).remove();
       const bar = q.querySelector('.editorbar span');
       if (bar) bar.textContent = 'Program zaženi v poljubnem okolju (Eclipse, VS Code, Programiz …) in primerjaj njegov izpis s pričakovanim. V Programizu razred preimenuj v Main. Kodo lahko shraniš tu.';
+      // An output the artifact keeps hidden (it checked the typed output) is what the student compares with now.
+      if (task.hideExp && task.expected != null && task.expected !== '') {
+        const box = h('div', { class: 'lr-tests' }, h('b', { text: 'Pravilen izpis za preverjanje' }), h('pre', { class: 'code', text: String([].concat(task.expected)[0]) }));
+        const row = q.querySelector(':scope > .blank');
+        if (row) row.before(box); else q.append(box);
+      }
     }
     if (task.self && task.type === 'blanks') {
       // No inputs: the known results are what the student compares with.
@@ -1290,6 +1296,7 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr-tests b{display:block;margin-bottom:4px}
 .lr-tests ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:2px}
 .lr-tests code{font-family:var(--lr-fm);font-weight:700}
+.lr-tests pre.code{margin:4px 0 0;padding:8px 12px;font-size:.9em}
 
 /* options of single tasks: bullets in a question, blanks in two columns, blanks typed in the code */
 .lr-q ul.lr-bul{margin:6px 0 10px;padding-left:22px;display:flex;flex-direction:column;gap:2px}

@@ -188,6 +188,7 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr-tests b{display:block;margin-bottom:4px}
 .lr-tests ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:2px}
 .lr-tests code{font-family:var(--lr-fm);font-weight:700}
+.lr-tests pre.code{margin:4px 0 0;padding:8px 12px;font-size:.9em}
 
 /* options of single tasks: bullets in a question, blanks in two columns, blanks typed in the code */
 .lr-q ul.lr-bul{margin:6px 0 10px;padding-left:22px;display:flex;flex-direction:column;gap:2px}

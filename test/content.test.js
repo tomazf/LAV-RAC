@@ -765,7 +765,7 @@ test('Za doma: two more tasks per chapter, added in the portal, unscored', async
     assert.ok(await a.locator('.page.on article', { hasText: titles[1] }).locator('.sol').isVisible());
   }
   // unscored: the catalog has the same tasks and points as before (3.1 to 3.3 changed on 10. 11. 2026: tasks the student checks have no points)
-  assert.deepEqual(catalog.exercises.map((e) => [e.id, e.tasks.length, e.maxPoints]), [['2.1', 98, 216], ['2.2', 85, 164], ['2.3', 129, 237], ['3.1', 52, 75], ['3.2', 53, 61], ['3.3', 55, 83], ['3.4', 76, 105], ['3.5', 50, 82]]);
+  assert.deepEqual(catalog.exercises.map((e) => [e.id, e.tasks.length, e.maxPoints]), [['2.1', 98, 216], ['2.2', 85, 164], ['2.3', 129, 237], ['3.1', 52, 75], ['3.2', 53, 61], ['3.3', 55, 83], ['3.4', 76, 105], ['3.5', 50, 58]]);
   await a.context().close();
   assert.deepEqual(errors, []);
 });
@@ -1059,8 +1059,10 @@ test('3.5: two theory groups, laboratory exercises are not mentioned, set E is "
   const sections = [...new Set(ex.tasks.map((t) => t.section))];
   assert.deepEqual(sections, ['Pogoji in stavek if', 'if – else, bloki in gnezdenje', 'Veriga else if in pogojni operator', 'Stavek switch', 'Naloge za utrjevanje', 'Ponavljanje']);
   assert.deepEqual(sections.map((n) => ex.tasks.filter((t) => t.section === n).length), [11, 9, 7, 9, 10, 4]);
-  assert.equal(ex.maxPoints, 82);
-  assert.ok(ex.tasks.every((t) => !t.self));
+  // 82 points of the artifact minus the 11 self-checked programs (B8, B9, E1-E6, E8-E10), which carry no points
+  assert.equal(ex.maxPoints, 58);
+  const nameOf = (t) => String.fromCharCode(65 + sections.indexOf(t.section)) + (ex.tasks.filter((u) => u.section === t.section).indexOf(t) + 1);
+  assert.deepEqual(ex.tasks.filter((t) => t.self).map(nameOf), ['B8', 'B9', 'E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E8', 'E9', 'E10']);
   assert.deepEqual(await a.locator('.lr-rail a.lr-gated .lr-tg').allTextContents(), ['A ·', 'B ·', 'C ·', 'D ·', 'E ·', 'F ·', 'G ·']);
   assert.equal((await a.locator('.lr-rail a.lr-gated .lr-tx').last().textContent()).trim(), 'Za doma');
   // nothing of the laboratory exercises, no chapter numbers of the artifact, no label switch
@@ -1075,13 +1077,11 @@ test('3.5: two theory groups, laboratory exercises are not mentioned, set E is "
   const fig = await a.locator('.page.on [data-fc] svg').first().textContent();
   assert.match(fig, /začetek.*preberi tocke.*izpiši "odlicno".*konec/);
   assert.doesNotMatch(fig, /Main|Input|Output/);
-  // the tasks that only ask for an output have no copy / Programiz buttons; the other program tasks keep them
-  for (const hash of ['naloge-c/1', 'naloge-c/2', 'naloge-c/3', 'naloge-c/7', 'naloge-d/1', 'naloge-d/2', 'naloge-d/3', 'naloge-d/4', 'naloge-d/7']) {
+  // the tasks that only ask for an output have no copy / Programiz buttons
+  for (const hash of ['naloge-b/5', 'naloge-c/1', 'naloge-c/2', 'naloge-c/3', 'naloge-c/7', 'naloge-d/1', 'naloge-d/2', 'naloge-d/3', 'naloge-d/4', 'naloge-d/7']) {
     await go(a, hash);
     assert.equal(await card(a).locator('.js-copy, a[href*=programiz]').count(), 0, hash);
   }
-  await go(a, 'naloge-b/5');
-  assert.ok(await card(a).locator('.js-copy').count() > 0);
   // the former laboratory tasks are ordinary additional tasks; the example that named the lab program is a plain sentence
   await go(a, 'naloge-e/1');
   assert.match(await card(a).locator('.tags').textContent(), /Dodatna/);
@@ -1089,16 +1089,45 @@ test('3.5: two theory groups, laboratory exercises are not mentioned, set E is "
   await card(a).locator('.lr-sol').click();
   await card(a).locator('.lr-solask .lr-danger').click();
   assert.match(await card(a).locator('.sol').textContent(), /Program z if – else izpiše isto/);
-  // a program task keeps the code and the output
+  // a self-checked program: the editor stays (the code can be saved) and keeps its buttons, there is no output
+  // field, the correct output is shown for comparison, and the task text no longer asks to paste an output
+  await go(a, 'naloge-b/8');
+  assert.ok(await card(a).locator('textarea.editor').isVisible());
+  assert.ok(await card(a).locator('.js-copy').count() > 0);
+  assert.equal(await card(a).locator('textarea.out').count(), 0);
+  assert.doesNotMatch(await card(a).textContent(), /[Pp]rilepi/);
+  assert.match((await card(a).locator('.lr-tests').textContent()).replace(/\s+/g, ' '), /Pravilen izpis za preverjanje\s*sodo/);
+  await go(a, 'naloge-e/1');
+  assert.match((await card(a).locator('.lr-tests').textContent()).replace(/\s+/g, ' '), /Pravilen izpis za preverjanje\s*Presek: \(1\.0, 3\.0\)/);
   await go(a, 'naloge-e/6');
   await card(a).locator('textarea.editor').fill('public class Main { /* moja koda */ }');
-  await card(a).locator('textarea.out').fill('12');
   await card(a).locator('.lr-check').click();
-  assert.equal(await card(a).getAttribute('data-lr'), 'ok');
+  assert.equal(await card(a).getAttribute('data-lr'), 'self');
+  await a.waitForTimeout(2500);
   await a.reload();
   await at(a, 'naloge-e/6');
+  assert.equal(await card(a).getAttribute('data-lr'), 'self');
   assert.equal(await card(a).locator('textarea.editor').inputValue(), 'public class Main { /* moja koda */ }');
-  assert.equal(await card(a).locator('textarea.out').inputValue(), '12');
+  // C5 and D9 check the written code as well as the output; a missing part is only a message, the task stays open
+  const feedback = async () => (await card(a).locator('.feedback').first().textContent()).trim();
+  const submit = async (code, out) => {
+    await card(a).locator('textarea.editor').fill(code);
+    await card(a).locator('textarea.out').fill(out);
+    await card(a).locator('.lr-check').click();
+    return [await feedback(), await card(a).getAttribute('data-lr')];
+  };
+  const sw = (cases, def, brk) => `int dan = 3; String ime;\nswitch (dan) {\n${cases.map((n) => `case ${n}: ime = "d${n}"; ${brk ? 'break;' : ''}`).join('\n')}\n${def ? 'default: ime = "x"; ' + (brk ? 'break;' : '') : ''}\n}\nSystem.out.println(ime);`;
+  await go(a, 'naloge-d/9');
+  assert.deepEqual(await submit('// stavek switch (dan) { case 1: default: break; }', 'sreda'), ['Najprej zapiši program v okno.', 'open']);
+  assert.deepEqual(await submit('int dan = 3; // switch (dan) { case 1: default: break; }', 'sreda'), ['V kodi manjka stavek switch (dan).', 'open']);
+  assert.deepEqual(await submit(sw([1, 2, 3, 4, 5, 6, 7], true, false), 'sreda'), ['Vsaka možnost case se mora končati z break, sicer se izvedejo tudi naslednje.', 'open']);
+  assert.deepEqual(await submit(sw([1, 2, 3, 4, 5, 6, 7], false, true), 'sreda'), ['Manjka veja default za dan, ki ne obstaja.', 'open']);
+  assert.deepEqual(await submit(sw([1, 2, 3, 4, 6, 7], true, true), 'sreda'), ['Manjka oznaka case 5.', 'open']);
+  assert.deepEqual(await submit(sw([1, 2, 3, 4, 5, 6, 7], true, true), 'sreda'), ['Pravilno: 3 točke.', 'ok']);
+  await go(a, 'naloge-c/5');
+  assert.deepEqual(await submit('// if (a > b) x = a;\nString s = "if"; int x = c;', '30'), ['V kodi manjka stavek if.', 'open']);
+  assert.deepEqual(await submit('int x; if (a > b) x = a; else x = b > c ? b : c;', '30'), ['V kodi ne sme biti operatorja ?:, nalogo reši s stavkom if.', 'open']);
+  assert.deepEqual(await submit('int x; if (a > b && a > c) x = a; else if (b > c) x = b; else x = c;', '30'), ['Pravilno: 2 točki.', 'ok']);
   // Za doma: four tasks, every solution a program in Java colours
   await go(a, 'doma');
   assert.match(await a.locator('.page.on .lr-shead p').textContent(), /^Vaje, ki jih narediš na računalniku/);

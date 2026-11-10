@@ -483,6 +483,12 @@
       if (out) (out.closest('.blank') || out).remove();
       const bar = q.querySelector('.editorbar span');
       if (bar) bar.textContent = 'Program zaženi v poljubnem okolju (Eclipse, VS Code, Programiz …) in primerjaj njegov izpis s pričakovanim. V Programizu razred preimenuj v Main. Kodo lahko shraniš tu.';
+      // An output the artifact keeps hidden (it checked the typed output) is what the student compares with now.
+      if (task.hideExp && task.expected != null && task.expected !== '') {
+        const box = h('div', { class: 'lr-tests' }, h('b', { text: 'Pravilen izpis za preverjanje' }), h('pre', { class: 'code', text: String([].concat(task.expected)[0]) }));
+        const row = q.querySelector(':scope > .blank');
+        if (row) row.before(box); else q.append(box);
+      }
     }
     if (task.self && task.type === 'blanks') {
       // No inputs: the known results are what the student compares with.
@@ -1118,6 +1124,7 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr-tests b{display:block;margin-bottom:4px}
 .lr-tests ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:2px}
 .lr-tests code{font-family:var(--lr-fm);font-weight:700}
+.lr-tests pre.code{margin:4px 0 0;padding:8px 12px;font-size:.9em}
 
 /* options of single tasks: bullets in a question, blanks in two columns, blanks typed in the code */
 .lr-q ul.lr-bul{margin:6px 0 10px;padding-left:22px;display:flex;flex-direction:column;gap:2px}
@@ -1750,7 +1757,7 @@ const T = [
  h:["Kje je deklarirana spremenljivka y?","Spremenljivka, deklarirana v bloku, velja le do zaključnega zavitega oklepaja."],
  why:"y je deklarirana v bloku stavka if in izven njega ne obstaja. Prevajalnik javi napako cannot find symbol. Popravek: int y = 0; pred stavkom if."},
 {lv:"B", own:true, pts:2, type:"code",
- q:"Napiši program, ki za število n = 14 izpiše sodo, če je število sodo, in liho, če je liho. Nato preizkusi še z n = 7 in n = -3. Prilepi izpis za n = 14.",
+ q:"Napiši program, ki za število n = 14 izpiše sodo, če je število sodo, in liho, če je liho. Nato preizkusi še z n = 7 in n = -3.",
  hideExp:true, expected:"sodo", starter:ST,
  sol:"public class Main {\n    public static void main(String[] args) {\n        int n = 14;\n        if (n % 2 == 0) {\n            System.out.println(\"sodo\");\n        } else {\n            System.out.println(\"liho\");\n        }\n    }\n}",
  h:["Uporabi ostanek pri deljenju z 2.","Ker sta možnosti dve, uporabi if – else."],
@@ -1787,7 +1794,7 @@ const T = [
  b:[{l:"stavek", acc:["max=a>b?a:b;","max=(a>b)?a:b;","max=a>=b?a:b;","max=(a>=b)?a:b;","max=b<a?a:b;","max=(b<a)?a:b;","max=a<b?b:a;","max=(a<b)?b:a;","max=b>a?b:a;","max=(b>a)?b:a;","max=(a>b?a:b);"], code:true}],
  h:["Zapis je pogoj ? vrednost1 : vrednost2.","Če je a > b, je rezultat a, sicer b."],
  why:"max = a > b ? a : b; izbere a, če je a večji, sicer b. Pri enakih vrednostih je vseeno, katero vrnemo."},
-{src:"M192/8", pts:2, lv:"C", type:"code",
+{src:"M192/8", pts:2, lv:"C", type:"code", need:[["\\bif\\b","V kodi manjka stavek if."],["^[^?]*$","V kodi ne sme biti operatorja ?:, nalogo reši s stavkom if."]],
  q:"V programu imamo naslednja stavka: int a=10, b=20, c=30; int x = a>b && a>c ? a : (b>c ? b : c); Zapišite drugi stavek z uporabo stavka if, torej brez operatorja ?:. Program naj na koncu izpiše x.",
  hideExp:true, expected:"30", starter:"public class Main {\n    public static void main(String[] args) {\n        int a = 10, b = 20, c = 30;\n        int x;\n        // tvoja koda (brez ?:)\n        System.out.println(x);\n    }\n}",
  sol:"public class Main {\n    public static void main(String[] args) {\n        int a = 10, b = 20, c = 30;\n        int x;\n        if (a > b && a > c)\n            x = a;\n        else if (b > c)\n            x = b;\n        else\n            x = c;\n        System.out.println(x);\n    }\n}",
@@ -1852,7 +1859,7 @@ const T = [
  o:["Stavek break omogoča ponavljanje drugih stavkov.","Stavek break ni stavek programskega jezika Java.","Stavek break omogoča takojšnjo prekinitev izvajanja stavka switch ali zanke, v kateri se nahaja.","Stavek break predstavlja zanko s pogojem na začetku."], a:[2],
  h:["V stavku switch break zaključi možnost.","Enako deluje v zankah (poglavje 6)."],
  why:"break takoj prekine stavek switch ali zanko, v kateri se nahaja. Program nadaljuje s prvim stavkom za njo."},
-{src:"M181/18", pts:3, lv:"D", type:"code", adapt:true,
+{src:"M181/18", pts:3, lv:"D", type:"code", adapt:true, need:[["\\bswitch\\s*\\(\\s*dan\\s*\\)","V kodi manjka stavek switch (dan)."],["\\bcase\\s+1\\s*(?::|->)","Manjka oznaka case 1."],["\\bcase\\s+2\\s*(?::|->)","Manjka oznaka case 2."],["\\bcase\\s+3\\s*(?::|->)","Manjka oznaka case 3."],["\\bcase\\s+4\\s*(?::|->)","Manjka oznaka case 4."],["\\bcase\\s+5\\s*(?::|->)","Manjka oznaka case 5."],["\\bcase\\s+6\\s*(?::|->)","Manjka oznaka case 6."],["\\bcase\\s+7\\s*(?::|->)","Manjka oznaka case 7."],["\\bdefault\\s*(?::|->)","Manjka veja default za dan, ki ne obstaja."],["->|(?:\\bbreak\\b[\\s\\S]*){7}","Vsaka možnost case se mora končati z break, sicer se izvedejo tudi naslednje."]],
  q:"Pretvorite navedeno zaporedje stavkov if v stavek switch. (Prirejeno: v kodi nastavi dan = 3, izpis naj bo ime dneva.)",
  snip:"if (dan==1)\n    danIme=\"ponedeljek\";\nelse\n    if (dan==2)\n        danIme = \"torek\";\n    else\n        if (dan ==3)\n            danIme = \"sreda\";\n        else\n            if (dan ==4)\n                danIme = \"cetrtek\";\n            else\n                if (dan ==5)\n                    danIme = \"petek\";\n                else\n                    if (dan ==6)\n                        danIme =\"sobota\";\n                    else\n                        if (dan ==7)\n                            danIme =\"nedelja\";\n                        else\n                            danIme = \"dan ne obstaja\";\nSystem.out.println(danIme);",
  hideExp:true, expected:"sreda", starter:"public class Main {\n    public static void main(String[] args) {\n        int dan = 3;\n        String danIme;\n        // stavek switch\n        System.out.println(danIme);\n    }\n}",
@@ -2041,7 +2048,7 @@ const srcLabel = s => { const r = /^MRAC\/(\d+)$/.exec(s); if(r) return `Katalog
 const ptsLabel = p => p===1 ? "1 točka" : p===2 ? "2 točki" : (p<5 ? p+" točke" : p+" točk");
 
 /* ---------- render tasks ---------- */
-LavRac.prepare(T, LEVELS, {"nobtn":["C1","C2","C3","C7","D1","D2","D3","D4","D7"]});
+LavRac.prepare(T, LEVELS, {"self":["B8","B9","E1","E2","E3","E4","E5","E6","E8","E9","E10"],"nobtn":["B5","C1","C2","C3","C7","D1","D2","D3","D4","D7"]});
 [{"code":"public class Main {\n    public static void main(String[] args) {\n        int a = 3, b = 4, c = 5;\n        if (a + b > c && a + c > b && b + c > a) {\n            if (a == b && b == c) {\n                System.out.println(\"enakostranicni\");\n            } else if (a == b || b == c || a == c) {\n                System.out.println(\"enakokraki\");\n            } else {\n                System.out.println(\"raznostranicni\");\n            }\n        } else {\n            System.out.println(\"trikotnik ne obstaja\");\n        }\n    }\n}","sol":"Zunanji if preveri, ali trikotnik obstaja, notranja veriga pa določi vrsto. Za 3, 3, 3 je trikotnik enakostranični, za 3, 3, 5 enakokraki, za 3, 4, 5 raznostranični, za 1, 2, 5 ne obstaja (1 + 2 ni večje od 5)."},{"code":"public class Main {\n    public static void main(String[] args) {\n        double a = 1, b = -3, c = 2;\n        double d = b * b - 4 * a * c;\n        if (d > 0) {\n            double x1 = (-b + Math.sqrt(d)) / (2 * a);\n            double x2 = (-b - Math.sqrt(d)) / (2 * a);\n            System.out.println(\"Dve resitvi: \" + x1 + \" in \" + x2);\n        } else if (d == 0) {\n            System.out.println(\"Ena resitev: \" + (-b / (2 * a)));\n        } else {\n            System.out.println(\"Ni realnih resitev\");\n        }\n    }\n}","sol":"Za (1, -3, 2) sta rešitvi 2.0 in 1.0, za (1, 2, 1) je rešitev -1.0, (1, 0, 1) nima realnih rešitev."},{"code":"import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        System.out.println(\"1 - pozdrav\");\n        System.out.println(\"2 - trenutno leto\");\n        System.out.println(\"3 - izhod\");\n        int izbira = sc.nextInt();\n        switch (izbira) {\n            case 1: System.out.println(\"Pozdravljen!\"); break;\n            case 2: System.out.println(2026); break;\n            case 3: System.out.println(\"Nasvidenje\"); break;\n            default: System.out.println(\"Napacna izbira\");\n        }\n    }\n}","sol":"Vsaka možnost se konča z break, sicer bi se izvedle tudi naslednje. Ne pozabi na import java.util.Scanner; na začetku datoteke."},{"code":"import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int t = sc.nextInt();\n        if (t < 0 || t > 100) {\n            System.out.println(\"Napacen vnos\");\n        } else if (t >= 90) {\n            System.out.println(5);\n        } else if (t >= 75) {\n            System.out.println(4);\n        } else if (t >= 60) {\n            System.out.println(3);\n        } else if (t >= 50) {\n            System.out.println(2);\n        } else {\n            System.out.println(1);\n        }\n    }\n}","sol":"Najprej preverimo območje, nato gremo od največje meje navzdol. Za 49 je ocena 1, za 50 ocena 2, za 89 ocena 4, za 90 ocena 5, za 101 izpis Napacen vnos."}].forEach((f, k) => { HOME[k].jsolCode = f.code; if (f.sol) HOME[k].sol = f.sol; });
 T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });
 LavRac.tasks(LEVELS.flatMap(L=>T.filter(t=>t.lv===L.tag)), { level: (t) => t.pts });
@@ -2166,6 +2173,12 @@ function wire(el,t){
       ok = all; if(!ok && s.v.includes(null)) msg="Razvrsti vse trditve.";
     }
     if(t.type==="output" || t.type==="code"){
+      if(t.type==="code" && t.need){
+        const code = ed.value.replace(/\/\*[\s\S]*?\*\//g,"").replace(/\/\/.*$/gm,"").replace(/"(?:\\.|[^"\\])*"/g,'""').replace(/'(?:\\.|[^'\\])*'/g,"''");
+        if(!code.trim()){ show(false,"Najprej zapiši program v okno."); return; }
+        const miss = t.need.find(n=>!new RegExp(n[0]).test(code));
+        if(miss){ show(false, miss[1]); return; }
+      }
       if(!out.value.trim()){ show(false, t.type==="code" ? "Zaženi program in prilepi njegov izpis." : "Napiši izpis."); return; }
       const exps = [].concat(t.expected); ok = exps.some(e=>normOut(out.value)===normOut(e));
       out.classList.remove("right","wrong"); out.classList.add(ok?"right":"wrong");
