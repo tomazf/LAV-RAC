@@ -17,7 +17,6 @@
         <div><dt>Simulacija</dt><dd><%= f.duration(r.time.Simulacija) %></dd></div>
         <div><dt>Naloge</dt><dd><%= f.duration(r.time.Naloge) %></dd></div>
       </dl>
-      <a class="btn <%= r.started && !finished ? '' : 'ghost' %>" href="/vaje/<%= e.id %>" aria-label="<%= finished ? 'Odpri' : r.started ? 'Nadaljuj' : 'Začni' %> vajo <%= e.no %>"><%= finished ? 'Odpri' : r.started ? 'Nadaljuj' : 'Začni' %></a>
     </li>
     <% }) %>
   </ol>

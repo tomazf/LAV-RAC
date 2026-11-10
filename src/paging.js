@@ -1,8 +1,8 @@
 // Long admin lists are shown a page at a time. The page and its size come from the query string, so links keep working.
-export const PER_PAGE = [20, 50, 100];
+export const PER_PAGE = [10, 20, 50];
 
 export function paging(query, total) {
-  const per = PER_PAGE.includes(Number(query.na)) ? Number(query.na) : 50;
+  const per = PER_PAGE.includes(Number(query.na)) ? Number(query.na) : 20;
   const pages = Math.max(1, Math.ceil(total / per));
   const page = Math.min(pages, Math.max(1, Math.floor(Number(query.stran)) || 1));
   return { per, page, pages, total, offset: (page - 1) * per, from: total ? (page - 1) * per + 1 : 0, to: Math.min(total, page * per) };

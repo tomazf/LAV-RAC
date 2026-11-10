@@ -191,6 +191,8 @@ test('parts without exercises wait for staff; a closed class shows a clear messa
   assert.equal(await s.locator('h3:has-text("Številski sistemi") .ex-no').textContent(), '1');
   assert.match(await s.textContent('main a.btn.big'), /^Začni vajo 1: Številski sistemi/);
   assert.match(await s.locator('h3:has-text("Številski sistemi") a').getAttribute('href'), /\/vaje\/2\.1$/);
+  // the rows have no buttons (agreed 10. 11. 2026): the title is the link, only the top button stays
+  assert.equal(await s.locator('.rail .btn').count(), 0);
   await a.goto(classUrl);
   assert.deepEqual(await a.locator('thead th a').allTextContents(), ['1', '2', '3']);
   await s.context().close();
@@ -250,6 +252,34 @@ test('the built exercise carries the current shell and nothing from outside', as
   assert.equal(ex21.module, 'LAV-RAČ2');
   assert.equal(ex21.tasks.length, 99);
   assert.equal(ex21.pages.filter((x) => x.chapter === 'Teorija').length, ex21.gate.length + 1);
+});
+
+test('»Vse vaje« and »Odjava« sit in the exercise header, which stays on screen when scrolling', async () => {
+  const p = await login('Ana Kovač');
+  await p.goto(EX);
+  await p.waitForSelector('.lr-top-in .lvs-back');
+  // the portal's links merge into the shell header (agreed 10. 11. 2026): no separate dark bar above it
+  assert.equal(await p.locator('.lvs-bar').count(), 0);
+  assert.equal(await p.locator('.lr-top-in .lvs-back').textContent(), '‹ Vse vaje');
+  assert.match(await p.locator('.lr-top-in .lvs-back').getAttribute('href'), /^\/vaje$/);
+  assert.equal(await p.locator('.lr-top-in .lvs-out button').textContent(), 'Odjava');
+  const top = await p.evaluate(() => {
+    const t = document.querySelector('.lr-top-in');
+    const s = getComputedStyle(t.parentElement);
+    return { first: t.firstElementChild.className, last: t.lastElementChild.className, position: s.position, top: s.top };
+  });
+  assert.equal(top.first, 'lvs-back');
+  assert.equal(top.last, 'lvs-right');
+  assert.equal(top.position, 'sticky');
+  assert.equal(top.top, '0px');
+  // scrolled to the bottom, the header still starts at the top of the screen
+  await p.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  assert.equal(await p.evaluate(() => document.querySelector('.lr-top').getBoundingClientRect().top), 0);
+  // existing parts stay: title, progress and the reset button
+  assert.match(await p.textContent('.lr-top .lr-name'), /Številski sistemi/);
+  assert.ok(await p.locator('.lr-top #resetBtn').isVisible());
+  await p.context().close();
+  assert.deepEqual(errors, []);
 });
 
 test('overview lists the parts; the tasks open only after every theory page', async () => {
@@ -936,12 +966,14 @@ test('admin lists: filter row, class for students without one, the log in pages,
   for (let i = 0; i < 60; i++) await db.query(`INSERT INTO audit_log(actor_name, action, detail) VALUES('Polnilo','Preizkus',$1)`, [String(i)]);
   const total = (await db.query('SELECT count(*)::int AS n FROM audit_log')).rows[0].n;
   await a.goto(`${APP}/admin/dnevnik`);
-  assert.equal(await a.locator('tbody tr').count(), 50);
-  assert.equal((await a.textContent('.list-pager .dim')).trim(), `1–50 od ${total}`);
-  await a.click('.list-pager .per a:text-is("20")');
   assert.equal(await a.locator('tbody tr').count(), 20);
+  assert.equal((await a.textContent('.list-pager .dim')).trim(), `1–20 od ${total}`);
+  // page sizes on offer: 10, 20 (the default) and 50 (agreed 10. 11. 2026)
+  assert.deepEqual(await a.locator('.list-pager .per a, .list-pager .per [aria-current]').allTextContents(), ['10', '20', '50']);
+  await a.click('.list-pager .per a:text-is("10")');
+  assert.equal(await a.locator('tbody tr').count(), 10);
   await a.click('.list-pager a[aria-label="Naslednja stran"]');
-  assert.equal((await a.textContent('.list-pager .dim')).trim(), `21–40 od ${total}`);
+  assert.equal((await a.textContent('.list-pager .dim')).trim(), `11–20 od ${total}`);
   await a.click('th a:text-is("Kdo")');
   const who = (await a.locator('tbody td:nth-child(2)').allTextContents()).filter((n) => ['Žan', 'Ana', 'Črt', 'Cvetka'].includes(n));
   assert.deepEqual(who, ['Ana', 'Cvetka', 'Črt']); // Žan is further down, on a later page

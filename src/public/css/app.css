@@ -95,7 +95,7 @@ main.stage{display:flex;align-items:center;justify-content:center;max-width:none
 .m-no{font:600 1.25rem var(--fm);color:var(--acc)}
 /* --cx: the middle of the wire, from the left edge of a node; the circle is centred on it */
 .rail{list-style:none;margin:0;padding:0 0 0 30px;position:relative;--cx:-17.5px}
-.node{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto 112px;gap:8px 24px;align-items:center;padding:14px 0;border-top:1px solid var(--line)}
+.node{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 24px;align-items:center;padding:14px 0;border-top:1px solid var(--line)}
 .node:first-child{border-top:0}
 /* the wire: grey until an exercise is finished, then logic 1 */
 /* top:-1px closes the gap the separator line above would leave in the wire */
@@ -181,9 +181,8 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 .tabs a[aria-current]{border-bottom-color:var(--sig);font-weight:700}
 .tight{gap:6px}
 @media (max-width:820px){
-  .node{grid-template-columns:minmax(0,1fr) auto}
+  .node{grid-template-columns:minmax(0,1fr)}
   .times{grid-column:1/-1;grid-row:2}
-  .node>.btn{grid-column:2;grid-row:1}
   .exd>summary{grid-template-columns:minmax(0,1fr)}
   h1{font-size:1.6rem}
   .who-name{display:none}

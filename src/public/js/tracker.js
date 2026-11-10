@@ -152,12 +152,10 @@
   function bar() {
     var css = document.createElement('style');
     css.textContent = '.lvs-bar{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;justify-content:space-between;background:#0a1020;color:#e8edf6;font:15px/1.4 "Atkinson Hyperlegible",system-ui,sans-serif;padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px))}'
-      + '.lvs-bar a{color:#fff;font-weight:700;text-underline-offset:3px}.lvs-right{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center}.lvs-out{margin:0}.lvs-out button{background:none;border:0;color:#fff;font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px 0}.lvs-bar .lvn-btn{color:#fff}.lvs-exnote{margin:0 auto;max-width:1180px;width:calc(100% - 32px)}.lvs-exnote:not([hidden]){margin-top:12px}.lvs-status{opacity:.85;font-size:14px}.lvs-warn{opacity:1;color:#f1b95a}.lvs-warn a{color:#f1b95a}';
+      + '.lvs-bar a{color:#fff;font-weight:700;text-underline-offset:3px}.lvs-right{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center}.lvs-out{margin:0}.lvs-out button{background:none;border:0;color:inherit;font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px 0}.lvs-bar .lvs-out button,.lvs-bar .lvn-btn{color:#fff}.lvs-exnote{margin:0 auto;max-width:1180px;width:calc(100% - 32px)}.lvs-exnote:not([hidden]){margin-top:12px}.lvs-status{opacity:.85;font-size:14px}.lvs-warn{opacity:1;color:#f1b95a}.lvs-warn a{color:#f1b95a}';
     document.head.appendChild(css);
-    var el = document.createElement('div');
-    el.className = 'lvs-bar';
     var back = document.createElement('a');
-    back.href = '/vaje'; back.textContent = '‹ Vse vaje';
+    back.href = '/vaje'; back.textContent = '‹ Vse vaje'; back.className = 'lvs-back';
     status = document.createElement('span');
     status.className = 'lvs-status'; status.setAttribute('aria-live', 'polite');
     var out = document.createElement('form');
@@ -184,12 +182,20 @@
       right.appendChild(exBtn);
     }
     right.appendChild(out);
-    el.appendChild(back); el.appendChild(right);
-    document.body.insertBefore(el, document.body.firstChild);
-    if (exNote) {
-      el.parentNode.insertBefore(exNote, el.nextSibling);
-      LavelsNotes.show(exNote, B.notes.exercise, exBtn);
+    // An exercise shell with its own always-visible header takes the links in; without one, a dark bar on top.
+    var top = document.querySelector('.lr-top-in');
+    if (top) {
+      top.insertBefore(back, top.firstChild);
+      top.appendChild(right);
+      if (exNote) top.parentNode.appendChild(exNote);
+    } else {
+      var el = document.createElement('div');
+      el.className = 'lvs-bar';
+      el.appendChild(back); el.appendChild(right);
+      document.body.insertBefore(el, document.body.firstChild);
+      if (exNote) el.parentNode.insertBefore(exNote, el.nextSibling);
     }
+    if (exNote) LavelsNotes.show(exNote, B.notes.exercise, exBtn);
   }
   // A letter icon opens the note; a saved note is shown next to what it belongs to.
   function noteButton(heading, task, box, label) {

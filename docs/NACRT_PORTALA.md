@@ -32,6 +32,7 @@ Pravila:
 - Če učitelj vajo zapre, se novi odgovori dijakov ne shranijo. Rezultati ostanejo v pregledu.
 - Učitelji in skrbniki vidijo vse vaje in prazne skupine »V pripravi«, dijaki ne.
 - Vaje so razdeljene v module (skupine); modul prikažemo samo, če ima vaje.
+- Na dijakovem seznamu vaj vrstica vaje nima gumba: povezava je naslov vaje, zgoraj ostane en sam gumb, ki nadaljuje pri naslednji vaji (10. 11. 2026).
 - **Letniki** (dogovorjeno 6. 11. 2026, neobvezno): `content/portal.json` ima `years`, npr. `{ "2": "LAV-RAČ2" }` (letnik: skupina). Ko je nastavljen in ima vsaj ena od teh skupin vaje, ima vsak razred letnik (skrbnik ga izbere ob ustvarjanju in ga lahko spremeni). Razred dela samo na skupini svojega letnika: učitelj odpira samo ta poglavja, pregled razreda, rezultati, CSV in podrobnosti dijaka kažejo samo ta letnik. Brez `years` (ali za razred brez letnika) razred vidi vse skupine, kot prej.
 - Razred ima nastavitev **»vidi prejšnje letnike«** (za cel razred, nastavi skrbnik). Najnižji letnik je nima; napis pove, kaj se odpre (»vidi 2. letnik«, »vidi 2. in 3. letnik«). Takrat dijaki vidijo vsa poglavja nižjih letnikov, ne glede na to, kaj je odprto tem letnikom, ločeno pod »Prejšnji letniki«. Vsebina je vedno trenutna različica. Napredek se pri njih hrani, dijak ga vidi in ga lahko sam ponastavi; ne šteje v letošnji seštevek in ga učitelj ne vidi.
 
@@ -54,6 +55,7 @@ Vaja je ena HTML datoteka (`content/exercises/<id>.html`), seznam nalog in stran
 - **Zagon**: datoteka mora vsebovati oznako `<!--LAVELS:BOOT-->` v `<head>`. Strežnik jo nadomesti s `window.__LAVELS` (`id`, `title`, `key`, `attempt`, `uid`, `name`, `state`, `csrf`, `staff`, `variant`, `notes`) in skripti `notes.js` in `tracker.js`. Oznaka `<!--LAVELS:VARIANTS-->` je za spremenljiva števila.
 - **Shranjevanje**: vaja stanje shranjuje v `localStorage` pod `key` kot JSON `{ t: { <indeks naloge>: {...} } }`. Sledilnik ob zagonu postavi stanje s strežnika, vsako spremembo pošlje na `/api/progress/<id>` in šteje čas na `/api/time/<id>`. Pri poskusu, ki ga je spremenil drug zavihek ali ponastavitev, strežnik odgovori 409.
 - **Obvezni elementi vaje**: gumb `#resetBtn` s potrditvijo `#resetYes`, naloge `.task`, strani `.page`. Poglavja (`Teorija`, `Simulacija`, `Naloge`) so zapisana v kodi (`CHAPTERS` v `src/catalog.js`).
+- **Vrstica sledilnika**: sledilnik vaji doda povezavo »‹ Vse vaje«, stanje shranjevanja, opombo k vaji in gumb Odjava. Če ima vaja svojo vedno vidno glavo z elementom `.lr-top-in`, se vgradijo vanjo (povezava levo, odjava desno, brez ločenega temnega traku; 10. 11. 2026); sicer dobijo svoj temni trak na vrhu strani.
 - **Ključi**: `scnm_lavele_*` in `window.__LAVELS` so tehnična imena in ostanejo tudi v novem portalu, razen če se spremeni tudi sledilnik.
 - Vaje 3.1 in 3.2 imata v svoji kodi vrstico `LavelsVariants.apply(...)`, ki jo orodje za uvoz ne doda.
 - Računalniki se delijo, zato se pri odjavi in v sledilniku iz `localStorage` odstranijo podatki drugih uporabnikov in drugih vaj.
@@ -76,7 +78,7 @@ Vaja je ena HTML datoteka (`content/exercises/<id>.html`), seznam nalog in stran
 
 ## 8. Skrbnik
 
-Strani: Uporabniki (filter, iskanje, vloge, izbris; dijakom brez razreda skrbnik izbere razred in shrani vse naenkrat), Vaje (pregled), Razredi, Šolsko leto (samo z letniki), Kopije, Dnevnik (razvrščanje po stolpcih, brisanje zapisov, starejših od 1, 2 ali 3 mesecev; zadnji zapis o kopiji in o zaključku šolskega leta vedno ostaneta), Čiščenje (izbris neaktivnih dijakov). Dolgi seznami (Uporabniki, Dnevnik) so po straneh, 20, 50 ali 100 na stran, privzeto 50 (8. 11. 2026). Dnevnik dejanj beleži, kdo je kaj naredil (slovenska imena dejanj).
+Strani: Uporabniki (filter, iskanje, vloge, izbris; dijakom brez razreda skrbnik izbere razred in shrani vse naenkrat), Vaje (pregled), Razredi, Šolsko leto (samo z letniki), Kopije, Dnevnik (razvrščanje po stolpcih, brisanje zapisov, starejših od 1, 2 ali 3 mesecev; zadnji zapis o kopiji in o zaključku šolskega leta vedno ostaneta), Čiščenje (izbris neaktivnih dijakov). Dolgi seznami (Uporabniki, Dnevnik) so po straneh, 10, 20 ali 50 na stran, privzeto 20 (10. 11. 2026). Dnevnik dejanj beleži, kdo je kaj naredil (slovenska imena dejanj).
 
 **Kopije** (Administracija > Kopije):
 - Prenos: `pg_dump` (zapis `custom`, brez sej), datoteka se ne shrani na strežnik, ampak samo na skrbnikov računalnik. Zadnja kopija se zabeleži v dnevnik.
