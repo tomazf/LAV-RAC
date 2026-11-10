@@ -239,10 +239,13 @@
       no.focus();
     };
     idle();
+    // The title, progress and reset sit in the middle; the portal's tracker adds »Vse vaje« before them and »Odjava« after them,
+    // so those two stay at the edges of the page, away from the content.
     return h('div', { class: 'lr-top' }, h('div', { class: 'lr-top-in' },
-      h('div', { class: 'lr-name' }, h('b', { text: c.title }), c.kicker ? h('span', { text: c.kicker }) : null),
-      h('div', { class: 'lr-prog', role: 'status' }, bar, h('span', { class: 'lr-ptxt', id: 'lrPtxt' })),
-      reset));
+      h('div', { class: 'lr-top-mid' },
+        h('div', { class: 'lr-name' }, h('b', { text: c.title }), c.kicker ? h('span', { text: c.kicker }) : null),
+        h('div', { class: 'lr-prog', role: 'status' }, bar, h('span', { class: 'lr-ptxt', id: 'lrPtxt' })),
+        reset)));
   }
   function doReset() {
     state = { t: {}, seen: state.seen.slice() };

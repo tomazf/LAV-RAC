@@ -278,6 +278,26 @@ test('»Vse vaje« and »Odjava« sit in the exercise header, which stays on scr
   // existing parts stay: title, progress and the reset button
   assert.match(await p.textContent('.lr-top .lr-name'), /Številski sistemi/);
   assert.ok(await p.locator('.lr-top #resetBtn').isVisible());
+  // both links are tinted plates at the edges of the page, well away from the title (agreed 10. 11. 2026)
+  await p.setViewportSize({ width: 1500, height: 900 });
+  await p.evaluate(() => window.scrollTo(0, 0));
+  const box = await p.evaluate(() => {
+    const r = (s) => { const b = document.querySelector(s).getBoundingClientRect(); return { left: b.left, right: b.right, top: b.top }; };
+    const bg = (s) => getComputedStyle(document.querySelector(s)).backgroundColor;
+    return { top: r('.lr-top'), back: r('.lvs-back'), name: r('.lr-name'), out: r('.lvs-out button'), backBg: bg('.lvs-back'), outBg: bg('.lvs-out button'), width: innerWidth };
+  });
+  assert.equal(box.top.left, 0, 'the header spans the whole page');
+  assert.ok(box.back.left <= 40 && box.width - box.out.right <= 40, `the links sit at the edges: ${box.back.left}, ${box.width - box.out.right}`);
+  assert.ok(box.name.left - box.back.right >= 80, `room between »Vse vaje« and the title: ${box.name.left - box.back.right}`);
+  assert.notEqual(box.backBg, 'rgba(0, 0, 0, 0)');
+  assert.equal(box.backBg, box.outBg, 'the two plates look the same');
+  // on a phone the two plates share the first row
+  for (const width of [360, 320]) {
+    await p.setViewportSize({ width, height: 740 });
+    const row = await p.evaluate(() => [document.querySelector('.lvs-back'), document.querySelector('.lvs-out button')].map((e) => Math.round(e.getBoundingClientRect().top)));
+    assert.equal(row[0], row[1], `${width}px: back link and logout in one row`);
+    assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `${width}px: no sideways scroll`);
+  }
   await p.context().close();
   assert.deepEqual(errors, []);
 });
