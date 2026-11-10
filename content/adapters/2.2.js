@@ -1,8 +1,13 @@
-// Logične funkcije – utrjevanje. Connects the published artifact to the exercise shell: the portal's storage,
+// Logične funkcije. Connects the published artifact to the exercise shell: the portal's storage,
 // one answer per task, hints and solution reported to the shell, and three theory groups for the overview.
 
+import { readFileSync } from 'node:fs';
+
+// Longer code that is built into the artifact lives in content/adapters/2.2/ so that it can be read and checked as code.
+const part = (name) => readFileSync(new URL('./2.2/' + name, import.meta.url), 'utf8');
+
 const ICONS = {
-  vrata: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M4 17h10M4 31h10M38 24h7"/><path d="M14 10h10a14 14 0 0 1 0 28H14z"/></svg>',
+  vrata: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M4 17h10M4 31h10M34 24h11"/><rect x="14" y="10" width="20" height="28"/><text x="24" y="30" font-size="16" text-anchor="middle">&amp;</text></svg>',
   funkcije: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="8" width="36" height="32" rx="3"/><path d="M24 8v32M6 24h36"/><rect x="9" y="11" width="30" height="10" rx="5" class="fill" opacity=".35"/></svg>',
   aritmetika: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="12" y="8" width="24" height="32" rx="3"/><path d="M4 18h8M4 30h8M36 18h8M36 30h8M24 46v-6"/><text x="17" y="30" font-size="15">Σ</text></svg>',
 };
@@ -12,7 +17,7 @@ const GROUPS = [
   { id: 'funkcije', title: 'Funkcije in poenostavljanje', pages: ['zapis', 'algebra', 'veitch', 'demorgan'] },
   { id: 'aritmetika', title: 'Aritmetična vezja', pages: ['sestevalnik', 'odstevalnik'] },
 ];
-const TITLE = 'Logične funkcije – utrjevanje';
+const TITLE = 'Logične funkcije';
 const KICKER = 'LAV-RAČ2 · 2. poglavje';
 
 // Two more home tasks, added in the portal (8. 11. 2026); the artifact stays as it is.
@@ -38,10 +43,37 @@ export default {
   css: `html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-tile);--line:var(--lr-line);--fg:var(--lr-ink);--muted:var(--lr-mut);
   --accent:var(--lr-acc);--accent-soft:var(--lr-acc-soft);--ok:var(--lr-ok);--ok-soft:var(--lr-ok-bg);--bad:var(--lr-bad);--bad-soft:var(--lr-bad-bg);
   --seen:var(--lr-seen);--seen-soft:var(--lr-seen-bg);--f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}
-  body{padding-left:0;padding-right:0}`,
+  body{padding-left:0;padding-right:0}
+  /* IEC gate labels inside the rectangles; comparison table of symbol systems */
+  .circ .gl{stroke:none;font-weight:700;font-size:14px}
+  .vfig svg.g{width:150px;height:75px;color:var(--accent);flex:none}
+  .symcmp th small{font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0}
+  .symcmp td{vertical-align:middle}`,
   patches: [
     ['HOME.forEach((h,k)=>{', `HOME.push(...${JSON.stringify(HOME_PLUS)});\nHOME.forEach((h,k)=>{`],
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
+    // Gate symbols (agreed 10. 11. 2026): everything is drawn as IEC rectangles; the introduction compares them with ANSI/IEEE
+    // (content/adapters/2.2/iec.js, symcmp.js) and the texts that described the old shapes are rewritten.
+    ["function gateSvg(t, cls){",
+      part('iec.js') + '\n' + "function gateSvgAnsi(t, cls){"],
+    ["function gBody(t,H){",
+      "function gBodyAnsi(t,H){"],
+    ["WIDGETS.gates1 = h=>gateLab(h,[\"AND\",\"OR\",\"NOT\"]);",
+      part('symcmp.js') + '\n' + "WIDGETS.gates1 = h=>gateLab(h,[\"AND\",\"OR\",\"NOT\"]);"],
+    ["<p>V shemah ne rišemo stikal, ampak simbole vrat. Spodaj so vsa tri osnovna vrata. Pritisni gumba z vhodoma in poglej, kako se spremeni izhod. Vrstica tabele, ki trenutno velja, je obarvana.</p>",
+      "<p>V shemah ne rišemo stikal, ampak simbole vrat. Obstajata dva sistema simbolov. <strong>IEC</strong> je mednarodni standard: vrata so pravokotniki z oznako v notranjosti. <strong>ANSI/IEEE</strong> ima za vsaka vrata svojo obliko in ga pogosto srečaš v učbenikih, na spletu in v programih za risanje vezij. Spodaj sta primerjana. <strong>V tem gradivu uporabljamo samo simbole IEC.</strong></p></div>\n      <div data-w=\"symcmp\"></div>\n      <div class=\"prose\">\n        <p>Spodaj so vsa tri osnovna vrata. Pritisni gumba z vhodoma in poglej, kako se spremeni izhod. Vrstica tabele, ki trenutno velja, je obarvana.</p>"],
+    ["<p class=\"note\">Pripomoček prikazuje oblike simbolov, kot jih srečaš v večini učbenikov (ANSI/IEEE). V standardu IEC so vrata pravokotniki z oznako v notranjosti: <code>&amp;</code> za IN, <code>≥1</code> za ALI, <code>1</code> za NE, <code>=1</code> za XOR. Krožec na izhodu ali vhodu pomeni negacijo.</p>",
+      "<p class=\"note\">Simboli v tem gradivu so po standardu IEC: vrata so pravokotniki z oznako v notranjosti, <code>&amp;</code> za IN, <code>≥1</code> za ALI, <code>1</code> za NE, <code>=1</code> za XOR in <code>=</code> za XNOR. Krožec na izhodu ali vhodu pomeni negacijo.</p>"],
+    ["Simboli vrat so narisani v obliki ANSI/IEEE, v standardu IEC so vrata pravokotniki.",
+      "Simboli vrat so narisani po standardu IEC: vrata so pravokotniki z oznako v notranjosti."],
+    ["h:[\"Poglej izhod: ali ima krožec?\",\"Ravna zadnja stran je značilna za vrata IN.\"],\n why:\"Ravna zadnja stran in izhod brez krožca pomenita vrata IN. Če bi bil na izhodu krožec, bi bila to vrata NEIN.\"",
+      "h:[\"Poglej izhod: ali ima krožec?\",\"Oznaka v pravokotniku pove vrsto vrat: & je oznaka za IN.\"],\n why:\"Oznaka & v pravokotniku in izhod brez krožca pomenita vrata IN. Če bi bil na izhodu krožec, bi bila to vrata NEIN.\""],
+    ["h:[\"Zadnja stran je zaobljena, kot pri vratih ALI.\",\"Krožec na izhodu pomeni negacijo.\"],\n why:\"Zaobljena oblika so vrata ALI, krožec na izhodu pa izhod še negira. Skupaj so to vrata NEALI.\"",
+      "h:[\"Oznaka ≥1 je oznaka za vrata ALI.\",\"Krožec na izhodu pomeni negacijo.\"],\n why:\"Oznaka ≥1 pomeni vrata ALI, krožec na izhodu pa izhod še negira. Skupaj so to vrata NEALI.\""],
+    ["h:[\"Opazuj vhodno stran vrat.\",\"Dodatna ukrivljena črta ob vhodih loči XOR od ALI.\"],\n why:\"Dodatna ukrivljena črta pri vhodih je znak za ekskluzivni ALI (XOR). Ker izhod nima krožca, ni XNOR.\"",
+      "h:[\"Preberi oznako v pravokotniku.\",\"Oznaka =1 loči XOR od ALI (≥1).\"],\n why:\"Oznaka =1 je znak za ekskluzivni ALI (XOR). Ker izhod nima krožca, ni XNOR.\""],
+    ["h:[\"Zadnja stran je ravna.\",\"Krožec na izhodu pomeni, da je rezultat negiran.\"],\n why:\"Ravna zadnja stran so vrata IN, krožec izhod negira: to so vrata NEIN.\"",
+      "h:[\"Oznaka & je oznaka za vrata IN.\",\"Krožec na izhodu pomeni, da je rezultat negiran.\"],\n why:\"Oznaka & so vrata IN, krožec izhod negira: to so vrata NEIN.\""],
     // Storage: the portal's state for this student; the artifact's own account sync is not used.
     [`const STORE = "logicne-funkcije-scnm-v1";
 let S = {}, localT = 0;

@@ -1388,6 +1388,9 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr{min-height:100vh}
 .lr-btn{font:600 .9rem var(--lr-fb);border-radius:7px;padding:6px 14px;min-height:36px;cursor:pointer;border:1.5px solid var(--lr-acc);background:var(--lr-acc);color:var(--lr-card);text-decoration:none;display:inline-flex;align-items:center;gap:6px}
 .lr-btn.lr-ghost{background:transparent;color:var(--lr-acc)}
+/* the artifacts' text-only buttons get the same outline as their other buttons (agreed 10. 11. 2026); the reset link keeps its look */
+html:not(#lr) .btn.ghost:not(#resetBtn){border-color:var(--lr-line);background:var(--lr-card)}
+html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 .lr-btn.lr-danger{background:var(--lr-bad);border-color:var(--lr-bad);color:#fff}
 .lr-btn:disabled{opacity:.4;cursor:default}
 .lr :focus-visible{outline:3px solid var(--lr-lamp);outline-offset:2px}

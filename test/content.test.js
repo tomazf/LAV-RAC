@@ -248,7 +248,7 @@ test('the built exercise carries the current shell and nothing from outside', as
   assert.ok(html.includes(readFileSync(path.join(root, 'content/shell/vaja.css'), 'utf8').trim()), 'run npm run import after changing the shell');
   assert.doesNotMatch(html, /fonts\.googleapis|Function\(|eval\(/);
   assert.equal(ex21.module, 'LAV-RAČ2');
-  assert.equal(ex21.tasks.length, 98);
+  assert.equal(ex21.tasks.length, 99);
   assert.equal(ex21.pages.filter((x) => x.chapter === 'Teorija').length, ex21.gate.length + 1);
 });
 
@@ -270,7 +270,7 @@ test('overview lists the parts; the tasks open only after every theory page', as
   await p.click('.lr-tile[data-tile=kodiranje]');
   await at(p, 'bcd');
   assert.equal(await p.locator('.page.on').getAttribute('id'), 'bcd');
-  assert.match(await p.textContent('.page.on .lr-count'), /Razlaga 12 \/ 18/);
+  assert.match(await p.textContent('.page.on .lr-count'), /Razlaga 11 \/ 17/);
   await readAll(p);
   await go(p, 'naloge-a');
   assert.ok(await p.locator('.page.on .lr-locked').isHidden());
@@ -329,7 +329,7 @@ test('one answer per task: right, wrong, with a hint, and the solution', async (
   const sol = await card(p).locator('.lr-sol').boundingBox();
   assert.ok(sol.x > check.x + 300);
   assert.deepEqual(await p.locator('.page.on .lr-num').evaluateAll((b) => b.slice(0, 5).map((x) => x.dataset.s)), ['ok', 'half', 'bad', 'seen', 'open']);
-  assert.match(await p.textContent('#lrPtxt'), /^4 \/ 98 nalog · 1,5 \/ 216 točk$/);
+  assert.match(await p.textContent('#lrPtxt'), /^4 \/ 99 nalog · 1,5 \/ 218 točk$/);
   await settled(p);
   const r = await progressRow('Ana Kovač');
   assert.equal(Number(r.score), 1.5);
@@ -342,7 +342,7 @@ test('another computer continues where the student left off, and locked stays lo
   const p = await login('Ana Kovač');
   await p.goto(EX);
   assert.match(await p.textContent('#lrResume'), /Vaje A · Pretvorbe/);
-  assert.match(await p.textContent('#lrPtxt'), /^4 \/ 98 nalog · 1,5 \/ 216 točk$/);
+  assert.match(await p.textContent('#lrPtxt'), /^4 \/ 99 nalog · 1,5 \/ 218 točk$/);
   await go(p, 'naloge-a/3');
   assert.equal(await card(p).getAttribute('data-lr'), 'bad');
   assert.ok(await card(p).locator('.lr-check').isDisabled());
@@ -456,7 +456,7 @@ test('a reset starts a new attempt that the teacher sees; read pages stay read',
   await p.goto(EX);
   await p.click('#resetBtn');
   await Promise.all([p.waitForEvent('load'), p.click('#resetYes')]);
-  await p.waitForFunction(() => /^0 \/ 98 nalog/.test(document.getElementById('lrPtxt')?.textContent || ''), null, { timeout: 8000 });
+  await p.waitForFunction(() => /^0 \/ 99 nalog/.test(document.getElementById('lrPtxt')?.textContent || ''), null, { timeout: 8000 });
   await go(p, 'naloge-a');
   assert.ok(await p.locator('.page.on .lr-locked').isHidden());
   assert.equal(await card(p).getAttribute('data-lr'), 'open');
@@ -490,6 +490,204 @@ test('2.2, 2.3 and 3.1 to 3.5: every page opens without errors, with their theor
     assert.deepEqual(await a.evaluate((list) => list.filter((x) => document.querySelectorAll(`[id="${x}"]`).length !== 1), own), []);
     await a.context().close();
   }
+  assert.deepEqual(errors, []);
+});
+
+test('2.1: no subtraction with borrowing; subtraction is addition of the complement with the carries drawn; pages are renumbered', async () => {
+  const a = await login('Sara Skrbnik');
+  assert.equal(ex21.version, 2);
+  assert.equal(ex21.pages.some((x) => x.id === 'odstevanje'), false);
+  await a.goto(EX);
+  assert.equal(await a.locator('#odstevanje').count(), 0);
+  assert.doesNotMatch(await a.locator('.lr-rail').textContent(), /z izposojo/);
+  for (const [hash, n] of [['hex', 9], ['okt', 10], ['precna-vzdolzna', 16], ['popravljanje', 17]]) {
+    await go(a, hash);
+    assert.match(await a.textContent('.page.on .lr-count'), new RegExp(`Razlaga ${n} \\/ 17`), hash);
+  }
+  await go(a, 'hex');
+  const calc = a.locator('.page.on [data-w="calc"]').first();
+  const out = calc.locator('.out');
+  const text = async () => (await out.textContent()).replace(/\s+/g, ' ');
+  // hexadecimal: complement, +1, addition; the carry out of the top column is crossed out
+  await calc.locator('[data-o="-"]').click();
+  let t = await text();
+  assert.doesNotMatch(t, /Izposodiš/);
+  assert.match(t, /Komplement do F števila B/);
+  assert.match(t, /Komplement do 16: prištej 1/);
+  assert.match(t, /Seštej A \+ \(−B\)/);
+  assert.match(t, /Prenos čez zgornje mesto zavržeš/);
+  assert.match(t, /60 − 47 = 13, rezultat D₁₆ = 13 ✓/);
+  assert.equal(await out.locator('ol.stp > li').count(), 4);
+  assert.equal(await out.locator('tr.carry b.on').count(), 1);
+  assert.equal(await out.locator('tr.carry b.disc').count(), 1);
+  assert.equal(await out.locator('tr.carry td.ar.on').count(), 1);
+  // binary, A < B: no carry out, the result is read as a complement and written with a minus
+  await calc.locator('[data-b="2"]').click();
+  await calc.locator('.in.a').fill('1101');
+  await calc.locator('.in.b').fill('10110');
+  t = await text();
+  assert.match(t, /Eniški komplement števila B/);
+  assert.match(t, /Dvojiški komplement: prištej 1/);
+  assert.match(t, /Prenosa čez zgornje mesto ni/);
+  assert.match(t, /Torej A − B = −1001₂/);
+  assert.match(t, /13 − 22 = −9, rezultat −1001₂ = −9 ✓/);
+  assert.equal(await out.locator('tr.carry b.disc').count(), 0);
+  // subtracting zero
+  await calc.locator('.in.b').fill('0');
+  assert.match(await text(), /Odštevanje ničle števila ne spremeni/);
+  // the octal example blocks use the same method
+  await go(a, 'okt');
+  const oct = a.locator('.page.on [data-w="calc"]').first();
+  await oct.locator('[data-o="-"]').click();
+  t = (await oct.locator('.out').textContent()).replace(/\s+/g, ' ');
+  assert.match(t, /Komplement do 8: prištej 1/);
+  assert.match(t, /159 − 125 = 34/);
+  await a.context().close();
+  assert.deepEqual(errors, []);
+});
+
+test('2.1: the parity table keeps its structure for a new example and explains the bits; the RAID page walks through parity and recovery; the new RAID task', async () => {
+  const a = await login('Sara Skrbnik');
+  await a.goto(EX);
+  await readAll(a);
+  await go(a, 'precna-vzdolzna');
+  const w = a.locator('.page.on [data-w="pgfill"]');
+  const cells = () => w.locator('tbody.tb tr').evaluateAll((rs) => rs.map((r) => r.children.length));
+  // NOVO: one labelled row per character, the same number of cells in every row, the last row labelled too
+  assert.deepEqual(await w.locator('tbody.tb td.lb').allTextContents(), ['N = 78', 'O = 79', 'V = 86', 'O = 79', 'paritetni bit']);
+  assert.deepEqual(await cells(), [9, 9, 9, 9, 9]);
+  assert.match(await w.locator('.pgwhy').textContent(), /Od kod so enice in ničle\?[\s\S]*ASCII[\s\S]*78₁₀ = 1001110₂/);
+  assert.match(await w.locator('.pgwhy').textContent(), /Zakaj sploh računamo paritetne bite\?[\s\S]*popravi/);
+  // a new random example is a new word, not a broken table
+  for (let k = 0; k < 4; k++) {
+    await w.locator('[data-a="new"]').click();
+    const labels = await w.locator('tbody.tb td.lb').allTextContents();
+    assert.equal(labels.length, 5);
+    assert.match(labels[0], /^[A-Z] = \d+$/);
+    assert.equal(labels.at(-1), 'paritetni bit');
+    assert.deepEqual(await cells(), [9, 9, 9, 9, 9]);
+    assert.equal(await w.locator('.pf').count(), 12);
+    assert.match(await w.locator('.pgwhy').textContent(), new RegExp(`Pri znaku ${labels[0][0]} je koda ${labels[0].split('= ')[1]}`));
+  }
+  // check: empty fields are not right, the solution fills everything in
+  await w.locator('[data-a="check"]').click();
+  assert.match(await w.locator('.res').textContent(), /Pravilnih je \d+ od 12/);
+  await w.locator('[data-a="sol"]').click();
+  assert.equal(await w.locator('.pf.ok').count(), 12);
+  await w.locator('[data-a="clr"]').click();
+  assert.equal(await w.locator('.pf:not(:empty)').count(), 0);
+  // the helper buttons are outlined: a visible border and a card background
+  for (const sel of ['[data-a="sol"]', '[data-a="clr"]']) {
+    const st = await w.locator(sel).evaluate((b) => { const c = getComputedStyle(b); return { w: c.borderTopWidth, s: c.borderTopStyle, bg: c.backgroundColor }; });
+    assert.equal(st.w, '1px', sel);
+    assert.equal(st.s, 'solid', sel);
+    assert.notEqual(st.bg, 'rgba(0, 0, 0, 0)', sel);
+  }
+  // RAID: P step by step, then a failed disk and the rebuild
+  await go(a, 'popravljanje');
+  const r = a.locator('.page.on .raid');
+  assert.deepEqual(await r.locator('tbody th').allTextContents(), ['Disk 1', 'Disk 2', 'Disk 3', 'Disk P (paritetni)']);
+  assert.equal(await r.locator('.bt.q').count(), 8);
+  await r.locator('[data-a="next"]').click();
+  assert.match(await r.locator('.rline').textContent(), /Stolpec 1: 1 XOR 0 XOR 1 = 0/);
+  assert.equal(await r.locator('.bt.q').count(), 7);
+  await r.locator('[data-a="all"]').click();
+  assert.match(await r.locator('.rline').textContent(), /P = 10110010 XOR 01101100 XOR 11100101 = 00111011\. Vsi diski delujejo/);
+  assert.ok(await r.locator('[data-a="next"]').isDisabled());
+  await r.locator('[data-ph="2"]').click();
+  assert.match(await r.locator('.rline').textContent(), /Disk 2 je odpovedal/);
+  assert.equal(await r.locator('tbody tr.dead').count(), 1);
+  assert.equal(await r.locator('.bt.lost').count(), 8);
+  await r.locator('[data-a="next"]').click();
+  assert.match(await r.locator('.rline').textContent(), /Disk 1 XOR Disk 3 XOR Disk P = 1 XOR 1 XOR 0 = 0/);
+  await r.locator('[data-a="all"]').click();
+  assert.match(await r.locator('.rline').textContent(), /Disk 2 = 01101100\. Enako kot pred odpovedjo/);
+  await r.locator('[data-f="3"]').click();
+  await r.locator('[data-a="all"]').click();
+  assert.match(await r.locator('.rline').textContent(), /Disk P = 00111011/);
+  assert.match(await r.locator('.rnote').textContent(), /B = A XOR C XOR P/);
+  assert.doesNotMatch(await r.textContent(), /⊕/);
+  // the new task: rebuild the failed disk (2 points, the answer keeps its leading zeros)
+  const task = ex21.tasks.find((x) => /RAID 5/.test(x.q));
+  assert.equal(task.section, 'Pariteta');
+  assert.equal(task.max, 2);
+  const pos = ex21.tasks.filter((x) => x.section === 'Pariteta').indexOf(task) + 1;
+  await go(a, `naloge-d/${pos}`);
+  assert.deepEqual(await card(a).locator('table.al th').allTextContents(), ['Disk 1', 'Disk 2', 'Disk 3', 'Disk P']);
+  assert.equal(await card(a).locator('table.al tr').nth(1).locator('td').allTextContents().then((c) => c.join('')), '????????');
+  await card(a).locator('input[data-f]').fill('');
+  await card(a).locator('.lr-check').click();
+  assert.match(await card(a).locator('.lr-left .feedback').textContent(), /Najprej/);
+  assert.equal(await card(a).getAttribute('data-lr'), 'open');
+  await card(a).locator('input[data-f]').fill('10010110');
+  await card(a).locator('.lr-check').click();
+  assert.equal(await card(a).getAttribute('data-lr'), 'ok');
+  await a.context().close();
+  assert.deepEqual(errors, []);
+});
+
+test('the helper buttons of 2.2 and of the Java exercises are outlined', async () => {
+  const a = await login('Sara Skrbnik');
+  for (const [id, sel] of [['2.2', '.js-gclr'], ['3.1', '.js-restore'], ['3.2', '.js-restore'], ['3.3', '.js-restore']]) {
+    await a.goto(`${APP}/vaje/${id}`);
+    await a.waitForSelector('.lr-rail');
+    const st = await a.locator(sel).first().evaluate((b) => { const c = getComputedStyle(b); return { w: c.borderTopWidth, s: c.borderTopStyle, bg: c.backgroundColor }; });
+    assert.equal(st.w, '1px', `${id} ${sel}`);
+    assert.equal(st.s, 'solid', `${id} ${sel}`);
+    assert.notEqual(st.bg, 'rgba(0, 0, 0, 0)', `${id} ${sel}`);
+  }
+  await a.context().close();
+});
+
+test('2.2: the title is "Logične funkcije"; every symbol is IEC, the ANSI/IEEE ones only appear in the comparison table of the introduction', async () => {
+  const ex = catalog.exercises.find((e) => e.id === '2.2');
+  assert.equal(ex.title, 'Logične funkcije');
+  assert.doesNotMatch(JSON.stringify([ex.title, ex.fullTitle]), /utrjevanje/);
+  const a = await login('Sara Skrbnik');
+  await a.goto(`${APP}/vaje/2.2#pregled`);
+  await at(a, 'pregled');
+  assert.match(await a.textContent('.lr-top'), /Logične funkcije/);
+  assert.doesNotMatch(await a.textContent('.lr-top'), /utrjevanje/);
+  await go(a, 'vrata1');
+  const page = a.locator('.page.on');
+  assert.match(await page.textContent(), /Obstajata dva sistema simbolov[\s\S]*IEC[\s\S]*ANSI\/IEEE/);
+  // comparison table: seven gates, IEC rectangles next to the ANSI shapes
+  const cmp = page.locator('[data-w="symcmp"]');
+  assert.equal(await cmp.locator('tbody tr').count(), 7);
+  assert.deepEqual(await cmp.locator('thead th').evaluateAll((h) => h.map((x) => x.firstChild.textContent)), ['Vrata', 'IEC', 'ANSI/IEEE']);
+  for (let i = 0; i < 7; i++) {
+    const row = cmp.locator('tbody tr').nth(i);
+    assert.equal(await row.locator('td').nth(1).locator('svg rect').count(), 1, `IEC row ${i}`);
+    assert.equal(await row.locator('td').nth(2).locator('svg rect').count(), 0, `ANSI row ${i}`);
+  }
+  // the gate laboratory, the tasks that show a gate, the circuits and the De Morgan symbols: rectangles with a label, no ANSI shapes
+  const ansi = /A19 19|Q40 6|L50 25/;
+  await go(a, 'vrata2');
+  assert.equal(await page.locator('[data-w="gates2"] svg rect').count(), 1);
+  await go(a, 'demorgan');
+  assert.ok(await page.locator('text.gl').count() > 4);
+  await go(a, 'sestevalnik');
+  assert.ok(await page.locator('text.gl').count() >= 4);
+  await go(a, 'odstevalnik');
+  assert.ok(await page.locator('text.gl').count() >= 3);
+  for (const id of ['vrata2', 'zapis', 'veitch', 'demorgan', 'sestevalnik', 'odstevalnik', 'naloge-a', 'naloge-e', 'naloge-f']) {
+    await go(a, id);
+    const html = await page.innerHTML();
+    assert.doesNotMatch(html, ansi, id);
+  }
+  // A1: the figure of a gate in a task is a modest rectangle
+  await go(a, 'naloge-a/1');
+  const fig = card(a).locator('.vfig svg.g');
+  assert.equal(await fig.locator('rect').count(), 1);
+  assert.equal(await fig.locator('text').textContent(), '&');
+  const box = await fig.boundingBox();
+  assert.ok(box.width <= 200 && box.width >= 100, `gate figure width ${box.width}`);
+  // the hints of the first tasks talk about the label in the rectangle, no longer about the shape of the back
+  await card(a).locator('.lr-hint').click();
+  const hints = await card(a).textContent();
+  assert.match(hints, /Poglej izhod: ali ima krožec\?/);
+  assert.doesNotMatch(hints, /Ravna zadnja|zaobljen|ukrivljen/);
+  await a.context().close();
   assert.deepEqual(errors, []);
 });
 
@@ -765,7 +963,7 @@ test('Za doma: two more tasks per chapter, added in the portal, unscored', async
     assert.ok(await a.locator('.page.on article', { hasText: titles[1] }).locator('.sol').isVisible());
   }
   // unscored: the catalog has the same tasks and points as before (3.1 to 3.3 changed on 10. 11. 2026: tasks the student checks have no points)
-  assert.deepEqual(catalog.exercises.map((e) => [e.id, e.tasks.length, e.maxPoints]), [['2.1', 98, 216], ['2.2', 85, 164], ['2.3', 129, 237], ['3.1', 52, 75], ['3.2', 53, 61], ['3.3', 55, 83], ['3.4', 76, 105], ['3.5', 50, 58]]);
+  assert.deepEqual(catalog.exercises.map((e) => [e.id, e.tasks.length, e.maxPoints]), [['2.1', 99, 218], ['2.2', 85, 164], ['2.3', 129, 237], ['3.1', 52, 75], ['3.2', 53, 61], ['3.3', 55, 83], ['3.4', 76, 105], ['3.5', 50, 58]]);
   await a.context().close();
   assert.deepEqual(errors, []);
 });

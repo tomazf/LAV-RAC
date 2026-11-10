@@ -16,10 +16,10 @@
    "module": "LAV-RAČ2",
    "title": "Številski sistemi, kodiranje in pariteta",
    "fullTitle": "Številski sistemi, kodiranje in pariteta",
-   "key": "scnm_lavrac_2_1_v1",
-   "version": 1,
+   "key": "scnm_lavrac_2_1_v2",
+   "version": 2,
    "format": "short",
-   "maxPoints": 216,
+   "maxPoints": 218,
    "tasks": [
     {
      "i": 0,
@@ -653,55 +653,62 @@
     },
     {
      "i": 90,
-     "level": "težja",
-     "max": 3,
+     "level": "srednja",
+     "max": 2,
      "section": "Pariteta",
-     "q": "Naloga 2: Vpiši paritetne bite (desni stolpec in spodnjo vrstico, tudi vogalni bit) pri sodi prečni in vzdolžni pariteti."
+     "q": "Sistem RAID 5 ima tri diske s podatki in paritetni disk P. Paritetni disk je izbran tako, da je v vsakem stolpcu število enic na vseh štirih diskih sodo. Disk 2"
     },
     {
      "i": 91,
      "level": "težja",
      "max": 3,
      "section": "Pariteta",
-     "q": "Naloga 3: Vpiši paritetne bite (desni stolpec in spodnjo vrstico, tudi vogalni bit) pri sodi prečni in vzdolžni pariteti."
+     "q": "Naloga 2: Vpiši paritetne bite (desni stolpec in spodnjo vrstico, tudi vogalni bit) pri sodi prečni in vzdolžni pariteti."
     },
     {
      "i": 92,
      "level": "težja",
      "max": 3,
      "section": "Pariteta",
-     "q": "Vpiši paritetne bite (desni stolpec in spodnjo vrstico, tudi vogalni bit) pri sodi prečni in vzdolžni pariteti."
+     "q": "Naloga 3: Vpiši paritetne bite (desni stolpec in spodnjo vrstico, tudi vogalni bit) pri sodi prečni in vzdolžni pariteti."
     },
     {
      "i": 93,
      "level": "težja",
      "max": 3,
      "section": "Pariteta",
-     "q": "Pri prečni in vzdolžni pariteti nastane ena napaka. Koliko napačnih bitov lahko tak sistem zanesljivo popravi?"
+     "q": "Vpiši paritetne bite (desni stolpec in spodnjo vrstico, tudi vogalni bit) pri sodi prečni in vzdolžni pariteti."
     },
     {
      "i": 94,
      "level": "težja",
      "max": 3,
      "section": "Pariteta",
-     "q": "Pri sodi pariteti se spremenita dva različna bita. Kaj naredi pariteta?"
+     "q": "Pri prečni in vzdolžni pariteti nastane ena napaka. Koliko napačnih bitov lahko tak sistem zanesljivo popravi?"
     },
     {
      "i": 95,
      "level": "težja",
      "max": 3,
      "section": "Pariteta",
-     "q": "V tabeli je en napačen bit (pariteta je soda; zadnji stolpec in zadnja vrstica sta paritetna). Klikni ga."
+     "q": "Pri sodi pariteti se spremenita dva različna bita. Kaj naredi pariteta?"
     },
     {
      "i": 96,
      "level": "težja",
      "max": 3,
      "section": "Pariteta",
-     "q": "Naloga 4: V tabeli je en napačen bit (pariteta je soda; zadnji stolpec in zadnja vrstica sta paritetna). Klikni ga."
+     "q": "V tabeli je en napačen bit (pariteta je soda; zadnji stolpec in zadnja vrstica sta paritetna). Klikni ga."
     },
     {
      "i": 97,
+     "level": "težja",
+     "max": 3,
+     "section": "Pariteta",
+     "q": "Naloga 4: V tabeli je en napačen bit (pariteta je soda; zadnji stolpec in zadnja vrstica sta paritetna). Klikni ga."
+    },
+    {
+     "i": 98,
      "level": "težja",
      "max": 3,
      "section": "Pariteta",
@@ -738,11 +745,6 @@
      "id": "sestevanje",
      "chapter": "Teorija",
      "label": "Seštevanje"
-    },
-    {
-     "id": "odstevanje",
-     "chapter": "Teorija",
-     "label": "Odštevanje z izposojo"
     },
     {
      "id": "komplement",
@@ -836,7 +838,6 @@
     "drugi-v-dec",
     "med-sistemi",
     "sestevanje",
-    "odstevanje",
     "komplement",
     "odst-komplement",
     "mnozenje",
@@ -855,8 +856,8 @@
    "id": "2.2",
    "no": "2",
    "module": "LAV-RAČ2",
-   "title": "Logične funkcije – utrjevanje",
-   "fullTitle": "Logične funkcije – utrjevanje",
+   "title": "Logične funkcije",
+   "fullTitle": "Logične funkcije",
    "key": "scnm_lavrac_2_2_v1",
    "version": 1,
    "format": "short",

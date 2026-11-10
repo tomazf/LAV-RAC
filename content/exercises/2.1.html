@@ -1115,6 +1115,9 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr{min-height:100vh}
 .lr-btn{font:600 .9rem var(--lr-fb);border-radius:7px;padding:6px 14px;min-height:36px;cursor:pointer;border:1.5px solid var(--lr-acc);background:var(--lr-acc);color:var(--lr-card);text-decoration:none;display:inline-flex;align-items:center;gap:6px}
 .lr-btn.lr-ghost{background:transparent;color:var(--lr-acc)}
+/* the artifacts' text-only buttons get the same outline as their other buttons (agreed 10. 11. 2026); the reset link keeps its look */
+html:not(#lr) .btn.ghost:not(#resetBtn){border-color:var(--lr-line);background:var(--lr-card)}
+html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 .lr-btn.lr-danger{background:var(--lr-bad);border-color:var(--lr-bad);color:#fff}
 .lr-btn:disabled{opacity:.4;cursor:default}
 .lr :focus-visible{outline:3px solid var(--lr-lamp);outline-offset:2px}
@@ -1321,6 +1324,29 @@ html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-ti
   --accent:var(--lr-acc);--accent-soft:var(--lr-acc-soft);--ok:var(--lr-ok);--ok-soft:var(--lr-ok-bg);--bad:var(--lr-bad);--bad-soft:var(--lr-bad-bg);
   --seen:var(--lr-seen);--seen-soft:var(--lr-seen-bg);--f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}
   body{padding-left:0;padding-right:0}
+  /* the complement subtraction: carry rings and arrows between the columns */
+  .al.cs td.ar{min-width:.8rem;padding:3px 0;color:var(--accent);font-size:.72rem}
+  .al.cs td.ch{padding:2px 4px}
+  .al.cs td.ch b{display:inline-flex;align-items:center;justify-content:center;min-width:1.35rem;height:1.35rem;border-radius:999px;font-size:.78rem;font-weight:700}
+  .al.cs td.ch b.on{background:var(--accent);color:#fff}
+  .al.cs td.ch b.none{border:1px dashed var(--line);color:var(--muted);font-weight:500}
+  .al.cs td.ch b.disc{text-decoration:line-through;opacity:.75}
+  .al tr.dn td{color:var(--muted);font-size:.8rem}
+  /* parity table: explanation below it; RAID page: disks as rows of bit boxes */
+  .pgwhy{margin-top:12px}
+  .raid .rline{margin:12px 0 4px;padding:10px 12px;border-radius:10px;background:var(--sunk);line-height:1.5}
+  .raid .rt{border-collapse:collapse;margin:6px 0}
+  .raid .rt th{background:transparent;text-transform:none;letter-spacing:0;font-family:var(--f-body);font-weight:600;text-align:left;padding:3px 12px 3px 0;white-space:nowrap;font-size:.92rem;color:var(--fg)}
+  .raid .rt td{padding:3px 2px;text-align:center}
+  .raid .rt td.cur{background:var(--accent-soft)}
+  .raid .rt .bt{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border-radius:7px;border:1px solid var(--line);background:var(--surface);font-family:var(--f-mono);font-weight:600}
+  .raid .rt .bt.q{border-style:dashed;color:var(--muted);background:transparent}
+  .raid .rt .bt.lost{border-style:dashed;border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+  .raid .rt .bt.new{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+  .raid .rt tr.par th,.raid .rt tr.par td{border-top:2px solid var(--line)}
+  .raid .rt tr.par th{color:var(--accent)}
+  .raid .rt tr.dead th{color:var(--bad)}
+  .raid .rt .x{font-size:.72rem;font-weight:500;border:1px solid var(--bad);color:var(--bad);border-radius:999px;padding:0 6px;margin-left:4px}
 </style>
 </head><body>
 <div class="wrap">
@@ -1505,6 +1531,7 @@ function colSub(A, B, base){
 /* blok primera: naslov, tabela, koraki, preizkus */
 function calcBlock(A, B, base, op){
   const va = parseInt(A,base), vb = parseInt(B,base), s = sub(base);
+  if(op==="-") return subGraph(A,B,base);
   if(op==="+"){
     const r = colAdd([A,B], base), vr = parseInt(r.res,base);
     return `<div class="ex"><strong>${A}${s} + ${B}${s}</strong>${al(r.rows)}<ol class="stp">${r.steps.map(x=>`<li>${x}</li>`).join("")}</ol>
@@ -1515,6 +1542,71 @@ function calcBlock(A, B, base, op){
   const r = colSub(X, Y, base), vr = parseInt(r.res,base);
   return `<div class="ex"><strong>${A}${s} − ${B}${s}</strong>${neg?`<p class="note">${A}${s} je manjše od ${B}${s}. Odštejemo manjše od večjega (${B}${s} − ${A}${s}) in rezultatu dodamo minus.</p>`:""}${al(r.rows)}<ol class="stp">${r.steps.map(x=>`<li>${x}</li>`).join("")}</ol>
     <p class="prv"><b>Preizkus:</b> ${va} − ${vb} = ${va-vb}, rezultat ${neg?"−":""}${r.res}${s} = ${neg?"−":""}${vr} ✓. Še s seštevanjem: ${r.res}${s} + ${Y}${s} = ${vr} + ${parseInt(Y,base)} = ${vr+parseInt(Y,base)} = ${parseInt(X,base)}, kar je ${X}${s} ✓</p></div>`;
+}
+
+/* Subtraction as addition of the complement, with the carries drawn from column to column (agreed 10. 11. 2026).
+   Inserted into the artifact by content/adapters/2.1.js; it uses the artifact's own helpers (al, sub, dc, dg, stripZ, esc). */
+const CS_NAMES = {
+  2: { c1: "eniški komplement", c2: "dvojiški komplement", rule: "vsak bit obrneš (0 postane 1, 1 postane 0)" },
+  8: { c1: "komplement do 7", c2: "komplement do 8", rule: "vsako števko d zamenjaš s 7 − d" },
+  16: { c1: "komplement do F", c2: "komplement do 16", rule: "vsako števko d zamenjaš s F − d (F je 15)" },
+};
+
+/* x + y for digit-value arrays of equal length (most significant first). cin[i] enters column i, cout leaves the leftmost column. */
+function addDigits(x, y, base) {
+  const L = x.length, res = Array(L), cin = Array(L).fill(0);
+  let c = 0;
+  for (let i = L - 1; i >= 0; i--) { cin[i] = c; const t = x[i] + y[i] + c; res[i] = t % base; c = t >= base ? 1 : 0; }
+  return { res, cin, cout: c };
+}
+
+/* One aligned grid. rows: {l, d (array of characters), k, ln}. With carry = {cin, cout} a carry row is drawn on top:
+   a ring with 1 above every column that receives a carry and an arrow between the columns it travels from and to. */
+function csGrid(rows, w, carry) {
+  const arrow = on => `<td class="ar${on ? " on" : ""}">${on ? "◀" : ""}</td>`;
+  let h = `<div class="tbl fit"><table class="al cs"><tbody>`;
+  if (carry) {
+    h += `<tr class="carry"><th scope="row">prenos</th><td class="ch ov"><b class="${carry.cout ? "on disc" : "none"}">${carry.cout}</b></td>`;
+    for (let i = 0; i < w; i++) h += arrow((i === 0 ? carry.cout : carry.cin[i - 1]) === 1) + `<td class="ch">${carry.cin[i] ? `<b class="on">1</b>` : ""}</td>`;
+    h += `</tr>`;
+  }
+  for (const r of rows) {
+    h += `<tr class="${r.k || "num"}${r.ln ? " ln" : ""}"><th scope="row">${r.l || ""}</th>${carry ? `<td class="ov"></td>` : ""}`;
+    for (let i = 0; i < w; i++) h += (carry ? `<td class="ar"></td>` : "") + `<td>${r.d[i]}</td>`;
+    h += `</tr>`;
+  }
+  return h + `</tbody></table></div>`;
+}
+
+function subGraph(A, B, base) {
+  const s = sub(base), va = parseInt(A, base), vb = parseInt(B, base), nm = CS_NAMES[base], top = base - 1;
+  const w = Math.max(A.length, B.length);
+  const dv = str => [...str.padStart(w, "0")].map(dg), ch = arr => arr.map(dc);
+  const a = dv(A), b = dv(B), one = [...Array(w - 1).fill(0), 1];
+  const comp = b.map(d => top - d);
+  const s2 = addDigits(comp, one, base);       // -B
+  const s3 = addDigits(a, s2.res, base);       // A + (-B)
+  const neg = va < vb;
+  const R = ch(s3.res).join("");
+  let steps = `<li><b>${nm.c1[0].toUpperCase() + nm.c1.slice(1)} števila B:</b> ${nm.rule}.${csGrid([{ l: "B", d: ch(b) }, { l: "", d: b.map(() => "↓"), k: "dn" }, { l: nm.c1, d: ch(comp), k: "res" }], w, null)}</li>`;
+  steps += `<li><b>${nm.c2[0].toUpperCase() + nm.c2.slice(1)}: prištej 1.</b> Tako dobiš −B. Prenos, ki nastane (krožec ◀), se prepiše v stolpec na levi.${csGrid([{ l: nm.c1, d: ch(comp) }, { l: "+ 1", d: ch(one), ln: true }, { l: "−B", d: ch(s2.res), k: "res" }], w, s2)}</li>`;
+  steps += `<li><b>Seštej A + (−B).</b> Prenos nastane, ko vsota stolpca doseže ${base}: zapišeš ostanek, prenos 1 pa gre v naslednji stolpec levo.${csGrid([{ l: "A", d: ch(a) }, { l: "+ (−B)", d: ch(s2.res), ln: true }, { l: "=", d: ch(s3.res), k: "res" }], w, s3)}</li>`;
+  let tail, M = null;
+  if (vb === 0) {
+    tail = `<li><b>Odštevanje ničle</b> števila ne spremeni, zato ostane rezultat <b>${stripZ(R)}</b>.</li>`;
+  } else if (!neg) {
+    tail = `<li><b>Prenos čez zgornje mesto zavržeš</b> (prekrižan krožec). Rezultat: <b>${stripZ(R)}</b>${s}. Ker je prenos nastal, je A ≥ B in je rezultat pozitiven.</li>`;
+  } else {
+    const compR = s3.res.map(d => top - d), s4 = addDigits(compR, one, base);
+    M = stripZ(ch(s4.res).join(""));
+    tail = `<li><b>Prenosa čez zgornje mesto ni</b> (krožec 0). To pomeni, da je A &lt; B in je rezultat negativen: ${R}${s} je zapisan v komplementu. Absolutno vrednost dobiš z istim postopkom (komplement, nato +1):${csGrid([{ l: "rezultat", d: ch(s3.res) }, { l: nm.c1, d: ch(compR) }, { l: "+ 1", d: ch(one), ln: true }, { l: "velikost", d: ch(s4.res), k: "res" }], w, s4)}Torej A − B = <b>−${M}</b>${s}.</li>`;
+  }
+  // the check reads the value off the digits that were drawn, then compares it with the plain subtraction
+  const shown = neg ? `−${M}` : stripZ(R), got = neg ? -parseInt(M, base) : parseInt(R, base), val = va - vb, mi = n => String(n).replace("-", "−");
+  if (got !== val) throw new Error(`subGraph: ${A} - ${B} in base ${base} gave ${got}, expected ${val}`);
+  return `<div class="ex"><strong>${A}${s} − ${B}${s}</strong><p class="prv">Račun v ${w} mestih (krajše število dopolniš z ničlami na levi). Odštevanje je seštevanje komplementa: <b>A − B = A + (−B)</b>.</p>
+    <ol class="stp big">${steps}${tail}</ol>
+    <p class="prv"><b>Preizkus:</b> ${va} − ${vb} = ${mi(val)}, rezultat ${shown}${s} = ${mi(got)} ✓</p></div>`;
 }
 
 /* množenje: aligniran zapis delnih produktov */
@@ -1749,6 +1841,7 @@ const THEORY = [
   ${note("<strong>Zakaj to ni dovolj?</strong> Računalnik nima posebnega vezja za odštevanje z izposojo. Ima samo seštevalnik. Odštevanje zato prevede v seštevanje negativnega števila: <strong>A − B = A + (−B)</strong>. Kako zapišemo negativno število, razloži naslednja stran.")}`},
 
  {id:"komplement", g:1, t:"Negativna števila: eniški in dvojiški komplement", h:()=>`
+  ${note("<strong>Zakaj to potrebujemo?</strong> Računalnik nima posebnega vezja za odštevanje. Ima samo seštevalnik. Odštevanje zato prevede v seštevanje negativnega števila: <strong>A − B = A + (−B)</strong>. Kako zapišemo negativno število, pokaže ta stran, odštevanje po tem postopku pa naslednja.")}
   ${prose(`<p>Računalnik pozna samo ničle in enice, znaka minus nima. Zato negativno število zapiše z <strong>vnaprej dogovorjenim številom bitov</strong> (npr. 8) in z dogovorom, da ima <strong>najvišji bit</strong> poseben pomen. Postopek se imenuje <strong>komplement</strong>.</p>`)}
   <h3>1. Eniški komplement</h3>
   ${prose(`<p>Vsak bit zamenjamo: 0 postane 1, 1 postane 0. Temu pravimo tudi <strong>invertiranje</strong> (operacija NOT).</p>`)}
@@ -1785,6 +1878,7 @@ const THEORY = [
   ${subComp(45,18,8)}
   ${subComp(18,45,8)}
   ${subComp(100,37,8)}
+  ${note("<strong>Več členov.</strong> Pri računu <code>1011 + 101 − 11 + 10</code> računaš od leve proti desni: 1011 + 101 = 10000, nato 10000 − 11 = 1101 in 1101 + 10 = <strong>1111</strong>. Preizkus: 11 + 5 − 3 + 2 = 15.")}
   <h3>Hitri pregled</h3>
   ${tbl(["Pogoj","Prenos čez zgornje mesto","Rezultat"],[["A &gt; B","1 (zavržemo ga)","pozitiven, preberemo ga neposredno"],["A = B","1 (zavržemo ga)","00000000"],["A &lt; B","0","negativen, zapisan v dvojiškem komplementu"]],"fit")}
   <h3>Preizkusi sam</h3>
@@ -1807,29 +1901,25 @@ const THEORY = [
   ${wData("mul")}`},
 
  {id:"hex", g:1, t:"Šestnajstiško računanje", h:()=>`
-  ${prose(`<p>Šestnajstiški sistem ima 16 števk. Računamo stolpično, enako kot desetiško, le da je osnova 16: <strong>prenos nastane, ko vsota stolpca doseže 16</strong>. Pri odštevanju si izposodimo 16 (ne 10). Pri računanju v glavi si pomagaj z desetiškimi vrednostmi črk.</p>`)}
+  ${prose(`<p>Šestnajstiški sistem ima 16 števk. Računamo stolpično, enako kot desetiško, le da je osnova 16: <strong>prenos nastane, ko vsota stolpca doseže 16</strong>. Odštevanje računamo kot seštevanje komplementa (spodaj). Pri računanju v glavi si pomagaj z desetiškimi vrednostmi črk.</p>`)}
   ${digitStrip(16)}
   <p class="prose" style="color:var(--muted)">Zgoraj je vrednost, spodaj števka. Obarvani polji sta A do F (vrednosti 10 do 15).</p>
   <h3>Seštevanje: trije primeri</h3>
   ${exs(calcBlock("3C","2F",16,"+"), calcBlock("A7B","5E9",16,"+"), calcBlock("FFFF","1",16,"+"))}
-  <h3>Odštevanje: trije primeri</h3>
+  <h3>Odštevanje s komplementom: trije primeri</h3>
+  ${prose(`<p>Tako kot v dvojiškem sistemu računalnik A − B izračuna kot A + (−B). Komplement števila dobiš tako, da <strong>vsako števko odšteješ od F</strong>, nato prišteješ 1. Prenos čez zgornje mesto zavržeš. Pri vsakem primeru so koraki narisani, prenos se vidi od stolpca do stolpca.</p>`)}
   ${exs(calcBlock("7A","2F",16,"-"), calcBlock("B3C","7D5",16,"-"), calcBlock("1000","1",16,"-"))}
-  <h3>Odštevanje s komplementom</h3>
-  ${prose(`<p>Tako kot v dvojiškem sistemu lahko A − B izračunaš kot A + (−B). Komplement števila dobiš tako, da <strong>vsako števko odšteješ od F</strong>, nato prišteješ 1. Prenos čez zgornje mesto zavržeš.</p>`)}
-  ${compBase("7A","2F",16,2)}
   <h3>Preizkusi sam</h3>
   ${wData("calc","16:+")}`},
 
  {id:"okt", g:1, t:"Osmiško računanje", h:()=>`
-  ${prose(`<p>Osmiški sistem ima 8 števk (0 do 7). <strong>Prenos nastane, ko vsota stolpca doseže 8</strong>, pri odštevanju si izposodimo 8. Števke 8 in 9 ne obstajata, zato je vsota 7 + 1 že 10₈ (zapišeš 0, prenos 1).</p>`)}
+  ${prose(`<p>Osmiški sistem ima 8 števk (0 do 7). <strong>Prenos nastane, ko vsota stolpca doseže 8</strong>, odštevanje pa računamo kot seštevanje komplementa. Števke 8 in 9 ne obstajata, zato je vsota 7 + 1 že 10₈ (zapišeš 0, prenos 1).</p>`)}
   ${digitStrip(8)}
   <h3>Seštevanje: trije primeri</h3>
   ${exs(calcBlock("27","45",8,"+"), calcBlock("237","175",8,"+"), calcBlock("777","1",8,"+"))}
-  <h3>Odštevanje: trije primeri</h3>
+  <h3>Odštevanje s komplementom: trije primeri</h3>
+  ${prose(`<p>V osmiškem sistemu je komplement števk <strong>7 − števka</strong>, nato prišteješ 1. Postopek je enak kot v dvojiškem in šestnajstiškem sistemu. Pri vsakem primeru so koraki narisani, prenos se vidi od stolpca do stolpca.</p>`)}
   ${exs(calcBlock("52","17",8,"-"), calcBlock("463","275",8,"-"), calcBlock("1000","1",8,"-"))}
-  <h3>Odštevanje s komplementom</h3>
-  ${prose(`<p>V osmiškem sistemu je komplement števk <strong>7 − števka</strong>, nato prišteješ 1. Postopek je enak kot v dvojiškem in šestnajstiškem sistemu.</p>`)}
-  ${compBase("52","17",8,3)}
   ${note("<strong>Bližnjica prek dvojiškega sistema:</strong> osmiški števili pretvoriš v dvojiški (po 3 bite na števko), računaš dvojiško, rezultat pretvoriš nazaj. Primer: 27₈ + 45₈ = 010 111 + 100 101 = 111 100 = <strong>74</strong>₈.")}
   <h3>Preizkusi sam</h3>
   ${wData("calc","8:+")}`},
@@ -1938,8 +2028,8 @@ const THEORY = [
   </div>
   <p class="prose" style="color:var(--muted)">Obarvana polja so paritetni biti (soda pariteta).</p>
   <h3>Primer: beseda NOVO</h3>
-  ${prose(`<p>Vsak znak je ena vrstica (7 bitov ASCII). Vsaki vrstici dodamo prečni bit, pod stolpce pa vzdolžne bite (soda pariteta). To je pravi primer, kako so paritetne bite dodajali na magnetne trakove in kartice.</p>`)}
-  ${pgv(NOVO,"even",true,true,[..."NOVO"])}
+  ${prose(`<p>Vsak znak je ena vrstica: njegova koda ASCII (N = 78, O = 79, V = 86), zapisana v 7 bitih (78 = 1001110). Vsaki vrstici dodamo prečni bit, pod stolpce pa vzdolžne bite (soda pariteta). To je pravi primer, kako so paritetne bite dodajali na magnetne trakove in kartice.</p>`)}
+  ${pgv(NOVO,"even",true,true,[..."NOVO"].map(ch=>ch+" = "+ch.charCodeAt(0)))}
   <h3>Kaj zazna katera pariteta?</h3>
   ${tbl(["Napaka","Samo prečna","Samo vzdolžna","Obe skupaj"],[["En bit","zazna","zazna","zazna in <b>popravi</b>"],["Dva bita v isti vrstici","ne zazna","zazna (dva stolpca)","zazna"],["Dva bita v istem stolpcu","zazna (dve vrstici)","ne zazna","zazna"],["Štirje biti v ogliščih pravokotnika","ne zazna","ne zazna","<b>ne zazna</b>"]])}
   <h3>Preizkusi sam: dopolni paritetne bite</h3>
@@ -1961,9 +2051,10 @@ const THEORY = [
   <h3>Kje se to uporablja v praksi?</h3>
   ${cards([["RAID 5 (diski)","Podatki so razporejeni po več diskih, na enem pa je paritetni blok (XOR vseh podatkov). Če en disk odpove, se njegovi podatki izračunajo iz ostalih. To je ista ideja kot vzdolžna pariteta."],["Pomnilnik z ECC","Strežniški pomnilnik uporablja izboljšano pariteto (Hammingovo kodo). Eno napako popravi, dve zazna. Tako se ne sesuje ob kozmičnem sevanju, ki lahko obrne posamezen bit."],["Magnetni trak in kartice","Na magnetnem traku ali kartici ima vsak znak paritetni bit (prečna), na koncu bloka pa je še kontrolni znak (vzdolžna). Bralnik zazna napako pri branju."],["Serijska vrata (UART, RS-232)","Pri serijski komunikaciji lahko vsakemu znaku dodamo paritetni bit. Nastavitev »8E1« pomeni 8 podatkovnih bitov, sodo pariteto in 1 stop bit."],["Črtna koda in kontrolna števka","Zadnja števka črtne kode (EAN-13) je kontrolna: izračuna se iz ostalih. Čitalnik zazna napačno prebrano kodo. Ista ideja kot pariteta, le v desetiškem sistemu."],["Omrežje in datoteke (CRC)","Ethernet, ZIP in številne datoteke uporabljajo CRC, močnejšo posplošitev paritete, ki zazna tudi več napak hkrati."]])}
   <h3>RAID 5 v praksi</h3>
-  ${prose(`<p>Tri diski hranijo podatke, četrti paritetni blok P = XOR vseh treh (sodo pariteto po stolpcih). Izberi disk, ki »odpove«, in oglej si, kako ga sistem obnovi.</p>`)}
+  ${prose(`<p>Pri RAID 5 so podatki razporejeni po več diskih. Poleg njih sistem hrani <strong>paritetni blok P</strong>, izračunan po stolpcih enako kot vzdolžna pariteta v tabeli. Če en disk odpove, se njegova vsebina izračuna iz preostalih. V prikazu spodaj to narediš po korakih: najprej nastane P, nato en disk odpove in se obnovi bit za bitom.</p>`)}
   ${wData("raid")}`}
 ];
+THEORY.splice(THEORY.findIndex(p=>p.id==="odstevanje"),1);
 const GROUPS = ["Pretvorbe","Računanje","Kodiranje","Pariteta"];
 
 /* ---------- naloge ---------- */
@@ -2084,6 +2175,19 @@ const er=(full,p,src,lab)=>{ const bad=o=>p==="even"?o%2===1:o%2===0, r=full.fin
 er(flipAt(fullM([[1,0,1,1],[0,1,0,1],[1,1,1,1]],"even"),1,2),"even",null,"");
 er([[1,0,1,0,1,1,0,0],[0,1,1,0,0,0,1,1],[1,1,0,1,0,0,0,0],[0,0,1,1,0,1,1,0],[0,0,1,0,0,0,0,1]],"even",P,"Naloga 4");
 er(flipAt(fullM([[1,1,0,1,0],[0,1,1,0,1],[1,0,0,1,1],[0,0,1,1,1]],"even"),1,5),"even",null,"");
+/* A task for the RAID page (10. 11. 2026): rebuild the disk that failed. It sits in set D (Pariteta). */
+{
+  const d = ["11001010", "10010110", "01110001"], P = xorS(xorS(d[0], d[1]), d[2]);
+  add(3, 2, {
+    t: "num", fixed: 1, ans: d[1], lab: "Obnovljeni Disk 2 (8 bitov)",
+    fig: al([{ l: "Disk 1", s: d[0] }, { l: "Disk 2", s: "????????" }, { l: "Disk 3", s: d[2], ln: true }, { l: "Disk P", s: P }]),
+    q: "Sistem RAID 5 ima tri diske s podatki in paritetni disk P. Paritetni disk je izbran tako, da je v vsakem stolpcu število enic na vseh štirih diskih sodo. Disk 2 je odpovedal. Iz preostalih diskov obnovi njegovih 8 bitov.",
+    h: ["V vsakem stolpcu je število enic na vseh štirih diskih sodo. Če manjka en bit, ga dopolniš do sodega števila enic.",
+      `Računaj stolpec za stolpcem: Disk 1 XOR Disk 3 XOR Disk P. V prvem stolpcu je ${d[0][0]} XOR ${d[2][0]} XOR ${P[0]} = ${d[1][0]}.`],
+    sol: `<p>Vsak bit Diska 2 je XOR istoležnih bitov preostalih treh diskov:</p>${al([{ l: "Disk 1", s: d[0] }, { l: "Disk 3", s: d[2] }, { l: "Disk P", s: P, ln: true }, { l: "XOR = Disk 2", s: d[1], k: "res" }])}<p>Prvi stolpec: ${d[0][0]} XOR ${d[2][0]} XOR ${P[0]} = ${d[1][0]}. Tako dobiš vseh osem bitov: <b>${d[1]}</b>.</p>`
+  });
+}
+
 
 /* urejanje, številke in id-ji */
 const MT = MODS.map((_,m)=>T.filter(t=>t.m===m).map((t,i)=>({t,i})).sort((a,b)=>a.t.lv-b.t.lv||a.i-b.i).map(x=>x.t));
@@ -2143,7 +2247,7 @@ function bodyHTML(t){
   const id=t.id;
   const inp = (k,label,extra)=>`<div class="blank"><label for="b-${id}-${k}">${label}</label><input type="text" class="mono" id="b-${id}-${k}" data-f autocomplete="off" spellcheck="false" ${extra||""}></div>`;
   switch(t.t){
-    case "num": return inp(0,"Tvoj odgovor");
+    case "num": return (t.fig||"")+inp(0,t.lab||"Tvoj odgovor");
     case "par": return `<p><code class="code-inline">${t.w}</code> + paritetni bit</p>` + inp(0,"Celotna beseda s paritetnim bitom");
     case "ml": return t.o.map((b,k)=>inp(k,`${NM[b][0].toUpperCase()+NM[b].slice(1)} sistem (osnova ${b})`,`data-base="${b}"`)).join("");
     case "bl": return t.items.map((it,k)=>inp(k,`${it.w} (${it.p==="even"?"soda":"liha"} pariteta)`)).join("");
@@ -2775,6 +2879,122 @@ WIDGETS.raid = host=>{
   draw();
 };
 
+
+/* Rewritten parity and RAID widgets (10. 11. 2026). Inserted into the artifact by content/adapters/2.1.js before the widgets start;
+   they use the artifact's own helpers (a7, sum, esc, segHTML, xorS, $). */
+
+/* Parity table to fill in. Every row is one character ("N = 78"), so the bits can be traced back to the ASCII code,
+   the label column is always there, and a new example is a random word instead of random bits. */
+WIDGETS.pgfill = host=>{
+  const WORDS = ["JAVA","KODA","DISK","BAJT","BITI","DATA","BYTE","RAID"];
+  let word = "NOVO", user = null, checked = false;
+  const data = ()=>[...word].map(a7).map(s=>[...s].map(Number));
+  const exp = ()=>{ const d = data(), rb = d.map(r=>sum(r)%2), cb = d[0].map((_,j)=>sum(d.map(r=>r[j]))%2); return {d, rb, cb, co:sum(cb)%2}; };
+  const reset = ()=>{ const d = data(); user = {r:Array(d.length).fill(null), c:Array(d[0].length).fill(null), x:null}; checked = false; };
+  reset();
+  host.innerHTML = `<div class="wbox"><p class="wnote">Vsaka vrstica je en znak v 7-bitni kodi ASCII (znak = koda). Dopolni paritetne bite za <b>sodo pariteto</b>: bit na desni naredi število enic v vrstici sodo, bit spodaj število enic v stolpcu. Klik na polje ga nastavi na 1, nato na 0 in nazadnje spet izprazni.</p>
+    <div class="row"><button class="chip" type="button" data-a="novo">Primer: NOVO</button><button class="chip" type="button" data-a="new">Nov naključen primer</button></div>
+    <div class="tbl fit"><table class="pgrid"><tbody class="tb"></tbody></table></div>
+    <div class="actions"><button class="btn" type="button" data-a="check">Preveri</button><button class="btn ghost" type="button" data-a="sol">Prikaži rešitev</button><button class="btn ghost" type="button" data-a="clr">Počisti</button></div>
+    <p class="wnote res" aria-live="polite"></p>
+    <div class="pgwhy"></div></div>`;
+  const tb = $(".tb",host), res = $(".res",host), why = $(".pgwhy",host);
+  const pcell = (kind,i,val,want)=>{ const cls = checked ? (val===want?" ok":" no") : ""; return `<td class="pb"><button type="button" class="pf${cls}" data-k="${kind}" data-i="${i}" aria-label="paritetni bit ${kind==="r"?"vrstice "+(i+1):kind==="c"?"stolpca "+(i+1):"v kotu"}">${val===null?"":val}</button></td>`; };
+  const explain = ()=>{
+    const ch = word[0], code = ch.charCodeAt(0);
+    why.innerHTML = `<p class="wnote"><b>Od kod so enice in ničle?</b> Vsak znak ima svojo kodo ASCII. Računalnik jo shrani kot dvojiško število v 7 bitih. Pri znaku <b>${esc(ch)}</b> je koda ${code} in ${code}₁₀ = <code>${a7(ch)}</code>₂, zato je prva vrstica <code>${a7(ch)}</code>. Enako velja za vse druge vrstice.</p>
+      <p class="wnote"><b>Zakaj sploh računamo paritetne bite?</b> Pošiljatelj podatkom doda paritetne bite in vse skupaj pošlje (po kablu, brezžično) ali shrani (trak, kartica, pomnilnik). Prejemnik v vsaki vrstici in vsakem stolpcu ponovno prešteje enice. Če število ni sodo, je nastala napaka. Če sta napačni natanko ena vrstica in en stolpec, je napačen bit na njunem presečišču, zato ga prejemnik ne samo zazna, ampak tudi popravi (obrne 0 ↔ 1).</p>`;
+  };
+  const draw = ()=>{
+    const e = exp(), C = e.d[0].length;
+    host.querySelector('[data-a="novo"]').setAttribute("aria-pressed", String(word==="NOVO"));
+    tb.innerHTML = e.d.map((r,i)=>`<tr><td class="lb">${esc(word[i])} = ${word.charCodeAt(i)}</td>${r.map(v=>`<td>${v}</td>`).join("")}${pcell("r",i,user.r[i],e.rb[i])}</tr>`).join("")
+      + `<tr><td class="lb">paritetni bit</td>${[...Array(C)].map((_,j)=>pcell("c",j,user.c[j],e.cb[j])).join("")}${pcell("x",0,user.x,e.co)}</tr>`;
+    tb.querySelectorAll(".pf").forEach(b=>b.addEventListener("click",()=>{
+      const k=b.dataset.k, i=+b.dataset.i; const cur = k==="r"?user.r[i]:k==="c"?user.c[i]:user.x;
+      const nx = cur===null?1:cur===1?0:null;
+      if(k==="r") user.r[i]=nx; else if(k==="c") user.c[i]=nx; else user.x=nx;
+      checked = false; res.textContent = ""; res.className = "wnote res"; draw();
+      const nb = tb.querySelector(`.pf[data-k="${k}"][data-i="${i}"]`); if(nb) nb.focus();
+    }));
+  };
+  const check = ()=>{
+    const e = exp(); checked = true;
+    const all = [...user.r.map((v,i)=>[v,e.rb[i]]), ...user.c.map((v,j)=>[v,e.cb[j]]), [user.x,e.co]];
+    const good = all.filter(([v,w])=>v===w).length, empty = all.filter(([v])=>v===null).length;
+    draw();
+    res.className = "wnote res " + (good===all.length?"ok":"bad");
+    res.innerHTML = good===all.length ? `Vse pravilno: ${all.length} od ${all.length}. Bit v kotu je pariteta paritetnih bitov: dobiš ga iz desnega stolpca in iz spodnje vrstice enako.` : `Pravilnih je ${good} od ${all.length}${empty?` (${empty} polj je praznih)`:""}. Rdeča polja popravi: za vrstico preštej enice v vrstici, za stolpec enice v stolpcu, nato izberi bit tako, da bo število enic sodo.`;
+  };
+  const fresh = w=>{ word = w; reset(); res.textContent = ""; res.className = "wnote res"; explain(); draw(); };
+  host.querySelectorAll("[data-a]").forEach(b=>b.addEventListener("click",()=>{
+    const a=b.dataset.a;
+    if(a==="check") check();
+    else if(a==="sol"){ const e=exp(); user = {r:e.rb.slice(), c:e.cb.slice(), x:e.co}; checked=true; draw(); res.className="wnote res"; res.textContent="Rešitev je izpolnjena."; }
+    else if(a==="clr"){ reset(); res.textContent=""; res.className="wnote res"; draw(); }
+    else if(a==="novo") fresh("NOVO");
+    else if(a==="new"){ const pool = WORDS.filter(x=>x!==word); fresh(pool[rint(pool.length)]); }
+  }));
+  explain(); draw();
+};
+
+/* RAID 5 step by step: first how the parity block P comes out of the three data disks (column by column), then what happens
+   when one disk fails and how its bits are rebuilt, again column by column, with the arithmetic written out. */
+WIDGETS.raid = host=>{
+  const names = ["Disk 1","Disk 2","Disk 3","Disk P"], N = 8;
+  const d = ["10110010","01101100","11100101"], P = xorS(xorS(d[0],d[1]),d[2]), all = [...d, P];
+  let phase = 1, failed = 1, k = 0;
+  const eni = o => ["nobene enice","eno enico","dve enici","tri enice","štiri enice"][o];
+  host.innerHTML = `<div class="wbox raid"><p class="wnote">Trije diski hranijo podatke, četrti (Disk P) hrani <b>paritetni blok</b>. Vsak disk ima tu 8 bitov. P je izbran tako, da je v <b>vsakem stolpcu</b> število enic na vseh štirih diskih sodo. To je XOR podatkovnih bitov in ista ideja kot vzdolžna pariteta.</p>
+    <div class="row"><span class="eyebrow">Korak</span>${segHTML([[1,"1. Kako nastane P"],[2,"2. Disk odpove in obnova"]],1,"data-ph")}</div>
+    <div class="row rf" hidden><span class="eyebrow">Odpove</span>${segHTML([[0,"Disk 1"],[1,"Disk 2"],[2,"Disk 3"],[3,"Disk P"]],1,"data-f")}</div>
+    <div class="tbl fit rgrid"></div>
+    <div class="rline" aria-live="polite"></div>
+    <div class="actions"><button class="btn" type="button" data-a="next">Naslednji bit</button><button class="btn ghost" type="button" data-a="all">Prikaži vse</button><button class="btn ghost" type="button" data-a="again">Znova</button></div>
+    <div class="rnote"></div></div>`;
+  const grid = $(".rgrid",host), line = $(".rline",host), note = $(".rnote",host);
+  const draw = ()=>{
+    host.querySelectorAll("[data-ph]").forEach(b=>b.setAttribute("aria-pressed", String(+b.dataset.ph===phase)));
+    host.querySelectorAll("[data-f]").forEach(b=>b.setAttribute("aria-pressed", String(+b.dataset.f===failed)));
+    $(".rf",host).hidden = phase!==2;
+    $('[data-a="next"]',host).disabled = k>=N;
+    grid.innerHTML = `<table class="rt"><tbody>${names.map((n,i)=>{
+      const dead = phase===2 && i===failed;
+      const cells = [...Array(N)].map((_,j)=>{
+        let cls = "bt", txt = all[i][j];
+        if(phase===1 && i===3){ if(j>=k){ txt = "?"; cls += " q"; } else cls += " new"; }
+        if(dead){ if(j>=k){ txt = "?"; cls += " lost"; } else cls += " new"; }
+        return `<td class="${k>0 && j===k-1 ? "cur" : ""}"><span class="${cls}">${txt}</span></td>`;
+      }).join("");
+      return `<tr class="${i===2?"ln ":""}${i===3?"par ":""}${dead?"dead":""}"><th scope="row">${n}${i===3?" (paritetni)":""}${dead?` <span class="x">odpovedal</span>`:""}</th>${cells}</tr>`;
+    }).join("")}</tbody></table>`;
+    const j = k-1;
+    if(phase===1){
+      if(k===0) line.innerHTML = `Pritisni »Naslednji bit«. Za vsak stolpec se izračuna bit na paritetnem disku.`;
+      else if(k<N){ const b = [0,1,2].map(i=>+d[i][j]), o = sum(b);
+        line.innerHTML = `<b>Stolpec ${k}:</b> ${b.join(" XOR ")} = <b>${P[j]}</b>. Podatkovni biti imajo ${eni(o)}. Da jih je skupaj sodo, je P = ${P[j]}.`; }
+      else line.innerHTML = `<b>Vsi stolpci:</b> P = ${d[0]} XOR ${d[1]} XOR ${d[2]} = <b>${P}</b>. Vsi diski delujejo.`;
+    } else {
+      const surv = [0,1,2,3].filter(i=>i!==failed);
+      if(k===0) line.innerHTML = `<b>${names[failed]} je odpovedal</b>, njegovi biti so izgubljeni (?). Pritisni »Naslednji bit«: vsak izgubljeni bit se izračuna iz preostalih treh diskov v istem stolpcu.`;
+      else if(k<N){ const b = surv.map(i=>+all[i][j]), o = sum(b);
+        line.innerHTML = `<b>Stolpec ${k}:</b> ${surv.map(i=>names[i]).join(" XOR ")} = ${b.join(" XOR ")} = <b>${all[failed][j]}</b>. Preostali imajo ${eni(o)}. Da jih je skupaj sodo, mora biti izgubljeni bit ${all[failed][j]}.`; }
+      else line.innerHTML = `<b>Obnovljeno:</b> ${names[failed]} = <b>${all[failed]}</b>. Enako kot pred odpovedjo ✓ Vsi podatki so spet na voljo.`;
+    }
+    note.innerHTML = phase===1
+      ? `<p class="wnote">XOR dveh bitov je 1, kadar sta različna. Pri treh bitih je rezultat 1, kadar je enic <b>liho</b> mnogo. Zato paritetni bit vedno dopolni število enic v stolpcu na sodo.</p>`
+      : `<p class="wnote"><b>Zakaj to deluje?</b> V vsakem stolpcu je število enic na štirih diskih sodo. Ko en bit izgine, ga dopolnimo do sodega: to je XOR preostalih treh. Matematično: iz P = A XOR B XOR C sledi B = A XOR C XOR P, ker je XOR sam sebi obraten. Če odpovesta dva diska, sta v stolpcu dve neznanki in obnova ni mogoča.</p>
+        <p class="wnote"><b>V praksi:</b> pri pravem RAID 5 so paritetni bloki razporejeni po vseh diskih (ne samo po enem), disk, ki odpove, se zamenja z novim in sistem med obnovo prebere vse preostale diske. Če odpove paritetni disk, se P preprosto izračuna na novo iz podatkovnih diskov.</p>`;
+  };
+  host.querySelectorAll("[data-ph]").forEach(b=>b.addEventListener("click",()=>{ phase = +b.dataset.ph; k = 0; draw(); }));
+  host.querySelectorAll("[data-f]").forEach(b=>b.addEventListener("click",()=>{ failed = +b.dataset.f; k = 0; draw(); }));
+  host.querySelectorAll("[data-a]").forEach(b=>b.addEventListener("click",()=>{
+    const a = b.dataset.a;
+    if(a==="next") k = Math.min(N, k+1); else if(a==="all") k = N; else k = 0;
+    draw();
+  }));
+  draw();
+};
 
 document.querySelectorAll("[data-w]").forEach(h=>{ const f = WIDGETS[h.dataset.w]; if(f) f(h); });
 

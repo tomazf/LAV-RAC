@@ -1129,6 +1129,9 @@ html body .lvs-bar{background:var(--lr-hdr)}
 .lr{min-height:100vh}
 .lr-btn{font:600 .9rem var(--lr-fb);border-radius:7px;padding:6px 14px;min-height:36px;cursor:pointer;border:1.5px solid var(--lr-acc);background:var(--lr-acc);color:var(--lr-card);text-decoration:none;display:inline-flex;align-items:center;gap:6px}
 .lr-btn.lr-ghost{background:transparent;color:var(--lr-acc)}
+/* the artifacts' text-only buttons get the same outline as their other buttons (agreed 10. 11. 2026); the reset link keeps its look */
+html:not(#lr) .btn.ghost:not(#resetBtn){border-color:var(--lr-line);background:var(--lr-card)}
+html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 .lr-btn.lr-danger{background:var(--lr-bad);border-color:var(--lr-bad);color:#fff}
 .lr-btn:disabled{opacity:.4;cursor:default}
 .lr :focus-visible{outline:3px solid var(--lr-lamp);outline-offset:2px}
@@ -1335,6 +1338,11 @@ html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-ti
   --accent:var(--lr-acc);--accent-soft:var(--lr-acc-soft);--ok:var(--lr-ok);--ok-soft:var(--lr-ok-bg);--bad:var(--lr-bad);--bad-soft:var(--lr-bad-bg);
   --seen:var(--lr-seen);--seen-soft:var(--lr-seen-bg);--f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}
   body{padding-left:0;padding-right:0}
+  /* IEC gate labels inside the rectangles; comparison table of symbol systems */
+  .circ .gl{stroke:none;font-weight:700;font-size:14px}
+  .vfig svg.g{width:150px;height:75px;color:var(--accent);flex:none}
+  .symcmp th small{font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0}
+  .symcmp td{vertical-align:middle}
 </style>
 </head><body>
 <div class="wrap">
@@ -1423,7 +1431,10 @@ html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-ti
       </div>
       <h3>Simbol, pravilnostna tabela in izraz</h3>
       <div class="prose">
-        <p>V shemah ne rišemo stikal, ampak simbole vrat. Spodaj so vsa tri osnovna vrata. Pritisni gumba z vhodoma in poglej, kako se spremeni izhod. Vrstica tabele, ki trenutno velja, je obarvana.</p>
+        <p>V shemah ne rišemo stikal, ampak simbole vrat. Obstajata dva sistema simbolov. <strong>IEC</strong> je mednarodni standard: vrata so pravokotniki z oznako v notranjosti. <strong>ANSI/IEEE</strong> ima za vsaka vrata svojo obliko in ga pogosto srečaš v učbenikih, na spletu in v programih za risanje vezij. Spodaj sta primerjana. <strong>V tem gradivu uporabljamo samo simbole IEC.</strong></p></div>
+      <div data-w="symcmp"></div>
+      <div class="prose">
+        <p>Spodaj so vsa tri osnovna vrata. Pritisni gumba z vhodoma in poglej, kako se spremeni izhod. Vrstica tabele, ki trenutno velja, je obarvana.</p>
       </div>
       <div data-w="gates1"></div>
       <h3>Signali v času</h3>
@@ -1441,7 +1452,7 @@ html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-ti
           </tbody>
         </table>
       </div>
-      <p class="note">Pripomoček prikazuje oblike simbolov, kot jih srečaš v večini učbenikov (ANSI/IEEE). V standardu IEC so vrata pravokotniki z oznako v notranjosti: <code>&amp;</code> za IN, <code>≥1</code> za ALI, <code>1</code> za NE, <code>=1</code> za XOR. Krožec na izhodu ali vhodu pomeni negacijo.</p>
+      <p class="note">Simboli v tem gradivu so po standardu IEC: vrata so pravokotniki z oznako v notranjosti, <code>&amp;</code> za IN, <code>≥1</code> za ALI, <code>1</code> za NE, <code>=1</code> za XOR in <code>=</code> za XNOR. Krožec na izhodu ali vhodu pomeni negacijo.</p>
     </section>
 
     <section id="vrata2">
@@ -1808,7 +1819,7 @@ html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-ti
     <nav class="pager" id="pager" aria-label="Listanje po straneh"></nav>
 
     <footer>
-      <span>Razlaga in naloge sledijo gradivu Osnovne logične funkcije in De Morgan, krajšanje, Veitch. Simboli vrat so narisani v obliki ANSI/IEEE, v standardu IEC so vrata pravokotniki.</span>
+      <span>Razlaga in naloge sledijo gradivu Osnovne logične funkcije in De Morgan, krajšanje, Veitch. Simboli vrat so narisani po standardu IEC: vrata so pravokotniki z oznako v notranjosti.</span>
       <span>Pravilnostne tabele, PDNO, PKNO, minimalne oblike in preverjanje odgovorov so izračunani s kodo na tej strani.</span>
       <span id="resetWrap"></span>
     </footer>
@@ -1983,7 +1994,28 @@ const GM = {
   XNOR:["XNOR","=","¬(A⊕B)","Ekvivalenca: izhod je 1, kadar sta vhoda enaka."]
 };
 const FN = {AND:(a,b)=>a&b, OR:(a,b)=>a|b, NOT:a=>1-a, NAND:(a,b)=>1-(a&b), NOR:(a,b)=>1-(a|b), XOR:(a,b)=>a^b, XNOR:(a,b)=>1-(a^b)};
+/* Gate symbols as IEC rectangles with the label inside (agreed 10. 11. 2026). Inserted into the artifact by content/adapters/2.2.js
+   in front of the artifact's own ANSI/IEEE drawing, which stays only as gateSvgAnsi / gBodyAnsi for the comparison table in the introduction.
+   They use the artifact's GM (names and labels) and G_ (family, negation) tables. */
+const iecLab = t => GM[t][1].replace("&", "&amp;");
+
+/* the gate as a picture of its own (gate laboratory, tasks A1-A4, comparison table) */
 function gateSvg(t, cls){
+  const inv = /^(NAND|NOR|XNOR|NOT)$/.test(t), u = t === "NOT";
+  const x0 = u ? 34 : 30, w = u ? 30 : 40, y0 = u ? 11 : 4, h = u ? 28 : 42, x1 = x0 + w;
+  const wires = (u ? `M0 25H${x0}` : `M0 15H${x0}M0 35H${x0}`) + `M${x1 + (inv ? 8 : 0)} 25H100`;
+  return `<svg ${cls ? `class="${cls}" ` : ""}viewBox="0 0 100 50" role="img" aria-label="${GM[t][0]}"><g fill="none" stroke="currentColor" stroke-width="2"><rect x="${x0}" y="${y0}" width="${w}" height="${h}"/><path d="${wires}"/>${inv ? `<circle cx="${x1 + 4}" cy="25" r="4"/>` : ""}<text x="${x0 + w / 2}" y="25.5" text-anchor="middle" dominant-baseline="central" fill="currentColor" stroke="none" font-size="17" font-weight="700" style="font-family:var(--f-mono)">${iecLab(t)}</text></g></svg>`;
+}
+
+/* the body used by every circuit (two-level circuits, De Morgan symbols, adders): same contract as the artifact's gBody */
+function gBody(t, H){
+  const [fam, inv] = G_[t];
+  const W = fam === "not" ? 30 : 40, h = fam === "not" ? Math.min(H, 28) : H;
+  return { W, H: h, body: `M0 0H${W}V${h}H0Z`, inv, pinX: () => 0, fam,
+    xr: `<text class="gl" x="${W / 2}" y="${h / 2 + .5}" text-anchor="middle" dominant-baseline="central">${iecLab(t)}</text>` };
+}
+
+function gateSvgAnsi(t, cls){
   const inv = /^(NAND|NOR|XNOR|NOT)$/.test(t), u = t==="NOT";
   const body = u ? "M14 6L50 25L14 44Z" : /AND/.test(t) ? "M12 6H33A19 19 0 0 1 33 44H12Z" : "M12 6Q40 6 58 25Q40 44 12 44Q24 25 12 6Z";
   const end = u ? 50 : /AND/.test(t) ? 52 : 58, xr = /X/.test(t) ? '<path d="M5 6Q17 25 5 44"/>' : "";
@@ -2023,17 +2055,17 @@ const tab2 = (f,h) => ({type:"tt", f, h});
 
 /* A · vrata */
 add({id:"a01", lv:"A", d:1, type:"mc", fig:gateSvg("AND","g"), q:"Katera vrata prikazuje simbol?", o:["IN (AND)","ALI (OR)","NEIN (NAND)","XOR"], a:[0],
- h:["Poglej izhod: ali ima krožec?","Ravna zadnja stran je značilna za vrata IN."],
- why:"Ravna zadnja stran in izhod brez krožca pomenita vrata IN. Če bi bil na izhodu krožec, bi bila to vrata NEIN."});
+ h:["Poglej izhod: ali ima krožec?","Oznaka v pravokotniku pove vrsto vrat: & je oznaka za IN."],
+ why:"Oznaka & v pravokotniku in izhod brez krožca pomenita vrata IN. Če bi bil na izhodu krožec, bi bila to vrata NEIN."});
 add({id:"a02", lv:"A", d:1, type:"mc", fig:gateSvg("NOR","g"), q:"Katera vrata prikazuje simbol?", o:["ALI (OR)","NEALI (NOR)","XNOR","NE (NOT)"], a:[1],
- h:["Zadnja stran je zaobljena, kot pri vratih ALI.","Krožec na izhodu pomeni negacijo."],
- why:"Zaobljena oblika so vrata ALI, krožec na izhodu pa izhod še negira. Skupaj so to vrata NEALI."});
+ h:["Oznaka ≥1 je oznaka za vrata ALI.","Krožec na izhodu pomeni negacijo."],
+ why:"Oznaka ≥1 pomeni vrata ALI, krožec na izhodu pa izhod še negira. Skupaj so to vrata NEALI."});
 add({id:"a03", lv:"A", d:1, type:"mc", fig:gateSvg("XOR","g"), q:"Katera vrata prikazuje simbol?", o:["ALI (OR)","NEALI (NOR)","XOR","XNOR"], a:[2],
- h:["Opazuj vhodno stran vrat.","Dodatna ukrivljena črta ob vhodih loči XOR od ALI."],
- why:"Dodatna ukrivljena črta pri vhodih je znak za ekskluzivni ALI (XOR). Ker izhod nima krožca, ni XNOR."});
+ h:["Preberi oznako v pravokotniku.","Oznaka =1 loči XOR od ALI (≥1)."],
+ why:"Oznaka =1 je znak za ekskluzivni ALI (XOR). Ker izhod nima krožca, ni XNOR."});
 add({id:"a04", lv:"A", d:1, type:"mc", fig:gateSvg("NAND","g"), q:"Katera vrata prikazuje simbol?", o:["IN (AND)","NEIN (NAND)","NEALI (NOR)","NE (NOT)"], a:[1],
- h:["Zadnja stran je ravna.","Krožec na izhodu pomeni, da je rezultat negiran."],
- why:"Ravna zadnja stran so vrata IN, krožec izhod negira: to so vrata NEIN."});
+ h:["Oznaka & je oznaka za vrata IN.","Krožec na izhodu pomeni, da je rezultat negiran."],
+ why:"Oznaka & so vrata IN, krožec izhod negira: to so vrata NEIN."});
 add({id:"a05", lv:"A", d:1, type:"mc", q:"Izhod vrat IN je 1, kadar …", o:["je vsaj en vhod 1","sta oba vhoda 1","sta vhoda različna","je A = 0"], a:[1],
  h:["Spomni se vezave dveh stikal za žarnico.","Pri vratih IN morata biti izpolnjena oba pogoja."],
  why:"Vrata IN so kot dve zaporedni stikali: tok steče samo, če sta sklenjeni obe. Izhod je zato 1 samo pri A = B = 1."});
@@ -2343,7 +2375,7 @@ function formExpr(on,n,form){
 /* ---------- risanje vrat ---------- */
 const G_ = {AND:["and",0],OR:["or",0],NAND:["and",1],NOR:["or",1],XOR:["xor",0],XNOR:["xor",1],NOT:["not",1]};
 /* telo vrat: vrne {svg, pinX(y), outX, w} - lokalne koordinate (0,0) = zgoraj levo */
-function gBody(t,H){
+function gBodyAnsi(t,H){
   const [fam,inv] = G_[t]; let W, body = "", xr = "", cx = 0;
   if(fam==="and"){ W = Math.max(50,H/2+18); body = `M0 0H${W-H/2}A${H/2} ${H/2} 0 0 1 ${W-H/2} ${H}H0Z`; }
   else if(fam==="not"){ W = 30; H = Math.min(H,28); body = `M0 0L${W} ${H/2}L0 ${H}Z`; }
@@ -3076,6 +3108,14 @@ function gateLab(h,list){
   };
   draw();
 }
+/* Introduction to the symbols: the IEC symbols used in this material next to the ANSI/IEEE ones found in many textbooks. */
+WIDGETS.symcmp = h=>{
+  const list = ["AND","OR","NOT","NAND","NOR","XOR","XNOR"];
+  h.innerHTML = `<div class="wbox"><div class="tbl"><table class="eqtab symcmp"><thead><tr><th>Vrata</th><th>IEC<br><small>uporabljamo v tem gradivu</small></th><th>ANSI/IEEE<br><small>srečaš v učbenikih in na spletu</small></th></tr></thead>
+    <tbody>${list.map(t=>`<tr><td>${GM[t][0]} (${t})</td><td>${gateSvg(t,"gsvg sm")}</td><td>${gateSvgAnsi(t,"gsvg sm")}</td></tr>`).join("")}</tbody></table></div>
+    <p class="wnote">Oba sistema pomenita isto: krožec na izhodu je negacija, oblika ali oznaka pa pove vrsto vrat. V tem gradivu, v nalogah in v vezjih so vedno simboli IEC.</p></div>`;
+};
+
 WIDGETS.gates1 = h=>gateLab(h,["AND","OR","NOT"]);
 WIDGETS.gates2 = h=>gateLab(h,["NAND","NOR","XOR","XNOR"]);
 WIDGETS.pregled = h=>{
@@ -3569,14 +3609,14 @@ mountWidgets();
   const title = id => (PAGES.find(p=>p[0]===id) || [id, id])[1];
   const home = document.getElementById("doma");
   LavRac.mount({
-    title: "Logične funkcije – utrjevanje",
+    title: "Logične funkcije",
     kicker: "LAV-RAČ2 · 2. poglavje",
     root: ".wrap",
     lead: document.querySelector("#hero .lead").textContent.trim(),
     hero: document.querySelector("#hero .magic"),
     source: [...document.querySelectorAll("footer > span:not(#resetWrap)")].map(e=>e.textContent.trim()).join(" "),
     vajeNote: document.querySelector("#naloge .prose").innerHTML,
-    groups: [{"id":"vrata","title":"Logična vrata","pages":["vrata1","vrata2"],"icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><path d=\"M4 17h10M4 31h10M38 24h7\"/><path d=\"M14 10h10a14 14 0 0 1 0 28H14z\"/></svg>"},{"id":"funkcije","title":"Funkcije in poenostavljanje","pages":["zapis","algebra","veitch","demorgan"],"icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><rect x=\"6\" y=\"8\" width=\"36\" height=\"32\" rx=\"3\"/><path d=\"M24 8v32M6 24h36\"/><rect x=\"9\" y=\"11\" width=\"30\" height=\"10\" rx=\"5\" class=\"fill\" opacity=\".35\"/></svg>"},{"id":"aritmetika","title":"Aritmetična vezja","pages":["sestevalnik","odstevalnik"],"icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><rect x=\"12\" y=\"8\" width=\"24\" height=\"32\" rx=\"3\"/><path d=\"M4 18h8M4 30h8M36 18h8M36 30h8M24 46v-6\"/><text x=\"17\" y=\"30\" font-size=\"15\">Σ</text></svg>"}].map(g=>({ ...g, pages: g.pages.map(id=>({ id, title: title(id), el: document.getElementById(id) })) })),
+    groups: [{"id":"vrata","title":"Logična vrata","pages":["vrata1","vrata2"],"icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><path d=\"M4 17h10M4 31h10M34 24h11\"/><rect x=\"14\" y=\"10\" width=\"20\" height=\"28\"/><text x=\"24\" y=\"30\" font-size=\"16\" text-anchor=\"middle\">&amp;</text></svg>"},{"id":"funkcije","title":"Funkcije in poenostavljanje","pages":["zapis","algebra","veitch","demorgan"],"icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><rect x=\"6\" y=\"8\" width=\"36\" height=\"32\" rx=\"3\"/><path d=\"M24 8v32M6 24h36\"/><rect x=\"9\" y=\"11\" width=\"30\" height=\"10\" rx=\"5\" class=\"fill\" opacity=\".35\"/></svg>"},{"id":"aritmetika","title":"Aritmetična vezja","pages":["sestevalnik","odstevalnik"],"icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><rect x=\"12\" y=\"8\" width=\"24\" height=\"32\" rx=\"3\"/><path d=\"M4 18h8M4 30h8M36 18h8M36 30h8M24 46v-6\"/><text x=\"17\" y=\"30\" font-size=\"15\">Σ</text></svg>"}].map(g=>({ ...g, pages: g.pages.map(id=>({ id, title: title(id), el: document.getElementById(id) })) })),
     sets: LEVELS.map(L=>({ id: L.id, tag: L.tag, title: L.title, note: L.note, el: document.getElementById(L.id),
       tasks: T.filter(t=>t.lv===L.tag).map(t=>({ idx: t.idx, el: document.getElementById("t-"+t.id) })) })),
     extra: { id: "doma", title: "Za doma", note: home.querySelector(":scope > .prose").textContent.trim(), el: home },
