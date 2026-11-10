@@ -1075,6 +1075,13 @@ test('3.5: two theory groups, laboratory exercises are not mentioned, set E is "
   const fig = await a.locator('.page.on [data-fc] svg').first().textContent();
   assert.match(fig, /začetek.*preberi tocke.*izpiši "odlicno".*konec/);
   assert.doesNotMatch(fig, /Main|Input|Output/);
+  // the tasks that only ask for an output have no copy / Programiz buttons; the other program tasks keep them
+  for (const hash of ['naloge-c/1', 'naloge-c/2', 'naloge-c/3', 'naloge-c/7', 'naloge-d/1', 'naloge-d/2', 'naloge-d/3', 'naloge-d/4', 'naloge-d/7']) {
+    await go(a, hash);
+    assert.equal(await card(a).locator('.js-copy, a[href*=programiz]').count(), 0, hash);
+  }
+  await go(a, 'naloge-b/5');
+  assert.ok(await card(a).locator('.js-copy').count() > 0);
   // the former laboratory tasks are ordinary additional tasks; the example that named the lab program is a plain sentence
   await go(a, 'naloge-e/1');
   assert.match(await card(a).locator('.tags').textContent(), /Dodatna/);

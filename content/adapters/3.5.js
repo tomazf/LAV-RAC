@@ -12,8 +12,11 @@ const GROUPS = [
   { id: 'g-if', icon: 'if', title: 'Stavek if', pages: ['stavek-if', 'if-else', 'gnezdenje'] },
   { id: 'g-vec', icon: 'vec', title: 'Več možnosti', pages: ['veriga', 'switch', 'napake'] },
 ];
-// The teacher's task names (set letter and place in the set as the portal shows it); nothing named yet.
-const PREP = {};
+// The teacher's task names (set letter and place in the set as the portal shows it, 10. 11. 2026): the tasks that only
+// ask for an output have no copy / Programiz buttons.
+const PREP = {
+  nobtn: ['C1', 'C2', 'C3', 'C7', 'D1', 'D2', 'D3', 'D4', 'D7'],
+};
 // Za doma: the program of every solution is a block of code (Java colours), the sentence keeps the explanation
 // (as asked for the other chapters on 10. 11. 2026). Every program was compiled and run with the values below.
 const HOME_CODE = [
