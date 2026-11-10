@@ -15,8 +15,12 @@ const GROUPS = [
 ];
 // The teacher's task names (10. 11. 2026): the set letter and the place in the set as the portal shows it (the split of
 // set E is already made when the names are read). E10 gets its statements as code, which would bring the buttons, so it has none.
+// Reviewed against the task-kind rules (docs/LAV-RAC.md) and decided on 10. 11. 2026: the tasks that only ask for an output
+// have no buttons (nobtn); the programs the student writes with a fixed result (the former laboratory programs, C7, D8) are
+// ticked by the student and carry no points (self), as the exercise tasks of 3.5.
 const PREP = {
-  nobtn: ['A3', 'B3', 'B7', 'D1', 'E4', 'E7', 'E10'],
+  self: ['C7', 'D8', 'F1', 'F2', 'F3', 'F4', 'F5', 'F7', 'F8', 'F9', 'F10'],
+  nobtn: ['A2', 'A3', 'B2', 'B3', 'B7', 'C3', 'C8', 'D1', 'D2', 'D6', 'D7', 'E2', 'E3', 'E4', 'E6', 'E7', 'E8', 'E10', 'E11', 'E15', 'E22', 'E23', 'F6', 'F16', 'G4'],
 };
 // Za doma: the program of every solution is a block of code (Java colours), the sentence keeps the explanation.
 const HOME_CODE = [

@@ -4042,10 +4042,10 @@
    "module": "LAV-RAČ3",
    "title": "Podatkovni tipi v Javi",
    "fullTitle": "Podatkovni tipi v Javi",
-   "key": "scnm_lavrac_3_4_v1",
-   "version": 1,
+   "key": "scnm_lavrac_3_4_v2",
+   "version": 2,
    "format": "short",
-   "maxPoints": 105,
+   "maxPoints": 83,
    "tasks": [
     {
      "i": 0,
@@ -4183,7 +4183,8 @@
     {
      "i": 19,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Znak in ASCII",
      "q": "Napiši program, ki v spremenljivko c tipa char shrani znak 'a' in izpiše naslednjo črko v abecedi (b)."
     },
@@ -4253,7 +4254,8 @@
     {
      "i": 29,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Integer, Double in pretvorba niz ↔ število",
      "q": "Napiši program, ki v kodi definira niz \"17\", ga pretvori v int, prišteje 3 in izpiše rezultat. Izpis naj bo samo število."
     },
@@ -4428,35 +4430,40 @@
     {
      "i": 54,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Računanje s programi in logični izrazi",
      "q": "Program Obrni: napiši program, ki obrne štirimestno naravno število. Iz števila 1234 sestavi 4321 in ga izpiši. Števke izlušči z operatorjema / in %."
     },
     {
      "i": 55,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Računanje s programi in logični izrazi",
      "q": "Program Stirimestno: napiši program, ki za število 1234 zamenja prvo in zadnjo števko, drugo in tretjo pa kvadrira in ohrani samo enice kvadrata. Izpiši dobljen"
     },
     {
      "i": 56,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Računanje s programi in logični izrazi",
      "q": "Program Zlitje: za trimestni števili 123 in 456 sestavi šestmestno število. Prva števka naj bo stotica prvega, druga stotica drugega, tretja in četrta desetici "
     },
     {
      "i": 57,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Računanje s programi in logični izrazi",
      "q": "Program VsotaKotov: kota 45° 30′ 40″ in 100° 50′ 35″ seštej. Rezultat izpiši kot tri števila: stopinje, minute, sekunde, ločena s presledki."
     },
     {
      "i": 58,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Računanje s programi in logični izrazi",
      "q": "Program CasPotovanja: vlak odpelje ob 8:15 in prispe ob 10:40 istega dne. Izpiši čas potovanja v obliki »2 h 25 min«."
     },
@@ -4470,28 +4477,32 @@
     {
      "i": 60,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Računanje s programi in logični izrazi",
      "q": "Temperatura je 25 °C. Napiši program, ki temperaturo pretvori v stopinje Fahrenheita po formuli F = C · 9 / 5 + 32 in izpiše rezultat."
     },
     {
      "i": 61,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Računanje s programi in logični izrazi",
      "q": "Napiši program, ki izpiše vsoto vseh štirih števk štirimestnega števila 4821."
     },
     {
      "i": 62,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Računanje s programi in logični izrazi",
      "q": "Napiši program, ki 1234 mm pretvori v metre, centimetre in milimetre. Izpiši »1 m 23 cm 4 mm«."
     },
     {
      "i": 63,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Računanje s programi in logični izrazi",
      "q": "Napiši program, ki 3725 sekund pretvori v ure, minute in sekunde. Izpiši »1 h 2 min 5 s«."
     },

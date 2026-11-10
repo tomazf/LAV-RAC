@@ -980,7 +980,7 @@ test('Za doma: two more tasks per chapter, added in the portal, unscored', async
     assert.ok(await a.locator('.page.on article', { hasText: titles[1] }).locator('.sol').isVisible());
   }
   // unscored: the catalog has the same tasks and points as before (3.1 to 3.3 changed on 10. 11. 2026: tasks the student checks have no points)
-  assert.deepEqual(catalog.exercises.map((e) => [e.id, e.tasks.length, e.maxPoints]), [['2.1', 99, 218], ['2.2', 85, 164], ['2.3', 129, 237], ['3.1', 52, 75], ['3.2', 53, 61], ['3.3', 55, 83], ['3.4', 76, 105], ['3.5', 50, 58]]);
+  assert.deepEqual(catalog.exercises.map((e) => [e.id, e.tasks.length, e.maxPoints]), [['2.1', 99, 218], ['2.2', 85, 164], ['2.3', 129, 237], ['3.1', 52, 75], ['3.2', 53, 61], ['3.3', 55, 83], ['3.4', 76, 83], ['3.5', 50, 58]]);
   await a.context().close();
   assert.deepEqual(errors, []);
 });
@@ -1212,7 +1212,7 @@ test('3.3: matura labels and no switch; blanks typed in the code; tasks without 
   assert.deepEqual(errors, []);
 });
 
-test('3.4: the operator set is split in two, the revision set is last, laboratory exercises are not mentioned, programs keep code and output', async () => {
+test('3.4: the operator set is split in two, the revision set is last, laboratory exercises are not mentioned, programs with a fixed result are checked by the student, "Kaj izpiše" has no buttons', async () => {
   const ex = catalog.exercises.find((e) => e.id === '3.4');
   const a = await login('Sara Skrbnik');
   await a.goto(`${APP}/vaje/3.4#pregled`);
@@ -1235,19 +1235,28 @@ test('3.4: the operator set is split in two, the revision set is last, laborator
     await go(a, hash);
     assert.doesNotMatch(await a.locator('body').innerText(), /Poglavje \d+ od 12|RAČ-LAV|aboratorij/, hash);
   }
-  // a task that asks for a program keeps the code and the output
+  // the programs the student writes with a fixed result (C7, D8, F1-F5, F7-F10, the former laboratory programs) are checked by
+  // the student: the code stays (and can be saved), the buttons stay, there is no output field and no points
+  const selfNames = ['C7', 'D8', 'F1', 'F2', 'F3', 'F4', 'F5', 'F7', 'F8', 'F9', 'F10'];
+  const nameOf = (t) => String.fromCharCode(65 + sections.indexOf(t.section)) + (ex.tasks.filter((u) => u.section === t.section).indexOf(t) + 1);
+  assert.deepEqual(ex.tasks.filter((t) => t.self).map(nameOf), selfNames);
+  assert.equal(ex.maxPoints, 83); // 105 points of the artifact minus the 11 programs of 2 points
   await go(a, 'naloge-f/1');
+  assert.match(await card(a).locator('.tags').textContent(), /Sam preveri · brez točk/);
+  assert.equal(await card(a).locator('textarea.out').count(), 0);
+  assert.ok(await card(a).locator('.js-copy').count() > 0);
+  assert.match((await card(a).locator('.lr-tests').textContent()).replace(/\s+/g, ' '), /Pravilen izpis za preverjanje\s*4321/);
   await card(a).locator('textarea.editor').fill('public class Main { /* moja koda */ }');
-  await card(a).locator('textarea.out').fill('4321');
   await card(a).locator('.lr-check').click();
-  assert.equal(await card(a).getAttribute('data-lr'), 'ok');
+  assert.equal(await card(a).getAttribute('data-lr'), 'self');
+  await a.waitForTimeout(2500);
   await a.reload();
   await at(a, 'naloge-f/1');
   assert.equal(await card(a).locator('textarea.editor').inputValue(), 'public class Main { /* moja koda */ }');
-  assert.equal(await card(a).locator('textarea.out').inputValue(), '4321');
-  assert.equal(await card(a).getAttribute('data-lr'), 'ok');
-  // the tasks named by the teacher have no copy / Programiz buttons; E10 shows its statements as code and still has none
-  for (const hash of ['naloge-a/3', 'naloge-b/3', 'naloge-b/7', 'naloge-d/1', 'naloge-e/4', 'naloge-e/7', 'naloge-e/10']) {
+  assert.equal(await card(a).getAttribute('data-lr'), 'self');
+  // the tasks that only ask for an output have no copy / Programiz buttons (the teacher's first list and, from 10. 11. 2026, all
+  // "Kaj izpiše"); E10 shows its statements as code and still has none
+  for (const hash of ['naloge-a/2', 'naloge-a/3', 'naloge-b/2', 'naloge-b/3', 'naloge-b/7', 'naloge-c/3', 'naloge-c/8', 'naloge-d/1', 'naloge-d/2', 'naloge-d/6', 'naloge-d/7', 'naloge-e/2', 'naloge-e/3', 'naloge-e/4', 'naloge-e/6', 'naloge-e/7', 'naloge-e/8', 'naloge-e/10', 'naloge-e/11', 'naloge-e/15', 'naloge-e/22', 'naloge-e/23', 'naloge-f/6', 'naloge-f/16', 'doma-mat/4']) {
     await go(a, hash);
     assert.equal(await card(a).locator('.js-copy, a[href*=programiz]').count(), 0, hash);
   }
