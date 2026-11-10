@@ -4664,6 +4664,449 @@
     "operatorji",
     "napake"
    ]
+  },
+  {
+   "id": "3.5",
+   "no": "5",
+   "module": "LAV-RAČ3",
+   "title": "Pogojni stavki v Javi",
+   "fullTitle": "Pogojni stavki v Javi",
+   "key": "scnm_lavrac_3_5_v1",
+   "version": 1,
+   "format": "short",
+   "maxPoints": 82,
+   "tasks": [
+    {
+     "i": 0,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pogoji in stavek if",
+     "q": "Kateri izmed opisov velja za stavek if?"
+    },
+    {
+     "i": 1,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pogoji in stavek if",
+     "q": "Kakšnega tipa mora biti vrednost pogoja v stavku if (pogoj)?"
+    },
+    {
+     "i": 2,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pogoji in stavek if",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 3,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pogoji in stavek if",
+     "q": "V katerem stavku je zanesljivo vrednost pogoja true, če je vrednost spremenljivke a v intervalu [20..40]?"
+    },
+    {
+     "i": 4,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pogoji in stavek if",
+     "q": "Naj bo x celoštevilska spremenljivka. Obkrožite črko pred pogojema, ki se ovrednotita na true, če je x sodo število."
+    },
+    {
+     "i": 5,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pogoji in stavek if",
+     "q": "Katera pogoja bi vrnila vrednost true, če je vrednost celoštevilske spremenljivke x sodo število?"
+    },
+    {
+     "i": 6,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pogoji in stavek if",
+     "q": "Dani imamo deklaraciji: boolean a=true, b=false; boolean c=true, d=false; Kakšna je vrednost pogoja ((a||b)&&(!c||!d))? Vpiši true ali false."
+    },
+    {
+     "i": 7,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pogoji in stavek if",
+     "q": "Deklarirani sta spremenljivki a in b tipa boolean in dan je stavek if (!a && !b) {/*…*/}. Zapišite ekvivalentni stavek if brez uporabe operatorja &&. Vpiši samo"
+    },
+    {
+     "i": 8,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pogoji in stavek if",
+     "q": "Dan je logični izraz: !(x>0 && x<10). Zapišite enakovreden pogoj, pri čemer ne smete uporabiti negacije."
+    },
+    {
+     "i": 9,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pogoji in stavek if",
+     "q": "Dan je izsek programa: int z=65; double d1=65.0; Integer i=65; String s=\"A\"; Obkrožite veljavni primerjavi."
+    },
+    {
+     "i": 10,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pogoji in stavek if",
+     "q": "Kaj izpiše program? Pozorno poglej prvo vrstico s pogojem."
+    },
+    {
+     "i": 11,
+     "level": "lažja",
+     "max": 1,
+     "section": "if – else, bloki in gnezdenje",
+     "q": "Izračunajte vrednost spremenljivke x po izvedbi tega dela programa:"
+    },
+    {
+     "i": 12,
+     "level": "srednja",
+     "max": 2,
+     "section": "if – else, bloki in gnezdenje",
+     "q": "Po izvedbi naslednjega dela programa je vrednost spremenljivke x:"
+    },
+    {
+     "i": 13,
+     "level": "srednja",
+     "max": 2,
+     "section": "if – else, bloki in gnezdenje",
+     "q": "Izračunajte vrednost spremenljivk x in y po izvedbi tega dela programa:"
+    },
+    {
+     "i": 14,
+     "level": "srednja",
+     "max": 2,
+     "section": "if – else, bloki in gnezdenje",
+     "q": "Izračunajte vrednost spremenljivk x in y, ko se izvede program."
+    },
+    {
+     "i": 15,
+     "level": "lažja",
+     "max": 1,
+     "section": "if – else, bloki in gnezdenje",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 16,
+     "level": "srednja",
+     "max": 2,
+     "section": "if – else, bloki in gnezdenje",
+     "q": "Kaj izpiše program pri danih vrednostih? Če program ne izpiše ničesar, vpiši nic."
+    },
+    {
+     "i": 17,
+     "level": "lažja",
+     "max": 1,
+     "section": "if – else, bloki in gnezdenje",
+     "q": "Kaj se zgodi s programom? int x = 3; if (x > 0) { int y = x * 2; } System.out.println(y);"
+    },
+    {
+     "i": 18,
+     "level": "srednja",
+     "max": 2,
+     "section": "if – else, bloki in gnezdenje",
+     "q": "Napiši program, ki za število n = 14 izpiše sodo, če je število sodo, in liho, če je liho. Nato preizkusi še z n = 7 in n = -3. Prilepi izpis za n = 14."
+    },
+    {
+     "i": 19,
+     "level": "srednja",
+     "max": 2,
+     "section": "if – else, bloki in gnezdenje",
+     "q": "Spremenljivkama x in y tipa double smo že določili neničelne vrednosti. Zapišite pogojne stavke, s katerimi izpišemo, v katerem kvadrantu se nahaja točka s koor"
+    },
+    {
+     "i": 20,
+     "level": "lažja",
+     "max": 1,
+     "section": "Veriga else if in pogojni operator",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 21,
+     "level": "srednja",
+     "max": 2,
+     "section": "Veriga else if in pogojni operator",
+     "q": "Program ima pogoje v napačnem vrstnem redu. Kaj izpiše?"
+    },
+    {
+     "i": 22,
+     "level": "lažja",
+     "max": 1,
+     "section": "Veriga else if in pogojni operator",
+     "q": "Kaj izpiše spodnji diagram poteka (in z njim zapisana koda), če je tocke = 30?"
+    },
+    {
+     "i": 23,
+     "level": "lažja",
+     "max": 1,
+     "section": "Veriga else if in pogojni operator",
+     "q": "Spremenljivki a in b sta tipa int. Z enim prireditvenim stavkom in pogojnim operatorjem ?: v spremenljivko max shrani večjo od obeh vrednosti. Vpiši celoten sta"
+    },
+    {
+     "i": 24,
+     "level": "srednja",
+     "max": 2,
+     "section": "Veriga else if in pogojni operator",
+     "q": "V programu imamo naslednja stavka: int a=10, b=20, c=30; int x = a>b && a>c ? a : (b>c ? b : c); Zapišite drugi stavek z uporabo stavka if, torej brez operatorj"
+    },
+    {
+     "i": 25,
+     "level": "srednja",
+     "max": 2,
+     "section": "Veriga else if in pogojni operator",
+     "q": "Kateri metodi sprejmeta celo število x in vrneta logično vrednost?"
+    },
+    {
+     "i": 26,
+     "level": "lažja",
+     "max": 1,
+     "section": "Veriga else if in pogojni operator",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 27,
+     "level": "lažja",
+     "max": 1,
+     "section": "Stavek switch",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 28,
+     "level": "lažja",
+     "max": 1,
+     "section": "Stavek switch",
+     "q": "Kakšen je izpis po izvedbi naslednjega programa?"
+    },
+    {
+     "i": 29,
+     "level": "srednja",
+     "max": 2,
+     "section": "Stavek switch",
+     "q": "Kaj izpiše naslednji program? (Prikazan je izsek iz metode main.)"
+    },
+    {
+     "i": 30,
+     "level": "srednja",
+     "max": 2,
+     "section": "Stavek switch",
+     "q": "Podan imamo naslednji del programa. Kaj se izpiše po naslednjih stavkih?"
+    },
+    {
+     "i": 31,
+     "level": "lažja",
+     "max": 1,
+     "section": "Stavek switch",
+     "q": "Koliko je vrednost spremenljivke a po izvedbi programa?"
+    },
+    {
+     "i": 32,
+     "level": "lažja",
+     "max": 1,
+     "section": "Stavek switch",
+     "q": "Spremenljivka katerega tipa NE more biti izraz v stavku switch?"
+    },
+    {
+     "i": 33,
+     "level": "lažja",
+     "max": 1,
+     "section": "Stavek switch",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 34,
+     "level": "lažja",
+     "max": 1,
+     "section": "Stavek switch",
+     "q": "Kateri izmed opisov velja za stavek break?"
+    },
+    {
+     "i": 35,
+     "level": "težja",
+     "max": 3,
+     "section": "Stavek switch",
+     "q": "Pretvorite navedeno zaporedje stavkov if v stavek switch. (Prirejeno: v kodi nastavi dan = 3, izpis naj bo ime dneva.)"
+    },
+    {
+     "i": 36,
+     "level": "težja",
+     "max": 3,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program, ki ugotovi, ali se premici y1 = k1·x + n1 in y2 = k2·x + n2 sečeta. Možnosti so tri: premici sta vzporedni (se ne sečeta), se ujemata (neskončn"
+    },
+    {
+     "i": 37,
+     "level": "težja",
+     "max": 3,
+     "section": "Naloge za utrjevanje",
+     "q": "Določi, ali točka leži znotraj, zunaj ali na robu pravokotnika. Pravokotnik je podan z nasprotnima ogliščema (5, 4) in (1, 1), stranice so vzporedne koordinatni"
+    },
+    {
+     "i": 38,
+     "level": "srednja",
+     "max": 2,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program Interval: dani sta celi števili a = 7 in b = 2 ter realno število x = 4.5. Preveri, ali x leži na zaprtem intervalu, ki ga določata a in b (spod"
+    },
+    {
+     "i": 39,
+     "level": "srednja",
+     "max": 2,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program Kipci: Indiana Jones najde tri zlate kipce, vzame pa lahko le dva. Vrednosti kipcev so 120, 75 in 300. Izpiši, katera dva kipca se najbolj splač"
+    },
+    {
+     "i": 40,
+     "level": "težja",
+     "max": 3,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program Datum: dana sta letnica 2024 in zaporedna številka dneva v letu 61. Izpiši, kateri dan in mesec je to, v obliki »1. 3. 2024«. Upoštevaj prestopn"
+    },
+    {
+     "i": 41,
+     "level": "lažja",
+     "max": 1,
+     "section": "Naloge za utrjevanje",
+     "q": "Izmed treh števil 7, 12 in 9 poišči in izpiši največje."
+    },
+    {
+     "i": 42,
+     "level": "srednja",
+     "max": 2,
+     "section": "Naloge za utrjevanje",
+     "q": "Kako bi pretvoril poljubni stavek if v stavek switch? Razvrsti pogoje: katere lahko neposredno zapišemo kot oznake case?"
+    },
+    {
+     "i": 43,
+     "level": "srednja",
+     "max": 2,
+     "section": "Naloge za utrjevanje",
+     "q": "Napiši program, ki izpiše, koliko dni ima mesec. Upoštevaj prestopno leto. V kodi nastavi mesec = 2 in leto = 2024. Uporabi stavek switch."
+    },
+    {
+     "i": 44,
+     "level": "srednja",
+     "max": 2,
+     "section": "Naloge za utrjevanje",
+     "q": "Napiši preprost kalkulator z operacijami +, -, * in /. V kodi nastavi a = 12.0, b = 4.0 in znak op = '/'. Izpiši »12.0 / 4.0 = 3.0«. Pri deljenju z nič izpiši »"
+    },
+    {
+     "i": 45,
+     "level": "srednja",
+     "max": 2,
+     "section": "Naloge za utrjevanje",
+     "q": "Napiši program, ki za dano leto pove, ali je prestopno. Leto je prestopno, če je deljivo s 400 ali če je deljivo s 4 in ni deljivo s 100. V kodi nastavi leto = "
+    },
+    {
+     "i": 46,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Katera pogoja vrneta true natanko takrat, ko je vrednost celoštevilske spremenljivke x sodo število?"
+    },
+    {
+     "i": 47,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Kaj izpiše navedeni del programa? Integer a= new Integer(2); Integer b= new Integer(2); if(a==b) System.out.print(\"a==b vrne true \"); if(a.equals(b)) System.out"
+    },
+    {
+     "i": 48,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Dopolnite trditvi: Stavek ____ nemudoma prekine izvajanje najbolj notranje zanke ali stavka switch, v katerem se nahaja. Če želimo prekiniti izvajanje metode, v"
+    },
+    {
+     "i": 49,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Katera od podanih rešitev je resnična za prireditveni stavek v programskem jeziku Java?"
+    }
+   ],
+   "pages": [
+    {
+     "id": "pregled",
+     "chapter": "Teorija",
+     "label": "Pregled"
+    },
+    {
+     "id": "stavek-if",
+     "chapter": "Teorija",
+     "label": "Pogojni stavek if"
+    },
+    {
+     "id": "if-else",
+     "chapter": "Teorija",
+     "label": "if – else in blok stavkov"
+    },
+    {
+     "id": "gnezdenje",
+     "chapter": "Teorija",
+     "label": "Gnezdenje in viseči else"
+    },
+    {
+     "id": "veriga",
+     "chapter": "Teorija",
+     "label": "Veriga else if in ?:"
+    },
+    {
+     "id": "switch",
+     "chapter": "Teorija",
+     "label": "Stavek switch"
+    },
+    {
+     "id": "napake",
+     "chapter": "Teorija",
+     "label": "Pogoste napake"
+    },
+    {
+     "id": "naloge-a",
+     "chapter": "Naloge",
+     "label": "Vaje A · Pogoji in stavek if"
+    },
+    {
+     "id": "naloge-b",
+     "chapter": "Naloge",
+     "label": "Vaje B · if – else, bloki in gnezdenje"
+    },
+    {
+     "id": "naloge-c",
+     "chapter": "Naloge",
+     "label": "Vaje C · Veriga else if in pogojni operator"
+    },
+    {
+     "id": "naloge-d",
+     "chapter": "Naloge",
+     "label": "Vaje D · Stavek switch"
+    },
+    {
+     "id": "naloge-e",
+     "chapter": "Naloge",
+     "label": "Vaje E · Naloge za utrjevanje"
+    },
+    {
+     "id": "doma-mat",
+     "chapter": "Naloge",
+     "label": "Vaje F · Ponavljanje"
+    },
+    {
+     "id": "doma",
+     "chapter": "Naloge",
+     "label": "Vaje G · Za doma"
+    }
+   ],
+   "gate": [
+    "stavek-if",
+    "if-else",
+    "gnezdenje",
+    "veriga",
+    "switch",
+    "napake"
+   ]
   }
  ],
  "planned": [

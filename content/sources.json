@@ -62,6 +62,13 @@
       "artifactTitle": "Podatkovni tipi v Javi",
       "version": 1,
       "no": "4"
+    },
+    {
+      "id": "3.5",
+      "artifact": "https://claude.ai/artifact/EvT88ysi3TbBmGew2Q7d7R",
+      "artifactTitle": "Pogojni stavki v Javi",
+      "version": 1,
+      "no": "5"
     }
   ],
   "planned": [

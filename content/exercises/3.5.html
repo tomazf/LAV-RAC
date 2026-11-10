@@ -1,0 +1,2346 @@
+<!doctype html>
+<html lang="sl"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!--LAVELS:BOOT-->
+<!-- LAV-RAČ: built by scripts/import-artifacts.js from content/sources/3.5.html. Do not edit, run the import. -->
+<script>
+// LAV-RAČ exercise shell. The importer puts it into every exercise, before the exercise's own code.
+// The artifact keeps its content and answer checks; the shell owns the layout, the paging, the gate
+// before the tasks, and the scoring state in the portal's format ({ t: { <index>: { d, p, h, sol } }, seen }).
+// Rules are the portal's: one answer per task, a hint halves the points, the solution gives 0 points.
+// A task marked self (»Sam preveri«) has no points: the student runs the work elsewhere, compares it with the known
+// results and ticks »Preveril sem«. The solution may be opened without locking anything.
+(function () {
+  'use strict';
+  const B = window.__LAVELS || null;
+  const KEY = B ? B.key : 'lavrac_local_' + location.pathname;
+  const STAFF = !!(B && B.staff);
+  const TASKS = [];            // index -> { id, max, src }
+  const byId = new Map();      // artifact task id -> index
+  const cards = new Map();     // index -> card element
+  const notes = new Map();     // index -> why the answer was wrong (only until the page is reloaded)
+  let state = read();
+  let cfg = null;
+  let quiet = false;           // true while the shell itself opens a solution at the start: nothing is recorded
+  let pages = [];              // every page in order: { id, kind, title, group, el, set }
+  let gate = [];               // theory page ids that open the tasks
+  const setPos = new Map();    // set id -> shown task position
+
+  function read() {
+    let s = null;
+    try { s = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { s = null; }
+    if (!s || typeof s !== 'object') s = {};
+    if (!s.t || typeof s.t !== 'object') s.t = {};
+    if (!Array.isArray(s.seen)) s.seen = [];
+    return s;
+  }
+  function persist() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* the tracker shows saving problems */ }
+  }
+  const rec = (i) => state.t[i] || (state.t[i] = {});
+  const half = (n) => Math.round(n * 50) / 100;
+
+  // ---------- task state ----------
+  function status(i) {
+    const r = state.t[i] || {};
+    if (!r.d) return r.h ? 'hinted' : 'open';
+    if (TASKS[i] && TASKS[i].self) return 'self';
+    if (r.sol) return 'seen';
+    if (r.p > 0) return r.h ? 'half' : 'ok';
+    return 'bad';
+  }
+  const pts = (n) => {
+    const s = String(n).replace('.', ',');
+    if (n === 1) return '1 točka';
+    if (n === 2) return '2 točki';
+    if (n === 3 || n === 4) return s + ' točke';
+    if (!Number.isInteger(n)) return s + ' točke';
+    return s + ' točk';
+  };
+  const MESSAGE = {
+    ok: (r) => 'Pravilno: ' + pts(r.p) + '.',
+    half: (r) => 'Pravilno z namigom: ' + pts(r.p) + '.',
+    bad: (r, note) => 'Napačno: 0 točk.' + (note ? ' ' + note : '') + ' Naloga je zaklenjena, rešitev si lahko ogledaš.',
+    seen: () => 'Rešitev prikazana: 0 točk. Naloga je zaklenjena.',
+    self: () => 'Označeno: sam si preveril delovanje. Naloga nima točk.',
+  };
+  const LABEL = { ok: 'Pravilno', half: 'Pravilno z namigom', bad: 'Napačno', seen: 'Rešitev ogledana', self: 'Sam preveril' };
+
+  function totals() {
+    const r = { ok: 0, half: 0, bad: 0, seen: 0, self: 0, done: 0, points: 0, max: 0, n: TASKS.length };
+    TASKS.forEach((t, i) => {
+      const s = status(i);
+      r.max += t.max;
+      if (r[s] !== undefined) { r[s]++; r.done++; }
+      r.points += (state.t[i] && state.t[i].d && Number(state.t[i].p)) || 0;
+    });
+    r.points = Math.round(r.points * 100) / 100;
+    return r;
+  }
+
+  // ---------- calls from the artifact ----------
+  const api = {
+    // list: the artifact's tasks in the order they are shown; level(t) gives 1, 2 or 3 for the teacher's list.
+    // A self task has no points (max 0); its pts only say how hard it is.
+    tasks(list, opts) {
+      const level = (opts && opts.level) || ((t) => t.lv);
+      list.forEach((t, i) => { t.idx = i; TASKS.push({ id: t.id, max: t.self ? 0 : Number(t.pts) || 1, self: !!t.self, task: t, level: level(t) }); byId.set(t.id, i); });
+    },
+    // Before the tasks are numbered: the teacher's task names (set letter and the place in the artifact's own list,
+    // e.g. »C9«) get their options, and removed tasks leave the list. The names are read before anything is removed,
+    // so they keep the numbers the teacher sees in the artifact. A name that does not exist stops the import.
+    //   self: no points, ticked by the student   nobtn: no »Kopiraj kodo« / »Odpri Programiz«
+    //   inline: the blanks (___) are typed in the code (same: all as wide as the widest)   cols: the blanks in two columns
+    //   list: lines »- …« of the question become bullets   example: the solution is open from the start   remove: leave the list
+    prepare(list, levels, o) {
+      const ref = new Map();
+      levels.forEach((L) => list.filter((t) => t.lv === L.tag).forEach((t, k) => ref.set(L.tag + (k + 1), t)));
+      const get = (r) => { const t = ref.get(r); if (!t) throw new Error('LavRac.prepare: no task ' + r); return t; };
+      ['self', 'nobtn', 'inline', 'same', 'cols', 'list', 'example'].forEach((flag) => (o[flag] || []).forEach((r) => { get(r)[flag] = true; }));
+      (o.remove || []).map(get).forEach((t) => { list.splice(list.indexOf(t), 1); });
+    },
+    // The artifact's own memory of what was typed and how many hints are open.
+    loadUi() {
+      const S = {};
+      TASKS.forEach((t, i) => {
+        const r = state.t[i];
+        if (!r) return;
+        const s = {};
+        if (r.a !== undefined) s.v = r.a;
+        if (r.n !== undefined) s.h = r.n;
+        S[t.id] = s;
+      });
+      return S;
+    },
+    saveUi(S) {
+      let changed = false;
+      Object.keys(S).forEach((id) => {
+        const i = byId.get(id);
+        if (i === undefined) return;
+        const s = S[id] || {};
+        if (!state.t[i] && s.v === undefined && s.h === undefined) return;
+        const r = rec(i);
+        if (r.d) return;
+        if (JSON.stringify(r.a) !== JSON.stringify(s.v)) { r.a = s.v; changed = true; }
+        if (s.h !== undefined && r.n !== s.h) { r.n = s.h; changed = true; }
+      });
+      if (changed) persist();
+    },
+    // note: the artifact's explanation of a wrong answer, shown with the result.
+    answered(i, ok, note) {
+      const r = rec(i);
+      if (r.d) return;
+      notes.set(i, ok ? '' : String(note || '').trim());
+      const max = TASKS[i].max;
+      r.d = true;
+      r.p = ok ? (r.h ? half(max) : max) : 0;
+      persist();
+      paintTask(i, true);
+      paintProgress();
+    },
+    hinted(i) {
+      const r = rec(i);
+      if (r.d || r.h) return;
+      r.h = true;
+      persist();
+      paintTask(i);
+    },
+    // »Preveril sem«: the student ticks a self task. No points, and nothing about it can be wrong.
+    checked(i) {
+      const r = rec(i);
+      if (r.d || !TASKS[i].self) return;
+      r.d = true; r.p = 0;
+      persist();
+      paintTask(i, true);
+      paintProgress();
+    },
+    solution(i) {
+      const r = rec(i);
+      // Looking at the solution of a self task costs nothing and locks nothing.
+      if (quiet) return;
+      if (r.d || TASKS[i].self) { if (!r.v) { r.v = true; persist(); } return; }
+      r.d = true; r.p = 0; r.sol = true;
+      persist();
+      paintTask(i, true);
+      paintProgress();
+    },
+    status,
+    mount,
+    catalog,
+  };
+  window.LavRac = api;
+
+  // ---------- small builders ----------
+  const h = (tag, attrs, ...kids) => {
+    const el = document.createElement(tag);
+    Object.entries(attrs || {}).forEach(([k, v]) => {
+      if (v === null || v === undefined || v === false) return;
+      if (k === 'html') el.innerHTML = v;
+      else if (k === 'text') el.textContent = v;
+      else el.setAttribute(k, v === true ? '' : v);
+    });
+    kids.flat().forEach((k) => { if (k !== null && k !== undefined && k !== false) el.append(k); });
+    return el;
+  };
+  const ICON = {
+    vaje: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="9" y="6" width="30" height="36" rx="4"/><path d="M15 17l3 3 6-6M15 29l3 3 6-6M28 17h6M28 29h6"/></svg>',
+    lock: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+    check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    home: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 22L24 9l16 13M13 19v20h22V19"/><path d="M20 39V28h8v11"/></svg>',
+  };
+
+  // ---------- layout ----------
+  function mount(c) {
+    cfg = c;
+    const old = document.querySelector(c.root || '.wrap');
+    const groups = c.groups.map((g) => ({ ...g, pages: g.pages.map((p) => ({ ...p, kind: 'theory', group: g })) }));
+    const theory = groups.flatMap((g) => g.pages);
+    gate = theory.map((p) => p.id);
+    const sets = c.sets.map((s) => ({ ...s, kind: 'set' }));
+    // Za doma follows the last set in the alphabet; the importer checks that the letters have no gap.
+    if (c.extra) c.extra.tag = nextTag(sets);
+    pages = [{ id: 'pregled', kind: 'overview', title: 'Pregled' }, ...theory, ...sets];
+    if (c.extra) pages.push({ ...c.extra, kind: 'extra' });
+    if (STAFF) { gate.concat(c.extra ? [c.extra.id] : []).forEach((id) => { if (!state.seen.includes(id)) state.seen.push(id); }); }
+
+    const main = h('main', { class: 'lr-main', id: 'lrMain' });
+    const top = buildTop(c);
+    const rail = buildRail(groups, sets, c);
+    main.append(buildMobileNav());
+    pages.forEach((p) => {
+      // The page gets the artifact's id; the artifact's own element keeps a different one, so ids stay unique.
+      if (p.el && p.el.id === p.id) p.el.id = 'src-' + p.id;
+      p.page = h('div', { class: 'page lr-page lr-' + p.kind, id: p.id, 'data-chapter': p.kind === 'theory' || p.kind === 'overview' ? 'Teorija' : 'Naloge' });
+      if (p.kind === 'overview') buildOverview(p, groups, sets, c);
+      if (p.kind === 'theory') buildTheory(p, theory);
+      if (p.kind === 'set') buildSet(p, c);
+      if (p.kind === 'extra') buildExtra(p);
+      if (p.kind !== 'set') p.page.append(buildPager(p));
+      main.append(p.page);
+    });
+    const lr = h('div', { class: 'lr' }, top, h('div', { class: 'lr-body' }, rail, main));
+    if (old) old.replaceWith(lr); else document.body.append(lr);
+    TASKS.forEach((_, i) => paintTask(i));
+    paintProgress();
+    window.addEventListener('hashchange', route);
+    route();
+    // The browser jumps to the element named in the address once the page has loaded; start at the top instead.
+    window.addEventListener('load', () => setTimeout(() => window.scrollTo(0, 0), 0));
+  }
+
+  function buildTop(c) {
+    const bar = h('div', { class: 'lr-stack', 'aria-hidden': 'true' }, ...['ok', 'half', 'bad', 'seen', 'self'].map((k) => h('i', { class: 'lr-' + k })));
+    const reset = h('div', { class: 'lr-reset', id: 'lrReset' });
+    const idle = () => {
+      reset.replaceChildren(h('button', { type: 'button', class: 'lr-btn lr-ghost', id: 'resetBtn', text: 'Ponastavi vajo' }));
+      reset.firstChild.addEventListener('click', ask);
+    };
+    const ask = () => {
+      const yes = h('button', { type: 'button', class: 'lr-btn lr-danger', id: 'resetYes', text: 'Da, ponastavi' });
+      const no = h('button', { type: 'button', class: 'lr-btn lr-ghost', text: 'Prekliči' });
+      reset.replaceChildren(h('span', { class: 'lr-confirm', role: 'alert' },
+        h('span', { text: 'Res ponastavim vajo? Vsi odgovori se izbrišejo. Dokler ne odgovoriš na novo nalogo, štejejo prejšnje točke.' }), yes, no));
+      yes.addEventListener('click', doReset);
+      no.addEventListener('click', idle);
+      no.focus();
+    };
+    idle();
+    return h('div', { class: 'lr-top' }, h('div', { class: 'lr-top-in' },
+      h('div', { class: 'lr-name' }, h('b', { text: c.title }), c.kicker ? h('span', { text: c.kicker }) : null),
+      h('div', { class: 'lr-prog', role: 'status' }, bar, h('span', { class: 'lr-ptxt', id: 'lrPtxt' })),
+      reset));
+  }
+  function doReset() {
+    state = { t: {}, seen: state.seen.slice() };
+    persist();
+    const pending = B ? 'lavels_pending_' + B.uid + '_' + B.id : null;
+    let waited = 0;
+    const done = () => { history.replaceState(null, '', '#pregled'); location.reload(); };
+    if (!pending) return done();
+    const wait = () => {
+      waited += 150;
+      let left = null;
+      try { left = localStorage.getItem(pending); } catch (e) { left = null; }
+      if (!left || waited > 5000) done(); else setTimeout(wait, 150);
+    };
+    setTimeout(wait, 150);
+  }
+
+  // The letter after the last set's letter ('' gives A).
+  const nextTag = (sets) => (sets.length ? String.fromCharCode(String(sets[sets.length - 1].tag).charCodeAt(0) + 1) : 'A');
+  const setLabel = (p) => p.tag + ' · ' + p.title;
+  function buildRail(groups, sets, c) {
+    const nav = h('nav', { class: 'lr-rail', 'aria-label': 'Vsebina vaje' });
+    // The tag column (»3 ·«, »B ·«) is as wide as the longest number, so every text starts at the same place
+    // and a wrapped line hangs under the text, not under the tag.
+    nav.style.setProperty('--lr-tgd', String(String(groups.reduce((a, g) => a + g.pages.length, 0)).length));
+    const lab = (tag, text) => h('span', { class: 'lr-lab' }, h('span', { class: 'lr-tg', text: tag + ' ·' }), h('span', { class: 'lr-tx', text }));
+    nav.append(h('a', { class: 'lr-ov', href: '#pregled', 'data-page': 'pregled', text: 'Pregled' }));
+    let n = 0;
+    groups.forEach((g) => {
+      nav.append(h('div', { class: 'lr-grp' }, h('span', { class: 'lr-gi', html: g.icon || '' }), h('b', { text: g.title }), h('small', { class: 'lr-gc', 'data-gc': g.id })));
+      g.pages.forEach((p) => {
+        n++;
+        nav.append(h('a', { href: '#' + p.id, 'data-page': p.id, class: 'lr-pg' }, h('i', { class: 'lr-dot', html: ICON.check }), lab(n, p.title)));
+      });
+    });
+    nav.append(h('div', { class: 'lr-grp lr-vaje' }, h('span', { class: 'lr-gi', html: ICON.vaje }), h('b', { text: 'Vaje' }), h('span', { class: 'lr-lock', html: ICON.lock, title: 'Odklene se, ko pregledaš vse razlage' })));
+    // A set shows its state as a small pie in the task colours (paintProgress); Za doma gets a tick once it is opened.
+    sets.forEach((s) => nav.append(h('a', { href: '#' + s.id, 'data-page': s.id, class: 'lr-pg lr-gated' },
+      h('i', { class: 'lr-pie', 'data-pie': s.id, 'aria-hidden': 'true' }), lab(s.tag, s.title), h('small', { class: 'lr-cnt', 'data-cnt': s.id }))));
+    if (c.extra) nav.append(h('a', { href: '#' + c.extra.id, 'data-page': c.extra.id, class: 'lr-pg lr-gated' }, h('i', { class: 'lr-dot', html: ICON.check }), lab(c.extra.tag, c.extra.title)));
+    // c.tools() gives a fresh element each time, so the rail and the phone list each get their own copy.
+    if (c.tools) nav.append(h('div', { class: 'lr-tools' }, c.tools()));
+    return nav;
+  }
+  function buildMobileNav() {
+    const sel = h('select', { id: 'lrSel', 'aria-label': 'Stran' });
+    let grp = null;
+    pages.forEach((p) => {
+      const label = p.kind === 'theory' ? p.group.title : p.kind === 'overview' ? null : 'Vaje';
+      if (label && (!grp || grp.label !== label)) { grp = h('optgroup', { label }); sel.append(grp); }
+      const o = h('option', { value: p.id, text: p.kind === 'set' || p.kind === 'extra' ? setLabel(p) : p.title });
+      (label ? grp : sel).append(o);
+    });
+    sel.addEventListener('change', () => { location.hash = sel.value; });
+    const box = h('div', { class: 'lr-mnav' }, h('label', { class: 'lr-msel' }, h('span', { text: 'Stran' }), sel));
+    if (cfg.tools) box.append(h('div', { class: 'lr-tools' }, cfg.tools()));
+    return box;
+  }
+
+  function buildOverview(p, groups, sets, c) {
+    const hero = h('section', { class: 'lr-hero' }, h('h1', { text: c.title }));
+    if (c.lead) hero.append(h('p', { class: 'lr-lead', text: c.lead }));
+    if (c.hero) hero.append(c.hero);
+    p.page.append(hero);
+    p.page.append(h('div', { class: 'lr-resume', id: 'lrResume', hidden: true }));
+    const grid = h('div', { class: 'lr-tiles' });
+    groups.forEach((g) => {
+      const list = h('ul', {}, ...g.pages.map((x) => h('li', { text: x.title })));
+      grid.append(h('a', { class: 'lr-tile', href: '#' + g.pages[0].id, 'data-tile': g.id },
+        h('span', { class: 'lr-ti', html: g.icon || '' }),
+        h('span', { class: 'lr-tt', text: g.title }),
+        h('span', { class: 'lr-td', text: g.pages.length === 1 ? '1 razlaga' : g.pages.length + (g.pages.length < 5 ? ' razlage' : ' razlag') }),
+        list,
+        h('span', { class: 'lr-tf', 'data-tf': g.id })));
+    });
+    const setList = h('ul', {}, ...sets.map((s) => h('li', { text: s.tag + ' · ' + s.title + ' (' + s.tasks.length + ')' })));
+    if (c.extra) setList.append(h('li', { text: setLabel(c.extra) }));
+    grid.append(h('a', { class: 'lr-tile lr-tile-vaje', href: '#' + sets[0].id, 'data-tile': 'vaje' },
+      h('span', { class: 'lr-ti', html: ICON.vaje }),
+      h('span', { class: 'lr-tt', text: 'Vaje' }),
+      h('span', { class: 'lr-td', text: TASKS.length + ' nalog v ' + sets.length + (sets.length < 5 ? ' sklopih' : ' sklopih') }),
+      setList,
+      h('span', { class: 'lr-tf', 'data-tf': 'vaje' })));
+    p.page.append(grid);
+    const rules = h('div', { class: 'lr-rules' },
+      h('h2', { text: 'Kako poteka' }),
+      h('ol', {},
+        h('li', { text: 'Najprej preglej vse razlage. Vaje se odklenejo, ko odpreš vsako stran razlage.' }),
+        h('li', { text: 'Pri vsaki nalogi oddaš en odgovor. Pravilen odgovor prinese vse točke, napačen 0 točk.' }),
+        h('li', { text: 'Namig odbije polovico točk naloge. Ogled rešitve prinese 0 točk in nalogo zaklene.' }),
+        TASKS.some((t) => t.self) ? h('li', { text: 'Naloge z oznako »Sam preveri« nimajo točk: rešitev narediš sam, jo preizkusiš in nalogo označiš s »Preveril sem«. Rešitev si lahko ogledaš brez posledic.' }) : null,
+        h('li', { text: 'Napredek se shranjuje v tvoj račun, zato lahko nadaljuješ na katerem koli računalniku.' })));
+    if (c.vajeNote) rules.append(h('p', { class: 'lr-just', html: c.vajeNote }));
+    p.page.append(rules);
+    if (c.source) p.page.append(h('p', { class: 'lr-src', text: c.source }));
+  }
+
+  function phead(p, theory) {
+    const k = theory.indexOf(p);
+    const dash = h('span', { class: 'lr-dash', 'aria-hidden': 'true' }, ...theory.map((x, j) => h('i', { class: j <= k ? 'on' : '' })));
+    return h('div', { class: 'lr-phead' },
+      h('span', { class: 'lr-pgrp' }, h('span', { class: 'lr-gi', html: p.group.icon || '' }), h('span', { text: p.group.title })),
+      h('span', { class: 'lr-count', text: 'Razlaga ' + (k + 1) + ' / ' + theory.length }),
+      dash);
+  }
+  function buildTheory(p, theory) {
+    p.page.append(phead(p, theory));
+    const el = p.el;
+    el.hidden = false;
+    const eyebrow = el.querySelector(':scope > .eyebrow');
+    if (eyebrow) eyebrow.remove();
+    p.page.append(el);
+  }
+
+  function buildSet(p, c) {
+    const s = p;
+    const head = h('header', { class: 'lr-shead' },
+      h('span', { class: 'lr-gi', html: ICON.vaje }),
+      h('div', {}, h('span', { class: 'lr-kick', text: 'Vaje · sklop ' + s.tag }), h('h2', { text: s.title }), s.note ? h('p', { class: 'lr-just', text: s.note }) : null));
+    const nums = h('div', { class: 'lr-nums', role: 'group', 'aria-label': 'Naloge v sklopu ' + s.title });
+    s.tasks.forEach((t, k) => {
+      const b = h('button', { type: 'button', class: 'lr-num', 'data-k': k, 'data-i': t.idx, text: String(k + 1) });
+      b.addEventListener('click', () => { location.hash = s.id + '/' + (k + 1); });
+      nums.append(b);
+    });
+    // A set of self tasks has only that state in its legend; a mixed set has both.
+    const allSelf = s.tasks.every((t) => TASKS[t.idx].self), anySelf = s.tasks.some((t) => TASKS[t.idx].self);
+    const legend = h('div', { class: 'lr-legend' },
+      ...[...(allSelf ? [] : [['ok', 'pravilno'], ['half', 'pravilno z namigom (50 %)'], ['bad', 'napačno'], ['seen', 'ogledana rešitev (0 točk)']]), ...(anySelf ? [['self', 'sam preveril (brez točk)']] : [])]
+        .map(([k, t]) => h('span', {}, h('i', { class: 'lr-sw lr-' + k }), t)));
+    const board = h('div', { class: 'lr-board' },
+      h('div', { class: 'lr-bh' }, h('b', { text: s.title }), h('span', { class: 'lr-done', 'data-done': s.id })),
+      nums, legend);
+    const list = h('div', { class: 'lr-cardlist' });
+    s.tasks.forEach((t, k) => {
+      const card = t.el;
+      cards.set(t.idx, card);
+      prepareCard(card, t.idx, k, s.tasks.length, c.sel);
+      list.append(card);
+    });
+    const prev = h('button', { type: 'button', class: 'lr-btn lr-ghost lr-prev', text: '‹ Prejšnja naloga' });
+    const next = h('button', { type: 'button', class: 'lr-btn lr-ghost lr-next', text: 'Naslednja naloga ›' });
+    prev.addEventListener('click', () => step(s, -1));
+    next.addEventListener('click', () => step(s, 1));
+    const tpager = h('nav', { class: 'lr-tpager', 'aria-label': 'Listanje po nalogah' }, prev, next);
+    const body = h('div', { class: 'lr-setbody' }, board, list, tpager);
+    const locked = h('div', { class: 'lr-locked', role: 'note' });
+    s.page.append(head, locked, body, buildPager(s));
+    if (s.el) s.el.remove();
+  }
+  function prepareCard(card, i, k, n, sel) {
+    const task = TASKS[i].task;
+    card.hidden = false;
+    card.id = 't' + i;
+    card.classList.add('lr-task');
+    if (task.self) card.dataset.self = task.type;
+    const head = card.querySelector(sel.head);
+    if (head) {
+      head.classList.add('crumb');
+      const num = head.querySelector(sel.num);
+      if (num) num.textContent = 'Naloga ' + (k + 1) + ' od ' + n;
+      const tags = head.querySelector(sel.tags);
+      if (tags) {
+        tags.classList.add('lv');
+        tags.prepend(h('span', { class: 'tag lr-st', hidden: true }));
+        // The points tag is the only one that names points: a self task has none.
+        if (task.self) tags.querySelectorAll('.tag:not(.lr-st)').forEach((t) => { if (/točk/.test(t.textContent)) t.textContent = 'Sam preveri · brez točk'; });
+        if (task.example) tags.append(h('span', { class: 'tag', text: 'Rešen primer' }));
+      }
+    }
+    const q = card.querySelector(sel.q);
+    if (q) q.classList.add('lr-q');
+    if (q) shapeTask(card, q, task);
+    let check = card.querySelector(sel.check);
+    if (task.self && check) {
+      // The artifact's own check goes away with its listener; ticking is the shell's.
+      const tick = check.cloneNode(false);
+      tick.textContent = 'Preveril sem';
+      tick.addEventListener('click', () => api.checked(i));
+      check.replaceWith(tick);
+      check = tick;
+    }
+    const hint = card.querySelector(sel.hint);
+    const sol = card.querySelector(sel.sol);
+    const fb = card.querySelector(sel.fb);
+    if (check) check.classList.add('lr-check');
+    if (hint) hint.classList.add('lr-hint');
+    if (sol) sol.classList.add('lr-sol');
+    // The artifact rewrites the feedback's classes, so the shell keeps its own reference.
+    if (fb) { fb.classList.add('lr-fb'); card.lrFb = fb; }
+    const actions = card.querySelector(sel.actions);
+    if (actions) {
+      actions.classList.add('lr-actions');
+      const left = h('div', { class: 'lr-left' });
+      const right = h('div', { class: 'lr-right' });
+      const extra = sel.extra ? [...card.querySelectorAll(sel.extra)] : [];
+      extra.forEach((x) => x.classList.add('lr-extra'));
+      [...extra, check, fb].forEach((x) => x && left.append(x));
+      [hint, sol].forEach((x) => x && right.append(x));
+      actions.prepend(left, right);
+      const ask = h('div', { class: 'lr-solask', hidden: true, role: 'alert' });
+      actions.after(ask);
+      if (sol) {
+        sol.addEventListener('click', (e) => {
+          if (task.self || (status(i) !== 'open' && status(i) !== 'hinted')) return;
+          if (card.dataset.solOk) return;
+          e.stopImmediatePropagation();
+          e.preventDefault();
+          const yes = h('button', { type: 'button', class: 'lr-btn lr-danger', text: 'Prikaži rešitev' });
+          const no = h('button', { type: 'button', class: 'lr-btn lr-ghost', text: 'Prekliči' });
+          ask.replaceChildren(h('span', { text: 'Ogled rešitve prinese 0 točk in nalogo zaklene.' }), yes, no);
+          ask.hidden = false;
+          yes.addEventListener('click', () => { ask.hidden = true; card.dataset.solOk = '1'; sol.click(); });
+          no.addEventListener('click', () => { ask.hidden = true; sol.focus(); });
+          no.focus();
+        }, true);
+        if (task.example) { quiet = true; sol.click(); quiet = false; }
+      }
+    }
+  }
+
+  // The options of a task (LavRac.prepare) shape the artifact's card.
+  function shapeTask(card, q, task) {
+    if (task.nobtn) {
+      q.querySelectorAll('.js-copy, a[href*="programiz"]').forEach((x) => x.remove());
+      q.querySelectorAll('.actions').forEach((a) => { if (!a.children.length) a.remove(); });
+    }
+    if (task.self && task.type === 'code') {
+      // The program is written elsewhere and the answer is already told: there is no output to type.
+      const out = q.querySelector('[id^="o-"]');
+      if (out) (out.closest('.blank') || out).remove();
+      const bar = q.querySelector('.editorbar span');
+      if (bar) bar.textContent = 'Program zaženi v poljubnem okolju (Eclipse, VS Code, Programiz …) in primerjaj njegov izpis s pričakovanim. V Programizu razred preimenuj v Main. Kodo lahko shraniš tu.';
+    }
+    if (task.self && task.type === 'blanks') {
+      // No inputs: the known results are what the student compares with.
+      const rows = [...q.querySelectorAll(':scope > .blank')];
+      if (rows.length) {
+        const text = (b) => String(Array.isArray(b.acc) ? b.acc[0] : b.acc);
+        const box = h('div', { class: 'lr-tests' }, h('b', { text: 'Pravilni rezultati za preverjanje' }),
+          h('ul', {}, ...task.b.map((b) => h('li', {}, b.l + ': ', h('code', { text: text(b) })))));
+        rows[0].before(box);
+        rows.forEach((r) => r.remove());
+      }
+    }
+    if (task.cols) {
+      const rows = [...q.querySelectorAll(':scope > .blank')];
+      if (rows.length) { const g = h('div', { class: 'lr-cols' }); rows[0].before(g); rows.forEach((r) => g.append(r)); }
+    }
+    if (task.inline) gapFill(q, task);
+    if (task.list) {
+      const p = q.querySelector(':scope > p');
+      if (p) {
+        const out = [];
+        let ul = null;
+        p.textContent.split('\n').forEach((line) => {
+          if (line.startsWith('- ')) { if (!ul) { ul = h('ul', { class: 'lr-bul' }); out.push(ul); } ul.append(h('li', { text: line.slice(2) })); }
+          else { ul = null; out.push(h('p', { text: line })); }
+        });
+        p.replaceWith(...out);
+      }
+    }
+  }
+  // The blanks (___) of a code snippet become inputs in the code itself; the artifact still finds them by their ids.
+  function gapFill(q, task) {
+    const pre = q.querySelector('pre.code');
+    const rows = [...q.querySelectorAll(':scope > .blank')];
+    const inputs = rows.map((r) => r.querySelector('input'));
+    if (!pre || !inputs.length || inputs.some((x) => !x)) throw new Error('inline: no code or blanks in ' + task.id);
+    let k = 0;
+    const walker = document.createTreeWalker(pre, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach((n) => {
+      if (!n.nodeValue.includes('___')) return;
+      const frag = document.createDocumentFragment();
+      n.nodeValue.split('___').forEach((part, j) => {
+        if (j) {
+          const inp = inputs[k], b = task.b[k];
+          k++;
+          if (!inp) throw new Error('inline: more gaps than blanks in ' + task.id);
+          inp.classList.add('lr-gap');
+          inp.placeholder = String(k);
+          inp.setAttribute('aria-label', 'Vrzel ' + k + ': ' + b.l);
+          inp.title = b.l;
+          const len = Math.max(...(task.same ? task.b : [b]).flatMap((x) => [].concat(x.acc).map((a) => String(a).length)));
+          inp.style.width = Math.max(3, len + 2) + 'ch';
+          frag.append(inp);
+        }
+        if (part) frag.append(part);
+      });
+      n.replaceWith(frag);
+    });
+    if (k !== inputs.length) throw new Error('inline: ' + k + ' gaps for ' + inputs.length + ' blanks in ' + task.id);
+    rows.forEach((r) => r.remove());
+  }
+  function buildExtra(p) {
+    p.page.append(h('header', { class: 'lr-shead' }, h('span', { class: 'lr-gi', html: ICON.home }),
+      h('div', {}, h('span', { class: 'lr-kick', text: 'Vaje · sklop ' + p.tag }), h('h2', { text: p.title }), p.note ? h('p', { class: 'lr-just', text: p.note }) : null)));
+    p.page.append(h('div', { class: 'lr-locked', role: 'note' }));
+    const el = p.el;
+    el.hidden = false;
+    el.querySelectorAll(':scope > .eyebrow, :scope > h2, :scope > p.prose').forEach((x) => x.remove());
+    el.classList.add('lr-setbody');
+    p.page.append(el);
+  }
+  function buildPager(p) {
+    const k = pages.indexOf(p);
+    const nav = h('nav', { class: 'lr-pager', 'aria-label': 'Listanje po straneh' });
+    const prev = pages[k - 1], next = pages[k + 1];
+    const label = (x) => x.kind === 'set' || x.kind === 'extra' ? 'Vaje ' + setLabel(x) : x.title;
+    // The arrow and the side say the direction; screen readers still hear it.
+    if (prev) nav.append(h('a', { class: 'lr-prevp', href: '#' + prev.id, 'aria-label': 'Nazaj: ' + label(prev) }, h('span', { text: label(prev) })));
+    if (next) nav.append(h('a', { class: 'lr-nextp', href: '#' + next.id, 'data-to': next.id, 'aria-label': 'Naprej: ' + label(next) }, h('span', { text: label(next) })));
+    return nav;
+  }
+
+  // ---------- painting ----------
+  function paintTask(i, announce) {
+    const card = cards.get(i);
+    const s = status(i);
+    document.querySelectorAll('.lr-num[data-i="' + i + '"]').forEach((b) => { b.dataset.s = s; b.setAttribute('aria-label', 'Naloga ' + b.textContent + (LABEL[s] ? ', ' + LABEL[s].toLowerCase() : '')); });
+    if (!card) return;
+    card.dataset.lr = s;
+    const done = !['open', 'hinted'].includes(s);
+    const tag = card.querySelector('.lr-st');
+    if (tag) { tag.hidden = !done; tag.textContent = LABEL[s] || ''; tag.className = 'tag lr-st lr-' + s; }
+    const fb = card.lrFb;
+    if (done) {
+      card.querySelectorAll('.lr-q input, .lr-q select, .lr-q textarea, .lr-q button, .lr-check, .lr-extra').forEach((x) => { x.disabled = true; });
+      if (fb) { fb.textContent = MESSAGE[s](state.t[i], notes.get(i)); fb.className = 'feedback lr-fb ' + (s === 'ok' || s === 'half' || s === 'self' ? 'ok' : 'bad'); }
+    }
+    if (announce) {
+      const sb = card.querySelector('.lr-solask');
+      if (sb) sb.hidden = true;
+    }
+  }
+  function paintProgress() {
+    const r = totals();
+    const t = document.getElementById('lrPtxt');
+    if (t) t.textContent = r.done + ' / ' + r.n + ' nalog · ' + String(r.points).replace('.', ',') + ' / ' + r.max + ' točk';
+    ['ok', 'half', 'bad', 'seen', 'self'].forEach((k) => {
+      const el = document.querySelector('.lr-stack .lr-' + k);
+      if (el) el.style.width = (r.n ? 100 * r[k] / r.n : 0) + '%';
+    });
+    pages.filter((p) => p.kind === 'set').forEach((s) => {
+      const d = s.tasks.filter((x) => !['open', 'hinted'].includes(status(x.idx))).length;
+      paintPie(s);
+      document.querySelectorAll('[data-done="' + s.id + '"]').forEach((e) => { e.textContent = 'rešenih ' + d + ' / ' + s.tasks.length; });
+      document.querySelectorAll('[data-cnt="' + s.id + '"]').forEach((e) => { e.textContent = d + '/' + s.tasks.length; e.classList.toggle('full', d === s.tasks.length); });
+    });
+    const vt = document.querySelector('[data-tf="vaje"]');
+    if (vt && gateOpen()) vt.textContent = 'Rešenih ' + r.done + ' / ' + r.n + ', ' + String(r.points).replace('.', ',') + ' / ' + r.max + ' točk';
+  }
+  // The set's pie in the rail: one slice per state, clockwise from the top, in the order of the legend.
+  const PIE = [['ok', '--lr-ok', 'pravilno'], ['half', '--lr-half', 'pravilno z namigom'], ['bad', '--lr-bad', 'napačno'], ['seen', '--lr-seen', 'ogledana rešitev'], ['self', '--lr-self', 'sam preveril'], ['none', '--lr-none', 'brez odgovora']];
+  function paintPie(s) {
+    const n = s.tasks.length;
+    if (!n) return;
+    const c = { ok: 0, half: 0, bad: 0, seen: 0, self: 0, none: 0 };
+    s.tasks.forEach((x) => { const st = status(x.idx); c[c[st] === undefined ? 'none' : st]++; });
+    let cum = 0;
+    const parts = [];
+    PIE.forEach(([k, v]) => {
+      if (!c[k]) return;
+      const from = cum;
+      cum += c[k];
+      parts.push('var(' + v + ') ' + (100 * from / n).toFixed(2) + '% ' + (100 * cum / n).toFixed(2) + '%');
+    });
+    const text = PIE.filter(([k]) => c[k]).map(([k, , t]) => t + ' ' + c[k]).join(', ');
+    document.querySelectorAll('[data-pie="' + s.id + '"]').forEach((e) => {
+      e.style.background = 'conic-gradient(' + parts.join(',') + ')';
+      if (e.parentElement) e.parentElement.title = text;
+    });
+  }
+  function paintSeen() {
+    const open = gateOpen();
+    document.querySelectorAll('.lr-pg[data-page]').forEach((a) => a.classList.toggle('seen', state.seen.includes(a.dataset.page)));
+    document.querySelectorAll('.lr-gated').forEach((a) => { a.classList.toggle('locked', !open); a.setAttribute('aria-disabled', open ? 'false' : 'true'); });
+    document.querySelectorAll('.lr-vaje').forEach((g) => g.classList.toggle('locked', !open));
+    (cfg ? cfg.groups : []).forEach((g) => {
+      const n = g.pages.filter((p) => state.seen.includes(p.id)).length;
+      document.querySelectorAll('[data-gc="' + g.id + '"]').forEach((e) => { e.textContent = n + '/' + g.pages.length; e.classList.toggle('full', n === g.pages.length); });
+      document.querySelectorAll('[data-tf="' + g.id + '"]').forEach((e) => { e.textContent = n === g.pages.length ? 'Pregledano' : 'Pregledano ' + n + ' / ' + g.pages.length; e.classList.toggle('full', n === g.pages.length); });
+    });
+    const tile = document.querySelector('[data-tile="vaje"]');
+    if (tile) {
+      tile.classList.toggle('locked', !open);
+      const left = gate.filter((id) => !state.seen.includes(id)).length;
+      if (!open) tile.querySelector('[data-tf="vaje"]').textContent = 'Odklene se, ko pregledaš vse razlage. Še ' + left + '.';
+      tile.querySelector('.lr-ti').innerHTML = open ? ICON.vaje : ICON.lock;
+    }
+    document.querySelectorAll('#lrSel option').forEach((o) => {
+      const p = pages.find((x) => x.id === o.value);
+      if (p && (p.kind === 'set' || p.kind === 'extra')) o.textContent = setLabel(p) + (open ? '' : ' (zaklenjeno)');
+    });
+    paintProgress();
+  }
+  const gateOpen = () => gate.every((id) => state.seen.includes(id));
+
+  // ---------- routing ----------
+  function route() {
+    const raw = decodeURIComponent(location.hash.slice(1));
+    const [id, nRaw] = raw.split('/');
+    let p = pages.find((x) => x.id === id);
+    if (!p) {
+      p = pages[0];
+      if (raw) history.replaceState(null, '', '#' + p.id);
+    }
+    show(p, nRaw ? Number(nRaw) - 1 : null);
+  }
+  function show(p, k) {
+    pages.forEach((x) => { const on = x === p; x.page.classList.toggle('on', on); x.page.hidden = !on; });
+    if ((p.kind === 'theory' || p.kind === 'extra') && !state.seen.includes(p.id)) { state.seen.push(p.id); persist(); }
+    const locked = (p.kind === 'set' || p.kind === 'extra') && !gateOpen();
+    if (p.kind === 'set' || p.kind === 'extra') paintLock(p, locked);
+    if (p.kind === 'set' && !locked) {
+      const first = p.tasks.findIndex((t) => ['open', 'hinted'].includes(status(t.idx)));
+      const pos = k !== null && k >= 0 && k < p.tasks.length ? k : (setPos.has(p.id) ? setPos.get(p.id) : Math.max(0, first));
+      showTask(p, pos);
+    }
+    document.querySelectorAll('.lr-rail a').forEach((a) => { if (a.dataset.page === p.id) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    const sel = document.getElementById('lrSel');
+    if (sel) sel.value = p.id;
+    if (p.kind !== 'overview') { state.at = p.id; persist(); }
+    paintResume();
+    paintSeen();
+    window.scrollTo(0, 0);
+  }
+  function paintLock(p, locked) {
+    const box = p.page.querySelector('.lr-locked');
+    const body = p.page.querySelector('.lr-setbody');
+    if (body) body.hidden = locked;
+    box.hidden = !locked;
+    if (!locked) return;
+    const missing = pages.filter((x) => x.kind === 'theory' && !state.seen.includes(x.id));
+    box.replaceChildren(
+      h('span', { class: 'lr-gi', html: ICON.lock }),
+      h('div', {},
+        h('h3', { text: 'Vaje so še zaklenjene' }),
+        h('p', { text: 'Odklenejo se, ko pregledaš vse razlage. Ostalo jih je še ' + missing.length + ':' }),
+        h('ul', {}, ...missing.map((x) => h('li', {}, h('a', { href: '#' + x.id, text: x.group.title + ': ' + x.title })))),
+        h('a', { class: 'lr-btn lr-primary', href: '#' + missing[0].id, text: 'Na prvo nepregledano razlago' })));
+  }
+  function showTask(s, k) {
+    setPos.set(s.id, k);
+    s.tasks.forEach((t, j) => cards.get(t.idx).classList.toggle('lr-off', j !== k));
+    s.page.querySelectorAll('.lr-num').forEach((b) => { if (Number(b.dataset.k) === k) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+    s.page.querySelector('.lr-prev').disabled = k === 0;
+    const next = s.page.querySelector('.lr-next');
+    next.disabled = k === s.tasks.length - 1;
+  }
+  function step(s, d) {
+    const k = (setPos.get(s.id) || 0) + d;
+    if (k < 0 || k >= s.tasks.length) return;
+    location.hash = s.id + '/' + (k + 1);
+  }
+  function paintResume() {
+    const box = document.getElementById('lrResume');
+    if (!box) return;
+    const p = pages.find((x) => x.id === state.at);
+    box.hidden = !p || p.kind === 'overview';
+    if (!p) return;
+    box.replaceChildren(h('span', { text: 'Nazadnje si bil pri: ' }), h('a', { href: '#' + p.id, text: p.kind === 'set' || p.kind === 'extra' ? 'Vaje ' + setLabel(p) : p.title }));
+  }
+
+  // ---------- for the importer ----------
+  function catalog() {
+    const LEVEL = { 1: 'lažja', 2: 'srednja', 3: 'težja' };
+    const tasks = [];
+    pages.filter((p) => p.kind === 'set').forEach((s) => s.tasks.forEach((t) => {
+      const src = TASKS[t.idx].task;
+      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
+    }));
+    tasks.sort((a, b) => a.i - b.i);
+    return {
+      pages: pages.map((p) => ({ id: p.id, chapter: p.kind === 'theory' || p.kind === 'overview' ? 'Teorija' : 'Naloge', label: p.kind === 'set' || p.kind === 'extra' ? 'Vaje ' + setLabel(p) : p.title })),
+      tasks,
+      gate: gate.slice(),
+      tags: pages.filter((p) => p.kind === 'set' || p.kind === 'extra').map((p) => p.tag),
+    };
+  }
+})();
+
+</script>
+<link href="/static/fonts/fonts.css" rel="stylesheet">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<title>Pogojni stavki v Javi</title>
+<style>
+/* Layout: sticky chapter rail (desktop) + single reading column; theory first, then graded task cards, then homework. */
+:root{
+  --bg:#f4f6f8; --surface:#ffffff; --sunk:#e9edf1; --line:#d3dae1;
+  --fg:#18202b; --muted:#5a6675;
+  --accent:#8b4a1f; --accent-soft:#f3e4d8;
+  --ok:#11775f; --ok-soft:#dcf1ea; --bad:#b4372b; --bad-soft:#f8e1de; --seen:#8a6a00; --seen-soft:#f6edcc;
+  --code-bg:#1d2430; --code-fg:#e5e9f0; --k:#f0a868; --s:#9fd39a; --c:#8a96a8; --n:#d6a5f0;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11151b; --surface:#181e26; --sunk:#0d1116; --line:#2b3440;
+  --fg:#e4e8ee; --muted:#9aa5b3;
+  --accent:#e8a26f; --accent-soft:#3a2a1f;
+  --ok:#53c9a6; --ok-soft:#14322a; --bad:#f08578; --bad-soft:#3a1e1b; --seen:#e2c25a; --seen-soft:#352d12;
+  --code-bg:#0b0f14; --code-fg:#e5e9f0;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11151b; --surface:#181e26; --sunk:#0d1116; --line:#2b3440;
+  --fg:#e4e8ee; --muted:#9aa5b3;
+  --accent:#e8a26f; --accent-soft:#3a2a1f;
+  --ok:#53c9a6; --ok-soft:#14322a; --bad:#f08578; --bad-soft:#3a1e1b; --seen:#e2c25a; --seen-soft:#352d12;
+  --code-bg:#0b0f14; --code-fg:#e5e9f0;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:17px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:48px;padding-block:32px 80px}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr);gap:24px;padding-block:20px 60px}.wrap > .rail{display:none}}
+[hidden]{display:none!important}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(2rem,4.5vw,3rem);font-weight:700;letter-spacing:-.02em}
+h2{font-size:1.65rem;font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.2rem;font-weight:700}
+p{margin:0}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.eyebrow{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+main{min-width:0;display:flex;flex-direction:column;gap:56px}
+section{display:flex;flex-direction:column;gap:18px;scroll-margin-top:24px}
+.prose{max-width:68ch;display:flex;flex-direction:column;gap:14px}
+p.prose{display:block}
+.prose ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--sunk);padding:.08em .35em;border-radius:4px}
+pre{margin:0}
+.code{background:var(--code-bg);color:var(--code-fg);font-family:var(--f-mono);font-size:.84rem;line-height:1.55;padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.code .k{color:var(--k)} .code .s{color:var(--s)} .code .c{color:var(--c);font-style:italic} .code .n{color:var(--n)}
+.term .p{color:var(--k);user-select:none} .term .o{color:#a9b4c4}
+
+/* rail */
+.rail{position:sticky;top:max(24px,env(safe-area-inset-top,0px));align-self:start;display:flex;flex-direction:column;gap:20px;font-size:.93rem}
+.rail nav{display:flex;flex-direction:column;gap:2px}
+.rail nav a{color:var(--muted);text-decoration:none;padding:4px 10px;border-left:2px solid var(--line)}
+.rail nav a:hover{color:var(--fg);border-left-color:var(--accent)}
+.rail .grp{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 0 4px 12px}
+
+/* hero */
+.hero{display:flex;flex-direction:column;gap:16px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.hero .lead{font-size:1.15rem;color:var(--muted);max-width:62ch}
+.magic{font-family:var(--f-mono);font-size:clamp(.8rem,2.4vw,1rem);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.magic span{padding:3px 7px;border-radius:4px;background:var(--sunk);color:var(--muted)}
+.magic span.hi{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.magic small{color:var(--muted);font-family:var(--f-body);font-size:.85rem;margin-left:6px}
+
+/* progress */
+.progress{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.progress .row{display:flex;justify-content:space-between;gap:8px;font-variant-numeric:tabular-nums;font-size:.92rem}
+.bar{height:8px;background:var(--sunk);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.progress .tools{display:flex;gap:8px;flex-wrap:wrap}
+
+/* diagram + tables */
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;overflow-x:auto}
+.fig svg{display:block;min-width:640px;width:100%;height:auto}
+.fig figcaption{font-size:.88rem;color:var(--muted);margin-top:8px}
+figure{margin:0}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.95rem;min-width:520px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
+.note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 14px;border-radius:0 8px 8px 0;max-width:68ch;font-size:.97rem}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.two > *{min-width:0}
+
+/* task list */
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:inherit;font-size:.88rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:5px 12px;border-radius:99px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.level{display:flex;flex-direction:column;gap:14px}
+.level > header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding-top:8px}
+.level > header p{color:var(--muted);font-size:.95rem}
+.task{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px;scroll-margin-top:24px}
+.task[data-state="ok"]{border-color:var(--ok)}
+.task[data-state="seen"]{border-color:var(--seen)}
+.thead{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.tnum{font-family:var(--f-display);font-weight:700;font-size:1.05rem}
+.tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.tag{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.04em;padding:2px 8px;border-radius:4px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.tag.mat{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.tag.st-ok{background:var(--ok-soft);color:var(--ok)}
+.tag.st-seen{background:var(--seen-soft);color:var(--seen)}
+.q{display:flex;flex-direction:column;gap:10px;max-width:72ch}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 12px;border:1px solid var(--line);border-radius:8px;cursor:pointer;background:var(--bg)}
+.opt:hover{border-color:var(--muted)}
+.opt input{margin-top:5px;accent-color:var(--accent)}
+.opt b{font-family:var(--f-mono);font-weight:600;min-width:1.2em}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.blank{display:flex;flex-direction:column;gap:4px}
+.blank label{font-size:.93rem;color:var(--muted)}
+input[type="text"],textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 10px;width:100%}
+input.mono,textarea.mono{font-family:var(--f-mono);font-size:.86rem}
+textarea.editor{font-family:var(--f-mono);font-size:.84rem;line-height:1.5;min-height:180px;tab-size:4;white-space:pre;overflow:auto;resize:vertical}
+textarea.out{min-height:90px}
+input.right,textarea.right{border-color:var(--ok);background:var(--ok-soft)}
+input.wrong,textarea.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.cls{display:flex;flex-direction:column;gap:6px}
+.crow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.crow.right{border-color:var(--ok);background:var(--ok-soft)} .crow.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.crow .txt{min-width:0;font-size:.96rem}
+.seg{display:inline-flex;justify-self:start;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex-wrap:wrap}
+.seg button{font:inherit;font-size:.84rem;border:0;background:var(--surface);color:var(--fg);padding:4px 10px;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+@media (max-width:560px){.crow{grid-template-columns:minmax(0,1fr)}}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;font-size:.92rem;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:6px 14px;border-radius:6px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.feedback{font-weight:600;font-size:.95rem}
+.feedback.ok{color:var(--ok)} .feedback.bad{color:var(--bad)}
+.hints{display:flex;flex-direction:column;gap:6px}
+.hint{background:var(--sunk);border-radius:8px;padding:8px 12px;font-size:.95rem;max-width:72ch}
+.hint b{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);margin-right:6px}
+.sol{border-top:1px dashed var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px}
+.sol .ans{font-weight:700}
+.sol .why{max-width:72ch;color:var(--fg)}
+.editorbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.editorbar span{font-size:.85rem;color:var(--muted)}
+.confirm{display:inline-flex;gap:8px;align-items:center;font-size:.9rem}
+/* paging */
+.rail nav a[aria-current="page"]{color:var(--fg);border-left-color:var(--accent);font-weight:600;background:var(--surface)}
+.rail nav a{display:flex;justify-content:space-between;gap:8px}
+.rail nav a .cnt{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:400}
+.rail nav a .cnt.full{color:var(--ok)}
+.rprog{display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:.86rem;font-variant-numeric:tabular-nums}
+.sync{display:flex;gap:6px;align-items:flex-start;color:var(--muted);font-size:.8rem;line-height:1.35}
+.sync::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;margin-top:4px;background:var(--seen)}
+.sync[data-s="cloud"]::before{background:var(--ok)}
+.mtop{display:none;flex-direction:column;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.mtop select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 10px;width:100%}
+.mtop .row{display:flex;justify-content:space-between;gap:8px;font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+@media (max-width:900px){.mtop{display:flex}}
+.crumb{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-top:1px solid var(--line);padding-top:20px}
+.pager a{display:flex;flex-direction:column;gap:2px;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);text-decoration:none;min-width:0}
+.pager a:hover{border-color:var(--accent)}
+.pager a.next{text-align:right;grid-column:2}
+.pager a .t{font-family:var(--f-display);font-weight:700;font-size:1.05rem}
+.pager a.next .t::after{content:" \2192"} .pager a.prev .t::before{content:"\2190  "}
+.pager .eyebrow{font-size:.7rem}
+@media (max-width:560px){.pager{grid-template-columns:1fr}.pager a.next{grid-column:1}}
+.lvl-empty{color:var(--muted);font-style:italic}
+main{gap:40px}
+footer{color:var(--muted);font-size:.88rem;border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.fc{display:block;max-width:100%;height:auto;margin:0 auto}
+.fc .fn{fill:var(--surface);stroke:var(--fg);stroke-width:1.5}
+.fc .fl{fill:none;stroke:var(--fg);stroke-width:1.5}
+.fc .fa{fill:var(--fg);stroke:none}
+.fc .ft{font-family:var(--f-mono);font-size:13px;fill:var(--fg);text-anchor:middle;dominant-baseline:central}
+.fc .fl2{font-family:var(--f-body);font-size:12px;font-weight:600;fill:var(--muted)}
+.fc.sym{margin:0}
+.fc .fb{fill:var(--accent);stroke:var(--surface);stroke-width:1.5}
+.fc .fbt{font-family:var(--f-body);font-size:11px;font-weight:700;fill:var(--surface);text-anchor:middle;dominant-baseline:central}
+p.prose{display:block}
+.langsw{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.mtop .langsw{flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap}
+
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+<style>
+/* LAV-RAČ exercise shell: light orange background with the portal's plum for text and buttons, and the same task colours as the teacher's results. The artifact's own content keeps its styles;
+   these rules own the frame (top progress, rail, pages, task paging) and the task buttons. */
+:root{
+  --lr-bg:#fffaf4;--lr-card:#fff;--lr-ink:#241433;--lr-mut:#5f5470;--lr-acc:#6b2a7a;--lr-acc-soft:#fdeedd;--lr-line:#f0e3d3;--lr-tile:#faf0e3;
+  --lr-hdr:#2e1a40;--lr-lamp:#ffc45c;
+  --lr-ok:#2b8a3e;--lr-ok-bg:#e3f5e8;--lr-half:#9a6416;--lr-half-bg:#f8eed9;--lr-bad:#c92a2a;--lr-bad-bg:#fde8e8;--lr-seen:#5f5470;--lr-seen-bg:#ece6f2;
+  --lr-self:#1f6f8b;--lr-self-bg:#e1f0f5;
+  --lr-none:#e6dccf;--lr-ring:#c3b5a3;
+  --lr-fb:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;--lr-fm:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --lr-bg:#171021;--lr-card:#231833;--lr-ink:#efe9f5;--lr-mut:#a99cba;--lr-acc:#d5a6e6;--lr-acc-soft:#3a2a4a;--lr-line:#3a2c4d;--lr-tile:#2f2242;
+  --lr-hdr:#1f1130;
+  --lr-ok:#6fd48a;--lr-ok-bg:#17352a;--lr-half:#f1b95a;--lr-half-bg:#3a2e17;--lr-bad:#ff8080;--lr-bad-bg:#3d2230;--lr-seen:#a99cba;--lr-seen-bg:#2f2242;
+  --lr-self:#6cc1dd;--lr-self-bg:#16313b;
+  --lr-none:#4a3a60;--lr-ring:#76648f;
+}}
+html body{background:var(--lr-bg);color:var(--lr-ink);font-family:var(--lr-fb);padding:0}
+html body .lvs-bar{background:var(--lr-hdr)}
+[hidden]{display:none!important}
+.lr{min-height:100vh}
+.lr-btn{font:600 .9rem var(--lr-fb);border-radius:7px;padding:6px 14px;min-height:36px;cursor:pointer;border:1.5px solid var(--lr-acc);background:var(--lr-acc);color:var(--lr-card);text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.lr-btn.lr-ghost{background:transparent;color:var(--lr-acc)}
+.lr-btn.lr-danger{background:var(--lr-bad);border-color:var(--lr-bad);color:#fff}
+.lr-btn:disabled{opacity:.4;cursor:default}
+.lr :focus-visible{outline:3px solid var(--lr-lamp);outline-offset:2px}
+
+/* top: always visible progress */
+.lr-top{position:sticky;top:0;z-index:20;background:var(--lr-card);border-bottom:1px solid var(--lr-line);box-shadow:0 2px 10px #24143312}
+.lr-top-in{max-width:1240px;margin:auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px;padding:10px max(16px,env(safe-area-inset-left,0px))}
+.lr-name{display:flex;flex-direction:column;min-width:0;flex:1 1 220px;line-height:1.25}
+.lr-name b{font-size:1.05rem}
+.lr-name span{font-size:.85rem;color:var(--lr-mut)}
+.lr-prog{flex:2 1 300px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.lr-stack{display:flex;height:12px;border-radius:99px;background:var(--lr-tile);overflow:hidden}
+.lr-stack i{display:block;height:100%;width:0;transition:width .35s ease-out}
+.lr-ptxt{font:500 .9rem var(--lr-fm);color:var(--lr-mut);font-variant-numeric:tabular-nums}
+.lr-reset{display:flex;align-items:center}
+.lr-confirm{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:.92rem;max-width:560px}
+.lr-ok{background:var(--lr-ok)}.lr-half{background:var(--lr-half)}.lr-bad{background:var(--lr-bad)}.lr-seen{background:var(--lr-seen)}.lr-self{background:var(--lr-self)}
+
+/* body: rail + page */
+.lr-body{max-width:1240px;margin:auto;display:grid;grid-template-columns:272px minmax(0,1fr);gap:40px;padding:24px max(16px,env(safe-area-inset-left,0px)) 80px}
+.lr-rail{position:sticky;top:96px;align-self:start;max-height:calc(100vh - 112px);overflow-y:auto;display:flex;flex-direction:column;gap:2px;padding-right:6px;font-size:.93rem}
+/* a label that wraps hangs under its text, and a counter sits at the right edge */
+.lr-rail a{color:var(--lr-mut);text-decoration:none;border-radius:8px;padding:5px 10px;display:flex;align-items:flex-start;gap:8px;justify-content:space-between;line-height:1.35}
+.lr-rail a:hover{background:var(--lr-tile);color:var(--lr-ink)}
+.lr-rail a[aria-current=page]{background:var(--lr-acc-soft);color:var(--lr-ink);font-weight:700;box-shadow:inset 3px 0 0 var(--lr-acc)}
+.lr-rail a.lr-pg{justify-content:flex-start}
+.lr-ov{font-weight:700;color:var(--lr-ink)!important}
+.lr-grp{display:flex;align-items:center;gap:10px;margin:18px 0 4px;padding:0 4px;color:var(--lr-ink)}
+.lr-grp b{font-size:1.08rem;letter-spacing:.005em;flex:1}
+.lr-grp .lr-gi{width:30px;height:30px;flex:none;border-radius:8px;background:var(--lr-acc-soft);display:grid;place-items:center}
+.lr-grp .lr-gi svg{width:22px;height:22px}
+.lr-gc,.lr-cnt{font:500 .78rem var(--lr-fm);color:var(--lr-mut);font-variant-numeric:tabular-nums}
+.lr-gc.full,.lr-cnt.full{color:var(--lr-ok)}
+.lr-lab{display:flex;gap:6px;flex:1;min-width:0}
+/* em, not ch: the open page is bold, and a bold zero is wider, which would shift its text */
+.lr-tg{flex:none;min-width:calc(var(--lr-tgd,1) * .7em + 1.1em);white-space:nowrap}
+.lr-tx{flex:1;min-width:0;overflow-wrap:anywhere}
+.lr-rail .lr-cnt{margin-left:auto;flex:none;white-space:nowrap;line-height:1.61}
+.lr-dot,.lr-pie{box-sizing:border-box;margin-top:calc((1.35em - 16px) / 2)}
+.lr-pie{flex:none;width:16px;height:16px;border-radius:50%;background:var(--lr-none);box-shadow:0 0 0 1px var(--lr-ring)}
+.lr-dot{flex:none;width:16px;height:16px;border-radius:50%;border:1.5px solid var(--lr-line);display:grid;place-items:center}
+.lr-dot svg{width:12px;height:12px;stroke:transparent;stroke-width:3;fill:none}
+.lr-pg.seen .lr-dot{background:var(--lr-ok);border-color:var(--lr-ok)}
+.lr-pg.seen .lr-dot svg{stroke:#fff}
+.lr-lock{display:none;width:18px;height:18px;color:var(--lr-mut)}
+.lr-lock svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.lr-vaje.locked .lr-lock{display:block}
+.lr-rail a.locked{opacity:.55}
+.lr-gi svg,.lr-ti svg{fill:none;stroke:var(--lr-acc);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.lr-gi svg text,.lr-ti svg text{fill:var(--lr-acc);stroke:none;font-family:var(--lr-fm);font-weight:600}
+.lr-gi svg .fill,.lr-ti svg .fill{fill:var(--lr-acc);stroke:none}
+.lr-mnav{display:none}
+.lr-rail .lr-tools{margin-top:18px;padding:0 10px}
+.lr-main{min-width:0}
+.lr-main .prose,.lr-main .note,.lr-main .q,.lr-main .qtext,.lr-main .hint,.lr-main .sol .why,.lr-main .wnote,.lr-main .think,.lr-main .lead,.lr-main p,.lr-main ul,.lr-main ol,.lr-shead>div{max-width:none}
+.lr-page{display:flex;flex-direction:column;gap:22px;scroll-margin-top:140px}
+.lr-just,.lr-main .prose p,.lr-main p.prose,.lr-main .note,.lr-main .qtext,.lr-main .wnote,.lr-main .hint,.lr-main .sol .why p,.lr-main .level>header p,.lr-main .think div{text-align:justify;hyphens:auto;-webkit-hyphens:auto}
+
+/* page head: where you are in the theory */
+.lr-phead{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding-bottom:12px;border-bottom:1px solid var(--lr-line)}
+.lr-pgrp{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--lr-acc);font-size:1.02rem}
+.lr-pgrp .lr-gi{width:36px;height:36px;border-radius:9px;background:var(--lr-acc-soft);display:grid;place-items:center}
+.lr-pgrp .lr-gi svg{width:26px;height:26px}
+.lr-count{font:500 .86rem var(--lr-fm);color:var(--lr-mut);margin-left:auto}
+.lr-dash{display:flex;gap:4px;flex:1 1 100%}
+.lr-dash i{height:5px;flex:1;border-radius:3px;background:var(--lr-tile)}
+.lr-dash i.on{background:var(--lr-acc)}
+
+/* overview */
+.lr-hero{display:flex;flex-direction:column;gap:14px;padding:4px 0 6px}
+.lr-hero h1{font-size:clamp(1.8rem,3.6vw,2.6rem);line-height:1.12;margin:0}
+.lr-lead{font-size:1.12rem;color:var(--lr-mut);text-align:justify;hyphens:auto}
+.lr-resume{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 14px;border-radius:10px;background:var(--lr-acc-soft)}
+.lr-resume a{color:var(--lr-acc);font-weight:700}
+.lr-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.lr-tile{display:flex;flex-direction:column;gap:6px;padding:18px;border-radius:14px;background:var(--lr-card);border:1px solid var(--lr-line);color:var(--lr-ink);text-decoration:none;min-width:0}
+.lr-tile:hover{border-color:var(--lr-acc);box-shadow:0 6px 18px #2414331a}
+.lr-ti{width:56px;height:56px;border-radius:14px;background:var(--lr-acc-soft);display:grid;place-items:center;margin-bottom:6px}
+.lr-ti svg{width:40px;height:40px}
+.lr-tt{font-size:1.25rem;font-weight:700}
+.lr-td{font-size:.9rem;color:var(--lr-mut)}
+.lr-tile ul{margin:4px 0 0;padding-left:18px;font-size:.9rem;color:var(--lr-mut);display:flex;flex-direction:column;gap:2px}
+.lr-tf{margin-top:auto;padding-top:10px;font-size:.88rem;font-weight:700;color:var(--lr-mut)}
+.lr-tf.full{color:var(--lr-ok)}
+.lr-tile-vaje{background:var(--lr-hdr);border-color:var(--lr-hdr);color:#fff}
+.lr-tile-vaje .lr-td,.lr-tile-vaje ul,.lr-tile-vaje .lr-tf{color:#e6d8ee}
+.lr-tile-vaje .lr-ti{background:#ffffff1f}
+.lr-tile-vaje .lr-ti svg{stroke:var(--lr-lamp)}
+.lr-tile-vaje.locked{background:var(--lr-tile);border-color:var(--lr-line);color:var(--lr-ink)}
+.lr-tile-vaje.locked .lr-td,.lr-tile-vaje.locked ul,.lr-tile-vaje.locked .lr-tf{color:var(--lr-mut)}
+.lr-tile-vaje.locked .lr-ti{background:var(--lr-card)}
+.lr-tile-vaje.locked .lr-ti svg{stroke:var(--lr-mut)}
+.lr-rules{padding:18px 20px;border-radius:14px;background:var(--lr-card);border:1px solid var(--lr-line)}
+.lr-rules h2{font-size:1.15rem;margin:0 0 6px}
+.lr-rules ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:4px}
+.lr-rules p{margin:10px 0 0;color:var(--lr-mut);font-size:.95rem}
+.lr-src{font-size:.88rem;color:var(--lr-mut);text-align:justify;hyphens:auto}
+
+/* set page */
+.lr-shead{display:flex;gap:16px;align-items:flex-start}
+.lr-shead>.lr-gi{flex:none;width:56px;height:56px;border-radius:14px;background:var(--lr-acc-soft);display:grid;place-items:center}
+.lr-shead>.lr-gi svg{width:40px;height:40px}
+.lr-shead>div{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
+.lr-shead h2{margin:0}
+.lr-kick{font-size:.9rem;font-weight:700;color:var(--lr-acc)}
+.lr-board{background:var(--lr-card);border:1px solid var(--lr-line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.lr-bh{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.lr-bh b{font-size:1rem}
+.lr-done{font-size:.92rem;color:var(--lr-mut);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lr-nums{display:flex;flex-wrap:wrap;gap:6px}
+.lr-num{width:36px;height:32px;border-radius:6px;border:1.5px solid var(--lr-line);background:var(--lr-card);color:var(--lr-ink);font:700 .82rem var(--lr-fb);cursor:pointer}
+.lr-num:hover{border-color:var(--lr-acc)}
+.lr-num[data-s=ok]{background:var(--lr-ok-bg);border-color:var(--lr-ok);color:var(--lr-ok)}
+.lr-num[data-s=half]{background:var(--lr-half-bg);border-color:var(--lr-half);color:var(--lr-half)}
+.lr-num[data-s=bad]{background:var(--lr-bad-bg);border-color:var(--lr-bad);color:var(--lr-bad)}
+.lr-num[data-s=seen]{background:var(--lr-seen-bg);border-color:var(--lr-seen);color:var(--lr-seen)}
+.lr-num[data-s=self]{background:var(--lr-self-bg);border-color:var(--lr-self);color:var(--lr-self)}
+.lr-num[aria-current=step]{box-shadow:0 0 0 3px var(--lr-acc);border-color:var(--lr-acc)}
+.lr-legend{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px 18px;font-size:.88rem;color:var(--lr-mut)}
+.lr-legend span{display:inline-flex;align-items:center;gap:6px}
+.lr-sw{width:14px;height:14px;border-radius:4px}
+.lr-setbody{display:flex;flex-direction:column;gap:16px}
+.lr-cardlist{display:flex;flex-direction:column}
+.lr-task.lr-off{display:none!important}
+.lr-tpager{display:flex;justify-content:space-between;gap:12px}
+.lr-locked{display:flex;gap:16px;padding:20px;border-radius:14px;background:var(--lr-card);border:1.5px dashed var(--lr-line)}
+.lr-locked .lr-gi{flex:none;width:48px;height:48px;border-radius:12px;background:var(--lr-tile);display:grid;place-items:center}
+.lr-locked .lr-gi svg{width:28px;height:28px;stroke:var(--lr-mut)}
+.lr-locked h3{margin:0 0 4px}
+.lr-locked ul{margin:8px 0 14px;padding-left:20px}
+.lr-locked a:not(.lr-btn){color:var(--lr-acc)}
+
+/* task card: check on the left, help on the right */
+.lr-task .crumb{align-items:center}
+.lr-actions{display:flex!important;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-top:6px}
+/* empty help boxes take no room, so the space above and below the buttons stays even */
+.lr-task .hints:empty,.lr-task .tests:empty{display:none}
+.lr-left,.lr-right{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.lr-right{margin-left:auto}
+.lr-task .lr-hint,.lr-task .lr-sol{background:transparent!important;border:1.5px solid var(--lr-acc)!important;color:var(--lr-acc)!important;border-radius:7px;min-height:36px;padding:5px 14px;font-size:.9rem;font-weight:600}
+.lr-task .lr-hint:disabled{opacity:.45}
+.lr-task[data-lr=open] .lr-hint::after,.lr-task[data-lr=open] .lr-sol::after,.lr-task[data-lr=hinted] .lr-sol::after{font:500 .74rem var(--lr-fm);margin-left:8px;padding:1px 6px;border-radius:99px;background:var(--lr-acc-soft)}
+.lr-task[data-lr=open] .lr-hint::after{content:"−50 %"}
+.lr-task[data-lr=open] .lr-sol::after,.lr-task[data-lr=hinted] .lr-sol::after{content:"0 točk"}
+.lr-task .lr-check{background:var(--lr-acc)!important;border-color:var(--lr-acc)!important;color:var(--lr-card)!important;border-radius:7px;min-height:36px;padding:5px 16px;font-size:.9rem}
+.lr-task .lr-check:disabled,.lr-task .lr-extra:disabled{opacity:.4;cursor:default}
+.lr-task .lr-extra{background:transparent!important;border:1.5px solid var(--lr-acc)!important;color:var(--lr-acc)!important;border-radius:7px;min-height:36px;padding:5px 14px;font-size:.9rem;font-weight:600}
+.lr-solask{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:flex-end;padding:10px 12px;border-radius:10px;background:var(--lr-bad-bg);font-size:.95rem}
+.lr-task[data-lr=ok]{border-color:var(--lr-ok)!important}
+.lr-task[data-lr=half]{border-color:var(--lr-half)!important}
+.lr-task[data-lr=bad]{border-color:var(--lr-bad)!important}
+.lr-task[data-lr=seen]{border-color:var(--lr-seen)!important}
+.lr-task[data-lr=self]{border-color:var(--lr-self)!important}
+.tag.lr-st{font-weight:700}
+.tag.lr-st.lr-ok{background:var(--lr-ok-bg);color:var(--lr-ok)}
+.tag.lr-st.lr-half{background:var(--lr-half-bg);color:var(--lr-half)}
+.tag.lr-st.lr-bad{background:var(--lr-bad-bg);color:var(--lr-bad)}
+.tag.lr-st.lr-seen{background:var(--lr-seen-bg);color:var(--lr-seen)}
+.tag.lr-st.lr-self{background:var(--lr-self-bg);color:var(--lr-self)}
+
+/* self tasks: no points, so the hint and the solution carry no price tag; the known results replace the inputs */
+.lr-task[data-self][data-lr] .lr-hint::after,.lr-task[data-self][data-lr] .lr-sol::after{content:none}
+.lr-task[data-self=blanks] .sol .ans{display:none}
+.lr-tests{margin:10px 0;padding:10px 14px;border-radius:10px;background:var(--lr-self-bg);border-left:4px solid var(--lr-self)}
+.lr-tests b{display:block;margin-bottom:4px}
+.lr-tests ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:2px}
+.lr-tests code{font-family:var(--lr-fm);font-weight:700}
+
+/* options of single tasks: bullets in a question, blanks in two columns, blanks typed in the code */
+.lr-q ul.lr-bul{margin:6px 0 10px;padding-left:22px;display:flex;flex-direction:column;gap:2px}
+.lr-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 28px;margin:6px 0}
+@media (max-width:640px){.lr-cols{grid-template-columns:minmax(0,1fr)}}
+/* the blanks typed in the code: they must beat the artifact's own input style (padding, border, width) */
+.lr-q input.lr-gap{font:inherit;font-family:var(--lr-fm);font-size:inherit;color:var(--lr-ink);background:var(--lr-acc-soft);border:0;border-bottom:2px solid var(--lr-acc);border-radius:4px 4px 0 0;padding:0 .3em;margin:0 .1em;height:1.45em;line-height:1.2;text-align:center;box-sizing:content-box;min-width:3ch;vertical-align:baseline}
+.lr-q input.lr-gap::placeholder{color:var(--lr-mut);opacity:.7}
+.lr-q input.lr-gap.right{border-bottom-color:var(--lr-ok);background:var(--lr-ok-bg)}
+.lr-q input.lr-gap.wrong{border-bottom-color:var(--lr-bad);background:var(--lr-bad-bg)}
+.lr-q input.lr-gap:disabled{opacity:1;color:var(--lr-ink);-webkit-text-fill-color:var(--lr-ink)}
+
+/* pager between pages, bottom right */
+.lr-pager{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--lr-line);padding-top:14px;margin-top:4px;flex-wrap:wrap}
+.lr-pager a{display:flex;flex-direction:column;gap:0;padding:7px 12px;border:1.5px solid var(--lr-line);border-radius:7px;background:var(--lr-card);color:var(--lr-ink);text-decoration:none;min-width:0;max-width:320px;line-height:1.3}
+.lr-pager a:hover{border-color:var(--lr-acc)}
+.lr-pager span{font-weight:700;font-size:.9rem}
+.lr-pager .lr-prevp span::before{content:"‹ "}
+.lr-pager .lr-nextp{border-color:var(--lr-acc);text-align:right;margin-left:auto}
+.lr-pager .lr-nextp span::after{content:" ›"}
+
+@media (max-width:900px){
+  .lr-body{grid-template-columns:minmax(0,1fr);gap:16px;padding-top:14px}
+  .lr-rail{display:none}
+  .lr-mnav{display:flex;flex-direction:column;gap:12px;font-size:.85rem;color:var(--lr-mut)}
+  .lr-msel{display:flex;flex-direction:column;gap:4px}
+  .lr-mnav select{font:inherit;font-size:.95rem;color:var(--lr-ink);background:var(--lr-card);border:1px solid var(--lr-line);border-radius:7px;padding:6px 10px;min-height:38px}
+  .lr-top{position:sticky}
+  .lr-reset{flex:1 1 100%}
+  .lr-shead>.lr-gi{display:none}
+  .lr-right{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){.lr *{transition:none!important}}
+
+html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-tile);--line:var(--lr-line);--fg:var(--lr-ink);--muted:var(--lr-mut);
+  --accent:var(--lr-acc);--accent-soft:var(--lr-acc-soft);--ok:var(--lr-ok);--ok-soft:var(--lr-ok-bg);--bad:var(--lr-bad);--bad-soft:var(--lr-bad-bg);
+  --seen:var(--lr-seen);--seen-soft:var(--lr-seen-bg);--f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}
+  body{padding-left:0;padding-right:0}
+</style>
+</head><body>
+<div class="wrap">
+  <aside class="rail" aria-label="Vsebina poglavja">
+    <div class="eyebrow">Poglavje 5 od 12</div>
+    <nav>
+      <div class="grp">Razlaga</div>
+      <a href="#stavek-if">Stavek if</a>
+      <a href="#if-else">if – else in bloki</a>
+      <a href="#gnezdenje">Gnezdenje in else</a>
+      <a href="#veriga">else if in ?:</a>
+      <a href="#switch">Stavek switch</a>
+      <a href="#napake">Pogoste napake</a>
+      <div class="grp">Vaje</div>
+      <a href="#naloge-a">A · Pogoji in if <span class="cnt" data-lv="A"></span></a>
+      <a href="#naloge-b">B · if – else <span class="cnt" data-lv="B"></span></a>
+      <a href="#naloge-c">C · else if in ?: <span class="cnt" data-lv="C"></span></a>
+      <a href="#naloge-d">D · switch <span class="cnt" data-lv="D"></span></a>
+      <a href="#naloge-e">E · Laboratorijske vaje <span class="cnt" data-lv="E"></span></a>
+      <a href="#doma">Za doma <span class="cnt" data-lv="F"></span></a>
+    </nav>
+    <div class="rprog" aria-live="polite">
+      <strong>Tvoj napredek</strong>
+      <div class="bar"><i class="js-bar"></i></div>
+      <span class="js-progtxt"></span>
+      <span class="sync js-sync" data-s="local">Napredek se shranjuje v tem brskalniku.</span>
+    </div>
+      
+  </aside>
+
+  <main>
+    <div class="mtop">
+      <label class="eyebrow" for="pageSel">Poglavje 5 · stran</label>
+      <select id="pageSel"></select>
+      <div class="bar"><i class="js-bar"></i></div>
+      <div class="row"><span class="js-progtxt"></span></div>
+      <span class="sync js-sync" data-s="local">Napredek se shranjuje v tem brskalniku.</span>
+      
+    </div>
+    <div class="crumb" id="crumb"><span class="eyebrow">Poglavje 5 · Pogojni stavki</span><span class="eyebrow" id="crumbN"></span></div>
+    <header class="hero" id="hero">
+      <div class="eyebrow">Splošna matura · Računalništvo · Izpitna pola 1</div>
+      <h1>Pogojni stavki v Javi</h1>
+      <p class="lead">Program se mora pogosto odločiti, kaj bo naredil: izpisati »sodo« ali »liho«, izbrati oceno glede na točke ali ime dneva glede na številko. Spoznaš stavek <code>if</code> z vejo <code>else</code>, gnezdenje in verige <code>else if</code>, pogojni operator in stavek <code>switch</code>.</p>
+      <div class="magic" aria-label="Teme poglavja">
+        <span class="hi">if</span><span>·</span><span class="hi">else</span><span>·</span><span class="hi">switch</span>
+        <small>trije gradniki vejitve</small>
+      </div>
+    </header>
+
+    <!-- ===================== RAZLAGA ===================== -->
+    <section id="stavek-if">
+      <div class="eyebrow">Razlaga 1</div>
+      <h2>Pogojni stavek if</h2>
+      <div class="prose">
+        <p>Pogojni stavek uporabimo, kadar želimo nek stavek izvesti <strong>samo takrat, ko je izpolnjen pogoj</strong>. Zapišemo ga z besedo <code>if</code>, za njo v oklepaju pogoj, nato stavek, ki se izvede, če ima pogoj vrednost <code>true</code>.</p>
+        <p><strong>Pogoj</strong> je vedno izraz tipa <code>boolean</code>: primerjava (<code>x &lt; 0</code>, <code>n % 2 == 0</code>), logična spremenljivka ali več pogojev, povezanih z <code>&amp;&amp;</code>, <code>||</code> in <code>!</code> (poglavje 4).</p>
+      </div>
+      <div class="two">
+        <pre class="code js-hl">if (pogoj) stavek;
+
+// primer: absolutna vrednost
+int x = -7;
+if (x &lt; 0) x = -x;      // predznak spremenimo samo pri negativnem številu
+System.out.println(x);   // 7</pre>
+        <figure class="fig"><div data-fc="abs"></div><figcaption>Diagram poteka za absolutno vrednost. Pri vrednosti False se ne izvede nič.</figcaption></figure>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr><th>Kaj želimo preveriti</th><th>Pogoj v Javi</th></tr></thead>
+        <tbody>
+          <tr><td>x je negativen</td><td><code>x &lt; 0</code></td></tr>
+          <tr><td>n je sodo število</td><td><code>n % 2 == 0</code></td></tr>
+          <tr><td>a leži na intervalu [20, 40]</td><td><code>a &gt;= 20 &amp;&amp; a &lt;= 40</code></td></tr>
+          <tr><td>a leži zunaj intervala [20, 40]</td><td><code>a &lt; 20 || a &gt; 40</code></td></tr>
+          <tr><td>x je večkratnik y</td><td><code>x % y == 0</code></td></tr>
+          <tr><td>niza s in t imata enako vsebino</td><td><code>s.equals(t)</code></td></tr>
+        </tbody>
+      </table></div>
+      <p class="note"><strong>Pozor:</strong> zapisa <code>20 &lt;= a &lt;= 40</code> Java ne pozna. Prvi del da <code>true</code> ali <code>false</code>, logične vrednosti pa ne moremo primerjati s številom 40. Pravilno: <code>a &gt;= 20 &amp;&amp; a &lt;= 40</code>.</p>
+    </section>
+
+    <section id="if-else">
+      <div class="eyebrow">Razlaga 2</div>
+      <h2>if – else in blok stavkov</h2>
+      <div class="prose">
+        <p>Če želimo v primeru, ko pogoj <strong>ni</strong> izpolnjen, izvesti kakšen drug stavek, dodamo besedo <code>else</code> in stavek za ta primer. Izvede se natanko ena od obeh vej.</p>
+        <p>Kadar mora veja vsebovati več stavkov, jih obdamo z zavitimi oklepaji <code>{ }</code>. Tak stavek imenujemo <strong>sestavljeni stavek</strong> ali <strong>blok</strong>.</p>
+      </div>
+      <div class="two">
+        <pre class="code js-hl">int n = 7;
+if (n % 2 == 0) {
+    System.out.println("sodo");
+    n = n / 2;
+}
+else {
+    System.out.println("liho");
+    n = 3 * n + 1;
+}
+System.out.println(n);   // liho, nato 22</pre>
+        <figure class="fig"><div data-fc="sodo"></div><figcaption>Vejitev z dvema vejama. Obe veji se združita, program nadaljuje pod njima.</figcaption></figure>
+      </div>
+      <p class="note"><strong>Brez zavitih oklepajev</strong> k pogoju spada samo <strong>prvi</strong> stavek. Pri <code>if (a &gt; 5) a = a * 2; a = a + 1;</code> se drugi stavek izvede vedno, ne glede na pogoj. Zamik vrstic na to ne vpliva. Zato zavite oklepaje pišemo tudi pri enem stavku.</p>
+      <h3 style="font-size:1.15rem;margin-top:8px">Doseg spremenljivk v bloku</h3>
+      <div class="prose">
+        <p>Spremenljivka, ki jo deklariramo <strong>znotraj bloka</strong>, velja samo do konca tega bloka. Izven bloka je ni (kot da ne obstaja), zato se program, ki jo uporabi za blokom, ne prevede.</p>
+      </div>
+      <pre class="code js-hl">int x = 7;
+if (x &gt; 0) {
+    int dvojno = 2 * x;           // dvojno obstaja samo v tem bloku
+    System.out.println(dvojno);   // 14
+}
+// System.out.println(dvojno);   // napaka pri prevajanju: cannot find symbol
+
+int z;                            // spremenljivko deklariramo PRED vejitvijo,
+if (x &lt; 10) z = 1; else z = 2;    // v obeh vejah ji določimo vrednost
+System.out.println(z);            // 1</pre>
+    </section>
+
+    <section id="gnezdenje">
+      <div class="eyebrow">Razlaga 3</div>
+      <h2>Gnezdenje in »viseči« else</h2>
+      <div class="prose">
+        <p>Pogojni stavek je navaden stavek, zato ga lahko zapišemo znotraj drugega pogojnega stavka. Temu rečemo <strong>gnezdenje</strong>. Notranji pogoj se preverja samo, če je zunanji izpolnjen.</p>
+        <p>Težava nastane, če napišemo dva pogojna stavka in samo en <code>else</code>. Pravilo prevajalnika je jasno: <strong><code>else</code> pripada zadnjemu (najbližjemu) stavku <code>if</code>, ki še nima svojega <code>else</code></strong>. Zamik vrstic tega ne spremeni.</p>
+      </div>
+      <div class="two">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span class="eyebrow">Zamik zavaja</span>
+          <pre class="code js-hl">if (pogoj1)
+    if (pogoj2) stavek1;
+else stavek2;     // pripada if (pogoj2)!</pre>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span class="eyebrow">else pripada prvemu if</span>
+          <pre class="code js-hl">if (pogoj1) {
+    if (pogoj2) stavek1;
+}
+else stavek2;     // zdaj pripada if (pogoj1)</pre>
+        </div>
+      </div>
+      <pre class="code js-hl">int x = 5, y = -3;
+if (x &gt; 2) {
+    x = 3;                 // izvede se, ker je 5 &gt; 2
+    if (y &lt; 0) {
+        x += 1;            // izvede se, ker je -3 &lt; 0
+        y++;
+    }
+}
+System.out.println(x + " " + y);   // 4 -2</pre>
+      <p class="note">Pri maturitetnih nalogah »izračunaj vrednost spremenljivk« si zapiši vrednosti po vsakem stavku. Najprej preveri zunanji pogoj: če ni izpolnjen, se celoten notranji del preskoči.</p>
+    </section>
+
+    <section id="veriga">
+      <div class="eyebrow">Razlaga 4</div>
+      <h2>Veriga else if in pogojni operator</h2>
+      <div class="prose">
+        <p>Kadar je možnosti več kot dve, uporabimo posebno obliko gnezdenja: za vsakim <code>else</code> takoj sledi nov <code>if</code>. Pogoji se preverjajo <strong>od zgoraj navzdol</strong>. Izvede se veja <strong>prvega</strong> izpolnjenega pogoja, ostali se ne preverjajo več. Zadnji <code>else</code> velja za vse ostale primere.</p>
+      </div>
+      <div class="two">
+        <pre class="code js-hl">int tocke = 72;
+if (tocke &gt;= 90) {
+    System.out.println("odlicno");
+} else if (tocke &gt;= 50) {
+    System.out.println("pozitivno");
+} else {
+    System.out.println("negativno");
+}
+// izpis: pozitivno</pre>
+        <figure class="fig"><div data-fc="veriga"></div><figcaption>Veriga else if v diagramu poteka: vsak naslednji pogoj je v veji False prejšnjega.</figcaption></figure>
+      </div>
+      <p class="note"><strong>Vrstni red pogojev je pomemben.</strong> Če bi najprej preverili <code>tocke &gt;= 50</code>, bi 95 točk dobilo »pozitivno«, ker je ta pogoj izpolnjen prvi, »odlicno« pa ne bi bilo nikoli izbrano. Pri mejah »vsaj« začnemo pri največji meji.</p>
+      <h3 style="font-size:1.15rem;margin-top:8px">Pogojni operator ?: namesto if – else</h3>
+      <div class="prose">
+        <p>Kadar if – else le <strong>izbere eno od dveh vrednosti</strong> za isto spremenljivko, ga lahko zapišemo krajše s pogojnim (ternarnim) operatorjem: <code>pogoj ? vrednost1 : vrednost2</code>. Spodnja programa izpišeta enako.</p>
+      </div>
+      <div class="two">
+        <pre class="code js-hl">int x = 7;
+int y = 8;
+int z;
+if (x &lt; y) {
+    z = x;
+}
+else {
+    z = y;
+}
+System.out.println(z);   // 7</pre>
+        <pre class="code js-hl">int x = 7;
+int y = 8;
+int z = (x &lt; y) ? x : y;
+System.out.println(z);   // 7</pre>
+      </div>
+      <p class="note">Pogojni operator vrne vrednost, ne izvaja stavkov. Za izbiro med dvema izpisoma ali dvema skupinama stavkov uporabi if – else.</p>
+    </section>
+
+    <section id="switch">
+      <div class="eyebrow">Razlaga 5</div>
+      <h2>Stavek switch</h2>
+      <div class="prose">
+        <p>Stavek <code>switch</code> izračuna vrednost izraza in skoči na oznako <code>case</code> z enako vrednostjo. Če take oznake ni, skoči na <code>default</code> (če obstaja). Primeren je, kadar isto spremenljivko primerjamo z več <strong>konkretnimi vrednostmi</strong>.</p>
+      </div>
+      <pre class="code js-hl">switch (izraz) {
+    case vrednost1: stavek1; break;
+    case vrednost2: stavek2; break;
+    case vrednost3: stavek3; break;
+    default:        stavekD;
+}</pre>
+      <div class="tbl"><table>
+        <thead><tr><th>Del</th><th>Pomen</th></tr></thead>
+        <tbody>
+          <tr><td><code>switch (izraz)</code></td><td>začetek stavka; izraz je tipa <code>byte</code>, <code>short</code>, <code>char</code> ali <code>int</code> (od Jave 7 tudi <code>String</code>). <code>long</code>, <code>double</code>, <code>float</code> in <code>boolean</code> niso dovoljeni.</td></tr>
+          <tr><td><code>case vrednost:</code></td><td>oznaka možnosti; vrednost mora biti konstanta, ne pogoj (<code>case x &gt; 5:</code> ni dovoljen)</td></tr>
+          <tr><td><code>break</code></td><td>zaključi možnost in takoj prekine izvajanje stavka switch</td></tr>
+          <tr><td><code>default:</code></td><td>izvede se, če nobena oznaka case ni enaka izrazu</td></tr>
+        </tbody>
+      </table></div>
+      <h3 style="font-size:1.15rem;margin-top:8px">Brez break se izvajanje nadaljuje</h3>
+      <div class="prose">
+        <p>Ko switch skoči na ustrezno oznako, izvaja stavke <strong>do prvega <code>break</code></strong> ali do konca stavka switch. Oznake case, ki sledijo, ga ne ustavijo. To je pogosta maturitetna past, lahko pa ga uporabimo tudi namenoma, ko ima več vrednosti enak rezultat.</p>
+      </div>
+      <div class="two">
+        <pre class="code js-hl">char ch = 'b';
+switch (ch) {
+    case 'a': System.out.print(ch);
+    case 'b': System.out.print(ch);   // skok sem
+    case 'c': System.out.print(ch);   // nadaljuje
+    case 'd': System.out.print(ch);   // nadaljuje
+}
+// izpis: bbb</pre>
+        <pre class="code js-hl">int mesec = 4;
+int dni;
+switch (mesec) {
+    case 2:
+        dni = 28;
+        break;
+    case 4: case 6: case 9: case 11:
+        dni = 30;                      // več oznak, en rezultat
+        break;
+    default:
+        dni = 31;
+}
+System.out.println(dni);              // 30</pre>
+      </div>
+      <h3 style="font-size:1.15rem;margin-top:8px">Pretvorba if v switch</h3>
+      <div class="prose">
+        <p>Verigo <code>if – else if</code> lahko pretvorimo v switch, kadar <strong>vsi pogoji primerjajo isto spremenljivko z enakostjo (<code>==</code>) s konstanto</strong>. Vsak pogoj <code>dan == 3</code> postane <code>case 3:</code>, zadnji <code>else</code> postane <code>default:</code>, vsaka veja pa se konča z <code>break</code>. Pogojev z <code>&lt;</code>, <code>&gt;</code>, intervalov ali pogojev z več spremenljivkami ne moremo neposredno pretvoriti.</p>
+      </div>
+      <div class="two">
+        <pre class="code js-hl">if (dan == 1) ime = "ponedeljek";
+else if (dan == 2) ime = "torek";
+else if (dan == 3) ime = "sreda";
+else ime = "dan ne obstaja";</pre>
+        <pre class="code js-hl">switch (dan) {
+    case 1: ime = "ponedeljek"; break;
+    case 2: ime = "torek"; break;
+    case 3: ime = "sreda"; break;
+    default: ime = "dan ne obstaja";
+}</pre>
+      </div>
+    </section>
+
+    <section id="napake">
+      <div class="eyebrow">Razlaga 6</div>
+      <h2>Pogoste napake</h2>
+      <div class="tbl"><table>
+        <thead><tr><th>Napaka</th><th>Kaj se zgodi</th><th>Popravek</th></tr></thead>
+        <tbody>
+          <tr><td><code>if (x &gt; 5); System.out.println("A");</code></td><td>podpičje je prazen stavek, ki je edini pogojni stavek; izpis se izvede vedno</td><td>za oklepajem pogoja ne pišemo podpičja</td></tr>
+          <tr><td><code>if (x = 5)</code></td><td>program se ne prevede (int ni boolean)</td><td>primerjamo z <code>==</code></td></tr>
+          <tr><td><code>if (20 &lt;= a &lt;= 40)</code></td><td>program se ne prevede</td><td><code>a &gt;= 20 &amp;&amp; a &lt;= 40</code></td></tr>
+          <tr><td><code>if (s == "da")</code> pri nizih</td><td>primerja objekta, ne vsebine; lahko vrne false</td><td><code>s.equals("da")</code></td></tr>
+          <tr><td>dva stavka za if brez <code>{ }</code></td><td>pogoju pripada samo prvi stavek</td><td>veje vedno pišemo v zavitih oklepajih</td></tr>
+          <tr><td>else zamaknjen pod prvi if</td><td>else pripada najbližjemu if brez else</td><td>z zavitimi oklepaji določimo, kam spada</td></tr>
+          <tr><td>veriga else if z napačnim vrstnim redom</td><td>prvi izpolnjen pogoj »prekrije« ostale</td><td>pri mejah »vsaj« začni pri največji meji</td></tr>
+          <tr><td>pozabljen <code>break</code> v switch</td><td>izvedejo se tudi naslednje možnosti</td><td>vsako možnost zaključi z <code>break</code></td></tr>
+          <tr><td><code>switch</code> na <code>double</code> ali <code>case x &gt; 5:</code></td><td>program se ne prevede</td><td>uporabi verigo if – else if</td></tr>
+          <tr><td>spremenljivka deklarirana v bloku, uporabljena za njim</td><td>program se ne prevede (cannot find symbol)</td><td>deklariraj jo pred vejitvijo</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Program z vejitvijo vedno preizkusi z več vrednostmi: z vrednostjo za vsako vejo in z mejnimi vrednostmi (npr. točno 50 točk pri meji 50).</p>
+    </section>
+
+    <!-- ===================== NALOGE ===================== -->
+    <section id="naloge" style="gap:24px">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="eyebrow">Vaje</div>
+        <h2>Naloge od lažjih do težjih</h2>
+        <p class="prose" style="color:var(--muted)">Naloge z oznako <span class="tag mat">Matura</span> so iz izpitnih pol 1 iz let 2012–2026, z enakim številom točk kot na izpitu. Pri nalogah z izpisom ali programom lahko kodo kopiraš v Programiz in preveriš, ali je tvoj odgovor pravilen. Vrednosti so v kodi zapisane kar v spremenljivke, vnosa s Scannerjem tam ni treba preizkušati. Če si ogledaš rešitev, preden nalogo pravilno rešiš, se ti točke ne štejejo.</p>
+        <div class="filters" role="group" aria-label="Prikaži naloge">
+          <button class="chip" data-f="all" aria-pressed="true" type="button">Vse</button>
+          <button class="chip" data-f="mat" aria-pressed="false" type="button">Samo maturitetne</button>
+          <button class="chip" data-f="own" aria-pressed="false" type="button">Samo dodatne</button>
+          <button class="chip" data-f="open" aria-pressed="false" type="button">Še nerešene</button>
+        </div>
+      </div>
+      <div id="levels" style="display:flex;flex-direction:column;gap:40px"></div>
+    </section>
+
+    <section id="doma">
+      <div class="eyebrow">Za doma</div>
+      <h2>Vaje za doma</h2>
+      <p class="prose" style="color:var(--muted)">Najprej maturitetne naloge za ponavljanje, nato praktične vaje, ki jih narediš na računalniku v Eclipse ali VS Code.</p>
+      <div id="homeMat"></div>
+      <div class="level"><header><span class="eyebrow">Praktične vaje</span><h3 style="font-size:1.35rem">Na svojem računalniku</h3></header><div id="home" class="level"></div></div>
+    </section>
+
+    <nav class="pager" id="pager" aria-label="Listanje po straneh"></nav>
+
+    <footer>
+      <span>Viri nalog: Državni izpitni center (RIC), izpitne pole 1 iz računalništva 2012–2026. Predmetni izpitni katalog za splošno maturo – računalništvo 2023 (velja do 2028).</span>
+      <span>Naloge z oznako »Prirejeno« so po izvirniku prilagojene za to stran. Vsi programi in izpisi so preverjeni z OpenJDK 21.</span>
+      <span id="resetWrap"></span>
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+const PROGRAMIZ = "https://www.programiz.com/java-programming/online-compiler/";
+const STORE = "java-matura-p1-poglavje5-v1";
+
+/* ---------- diagrami poteka ---------- */
+/* ---------- diagram poteka: preprost samodejni razpored ---------- */
+const FLOW = (function(){
+  const CW = 7.8, GAP = 24, ST = 14, MIN = 110;
+  const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const tw = s => String(s).length * CW;
+  const lw = s => String(s).length * 7 + 6;   // širina oznak da/ne (True/False)
+  const LBL = {
+    en:{start:"Main", end:"End", yes:"True", no:"False"},
+    sl:{start:"začetek", end:"konec", yes:"da", no:"ne"}
+  };
+  let LANG = "sl";
+  const B = {
+    start:t=>({t:"start",x:t||null}), end:t=>({t:"end",x:t||null}),
+    p:x=>({t:"p",x}),
+    inp:(...v)=>({t:"io",k:"in",v}), out:(...v)=>({t:"io",k:"out",v}),
+    if:(c,y,n)=>({t:"if",c,y:y||[],n:n||[]}),
+    wh:(c,b)=>({t:"wh",c,b:b||[]}), dw:(c,b)=>({t:"dw",c,b:b||[]})
+  };
+  function poly(pts, cls){ return `<polygon class="${cls||"fn"}" points="${pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")}"/>`; }
+  function line(pts){ return `<polyline class="fl" points="${pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")}"/>`; }
+  function head(x,y,dir){ // arrowhead whose tip is at (x,y)
+    const a=5.5, b=4;
+    const P = dir==="d" ? [[x,y],[x-b,y-a],[x+b,y-a]] : dir==="r" ? [[x,y],[x-a,y-b],[x-a,y+b]] : dir==="l" ? [[x,y],[x+a,y-b],[x+a,y+b]] : [[x,y],[x-b,y+a],[x+b,y+a]];
+    return `<polygon class="fa" points="${P.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")}"/>`;
+  }
+  function text(x,y,s,cls,anchor){ return `<text class="${cls||"ft"}" x="${x.toFixed(1)}" y="${y.toFixed(1)}"${anchor?` text-anchor="${anchor}"`:""}>${esc(s)}</text>`; }
+  const DH = 54;
+  function dwOf(c){ return Math.max(MIN, tw(c)*1.45 + 44); }
+
+  let NUM = null;
+  function shape(kind, s, x, y, out){
+    const m = shape0(kind, s, x, y, out);
+    if(NUM && kind!=="start" && kind!=="end"){
+      const bx = kind==="p" ? x-m.w/2 : kind==="io" ? x-m.w/2+12 : x-m.w/4-6, by = kind==="if" ? y+m.h/4-6 : y;
+      NUM.n++;
+      out.push(`<circle class="fb" cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="9"/><text class="fbt" x="${bx.toFixed(1)}" y="${by.toFixed(1)}">${NUM.n}</text>`);
+    }
+    return m;
+  }
+  function shape0(kind, s, x, y, out){ // top-centre at (x,y); returns {w,h}
+    const t = s==null ? "" : s;
+    if(kind==="start"||kind==="end"){ const w=Math.max(90,tw(t)+34), h=30;
+      out.push(`<rect class="fn" x="${(x-w/2).toFixed(1)}" y="${y}" width="${w}" height="${h}" rx="15"/>`+text(x,y+h/2,t)); return {w,h}; }
+    if(kind==="p"){ const w=Math.max(100,tw(t)+28), h=34;
+      out.push(`<rect class="fn" x="${(x-w/2).toFixed(1)}" y="${y}" width="${w}" height="${h}"/>`+text(x,y+h/2,t)); return {w,h}; }
+    if(kind==="io"){ const w=Math.max(110,tw(t)+48), h=34, k=12;
+      out.push(poly([[x-w/2+k,y],[x+w/2,y],[x+w/2-k,y+h],[x-w/2,y+h]])+text(x,y+h/2,t)); return {w,h}; }
+    if(kind==="if"){ const w=dwOf(t), h=DH;
+      out.push(poly([[x,y],[x+w/2,y+h/2],[x,y+h],[x-w/2,y+h/2]])+text(x,y+h/2,t)); return {w,h}; }
+  }
+  function ioText(n){
+    if(n.k==="in") return LANG==="en" ? "Input "+n.v[0] : "preberi "+n.v.join(", ");
+    const lit = n.v.some(a=>String(a).trim().charAt(0)==='"');
+    return LANG==="en" ? "Output "+n.v.join(lit ? " & " : ' & " " & ') : "izpiši "+n.v.join(", ");
+  }
+  function prep(list){
+    const out=[];
+    list.forEach(n=>{
+      if(n.t==="io" && n.k==="in" && LANG==="en" && n.v.length>1){ n.v.forEach(v=>out.push({t:"io",k:"in",v:[v]})); }
+      else if(n.t==="if") out.push({t:"if",c:n.c,y:prep(n.y),n:prep(n.n)});
+      else if(n.t==="wh"||n.t==="dw") out.push({t:n.t,c:n.c,b:prep(n.b)});
+      else out.push(n);
+    });
+    return out;
+  }
+  function simple(kind, s){
+    const o=[]; const m = shape0(kind,s,0,0,[]);
+    return {l:m.w/2, r:m.w/2, h:m.h, draw(x,y,out){ shape(kind,s,x,y,out); }};
+  }
+  function seq(list){
+    const items = list.map(layout);
+    let l=0,r=0,h=0;
+    items.forEach((it,i)=>{ l=Math.max(l,it.l); r=Math.max(r,it.r); h+=it.h+(i?GAP:0); });
+    return {l,r,h,n:items.length, draw(x,y,out){
+      let cy=y;
+      items.forEach((it,i)=>{
+        if(i){ out.push(line([[x,cy-GAP],[x,cy]])+head(x,cy,"d")); }
+        it.draw(x,cy,out); cy+=it.h+GAP;
+      });
+    }};
+  }
+  function layout(n){
+    if(n.t==="if") return ifL(n);
+    if(n.t==="wh") return whL(n);
+    if(n.t==="dw") return dwL(n);
+    if(n.t==="io") return simple("io", ioText(n));
+    if(n.t==="start"||n.t==="end") return simple(n.t, n.x || LBL[LANG][n.t]);
+    return simple(n.t, n.x);
+  }
+  function ifL(n){
+    const dw = dwOf(n.c), cy = DH/2;
+    const L = seq(n.y), R = seq(n.n);
+    const xL = -Math.max(dw/2+4, L.r+22), xR = Math.max(dw/2+4, R.l+22);
+    const yb = DH + 8;
+    const yj = yb + Math.max(L.h, R.h) + 22;
+    return {l:Math.max(dw/2+4+lw(LBL[LANG].yes), L.l-xL), r:Math.max(dw/2+4+lw(LBL[LANG].no), xR+R.r), h:yj, draw(x,y,out){
+      shape("if",n.c,x,y,out);
+      out.push(text(x-dw/2-4,y+cy-7,LBL[LANG].yes,"fl2","end")+text(x+dw/2+4,y+cy-7,LBL[LANG].no,"fl2","start"));
+      [[xL,L],[xR,R]].forEach(([dx,B])=>{
+        const bx=x+dx, sx = dx<0 ? x-dw/2 : x+dw/2;
+        if(B.n){
+          out.push(line([[sx,y+cy],[bx,y+cy],[bx,y+yb]])+head(bx,y+yb,"d"));
+          B.draw(bx,y+yb,out);
+          out.push(line([[bx,y+yb+B.h],[bx,y+yj],[x,y+yj]]));
+        } else out.push(line([[sx,y+cy],[bx,y+cy],[bx,y+yj],[x,y+yj]]));
+      });
+    }};
+  }
+  function whL(n){
+    const dw = dwOf(n.c), cy = DH/2, Bd = seq(n.b);
+    const y0 = DH + 26;
+    const xb = -(Math.max(Bd.l, dw/2) + 26), xe = Math.max(Bd.r, dw/2) + 26;
+    const ybot = y0 + Bd.h, yEnd = ybot + 44;
+    return {l:-xb, r:Math.max(xe, dw/2+4+lw(LBL[LANG].no)), h:yEnd, draw(x,y,out){
+      shape("if",n.c,x,y,out);
+      out.push(text(x+8,y+DH+17,LBL[LANG].yes,"fl2","start")+text(x+dw/2+4,y+cy-7,LBL[LANG].no,"fl2","start"));
+      out.push(line([[x,y+DH],[x,y+y0]])+head(x,y+y0,"d"));
+      Bd.draw(x,y+y0,out);
+      out.push(line([[x,y+ybot],[x,y+ybot+20],[x+xb,y+ybot+20],[x+xb,y+cy],[x-dw/2,y+cy]])+head(x-dw/2,y+cy,"r"));
+      out.push(line([[x+dw/2,y+cy],[x+xe,y+cy],[x+xe,y+yEnd],[x,y+yEnd]]));
+    }};
+  }
+  function dwL(n){
+    const dw = dwOf(n.c), cy = DH/2, Bd = seq(n.b);
+    const gap = Math.max(26, lw(LBL[LANG].yes)+8);
+    const yd = Bd.h + 26, xb = -(Math.max(Bd.l, dw/2) + gap), yEnd = yd + DH + 26;
+    return {l:-xb, r:Math.max(Bd.r, dw/2), h:yEnd, draw(x,y,out){
+      Bd.draw(x,y,out);
+      out.push(line([[x,y+Bd.h],[x,y+yd]])+head(x,y+yd,"d"));
+      shape("if",n.c,x,y+yd,out);
+      out.push(text(x-dw/2-4,y+yd+cy-7,LBL[LANG].yes,"fl2","end")+text(x+8,y+yd+DH+17,LBL[LANG].no,"fl2","start"));
+      out.push(line([[x-dw/2,y+yd+cy],[x+xb,y+yd+cy],[x+xb,y-12],[x,y-12]])+head(x,y-12,"r"));
+      out.push(line([[x,y+yd+DH],[x,y+yEnd]]));
+    }};
+  }
+  function svg(blocks, o){
+    o = o||{};
+    const list = (o.bare ? [] : [B.start(o.start)]).concat(prep(blocks), o.bare ? [] : [B.end(o.end)]);
+    const S = seq(list); const out=[]; NUM = o.num ? {n:0} : null;
+    const P = 14, pad = 12, w = S.l+S.r+2*P, h = S.h+2*P+ST;
+    S.draw(S.l+P, P+ST, out); NUM = null;
+    return `<svg class="fc" viewBox="0 0 ${w.toFixed(0)} ${h.toFixed(0)}" style="width:${Math.ceil(w)}px;max-width:100%;min-width:0;height:auto" role="img" aria-label="${esc(o.label||"Diagram poteka")}">${out.join("")}</svg>`;
+  }
+  function sym(kind){ // prazen simbol za izbiro
+    const out=[]; const m=shape(kind==="if"?"if":kind,"",50,6,out);
+    const w=Math.max(100,m.w+12), h=m.h+12;
+    const o2=[]; shape(kind==="if"?"if":kind,"",w/2,6,o2);
+    return `<svg class="fc sym" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true">${o2.join("")}</svg>`;
+  }
+  return {B, svg, sym, setLang:l=>{ LANG = l==="sl" ? "sl" : "en"; }, getLang:()=>LANG};
+})();
+
+const J = {};
+const FLOWS = (function(){ const B = FLOW.B; return {
+  abs: [B.inp("x"), B.if("x < 0",[B.p("x = -x")],[]), B.out("x")],
+  sodo: [B.inp("n"), B.if("n % 2 == 0",[B.out('"sodo"'), B.p("n = n / 2")],[B.out('"liho"'), B.p("n = 3 * n + 1")]), B.out("n")],
+  veriga: [B.inp("tocke"), B.if("tocke >= 90",[B.out('"odlicno"')],[B.if("tocke >= 50",[B.out('"pozitivno"')],[B.out('"negativno"')])])]
+}; })();
+const ST = "public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}";
+
+const LEVELS = [
+ {id:"naloge-a", tag:"A", title:"Pogoji in stavek if", note:"Kaj je pogoj, kako zapišemo interval, sodost in sestavljene pogoje (razlaga 1)."},
+ {id:"naloge-b", tag:"B", title:"if – else, bloki in gnezdenje", note:"Sledenje izvajanju, zaviti oklepaji, viseči else in doseg spremenljivk (razlagi 2 in 3)."},
+ {id:"naloge-c", tag:"C", title:"Veriga else if in pogojni operator", note:"Več možnosti, vrstni red pogojev in pretvorba med ?: in if (razlaga 4)."},
+ {id:"naloge-d", tag:"D", title:"Stavek switch", note:"Oznake case, break, default, nadaljevanje brez break in pretvorba if v switch (razlaga 5)."},
+ {id:"naloge-e", tag:"E", title:"Naloge za utrjevanje", note:"Programi s pogojnimi stavki. Vrednosti so zapisane v kodi, Scannerja ne potrebuješ."},
+ {id:"doma-mat", tag:"F", title:"Ponavljanje", note:"Maturitetne naloge iz drugih rokov za ponavljanje. Preverjaš jih enako kot v sklopih A–E.", home:true}
+];
+
+const T = [
+/* ----- A: Pogoji in stavek if ----- */
+{src:"M181/4", pts:1, lv:"A", type:"mc",
+ q:"Kateri izmed opisov velja za stavek if?",
+ o:["Stavek if omogoča ponavljanje drugih stavkov.","Stavek if ni stavek programskega jezika Java.","Stavek if omogoča, da nekatere stavke izvedemo le, če je izpolnjen neki pogoj.","Stavek if predstavlja zanko s pogojem na začetku."], a:[2],
+ h:["Ponavljanje stavkov je naloga zanke, ne vejitve.","if izbere, ali se stavek izvede ali ne."],
+ why:"Stavek if je vejitev: stavek izvede le, če ima pogoj vrednost true. Ponavljanje (zanke) obravnavamo v poglavju 6."},
+{lv:"A", own:true, pts:1, type:"mc",
+ q:"Kakšnega tipa mora biti vrednost pogoja v stavku if (pogoj)?",
+ o:["int","boolean","String","poljubnega tipa, 0 pomeni false"], a:[1],
+ h:["Pogoj je lahko le resničen ali neresničen.","V Javi (za razliko od jezika C) števila ne moremo uporabiti kot pogoj."],
+ why:"Pogoj je izraz tipa boolean (true ali false). Zapis if (x) za int x se v Javi ne prevede."},
+{lv:"A", own:true, pts:1, type:"output",
+ q:"Kaj izpiše program?",
+ code:"int x = 7;\nif (x > 5) System.out.println(\"velik\");\nSystem.out.println(\"konec\");",
+ expected:"velik\nkonec",
+ h:["Pogoj 7 > 5 je izpolnjen.","Druga vrstica izpisa ni del stavka if, zato se izvede vedno."],
+ why:"Ker je 7 > 5, se izpiše velik. Stavek z izpisom konec ni del stavka if in se izvede v vsakem primeru."},
+{src:"M131/5", pts:2, lv:"A", type:"mc",
+ q:"V katerem stavku je zanesljivo vrednost pogoja true, če je vrednost spremenljivke a v intervalu [20..40]?",
+ o:["if ((a=<20)&&(a=>40)) {...}","if ((20<=a<=40)) {...}","if ((a>=20)&(a<=b)) {...}","if ((a>=20)&&(a<=40)) {...}"], a:[3],
+ h:["Operatorja =< in => v Javi ne obstajata.","Zapis 20 <= a <= 40 se ne prevede, pri C pa nastopa neznana spremenljivka b."],
+ why:"Pogoj a >= 20 && a <= 40 je true natanko tedaj, ko je a med 20 in 40. Pri A sta operatorja napačna, B se ne prevede, C primerja z b, katerega vrednosti ne poznamo."},
+{src:"M151/14", pts:2, lv:"A", type:"mc",
+ q:"Naj bo x celoštevilska spremenljivka. Obkrožite črko pred pogojema, ki se ovrednotita na true, če je x sodo število.",
+ o:["x % 2 == 0","x == 2*k","x / 2 == 0","x % 2 != 1"], a:[0,3],
+ h:["Sodo število ima pri deljenju z 2 ostanek 0.","Spremenljivka k ni deklarirana, x / 2 pa je količnik, ne ostanek."],
+ why:"Pri sodem številu je x % 2 enako 0, zato sta pogoja A (x % 2 == 0) in D (x % 2 != 1) true. B se ne prevede (k ni deklarirana), C (x / 2 == 0) je true samo za -1, 0 in 1. Pozor: D ni splošen test sodosti, ker je true tudi za negativna liha števila (pri -3 je x % 2 enak -1)."},
+{src:"M172/6", pts:2, lv:"A", type:"mc",
+ q:"Katera pogoja bi vrnila vrednost true, če je vrednost celoštevilske spremenljivke x sodo število?",
+ o:["((x / 2) == 0)","((x % 2) == 0)","((x && 1) == 0)","((x & 1) == 0)","((x-2) == 0)"], a:[1,3],
+ h:["Pri sodem številu je najnižji bit 0.","Operator && deluje samo z logičnimi vrednostmi, & pa tudi s celimi števili (bitni IN)."],
+ why:"(x % 2) == 0 in (x & 1) == 0 (bitni IN z 1 vrne najnižji bit) veljata za vsa soda števila. && z int se ne prevede, x / 2 == 0 in x − 2 == 0 nista splošna testa sodosti. Oklepaji pri (x & 1) == 0 so nujni, ker ima == višjo prioriteto kot &."},
+{src:"M152/3", pts:1, lv:"A", type:"blanks",
+ q:"Dani imamo deklaraciji: boolean a=true, b=false; boolean c=true, d=false; Kakšna je vrednost pogoja ((a||b)&&(!c||!d))? Vpiši true ali false.",
+ b:[{l:"vrednost pogoja", acc:["true"]}],
+ h:["Izračunaj vsak oklepaj posebej.","!c je false, !d je true."],
+ why:"(true || false) je true, (!c || !d) = (false || true) je true. true && true je true."},
+{src:"M191/7", pts:1, lv:"A", type:"blanks",
+ q:"Deklarirani sta spremenljivki a in b tipa boolean in dan je stavek if (!a && !b) {/*…*/}. Zapišite ekvivalentni stavek if brez uporabe operatorja &&. Vpiši samo glavo stavka, npr. if (...)",
+ b:[{l:"stavek if", acc:["if(!(a||b))","if(!(b||a))"], code:true}],
+ h:["Uporabi De Morganov zakon.","»ne a in ne b« pomeni isto kot »ni res, da a ali b«."],
+ why:"Po De Morganovem zakonu je !a && !b enakovredno !(a || b). Stavek se glasi if (!(a || b)) {/*…*/}."},
+{src:"M151/11", pts:2, lv:"A", type:"blanks",
+ q:"Dan je logični izraz: !(x>0 && x<10). Zapišite enakovreden pogoj, pri čemer ne smete uporabiti negacije.",
+ b:[{l:"pogoj", acc:["x<=0||x>=10","x>=10||x<=0","(x<=0)||(x>=10)","(x>=10)||(x<=0)","0>=x||x>=10","x<=0||10<=x","0>=x||10<=x"], code:true}],
+ h:["Negacija && postane || in obratno.","Negacija x > 0 je x <= 0."],
+ why:"Po De Morganovem zakonu je !(x>0 && x<10) enako !(x>0) || !(x<10), to pa je x <= 0 || x >= 10."},
+{src:"M171/4", pts:2, lv:"A", type:"mc",
+ q:"Dan je izsek programa: int z=65; double d1=65.0; Integer i=65; String s=\"A\"; Obkrožite veljavni primerjavi.",
+ o:["if (z==d1) {}","if (z==i) {}","if (z==s){}","if (d1==s) {}"], a:[0,1],
+ h:["Števila različnih številskih tipov lahko primerjamo, Java jih pretvori.","Števila in niza z == ne moremo primerjati."],
+ why:"int in double primerjamo po pretvorbi v double (65.0 == 65.0). Integer se samodejno razpakira v int. Primerjava števila z nizom (C, D) se ne prevede."},
+{lv:"A", own:true, pts:1, type:"output",
+ q:"Kaj izpiše program? Pozorno poglej prvo vrstico s pogojem.",
+ code:"int x = 3;\nif (x > 5);\nSystem.out.println(\"velik\");",
+ expected:"velik",
+ h:["Podpičje za oklepajem pogoja je samostojen (prazen) stavek.","Stavek z izpisom zato ni več del stavka if."],
+ why:"if (x > 5); ima za pogojni stavek prazen stavek. Izpis velik je naslednji stavek, ki se izvede vedno. Prevajalnik ne javi napake, zato je to semantična napaka."},
+
+/* ----- B: if – else, bloki in gnezdenje ----- */
+{src:"M142/9", pts:1, lv:"B", type:"blanks",
+ q:"Izračunajte vrednost spremenljivke x po izvedbi tega dela programa:",
+ snip:"int x = 5;\nint y = -3;\nif (x > 2)\n{\n    x = 3;\n    if (y < 0)\n    {\n        x+= 1;\n        y++;\n    }\n}",
+ b:[{l:"x =", acc:["4"]}],
+ h:["Pogoj 5 > 2 je izpolnjen, zato x postane 3.","Tudi -3 < 0 je izpolnjen."],
+ why:"Zunanji pogoj je true, x = 3. Notranji pogoj je true, x += 1 da 4 (y postane -2)."},
+{src:"M121/4", pts:2, lv:"B", type:"mc",
+ q:"Po izvedbi naslednjega dela programa je vrednost spremenljivke x:",
+ snip:"int x = - 4;\nif (x < 0)\n{\n    if (x % 2 == 0)\n    {\n        x = x + 2;\n    }\n    x = 2;\n}",
+ o:["–4","–2","0","2","4"], a:[3],
+ h:["Stavek x = 2 je znotraj zunanjega bloka, a izven notranjega.","Ker je -4 < 0, se izvede ves zunanji blok."],
+ why:"x = -4 je negativen, zato se izvede zunanji blok. -4 % 2 == 0, zato x postane -2. Nato se izvede x = 2, ki je v zunanjem bloku. Končna vrednost je 2."},
+{src:"M122/4", pts:2, lv:"B", type:"blanks",
+ q:"Izračunajte vrednost spremenljivk x in y po izvedbi tega dela programa:",
+ snip:"int x = -3;\nint y = -5;\nif (x < -4)\n    if (y < 0)\n    {\n        x+= 3;\n        y ++;\n    }",
+ b:[{l:"x =", acc:["-3"]},{l:"y =", acc:["-5"]}],
+ h:["Najprej preveri zunanji pogoj -3 < -4.","Če zunanji pogoj ni izpolnjen, se notranji if sploh ne preverja."],
+ why:"-3 < -4 je false, zato se notranji stavek if ne izvede. Vrednosti ostaneta x = -3 in y = -5."},
+{src:"M132/3", pts:2, lv:"B", type:"blanks",
+ q:"Izračunajte vrednost spremenljivk x in y, ko se izvede program.",
+ snip:"int x = -1;\nint y = -5;\nif (x < -4){\n    if (y < 0 || true){\n        x+= 1;\n        y++;\n    }\n}\nelse{\n    x--;\n    y = 3;\n}",
+ b:[{l:"x =", acc:["-2"]},{l:"y =", acc:["3"]}],
+ h:["Pogoj -1 < -4 ni izpolnjen.","Kateremu if pripada else? Poglej zavite oklepaje."],
+ why:"-1 < -4 je false, zato se izvede veja else zunanjega if (else stoji za zaključnim oklepajem zunanjega bloka). x-- da -2, y = 3."},
+{lv:"B", own:true, pts:1, type:"output",
+ q:"Kaj izpiše program?",
+ code:"int a = 4;\nif (a > 5)\n    a = a * 2;\n    a = a + 1;\nSystem.out.println(a);",
+ expected:"5",
+ h:["Brez zavitih oklepajev pogoju pripada samo prvi stavek.","Zamik druge vrstice zavaja."],
+ why:"Pogoj 4 > 5 ni izpolnjen, zato se a = a * 2 ne izvede. a = a + 1 ni del stavka if (ni zavitih oklepajev), zato se izvede vedno. a je 5."},
+{lv:"B", own:true, pts:2, type:"blanks",
+ q:"Kaj izpiše program pri danih vrednostih? Če program ne izpiše ničesar, vpiši nic.",
+ snip:"if (x > 0)\n    if (y > 0) System.out.println(\"A\");\nelse System.out.println(\"B\");",
+ b:[{l:"x = 5, y = -1", acc:["B"], cs:true},{l:"x = -5, y = 1", acc:["nic","nič"]}],
+ h:["else pripada najbližjemu if brez else, to je if (y > 0).","Ko je x negativen, se ves notranji stavek preskoči, tudi else."],
+ why:"else spada k if (y > 0), ne glede na zamik. Pri x = 5, y = -1 je zunanji pogoj izpolnjen, notranji ne, zato se izpiše B. Pri x = -5 se notranji stavek (skupaj z else) ne izvede in program ne izpiše ničesar."},
+{lv:"B", own:true, pts:1, type:"mc",
+ q:"Kaj se zgodi s programom? int x = 3; if (x > 0) { int y = x * 2; } System.out.println(y);",
+ o:["Izpiše 6.","Izpiše 0.","Program se ne prevede.","Pride do izjeme med izvajanjem."], a:[2],
+ h:["Kje je deklarirana spremenljivka y?","Spremenljivka, deklarirana v bloku, velja le do zaključnega zavitega oklepaja."],
+ why:"y je deklarirana v bloku stavka if in izven njega ne obstaja. Prevajalnik javi napako cannot find symbol. Popravek: int y = 0; pred stavkom if."},
+{lv:"B", own:true, pts:2, type:"code",
+ q:"Napiši program, ki za število n = 14 izpiše sodo, če je število sodo, in liho, če je liho. Nato preizkusi še z n = 7 in n = -3. Prilepi izpis za n = 14.",
+ hideExp:true, expected:"sodo", starter:ST,
+ sol:"public class Main {\n    public static void main(String[] args) {\n        int n = 14;\n        if (n % 2 == 0) {\n            System.out.println(\"sodo\");\n        } else {\n            System.out.println(\"liho\");\n        }\n    }\n}",
+ h:["Uporabi ostanek pri deljenju z 2.","Ker sta možnosti dve, uporabi if – else."],
+ why:"14 % 2 je 0, zato se izpiše sodo. Pri -3 je ostanek -1, zato je pogoj n % 2 == 0 pravilna izbira (n % 2 == 1 bi za -3 dal napačen rezultat)."},
+{src:"M171/7", pts:2, lv:"B", type:"code", adapt:true,
+ q:"Spremenljivkama x in y tipa double smo že določili neničelne vrednosti. Zapišite pogojne stavke, s katerimi izpišemo, v katerem kvadrantu se nahaja točka s koordinatama x in y. (Prirejeno: v kodi nastavi x = -2.5 in y = 3.0, izpiši samo številko kvadranta.)",
+ hideExp:true, expected:"2", starter:"public class Main {\n    public static void main(String[] args) {\n        double x = -2.5;\n        double y = 3.0;\n        // tvoja koda\n    }\n}",
+ sol:"public class Main {\n    public static void main(String[] args) {\n        double x = -2.5;\n        double y = 3.0;\n        if (x > 0 && y > 0) System.out.println(1);\n        else if (x < 0 && y > 0) System.out.println(2);\n        else if (x < 0 && y < 0) System.out.println(3);\n        else System.out.println(4);\n    }\n}",
+ h:["1. kvadrant: x > 0 in y > 0; kvadranti se štejejo v nasprotni smeri urinega kazalca.","Ker vrednosti nista 0, za zadnji primer zadošča else."],
+ why:"Točka (-2.5, 3.0) ima negativen x in pozitiven y, zato leži v 2. kvadrantu. Ker sta koordinati neničelni, je četrti kvadrant edina preostala možnost in jo zapišemo z else."},
+
+/* ----- C: Veriga else if in pogojni operator ----- */
+{lv:"C", own:true, pts:1, type:"output",
+ q:"Kaj izpiše program?",
+ code:"int tocke = 72;\nif (tocke >= 90) System.out.println(\"odlicno\");\nelse if (tocke >= 75) System.out.println(\"prav dobro\");\nelse if (tocke >= 60) System.out.println(\"dobro\");\nelse if (tocke >= 50) System.out.println(\"zadostno\");\nelse System.out.println(\"nezadostno\");",
+ expected:"dobro",
+ h:["Pogoje preverjaj od zgoraj navzdol.","Prvi izpolnjen pogoj je 72 >= 60."],
+ why:"72 >= 90 in 72 >= 75 sta false, 72 >= 60 je true. Izvede se ta veja, ostali pogoji se ne preverjajo več."},
+{lv:"C", own:true, pts:2, type:"output",
+ q:"Program ima pogoje v napačnem vrstnem redu. Kaj izpiše?",
+ code:"int tocke = 95;\nif (tocke >= 50) System.out.println(\"zadostno\");\nelse if (tocke >= 75) System.out.println(\"prav dobro\");\nelse if (tocke >= 90) System.out.println(\"odlicno\");",
+ expected:"zadostno",
+ h:["Kateri pogoj je izpolnjen prvi?","Po prvem izpolnjenem pogoju se veriga konča."],
+ why:"95 >= 50 je true že v prvem pogoju, zato se izpiše zadostno. Pri mejah »vsaj« moramo začeti pri največji meji (90)."},
+{lv:"C", own:true, pts:1, type:"output",
+ q:"Kaj izpiše spodnji diagram poteka (in z njim zapisana koda), če je tocke = 30?",
+ fcq:FLOWS.veriga,
+ code:"int tocke = 30;\nif (tocke >= 90) {\n    System.out.println(\"odlicno\");\n} else if (tocke >= 50) {\n    System.out.println(\"pozitivno\");\n} else {\n    System.out.println(\"negativno\");\n}",
+ expected:"negativno",
+ h:["Pri prvem rombu je 30 >= 90 False.","Tudi pri drugem rombu je 30 >= 50 False, zato gremo v zadnjo vejo."],
+ why:"Oba pogoja nista izpolnjena, zato se izvede zadnja veja else in izpiše negativno. Koda je zapis istega diagrama v Javi."},
+{lv:"C", own:true, pts:1, type:"blanks",
+ q:"Spremenljivki a in b sta tipa int. Z enim prireditvenim stavkom in pogojnim operatorjem ?: v spremenljivko max shrani večjo od obeh vrednosti. Vpiši celoten stavek, npr. max = ...;",
+ b:[{l:"stavek", acc:["max=a>b?a:b;","max=(a>b)?a:b;","max=a>=b?a:b;","max=(a>=b)?a:b;","max=b<a?a:b;","max=(b<a)?a:b;","max=a<b?b:a;","max=(a<b)?b:a;","max=b>a?b:a;","max=(b>a)?b:a;","max=(a>b?a:b);"], code:true}],
+ h:["Zapis je pogoj ? vrednost1 : vrednost2.","Če je a > b, je rezultat a, sicer b."],
+ why:"max = a > b ? a : b; izbere a, če je a večji, sicer b. Pri enakih vrednostih je vseeno, katero vrnemo."},
+{src:"M192/8", pts:2, lv:"C", type:"code",
+ q:"V programu imamo naslednja stavka: int a=10, b=20, c=30; int x = a>b && a>c ? a : (b>c ? b : c); Zapišite drugi stavek z uporabo stavka if, torej brez operatorja ?:. Program naj na koncu izpiše x.",
+ hideExp:true, expected:"30", starter:"public class Main {\n    public static void main(String[] args) {\n        int a = 10, b = 20, c = 30;\n        int x;\n        // tvoja koda (brez ?:)\n        System.out.println(x);\n    }\n}",
+ sol:"public class Main {\n    public static void main(String[] args) {\n        int a = 10, b = 20, c = 30;\n        int x;\n        if (a > b && a > c)\n            x = a;\n        else if (b > c)\n            x = b;\n        else\n            x = c;\n        System.out.println(x);\n    }\n}",
+ h:["Zunanji ?: postane if – else, notranji (b>c ? b : c) postane else if.","Spremenljivki x moraš določiti vrednost v vsaki veji."],
+ why:"Izraz izbere največjo od treh vrednosti. Prvi pogoj (a je večji od b in c) postane if, notranji pogojni operator pa veriga else if – else. Pri danih vrednostih je x = 30."},
+{src:"M172/12", pts:2, lv:"C", type:"mc",
+ q:"Kateri metodi sprejmeta celo število x in vrneta logično vrednost?",
+ o:["public static boolean konvert1(int x){ return (x!=0); }","public static boolean konvert2(int x){ return (x!=0 ? true : false); }","public static int konvert3(int x){ return (x); }","public static double konvert4(int x){ return (x); }"], a:[0,1],
+ h:["Tip rezultata je zapisan pred imenom metode.","Primerjava x != 0 je že logična vrednost."],
+ why:"Metodi A in B imata tip rezultata boolean in vrneta true, ko x ni 0. Pri B je pogojni operator odveč, ker x != 0 že je true ali false. C vrne int, D vrne double."},
+{lv:"C", own:true, pts:1, type:"output",
+ q:"Kaj izpiše program?",
+ code:"int x = 7;\nint y = 8;\nint z = (x < y) ? x : y;\nSystem.out.println(z);",
+ expected:"7",
+ h:["Pogoj 7 < 8 je izpolnjen.","Izbere se vrednost pred dvopičjem."],
+ why:"Ker je x < y, je z = x = 7. Program z if – else izpiše isto, saj obe obliki izbereta manjšo vrednost."},
+
+/* ----- D: Stavek switch ----- */
+{lv:"D", own:true, pts:1, type:"output",
+ q:"Kaj izpiše program?",
+ code:"int dan = 6;\nswitch (dan) {\n    case 6:\n    case 7:\n        System.out.println(\"vikend\");\n        break;\n    default:\n        System.out.println(\"delovni dan\");\n}",
+ expected:"vikend",
+ h:["switch skoči na case 6.","Pri case 6 ni stavkov, zato se izvajanje nadaljuje pri case 7."],
+ why:"Oznaki case 6 in case 7 imata skupne stavke. Izpiše se vikend, break nato prekine stavek switch."},
+{src:"M202/7", pts:1, lv:"D", type:"output",
+ q:"Kakšen je izpis po izvedbi naslednjega programa?",
+ code:"public class Izpis {\n    public static void main(String[] args) {\n        char ch = 'u';\n        switch (ch) {\n            case 'm': System.out.print(ch);\n            case 'a': System.out.print(ch);\n            case 't': System.out.print(ch);\n            case 'u': System.out.print(ch);\n            case 'r': System.out.print(ch);\n            case 'e': System.out.print(ch);\n        }\n    }\n}",
+ expected:"uuu",
+ h:["switch skoči na case 'u'.","Ker ni stavkov break, se izvedejo tudi vse naslednje možnosti."],
+ why:"Izvajanje se začne pri case 'u' in nadaljuje pri 'r' in 'e'. Vsakič se izpiše vrednost ch, torej uuu."},
+{src:"M172/18", pts:2, lv:"D", type:"output", adapt:true,
+ q:"Kaj izpiše naslednji program? (Prikazan je izsek iz metode main.)",
+ code:"char ch = 'b';\nswitch (ch) {\n    case 'a': System.out.print(ch);\n    case 'b': System.out.print(ch);\n    case 'c': System.out.print(ch);\n    case 'd': System.out.print(ch);\n}",
+ expected:"bbb",
+ h:["Začetek je pri case 'b'.","Brez break se izvedejo še 'c' in 'd'."],
+ why:"Izvede se izpis pri 'b', 'c' in 'd', zato je izpis bbb. V izvirni poli je glava razreda zapisana kot Public class (z veliko črko), kar se ne bi prevedlo; tu je prikazan samo izsek."},
+{src:"M211/9", pts:2, lv:"D", type:"output",
+ q:"Podan imamo naslednji del programa. Kaj se izpiše po naslednjih stavkih?",
+ code:"int st = 3;\nswitch (st) {\ncase 1:\n    System.out.println(1);\ncase 2:\n    System.out.println(2);\ncase 3:\n    System.out.println(3);\ndefault:\n    System.out.println(\"Privzeto\");\n    break;\n}",
+ expected:"3\nPrivzeto",
+ h:["switch skoči na case 3.","Pred default ni stavka break."],
+ why:"Izpiše se 3, nato se izvajanje nadaljuje v default in izpiše Privzeto. break na koncu prekine switch."},
+{src:"M231/5", pts:1, lv:"D", type:"mc",
+ q:"Koliko je vrednost spremenljivke a po izvedbi programa?",
+ snip:"int a = 10;\nint x = 20;\nswitch(x) {\n    case 20: a += 20;\n    case 30: a += 10;\n    case 40: a += 30; break;\n    case 50: a += 10;\n}",
+ o:["30","70","80","10"], a:[1],
+ h:["Začni pri case 20 in nadaljuj do prvega break.","Prištej 20, 10 in 30."],
+ why:"a = 10 + 20 = 30, nato + 10 = 40, nato + 30 = 70. break prekine switch, zato case 50 ne pride na vrsto."},
+{lv:"D", own:true, pts:1, type:"mc",
+ q:"Spremenljivka katerega tipa NE more biti izraz v stavku switch?",
+ o:["int","char","String","double"], a:[3],
+ h:["Vrednosti v oznakah case morajo biti natančne konstante.","Realna števila zaradi zaokroževanja niso primerna za primerjavo enakosti."],
+ why:"switch dovoljuje byte, short, char, int in (od Jave 7) String. double, float, long in boolean niso dovoljeni."},
+{lv:"D", own:true, pts:1, type:"output",
+ q:"Kaj izpiše program?",
+ code:"String luc = \"rumena\";\nswitch (luc) {\n    case \"rdeca\":  System.out.println(\"stoj\"); break;\n    case \"rumena\": System.out.println(\"pozor\"); break;\n    case \"zelena\": System.out.println(\"pojdi\"); break;\n    default:       System.out.println(\"napaka\");\n}",
+ expected:"pozor",
+ h:["Od Jave 7 lahko switch uporabimo tudi z nizi.","Primerjava poteka z vsebino niza (kot equals)."],
+ why:"Niz \"rumena\" se ujema z drugo oznako, izpiše se pozor in break prekine switch."},
+{src:"M171/5", pts:1, lv:"D", type:"mc",
+ q:"Kateri izmed opisov velja za stavek break?",
+ o:["Stavek break omogoča ponavljanje drugih stavkov.","Stavek break ni stavek programskega jezika Java.","Stavek break omogoča takojšnjo prekinitev izvajanja stavka switch ali zanke, v kateri se nahaja.","Stavek break predstavlja zanko s pogojem na začetku."], a:[2],
+ h:["V stavku switch break zaključi možnost.","Enako deluje v zankah (poglavje 6)."],
+ why:"break takoj prekine stavek switch ali zanko, v kateri se nahaja. Program nadaljuje s prvim stavkom za njo."},
+{src:"M181/18", pts:3, lv:"D", type:"code", adapt:true,
+ q:"Pretvorite navedeno zaporedje stavkov if v stavek switch. (Prirejeno: v kodi nastavi dan = 3, izpis naj bo ime dneva.)",
+ snip:"if (dan==1)\n    danIme=\"ponedeljek\";\nelse\n    if (dan==2)\n        danIme = \"torek\";\n    else\n        if (dan ==3)\n            danIme = \"sreda\";\n        else\n            if (dan ==4)\n                danIme = \"cetrtek\";\n            else\n                if (dan ==5)\n                    danIme = \"petek\";\n                else\n                    if (dan ==6)\n                        danIme =\"sobota\";\n                    else\n                        if (dan ==7)\n                            danIme =\"nedelja\";\n                        else\n                            danIme = \"dan ne obstaja\";\nSystem.out.println(danIme);",
+ hideExp:true, expected:"sreda", starter:"public class Main {\n    public static void main(String[] args) {\n        int dan = 3;\n        String danIme;\n        // stavek switch\n        System.out.println(danIme);\n    }\n}",
+ sol:"public class Main {\n    public static void main(String[] args) {\n        int dan = 3;\n        String danIme;\n        switch (dan) {\n            case 1: danIme = \"ponedeljek\"; break;\n            case 2: danIme = \"torek\"; break;\n            case 3: danIme = \"sreda\"; break;\n            case 4: danIme = \"cetrtek\"; break;\n            case 5: danIme = \"petek\"; break;\n            case 6: danIme = \"sobota\"; break;\n            case 7: danIme = \"nedelja\"; break;\n            default: danIme = \"dan ne obstaja\";\n        }\n        System.out.println(danIme);\n    }\n}",
+ h:["Vsak pogoj dan == n postane case n:, zadnji else postane default:.","Ne pozabi break na koncu vsake možnosti, sicer se izvedejo tudi naslednje."],
+ why:"Vsi pogoji primerjajo isto spremenljivko s konstanto, zato jih lahko pretvorimo v switch. Brez break bi se pri dan = 3 vrednost prepisala vse do default in izpisalo bi se »dan ne obstaja«. Na izpitu je četrtek zapisan s č; v kodi za Programiz uporabljamo »cetrtek«."},
+
+/* ----- E: naloge za utrjevanje ----- */
+{lv:"E", own:true, pts:3, type:"code",
+ q:"Sestavi program, ki ugotovi, ali se premici y1 = k1·x + n1 in y2 = k2·x + n2 sečeta. Možnosti so tri: premici sta vzporedni (se ne sečeta), se ujemata (neskončno skupnih točk) ali se sečeta v eni točki. V kodi nastavi k1 = 2, n1 = 1, k2 = -1, n2 = 4 (tip double). Izpiši »Premici sta vzporedni«, »Premici se ujemata« ali »Presek: (x, y)«.",
+ hideExp:true, expected:"Presek: (1.0, 3.0)", starter:ST,
+ sol:"public class Main {\n    public static void main(String[] args) {\n        double k1 = 2, n1 = 1, k2 = -1, n2 = 4;\n        if (k1 == k2) {\n            if (n1 == n2) System.out.println(\"Premici se ujemata\");\n            else System.out.println(\"Premici sta vzporedni\");\n        } else {\n            double x = (n2 - n1) / (k1 - k2);\n            double y = k1 * x + n1;\n            System.out.println(\"Presek: (\" + x + \", \" + y + \")\");\n        }\n    }\n}",
+ h:["Premici z enakim naklonom k sta vzporedni ali se ujemata, odvisno od n.","Presek dobiš iz k1·x + n1 = k2·x + n2, torej x = (n2 − n1) / (k1 − k2)."],
+ why:"k1 ≠ k2, zato se premici sečeta: x = (4 − 1) / (2 − (−1)) = 1, y = 2 · 1 + 1 = 3. Preizkusi še k2 = 2 z n2 = 1 (ujemata se) in z n2 = 5 (vzporedni)."},
+{lv:"E", own:true, pts:3, type:"code",
+ q:"Določi, ali točka leži znotraj, zunaj ali na robu pravokotnika. Pravokotnik je podan z nasprotnima ogliščema (5, 4) in (1, 1), stranice so vzporedne koordinatnima osema. V kodi nastavi točko (5, 2). Izpiši »znotraj«, »zunaj« ali »na robu«.",
+ hideExp:true, expected:"na robu", starter:ST,
+ sol:"public class Main {\n    public static void main(String[] args) {\n        int x1 = 5, y1 = 4, x2 = 1, y2 = 1;\n        int x = 5, y = 2;\n        int xmin = Math.min(x1, x2), xmax = Math.max(x1, x2);\n        int ymin = Math.min(y1, y2), ymax = Math.max(y1, y2);\n        if (x < xmin || x > xmax || y < ymin || y > ymax)\n            System.out.println(\"zunaj\");\n        else if (x == xmin || x == xmax || y == ymin || y == ymax)\n            System.out.println(\"na robu\");\n        else\n            System.out.println(\"znotraj\");\n    }\n}",
+ h:["Oglišči nista nujno podani kot »spodaj levo« in »zgoraj desno«. Najprej določi manjši in večji x ter y.","Najprej izloči točke zunaj, nato preveri, ali točka leži na kateri od stranic."],
+ why:"x leži med 1 in 5, y med 1 in 4, zato točka ni zunaj. Ker je x = 5 enak desni stranici, točka leži na robu. Preizkusi še (3, 2) (znotraj) in (6, 2) (zunaj)."},
+{lv:"E", own:true, pts:2, type:"code",
+ q:"Sestavi program Interval: dani sta celi števili a = 7 in b = 2 ter realno število x = 4.5. Preveri, ali x leži na zaprtem intervalu, ki ga določata a in b (spodnja meja je manjše, zgornja večje število). Izpiši »4.5 je na intervalu [2, 7]« ali »4.5 ni na intervalu [2, 7]«. Manjše in večje število določi s stavkom if.",
+ hideExp:true, expected:"4.5 je na intervalu [2, 7]", starter:ST,
+ sol:"public class Main {\n    public static void main(String[] args) {\n        int a = 7, b = 2;\n        double x = 4.5;\n        int sp, zg;\n        if (a < b) { sp = a; zg = b; }\n        else { sp = b; zg = a; }\n        if (x >= sp && x <= zg)\n            System.out.println(x + \" je na intervalu [\" + sp + \", \" + zg + \"]\");\n        else\n            System.out.println(x + \" ni na intervalu [\" + sp + \", \" + zg + \"]\");\n    }\n}",
+ h:["Ker je a večji od b, je spodnja meja b.","Zaprt interval vključuje tudi meji, zato uporabi >= in <=."],
+ why:"Spodnja meja je 2, zgornja 7. 4.5 je med njima, zato je na intervalu. Preizkusi še x = 2 (meja, še vedno na intervalu) in x = 7.5."},
+{lv:"E", own:true, pts:2, type:"code",
+ q:"Sestavi program Kipci: Indiana Jones najde tri zlate kipce, vzame pa lahko le dva. Vrednosti kipcev so 120, 75 in 300. Izpiši, katera dva kipca se najbolj splača vzeti, v obliki »Vzemi kipca 1 in 3« (manjša številka najprej).",
+ hideExp:true, expected:"Vzemi kipca 1 in 3", starter:ST,
+ sol:"public class Main {\n    public static void main(String[] args) {\n        int k1 = 120, k2 = 75, k3 = 300;\n        if (k1 <= k2 && k1 <= k3)\n            System.out.println(\"Vzemi kipca 2 in 3\");\n        else if (k2 <= k1 && k2 <= k3)\n            System.out.println(\"Vzemi kipca 1 in 3\");\n        else\n            System.out.println(\"Vzemi kipca 1 in 2\");\n    }\n}",
+ h:["Namesto da iščeš dva največja, poišči najmanj vrednega.","Pusti kipec, ki je manjši ali enak obema ostalima."],
+ why:"Najmanj vreden je kipec 2 (75), zato vzamemo kipca 1 in 3. Pogoj z <= poskrbi, da program deluje tudi pri enakih vrednostih."},
+{lv:"E", own:true, pts:3, type:"code",
+ q:"Sestavi program Datum: dana sta letnica 2024 in zaporedna številka dneva v letu 61. Izpiši, kateri dan in mesec je to, v obliki »1. 3. 2024«. Upoštevaj prestopno leto. Pri tej nalogi ne uporabljaj zank in tabel.",
+ hideExp:true, expected:"1. 3. 2024", starter:ST,
+ sol:"public class Main {\n    public static void main(String[] args) {\n        int leto = 2024, dan = 61;\n        boolean prestopno = (leto % 4 == 0 && leto % 100 != 0) || leto % 400 == 0;\n        int p = prestopno ? 1 : 0;\n        int m, d;\n        if (dan <= 31)            { m = 1;  d = dan; }\n        else if (dan <= 59 + p)   { m = 2;  d = dan - 31; }\n        else if (dan <= 90 + p)   { m = 3;  d = dan - 59 - p; }\n        else if (dan <= 120 + p)  { m = 4;  d = dan - 90 - p; }\n        else if (dan <= 151 + p)  { m = 5;  d = dan - 120 - p; }\n        else if (dan <= 181 + p)  { m = 6;  d = dan - 151 - p; }\n        else if (dan <= 212 + p)  { m = 7;  d = dan - 181 - p; }\n        else if (dan <= 243 + p)  { m = 8;  d = dan - 212 - p; }\n        else if (dan <= 273 + p)  { m = 9;  d = dan - 243 - p; }\n        else if (dan <= 304 + p)  { m = 10; d = dan - 273 - p; }\n        else if (dan <= 334 + p)  { m = 11; d = dan - 304 - p; }\n        else                      { m = 12; d = dan - 334 - p; }\n        System.out.println(d + \". \" + m + \". \" + leto);\n    }\n}",
+ h:["Seštej dni mesecev: do konca januarja 31, do konca februarja 59 (v prestopnem letu 60), do konca marca 90 (91) …","Od februarja naprej vsem mejam prištej 1, če je leto prestopno."],
+ why:"Leto 2024 je prestopno, zato ima februar 29 dni in se konča z 60. dnevom. 61. dan je zato 1. marec. Rešitev je preverjena za vse dni leta 2024 in 2025."},
+{lv:"E", own:true, pts:1, type:"code",
+ q:"Izmed treh števil 7, 12 in 9 poišči in izpiši največje.",
+ hideExp:true, expected:"12", starter:ST,
+ sol:"public class Main {\n    public static void main(String[] args) {\n        int a = 7, b = 12, c = 9;\n        int max = a;\n        if (b > max) max = b;\n        if (c > max) max = c;\n        System.out.println(max);\n    }\n}",
+ h:["Predpostavi, da je največje prvo število.","Nato ga primerjaj z drugim in tretjim ter po potrebi zamenjaj."],
+ why:"max je najprej 7, nato 12 (ker je 12 > 7), 9 pa ni večje od 12. Izpiše se 12. Drug način je veriga else if s pogoji a >= b && a >= c."},
+{lv:"E", own:true, pts:2, type:"cls",
+ cats:["Lahko pretvorimo v switch","Ne moremo neposredno"],
+ q:"Kako bi pretvoril poljubni stavek if v stavek switch? Razvrsti pogoje: katere lahko neposredno zapišemo kot oznake case?",
+ items:[["if (dan == 1) … else if (dan == 2) …",0],["if (ocena == 5) … else if (ocena == 4) …",0],["if (znak == 'a') … else if (znak == 'b') …",0],["if (tocke >= 90) … else if (tocke >= 75) …",1],["if (x == 1) … else if (y == 2) …",1],["if (t == 36.6) …  (t je double)",1],["if (ukaz.equals(\"start\")) … (ukaz je String)",0]],
+ h:["case potrebuje konstantno vrednost, s katero se primerja ena sama spremenljivka.","Neenakosti (>=, <) in tip double v switch nista dovoljena."],
+ why:"V switch pretvorimo verigo, v kateri ISTO spremenljivko (int, char, String …) primerjamo z enakostjo s konstantami. Pogoje z mejami lahko pretvorimo le posredno (npr. switch (tocke / 10)), pogojev z različnimi spremenljivkami in z double pa ne."},
+{lv:"E", own:true, pts:2, type:"code",
+ q:"Napiši program, ki izpiše, koliko dni ima mesec. Upoštevaj prestopno leto. V kodi nastavi mesec = 2 in leto = 2024. Uporabi stavek switch.",
+ hideExp:true, expected:"29", starter:ST,
+ sol:"public class Main {\n    public static void main(String[] args) {\n        int mesec = 2, leto = 2024;\n        int dni;\n        switch (mesec) {\n            case 2:\n                boolean prestopno = (leto % 4 == 0 && leto % 100 != 0) || leto % 400 == 0;\n                dni = prestopno ? 29 : 28;\n                break;\n            case 4: case 6: case 9: case 11:\n                dni = 30;\n                break;\n            default:\n                dni = 31;\n        }\n        System.out.println(dni);\n    }\n}",
+ h:["April, junij, september in november imajo 30 dni, februar 28 ali 29, ostali 31.","Več oznak case lahko zapišeš eno za drugo: case 4: case 6: …"],
+ why:"Leto 2024 je prestopno, zato ima februar 29 dni. Preizkusi še mesec = 2 z letom 1900 (28) in mesec = 11 (30)."},
+{lv:"E", own:true, pts:2, type:"code",
+ q:"Napiši preprost kalkulator z operacijami +, -, * in /. V kodi nastavi a = 12.0, b = 4.0 in znak op = '/'. Izpiši »12.0 / 4.0 = 3.0«. Pri deljenju z nič izpiši »Deljenje z 0 ni mogoce«, pri neznanem znaku »Neznana operacija«.",
+ hideExp:true, expected:"12.0 / 4.0 = 3.0", starter:ST,
+ sol:"public class Main {\n    public static void main(String[] args) {\n        double a = 12.0, b = 4.0;\n        char op = '/';\n        switch (op) {\n            case '+': System.out.println(a + \" + \" + b + \" = \" + (a + b)); break;\n            case '-': System.out.println(a + \" - \" + b + \" = \" + (a - b)); break;\n            case '*': System.out.println(a + \" * \" + b + \" = \" + (a * b)); break;\n            case '/':\n                if (b == 0) System.out.println(\"Deljenje z 0 ni mogoce\");\n                else System.out.println(a + \" / \" + b + \" = \" + (a / b));\n                break;\n            default: System.out.println(\"Neznana operacija\");\n        }\n    }\n}",
+ h:["Uporabi switch na znaku op (tip char).","Vsoto pri izpisu zapiši v oklepaje: (a + b), sicer se števili zlepita v niz."],
+ why:"12.0 / 4.0 = 3.0. Brez oklepajev bi pri + dobili »12.0 + 4.0 = 12.04.0«, ker se z nizom vse zlepi. Deljenje realnih števil z 0 ne sproži izjeme (dobimo Infinity), zato ga preverimo sami."},
+{lv:"E", own:true, pts:2, type:"code",
+ q:"Napiši program, ki za dano leto pove, ali je prestopno. Leto je prestopno, če je deljivo s 400 ali če je deljivo s 4 in ni deljivo s 100. V kodi nastavi leto = 1900. Izpiši »1900 je prestopno leto« ali »1900 ni prestopno leto«.",
+ hideExp:true, expected:"1900 ni prestopno leto", starter:ST,
+ sol:"public class Main {\n    public static void main(String[] args) {\n        int leto = 1900;\n        if (leto % 400 == 0 || (leto % 4 == 0 && leto % 100 != 0))\n            System.out.println(leto + \" je prestopno leto\");\n        else\n            System.out.println(leto + \" ni prestopno leto\");\n    }\n}",
+ h:["Pravilo zapiši z || in &&: deljivo s 400 ALI (deljivo s 4 IN ni deljivo s 100).","1900 je deljivo s 4 in s 100, ni pa deljivo s 400."],
+ why:"1900 je deljivo s 100 in ni deljivo s 400, zato ni prestopno. Preizkusi še 2000 (prestopno), 2024 (prestopno) in 2025 (ni)."},
+
+/* ----- F: maturitetne naloge za ponavljanje ----- */
+{src:"M241/6", pts:2, lv:"F", type:"mc",
+ q:"Katera pogoja vrneta true natanko takrat, ko je vrednost celoštevilske spremenljivke x sodo število?",
+ o:["((x%2)==0)","((x&2)==0)","((x&1)==0)","((x/2)==0)"], a:[0,2],
+ h:["Sodost določa najnižji bit (vrednost 1).","x & 2 preveri drugi bit, ne najnižjega."],
+ why:"(x % 2) == 0 in (x & 1) == 0 veljata natanko za soda števila. x & 2 preverja bit z vrednostjo 2, x / 2 == 0 pa velja le za -1, 0 in 1."},
+{src:"M152/14", pts:1, lv:"F", type:"mc",
+ q:"Kaj izpiše navedeni del programa? Integer a= new Integer(2); Integer b= new Integer(2); if(a==b) System.out.print(\"a==b vrne true \"); if(a.equals(b)) System.out.println(\"a.equals(b) vrne true\");",
+ o:["a==b vrne true","a==b vrne true a.equals(b) vrne true","a.equals(b) vrne true","nič od navedenega"], a:[2],
+ h:["new ustvari dva različna objekta.","== pri objektih primerja, ali gre za isti objekt, equals pa vsebino."],
+ why:"a in b sta dva različna objekta, zato je a == b false. Vsebina je enaka, zato equals vrne true. (V novejših različicah Jave je new Integer(2) označen kot zastarel, a se še prevede.)"},
+{src:"M222/10", pts:2, lv:"F", type:"blanks",
+ q:"Dopolnite trditvi: Stavek ____ nemudoma prekine izvajanje najbolj notranje zanke ali stavka switch, v katerem se nahaja. Če želimo prekiniti izvajanje metode, v kateri se nahajamo, moramo uporabiti stavek ____ .",
+ b:[{l:"prva beseda", acc:["break"]},{l:"druga beseda", acc:["return"]}],
+ h:["Isti stavek zaključi možnost v switch.","Metodo zaključimo s stavkom, ki vrne rezultat."],
+ why:"break prekine zanko ali switch, return prekine metodo (in po potrebi vrne vrednost)."},
+{src:"M261/3", pts:1, lv:"F", type:"mc",
+ q:"Katera od podanih rešitev je resnična za prireditveni stavek v programskem jeziku Java?",
+ o:["Prireditveni stavek v program uvede novo spremenljivko oz. objekt.","Prireditveni stavek se ne sme pojaviti v stavku switch.","Prireditveni stavek vedno poveča vrednost celoštevilske spremenljivke.","Prireditveni stavek spremeni vrednost obstoječe spremenljivke oz. objekta."], a:[3],
+ h:["Novo spremenljivko uvede deklaracija.","V switch smo v primerih zgoraj pogosto uporabili a += 20 ali dni = 30."],
+ why:"Prireditveni stavek spremeni vrednost že obstoječe spremenljivke. V stavku switch je povsem dovoljen (npr. dni = 30;)."}
+];
+
+const HOME = [
+ {id:"h1", title:"Vrsta trikotnika",
+  q:"V kodi nastavi dolžine stranic a, b in c (cela števila). Najprej preveri, ali trikotnik sploh obstaja (vsota vsakih dveh stranic mora biti večja od tretje). Če obstaja, izpiši, ali je enakostranični, enakokraki ali raznostranični. Preizkusi s 3, 3, 3; 3, 3, 5; 3, 4, 5 in 1, 2, 5.",
+  sol:"Zunanji if preveri a + b > c && a + c > b && b + c > a, sicer izpiše »trikotnik ne obstaja«. Znotraj je veriga: if (a == b && b == c) enakostranični; else if (a == b || b == c || a == c) enakokraki; else raznostranični. Pri 1, 2, 5 trikotnik ne obstaja."},
+ {id:"h2", title:"Kvadratna enačba",
+  q:"Za enačbo a·x² + b·x + c = 0 (a ≠ 0, vrednosti double v kodi) izračunaj diskriminanto D = b² − 4ac in izpiši, koliko realnih rešitev ima enačba. Če rešitve obstajajo, jih izpiši (Math.sqrt). Preizkusi z (1, -3, 2), (1, 2, 1) in (1, 0, 1).",
+  sol:"if (D > 0) dve rešitvi (-b ± Math.sqrt(D)) / (2 * a); else if (D == 0) ena rešitev -b / (2 * a); else ni realnih rešitev. Za (1, -3, 2) sta rešitvi 2.0 in 1.0, za (1, 2, 1) je rešitev -1.0, (1, 0, 1) nima realnih rešitev."},
+ {id:"h3", title:"Meni z vnosom",
+  q:"Napiši program, ki izpiše meni (1 – pozdrav, 2 – trenutno leto, 3 – izhod), s Scannerjem prebere izbiro in s stavkom switch izvede izbrano možnost. Pri napačni izbiri izpiši »Napacna izbira«.",
+  sol:"Scanner sc = new Scanner(System.in); int izbira = sc.nextInt(); switch (izbira) { case 1: System.out.println(\"Pozdravljen!\"); break; case 2: System.out.println(2026); break; case 3: System.out.println(\"Nasvidenje\"); break; default: System.out.println(\"Napacna izbira\"); }. Ne pozabi na import java.util.Scanner; na začetku datoteke."},
+ {id:"h4", title:"Ocena iz točk",
+  q:"S Scannerjem preberi število točk (0–100) in izpiši oceno: 90 in več 5, 75 in več 4, 60 in več 3, 50 in več 2, sicer 1. Za vrednosti zunaj območja 0–100 izpiši »Napacen vnos«. Preizkusi mejne vrednosti 49, 50, 89, 90 in 101.",
+  sol:"Najprej if (t < 0 || t > 100) Napacen vnos; nato veriga else if (t >= 90) 5; else if (t >= 75) 4; else if (t >= 60) 3; else if (t >= 50) 2; else 1. Za 49 je ocena 1, za 50 ocena 2, za 89 ocena 4, za 90 ocena 5, za 101 Napacen vnos."}
+];
+
+T.forEach(t=>{ if(t.solKey) t.sol = J[t.solKey]; });
+HOME.forEach(h=>{ if(h.jsol) h.jsolCode = J[h.jsol]; });
+
+/* ---------- storage: browser always, user account when available ---------- */
+let S = {}, localT = 0;
+let remote = null, pushTimer = null, pushing = false, dirty = false;
+function saveLocal(){ LavRac.saveUi(S); }
+function save(){ LavRac.saveUi(S); }
+function st(id){ return S[id] || (S[id] = {}); }
+const RANK = {ok:2, seen:1};
+function summary(){
+  const r = {resenih:0, tock:0, vseh:T.length, vsehTock:T.reduce((a,t)=>a+t.pts,0), sklopi:{}};
+  T.forEach(t=>{ const k=t.lv; r.sklopi[k] = r.sklopi[k] || {resenih:0, vseh:0}; r.sklopi[k].vseh++;
+    if(S[t.id] && S[t.id].state==="ok"){ r.resenih++; r.tock+=t.pts; r.sklopi[k].resenih++; } });
+  return r;
+}
+async function push(){
+  if(!remote || pushing || !dirty) return;
+  pushing = true; dirty = false;
+  try { await remote.ref.set({poglavje:5, naloge:S, povzetek:summary(), posodobljeno:localT}); setSync("cloud"); }
+  catch(e){ if(e && e.code==="invalid_argument"){ remote = null; setSync("local"); } else { setSync("err"); dirty = true; } }
+  pushing = false;
+  if(dirty && remote){ clearTimeout(pushTimer); pushTimer = setTimeout(push, 4000); }
+}
+function merge(R, rT){
+  let changed = false;
+  const newer = rT > localT;
+  Object.keys(R).forEach(id=>{
+    const r = R[id] || {}, l = S[id];
+    if(!l){ S[id] = r; changed = true; return; }
+    const base = newer ? Object.assign({}, l, r) : Object.assign({}, r, l);
+    const rs = Math.max(RANK[l.state]||0, RANK[r.state]||0);
+    base.state = rs===2 ? "ok" : rs===1 ? "seen" : undefined;
+    base.h = Math.max(l.h||0, r.h||0);
+    if(JSON.stringify(base)!==JSON.stringify(l)){ S[id] = base; changed = true; }
+  });
+  if(newer) localT = rT;
+  return changed;
+}
+const SYNC_TXT = {
+  local:"Napredek se shranjuje v tem brskalniku. Na drugem računalniku ga ne boš videl.",
+  cloud:"Napredek se shranjuje v tvojem računu in je na voljo na vseh napravah.",
+  err:"Shranjevanje v račun trenutno ne deluje. Napredek je varen v tem brskalniku."
+};
+function setSync(k){ document.querySelectorAll(".js-sync").forEach(e=>{ e.dataset.s=k; e.textContent=SYNC_TXT[k]; }); }
+
+/* ---------- helpers ---------- */
+const $ = (s,el=document)=>el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const KW = new Set("abstract boolean break byte case catch char class continue default do double else extends final finally float for if implements import instanceof int interface long new null package private protected public return short static super switch this throw throws try void while true false var String System".split(" "));
+function hl(code){
+  const re = /(\/\/[^\n]*)|("(?:\\.|[^"\\])*")|('(?:\\.|[^'\\])')|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_]\w*)\b/g;
+  let out="", last=0, m;
+  while((m=re.exec(code))){
+    out += esc(code.slice(last, m.index));
+    if(m[1]) out += '<span class="c">'+esc(m[1])+'</span>';
+    else if(m[2]||m[3]) out += '<span class="s">'+esc(m[2]||m[3])+'</span>';
+    else if(m[4]) out += '<span class="n">'+m[4]+'</span>';
+    else if(KW.has(m[5])) out += '<span class="k">'+m[5]+'</span>';
+    else out += esc(m[5]);
+    last = re.lastIndex;
+  }
+  return out + esc(code.slice(last));
+}
+const fold = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+function norm(s, o){
+  let x = String(s).trim();
+  if(o.code) return x.replace(/\s+/g,"");
+  x = x.replace(/\s+/g," ");
+  if(!o.cs) x = fold(x.toLowerCase()).replace(/[.]$/,"");
+  if(o.list) x = x.split(/\s*,\s*/).sort().join(",");
+  return x;
+}
+function matchBlank(val, b){
+  if(b.pool){ const set = new Set(String(val).split(/[\s,;]+/).map(x=>x.trim().toLowerCase()).filter(Boolean)); const n = [...set].filter(x=>b.pool.includes(x)).length; return n>=b.min && n===set.size; }
+  const v = norm(val,b); return b.acc.some(a => norm(a,b) === v); }
+const normOut = s => String(s).replace(/\r/g,"").split("\n").map(l=>l.replace(/\s+$/,"")).join("\n").replace(/\n+$/,"");
+const srcLabel = s => { const r = /^MRAC\/(\d+)$/.exec(s); if(r) return `Katalog 2023 · primer · ${r[1]}. nal.`; const m = /^M(\d\d)(\d)\/(\d+)$/.exec(s); return m ? `Matura 20${m[1]} · ${m[2]==="1"?"spomladi":"jeseni"} · ${m[3]}. nal.` : s; };
+const ptsLabel = p => p===1 ? "1 točka" : p===2 ? "2 točki" : (p<5 ? p+" točke" : p+" točk");
+
+/* ---------- render tasks ---------- */
+LavRac.prepare(T, LEVELS, {});
+[{"code":"public class Main {\n    public static void main(String[] args) {\n        int a = 3, b = 4, c = 5;\n        if (a + b > c && a + c > b && b + c > a) {\n            if (a == b && b == c) {\n                System.out.println(\"enakostranicni\");\n            } else if (a == b || b == c || a == c) {\n                System.out.println(\"enakokraki\");\n            } else {\n                System.out.println(\"raznostranicni\");\n            }\n        } else {\n            System.out.println(\"trikotnik ne obstaja\");\n        }\n    }\n}","sol":"Zunanji if preveri, ali trikotnik obstaja, notranja veriga pa določi vrsto. Za 3, 3, 3 je trikotnik enakostranični, za 3, 3, 5 enakokraki, za 3, 4, 5 raznostranični, za 1, 2, 5 ne obstaja (1 + 2 ni večje od 5)."},{"code":"public class Main {\n    public static void main(String[] args) {\n        double a = 1, b = -3, c = 2;\n        double d = b * b - 4 * a * c;\n        if (d > 0) {\n            double x1 = (-b + Math.sqrt(d)) / (2 * a);\n            double x2 = (-b - Math.sqrt(d)) / (2 * a);\n            System.out.println(\"Dve resitvi: \" + x1 + \" in \" + x2);\n        } else if (d == 0) {\n            System.out.println(\"Ena resitev: \" + (-b / (2 * a)));\n        } else {\n            System.out.println(\"Ni realnih resitev\");\n        }\n    }\n}","sol":"Za (1, -3, 2) sta rešitvi 2.0 in 1.0, za (1, 2, 1) je rešitev -1.0, (1, 0, 1) nima realnih rešitev."},{"code":"import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        System.out.println(\"1 - pozdrav\");\n        System.out.println(\"2 - trenutno leto\");\n        System.out.println(\"3 - izhod\");\n        int izbira = sc.nextInt();\n        switch (izbira) {\n            case 1: System.out.println(\"Pozdravljen!\"); break;\n            case 2: System.out.println(2026); break;\n            case 3: System.out.println(\"Nasvidenje\"); break;\n            default: System.out.println(\"Napacna izbira\");\n        }\n    }\n}","sol":"Vsaka možnost se konča z break, sicer bi se izvedle tudi naslednje. Ne pozabi na import java.util.Scanner; na začetku datoteke."},{"code":"import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int t = sc.nextInt();\n        if (t < 0 || t > 100) {\n            System.out.println(\"Napacen vnos\");\n        } else if (t >= 90) {\n            System.out.println(5);\n        } else if (t >= 75) {\n            System.out.println(4);\n        } else if (t >= 60) {\n            System.out.println(3);\n        } else if (t >= 50) {\n            System.out.println(2);\n        } else {\n            System.out.println(1);\n        }\n    }\n}","sol":"Najprej preverimo območje, nato gremo od največje meje navzdol. Za 49 je ocena 1, za 50 ocena 2, za 89 ocena 4, za 90 ocena 5, za 101 izpis Napacen vnos."}].forEach((f, k) => { HOME[k].jsolCode = f.code; if (f.sol) HOME[k].sol = f.sol; });
+T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });
+LavRac.tasks(LEVELS.flatMap(L=>T.filter(t=>t.lv===L.tag)), { level: (t) => t.pts });
+S = LavRac.loadUi();
+const levelsEl = $("#levels");
+let counter = 0;
+function renderAll(){
+levelsEl.innerHTML = ""; $("#homeMat").innerHTML = ""; counter = 0;
+LEVELS.forEach(L=>{
+  const wrap = document.createElement("div");
+  wrap.className = "level"; wrap.id = L.id;
+  wrap.innerHTML = `<header><span class="eyebrow">Sklop ${L.tag}</span><h3 style="font-size:1.35rem">${esc(L.title)}</h3><p>${esc(L.note)}</p></header>`;
+  T.filter(t=>t.lv===L.tag).forEach(t=>{ counter++; t.n = counter; wrap.appendChild(card(t)); });
+  const em = document.createElement("p"); em.className = "lvl-empty"; em.hidden = true; em.textContent = "V tem sklopu ni nalog za izbrani filter.";
+  wrap.appendChild(em);
+  (L.home ? $("#homeMat") : levelsEl).appendChild(wrap);
+});
+applyFilter();
+}
+
+function card(t){
+  const el = document.createElement("article");
+  el.className = "task"; el.id = "t-"+t.id; el.dataset.kind = t.own ? "own" : "mat";
+  const tags = (t.lab ? `<span class="tag mat">${esc(t.lab)}</span>` : t.own ? `<span class="tag">Dodatna</span>` : `<span class="tag mat">${esc(srcLabel(t.src))}</span>`) + (t.adapt?`<span class="tag">Prirejeno</span>`:"") + (t.redr?`<span class="tag">Diagram prerisan</span>`:"") + (t.draw?`<span class="tag">Nariši diagram</span>`:"") + `<span class="tag">${ptsLabel(t.pts)}</span><span class="tag js-st" hidden></span>`;
+  let body = "";
+  if(t.code) body += `<pre class="code">${hl(t.code)}</pre>`;
+  if(t.code && t.type!=="output") body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="code">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`;
+  body += `<p>${esc(t.q)}</p>`;
+  if(t.snip) body += `<pre class="code">${hl(t.snip)}</pre>`;
+  if(t.fcq) body += `<div class="fig">${FLOW.svg(t.fcq)}</div>`;
+  if(t.type==="mc"){
+    const multi = t.a.length>1;
+    body += `<div class="opts">` + t.o.map((o,k)=>`<label class="opt"><input type="${multi?"checkbox":"radio"}" name="r-${t.id}" id="r-${t.id}-${k}" value="${k}"><b>${"ABCDEF"[k]}</b><span>${t.osym ? FLOW.sym(t.osym[k]) : esc(o)}</span></label>`).join("") + `</div>`;
+  } else if(t.type==="blanks"){
+    body += t.b.map((b,k)=>`<div class="blank"><label for="b-${t.id}-${k}">${esc(b.l)}</label><input type="text" id="b-${t.id}-${k}" class="${b.code||b.cs?"mono":""}" autocomplete="off" spellcheck="false"></div>`).join("");
+  } else if(t.type==="cls"){
+    body += `<div class="cls">` + t.items.map((it,k)=>`<div class="crow" data-k="${k}"><span class="txt">${esc(it[0])}</span><div class="seg" role="group" aria-label="Izberi">${t.cats.map((c,ci)=>`<button type="button" data-ci="${ci}" aria-pressed="false">${esc(c)}</button>`).join("")}</div></div>`).join("") + `</div>`;
+  } else if(t.type==="output"){
+    body += `<div class="blank"><label for="o-${t.id}">Tvoj odgovor (izpis)</label><textarea id="o-${t.id}" class="mono out" spellcheck="false"></textarea></div>`;
+    body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="code">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`;
+  } else if(t.type==="code"){
+    if(!t.hideExp) body += `<pre class="code">${esc(t.expected)}</pre>`;
+    body += `<div class="blank"><div class="editorbar"><label for="e-${t.id}">Tvoja koda</label><span>Zaženi program v poljubnem okolju (Eclipse, VS Code, Programiz …) in prilepi njegov izpis. V Programizu razred preimenuj v Main.</span></div><textarea id="e-${t.id}" class="editor" spellcheck="false"></textarea></div>`;
+    body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="editor">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a><button class="btn ghost js-restore" type="button">Ponastavi kodo</button></div>`;
+    body += `<div class="blank"><label for="o-${t.id}">Izpis tvojega programa</label><textarea id="o-${t.id}" class="mono out" spellcheck="false"></textarea></div>`;
+  }
+  el.innerHTML = `
+    <div class="thead"><span class="tnum">${t.n}. naloga</span><div class="tags">${tags}</div></div>
+    <div class="q">${body}</div>
+    <div class="actions">
+      <button class="btn primary js-check" type="button">Preveri</button>
+      <button class="btn js-hint" type="button">Namig</button>
+      <button class="btn ghost js-sol" type="button">Prikaži rešitev</button>
+      <span class="feedback" aria-live="polite"></span>
+    </div>
+    <div class="hints"></div>
+    <div class="sol" hidden></div>`;
+  wire(el,t);
+  return el;
+}
+
+function wire(el,t){
+  const s = st(t.id);
+  const fb = $(".feedback",el), hintsEl = $(".hints",el), solEl = $(".sol",el);
+  // restore inputs
+  if(t.type==="mc" && s.v) s.v.forEach(k=>{ const i=$(`#r-${t.id}-${k}`,el); if(i) i.checked=true; });
+  if(t.type==="blanks" && s.v) s.v.forEach((v,k)=>{ const i=$(`#b-${t.id}-${k}`,el); if(i) i.value=v; });
+  if(t.type==="cls"){
+    el.querySelectorAll(".crow").forEach(row=>{
+      const k = +row.dataset.k;
+      row.querySelectorAll("button").forEach(b=>{
+        if(s.v && s.v[k]===+b.dataset.ci) b.setAttribute("aria-pressed","true");
+        b.addEventListener("click",()=>{ row.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed","false")); b.setAttribute("aria-pressed","true"); row.classList.remove("right","wrong"); collect(); });
+      });
+    });
+  }
+  const ed = $(`#e-${t.id}`,el), out = $(`#o-${t.id}`,el);
+  const sv = s.v && typeof s.v === "object" && !Array.isArray(s.v) ? s.v : null;
+  if(ed){ ed.value = sv && sv.code != null ? sv.code : t.starter;
+    ed.addEventListener("keydown",e=>{ if(e.key==="Tab" && !e.shiftKey){ e.preventDefault(); const a=ed.selectionStart,b=ed.selectionEnd; ed.value=ed.value.slice(0,a)+"    "+ed.value.slice(b); ed.selectionStart=ed.selectionEnd=a+4; collect(); }});
+    ed.addEventListener("input",collect);
+    $(".js-restore",el).addEventListener("click",()=>{ ed.value=t.starter; collect(); });
+  }
+  if(out){ const o = sv ? sv.out : (typeof s.v === "string" ? s.v : null); if(o) out.value=o; out.addEventListener("input",collect); }
+  el.querySelectorAll("input").forEach(i=>i.addEventListener("input",()=>{ i.classList.remove("right","wrong"); collect(); }));
+  el.querySelectorAll("input[type=radio],input[type=checkbox]").forEach(i=>i.addEventListener("change",()=>{ el.querySelectorAll(".opt").forEach(o=>o.classList.remove("right","wrong")); collect(); }));
+
+  function collect(){
+    if(t.type==="mc") s.v = [...el.querySelectorAll(`input[name="r-${t.id}"]:checked`)].map(i=>+i.value);
+    if(t.type==="blanks") s.v = t.b.map((_,k)=>$(`#b-${t.id}-${k}`,el).value);
+    if(t.type==="cls") s.v = [...el.querySelectorAll(".crow")].map(r=>{ const p=r.querySelector('button[aria-pressed="true"]'); return p ? +p.dataset.ci : null; });
+    if(t.type==="output") s.v = out.value;
+    if(t.type==="code") s.v = { code: ed.value, out: out.value };
+    save();
+  }
+
+  el.querySelectorAll(".js-copy").forEach(btn=>btn.addEventListener("click",()=>{
+    const text = btn.dataset.copy==="editor" ? ed.value : t.code;
+    const done = ()=>{ const o=btn.textContent; btn.textContent="Kopirano"; setTimeout(()=>btn.textContent=o,1400); };
+    try { navigator.clipboard.writeText(text).then(done, ()=>fallback(text,done)); } catch(e){ fallback(text,done); }
+  }));
+
+  $(".js-check",el).addEventListener("click",()=>{
+    collect();
+    let ok=false, msg="";
+    if(t.type==="mc"){
+      const v = new Set(s.v||[]);
+      if(!v.size){ show(false,"Najprej izberi odgovor."); return; }
+      ok = v.size===t.a.length && t.a.every(k=>v.has(k));
+      el.querySelectorAll(".opt").forEach((o,k)=>{ o.classList.remove("right","wrong"); if(v.has(k)) o.classList.add(t.a.includes(k)?"right":"wrong"); });
+      if(!ok && t.a.length>1 && v.size!==t.a.length) msg = `Pravilnih odgovorov je ${t.a.length}.`;
+    }
+    if(t.type==="blanks"){
+      let all=true;
+      t.b.forEach((b,k)=>{ const i=$(`#b-${t.id}-${k}`,el); const good = matchBlank(i.value,b); i.classList.remove("right","wrong"); if(i.value.trim()) i.classList.add(good?"right":"wrong"); if(!good) all=false; });
+      ok = all;
+    }
+    if(t.type==="cls"){
+      let all=true, any=false;
+      el.querySelectorAll(".crow").forEach(r=>{ const k=+r.dataset.k; r.classList.remove("right","wrong"); if(s.v[k]==null){ all=false; return; } any=true; const good = s.v[k]===t.items[k][1]; r.classList.add(good?"right":"wrong"); if(!good) all=false; });
+      if(!any){ show(false,"Najprej razvrsti vsaj eno trditev."); return; }
+      ok = all; if(!ok && s.v.includes(null)) msg="Razvrsti vse trditve.";
+    }
+    if(t.type==="output" || t.type==="code"){
+      if(!out.value.trim()){ show(false, t.type==="code" ? "Zaženi program in prilepi njegov izpis." : "Napiši izpis."); return; }
+      const exps = [].concat(t.expected); ok = exps.some(e=>normOut(out.value)===normOut(e));
+      out.classList.remove("right","wrong"); out.classList.add(ok?"right":"wrong");
+      if(!ok){ const a=normOut(out.value).split("\n"), b=normOut(exps[0]).split("\n"); const k=b.findIndex((l,j)=>a[j]!==l); msg = k<0 ? "Izpis ima preveč vrstic." : `Razlika v ${k+1}. vrstici.`; }
+    }
+    if(!ok && t.type==="blanks" && t.b.every((_,k)=>!$(`#b-${t.id}-${k}`,el).value.trim())){ show(false,"Najprej vpiši odgovor."); return; }
+    if(!ok && /^Razvrsti/.test(msg)){ show(false,msg); return; }
+    save(); LavRac.answered(t.idx, ok, msg);
+  });
+
+  let hi = s.h || 0;
+  const drawHints = ()=>{ hintsEl.innerHTML = t.h.slice(0,hi).map((h,k)=>`<div class="hint"><b>NAMIG ${k+1}/${t.h.length}</b>${esc(h)}</div>`).join(""); const b=$(".js-hint",el); b.disabled = hi>=t.h.length; b.textContent = hi>=t.h.length ? "Ni več namigov" : (hi? "Naslednji namig":"Namig"); };
+  drawHints();
+  $(".js-hint",el).addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h=hi; save(); LavRac.hinted(t.idx); drawHints(); }});
+
+  function drawSol(){
+    let ans="";
+    if(t.type==="mc") ans = "Pravilno: " + t.a.map(k=>"ABCDEF"[k]).join(", ");
+    if(t.type==="blanks") ans = t.b.map(b=>`${b.l} ${b.acc[0]}`).join(" · ");
+    if(t.type==="cls") ans = t.items.map(it=>`${it[0]} → ${t.cats[it[1]]}`).join("\n");
+    let html = "";
+    if(t.type==="cls") html += `<div class="ans" style="white-space:pre-line;font-weight:400">${esc(ans)}</div>`;
+    else if(ans) html += `<div class="ans">${esc(ans)}</div>`;
+    if(t.fc) html += `<div class="fig"><div class="eyebrow" style="margin-bottom:8px">Diagram poteka</div>${FLOW.svg(t.fc)}</div>`;
+    if(t.jsolCode) html += `<div><div class="eyebrow">Primer v Javi</div><pre class="code">${hl(t.jsolCode)}</pre></div>`;
+    if(t.type==="output") html += `<div><div class="eyebrow">Pravilen izpis</div><pre class="code">${esc(t.expected)}</pre></div>`;
+    if(t.type==="code") html += `<div><div class="eyebrow">Ena od možnih rešitev</div><pre class="code">${hl(t.sol)}</pre></div>`;
+    html += `<p class="why">${esc(t.why)}</p>`;
+    solEl.innerHTML = html;
+  }
+  $(".js-sol",el).addEventListener("click",()=>{
+    if(solEl.hidden){ drawSol(); solEl.hidden=false; LavRac.solution(t.idx); $(".js-sol",el).textContent="Skrij rešitev"; }
+    else { solEl.hidden=true; $(".js-sol",el).textContent="Prikaži rešitev"; }
+  });
+
+  function show(ok,m){ fb.textContent=m; fb.className="feedback "+(ok?"ok":"bad"); }
+  function paint(){
+    el.dataset.state = s.state||"";
+    const tg = $(".js-st",el);
+    if(s.state==="ok"){ tg.hidden=false; tg.className="tag js-st st-ok"; tg.textContent="Rešeno"; }
+    else if(s.state==="seen"){ tg.hidden=false; tg.className="tag js-st st-seen"; tg.textContent="Rešitev ogledana"; }
+    else tg.hidden=true;
+  }
+  paint();
+}
+
+function fallback(text,done){
+  const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); done(); }catch(e){} ta.remove();
+}
+
+/* ---------- home ---------- */
+const homeEl = $("#home");
+HOME.forEach((h,k)=>{
+  const el = document.createElement("article"); el.className="task";
+  el.innerHTML = `<div class="thead"><span class="tnum">D${k+1}. ${esc(h.title)}</span><div class="tags"><span class="tag">Za doma</span></div></div>
+   <div class="q">${h.code?`<pre class="code">${hl(h.code)}</pre>`:""}<p>${esc(h.q)}</p>
+   ${h.code?`<div class="actions"><button class="btn js-c" type="button">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`:""}</div>
+   <div class="actions"><button class="btn ghost js-s" type="button">Prikaži rešitev</button></div>
+   <div class="sol" hidden>${h.fc?`<div class="fig">${FLOW.svg(h.fc)}</div>`:""}${h.jsolCode?`<pre class="code">${hl(h.jsolCode)}</pre>`:""}<p class="why">${esc(h.sol)}</p></div>`;
+  const sol=$(".sol",el), b=$(".js-s",el);
+  b.addEventListener("click",()=>{ sol.hidden=!sol.hidden; b.textContent= sol.hidden?"Prikaži rešitev":"Skrij rešitev"; });
+  const c=$(".js-c",el); if(c) c.addEventListener("click",()=>{ const done=()=>{c.textContent="Kopirano";setTimeout(()=>c.textContent="Kopiraj kodo",1400)}; try{navigator.clipboard.writeText(h.code).then(done,()=>fallback(h.code,done));}catch(e){fallback(h.code,done);} });
+  homeEl.appendChild(el);
+});
+
+/* ---------- static highlighting ---------- */
+document.querySelectorAll(".js-hl").forEach(p=>{ p.innerHTML = hl(p.textContent); });
+
+/* ---------- progress ---------- */
+function progress(){
+  const r = summary();
+  const txt = `${r.resenih} / ${r.vseh} nalog · ${r.tock} / ${r.vsehTock} točk`;
+  document.querySelectorAll(".js-progtxt").forEach(e=>e.textContent=txt);
+  document.querySelectorAll(".js-bar").forEach(e=>e.style.width=(100*r.tock/r.vsehTock)+"%");
+  document.querySelectorAll(".cnt[data-lv]").forEach(e=>{ const k=r.sklopi[e.dataset.lv]; if(!k) return; e.textContent=`${k.resenih}/${k.vseh}`; e.classList.toggle("full", k.resenih===k.vseh); });
+  const nm = T.filter(t=>!t.own).length, ps = $("#progSrc"); if(ps) ps.textContent = `${nm} maturitetnih · ${T.length-nm} dodatnih nalog`;
+}
+
+/* ---------- filters ---------- */
+let curFilter = "all";
+function applyFilter(){
+  document.querySelectorAll("#levels .task, #homeMat .task").forEach(el=>{
+    const s = S[el.id.slice(2)] || {};
+    el.hidden = (curFilter==="mat" && el.dataset.kind!=="mat") || (curFilter==="own" && el.dataset.kind!=="own") || (curFilter==="open" && s.state==="ok");
+  });
+  document.querySelectorAll("#levels .level, #homeMat .level").forEach(l=>{ const e=l.querySelector(".lvl-empty"); if(e) e.hidden = !!l.querySelector(".task:not([hidden])"); });
+}
+document.querySelectorAll(".chip").forEach(c=>c.addEventListener("click",()=>{
+  document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed","false"));
+  c.setAttribute("aria-pressed","true");
+  curFilter = c.dataset.f; applyFilter();
+}));
+
+/* ---------- pages ---------- */
+const PAGES = [["stavek-if","Pogojni stavek if"],["if-else","if – else in blok stavkov"],["gnezdenje","Gnezdenje in viseči else"],["veriga","Veriga else if in ?:"],["switch","Stavek switch"],["napake","Pogoste napake"],
+  ["naloge-a","Naloge A · Pogoji in if"],["naloge-b","Naloge B · if – else"],["naloge-c","Naloge C · else if in ?:"],["naloge-d","Naloge D · switch"],["naloge-e","Naloge E · Utrjevanje"],["doma","Vaje za doma"]];
+const sel = $("#pageSel");
+sel.innerHTML = PAGES.map((p,k)=>`<option value="${p[0]}">${k+1}. ${esc(p[1])}</option>`).join("");
+sel.addEventListener("change",()=>{ location.hash = sel.value; });
+let cur = PAGES[0][0];
+function showPage(id, quiet){
+  const k0 = PAGES.findIndex(p=>p[0]===id); const k = k0<0 ? 0 : k0; cur = PAGES[k][0];
+  document.querySelectorAll("main > section").forEach(sec=>{ sec.hidden = sec.id==="naloge" ? !cur.startsWith("naloge-") : sec.id!==cur; });
+  document.querySelectorAll("#levels > .level").forEach(l=>{ l.hidden = l.id!==cur; });
+  $("#hero").hidden = k!==0; $("#crumb").hidden = k===0;
+  $("#crumbN").textContent = `Stran ${k+1} od ${PAGES.length}`;
+  document.querySelectorAll(".rail nav a").forEach(a=>{ if(a.getAttribute("href")==="#"+cur) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
+  sel.value = cur;
+  const pv = PAGES[k-1], nx = PAGES[k+1];
+  $("#pager").innerHTML = (pv?`<a class="prev" href="#${pv[0]}"><span class="eyebrow">Nazaj</span><span class="t">${esc(pv[1])}</span></a>`:"") + (nx?`<a class="next" href="#${nx[0]}"><span class="eyebrow">Naprej</span><span class="t">${esc(nx[1])}</span></a>`:"");
+  if(!quiet) window.scrollTo(0,0);
+}
+
+
+/* ---------- reset with inline confirm ---------- */
+const rw = $("#resetWrap");
+function resetIdle(){ rw.innerHTML = `<button class="btn ghost" id="resetBtn" type="button" style="padding-left:0">Počisti ves napredek v tem poglavju</button>`; $("#resetBtn").addEventListener("click",resetAsk); }
+function resetAsk(){ rw.innerHTML = `<span class="confirm">Res izbrišem vse odgovore? <button class="btn" id="rY" type="button">Da, počisti</button><button class="btn ghost" id="rN" type="button">Prekliči</button></span>`;
+  $("#rY").addEventListener("click", async ()=>{ S = {}; localT = Date.now(); saveLocal();
+    if(remote){ try { await remote.ref.set({poglavje:5, naloge:{}, povzetek:summary(), posodobljeno:localT}); } catch(e){} }
+    location.hash = "stavek-if"; location.reload(); });
+  $("#rN").addEventListener("click",resetIdle); }
+resetIdle();
+
+/* ---------- start ---------- */
+FLOW.setLang("sl");
+function paintLang(){ document.querySelectorAll(".js-lang").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.lang===FLOW.getLang()))); }
+function fillFigs(){
+  document.querySelectorAll("[data-fc]").forEach(e=>{ e.innerHTML = FLOW.svg(FLOWS[e.dataset.fc],{num:!!e.dataset.num}); });
+  document.querySelectorAll("[data-sym]").forEach(e=>{ e.innerHTML = FLOW.sym(e.dataset.sym); });
+}
+fillFigs();
+renderAll();
+{
+  const title = id => (PAGES.find(p=>p[0]===id) || [id, id])[1];
+  const home = document.getElementById("doma");
+  const sets = LEVELS.map(L=>({ id: L.id, tag: L.tag, title: L.title, note: L.note, el: document.getElementById(L.id),
+    tasks: T.filter(t=>t.lv===L.tag).map(t=>({ idx: t.idx, el: document.getElementById("t-"+t.id) })) }));
+  LavRac.mount({
+    title: "Pogojni stavki v Javi",
+    kicker: "LAV-RAČ3 · 5. poglavje",
+    root: ".wrap",
+    lead: document.querySelector("#hero .lead").textContent.trim(),
+    hero: document.querySelector("#hero .magic"),
+    source: [...document.querySelectorAll("footer > span:not(#resetWrap)")].map(e=>e.textContent.trim()).join(" "),
+    vajeNote: document.querySelector("#naloge .prose").innerHTML,
+    groups: [{"id":"g-if","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><path d=\"M24 5l12 10-12 10-12-10z\"/><path d=\"M12 15H6v21M36 15h6v21\"/><rect x=\"1.5\" y=\"36\" width=\"9\" height=\"8\" rx=\"1.5\" class=\"fill\" opacity=\".35\"/><rect x=\"37.5\" y=\"36\" width=\"9\" height=\"8\" rx=\"1.5\"/></svg>","title":"Stavek if","pages":["stavek-if","if-else","gnezdenje"]},{"id":"g-vec","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><path d=\"M24 4v12\"/><path d=\"M24 16L8 30M24 16v14M24 16l16 14\"/><rect x=\"2\" y=\"30\" width=\"12\" height=\"9\" rx=\"1.5\"/><rect x=\"18\" y=\"30\" width=\"12\" height=\"9\" rx=\"1.5\" class=\"fill\" opacity=\".35\"/><rect x=\"34\" y=\"30\" width=\"12\" height=\"9\" rx=\"1.5\"/></svg>","title":"Več možnosti","pages":["veriga","switch","napake"]}].map(g=>({ ...g, pages: g.pages.map(id=>({ id, title: title(id), el: document.getElementById(id) })) })),
+    sets,
+    extra: { id: "doma", title: "Za doma", note: home.querySelector(":scope > .prose").textContent.trim().replace(/^Najprej .*?, nato praktične vaje/, "Vaje"), el: home },
+    sel: { head: ".thead", num: ".tnum", tags: ".tags", q: ".q", check: ".js-check", hint: ".js-hint", sol: ".js-sol", fb: ".feedback", actions: ":scope > .actions" },
+  });
+}
+
+/* ---------- account sync (db) ---------- */
+(async ()=>{
+  try {
+    return;
+    const user = await window.claude.use("user");
+    const db = await window.claude.use("db");
+    if(!user || !db) return;
+    const id = await user.id(); if(!id) return;
+    if(await user.can("data.write") === false) return;
+    const ref = db.doc("napredek/" + id);
+    const snap = await ref.get();
+    remote = { ref };
+    if(snap.exists){
+      const d = snap.data() || {};
+      if(merge(d.naloge || {}, +d.posodobljeno || 0)){ saveLocal(); renderAll(); progress(); }
+    }
+    setSync("cloud");
+    dirty = true; push();
+    document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden" && dirty){ clearTimeout(pushTimer); push(); } });
+  } catch(e){ remote = null; setSync("local"); }
+})();
+})();
+</script>
+</body></html>
