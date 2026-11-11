@@ -954,7 +954,6 @@ p.prose{display:block}
 .langsw{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
 .mtop .langsw{flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap}
 
-
 /* --- relacijska algebra --- */
 .ra{font-family:"Noto Sans Math","Cambria Math",var(--f-body)}
 .formula{font-family:"Noto Sans Math","Cambria Math",var(--f-body);font-size:1.22rem;background:var(--accent-soft);color:var(--fg);border-radius:8px;padding:10px 16px;overflow-x:auto;max-width:max-content}
@@ -985,6 +984,98 @@ details.dbx summary{cursor:pointer;font-size:.86rem;color:var(--muted);font-fami
 details.dbx[open]{padding-bottom:14px}
 .play{display:flex;flex-direction:column;gap:10px;border:1px dashed var(--accent);border-radius:10px;padding:14px 16px;background:var(--surface)}
 .play .presets{display:flex;gap:6px;flex-wrap:wrap}
+
+/* tabele brez vodoravnega drsnika */
+table.rel{min-width:0;font-size:.9rem}
+table.rel th,table.rel td{padding:7px 10px;overflow-wrap:anywhere}
+table.rel th{font-size:.68rem;letter-spacing:.03em}
+table.rel th.pk{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:2px}
+table.rel th.fk{font-style:italic}
+table.rel .hc,table.rel th.hc{background:var(--amber-soft)}
+tr.t1 td{background:hsl(205 70% 55% / .16)}
+tr.t2 td{background:hsl(145 55% 42% / .17)}
+tr.t3 td{background:hsl(32 90% 52% / .18)}
+tr.t4 td{background:hsl(280 50% 60% / .16)}
+tr.t5 td{background:hsl(350 70% 58% / .15)}
+tr.t6 td{background:hsl(180 60% 40% / .16)}
+.tbl,.reswrap{max-width:100%}
+.two{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.note{max-width:none}
+@media (max-width:560px){
+  table.rel{font-size:.8rem}
+  table.rel th,table.rel td{padding:6px 6px}
+  table.rel th{font-size:.62rem;letter-spacing:0}
+  .tcap{font-size:.72rem}
+}
+.tbl table,.reswrap table{min-width:0}
+pre.code{white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* enotna zgradba strani operacij */
+section > .blk{display:flex;flex-direction:column;gap:10px}
+.lbl{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.goal{margin:0;font-size:1.08rem;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.zrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.zrow .mini{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);width:64px;flex:none}
+.formula.gen{background:var(--sunk);font-size:1.05rem}
+.formula{white-space:normal;overflow-wrap:anywhere;max-width:100%}
+.legend{margin:0;font-size:.95rem;color:var(--muted);max-width:none}
+.meaning{margin:0;padding:10px 14px;border-radius:8px;background:var(--sunk);font-size:.97rem}
+.remember{margin:0;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);font-size:.97rem;max-width:none}
+h3.sub{font-size:1.15rem;margin:8px 0 0}
+.vrow{display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:10px}
+.venn{width:100%;max-width:210px;height:auto}
+.venn .on circle{fill:var(--amber);fill-opacity:.4}
+.venn .off circle{fill:var(--surface)}
+.venn .ln circle{fill:none;stroke:var(--fg);stroke-width:1.5}
+.venn text{fill:var(--fg);font:600 13px var(--f-mono)}
+.two.sm{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+/* koraki izračuna */
+details.steps{border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:8px 14px}
+details.steps summary{cursor:pointer;font-size:.9rem;color:var(--fg);font-weight:600}
+details.steps[open]{padding-bottom:14px}
+ol.steplist{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:14px;counter-reset:st}
+ol.steplist li{counter-increment:st;display:flex;flex-direction:column;gap:6px}
+ol.steplist li::before{content:"Korak " counter(st);font-family:var(--f-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.sx{font-size:1.02rem;overflow-wrap:anywhere}
+/* hitri preizkus */
+.quiz{display:flex;flex-direction:column;gap:8px;border:1px dashed var(--line);border-radius:10px;padding:14px 16px;background:var(--surface)}
+.quiz .qq{margin:0}
+.qopts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:8px}
+.qopt{display:flex;gap:10px;align-items:baseline;text-align:left;font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--fg);padding:8px 12px;border-radius:8px;cursor:pointer}
+.qopt:hover:not(:disabled){border-color:var(--amber)}
+.qopt.right{border-color:var(--ok,#2f7d4f);background:var(--ok-soft,#e5f3ea)}
+.qopt.wrong{border-color:var(--bad,#b3402f);background:var(--bad-soft,#f8e5e1)}
+.qopt:disabled{cursor:default;opacity:.85}
+/* shema povezav */
+.erd{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px 0;align-items:center;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:14px 10px}
+.erd .b,.erd .s{border:1px solid var(--fg);border-radius:8px;padding:8px 6px;text-align:center;font-family:var(--f-mono);font-size:.85rem;background:var(--bg)}
+.erd .b{font-weight:600}
+.erd .s{border-color:var(--line);display:flex;flex-direction:column;gap:2px;font-size:.78rem}
+.erd .s span{font-size:.68rem;color:var(--muted)}
+.erd .s.dash{border-style:dashed}
+.erd .lk{text-align:center;padding:0 6px;font-size:.72rem;color:var(--muted);border-top:0;position:relative;min-width:34px}
+.erd .lk::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:2px solid var(--fg);z-index:0}
+.erd .lk i{position:relative;z-index:1;background:var(--surface);padding:0 4px;font-style:normal;font-family:var(--f-mono)}
+/* rešeni primeri */
+.ex{display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--surface)}
+.exh{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.exn{font-weight:700;color:var(--fg);text-transform:uppercase;letter-spacing:.06em;margin-right:6px}
+ol.st4{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:8px}
+ol.st4 li{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-size:.93rem;display:flex;gap:8px;align-items:baseline}
+ol.st4 .n{color:var(--amber);font-weight:700}
+.ex .tbl{background:var(--bg)}
+.tbl th,.tbl td{overflow-wrap:anywhere}
+@media (max-width:560px){
+  .erd{padding:10px 6px;gap:8px 0}
+  .erd .b,.erd .s{padding:6px 3px;font-size:.74rem}
+  .erd .s{font-size:.7rem}
+  .erd .s span{font-size:.6rem}
+  .erd .lk{min-width:26px;padding:0 2px;font-size:.66rem}
+  .tbl th,.tbl td{padding:7px 8px}
+}
+
+.two{align-items:start}
+ol.st4{grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr))}
 
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 </style>
@@ -1263,9 +1354,14 @@ html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-ti
       <a href="#uvod">Kaj je relacijska algebra</a>
       <a href="#pojmi">Osnovni pojmi in baza</a>
       <a href="#selekcija">Selekcija σ</a>
-      <a href="#projekcija">Projekcija π in ρ</a>
-      <a href="#mnozice">Unija, presek, razlika</a>
-      <a href="#stiki">Produkt in stika</a>
+      <a href="#projekcija">Projekcija π</a>
+      <a href="#preimenovanje">Preimenovanje ρ</a>
+      <a href="#unija">Unija ∪</a>
+      <a href="#presek">Presek ∩</a>
+      <a href="#razlika">Razlika −</a>
+      <a href="#produkt">Kartezični produkt ×</a>
+      <a href="#stik">Naravni stik ⋈</a>
+      <a href="#thetastik">Θ-stik ⋈[F]</a>
       <a href="#kolicnik">Količnik ÷</a>
       <a href="#prioriteta">Prioriteta in napake</a>
       <a href="#sql">Od algebre do SQL</a>
@@ -1325,10 +1421,14 @@ html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-ti
 <tr><td class="num"><span class="ra op">∪</span></td><td>unija</td><td>vrstice, ki so v p ali v r</td></tr>
 <tr><td class="num"><span class="ra op">∩</span></td><td>presek</td><td>vrstice, ki so v p in v r</td></tr>
 <tr><td class="num"><span class="ra op">−</span></td><td>razlika</td><td>vrstice, ki so v p in niso v r</td></tr>
-<tr><td class="num"><span class="ra op">⋈</span></td><td>stik</td><td>poveže vrstici po skupnem atributu</td></tr>
+<tr><td class="num"><span class="ra op">⋈</span></td><td>naravni stik</td><td>poveže vrstici po skupnem atributu</td></tr>
+<tr><td class="num"><span class="ra op">⋈[F]</span></td><td>Θ-stik</td><td>poveže vrstici, ki izpolnjujeta poljuben pogoj F</td></tr>
 <tr><td class="num"><span class="ra op">÷</span></td><td>količnik</td><td>vrstice, ki nastopajo z vsemi vrsticami druge relacije</td></tr>
 </tbody>
 </table></div>
+<h3 style="font-size:1.15rem;margin-top:8px">Kako je zgrajena razlaga</h3>
+<div class="prose"><p>Vsako operacijo spoznaš na svoji strani in vedno v istem vrstnem redu: <strong>1 · kaj želimo doseči</strong> (ena vrstica), <strong>2 · zapis</strong> v relacijski algebri, <strong>3 · tabela</strong> z vhodom in rezultatom ter <strong>4 · isto v SQL</strong> kot alternativa. Na koncu sta še igrišče in hitri preizkus.</p>
+<p>Vsi primeri uporabljajo <strong>isto šolsko bazo</strong> (Dijak, Predmet, Ocena, Robotika, Šah, Nagrada), zato lahko rezultate primerjaš med stranmi. Rumeno obarvane vrstice ali stolpci so tisti, ki jih operacija izbere. Vrstice z <strong>isto barvo</strong> imajo isto vrednost ključa (npr. isti ID).</p></div>
 <p class="note"><strong>Zapis:</strong> pogoj ali seznam stolpcev pišemo v oglatih oklepajih, relacijo pa v okroglih: <span class="ra">σ[Kraj='Kranj'](Dijak)</span>. V literaturi in na maturi boš srečal tudi podpisani zapis <span class="ra">σ<sub>Kraj='Kranj'</sub>(Dijak)</span> — pomen je popolnoma enak, na tej strani pa povsod uporabljamo oglate oklepaje, ker jih zahteva tudi preverjalnik nalog.</p>
 <p class="note"><strong>Matura:</strong> relacijska algebra je del vsebin izpitne pole 2. Na dosedanjih izpitih sta bili dve nalogi: prevod stavka SQL v izraz relacijske algebre (2012) in prepoznavanje operacije za filtriranje (2013, jesen). Obe najdeš med nalogami tega poglavja.</p>
 </section>
@@ -1336,165 +1436,205 @@ html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-ti
 <section id="pojmi">
 <div class="eyebrow">Razlaga 2</div>
 <h2>Osnovni pojmi in šolska baza</h2>
-<div class="prose">
-  <p>Preden začnemo računati, se dogovorimo za besede. Vzemimo tabelo dijakov:</p>
-</div>
-<div class="two">
+<div class="prose"><p>Preden začnemo računati, se dogovorimo za besede. Vzemimo tabelo dijakov:</p></div>
 <div class="tbl" data-rel="Dijak"></div>
-<div class="tbl"><table>
-<thead><tr><th>Pojem</th><th>Pomen</th><th>V primeru</th></tr></thead>
-<tbody>
-<tr><td><strong>relacija</strong></td><td>tabela z imenom</td><td>Dijak</td></tr>
-<tr><td><strong>atribut</strong></td><td>stolpec</td><td>Kraj</td></tr>
-<tr><td><strong>terka</strong> (n-terica)</td><td>ena vrstica</td><td>(1, Ana, Novak, 4A, Ljubljana)</td></tr>
-<tr><td><strong>shema</strong></td><td>ime + atributi</td><td>Dijak(ID, Ime, Priimek, Razred, Kraj)</td></tr>
-<tr><td><strong>ključ</strong></td><td>atribut, ki enolično določi terko</td><td>ID</td></tr>
-</tbody>
-</table></div>
-</div>
+<div class="tbl"><table><thead><tr><th>Pojem</th><th>Pomen</th><th>V primeru</th></tr></thead><tbody><tr><td><strong>relacija</strong></td><td>tabela z imenom</td><td>Dijak</td></tr><tr><td><strong>atribut</strong></td><td>stolpec</td><td>Kraj</td></tr><tr><td><strong>terka</strong> (n-terica)</td><td>ena vrstica</td><td>(1, Ana, Novak, 4A, Ljubljana)</td></tr><tr><td><strong>shema</strong></td><td>ime relacije in njeni atributi</td><td>Dijak(ID, Ime, Priimek, Razred, Kraj)</td></tr><tr><td><strong>primarni ključ</strong></td><td>atribut, ki enolično določi terko (v glavi <u>podčrtan</u>)</td><td>ID</td></tr><tr><td><strong>tuji ključ</strong></td><td>atribut, ki kaže na ključ druge relacije (v glavi <i>ležeč</i>)</td><td>ID v relaciji Ocena</td></tr></tbody></table></div>
 <p class="note"><strong>Relacija je množica terk.</strong> Zato v njej ni dveh enakih vrstic in vrstni red vrstic ni pomemben. To bo kmalu pomembno: projekcija podvojene vrstice izloči, unija pa skupne terke šteje samo enkrat.</p>
-<div class="prose">
-  <p>Vse razlage in naloge sklopov B in C uporabljajo tole šolsko bazo. Relacija Ocena povezuje dijaka (ID) in predmet (PID) — to sta <strong>tuja ključa</strong>.</p>
+<div class="prose"><p>Skozi vso razlago uporabljamo <strong>eno samo šolsko bazo</strong>. Relacija Ocena povezuje dijaka (ID) in predmet (PID): to sta njena <strong>tuja ključa</strong>, skupaj pa tvorita tudi njen primarni ključ.</p></div>
+<div class="erd" role="img" aria-label="Povezave med relacijami: Dijak in Ocena prek ID, Ocena in Predmet prek PID, Robotika in Šah kažeta na Dijak, Profesor na Predmet, Nagrada je samostojna">
+<div class="b">Dijak</div><div class="lk"><i>ID</i></div><div class="b">Ocena</div><div class="lk"><i>PID</i></div><div class="b">Predmet</div>
+<div class="s">Robotika, Šah<span>ID ↑ Dijak</span></div><div></div><div class="s dash">Nagrada<span>primerjava: Ocena ≥ MinOcena</span></div><div></div><div class="s">Profesor<span>PID ↑ Predmet</span></div>
 </div>
-<div class="two">
-<div class="tbl" data-rel="Predmet"></div>
-<div class="tbl" data-rel="Profesor"></div>
-</div>
-<div class="two">
-<div class="tbl" data-rel="Ocena"></div>
-<div style="display:flex;flex-direction:column;gap:14px">
-<div class="tbl" data-rel="Robotika"></div>
-<div class="tbl" data-rel="Sah"></div>
-</div>
-</div>
-<div class="prose"><p>V sklopih D in E (ter deloma v F in v Za doma) boš delal še z bazo šolske knjižnice — njene tabele so prikazane pri vsaki nalogi.</p></div>
+<div class="two sm"><div class="tbl" data-rel="Predmet"></div><div class="tbl" data-rel="Profesor"></div></div>
+<div class="tbl" data-rel="Ocena" data-tint="ID"></div>
+<div class="two sm"><div class="tbl" data-rel="Robotika"></div><div class="tbl" data-rel="Sah"></div><div class="tbl" data-rel="Nagrada"></div></div>
+<div class="prose"><p>V sklopih D in E (ter deloma v F in v Za doma) boš delal še z bazo šolske knjižnice. Njene tabele so prikazane pri vsaki nalogi.</p></div>
 </section>
 
 <section id="selekcija">
 <div class="eyebrow">Razlaga 3</div>
 <h2>Selekcija σ — izbira vrstic</h2>
-<div class="formula ra">σ[Razred='4A'](Dijak)</div>
-<div class="prose">
-  <p>Selekcija obdrži samo vrstice, ki izpolnjujejo <strong>pogoj F</strong>. Stolpci ostanejo vsi — shema rezultata je enaka shemi vhoda.</p>
-  <p>Pogoj je sestavljen iz primerjav oblike <em>atribut Θ vrednost</em> ali <em>atribut Θ atribut</em>, kjer je Θ eden od <span class="ra">=, ≠, &lt;, &gt;, ≤, ≥</span>. Primerjave povezujemo z logičnimi operatorji <span class="ra">∧</span> (in), <span class="ra">∨</span> (ali) in <span class="ra">¬</span> (ne). Besedilo pišemo v narekovajih (<code>Kraj='Kranj'</code>), števila brez (<code>Starost&lt;17</code>).</p>
-</div>
-<div class="two">
-<div class="tbl" data-rel="Dijak" data-hl="0,2"></div>
-<div class="tbl" data-res="σ[Razred='4A'](Dijak)" data-cap="Rezultat"></div>
-</div>
-<pre class="code js-hl">SQL: SELECT * FROM Dijak WHERE Razred = '4A'</pre>
-<p class="note"><strong>Pozor:</strong> F v σ[F] je pogoj (formula), ne ime stolpca. σ nikoli ne spremeni števila stolpcev — če potrebuješ manj stolpcev, je na vrsti projekcija.</p>
-<div data-play='["σ[Kraj=&apos;Ljubljana&apos;](Dijak)","σ[Ocena≥4 ∧ PID=&apos;R&apos;](Ocena)","σ[Ure&lt;4](Predmet)"]'></div>
+<div class="blk"><div class="lbl">1 · Kaj želimo doseči</div><p class="goal">Izpiši vse podatke o dijakih razreda 4A.</p></div>
+<div class="blk"><div class="lbl">2 · Zapis v relacijski algebri</div><div class="zrow"><span class="mini">splošno</span><div class="formula ra gen">σ[pogoj](relacija)</div></div><div class="zrow"><span class="mini">primer</span><div class="formula ra">σ[Razred='4A'](Dijak)</div></div><p class="legend">σ obdrži vrstice, ki izpolnjujejo <strong>pogoj</strong>. Pogoj je primerjava <em>atribut Θ vrednost</em>, kjer je Θ eden od <span class="ra">=  ≠  &lt;  &gt;  ≤  ≥</span>. Več primerjav povežemo z <span class="ra">∧</span> (in), <span class="ra">∨</span> (ali) in <span class="ra">¬</span> (ne).</p></div>
+<div class="blk"><div class="lbl">3 · Tabela: vhod in rezultat</div><div class="two"><div class="tbl" data-rel="Dijak" data-cap="Dijak (vhod)" data-hl="0,2"></div><div class="tbl" data-res="σ[Razred=&#x27;4A&#x27;](Dijak)" data-cap="Rezultat: 2 vrstici"></div></div><div class="meaning"><strong>Kaj to pomeni:</strong> obdržali smo samo vrstici, kjer je Razred = 4A (Ana in Eva). Stolpci so ostali vsi, shema rezultata je enaka shemi Dijak.</div></div>
+<div class="blk"><div class="lbl">4 · Isto v SQL (alternativa)</div><pre class="code js-hl">SELECT *
+FROM Dijak
+WHERE Razred = '4A';</pre></div>
+<div class="tbl"><table><thead><tr><th>Sestavljen pogoj</th><th>Kaj želimo</th><th>Rezultat (imena)</th></tr></thead><tbody><tr><td><span class="ra">σ[Kraj='Ljubljana' ∧ Razred='4B'](Dijak)</span></td><td>iz Ljubljane in v 4B</td><td>Nika</td></tr><tr><td><span class="ra">σ[Kraj='Kranj' ∨ Kraj='Domžale'](Dijak)</span></td><td>iz Kranja ali iz Domžal</td><td>Luka, Jan</td></tr><tr><td><span class="ra">σ[¬(Razred='4A')](Dijak)</span></td><td>ni v 4A</td><td>Luka, Jan, Nika</td></tr></tbody></table></div><p class="note"><strong>Pozor:</strong> F v σ[F] je pogoj (formula), ne ime stolpca. σ nikoli ne spremeni števila stolpcev. Če potrebuješ manj stolpcev, je na vrsti projekcija.</p>
+<div data-play='[&quot;σ[Kraj=&#x27;Ljubljana&#x27;](Dijak)&quot;, &quot;σ[Ocena≥4](Ocena)&quot;, &quot;σ[Ure&lt;4](Predmet)&quot;, &quot;σ[Kraj=&#x27;Kranj&#x27; ∨ Kraj=&#x27;Domžale&#x27;](Dijak)&quot;]'></div>
+<p class="remember"><strong>Zapomni si:</strong> σ izbira <strong>vrstice</strong> (vodoravno). Stolpci ostanejo vsi.</p>
+<div data-quiz="{&quot;q&quot;: &quot;Relacija Dijak ima 5 stolpcev. Koliko stolpcev ima rezultat σ[Razred=&#x27;4A&#x27;](Dijak)?&quot;, &quot;o&quot;: [&quot;2&quot;, &quot;3&quot;, &quot;5&quot;, &quot;odvisno od števila vrstic&quot;], &quot;a&quot;: 2, &quot;why&quot;: &quot;σ izbira vrstice, zato stolpci ostanejo vsi (5).&quot;}"></div>
 </section>
 
 <section id="projekcija">
 <div class="eyebrow">Razlaga 4</div>
-<h2>Projekcija π in preimenovanje ρ</h2>
-<div class="formula ra">π[Kraj](Dijak)</div>
-<div class="prose">
-  <p>Projekcija obdrži samo <strong>naštete stolpce</strong>, v vrstnem redu z liste. Ker je rezultat spet množica, <strong>podvojene vrstice izginejo</strong> — Ljubljana se v tabeli Dijak pojavi trikrat, v rezultatu pa samo enkrat. Rezultat ima zato lahko manj vrstic kot vhod.</p>
-</div>
-<div class="two">
-<div class="tbl" data-rel="Dijak" data-cols="Kraj" data-hl="0,2,4" data-cap="Dijak (stolpec Kraj) — Ljubljana trikrat"></div>
-<div class="tbl" data-res="π[Kraj](Dijak)" data-cap="π[Kraj](Dijak) — 3 vrstice"></div>
-</div>
-<div class="prose"><p>Naštejemo lahko več stolpcev, ločenih z vejico, na primer <span class="ra">π[Ime,Priimek](Dijak)</span>:</p></div>
-<div class="two">
-<div class="tbl" data-res="π[Ime,Priimek](Dijak)" data-cap="π[Ime,Priimek](Dijak)"></div>
-</div>
-<pre class="code js-hl">SQL: SELECT DISTINCT Kraj FROM Dijak</pre>
-<h3 style="font-size:1.15rem;margin-top:8px">Sestavljanje: σ in π skupaj</h3>
-<div class="prose">
-  <p>Prava moč algebre je gnezdenje. Imena dijakov iz Ljubljane dobimo v dveh korakih — izraz beremo <strong>od znotraj navzven</strong>:</p>
-</div>
+<h2>Projekcija π — izbira stolpcev</h2>
+<div class="blk"><div class="lbl">1 · Kaj želimo doseči</div><p class="goal">Izpiši, v katerih krajih živijo dijaki (vsak kraj samo enkrat).</p></div>
+<div class="blk"><div class="lbl">2 · Zapis v relacijski algebri</div><div class="zrow"><span class="mini">splošno</span><div class="formula ra gen">π[stolpci](relacija)</div></div><div class="zrow"><span class="mini">primer</span><div class="formula ra">π[Kraj](Dijak)</div></div><p class="legend">π obdrži samo <strong>naštete stolpce</strong>, v vrstnem redu z liste. Ker je rezultat množica, <strong>podvojene vrstice izginejo</strong>.</p></div>
+<div class="blk"><div class="lbl">3 · Tabela: vhod in rezultat</div><div class="two sm"><div class="tbl" data-rel="Dijak" data-cap="Dijak, samo stolpec Kraj (vhod)" data-hl="0,2,4" data-cols="Kraj"></div><div class="tbl" data-res="π[Kraj](Dijak)" data-cap="Rezultat: 3 vrstice"></div></div><div class="meaning"><strong>Kaj to pomeni:</strong> Ljubljana se v tabeli pojavi trikrat (označeno), v rezultatu pa samo enkrat. Rezultat ima zato lahko manj vrstic kot vhod.</div></div>
+<div class="blk"><div class="lbl">4 · Isto v SQL (alternativa)</div><pre class="code js-hl">SELECT DISTINCT Kraj
+FROM Dijak;</pre><p class="legend">DISTINCT je potreben, ker SQL podvojenih vrstic sam ne izloči, relacija v algebri pa jih nima.</p></div>
+<h3 class="sub">Več stolpcev</h3>
+<div class="prose"><p>Stolpce naštejemo z vejico, vrstni red je poljuben: <span class="ra">π[Ime,Priimek](Dijak)</span>.</p></div>
+<div class="two"><div class="tbl" data-rel="Dijak" data-cap="Dijak (vhod)" data-hc="Ime,Priimek"></div><div class="tbl" data-res="π[Ime,Priimek](Dijak)" data-cap="Rezultat: 5 vrstic"></div></div>
+<h3 class="sub">Sestavljanje: σ in π skupaj</h3>
+<div class="prose"><p>Prava moč algebre je gnezdenje. Imena dijakov iz Ljubljane dobimo v dveh korakih; izraz beremo <strong>od znotraj navzven</strong>: najprej σ izbere vrstice, nato π obdrži stolpec.</p></div>
 <div class="formula ra">π[Ime](σ[Kraj='Ljubljana'](Dijak))</div>
-<div class="tbl"><table>
-<thead><tr><th>Korak</th><th>Izraz</th><th>Rezultat</th></tr></thead>
-<tbody>
-<tr><td class="num">1</td><td><span class="ra">Dijak</span></td><td>5 vrstic, 5 stolpcev</td></tr>
-<tr><td class="num">2</td><td><span class="ra">σ[Kraj='Ljubljana'](…)</span></td><td>3 vrstice: Ana, Eva, Nika</td></tr>
-<tr><td class="num">3</td><td><span class="ra">π[Ime](…)</span></td><td>samo stolpec Ime</td></tr>
-</tbody>
-</table></div>
-<p class="note"><strong>Vrstni red je pomemben:</strong> π[Ime](σ[Kraj='Ljubljana'](Dijak)) deluje, obratni izraz σ[Kraj='Ljubljana'](π[Ime](Dijak)) pa ne — po projekciji na Ime stolpca Kraj ni več in pogoj nima s čim delati.</p>
-<div class="prose">
-  <p><strong>Preimenovanje ρ</strong> da atributom nova imena: <span class="ra">ρ[IDB,ImeB,PriimekB,RazredB,KrajB](Dijak)</span> vrne isto tabelo s preimenovanimi stolpci. Potrebujemo ga, kadar isto relacijo uporabimo dvakrat — na primer pri primerjanju dveh dijakov med seboj (naloga Za doma). V SQL mu ustreza <code>FROM Dijak AS B</code>.</p>
-</div>
-<div data-play='["π[Razred](Dijak)","π[Ime,Kraj](σ[Razred=&apos;4B&apos;](Dijak))","π[Naziv](Predmet)"]'></div>
+<div data-steps="π[Ime](σ[Kraj=&#x27;Ljubljana&#x27;](Dijak))"></div>
+<p class="note"><strong>Vrstni red je pomemben:</strong> π[Ime](σ[Kraj='Ljubljana'](Dijak)) deluje, obratni izraz σ[Kraj='Ljubljana'](π[Ime](Dijak)) pa ne. Po projekciji na Ime stolpca Kraj ni več in pogoj nima s čim delati.</p>
+<div data-play='[&quot;π[Razred](Dijak)&quot;, &quot;π[Ime,Kraj](σ[Razred=&#x27;4B&#x27;](Dijak))&quot;, &quot;π[Naziv](Predmet)&quot;]'></div>
+<p class="remember"><strong>Zapomni si:</strong> π izbira <strong>stolpce</strong> (navpično) in izloči podvojene vrstice.</p>
+<div data-quiz="{&quot;q&quot;: &quot;Koliko vrstic ima rezultat π[Razred](Dijak)?&quot;, &quot;o&quot;: [&quot;5&quot;, &quot;2&quot;, &quot;3&quot;, &quot;1&quot;], &quot;a&quot;: 1, &quot;why&quot;: &quot;V Dijak sta samo razreda 4A in 4B. Projekcija podvojene vrstice izloči.&quot;}"></div>
 </section>
 
-<section id="mnozice">
+<section id="preimenovanje">
 <div class="eyebrow">Razlaga 5</div>
-<h2>Unija, presek, razlika</h2>
-<div class="prose">
-  <p>Tri operacije delajo z relacijama kot z množicama vrstic. Vse tri so <strong>smiselne le, če imata relaciji enako shemo</strong> (ista imena in isti vrstni red atributov) — pravimo, da sta <em>združljivi</em>. Shema rezultata je ista.</p>
-</div>
-<div class="two">
-<div class="tbl" data-rel="Robotika"></div>
-<div class="tbl" data-rel="Sah"></div>
-</div>
-<div class="tbl"><table>
-<thead><tr><th>Operacija</th><th>Pomen</th><th>Rezultat (imena)</th><th>Lastnost</th></tr></thead>
-<tbody>
-<tr><td><span class="ra">Robotika ∪ Sah</span></td><td>obiskuje vsaj en krožek</td><td>Ana, Luka, Jan, Eva</td><td>komutativna; podvojene terke se izločijo</td></tr>
-<tr><td><span class="ra">Robotika ∩ Sah</span></td><td>obiskuje oba krožka</td><td>Luka, Jan</td><td>komutativna; izpeljana: p − (p − r)</td></tr>
-<tr><td><span class="ra">Robotika − Sah</span></td><td>robotika, a ne šah</td><td>Ana</td><td><strong>ni</strong> komutativna: Sah − Robotika = {Eva}</td></tr>
-</tbody>
-</table></div>
-<pre class="code js-hl">SQL: UNION   INTERSECT   EXCEPT (Oracle: MINUS)</pre>
-<p class="note"><strong>Najpogostejša napaka na tej strani:</strong> unija, presek in razlika nad relacijama z različnima shemama (npr. Dijak ∪ Predmet) niso definirane. Če se shemi razlikujeta, najprej z π ali ρ poskrbi, da se ujemata.</p>
-<div data-play='["Robotika ∪ Sah","Robotika ∩ Sah","Sah − Robotika","π[ID](σ[PID=&apos;M&apos;](Ocena)) ∩ π[ID](σ[PID=&apos;R&apos;](Ocena))"]'></div>
+<h2>Preimenovanje ρ — nova imena stolpcev</h2>
+<div class="blk"><div class="lbl">1 · Kaj želimo doseči</div><p class="goal">Stolpca relacije Sah preimenuj v ID2 in Ime2.</p></div>
+<div class="blk"><div class="lbl">2 · Zapis v relacijski algebri</div><div class="zrow"><span class="mini">splošno</span><div class="formula ra gen">ρ[novo1,novo2,…](relacija)</div></div><div class="zrow"><span class="mini">primer</span><div class="formula ra">ρ[ID2,Ime2](Sah)</div></div><p class="legend">ρ da atributom <strong>nova imena</strong>, po vrsti. Podatkov ne spremeni.</p></div>
+<div class="blk"><div class="lbl">3 · Tabela: vhod in rezultat</div><div class="two sm"><div class="tbl" data-rel="Sah" data-cap="Sah (vhod)"></div><div class="tbl" data-res="ρ[ID2,Ime2](Sah)" data-cap="Rezultat: ista podatka, nova imena"></div></div><div class="meaning"><strong>Kaj to pomeni:</strong> vrstice so ostale iste, spremenili sta se samo imeni stolpcev v glavi tabele. Zato je število vrstic in stolpcev enako kot pri vhodu.</div></div>
+<div class="blk"><div class="lbl">4 · Isto v SQL (alternativa)</div><pre class="code js-hl">SELECT ID AS ID2, Ime AS Ime2
+FROM Sah;</pre><p class="legend">Za preimenovanje relacije v SQL uporabimo <code>FROM Sah AS S</code>.</p></div>
+<h3 class="sub">Kdaj ga potrebuješ</h3>
+<div class="tbl"><table><thead><tr><th>Situacija</th><th>Zakaj ρ</th></tr></thead><tbody><tr><td>produkt × ali Θ-stik nad relacijama z istoimenskimi atributi</td><td>atributi morajo imeti različna imena (naslednje strani)</td></tr><tr><td>relacijo moraš primerjati s samo seboj (pari dijakov)</td><td>ena kopija dobi nova imena</td></tr><tr><td>∪, ∩, − nad relacijama z drugačnimi imeni stolpcev</td><td>z ρ izenačiš shemi (pazi na vrstni red atributov)</td></tr></tbody></table></div>
+<p class="note"><strong>Zapis na tej strani:</strong> ρ[novo1, novo2, …](relacija) da vsem atributom po vrsti nova imena, zato mora biti imen toliko, kolikor je stolpcev. V knjigah boš našel tudi zapis ρ<sub>S(A,B)</sub>(R) ali ρ<sub>Kraj/Mesto</sub>(R); pomen je podoben.</p>
+<div data-play='[&quot;ρ[ID2,Ime2](Sah)&quot;, &quot;ρ[A,B](Robotika) ∪ ρ[A,B](Sah)&quot;]'></div>
+<p class="remember"><strong>Zapomni si:</strong> ρ spremeni <strong>imena stolpcev</strong>, ne vrstic.</p>
+<div data-quiz="{&quot;q&quot;: &quot;Kaj spremeni izraz ρ[ID2,Ime2](Sah)?&quot;, &quot;o&quot;: [&quot;vrstice relacije Sah&quot;, &quot;imena stolpcev, ne pa vrstic&quot;, &quot;število stolpcev&quot;, &quot;ime baze&quot;], &quot;a&quot;: 1, &quot;why&quot;: &quot;ρ samo preimenuje atribute; vrstice in njihovo število ostanejo isti.&quot;}"></div>
 </section>
 
-<section id="stiki">
+<section id="unija">
 <div class="eyebrow">Razlaga 6</div>
-<h2>Kartezični produkt in stika</h2>
-<div class="prose">
-  <p><strong>Kartezični produkt</strong> <span class="ra">p × r</span> združi vsako vrstico prve relacije z vsako vrstico druge. Število vrstic se zmnoži (|p| · |r|), stolpci se seštejejo. Sam po sebi je redko uporaben — skoraj vedno mu sledi selekcija, ki obdrži samo smiselne kombinacije.</p>
-  <p><strong>Θ-stik</strong> je prav ta par operacij v enem zapisu: <span class="ra">p ⋈[F] r = σ[F](p × r)</span>. Pogoj F primerja atribut leve in atribut desne relacije s poljubno primerjavo Θ.</p>
-</div>
-<div class="two">
-<div class="tbl" data-rel="Ponudba"></div>
-<div class="tbl" data-rel="Kupec"></div>
-</div>
-<div class="formula ra">Ponudba ⋈[Cena ≤ Proracun] Kupec</div>
-<div class="tbl" data-res="Ponudba ⋈[Cena≤Proracun] Kupec" data-cap="Pari izdelek–kupec, kjer si kupec izdelek lahko privošči"></div>
-<div class="prose">
-  <p><strong>Naravni stik</strong> <span class="ra">p ⋈ r</span> (brez pogoja) je najpogostejša oblika: poveže vrstici, ki imata <strong>enako vrednost skupnih atributov</strong> (atributov z istim imenom). Skupni stolpec se v rezultatu pojavi samo enkrat. Definicija: <span class="ra">p ⋈ r = π[X](σ[F](p × r))</span>, kjer F zahteva enakost istoimenskih atributov.</p>
-</div>
-<div class="two">
-<div class="tbl" data-res="Dijak ⋈ Ocena" data-cap="Dijak ⋈ Ocena — povezava po ID (8 vrstic)"></div>
-<div class="tbl" data-res="π[Ime,Naziv,Ocena](Dijak ⋈ Ocena ⋈ Predmet)" data-cap="… ⋈ Predmet in projekcija: kdo ima katero oceno"></div>
-</div>
-<pre class="code js-hl">SQL: SELECT * FROM Dijak NATURAL JOIN Ocena</pre>
+<h2>Unija ∪ — vrstice iz ene ali druge</h2>
+<div class="blk"><div class="lbl">1 · Kaj želimo doseči</div><p class="goal">Kdo obiskuje krožek Robotika <strong>ali</strong> krožek Šah (ali oba)?</p></div>
+<div class="blk"><div class="lbl">2 · Zapis v relacijski algebri</div><div class="zrow"><span class="mini">splošno</span><div class="formula ra gen">p ∪ r</div></div><div class="zrow"><span class="mini">primer</span><div class="formula ra">Robotika ∪ Sah</div></div><p class="legend">Relaciji morata imeti <strong>enako shemo</strong> (ista imena in isti vrstni red atributov); pravimo, da sta <em>združljivi</em>. Shema rezultata je ista.</p></div>
+<div class="blk"><div class="lbl">3 · Tabela: vhod in rezultat</div><div class="two sm"><div class="tbl" data-rel="Robotika" data-cap="Robotika (p)" data-tint="ID"></div><div class="tbl" data-rel="Sah" data-cap="Šah (r)" data-tint="ID"></div></div><div class="two sm"><div class="tbl" data-res="Robotika ∪ Sah" data-cap="Rezultat: 4 vrstice" data-tint="ID"></div><div class="vrow"><svg class="venn" viewBox="0 0 150 80" role="img" aria-label="Unija: obarvano je vse, kar je v p ali v r"><g class="on"><circle cx="58" cy="40" r="30"/><circle cx="92" cy="40" r="30"/></g><g class="ln"><circle cx="58" cy="40" r="30"/><circle cx="92" cy="40" r="30"/></g><text x="40" y="44" text-anchor="middle">p</text><text x="110" y="44" text-anchor="middle">r</text></svg></div></div><div class="meaning"><strong>Kaj to pomeni:</strong> rezultat ima vse vrstice iz obeh relacij. Luka in Jan (enaka barva) sta v obeh, a se v rezultatu pojavita samo <strong>enkrat</strong>, ker je relacija množica.</div></div>
+<div class="blk"><div class="lbl">4 · Isto v SQL (alternativa)</div><pre class="code js-hl">SELECT * FROM Robotika
+UNION
+SELECT * FROM Sah;</pre></div>
+<p class="note"><strong>Najpogostejša napaka:</strong> unija nad relacijama z različnima shemama (npr. Dijak ∪ Predmet) ni definirana. Če se shemi razlikujeta, ju najprej z π ali ρ izenači.</p>
+<div data-play='[&quot;Robotika ∪ Sah&quot;, &quot;Dijak ∪ Predmet&quot;, &quot;π[ID](Robotika) ∪ π[ID](Sah)&quot;]'></div>
+<p class="remember"><strong>Zapomni si:</strong> ∪ pomeni <strong>ali</strong>; shemi morata biti enaki; dvojniki se združijo.</p>
+<div data-quiz="{&quot;q&quot;: &quot;Koliko vrstic ima Robotika ∪ Sah?&quot;, &quot;o&quot;: [&quot;3&quot;, &quot;4&quot;, &quot;5&quot;, &quot;6&quot;], &quot;a&quot;: 1, &quot;why&quot;: &quot;3 + 3 = 6, a Luka in Jan sta v obeh relacijah in se štejeta samo enkrat: 4.&quot;}"></div>
+</section>
+
+<section id="presek">
+<div class="eyebrow">Razlaga 7</div>
+<h2>Presek ∩ — vrstice, ki so v obeh</h2>
+<div class="blk"><div class="lbl">1 · Kaj želimo doseči</div><p class="goal">Kdo obiskuje <strong>oba</strong> krožka, Robotiko in Šah?</p></div>
+<div class="blk"><div class="lbl">2 · Zapis v relacijski algebri</div><div class="zrow"><span class="mini">splošno</span><div class="formula ra gen">p ∩ r</div></div><div class="zrow"><span class="mini">primer</span><div class="formula ra">Robotika ∩ Sah</div></div><p class="legend">Tudi presek zahteva <strong>enako shemo</strong>. Rezultat vsebuje terke, ki so hkrati v p in v r.</p></div>
+<div class="blk"><div class="lbl">3 · Tabela: vhod in rezultat</div><div class="two sm"><div class="tbl" data-rel="Robotika" data-cap="Robotika (p)" data-tint="ID"></div><div class="tbl" data-rel="Sah" data-cap="Šah (r)" data-tint="ID"></div></div><div class="two sm"><div class="tbl" data-res="Robotika ∩ Sah" data-cap="Rezultat: 2 vrstici" data-tint="ID"></div><div class="vrow"><svg class="venn" viewBox="0 0 150 80" role="img" aria-label="Presek: obarvano je samo, kar je hkrati v p in v r"><clipPath id="vc"><circle cx="58" cy="40" r="30"/></clipPath><g class="on" clip-path="url(#vc)"><circle cx="92" cy="40" r="30"/></g><g class="ln"><circle cx="58" cy="40" r="30"/><circle cx="92" cy="40" r="30"/></g><text x="40" y="44" text-anchor="middle">p</text><text x="110" y="44" text-anchor="middle">r</text></svg></div></div><div class="meaning"><strong>Kaj to pomeni:</strong> ostala sta Luka in Jan, ki sta v obeh krožkih (enaka barva v vseh treh tabelah). Ana je samo v Robotiki, Eva samo v Šahu.</div></div>
+<div class="blk"><div class="lbl">4 · Isto v SQL (alternativa)</div><pre class="code js-hl">SELECT * FROM Robotika
+INTERSECT
+SELECT * FROM Sah;</pre><p class="legend">Presek je izpeljana operacija: p ∩ r = p − (p − r).</p></div>
+<h3 class="sub">Pogosta uporaba: dva pogoja na isti relaciji</h3>
+<div class="prose"><p>Kdo ima oceno pri matematiki <strong>in</strong> pri računalništvu? Izraz σ[PID='M' ∧ PID='R'](Ocena) vedno vrne prazno relacijo, ker ima ena vrstica samo en PID. Pravilno: presek množic ID-jev.</p></div>
+<div class="formula ra">π[ID](σ[PID='M'](Ocena)) ∩ π[ID](σ[PID='R'](Ocena))</div>
+<div data-steps="π[ID](σ[PID=&#x27;M&#x27;](Ocena)) ∩ π[ID](σ[PID=&#x27;R&#x27;](Ocena))"></div>
+<div data-play='[&quot;Robotika ∩ Sah&quot;, &quot;π[ID](σ[PID=&#x27;M&#x27;](Ocena)) ∩ π[ID](σ[PID=&#x27;R&#x27;](Ocena))&quot;]'></div>
+<p class="remember"><strong>Zapomni si:</strong> ∩ pomeni <strong>oba / hkrati</strong>.</p>
+<div data-quiz="{&quot;q&quot;: &quot;Naloga pravi: »dijaki, ki obiskujejo OBA krožka«. Katero operacijo uporabiš?&quot;, &quot;o&quot;: [&quot;unija&quot;, &quot;presek&quot;, &quot;razlika&quot;, &quot;kartezični produkt&quot;], &quot;a&quot;: 1, &quot;why&quot;: &quot;Beseda »oba« pomeni, da mora biti terka v obeh relacijah hkrati: presek.&quot;}"></div>
+</section>
+
+<section id="razlika">
+<div class="eyebrow">Razlaga 8</div>
+<h2>Razlika (−) — v prvi, ne pa v drugi</h2>
+<div class="blk"><div class="lbl">1 · Kaj želimo doseči</div><p class="goal">Kdo obiskuje krožek Robotika, <strong>ne pa</strong> krožka Šah?</p></div>
+<div class="blk"><div class="lbl">2 · Zapis v relacijski algebri</div><div class="zrow"><span class="mini">splošno</span><div class="formula ra gen">p − r</div></div><div class="zrow"><span class="mini">primer</span><div class="formula ra">Robotika − Sah</div></div><p class="legend">Tudi razlika zahteva <strong>enako shemo</strong>. Rezultat vsebuje terke iz p, ki jih v r ni.</p></div>
+<div class="blk"><div class="lbl">3 · Tabela: vhod in rezultat</div><div class="two sm"><div class="tbl" data-rel="Robotika" data-cap="Robotika (p)" data-tint="ID"></div><div class="tbl" data-rel="Sah" data-cap="Šah (r)" data-tint="ID"></div></div><div class="two sm"><div class="tbl" data-res="Robotika − Sah" data-cap="Rezultat: 1 vrstica" data-tint="ID"></div><div class="vrow"><svg class="venn" viewBox="0 0 150 80" role="img" aria-label="Razlika: obarvano je, kar je v p in ni v r"><g class="on"><circle cx="58" cy="40" r="30"/></g><g class="off"><circle cx="92" cy="40" r="30"/></g><g class="ln"><circle cx="58" cy="40" r="30"/><circle cx="92" cy="40" r="30"/></g><text x="40" y="44" text-anchor="middle">p</text><text x="110" y="44" text-anchor="middle">r</text></svg></div></div><div class="meaning"><strong>Kaj to pomeni:</strong> ostala je samo Ana. Luka in Jan sta tudi v Šahu, zato odpadeta. Razlika <strong>ni komutativna</strong>: Sah − Robotika vrne drugega dijaka (Evo).</div></div>
+<div class="blk"><div class="lbl">4 · Isto v SQL (alternativa)</div><pre class="code js-hl">SELECT * FROM Robotika
+EXCEPT
+SELECT * FROM Sah;</pre><p class="legend">V Oraclu se razlika imenuje <code>MINUS</code>.</p></div>
+<h3 class="sub">Pogosta uporaba: »ne«, »nihče«, »nobene«</h3>
+<div class="prose"><p>Beseda <strong>»ne«</strong> v nalogi skoraj vedno pomeni razliko: <em>vsi minus tisti, ki pogoj izpolnjujejo</em>. Imena dijakov, ki <strong>niso</strong> v krožku Robotika:</p></div>
+<div class="formula ra">π[Ime](Dijak ⋈ (π[ID](Dijak) − π[ID](Robotika)))</div>
+<div data-steps="π[Ime](Dijak ⋈ (π[ID](Dijak) − π[ID](Robotika)))"></div>
+<p class="note">Razliko ponavadi delamo nad ključem (ID), imena pa dobimo nazaj z naravnim stikom ⋈ (naslednje strani).</p>
+<div data-play='[&quot;Robotika − Sah&quot;, &quot;Sah − Robotika&quot;, &quot;π[ID](Dijak) − π[ID](Robotika)&quot;]'></div>
+<p class="remember"><strong>Zapomni si:</strong> − pomeni <strong>ne / nihče / nobene</strong>; vrstni red je pomemben.</p>
+<div data-quiz="{&quot;q&quot;: &quot;Ali sta Robotika − Sah in Sah − Robotika enaka rezultata?&quot;, &quot;o&quot;: [&quot;Da, razlika je komutativna&quot;, &quot;Ne: prva vrne Ano, druga Evo&quot;, &quot;Ne: prva je prazna&quot;, &quot;Da, če imata relaciji enako shemo&quot;], &quot;a&quot;: 1, &quot;why&quot;: &quot;Razlika ni komutativna. Robotika − Sah = {Ana}, Sah − Robotika = {Eva}.&quot;}"></div>
+</section>
+
+<section id="produkt">
+<div class="eyebrow">Razlaga 9</div>
+<h2>Kartezični produkt × — vse kombinacije</h2>
+<div class="blk"><div class="lbl">1 · Kaj želimo doseči</div><p class="goal">Sestavi vse možne pare (dijak iz razreda 4A, predmet).</p></div>
+<div class="blk"><div class="lbl">2 · Zapis v relacijski algebri</div><div class="zrow"><span class="mini">splošno</span><div class="formula ra gen">p × r</div></div><div class="zrow"><span class="mini">primer</span><div class="formula ra">π[Ime](σ[Razred='4A'](Dijak)) × π[Naziv](Predmet)</div></div><p class="legend">Vsako vrstico prve relacije združimo z vsako vrstico druge. Število vrstic se <strong>zmnoži</strong> (|p| · |r|), stolpci se <strong>seštejejo</strong>.</p></div>
+<div class="blk"><div class="lbl">3 · Tabela: vhod in rezultat</div><div class="two sm"><div class="tbl" data-res="π[Ime](σ[Razred=&#x27;4A&#x27;](Dijak))" data-cap="p: 2 vrstici"></div><div class="tbl" data-res="π[Naziv](Predmet)" data-cap="r: 3 vrstice"></div></div><div class="tbl" data-res="π[Ime](σ[Razred=&#x27;4A&#x27;](Dijak)) × π[Naziv](Predmet)" data-cap="p × r: 2 · 3 = 6 vrstic"></div><div class="meaning"><strong>Kaj to pomeni:</strong> vsak dijak se pojavi ob vsakem predmetu: 2 · 3 = 6 vrstic in 1 + 1 = 2 stolpca. Večina teh parov ni smiselna, zato produkt običajno sledi izbira vrstic.</div></div>
+<div class="blk"><div class="lbl">4 · Isto v SQL (alternativa)</div><pre class="code js-hl">SELECT Ime, Naziv
+FROM Dijak CROSS JOIN Predmet
+WHERE Razred = '4A';</pre><p class="legend">Starejši zapis: <code>FROM Dijak, Predmet</code> (vejica pomeni isto).</p></div>
+<h3 class="sub">Ko imata relaciji skupen atribut: ρ pomaga</h3>
+<div class="prose"><p>Robotika × Sah ne gre, ker imata obe stolpca ID in Ime. Eno relacijo preimenujemo in dobimo vse pare. Z σ obdržimo vsak par samo enkrat:</p></div>
+<div class="formula ra">σ[ID&lt;ID2](Robotika × ρ[ID2,Ime2](Robotika))</div>
+<div class="tbl" data-res="σ[ID&lt;ID2](Robotika × ρ[ID2,Ime2](Robotika))" data-cap="Pari članov Robotike: 3 vrstice"></div>
+<div data-steps="σ[ID&lt;ID2](Robotika × ρ[ID2,Ime2](Robotika))"></div>
+<p class="note">Sam po sebi je × redko uporaben. Skoraj vedno mu sledi σ, ki obdrži samo smiselne kombinacije. Ta par (× in σ) je v resnici <strong>Θ-stik</strong>.</p>
+<div data-play='[&quot;π[Ime](σ[Razred=&#x27;4A&#x27;](Dijak)) × π[Naziv](Predmet)&quot;, &quot;Robotika × Sah&quot;, &quot;Robotika × ρ[ID2,Ime2](Sah)&quot;]'></div>
+<p class="remember"><strong>Zapomni si:</strong> × naredi <strong>vse pare</strong>: vrstice se zmnožijo, stolpci seštejejo.</p>
+<div data-quiz="{&quot;q&quot;: &quot;Relacija p ima 4 vrstice, relacija r ima 5 vrstic. Koliko vrstic ima p × r?&quot;, &quot;o&quot;: [&quot;9&quot;, &quot;20&quot;, &quot;5&quot;, &quot;4&quot;], &quot;a&quot;: 1, &quot;why&quot;: &quot;4 · 5 = 20. Vsaka vrstica iz p se združi z vsako iz r.&quot;}"></div>
+</section>
+
+<section id="stik">
+<div class="eyebrow">Razlaga 10</div>
+<h2>Naravni stik ⋈ — povezovanje tabel</h2>
+<div class="blk"><div class="lbl">1 · Kaj želimo doseči</div><p class="goal">Poveži vsakega dijaka z njegovimi ocenami.</p></div>
+<div class="blk"><div class="lbl">2 · Zapis v relacijski algebri</div><div class="zrow"><span class="mini">splošno</span><div class="formula ra gen">p ⋈ r</div></div><div class="zrow"><span class="mini">primer</span><div class="formula ra">Dijak ⋈ Ocena</div></div><p class="legend">Poveže vrstici, ki imata <strong>enako vrednost skupnih atributov</strong> (atributov z istim imenom, tukaj ID). Skupni stolpec se v rezultatu pojavi samo enkrat.</p></div>
+<div class="blk"><div class="lbl">3 · Tabela: vhod in rezultat</div><div class="two"><div class="tbl" data-rel="Dijak" data-cap="Dijak (p)" data-tint="ID"></div><div class="tbl" data-rel="Ocena" data-cap="Ocena (r)" data-tint="ID"></div></div><div class="tbl" data-res="Dijak ⋈ Ocena" data-cap="Dijak ⋈ Ocena: 8 vrstic" data-tint="ID"></div><div class="meaning"><strong>Kaj to pomeni:</strong> vrstice z isto barvo (ID) so se povezale. Vsak dijak se pojavi tolikokrat, kolikor ocen ima: Ana, Luka in Nika dvakrat, Eva in Jan enkrat.</div></div>
+<div class="blk"><div class="lbl">4 · Isto v SQL (alternativa)</div><pre class="code js-hl">SELECT *
+FROM Dijak NATURAL JOIN Ocena;</pre><p class="legend">Pogosteje boš pisal <code>FROM Dijak JOIN Ocena ON Dijak.ID = Ocena.ID</code>; rezultat je podoben.</p></div>
+<h3 class="sub">Stik treh relacij</h3>
+<div class="prose"><p>Stike lahko povezujemo v verigo. Kdo ima katero oceno pri katerem predmetu: <span class="ra">π[Ime,Naziv,Ocena](Dijak ⋈ Ocena ⋈ Predmet)</span></p></div>
+<div class="tbl" data-res="π[Ime,Naziv,Ocena](Dijak ⋈ Ocena ⋈ Predmet)" data-cap="Ime, predmet in ocena: 8 vrstic"></div>
+<div data-steps="π[Ime,Naziv,Ocena](Dijak ⋈ Ocena ⋈ Predmet)"></div>
 <p class="note"><strong>Dve pasti naravnega stika:</strong> ① vrstice brez para izginejo iz rezultata (dijak brez ocene se v Dijak ⋈ Ocena ne pojavi); ② če skupnih atributov ni, je p ⋈ r = p × r, ker je pogoj prazen in vedno resničen.</p>
-<div data-play='["Dijak ⋈ Ocena","Ocena ⋈ Predmet","π[Ime,Profesor](Dijak ⋈ Ocena ⋈ Profesor)","Ponudba ⋈[Cena≤Proracun] Kupec"]'></div>
+<div data-play='[&quot;Dijak ⋈ Ocena&quot;, &quot;Ocena ⋈ Predmet&quot;, &quot;π[Ime,Profesor](Dijak ⋈ Ocena ⋈ Profesor)&quot;]'></div>
+<p class="remember"><strong>Zapomni si:</strong> ⋈ poveže tabele po <strong>skupnem atributu</strong> (ključ). Vrstice brez para izginejo.</p>
+<div data-quiz="{&quot;q&quot;: &quot;Dijak nima nobene ocene. Se pojavi v rezultatu Dijak ⋈ Ocena?&quot;, &quot;o&quot;: [&quot;da, s prazno oceno&quot;, &quot;da, z oznako NULL&quot;, &quot;ne, ker nima vrstice s parom v Ocena&quot;, &quot;odvisno od ID&quot;], &quot;a&quot;: 2, &quot;why&quot;: &quot;Naravni stik obdrži samo vrstice, ki imajo par. Dijak brez ocene izgine.&quot;}"></div>
+</section>
+
+<section id="thetastik">
+<div class="eyebrow">Razlaga 11</div>
+<h2>Θ-stik ⋈[F] — stik s pogojem</h2>
+<div class="blk"><div class="lbl">1 · Kaj želimo doseči</div><p class="goal">Za Anine ocene poišči nagrade, ki jih ocena dosega (ocena ≥ najnižja ocena nagrade).</p></div>
+<div class="blk"><div class="lbl">2 · Zapis v relacijski algebri</div><div class="zrow"><span class="mini">splošno</span><div class="formula ra gen">p ⋈[pogoj] r = σ[pogoj](p × r)</div></div><div class="zrow"><span class="mini">primer</span><div class="formula ra">σ[ID=1](Ocena) ⋈[Ocena≥MinOcena] Nagrada</div></div><p class="legend">Θ-stik je <strong>produkt × in izbira σ v enem zapisu</strong>: najprej bi naredili vse pare, nato obdržali tiste, ki izpolnjujejo pogoj.</p></div>
+<div class="blk"><div class="lbl">3 · Tabela: vhod in rezultat</div><div class="two sm"><div class="tbl" data-res="σ[ID=1](Ocena)" data-cap="p: Anine ocene (2 vrstici)"></div><div class="tbl" data-rel="Nagrada" data-cap="Nagrada (r)"></div></div><div class="tbl" data-res="σ[ID=1](Ocena) ⋈[Ocena≥MinOcena] Nagrada" data-cap="p ⋈[Ocena≥MinOcena] r: 5 vrstic"></div><div class="meaning"><strong>Kaj to pomeni:</strong> ocena 5 dosega vse tri nagrade, ocena 4 pa bronasto in srebrno: 3 + 2 = 5 vrstic. Parov, kjer ocena ne doseže MinOcena, ni.</div></div>
+<div class="blk"><div class="lbl">4 · Isto v SQL (alternativa)</div><pre class="code js-hl">SELECT *
+FROM Ocena JOIN Nagrada ON Ocena &gt;= MinOcena
+WHERE ID = 1;</pre></div>
+<p class="note"><strong>Θ-stik in naravni stik:</strong> če je pogoj samo enakost istoimenskih atributov, dobimo naravni stik. Θ-stik uporabimo, kadar želimo primerjati z <strong>&lt; &gt; ≤ ≥ ≠</strong>, torej tudi tam, kjer relaciji nimata skupnega ključa.</p>
+<p class="note"><strong>Pozor:</strong> atributi leve in desne relacije morajo imeti <em>različna</em> imena. Če imata isto ime, eno relacijo najprej preimenuj z ρ.</p>
+<div data-play='[&quot;σ[ID=1](Ocena) ⋈[Ocena≥MinOcena] Nagrada&quot;, &quot;σ[ID=1](Ocena) × Nagrada&quot;]'></div>
+<p class="remember"><strong>Zapomni si:</strong> ⋈[F] = <strong>σ[F](p × r)</strong>; pogoj je lahko poljubna primerjava.</p>
+<div data-quiz="{&quot;q&quot;: &quot;Kateri izraz je enak p ⋈[F] r?&quot;, &quot;o&quot;: [&quot;σ[F](p × r)&quot;, &quot;π[F](p × r)&quot;, &quot;σ[F](p ∪ r)&quot;, &quot;p ∩ r&quot;], &quot;a&quot;: 0, &quot;why&quot;: &quot;Θ-stik je produkt, ki mu sledi izbira vrstic s pogojem F.&quot;}"></div>
 </section>
 
 <section id="kolicnik">
-<div class="eyebrow">Razlaga 7</div>
+<div class="eyebrow">Razlaga 12</div>
 <h2>Količnik ÷ — »z vsemi«</h2>
-<div class="formula ra">p ÷ r</div>
-<div class="prose">
-  <p>Količnik odgovarja na vprašanja z besedo <strong>»vse«</strong>: kdo si je izposodil <em>vse</em> fantazijske knjige, kdo ima oceno pri <em>vseh</em> predmetih. Shema desne relacije mora biti prava podmnožica leve (R ⊂ P); shema rezultata je X = P − R.</p>
-  <p>Terka t je v rezultatu natanko tedaj, ko se v p pojavi <strong>v paru z vsako terko iz r</strong>.</p>
-</div>
-<div class="two">
-<div class="tbl" data-res="π[CID,KID](Izposoja)" data-cap="p = π[CID,KID](Izposoja)"></div>
-<div style="display:flex;flex-direction:column;gap:14px">
-<div class="tbl" data-res="π[KID](σ[Zanr='fantazija'](Knjiga))" data-cap="r = KID-ji fantazijskih knjig"></div>
-<div class="tbl" data-res="π[CID,KID](Izposoja) ÷ π[KID](σ[Zanr='fantazija'](Knjiga))" data-cap="p ÷ r — član 3 ima vse tri"></div>
-</div>
-</div>
-<div class="prose">
-  <p>Količnik je izpeljana operacija: <span class="ra">p ÷ r = π[X](p) − π[X]((π[X](p) × r) − p)</span>. Formule se ni treba učiti na pamet — razumi idejo: od vseh kandidatov odštejemo tiste, ki jim kakšna terka iz r manjka. V SQL količnik najpogosteje zapišemo z dvojno negacijo (NOT EXISTS) ali z GROUP BY … HAVING COUNT.</p>
-</div>
-<p class="note"><strong>Kdaj NE uporabiš količnika:</strong> »izposodil je K1 in K3« za dve konkretni vrednosti rešiš tudi s presekom dveh množic CID-jev. Količnik zasije, ko je desna stran rezultat poizvedbe (»vse Cankarjeve«, »vsi predmeti«) in se njen obseg lahko spreminja.</p>
-<div data-play='["π[CID,KID](Izposoja) ÷ π[KID](σ[Zanr=&apos;fantazija&apos;](Knjiga))","π[ID,PID](Ocena) ÷ π[PID](σ[ID=1](Ocena))"]'></div>
+<div class="blk"><div class="lbl">1 · Kaj želimo doseči</div><p class="goal">Kateri dijaki imajo oceno pri <strong>vseh</strong> predmetih iz množice {Matematika, Računalništvo}?</p></div>
+<div class="blk"><div class="lbl">2 · Zapis v relacijski algebri</div><div class="zrow"><span class="mini">splošno</span><div class="formula ra gen">p ÷ r</div></div><div class="zrow"><span class="mini">primer</span><div class="formula ra">π[ID,PID](Ocena) ÷ π[PID](σ[Naziv='Matematika' ∨ Naziv='Računalništvo'](Predmet))</div></div><p class="legend">Shema desne relacije mora biti prava podmnožica leve (tukaj PID ⊂ ID, PID). Shema rezultata je razlika shem (ID). Terka je v rezultatu, če se v p pojavi <strong>v paru z vsako terko iz r</strong>.</p></div>
+<div class="blk"><div class="lbl">3 · Tabela: vhod in rezultat</div><div class="two sm"><div class="tbl" data-res="π[ID,PID](Ocena)" data-cap="p: pari (dijak, predmet), 8 vrstic" data-hl="0,1,2,3,6,7"></div><div class="tbl" data-res="π[PID](σ[Naziv=&#x27;Matematika&#x27; ∨ Naziv=&#x27;Računalništvo&#x27;](Predmet))" data-cap="r: predmeta M in R"></div></div><div class="tbl" data-res="π[ID,PID](Ocena) ÷ π[PID](σ[Naziv=&#x27;Matematika&#x27; ∨ Naziv=&#x27;Računalništvo&#x27;](Predmet))" data-cap="p ÷ r: 3 vrstice"></div><div class="meaning"><strong>Kaj to pomeni:</strong> dijaki 1 (Ana), 2 (Luka) in 5 (Nika) imajo oceno pri M in pri R (označene vrstice v p). Eva ima samo F, Jan samo M, zato odpadeta.</div></div>
+<div class="blk"><div class="lbl">4 · Isto v SQL (alternativa)</div><pre class="code js-hl">SELECT D.Ime
+FROM Dijak D
+WHERE NOT EXISTS (
+  SELECT * FROM Predmet P
+  WHERE P.Naziv IN ('Matematika', 'Računalništvo')
+  AND NOT EXISTS (
+    SELECT * FROM Ocena O
+    WHERE O.ID = D.ID AND O.PID = P.PID));</pre><p class="legend">V SQL količnik najpogosteje zapišemo z dvojno negacijo (NOT EXISTS): »ne obstaja predmet iz množice, pri katerem dijak nima ocene«. Druga možnost je GROUP BY … HAVING COUNT.</p></div>
+<h3 class="sub">Imena namesto ID-jev</h3>
+<div class="formula ra">π[Ime](Dijak ⋈ (π[ID,PID](Ocena) ÷ π[PID](σ[Naziv='Matematika' ∨ Naziv='Računalništvo'](Predmet))))</div>
+<div data-steps="π[Ime](Dijak ⋈ (π[ID,PID](Ocena) ÷ π[PID](σ[Naziv=&#x27;Matematika&#x27; ∨ Naziv=&#x27;Računalništvo&#x27;](Predmet))))"></div>
+<div class="prose"><p>Količnik je izpeljana operacija: <span class="ra">p ÷ r = π[X](p) − π[X]((π[X](p) × r) − p)</span>. Formule se ni treba učiti na pamet. Razumi idejo: od vseh kandidatov odštejemo tiste, ki jim kakšna terka iz r manjka.</p></div>
+<p class="note"><strong>Kdaj NE uporabiš količnika:</strong> za dva konkretna predmeta zadošča tudi presek ID-jev (stran 7). Količnik zasije, ko je desna stran rezultat poizvedbe in se njen obseg lahko spreminja.</p>
+<div data-play='[&quot;π[ID,PID](Ocena) ÷ π[PID](σ[Naziv=&#x27;Matematika&#x27; ∨ Naziv=&#x27;Računalništvo&#x27;](Predmet))&quot;, &quot;π[ID,PID](Ocena) ÷ π[PID](σ[ID=1](Ocena))&quot;]'></div>
+<p class="remember"><strong>Zapomni si:</strong> ÷ odgovarja na vprašanja z besedo <strong>»vsi / vse / pri vseh«</strong>.</p>
+<div data-quiz="{&quot;q&quot;: &quot;Katera beseda v nalogi običajno napoveduje količnik?&quot;, &quot;o&quot;: [&quot;nobene&quot;, &quot;vsi / pri vseh&quot;, &quot;oba&quot;, &quot;vsaj eden&quot;], &quot;a&quot;: 1, &quot;why&quot;: &quot;»Pri vseh« pomeni, da mora terka nastopati z vsako vrstico druge relacije: količnik.&quot;}"></div>
 </section>
 
 <section id="prioriteta">
-<div class="eyebrow">Razlaga 8</div>
+<div class="eyebrow">Razlaga 13</div>
 <h2>Prioriteta in pogoste napake</h2>
 <div class="prose">
   <p>Kadar v izrazu nastopa več operacij, se izvajajo v tem vrstnem redu (z oklepaji je izraz vedno jasnejši — in na maturi varnejši):</p>
@@ -1522,7 +1662,7 @@ html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-ti
 </section>
 
 <section id="sql">
-<div class="eyebrow">Razlaga 9</div>
+<div class="eyebrow">Razlaga 14</div>
 <h2>Od algebre do SQL</h2>
 <div class="prose">
   <p>Vsaka operacija relacijske algebre ima neposreden prevod v SQL. Ta tabela je most med tem poglavjem in poglavjem 5 (SQL poizvedbe) — na maturi jo potrebuješ v obe smeri.</p>
@@ -1547,29 +1687,47 @@ html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-ti
 </section>
 
 <section id="postopek">
-<div class="eyebrow">Razlaga 10</div>
+<div class="eyebrow">Razlaga 15</div>
 <h2>Postopek reševanja in igrišče</h2>
-<div class="prose">
-  <p>Vsako besedilno nalogo rešuj v štirih korakih:</p>
+<div class="prose"><p>Vsako besedilno nalogo rešuj v štirih korakih. Najprej si oglej tabele, s katerimi bomo delali. Vrstice z isto barvo imajo isti ID, zato se v stiku povežejo:</p></div>
+<div class="two"><div class="tbl" data-rel="Dijak" data-tint="ID"></div><div class="tbl" data-rel="Ocena" data-tint="ID"></div></div>
+<div class="two sm"><div class="tbl" data-rel="Predmet"></div><div class="tbl" data-rel="Robotika" data-tint="ID"></div></div>
+<div class="prose"><p>Dijak in Ocena se povezujeta prek <strong>ID</strong> (Ana ima ID 1 in v Ocena dve vrstici), Ocena in Predmet prek <strong>PID</strong> (M, R, F). Robotika kaže na Dijak prek ID.</p></div>
+<div class="tbl"><table><thead><tr><th>Korak</th><th>Vprašanje</th><th>Operacija</th></tr></thead><tbody><tr><td class="num">1</td><td>Katere tabele potrebujem?</td><td>poišči jih v shemi baze</td></tr><tr><td class="num">2</td><td>Kako jih povežem?</td><td>⋈ po skupnih atributih (ID, PID)</td></tr><tr><td class="num">3</td><td>Katere vrstice obdržim?</td><td>σ s pogojem</td></tr><tr><td class="num">4</td><td>Katere stolpce izpišem?</td><td>π na koncu</td></tr></tbody></table></div>
+<div class="tbl"><table><thead><tr><th>Beseda v nalogi</th><th>Operacija</th></tr></thead><tbody><tr><td>»<strong>nobene</strong>«, »<strong>nihče</strong>«, »<strong>ne</strong>«</td><td>razlika − (vsi minus tisti, ki pogoj izpolnjujejo)</td></tr><tr><td>»<strong>oba</strong>«, »<strong>hkrati</strong>«</td><td>presek ∩</td></tr><tr><td>»<strong>vsaj eden</strong>«, »<strong>ali</strong>«</td><td>unija ∪ (ali ∨ v pogoju)</td></tr><tr><td>»<strong>vsi</strong>«, »<strong>pri vseh</strong>«</td><td>količnik ÷</td></tr></tbody></table></div>
+<h3 class="sub">Trije rešeni primeri</h3>
+<div class="ex">
+<div class="exh"><span class="exn">Primer 1</span> · ena tabela</div>
+<p class="goal">Imena in priimki dijakov iz Ljubljane.</p>
+<ol class="st4"><li><span class="n">①</span><b>Tabele:</b> Dijak</li><li><span class="n">②</span><b>Povezave:</b> ni jih, ker je samo ena tabela</li><li><span class="n">③</span><b>Vrstice:</b> Kraj = 'Ljubljana'</li><li><span class="n">④</span><b>Stolpci:</b> Ime, Priimek</li></ol>
+<div class="formula ra">π[Ime,Priimek](σ[Kraj='Ljubljana'](Dijak))</div>
+<div data-steps="π[Ime,Priimek](σ[Kraj=&#x27;Ljubljana&#x27;](Dijak))"></div>
+<div class="tbl" data-res="π[Ime,Priimek](σ[Kraj=&#x27;Ljubljana&#x27;](Dijak))" data-cap="Rezultat"></div>
 </div>
-<div class="tbl"><table>
-<thead><tr><th>Korak</th><th>Vprašanje</th><th>Operacija</th></tr></thead>
-<tbody>
-<tr><td class="num">1</td><td>Katere tabele potrebujem?</td><td>poišči jih v shemi baze</td></tr>
-<tr><td class="num">2</td><td>Kako jih povežem?</td><td>⋈ po skupnih atributih</td></tr>
-<tr><td class="num">3</td><td>Katere vrstice obdržim?</td><td>σ s pogojem</td></tr>
-<tr><td class="num">4</td><td>Katere stolpce izpišem?</td><td>π na koncu</td></tr>
-</tbody>
-</table></div>
-<div class="prose"><p>Primer: <em>kdo je pri matematiki dobil oceno 5?</em> — ① Dijak, Ocena, Predmet; ② Dijak ⋈ Ocena ⋈ Predmet; ③ σ[Naziv='Matematika' ∧ Ocena=5]; ④ π[Ime, Priimek].</p></div>
+<div class="ex">
+<div class="exh"><span class="exn">Primer 2</span> · dve tabeli prek ID</div>
+<p class="goal">Imena dijakov, ki imajo kjerkoli oceno 5.</p>
+<ol class="st4"><li><span class="n">①</span><b>Tabele:</b> Dijak (ime), Ocena (ocena)</li><li><span class="n">②</span><b>Povezave:</b> Dijak ⋈ Ocena (skupni atribut ID)</li><li><span class="n">③</span><b>Vrstice:</b> Ocena = 5</li><li><span class="n">④</span><b>Stolpci:</b> Ime</li></ol>
+<div class="formula ra">π[Ime](σ[Ocena=5](Dijak ⋈ Ocena))</div>
+<div data-steps="π[Ime](σ[Ocena=5](Dijak ⋈ Ocena))"></div>
+<div class="tbl" data-res="π[Ime](σ[Ocena=5](Dijak ⋈ Ocena))" data-cap="Rezultat"></div>
+</div>
+<div class="ex">
+<div class="exh"><span class="exn">Primer 3</span> · tri tabele</div>
+<p class="goal">Kdo je pri matematiki dobil oceno 5?</p>
+<ol class="st4"><li><span class="n">①</span><b>Tabele:</b> Dijak (ime), Ocena (ocena), Predmet (naziv)</li><li><span class="n">②</span><b>Povezave:</b> Dijak ⋈ Ocena ⋈ Predmet (ID in PID)</li><li><span class="n">③</span><b>Vrstice:</b> Naziv = 'Matematika' ∧ Ocena = 5</li><li><span class="n">④</span><b>Stolpci:</b> Ime, Priimek</li></ol>
 <div class="formula ra">π[Ime,Priimek](σ[Naziv='Matematika' ∧ Ocena=5](Dijak ⋈ Ocena ⋈ Predmet))</div>
-<div class="tbl" data-res="π[Ime,Priimek](σ[Naziv='Matematika' ∧ Ocena=5](Dijak ⋈ Ocena ⋈ Predmet))" data-cap="Rezultat"></div>
-<p class="note"><strong>Besede v nalogi:</strong> »<strong>nobene</strong>«, »<strong>nihče</strong>« ali »<strong>ne</strong>« skoraj vedno pomeni <strong>razliko</strong> (vsi minus tisti, ki pogoj izpolnjujejo); »<strong>oba</strong>« pomeni <strong>presek</strong>; »<strong>vsaj eden</strong>« <strong>unijo</strong>; »<strong>vse</strong>« pa <strong>količnik</strong>.</p>
-<h3 style="font-size:1.15rem;margin-top:8px">Igrišče</h3>
-<div class="prose">
-  <p>Tu lahko izračunaš <strong>poljuben izraz</strong> nad obema bazama (šolsko in knjižnično). Simbole vstaviš z gumbi ali z besedami <code>sigma</code>, <code>pi</code>, <code>join</code>, <code>union</code>, <code>intersect</code>, <code>minus</code>, <code>div</code>, <code>and</code>, <code>or</code>, <code>not</code>; namesto ≤ in ≥ lahko pišeš &lt;= in &gt;=.</p>
+<div data-steps="π[Ime,Priimek](σ[Naziv=&#x27;Matematika&#x27; ∧ Ocena=5](Dijak ⋈ Ocena ⋈ Predmet))"></div>
+<div class="tbl" data-res="π[Ime,Priimek](σ[Naziv=&#x27;Matematika&#x27; ∧ Ocena=5](Dijak ⋈ Ocena ⋈ Predmet))" data-cap="Rezultat"></div>
 </div>
-<div data-play='["π[Ime](σ[Kraj=&apos;Ljubljana&apos;](Dijak))","π[Naslov](σ[Avtor=&apos;Cankar&apos;](Knjiga))","Debata ∪ Gledalisce"]' data-open="1"></div>
+<h3 class="sub">Poskusi sam</h3>
+<div class="prose"><p>Zdaj reši tri naloge z istimi tabelami. Izraz lahko najprej preizkusiš z gumbom <em>Izračunaj</em>. Te naloge ne štejejo k točkam.</p></div>
+<div data-try="p1"></div>
+<div data-try="p2"></div>
+<div data-try="p3"></div>
+<h3 class="sub">Igrišče</h3>
+<div class="prose"><p>Tu lahko izračunaš <strong>poljuben izraz</strong> nad obema bazama (šolsko in knjižnično). Simbole vstaviš z gumbi ali z besedami <code>sigma</code>, <code>pi</code>, <code>join</code>, <code>union</code>, <code>intersect</code>, <code>minus</code>, <code>div</code>, <code>and</code>, <code>or</code>, <code>not</code>.</p></div>
+<div data-play='[&quot;π[Ime](σ[Kraj=&#x27;Ljubljana&#x27;](Dijak))&quot;, &quot;π[Naslov](σ[Avtor=&#x27;Cankar&#x27;](Knjiga))&quot;, &quot;Debata ∪ Gledalisce&quot;, &quot;π[Ime](Dijak ⋈ Ocena ⋈ Predmet)&quot;]'></div>
 </section>
 
 
@@ -1636,6 +1794,7 @@ const BAZA = {
     ["M","Kralj"],["R","Mlakar"],["F","Zupan"]] },
   Robotika: { attrs: ["ID","Ime"], rows: [[1,"Ana"],[2,"Luka"],[4,"Jan"]] },
   Sah: { attrs: ["ID","Ime"], rows: [[2,"Luka"],[3,"Eva"],[4,"Jan"]] },
+  Nagrada: { attrs: ["Stopnja","MinOcena"], rows: [["bronasta",3],["srebrna",4],["zlata",5]] },
   Vaja: { attrs: ["VajaID","Ime","Opis","Tocke"], rows: [
     [1,"Spremenljivke","uvodna vaja",6],
     [2,"Vejitve","if in switch",9],
@@ -1736,9 +1895,20 @@ function parse(src){
     throw new RAError("Desna stran primerjave mora biti vrednost ali atribut.");
   }
 
+  /* prioriteta (od najvišje): × ⋈ ÷ · ∩ · ∪ −  (enaki nivoji se računajo z leve proti desni) */
   function expr(){
+    let l = inter();
+    while(peek() && peek().k==="op" && "∪−".includes(peek().v)){ const op = next().v; l = { op, l, r:inter(), theta:null }; }
+    return l;
+  }
+  function inter(){
+    let l = prod();
+    while(isOp("∩")){ p++; l = { op:"∩", l, r:prod(), theta:null }; }
+    return l;
+  }
+  function prod(){
     let left = term();
-    while(peek() && peek().k==="op" && "⋈×∪∩−÷".includes(peek().v)){
+    while(peek() && peek().k==="op" && "⋈×÷".includes(peek().v)){
       const op = next().v;
       let theta = null;
       if(op==="⋈" && (isOp("[")||isOp("{"))){ const close = openSub(); theta = cond(); expect(close,"Manjka zaklepaj za pogoj Θ-stika."); }
@@ -1867,6 +2037,63 @@ function run(src){
   return evalNode(parse(src));
 }
 
+/* ---------- koraki izračuna (od znotraj navzven) ---------- */
+function showCond(c){
+  switch(c.c){
+    case "or":  return showCond(c.l)+" ∨ "+showCond(c.r);
+    case "and": return (c.l.c==="or" ? "("+showCond(c.l)+")" : showCond(c.l))+" ∧ "+(c.r.c==="or" ? "("+showCond(c.r)+")" : showCond(c.r));
+    case "not": return "¬("+showCond(c.e)+")";
+    case "cmp": return c.a+c.op+(typeof c.v==="string" ? "'"+c.v+"'" : c.v);
+    case "cmp2":return c.a+c.op+c.b;
+  }
+}
+function showNode(n, inner){
+  if(n.rel) return n.rel;
+  if(n.arg){
+    const a = n.op==="σ" ? showCond(n.arg) : n.arg.join(",");
+    return n.op+"["+a+"]("+showNode(n.e)+")";
+  }
+  const side = x => x.rel || x.arg ? showNode(x) : "("+showNode(x)+")";
+  const s = side(n.l)+" "+n.op+(n.theta ? "["+showCond(n.theta)+"]" : "")+" "+side(n.r);
+  return inner ? "("+s+")" : s;
+}
+function steps(src){
+  const ast = parse(src), out = [];
+  (function walk(n){
+    if(n.rel) return;
+    if(n.e) walk(n.e);
+    if(n.l){ walk(n.l); walk(n.r); }
+    out.push({ expr: showNode(n), rel: evalNode(n) });
+  })(ast);
+  return out;
+}
+
+/* ---------- razlika med dvema rezultatoma (za povratno informacijo) ---------- */
+function diff(mine, want){
+  const f = a => a.map(fold).slice().sort();
+  const A = f(mine.attrs), B = f(want.attrs);
+  if(A.length!==B.length || A.some((x,i)=>x!==B[i])) return { sameCols:false };
+  const ix = want.attrs.map(w => mine.attrs.findIndex(m => fold(m)===fold(w)));
+  const norm = r => JSON.stringify(r.map(v => typeof v==="string" ? fold(v) : v));
+  const mineRows = mine.rows.map(r => ix.map(i => r[i]));
+  const wantSet = new Set(want.rows.map(norm)), mineSet = new Set(mineRows.map(norm));
+  return {
+    sameCols: true,
+    extra: mineRows.filter(r => !wantSet.has(norm(r))),
+    missing: want.rows.filter(r => !mineSet.has(norm(r))),
+    attrs: want.attrs.slice()
+  };
+}
+
+/* ---------- ključi (za označevanje v tabelah) ---------- */
+const KEYS = {
+  Dijak:{pk:["ID"]}, Predmet:{pk:["PID"]}, Ocena:{pk:["ID","PID"],fk:["ID","PID"]},
+  Profesor:{pk:["PID"],fk:["PID"]}, Robotika:{pk:["ID"],fk:["ID"]}, Sah:{pk:["ID"],fk:["ID"]},
+  Nagrada:{pk:["Stopnja"]},
+  Clan:{pk:["CID"]}, Knjiga:{pk:["KID"]}, Izposoja:{fk:["CID","KID"]},
+  Debata:{pk:["CID"],fk:["CID"]}, Gledalisce:{pk:["CID"],fk:["CID"]}
+};
+
 /* ---------- primerjava rezultatov ---------- */
 function canon(rel){
   const order = rel.attrs.map((a,i)=>({f:fold(a), i})).sort((x,y)=> x.f<y.f?-1:x.f>y.f?1:0);
@@ -1876,18 +2103,18 @@ function canon(rel){
 }
 function equal(a, b){ return canon(a)===canon(b); }
 
-return { BAZA, ALIAS, run, parse, equal, canon, RAError };
+return { BAZA, ALIAS, KEYS, run, parse, steps, diff, equal, canon, RAError };
 })();
 
 
 /* ===== Poglavje 1: Relacijska algebra — sklopi in naloge ===== */
 const LEVELS = [
  {"id":"naloge-a","tag":"A","title":"Pojmi in operacije","note":"Osnovni pojmi relacijskega modela in pregled operacij (razlagi 1 in 2)."},
- {"id":"naloge-b","tag":"B","title":"Branje izrazov","note":"Dan je izraz — ugotovi, kaj vrne: koliko vrstic, katere stolpce, katere vrednosti (razlage 3 do 7). Vse naloge uporabljajo šolsko bazo z razlage 2."},
+ {"id":"naloge-b","tag":"B","title":"Branje izrazov","note":"Dan je izraz — ugotovi, kaj vrne: koliko vrstic, katere stolpce, katere vrednosti (razlage 3 do 12). Vse naloge uporabljajo šolsko bazo z razlage 2."},
  {"id":"naloge-c","tag":"C","title":"Pisanje izrazov · šolska baza","note":"Zapiši izraz relacijske algebre nad šolsko bazo (Dijak, Predmet, Ocena, Profesor). Stran izraz izračuna in preveri rezultat, zato je pravilen vsak enakovreden izraz."},
  {"id":"naloge-d","tag":"D","title":"Vaje · knjižnica","note":"Prva zbirka vaj: razumevanje operacij, pisanje izrazov in izziv nad bazo šolske knjižnice (Clan, Knjiga, Izposoja, Debata, Gledalisce). Oznaka ob nalogi je številka v izvirni zbirki."},
  {"id":"naloge-e","tag":"E","title":"Dodatne vaje · knjižnica","note":"Druga zbirka vaj nad isto bazo: več stikov treh relacij, razlika in presek ter izziv na koncu."},
- {"id":"naloge-f","tag":"F","title":"Težje naloge","note":"Presek prek razlike, Θ-stik, količnik in kombinirane naloge (razlage 5 do 8)."},
+ {"id":"naloge-f","tag":"F","title":"Težje naloge","note":"Presek prek razlike, Θ-stik, količnik in kombinirane naloge (razlage 7, 8, 11 in 12)."},
  {"id":"doma-mat","tag":"H","title":"Ponavljanje","note":"Kombinirane naloge za samostojno ponavljanje. Vsaka zahteva dve ali tri operacije.","home":true}
 ];
 
@@ -2214,6 +2441,12 @@ const T = [
 ];
 
 /* Praktične vaje (brez točk) */
+const TRY = [
+{"key": "p1", "own": true, "lab": "Poskusi sam 1", "tryLabel": "Poskusi sam 1", "pts": 0, "lv": "P", "type": "ra", "db": ["Dijak", "Ocena", "Predmet", "Robotika"], "q": "Imena in priimki dijakov razreda **4B**.", "sol": "π[Ime,Priimek](σ[Razred='4B'](Dijak))", "h": ["Dijak ima stolpec Razred. Najprej izberi vrstice (σ), nato stolpce (π)."], "why": "Ena relacija, zato stika ne potrebuješ: najprej σ za razred, nato π za Ime in Priimek."},
+{"key": "p2", "own": true, "lab": "Poskusi sam 2", "tryLabel": "Poskusi sam 2", "pts": 0, "lv": "P", "type": "ra", "db": ["Dijak", "Ocena", "Predmet", "Robotika"], "q": "Nazivi predmetov, pri katerih je **Luka** dobil oceno **višjo od 3**.", "sol": "π[Naziv](σ[Ime='Luka' ∧ Ocena>3](Dijak ⋈ Ocena ⋈ Predmet))", "h": ["Ime je v Dijak, ocena v Ocena, naziv pa v Predmet: poveži vse tri tabele (po ID in PID), nato σ in π."], "why": "Dijak ⋈ Ocena poveže po ID, nato ⋈ Predmet po PID. Pogoja Ime in Ocena sta v istem σ, naziv izpišeš na koncu."},
+{"key": "p3", "own": true, "lab": "Poskusi sam 3", "tryLabel": "Poskusi sam 3", "pts": 0, "lv": "P", "type": "ra", "db": ["Dijak", "Ocena", "Predmet", "Robotika"], "q": "Imena dijakov, ki **niso** v krožku Robotika.", "sol": "π[Ime](Dijak) − π[Ime](Robotika)", "h": ["Beseda »niso« pomeni razliko: vsi dijaki minus tisti, ki so v Robotiki."], "why": "Od vseh imen dijakov odštejemo imena članov Robotike. Ostaneta Eva in Nika."}
+];
+
 const HOME = [
  {"id":"h1","title":"Igrišče: preveri svoje ideje",
   "q":"Na strani Postopek reševanja je igrišče, ki izračuna poljuben izraz. Preizkusi: (1) Kaj vrne π[Razred](Dijak)? Koliko vrstic ima? (2) Primerjaj σ[Ocena≥4](Ocena ⋈ Predmet) in σ[Ocena≥4](Ocena) ⋈ Predmet — sta rezultata enaka? Zakaj?",
@@ -2306,7 +2539,7 @@ function matchBlank(val, b){
 const normOut = s => String(s).replace(/\r/g,"").split("\n").map(l=>l.replace(/\s+$/,"")).join("\n").replace(/\n+$/,"");
 const srcLabel = s => { const r = /^MRAC\/(\d+)$/.exec(s); if(r) return `Katalog 2023 · primer · ${r[1]}. nal.`; const m = /^M(\d\d)(\d)\/(\d+)$/.exec(s); return m ? `Matura 20${m[1]} · ${m[2]==="1"?"spomladi":"jeseni"} · ${m[3]}. nal.` : s; };
 const fmtQ = s => esc(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/`(.+?)`/g,'<span class="ra">$1</span>');
-const ptsLabel = p => p===1 ? "1 točka" : p===2 ? "2 točki" : (p<5 ? p+" točke" : p+" točk");
+const ptsLabel = p => p===0 ? "vaja, brez točk" : p===1 ? "1 točka" : p===2 ? "2 točki" : (p<5 ? p+" točke" : p+" točk");
 
 /* ---------- render tasks ---------- */
 LavRac.prepare(T, LEVELS, {});
@@ -2362,7 +2595,7 @@ function card(t){
     body += `<div class="blank"><label for="o-${t.id}">Izpis tvojega programa</label><textarea id="o-${t.id}" class="mono out" spellcheck="false"></textarea></div>`;
   }
   el.innerHTML = `
-    <div class="thead"><span class="tnum">${t.n}. naloga</span><div class="tags">${tags}</div></div>
+    <div class="thead"><span class="tnum">${t.tryLabel || (t.n + ". naloga")}</span><div class="tags">${tags}</div></div>
     <div class="q">${body}</div>
     <div class="actions">
       ${t.type==="ra" ? '<button class="btn js-run" type="button">Izračunaj</button>' : ''}
@@ -2460,12 +2693,17 @@ function wire(el,t){
       ok = RA.equal(mine, exp);
       raEl.classList.add(ok ? "right" : "wrong");
       outEl.hidden = false;
-      outEl.innerHTML = `<div class="eyebrow">Rezultat tvojega izraza (${mine.rows.length} ${vrstic(mine.rows.length)})</div><div class="reswrap">` + relTable(mine) + `</div>`;
+      outEl.innerHTML = `<div class="eyebrow">Rezultat tvojega izraza (${mine.rows.length} ${vrstic(mine.rows.length)})</div><div class="reswrap">` + relTable(mine) + `</div>` + stepsHtml(raEl.value);
       if(!ok){
-        const sameAttrs = RA.equal({attrs:mine.attrs,rows:[]},{attrs:exp.attrs,rows:[]});
-        msg = !sameAttrs ? "Rezultat nima pravih stolpcev (preveri projekcijo)."
-            : mine.rows.length!==exp.rows.length ? `Izraz se izračuna, a vrne ${mine.rows.length} ${vrstic(mine.rows.length)}, pravilni rezultat pa ${exp.rows.length}.`
-            : "Stolpci in število vrstic so pravi, vrednosti pa ne.";
+        const d = RA.diff(mine, exp);
+        if(!d.sameCols) msg = "Rezultat nima pravih stolpcev (preveri projekcijo). Pričakovani stolpci: " + exp.attrs.join(", ") + ".";
+        else {
+          const fmt = rows => rows.slice(0,3).map(r=>"("+r.join(", ")+")").join(", ") + (rows.length>3 ? " … in še " + (rows.length-3) : "");
+          const parts = [];
+          if(d.extra.length) parts.push("preveč v tvojem rezultatu: " + fmt(d.extra));
+          if(d.missing.length) parts.push("manjka: " + fmt(d.missing));
+          msg = "Stolpci so pravi, vrstice pa ne — " + parts.join("; ") + ".";
+        }
       }
     }
     if(t.type==="output" || t.type==="code"){
@@ -2474,6 +2712,7 @@ function wire(el,t){
       out.classList.remove("right","wrong"); out.classList.add(ok?"right":"wrong");
       if(!ok){ const a=normOut(out.value).split("\n"), b=normOut(exps[0]).split("\n"); const k=b.findIndex((l,j)=>a[j]!==l); msg = k<0 ? "Izpis ima preveč vrstic." : `Razlika v ${k+1}. vrstici.`; }
     }
+    if(t.lv==="P"){ if(ok){ if(s.state!=="seen") s.state="ok"; save(); } show(ok, ok ? "Pravilno." : ("Ni še pravilno. "+msg).trim()); paint(); return; }
     if(!ok && t.type==="blanks" && t.b.every((_,k)=>!$(`#b-${t.id}-${k}`,el).value.trim())){ show(false,"Najprej vpiši odgovor."); return; }
     if(!ok && /^Razvrsti/.test(msg)){ show(false,msg); return; }
     save(); LavRac.answered(t.idx, ok, msg);
@@ -2483,7 +2722,7 @@ function wire(el,t){
   const drawHints = ()=>{ hintsEl.innerHTML = t.h.slice(0,hi).map((h,k)=>`<div class="hint"><b>NAMIG ${k+1}/${t.h.length}</b>${esc(h)}</div>`).join(""); const b=$(".js-hint",el); if(!b) return; b.disabled = hi>=t.h.length; b.textContent = hi>=t.h.length ? "Ni več namigov" : (hi? "Naslednji namig":"Namig"); };
   drawHints();
   const hintB = $(".js-hint",el);
-  if(hintB) hintB.addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h=hi; save(); LavRac.hinted(t.idx); drawHints(); }});
+  if(hintB) hintB.addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h=hi; save(); if(t.lv!=="P") LavRac.hinted(t.idx); drawHints(); }});
   const runB = $(".js-run",el);
   if(runB) runB.addEventListener("click",()=>{
     const outEl = $(".ra-out",el);
@@ -2492,7 +2731,7 @@ function wire(el,t){
     try {
       const r = RA.run(raEl.value);
       outEl.hidden = false;
-      outEl.innerHTML = `<div class="eyebrow">Rezultat tvojega izraza (${r.rows.length} ${vrstic(r.rows.length)})</div><div class="reswrap">` + relTable(r) + `</div>`;
+      outEl.innerHTML = `<div class="eyebrow">Rezultat tvojega izraza (${r.rows.length} ${vrstic(r.rows.length)})</div><div class="reswrap">` + relTable(r) + `</div>` + stepsHtml(raEl.value);
       fb.textContent = "Izraz je izračunan, rezultat pa še ni preverjen. Za točke pritisni Preveri."; fb.className = "feedback";
     } catch(e){ outEl.hidden = true; raEl.classList.add("wrong"); show(false,(e && e.message) ? e.message : "Izraza ni mogoče izračunati."); }
   });
@@ -2507,7 +2746,7 @@ function wire(el,t){
     else if(ans) html += `<div class="ans">${esc(ans)}</div>`;
     if(t.type==="ra"){
       const r = RA.run(t.sol);
-      html += `<div class="ans ra" style="font-weight:400">${esc(t.sol)}</div><div class="eyebrow">Rezultat (${r.rows.length} ${vrstic(r.rows.length)})</div><div class="reswrap">` + relTable(r) + `</div>`;
+      html += `<div class="ans ra" style="font-weight:400">${esc(t.sol)}</div><div class="eyebrow">Rezultat (${r.rows.length} ${vrstic(r.rows.length)})</div><div class="reswrap">` + relTable(r) + `</div>` + stepsHtml(t.sol);
     }
     if(t.jsolCode) html += `<div><div class="eyebrow">Primer v Javi</div><pre class="code">${hl(t.jsolCode)}</pre></div>`;
     if(t.type==="output") html += `<div><div class="eyebrow">Pravilen izpis</div><pre class="code">${esc(t.expected)}</pre></div>`;
@@ -2516,7 +2755,7 @@ function wire(el,t){
     solEl.innerHTML = html;
   }
   $(".js-sol",el).addEventListener("click",()=>{
-    if(solEl.hidden){ drawSol(); solEl.hidden=false; LavRac.solution(t.idx); $(".js-sol",el).textContent="Skrij rešitev"; }
+    if(solEl.hidden){ drawSol(); solEl.hidden=false; if(t.lv==="P"){ if(s.state!=="ok"){ s.state="seen"; save(); paint(); } } else LavRac.solution(t.idx); $(".js-sol",el).textContent="Skrij rešitev"; }
     else { solEl.hidden=true; $(".js-sol",el).textContent="Prikaži rešitev"; }
   });
 
@@ -2581,7 +2820,7 @@ document.querySelectorAll(".chip").forEach(c=>c.addEventListener("click",()=>{
 }));
 
 /* ---------- pages ---------- */
-const PAGES = [["uvod","Kaj je relacijska algebra"],["pojmi","Osnovni pojmi in baza"],["selekcija","Selekcija σ"],["projekcija","Projekcija π in ρ"],["mnozice","Unija, presek, razlika"],["stiki","Produkt in stika"],["kolicnik","Količnik ÷"],["prioriteta","Prioriteta in napake"],["sql","Od algebre do SQL"],["postopek","Postopek in igrišče"],["naloge-a","Naloge A · Pojmi in operacije"],["naloge-b","Naloge B · Branje izrazov"],["naloge-c","Naloge C · Šolska baza"],["naloge-d","Naloge D · Vaje (knjižnica)"],["naloge-e","Naloge E · Dodatne vaje"],["naloge-f","Naloge F · Težje naloge"],["doma","Za doma"]];
+const PAGES = [["uvod","Kaj je relacijska algebra"],["pojmi","Osnovni pojmi in baza"],["selekcija","Selekcija σ"],["projekcija","Projekcija π"],["preimenovanje","Preimenovanje ρ"],["unija","Unija ∪"],["presek","Presek ∩"],["razlika","Razlika −"],["produkt","Kartezični produkt ×"],["stik","Naravni stik ⋈"],["thetastik","Θ-stik ⋈[F]"],["kolicnik","Količnik ÷"],["prioriteta","Prioriteta in napake"],["sql","Od algebre do SQL"],["postopek","Postopek in igrišče"],["naloge-a","Naloge A · Pojmi in operacije"],["naloge-b","Naloge B · Branje izrazov"],["naloge-c","Naloge C · Šolska baza"],["naloge-d","Naloge D · Vaje (knjižnica)"],["naloge-e","Naloge E · Dodatne vaje"],["naloge-f","Naloge F · Težje naloge"],["doma","Za doma"]];
 const sel = $("#pageSel");
 sel.innerHTML = PAGES.map((p,k)=>`<option value="${p[0]}">${k+1}. ${esc(p[1])}</option>`).join("");
 sel.addEventListener("change",()=>{ location.hash = sel.value; });
@@ -2611,42 +2850,101 @@ function resetAsk(){ rw.innerHTML = `<span class="confirm">Res izbrišem vse odg
 resetIdle();
 
 /* ---------- start ---------- */
-const RAKEYS = ["σ","π","ρ","⋈","×","∪","∩","−","÷","∧","∨","¬","=","≠","<",">","≤","≥","[","]","(",")","'",","];
+const RAKEYS = ["σ","π","ρ","⋈","×","∪","∩","−","÷","∧","∨","¬","=","≠","<",">","≤","≥","[","]","(",")","'"];
 const RASYM = "σπρ⋈×∪∩−÷∧∨¬";
 const keyBtn = ch => `<button type="button" class="key${RASYM.includes(ch)?" sym":""}" data-ch="${ch}" tabindex="-1" aria-label="${ch}">${ch}</button>`;
 const vrstic = n => n % 100 === 1 ? "vrstico" : n % 100 === 2 ? "vrstici" : (n % 100 === 3 || n % 100 === 4) ? "vrstice" : "vrstic";
-function relTable(rel, cap, hl){
-  let h = "<table>";
+const TINT = { ID:{1:1,2:2,3:3,4:4,5:5}, PID:{M:1,R:2,F:3}, CID:{1:1,2:2,3:3,4:4,5:5,6:6,7:1} };
+const tintOf = (attr, v) => { const m = TINT[attr] || (TINT[attr] = {}); if(!(v in m)) m[v] = Object.keys(m).length % 6 + 1; return m[v]; };
+/* o: tabela vrstic za označbo ali {hl:[vrstice], hc:[stolpci], tint:"ID", name:"Dijak"} */
+function relTable(rel, cap, o){
+  if(Array.isArray(o)) o = { hl:o };
+  o = o || {};
+  const fl = a => String(a).toLowerCase();
+  const hc = (o.hc || []).map(fl), key = (o.name && RA.KEYS[o.name]) || {};
+  const pk = (key.pk || []).map(fl), fk = (key.fk || []).map(fl);
+  const tix = o.tint ? rel.attrs.findIndex(a => fl(a)===fl(o.tint)) : -1;
+  let h = '<table class="rel">';
   if(cap) h = `<div class="tcap">${esc(cap)}</div>` + h;
-  h += "<thead><tr>" + rel.attrs.map(a=>`<th>${esc(a)}</th>`).join("") + "</tr></thead><tbody>";
+  h += "<thead><tr>" + rel.attrs.map(a=>{
+    const c = [hc.includes(fl(a)) ? "hc" : "", pk.includes(fl(a)) ? "pk" : "", fk.includes(fl(a)) ? "fk" : ""].filter(Boolean).join(" ");
+    return `<th${c ? ` class="${c}"` : ""}>${esc(a)}</th>`;
+  }).join("") + "</tr></thead><tbody>";
   if(!rel.rows.length) h += `<tr><td colspan="${rel.attrs.length}" style="color:var(--muted);font-style:italic">prazna relacija (0 vrstic)</td></tr>`;
-  else h += rel.rows.map((r,i)=>"<tr" + (hl && hl.includes(i) ? ' class="hl"' : "") + ">" + r.map(v=>`<td${typeof v==="number"?' class="num"':''}>${esc(v)}</td>`).join("") + "</tr>").join("");
+  else h += rel.rows.map((r,i)=>{
+    const cl = [o.hl && o.hl.includes(i) ? "hl" : "", tix>=0 ? "t"+tintOf(rel.attrs[tix], r[tix]) : ""].filter(Boolean).join(" ");
+    return "<tr" + (cl ? ` class="${cl}"` : "") + ">" + r.map((v,k)=>`<td class="${[typeof v==="number" ? "num" : "", hc.includes(fl(rel.attrs[k])) ? "hc" : ""].filter(Boolean).join(" ")}">${esc(v)}</td>`).join("") + "</tr>";
+  }).join("");
   return h + "</tbody></table>";
 }
 function dbDetails(db){
   if(!db || !db.length) return "";
   const sh = db.map(n=>n + "(" + RA.BAZA[n].attrs.join(", ") + ")").join("  ·  ");
   return `<details class="dbx"><summary>Shema: ${esc(sh)} — klikni za podatke</summary><div class="two" style="margin-top:12px">` +
-    db.map(n=>`<div class="tbl">${relTable(RA.BAZA[n], n)}</div>`).join("") + `</div></details>`;
+    db.map(n=>`<div class="tbl">${relTable(RA.BAZA[n], n, { name:n })}</div>`).join("") + `</div></details>`;
 }
 function fillRels(){
+  const opts = e => ({
+    hl: e.dataset.hl ? e.dataset.hl.split(",").map(Number) : null,
+    hc: e.dataset.hc ? e.dataset.hc.split(",") : null,
+    tint: e.dataset.tint || null
+  });
   document.querySelectorAll("[data-rel]").forEach(e=>{
     const n = e.dataset.rel; let R = RA.BAZA[n];
-    const hl = e.dataset.hl ? e.dataset.hl.split(",").map(Number) : null;
+    const o = opts(e); o.name = n;
     if(e.dataset.cols){
       const cs = e.dataset.cols.split(","), ix = cs.map(c=>R.attrs.indexOf(c));
       R = { attrs: cs, rows: R.rows.map(r=>ix.map(i=>r[i])) };
+      o.name = null;
     }
-    e.innerHTML = relTable(R, e.dataset.cap || (n + "(" + R.attrs.join(", ") + ")"), hl);
+    e.innerHTML = relTable(R, e.dataset.cap || n, o);
   });
   document.querySelectorAll("[data-res]").forEach(e=>{
-    e.innerHTML = relTable(RA.run(e.dataset.res), e.dataset.cap || e.dataset.res);
+    e.innerHTML = relTable(RA.run(e.dataset.res), e.dataset.cap || "Rezultat", opts(e));
   });
 }
+const opize = s => s.replace(/[σπρ⋈×∪∩−÷∧∨¬]/g, m=>`<span class="op">${m}</span>`);
 function fillFormulas(){
   document.querySelectorAll(".formula").forEach(e=>{
     if(e.children.length) return;
-    e.innerHTML = esc(e.textContent).replace(/[σπρ⋈×∪∩−÷∧∨¬]/g, m=>`<span class="op">${m}</span>`);
+    e.innerHTML = opize(esc(e.textContent));
+  });
+}
+/* koraki izračuna: gnezden izraz od znotraj navzven, z vmesnimi tabelami */
+function stepsHtml(src){
+  let st; try { st = RA.steps(src); } catch(_){ return ""; }
+  if(st.length < 2) return "";
+  return `<details class="steps"><summary>Pokaži korake izračuna (${st.length})</summary><ol class="steplist">` +
+    st.map(x=>`<li><div class="sx ra">${opize(esc(x.expr))}</div><div class="tbl">${relTable(x.rel, x.rel.rows.length + " " + vrstic(x.rel.rows.length))}</div></li>`).join("") + `</ol></details>`;
+}
+function fillSteps(){
+  document.querySelectorAll("[data-steps]").forEach(e=>{ e.innerHTML = stepsHtml(e.dataset.steps); });
+}
+/* hitri preizkus: eno vprašanje, ne šteje k točkam */
+function fillQuiz(){
+  document.querySelectorAll("[data-quiz]").forEach(e=>{
+    let q; try { q = JSON.parse(e.dataset.quiz); } catch(_){ return; }
+    e.className = "quiz";
+    e.innerHTML = `<div class="eyebrow">Hitri preizkus</div><p class="qq">${esc(q.q)}</p><div class="qopts">` +
+      q.o.map((o,k)=>`<button type="button" class="qopt" data-k="${k}"><b>${"ABCD"[k]}</b><span>${esc(o)}</span></button>`).join("") +
+      `</div><div class="feedback" aria-live="polite"></div>`;
+    const fb = $(".feedback", e);
+    e.querySelectorAll(".qopt").forEach(b=>b.addEventListener("click",()=>{
+      if(e.dataset.done) return;
+      const ok = +b.dataset.k === q.a;
+      b.classList.add(ok ? "right" : "wrong");
+      fb.className = "feedback " + (ok ? "ok" : "bad");
+      fb.textContent = ok ? "Pravilno. " + q.why : "Ni še. Poskusi znova.";
+      if(ok){ e.dataset.done = "1"; e.querySelectorAll(".qopt").forEach(x=>{ x.disabled = true; }); }
+    }));
+  });
+}
+/* naloge »Poskusi sam« na straneh razlage (ne štejejo k točkam) */
+function fillTry(){
+  document.querySelectorAll("[data-try]").forEach(e=>{
+    const t = TRY.find(x=>x.key===e.dataset.try); if(!t) return;
+    t.id = "try-" + t.key;
+    e.replaceWith(card(t));
   });
 }
 function fillPlay(){
@@ -2667,7 +2965,7 @@ function fillPlay(){
       try {
         const r = RA.run(ta.value);
         out.hidden = false;
-        out.innerHTML = `<div class="eyebrow">${r.rows.length} ${vrstic(r.rows.length)}</div><div class="reswrap">` + relTable(r) + `</div>`;
+        out.innerHTML = `<div class="eyebrow">${r.rows.length} ${vrstic(r.rows.length)}</div><div class="reswrap">` + relTable(r) + `</div>` + stepsHtml(ta.value);
       } catch(err){ out.hidden = true; fb.textContent = err.message || "Izraza ni mogoče izračunati."; fb.className = "feedback bad"; }
     };
     $(".js-run", e).addEventListener("click", run);
@@ -2681,7 +2979,7 @@ function fillPlay(){
     if(e.dataset.open) { /* odprto igrišče na strani Postopek */ }
   });
 }
-fillRels(); fillPlay(); fillFormulas();
+fillRels(); fillPlay(); fillFormulas(); fillSteps(); fillQuiz(); fillTry();
 renderAll();
 {
   const title = id => (PAGES.find(p=>p[0]===id) || [id, id])[1];
@@ -2696,7 +2994,7 @@ renderAll();
     hero: document.querySelector("#hero .magic"),
     source: [...document.querySelectorAll("footer > span:not(#resetWrap)")].map(e=>e.textContent.trim()).join(" "),
     vajeNote: document.querySelector("#naloge .prose").innerHTML,
-    groups: [{"id":"g-baza","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><rect x=\"6\" y=\"8\" width=\"36\" height=\"32\" rx=\"3\"/><path d=\"M6 18h36M6 28h36M18 8v32\"/><rect x=\"6\" y=\"8\" width=\"36\" height=\"10\" rx=\"3\" class=\"fill\" opacity=\".35\"/></svg>","title":"Pojmi in baza","pages":["uvod","pojmi"]},{"id":"g-oper","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><path d=\"M6 8h36L28 26v13l-8-4V26z\"/><path d=\"M6 8h36l-5 6H11z\" class=\"fill\" opacity=\".35\"/></svg>","title":"Osnovne operacije","pages":["selekcija","projekcija","mnozice"]},{"id":"g-stik","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><circle cx=\"18\" cy=\"24\" r=\"12\"/><circle cx=\"30\" cy=\"24\" r=\"12\"/><path d=\"M24 13.6A12 12 0 0 0 24 34.4A12 12 0 0 0 24 13.6z\" class=\"fill\" opacity=\".35\"/></svg>","title":"Stiki in količnik","pages":["stiki","kolicnik"]},{"id":"g-izraz","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><path d=\"M17 8H9v32h8M31 8h8v32h-8\"/><circle cx=\"24\" cy=\"24\" r=\"3.5\" class=\"fill\" opacity=\".35\"/></svg>","title":"Izrazi v praksi","pages":["prioriteta","sql","postopek"]}].map(g=>({ ...g, pages: g.pages.map(id=>({ id, title: title(id), el: document.getElementById(id) })) })),
+    groups: [{"id":"g-baza","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><rect x=\"6\" y=\"8\" width=\"36\" height=\"32\" rx=\"3\"/><path d=\"M6 18h36M6 28h36M18 8v32\"/><rect x=\"6\" y=\"8\" width=\"36\" height=\"10\" rx=\"3\" class=\"fill\" opacity=\".35\"/></svg>","title":"Pojmi in baza","pages":["uvod","pojmi"]},{"id":"g-oper","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><path d=\"M6 8h36L28 26v13l-8-4V26z\"/><path d=\"M6 8h36l-5 6H11z\" class=\"fill\" opacity=\".35\"/></svg>","title":"Osnovne operacije","pages":["selekcija","projekcija","preimenovanje","unija","presek","razlika","produkt"]},{"id":"g-stik","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><circle cx=\"18\" cy=\"24\" r=\"12\"/><circle cx=\"30\" cy=\"24\" r=\"12\"/><path d=\"M24 13.6A12 12 0 0 0 24 34.4A12 12 0 0 0 24 13.6z\" class=\"fill\" opacity=\".35\"/></svg>","title":"Stiki in količnik","pages":["stik","thetastik","kolicnik"]},{"id":"g-izraz","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><path d=\"M17 8H9v32h8M31 8h8v32h-8\"/><circle cx=\"24\" cy=\"24\" r=\"3.5\" class=\"fill\" opacity=\".35\"/></svg>","title":"Izrazi v praksi","pages":["prioriteta","sql","postopek"]}].map(g=>({ ...g, pages: g.pages.map(id=>({ id, title: title(id), el: document.getElementById(id) })) })),
     sets,
     extra: { id: "doma", title: "Za doma", note: home.querySelector(":scope > .prose").textContent.trim().replace(/^Najprej .*?, nato praktične vaje/, "Vaje"), el: home },
     sel: { head: ".thead", num: ".tnum", tags: ".tags", q: ".q", check: ".js-check", hint: ".js-hint", sol: ".js-sol", fb: ".feedback", actions: ":scope > .actions", extra: ".js-run" },

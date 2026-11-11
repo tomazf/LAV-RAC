@@ -1465,6 +1465,37 @@ test('4.1: relational algebra: four theory groups, the revision set is last, an 
   await play.locator('textarea').fill("π[Razred](Dijak)");
   await play.locator('.js-run').click();
   assert.match((await play.locator('.ra-out').innerText()).replace(/\s+/g, ' '), /2 vrstici.*4A.*4B/i);
+  // a page for every operation (artifact of 11. 11. 2026, evening); the groups keep them in the artifact's order
+  const rail = await a.locator('.lr-rail').evaluate((nav) => {
+    const out = [];
+    for (const el of nav.children) {
+      if (el.classList.contains('lr-vaje')) break;
+      if (el.classList.contains('lr-grp')) out.push([el.querySelector('b').textContent, []]);
+      else if (el.classList.contains('lr-pg')) out[out.length - 1][1].push(el.dataset.page);
+    }
+    return out;
+  });
+  assert.deepEqual(rail, [['Pojmi in baza', ['uvod', 'pojmi']], ['Osnovne operacije', ['selekcija', 'projekcija', 'preimenovanje', 'unija', 'presek', 'razlika', 'produkt']], ['Stiki in količnik', ['stik', 'thetastik', 'kolicnik']], ['Izrazi v praksi', ['prioriteta', 'sql', 'postopek']]]);
+  // the quick quiz at the end of a page: a wrong answer can be tried again, the right one closes it
+  await go(a, 'selekcija');
+  const quiz = a.locator('.page.on .quiz');
+  await quiz.locator('.qopt').nth(0).click();
+  assert.match(await quiz.locator('.feedback').innerText(), /^Ni še/);
+  await quiz.locator('.qopt').nth(2).click();
+  assert.match(await quiz.locator('.feedback').innerText(), /^Pravilno/);
+  assert.ok(await quiz.locator('.qopt').first().isDisabled());
+  // "Poskusi sam" on the Postopek page: three tasks without points that stay in the page and tell the server nothing
+  await go(a, 'postopek');
+  const tries = a.locator('.page.on article.task');
+  assert.equal(await tries.count(), 3);
+  const before = await a.textContent('#lrPtxt');
+  await tries.first().locator('.js-hint').click();
+  assert.equal(await tries.first().locator('.hint').count(), 1);
+  await tries.first().locator('textarea.expr').fill("π[Ime,Priimek](σ[Razred='4B'](Dijak))");
+  await tries.first().locator('.js-check').click();
+  assert.equal((await tries.first().locator('.feedback').innerText()).trim(), 'Pravilno.');
+  assert.equal(await tries.first().locator('.js-st').innerText(), 'Rešeno');
+  assert.equal(await a.textContent('#lrPtxt'), before);
   // C3 asks for the names of the students from Ljubljana
   await go(a, 'naloge-c/3');
   assert.match(await card(a).locator('.qtext, .q').first().textContent(), /živijo v Ljubljani/);

@@ -5794,17 +5794,42 @@
     {
      "id": "projekcija",
      "chapter": "Teorija",
-     "label": "Projekcija π in ρ"
+     "label": "Projekcija π"
     },
     {
-     "id": "mnozice",
+     "id": "preimenovanje",
      "chapter": "Teorija",
-     "label": "Unija, presek, razlika"
+     "label": "Preimenovanje ρ"
     },
     {
-     "id": "stiki",
+     "id": "unija",
      "chapter": "Teorija",
-     "label": "Produkt in stika"
+     "label": "Unija ∪"
+    },
+    {
+     "id": "presek",
+     "chapter": "Teorija",
+     "label": "Presek ∩"
+    },
+    {
+     "id": "razlika",
+     "chapter": "Teorija",
+     "label": "Razlika −"
+    },
+    {
+     "id": "produkt",
+     "chapter": "Teorija",
+     "label": "Kartezični produkt ×"
+    },
+    {
+     "id": "stik",
+     "chapter": "Teorija",
+     "label": "Naravni stik ⋈"
+    },
+    {
+     "id": "thetastik",
+     "chapter": "Teorija",
+     "label": "Θ-stik ⋈[F]"
     },
     {
      "id": "kolicnik",
@@ -5872,8 +5897,13 @@
     "pojmi",
     "selekcija",
     "projekcija",
-    "mnozice",
-    "stiki",
+    "preimenovanje",
+    "unija",
+    "presek",
+    "razlika",
+    "produkt",
+    "stik",
+    "thetastik",
     "kolicnik",
     "prioriteta",
     "sql",

@@ -9,16 +9,17 @@ const ICONS = {
   stik: '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="18" cy="24" r="12"/><circle cx="30" cy="24" r="12"/><path d="M24 13.6A12 12 0 0 0 24 34.4A12 12 0 0 0 24 13.6z" class="fill" opacity=".35"/></svg>',
   izraz: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17 8H9v32h8M31 8h8v32h-8"/><circle cx="24" cy="24" r="3.5" class="fill" opacity=".35"/></svg>',
 };
-// Theory groups (proposed 11. 11. 2026, to be confirmed by the teacher): pages in the artifact's own order.
+// Theory groups (proposed 11. 11. 2026, to be confirmed by the teacher): pages in the artifact's own order. Since the artifact has a page
+// per operation (11. 11. 2026, evening), the set operations and the product join the basic operations, and both joins the quotient.
 const GROUPS = [
   { id: 'g-baza', icon: 'baza', title: 'Pojmi in baza', pages: ['uvod', 'pojmi'] },
-  { id: 'g-oper', icon: 'oper', title: 'Osnovne operacije', pages: ['selekcija', 'projekcija', 'mnozice'] },
-  { id: 'g-stik', icon: 'stik', title: 'Stiki in količnik', pages: ['stiki', 'kolicnik'] },
+  { id: 'g-oper', icon: 'oper', title: 'Osnovne operacije', pages: ['selekcija', 'projekcija', 'preimenovanje', 'unija', 'presek', 'razlika', 'produkt'] },
+  { id: 'g-stik', icon: 'stik', title: 'Stiki in količnik', pages: ['stik', 'thetastik', 'kolicnik'] },
   { id: 'g-izraz', icon: 'izraz', title: 'Izrazi v praksi', pages: ['prioriteta', 'sql', 'postopek'] },
 ];
 const TITLE = 'Relacijska algebra';
 const KICKER = 'LAV-RAČ4 · 1. poglavje';
-const ZAGON = `fillRels(); fillPlay(); fillFormulas();
+const ZAGON = `fillRels(); fillPlay(); fillFormulas(); fillSteps(); fillQuiz(); fillTry();
 renderAll();
 {
   const title = id => (PAGES.find(p=>p[0]===id) || [id, id])[1];
@@ -79,20 +80,23 @@ S = LavRac.loadUi();`],
     // One answer per task. Something missing (an empty field, an expression that cannot be read) is not an answer
     // yet; anything else locks the task.
     [`    if(ok){ if(s.state!=="seen") s.state="ok"; save(); }
-    show(ok, ok ? (s.state==="seen" ? "Pravilno. Točke se ne štejejo, ker si si ogledal rešitev." : \`Pravilno. +\${ptsLabel(t.pts)}\`) : ("Ni še pravilno. "+msg).trim());
+    show(ok, ok ? (s.state==="seen" ? "Pravilno. Točke se ne štejejo, ker si si ogledal rešitev." : (t.pts ? \`Pravilno. +\${ptsLabel(t.pts)}\` : "Pravilno.")) : ("Ni še pravilno. "+msg).trim());
     paint(); progress();`,
-    `    if(!ok && t.type==="blanks" && t.b.every((_,k)=>!$(\`#b-\${t.id}-\${k}\`,el).value.trim())){ show(false,"Najprej vpiši odgovor."); return; }
+    // The three practice tasks on the Postopek page (lv "P", no points, "Poskusi sam") stay in the page: state in the portal's local
+    // storage, nothing sent to the server. Every other task goes through the shell.
+    `    if(t.lv==="P"){ if(ok){ if(s.state!=="seen") s.state="ok"; save(); } show(ok, ok ? "Pravilno." : ("Ni še pravilno. "+msg).trim()); paint(); return; }
+    if(!ok && t.type==="blanks" && t.b.every((_,k)=>!$(\`#b-\${t.id}-\${k}\`,el).value.trim())){ show(false,"Najprej vpiši odgovor."); return; }
     if(!ok && /^Razvrsti/.test(msg)){ show(false,msg); return; }
     save(); LavRac.answered(t.idx, ok, msg);`],
     ['if(hintB) hintB.addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h=hi; save(); drawHints(); }});',
-      'if(hintB) hintB.addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h=hi; save(); LavRac.hinted(t.idx); drawHints(); }});'],
+      'if(hintB) hintB.addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h=hi; save(); if(t.lv!=="P") LavRac.hinted(t.idx); drawHints(); }});'],
     ['if(solEl.hidden){ drawSol(); solEl.hidden=false; if(s.state!=="ok"){ s.state="seen"; save(); paint(); progress(); }',
-      'if(solEl.hidden){ drawSol(); solEl.hidden=false; LavRac.solution(t.idx);'],
+      'if(solEl.hidden){ drawSol(); solEl.hidden=false; if(t.lv==="P"){ if(s.state!=="ok"){ s.state="seen"; save(); paint(); } } else LavRac.solution(t.idx);'],
     // The shell does the paging.
     ['applyFilter(); showPage(cur, true);\n}', 'applyFilter();\n}'],
     ['window.addEventListener("hashchange",()=>showPage(location.hash.slice(1)));', ''],
     ['cur = location.hash.slice(1) || "uvod";\n', ''],
     // Start.
-    ['fillRels(); fillPlay(); fillFormulas();\nrenderAll();\nprogress();\nif(location.hash) setTimeout(()=>window.scrollTo(0,0), 0);', ZAGON],
+    ['fillRels(); fillPlay(); fillFormulas(); fillSteps(); fillQuiz(); fillTry();\n\nrenderAll();\nprogress();\nif(location.hash) setTimeout(()=>window.scrollTo(0,0), 0);', ZAGON],
   ],
 };
