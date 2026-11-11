@@ -69,6 +69,13 @@
       "artifactTitle": "Pogojni stavki v Javi",
       "version": 2,
       "no": "5"
+    },
+    {
+      "id": "4.1",
+      "artifact": "https://claude.ai/artifact/1kdR1famDRKf2eJ8NBDwdp",
+      "artifactTitle": "Relacijska algebra",
+      "version": 1,
+      "no": "1"
     }
   ],
   "planned": [

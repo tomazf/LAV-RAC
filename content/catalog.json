@@ -7,6 +7,10 @@
   {
    "id": "LAV-RAČ3",
    "title": "3. letnik"
+  },
+  {
+   "id": "LAV-RAČ4",
+   "title": "4. letnik"
   }
  ],
  "exercises": [
@@ -5129,6 +5133,751 @@
     "veriga",
     "switch",
     "napake"
+   ]
+  },
+  {
+   "id": "4.1",
+   "no": "1",
+   "module": "LAV-RAČ4",
+   "title": "Relacijska algebra",
+   "fullTitle": "Relacijska algebra",
+   "key": "scnm_lavrac_4_1_v1",
+   "version": 1,
+   "format": "short",
+   "maxPoints": 158,
+   "tasks": [
+    {
+     "i": 0,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pojmi in operacije",
+     "q": "Katera operacija relacijske algebre se uporablja za filtriranje podatkov (določanje pogojev, ki jim morajo ustrezati podatki)?"
+    },
+    {
+     "i": 1,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pojmi in operacije",
+     "q": "S katero operacijo iz relacije obdržimo samo nekatere stolpce (atribute)?"
+    },
+    {
+     "i": 2,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pojmi in operacije",
+     "q": "Razvrsti opise k operacijam relacijske algebre."
+    },
+    {
+     "i": 3,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pojmi in operacije",
+     "q": "Kaj je rezultat vsake operacije relacijske algebre?"
+    },
+    {
+     "i": 4,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pojmi in operacije",
+     "q": "Za katere operacije morata imeti obe relaciji enako shemo (enake atribute)? Izberi vse pravilne odgovore."
+    },
+    {
+     "i": 5,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pojmi in operacije",
+     "q": "Razvrsti pojme relacijskega modela k opisom. (Primer: v relaciji Dijak(ID, Ime, Priimek, Razred, Kraj) je ID ključ.)"
+    },
+    {
+     "i": 6,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pojmi in operacije",
+     "q": "Zakaj v relaciji ni dveh enakih vrstic?"
+    },
+    {
+     "i": 7,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pojmi in operacije",
+     "q": "Razvrsti operacije: osnovnih pet ali izpeljane (izraziti jih je mogoče z osnovnimi)?"
+    },
+    {
+     "i": 8,
+     "level": "lažja",
+     "max": 1,
+     "section": "Branje izrazov",
+     "q": "Koliko vrstic vrne izraz σ[Razred='4B'](Dijak)?"
+    },
+    {
+     "i": 9,
+     "level": "srednja",
+     "max": 2,
+     "section": "Branje izrazov",
+     "q": "Kaj vrne izraz π[Kraj](Dijak)?"
+    },
+    {
+     "i": 10,
+     "level": "srednja",
+     "max": 2,
+     "section": "Branje izrazov",
+     "q": "Relacija Dijak ima 5 vrstic in 5 stolpcev, Predmet pa 3 vrstice in 3 stolpce. Koliko vrstic in koliko stolpcev ima Dijak × Predmet?"
+    },
+    {
+     "i": 11,
+     "level": "srednja",
+     "max": 2,
+     "section": "Branje izrazov",
+     "q": "Krožka obiskujejo: Robotika = {Ana, Luka, Jan}, Sah = {Luka, Eva, Jan}. Koliko vrstic imajo rezultati?"
+    },
+    {
+     "i": 12,
+     "level": "srednja",
+     "max": 2,
+     "section": "Branje izrazov",
+     "q": "Izraz Dijak ⋈ Ocena poveže relaciji po skupnem atributu. Po katerem atributu ju poveže in koliko vrstic ima rezultat?"
+    },
+    {
+     "i": 13,
+     "level": "srednja",
+     "max": 2,
+     "section": "Branje izrazov",
+     "q": "Katere vrednosti vrne izraz π[Naziv](σ[Ure≥3](Predmet))? Naštej jih, ločene z vejico."
+    },
+    {
+     "i": 14,
+     "level": "srednja",
+     "max": 2,
+     "section": "Branje izrazov",
+     "q": "Dijak ⋈ Robotika (skupna atributa ID in Ime). Koliko vrstic ima rezultat in kaj se zgodi z dijaki, ki krožka ne obiskujejo?"
+    },
+    {
+     "i": 15,
+     "level": "srednja",
+     "max": 2,
+     "section": "Branje izrazov",
+     "q": "Kateri izraz je enakovreden izrazu σ[Razred='4B'](σ[Kraj='Ljubljana'](Dijak))?"
+    },
+    {
+     "i": 16,
+     "level": "srednja",
+     "max": 2,
+     "section": "Branje izrazov",
+     "q": "Relaciji p in r imata enako shemo; p ima 4 terke, r pa 3. Najmanj in največ koliko terk ima lahko p ∪ r?"
+    },
+    {
+     "i": 17,
+     "level": "srednja",
+     "max": 2,
+     "section": "Branje izrazov",
+     "q": "Isti relaciji: p ima 4 terke, r pa 3. Koliko terk ima natanko p × r in največ koliko p ∩ r?"
+    },
+    {
+     "i": 18,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pisanje izrazov · šolska baza",
+     "q": "Izpiši vse podatke o dijakih iz razreda 4B."
+    },
+    {
+     "i": 19,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pisanje izrazov · šolska baza",
+     "q": "Izpiši nazive predmetov, ki imajo vsaj 3 ure."
+    },
+    {
+     "i": 20,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje izrazov · šolska baza",
+     "q": "Izpiši imena in priimke dijakov, ki živijo v Ljubljani."
+    },
+    {
+     "i": 21,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje izrazov · šolska baza",
+     "q": "Izpiši imena in priimke dijakov iz razreda 4B, ki živijo v Ljubljani."
+    },
+    {
+     "i": 22,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje izrazov · šolska baza",
+     "q": "Izpiši ID dijakov in nazive predmetov, pri katerih so dobili oceno 5."
+    },
+    {
+     "i": 23,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje izrazov · šolska baza",
+     "q": "Izpiši imena dijakov, ki so pri računalništvu dobili oceno 5."
+    },
+    {
+     "i": 24,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje izrazov · šolska baza",
+     "q": "Izpiši ID dijakov, ki imajo oceno iz matematike (PID 'M') IN oceno iz računalništva (PID 'R')."
+    },
+    {
+     "i": 25,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje izrazov · šolska baza",
+     "q": "Izpiši ID dijakov, ki NIMAJO nobene ocene iz matematike (PID 'M')."
+    },
+    {
+     "i": 26,
+     "level": "težja",
+     "max": 3,
+     "section": "Pisanje izrazov · šolska baza",
+     "q": "Izpiši nazive predmetov, pri katerih nihče ni dobil ocene, nižje od 4."
+    },
+    {
+     "i": 27,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje izrazov · šolska baza",
+     "q": "Krožka vodita seznama Robotika(ID, Ime) in Sah(ID, Ime). Izpiši imena dijakov, ki obiskujejo oba krožka."
+    },
+    {
+     "i": 28,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje izrazov · šolska baza",
+     "q": "Izpiši profesorje, ki učijo Evo (predmete, pri katerih ima Eva oceno, uči ta profesor)."
+    },
+    {
+     "i": 29,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje izrazov · šolska baza",
+     "q": "Dana je relacija Vaja(VajaID, Ime, Opis, Tocke). Zgornji stavek SQL zapiši kot izraz relacijske algebre."
+    },
+    {
+     "i": 30,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vaje · knjižnica",
+     "q": "Katera operacija iz relacije izbere **vrstice**, ki izpolnjujejo pogoj?"
+    },
+    {
+     "i": 31,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vaje · knjižnica",
+     "q": "Katera operacija iz relacije izbere **stolpce**?"
+    },
+    {
+     "i": 32,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vaje · knjižnica",
+     "q": "Projekcija lahko vrne **manj vrstic**, kot jih ima vhodna relacija."
+    },
+    {
+     "i": 33,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vaje · knjižnica",
+     "q": "Selekcija lahko spremeni **število stolpcev** relacije."
+    },
+    {
+     "i": 34,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vaje · knjižnica",
+     "q": "Koliko vrstic ima rezultat izraza `Clan × Knjiga`?"
+    },
+    {
+     "i": 35,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vaje · knjižnica",
+     "q": "Koliko vrstic ima rezultat izraza `π[Kraj](Clan)`?"
+    },
+    {
+     "i": 36,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vaje · knjižnica",
+     "q": "Unijo, presek in razliko lahko naredimo le nad relacijama, ki imata **enake atribute**."
+    },
+    {
+     "i": 37,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vaje · knjižnica",
+     "q": "Za poljubni relaciji R in S velja `R − S = S − R`."
+    },
+    {
+     "i": 38,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vaje · knjižnica",
+     "q": "Po katerem atributu se poveže `Clan ⋈ Izposoja`?"
+    },
+    {
+     "i": 39,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vaje · knjižnica",
+     "q": "Kateri izraz **ni** veljaven?"
+    },
+    {
+     "i": 40,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vaje · knjižnica",
+     "q": "Kateri SQL stavek ustreza izrazu `π[Naslov](σ[Leto<1900](Knjiga))`?"
+    },
+    {
+     "i": 41,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vaje · knjižnica",
+     "q": "Naravni stik dveh relacij, ki **nimata skupnih atributov**, je enak njunemu kartezičnemu produktu."
+    },
+    {
+     "i": 42,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vaje · knjižnica",
+     "q": "Vsi podatki o članih, ki živijo v **Mariboru**."
+    },
+    {
+     "i": 43,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vaje · knjižnica",
+     "q": "Naslovi vseh knjig."
+    },
+    {
+     "i": 44,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vaje · knjižnica",
+     "q": "Ime in priimek članov, ki so **starejši od 16** let."
+    },
+    {
+     "i": 45,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vaje · knjižnica",
+     "q": "Naslov in avtor knjig, izdanih **po letu 1950**."
+    },
+    {
+     "i": 46,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vaje · knjižnica",
+     "q": "Vsi podatki o knjigah žanra **fantazija**, izdanih **pred letom 1990**."
+    },
+    {
+     "i": 47,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vaje · knjižnica",
+     "q": "Imena članov, ki živijo v **Ljubljani ali Celju**."
+    },
+    {
+     "i": 48,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vaje · knjižnica",
+     "q": "CID članov, ki so si izposodili knjigo **K3**."
+    },
+    {
+     "i": 49,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vaje · knjižnica",
+     "q": "Naslovi knjig, ki so bile izposojene v **septembru** (Mesec = 9)."
+    },
+    {
+     "i": 50,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vaje · knjižnica",
+     "q": "Imena članov, ki so si izposodili knjigo **Hobit**."
+    },
+    {
+     "i": 51,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vaje · knjižnica",
+     "q": "Imena članov **iz Ljubljane**, ki so si izposodili knjigo žanra **fantazija**."
+    },
+    {
+     "i": 52,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vaje · knjižnica",
+     "q": "CID in Ime članov, ki obiskujejo **vsaj enega** od krožkov (debata, gledališče)."
+    },
+    {
+     "i": 53,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vaje · knjižnica",
+     "q": "CID in Ime članov, ki obiskujejo **oba** krožka."
+    },
+    {
+     "i": 54,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vaje · knjižnica",
+     "q": "CID članov, ki si **niso izposodili nobene** knjige."
+    },
+    {
+     "i": 55,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vaje · knjižnica",
+     "q": "Naslovi knjig, ki si jih **ni izposodil nihče**."
+    },
+    {
+     "i": 56,
+     "level": "težja",
+     "max": 3,
+     "section": "Vaje · knjižnica",
+     "q": "Naslovi knjig, ki sta si jih izposodili **tako Maja (CID 1) kot Zala (CID 3)**."
+    },
+    {
+     "i": 57,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vaje · knjižnica",
+     "q": "Kaj vrne izraz `π[Avtor](σ[Zanr='fantazija'](Knjiga))`?"
+    },
+    {
+     "i": 58,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vaje · knjižnica",
+     "q": "Koliko vrstic ima rezultat `Clan ⋈ Izposoja`?"
+    },
+    {
+     "i": 59,
+     "level": "težja",
+     "max": 3,
+     "section": "Vaje · knjižnica",
+     "q": "**Izziv:** imena članov, ki so si knjigo izposodili v **oktobru** (10), v **septembru** (9) pa nobene."
+    },
+    {
+     "i": 60,
+     "level": "lažja",
+     "max": 1,
+     "section": "Dodatne vaje · knjižnica",
+     "q": "Vsi podatki o članih, ki so **mlajši od 17** let."
+    },
+    {
+     "i": 61,
+     "level": "srednja",
+     "max": 2,
+     "section": "Dodatne vaje · knjižnica",
+     "q": "Avtorji knjig žanra **mladinski**."
+    },
+    {
+     "i": 62,
+     "level": "srednja",
+     "max": 2,
+     "section": "Dodatne vaje · knjižnica",
+     "q": "Ime, priimek in kraj članov, ki **ne živijo v Ljubljani**."
+    },
+    {
+     "i": 63,
+     "level": "srednja",
+     "max": 2,
+     "section": "Dodatne vaje · knjižnica",
+     "q": "KID knjig, ki so bile izposojene v **oktobru** (Mesec = 10)."
+    },
+    {
+     "i": 64,
+     "level": "lažja",
+     "max": 1,
+     "section": "Dodatne vaje · knjižnica",
+     "q": "Koliko vrstic ima rezultat `Debata ∪ Gledalisce`?"
+    },
+    {
+     "i": 65,
+     "level": "srednja",
+     "max": 2,
+     "section": "Dodatne vaje · knjižnica",
+     "q": "Naslovi knjig, ki si jih je izposodil **Tim**."
+    },
+    {
+     "i": 66,
+     "level": "srednja",
+     "max": 2,
+     "section": "Dodatne vaje · knjižnica",
+     "q": "Ime in kraj članov, ki so si izposodili knjigo, izdano **pred letom 1920**."
+    },
+    {
+     "i": 67,
+     "level": "srednja",
+     "max": 2,
+     "section": "Dodatne vaje · knjižnica",
+     "q": "Žanri knjig, ki so bile izposojene v **septembru** (Mesec = 9)."
+    },
+    {
+     "i": 68,
+     "level": "lažja",
+     "max": 1,
+     "section": "Dodatne vaje · knjižnica",
+     "q": "Izraz `σ[A](σ[B](R))` vrne enak rezultat kot `σ[A ∧ B](R)`."
+    },
+    {
+     "i": 69,
+     "level": "srednja",
+     "max": 2,
+     "section": "Dodatne vaje · knjižnica",
+     "q": "Imena članov, ki obiskujejo **gledališki** krožek, **debatnega pa ne**."
+    },
+    {
+     "i": 70,
+     "level": "težja",
+     "max": 3,
+     "section": "Dodatne vaje · knjižnica",
+     "q": "Ime in priimek članov, ki obiskujejo **gledališki** krožek in so si izposodili **vsaj eno** knjigo."
+    },
+    {
+     "i": 71,
+     "level": "lažja",
+     "max": 1,
+     "section": "Dodatne vaje · knjižnica",
+     "q": "Kateri izraz vrne imena članov, ki si **niso izposodili nobene** knjige?"
+    },
+    {
+     "i": 72,
+     "level": "srednja",
+     "max": 2,
+     "section": "Dodatne vaje · knjižnica",
+     "q": "Naslovi knjig, ki si jih je izposodil kdo **iz Maribora**."
+    },
+    {
+     "i": 73,
+     "level": "lažja",
+     "max": 1,
+     "section": "Dodatne vaje · knjižnica",
+     "q": "Izraz `π[Ime](Clan ⋈ Izposoja)` vrne imena **vseh 7** članov."
+    },
+    {
+     "i": 74,
+     "level": "težja",
+     "max": 3,
+     "section": "Dodatne vaje · knjižnica",
+     "q": "**Izziv:** naslovi knjig, ki si jih **ni izposodil nihče iz Maribora**."
+    },
+    {
+     "i": 75,
+     "level": "srednja",
+     "max": 2,
+     "section": "Težje naloge",
+     "q": "Presek je izpeljana operacija. Kateri izraz je enakovreden izrazu p ∩ r?"
+    },
+    {
+     "i": 76,
+     "level": "srednja",
+     "max": 2,
+     "section": "Težje naloge",
+     "q": "Trgovina ima relaciji Ponudba(Izdelek, Cena) in Kupec(Kupec, Proracun). Izpiši vse pare izdelek–kupec, pri katerih si kupec izdelek lahko privošči (Cena ≤ Prora"
+    },
+    {
+     "i": 77,
+     "level": "težja",
+     "max": 3,
+     "section": "Težje naloge",
+     "q": "Izpiši imena članov, ki so si izposodili VSE fantazijske knjige. Uporabi količnik."
+    },
+    {
+     "i": 78,
+     "level": "težja",
+     "max": 3,
+     "section": "Težje naloge",
+     "q": "Izpiši imena članov, ki so si izposodili kakšno knjigo septembra (Mesec 9) IN kakšno oktobra (Mesec 10)."
+    },
+    {
+     "i": 79,
+     "level": "srednja",
+     "max": 2,
+     "section": "Težje naloge",
+     "q": "Izpiši naslove knjig, ki sta si jih izposodila član 1 ALI član 4. Uporabi unijo."
+    },
+    {
+     "i": 80,
+     "level": "lažja",
+     "max": 1,
+     "section": "Težje naloge",
+     "q": "Kakšna je shema rezultata količnika p ÷ r, če je Sh(p) = P in Sh(r) = R (R ⊂ P)?"
+    },
+    {
+     "i": 81,
+     "level": "težja",
+     "max": 3,
+     "section": "Ponavljanje",
+     "q": "Izpiši imena dijakov, ki imajo oceno pri vseh predmetih, pri katerih ima oceno Ana. Uporabi količnik."
+    },
+    {
+     "i": 82,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Izpiši imena dijakov, ki nimajo nobene petice."
+    },
+    {
+     "i": 83,
+     "level": "težja",
+     "max": 3,
+     "section": "Ponavljanje",
+     "q": "Izpiši kraje, iz katerih prihajata vsaj dva dijaka. Namig: potreboval boš ρ (preimenovanje) in kartezični produkt."
+    },
+    {
+     "i": 84,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Izpiši imena članov, ki so si izposodili kakšno knjigo, izdano pred letom 1940."
+    },
+    {
+     "i": 85,
+     "level": "težja",
+     "max": 3,
+     "section": "Ponavljanje",
+     "q": "Zgornji stavek SQL zapiši kot izraz relacijske algebre."
+    },
+    {
+     "i": 86,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Izpiši imena članov, ki so si izposodili vsaj eno Tolkienovo ali Rowlingovo knjigo."
+    },
+    {
+     "i": 87,
+     "level": "težja",
+     "max": 3,
+     "section": "Ponavljanje",
+     "q": "Izpiši imena članov, ki so si izposodili knjigo K1 IN knjigo K3."
+    },
+    {
+     "i": 88,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Izpiši avtorje (brez ponavljanja), katerih knjige si je izposodil Rok."
+    }
+   ],
+   "pages": [
+    {
+     "id": "pregled",
+     "chapter": "Teorija",
+     "label": "Pregled"
+    },
+    {
+     "id": "uvod",
+     "chapter": "Teorija",
+     "label": "Kaj je relacijska algebra"
+    },
+    {
+     "id": "pojmi",
+     "chapter": "Teorija",
+     "label": "Osnovni pojmi in baza"
+    },
+    {
+     "id": "selekcija",
+     "chapter": "Teorija",
+     "label": "Selekcija σ"
+    },
+    {
+     "id": "projekcija",
+     "chapter": "Teorija",
+     "label": "Projekcija π in ρ"
+    },
+    {
+     "id": "mnozice",
+     "chapter": "Teorija",
+     "label": "Unija, presek, razlika"
+    },
+    {
+     "id": "stiki",
+     "chapter": "Teorija",
+     "label": "Produkt in stika"
+    },
+    {
+     "id": "kolicnik",
+     "chapter": "Teorija",
+     "label": "Količnik ÷"
+    },
+    {
+     "id": "prioriteta",
+     "chapter": "Teorija",
+     "label": "Prioriteta in napake"
+    },
+    {
+     "id": "sql",
+     "chapter": "Teorija",
+     "label": "Od algebre do SQL"
+    },
+    {
+     "id": "postopek",
+     "chapter": "Teorija",
+     "label": "Postopek in igrišče"
+    },
+    {
+     "id": "naloge-a",
+     "chapter": "Naloge",
+     "label": "Vaje A · Pojmi in operacije"
+    },
+    {
+     "id": "naloge-b",
+     "chapter": "Naloge",
+     "label": "Vaje B · Branje izrazov"
+    },
+    {
+     "id": "naloge-c",
+     "chapter": "Naloge",
+     "label": "Vaje C · Pisanje izrazov · šolska baza"
+    },
+    {
+     "id": "naloge-d",
+     "chapter": "Naloge",
+     "label": "Vaje D · Vaje · knjižnica"
+    },
+    {
+     "id": "naloge-e",
+     "chapter": "Naloge",
+     "label": "Vaje E · Dodatne vaje · knjižnica"
+    },
+    {
+     "id": "naloge-f",
+     "chapter": "Naloge",
+     "label": "Vaje F · Težje naloge"
+    },
+    {
+     "id": "doma-mat",
+     "chapter": "Naloge",
+     "label": "Vaje G · Ponavljanje"
+    },
+    {
+     "id": "doma",
+     "chapter": "Naloge",
+     "label": "Vaje H · Za doma"
+    }
+   ],
+   "gate": [
+    "uvod",
+    "pojmi",
+    "selekcija",
+    "projekcija",
+    "mnozice",
+    "stiki",
+    "kolicnik",
+    "prioriteta",
+    "sql",
+    "postopek"
    ]
   }
  ],

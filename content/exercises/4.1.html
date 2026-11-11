@@ -1,0 +1,2701 @@
+<!doctype html>
+<html lang="sl"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!--LAVELS:BOOT-->
+<!-- LAV-RAČ: built by scripts/import-artifacts.js from content/sources/4.1.html. Do not edit, run the import. -->
+<script>
+// LAV-RAČ exercise shell. The importer puts it into every exercise, before the exercise's own code.
+// The artifact keeps its content and answer checks; the shell owns the layout, the paging, the gate
+// before the tasks, and the scoring state in the portal's format ({ t: { <index>: { d, p, h, sol } }, seen }).
+// Rules are the portal's: one answer per task, a hint halves the points, the solution gives 0 points.
+// A task marked self (»Sam preveri«) has no points: the student runs the work elsewhere, compares it with the known
+// results and ticks »Preveril sem«. The solution may be opened without locking anything.
+(function () {
+  'use strict';
+  const B = window.__LAVELS || null;
+  const KEY = B ? B.key : 'lavrac_local_' + location.pathname;
+  const STAFF = !!(B && B.staff);
+  const TASKS = [];            // index -> { id, max, src }
+  const byId = new Map();      // artifact task id -> index
+  const cards = new Map();     // index -> card element
+  const notes = new Map();     // index -> why the answer was wrong (only until the page is reloaded)
+  let state = read();
+  let cfg = null;
+  let quiet = false;           // true while the shell itself opens a solution at the start: nothing is recorded
+  let pages = [];              // every page in order: { id, kind, title, group, el, set }
+  let gate = [];               // theory page ids that open the tasks
+  const setPos = new Map();    // set id -> shown task position
+
+  function read() {
+    let s = null;
+    try { s = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { s = null; }
+    if (!s || typeof s !== 'object') s = {};
+    if (!s.t || typeof s.t !== 'object') s.t = {};
+    if (!Array.isArray(s.seen)) s.seen = [];
+    return s;
+  }
+  function persist() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* the tracker shows saving problems */ }
+  }
+  const rec = (i) => state.t[i] || (state.t[i] = {});
+  const half = (n) => Math.round(n * 50) / 100;
+
+  // ---------- task state ----------
+  function status(i) {
+    const r = state.t[i] || {};
+    if (!r.d) return r.h ? 'hinted' : 'open';
+    if (TASKS[i] && TASKS[i].self) return 'self';
+    if (r.sol) return 'seen';
+    if (r.p > 0) return r.h ? 'half' : 'ok';
+    return 'bad';
+  }
+  const pts = (n) => {
+    const s = String(n).replace('.', ',');
+    if (n === 1) return '1 točka';
+    if (n === 2) return '2 točki';
+    if (n === 3 || n === 4) return s + ' točke';
+    if (!Number.isInteger(n)) return s + ' točke';
+    return s + ' točk';
+  };
+  const MESSAGE = {
+    ok: (r) => 'Pravilno: ' + pts(r.p) + '.',
+    half: (r) => 'Pravilno z namigom: ' + pts(r.p) + '.',
+    bad: (r, note) => 'Napačno: 0 točk.' + (note ? ' ' + note : '') + ' Naloga je zaklenjena, rešitev si lahko ogledaš.',
+    seen: () => 'Rešitev prikazana: 0 točk. Naloga je zaklenjena.',
+    self: () => 'Označeno: sam si preveril delovanje. Naloga nima točk.',
+  };
+  const LABEL = { ok: 'Pravilno', half: 'Pravilno z namigom', bad: 'Napačno', seen: 'Rešitev ogledana', self: 'Sam preveril' };
+
+  function totals() {
+    const r = { ok: 0, half: 0, bad: 0, seen: 0, self: 0, done: 0, points: 0, max: 0, n: TASKS.length };
+    TASKS.forEach((t, i) => {
+      const s = status(i);
+      r.max += t.max;
+      if (r[s] !== undefined) { r[s]++; r.done++; }
+      r.points += (state.t[i] && state.t[i].d && Number(state.t[i].p)) || 0;
+    });
+    r.points = Math.round(r.points * 100) / 100;
+    return r;
+  }
+
+  // ---------- calls from the artifact ----------
+  const api = {
+    // list: the artifact's tasks in the order they are shown; level(t) gives 1, 2 or 3 for the teacher's list.
+    // A self task has no points (max 0); its pts only say how hard it is.
+    tasks(list, opts) {
+      const level = (opts && opts.level) || ((t) => t.lv);
+      list.forEach((t, i) => { t.idx = i; TASKS.push({ id: t.id, max: t.self ? 0 : Number(t.pts) || 1, self: !!t.self, task: t, level: level(t) }); byId.set(t.id, i); });
+    },
+    // Before the tasks are numbered: the teacher's task names (set letter and the place in the artifact's own list,
+    // e.g. »C9«) get their options, and removed tasks leave the list. The names are read before anything is removed,
+    // so they keep the numbers the teacher sees in the artifact. A name that does not exist stops the import.
+    //   self: no points, ticked by the student   nobtn: no »Kopiraj kodo« / »Odpri Programiz«
+    //   inline: the blanks (___) are typed in the code (same: all as wide as the widest)   cols: the blanks in two columns
+    //   list: lines »- …« of the question become bullets   example: the solution is open from the start   remove: leave the list
+    prepare(list, levels, o) {
+      const ref = new Map();
+      levels.forEach((L) => list.filter((t) => t.lv === L.tag).forEach((t, k) => ref.set(L.tag + (k + 1), t)));
+      const get = (r) => { const t = ref.get(r); if (!t) throw new Error('LavRac.prepare: no task ' + r); return t; };
+      ['self', 'nobtn', 'inline', 'same', 'cols', 'list', 'example'].forEach((flag) => (o[flag] || []).forEach((r) => { get(r)[flag] = true; }));
+      (o.remove || []).map(get).forEach((t) => { list.splice(list.indexOf(t), 1); });
+    },
+    // The artifact's own memory of what was typed and how many hints are open.
+    loadUi() {
+      const S = {};
+      TASKS.forEach((t, i) => {
+        const r = state.t[i];
+        if (!r) return;
+        const s = {};
+        if (r.a !== undefined) s.v = r.a;
+        if (r.n !== undefined) s.h = r.n;
+        S[t.id] = s;
+      });
+      return S;
+    },
+    saveUi(S) {
+      let changed = false;
+      Object.keys(S).forEach((id) => {
+        const i = byId.get(id);
+        if (i === undefined) return;
+        const s = S[id] || {};
+        if (!state.t[i] && s.v === undefined && s.h === undefined) return;
+        const r = rec(i);
+        if (r.d) return;
+        if (JSON.stringify(r.a) !== JSON.stringify(s.v)) { r.a = s.v; changed = true; }
+        if (s.h !== undefined && r.n !== s.h) { r.n = s.h; changed = true; }
+      });
+      if (changed) persist();
+    },
+    // note: the artifact's explanation of a wrong answer, shown with the result.
+    answered(i, ok, note) {
+      const r = rec(i);
+      if (r.d) return;
+      notes.set(i, ok ? '' : String(note || '').trim());
+      const max = TASKS[i].max;
+      r.d = true;
+      r.p = ok ? (r.h ? half(max) : max) : 0;
+      persist();
+      paintTask(i, true);
+      paintProgress();
+    },
+    hinted(i) {
+      const r = rec(i);
+      if (r.d || r.h) return;
+      r.h = true;
+      persist();
+      paintTask(i);
+    },
+    // »Preveril sem«: the student ticks a self task. No points, and nothing about it can be wrong.
+    checked(i) {
+      const r = rec(i);
+      if (r.d || !TASKS[i].self) return;
+      r.d = true; r.p = 0;
+      persist();
+      paintTask(i, true);
+      paintProgress();
+    },
+    solution(i) {
+      const r = rec(i);
+      // Looking at the solution of a self task costs nothing and locks nothing.
+      if (quiet) return;
+      if (r.d || TASKS[i].self) { if (!r.v) { r.v = true; persist(); } return; }
+      r.d = true; r.p = 0; r.sol = true;
+      persist();
+      paintTask(i, true);
+      paintProgress();
+    },
+    status,
+    mount,
+    catalog,
+  };
+  window.LavRac = api;
+
+  // ---------- small builders ----------
+  const h = (tag, attrs, ...kids) => {
+    const el = document.createElement(tag);
+    Object.entries(attrs || {}).forEach(([k, v]) => {
+      if (v === null || v === undefined || v === false) return;
+      if (k === 'html') el.innerHTML = v;
+      else if (k === 'text') el.textContent = v;
+      else el.setAttribute(k, v === true ? '' : v);
+    });
+    kids.flat().forEach((k) => { if (k !== null && k !== undefined && k !== false) el.append(k); });
+    return el;
+  };
+  const ICON = {
+    vaje: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="9" y="6" width="30" height="36" rx="4"/><path d="M15 17l3 3 6-6M15 29l3 3 6-6M28 17h6M28 29h6"/></svg>',
+    lock: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+    check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    home: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 22L24 9l16 13M13 19v20h22V19"/><path d="M20 39V28h8v11"/></svg>',
+  };
+
+  // ---------- layout ----------
+  function mount(c) {
+    cfg = c;
+    const old = document.querySelector(c.root || '.wrap');
+    const groups = c.groups.map((g) => ({ ...g, pages: g.pages.map((p) => ({ ...p, kind: 'theory', group: g })) }));
+    const theory = groups.flatMap((g) => g.pages);
+    gate = theory.map((p) => p.id);
+    const sets = c.sets.map((s) => ({ ...s, kind: 'set' }));
+    // Za doma follows the last set in the alphabet; the importer checks that the letters have no gap.
+    if (c.extra) c.extra.tag = nextTag(sets);
+    pages = [{ id: 'pregled', kind: 'overview', title: 'Pregled' }, ...theory, ...sets];
+    if (c.extra) pages.push({ ...c.extra, kind: 'extra' });
+    if (STAFF) { gate.concat(c.extra ? [c.extra.id] : []).forEach((id) => { if (!state.seen.includes(id)) state.seen.push(id); }); }
+
+    const main = h('main', { class: 'lr-main', id: 'lrMain' });
+    const top = buildTop(c);
+    const rail = buildRail(groups, sets, c);
+    main.append(buildMobileNav());
+    pages.forEach((p) => {
+      // The page gets the artifact's id; the artifact's own element keeps a different one, so ids stay unique.
+      if (p.el && p.el.id === p.id) p.el.id = 'src-' + p.id;
+      p.page = h('div', { class: 'page lr-page lr-' + p.kind, id: p.id, 'data-chapter': p.kind === 'theory' || p.kind === 'overview' ? 'Teorija' : 'Naloge' });
+      if (p.kind === 'overview') buildOverview(p, groups, sets, c);
+      if (p.kind === 'theory') buildTheory(p, theory);
+      if (p.kind === 'set') buildSet(p, c);
+      if (p.kind === 'extra') buildExtra(p);
+      if (p.kind !== 'set') p.page.append(buildPager(p));
+      main.append(p.page);
+    });
+    const lr = h('div', { class: 'lr' }, top, h('div', { class: 'lr-body' }, rail, main));
+    if (old) old.replaceWith(lr); else document.body.append(lr);
+    TASKS.forEach((_, i) => paintTask(i));
+    paintProgress();
+    window.addEventListener('hashchange', route);
+    route();
+    // The browser jumps to the element named in the address once the page has loaded; start at the top instead.
+    window.addEventListener('load', () => setTimeout(() => window.scrollTo(0, 0), 0));
+  }
+
+  function buildTop(c) {
+    const bar = h('div', { class: 'lr-stack', 'aria-hidden': 'true' }, ...['ok', 'half', 'bad', 'seen', 'self'].map((k) => h('i', { class: 'lr-' + k })));
+    const reset = h('div', { class: 'lr-reset', id: 'lrReset' });
+    const idle = () => {
+      reset.replaceChildren(h('button', { type: 'button', class: 'lr-btn lr-ghost', id: 'resetBtn', text: 'Ponastavi vajo' }));
+      reset.firstChild.addEventListener('click', ask);
+    };
+    const ask = () => {
+      const yes = h('button', { type: 'button', class: 'lr-btn lr-danger', id: 'resetYes', text: 'Da, ponastavi' });
+      const no = h('button', { type: 'button', class: 'lr-btn lr-ghost', text: 'Prekliči' });
+      reset.replaceChildren(h('span', { class: 'lr-confirm', role: 'alert' },
+        h('span', { text: 'Res ponastavim vajo? Vsi odgovori se izbrišejo. Dokler ne odgovoriš na novo nalogo, štejejo prejšnje točke.' }), yes, no));
+      yes.addEventListener('click', doReset);
+      no.addEventListener('click', idle);
+      no.focus();
+    };
+    idle();
+    // The title, progress and reset sit in the middle; the portal's tracker adds »Vse vaje« before them and »Odjava« after them,
+    // so those two stay at the edges of the page, away from the content.
+    return h('div', { class: 'lr-top' }, h('div', { class: 'lr-top-in' },
+      h('div', { class: 'lr-top-mid' },
+        h('div', { class: 'lr-name' }, h('b', { text: c.title }), c.kicker ? h('span', { text: c.kicker }) : null),
+        h('div', { class: 'lr-prog', role: 'status' }, bar, h('span', { class: 'lr-ptxt', id: 'lrPtxt' })),
+        reset)));
+  }
+  function doReset() {
+    state = { t: {}, seen: state.seen.slice() };
+    persist();
+    const pending = B ? 'lavels_pending_' + B.uid + '_' + B.id : null;
+    let waited = 0;
+    const done = () => { history.replaceState(null, '', '#pregled'); location.reload(); };
+    if (!pending) return done();
+    const wait = () => {
+      waited += 150;
+      let left = null;
+      try { left = localStorage.getItem(pending); } catch (e) { left = null; }
+      if (!left || waited > 5000) done(); else setTimeout(wait, 150);
+    };
+    setTimeout(wait, 150);
+  }
+
+  // The letter after the last set's letter ('' gives A).
+  const nextTag = (sets) => (sets.length ? String.fromCharCode(String(sets[sets.length - 1].tag).charCodeAt(0) + 1) : 'A');
+  const setLabel = (p) => p.tag + ' · ' + p.title;
+  function buildRail(groups, sets, c) {
+    const nav = h('nav', { class: 'lr-rail', 'aria-label': 'Vsebina vaje' });
+    // The tag column (»3 ·«, »B ·«) is as wide as the longest number, so every text starts at the same place
+    // and a wrapped line hangs under the text, not under the tag.
+    nav.style.setProperty('--lr-tgd', String(String(groups.reduce((a, g) => a + g.pages.length, 0)).length));
+    const lab = (tag, text) => h('span', { class: 'lr-lab' }, h('span', { class: 'lr-tg', text: tag + ' ·' }), h('span', { class: 'lr-tx', text }));
+    nav.append(h('a', { class: 'lr-ov', href: '#pregled', 'data-page': 'pregled', text: 'Pregled' }));
+    let n = 0;
+    groups.forEach((g) => {
+      nav.append(h('div', { class: 'lr-grp' }, h('span', { class: 'lr-gi', html: g.icon || '' }), h('b', { text: g.title }), h('small', { class: 'lr-gc', 'data-gc': g.id })));
+      g.pages.forEach((p) => {
+        n++;
+        nav.append(h('a', { href: '#' + p.id, 'data-page': p.id, class: 'lr-pg' }, h('i', { class: 'lr-dot', html: ICON.check }), lab(n, p.title)));
+      });
+    });
+    nav.append(h('div', { class: 'lr-grp lr-vaje' }, h('span', { class: 'lr-gi', html: ICON.vaje }), h('b', { text: 'Vaje' }), h('span', { class: 'lr-lock', html: ICON.lock, title: 'Odklene se, ko pregledaš vse razlage' })));
+    // A set shows its state as a small pie in the task colours (paintProgress); Za doma gets a tick once it is opened.
+    sets.forEach((s) => nav.append(h('a', { href: '#' + s.id, 'data-page': s.id, class: 'lr-pg lr-gated' },
+      h('i', { class: 'lr-pie', 'data-pie': s.id, 'aria-hidden': 'true' }), lab(s.tag, s.title), h('small', { class: 'lr-cnt', 'data-cnt': s.id }))));
+    if (c.extra) nav.append(h('a', { href: '#' + c.extra.id, 'data-page': c.extra.id, class: 'lr-pg lr-gated' }, h('i', { class: 'lr-dot', html: ICON.check }), lab(c.extra.tag, c.extra.title)));
+    // c.tools() gives a fresh element each time, so the rail and the phone list each get their own copy.
+    if (c.tools) nav.append(h('div', { class: 'lr-tools' }, c.tools()));
+    return nav;
+  }
+  function buildMobileNav() {
+    const sel = h('select', { id: 'lrSel', 'aria-label': 'Stran' });
+    let grp = null;
+    pages.forEach((p) => {
+      const label = p.kind === 'theory' ? p.group.title : p.kind === 'overview' ? null : 'Vaje';
+      if (label && (!grp || grp.label !== label)) { grp = h('optgroup', { label }); sel.append(grp); }
+      const o = h('option', { value: p.id, text: p.kind === 'set' || p.kind === 'extra' ? setLabel(p) : p.title });
+      (label ? grp : sel).append(o);
+    });
+    sel.addEventListener('change', () => { location.hash = sel.value; });
+    const box = h('div', { class: 'lr-mnav' }, h('label', { class: 'lr-msel' }, h('span', { text: 'Stran' }), sel));
+    if (cfg.tools) box.append(h('div', { class: 'lr-tools' }, cfg.tools()));
+    return box;
+  }
+
+  function buildOverview(p, groups, sets, c) {
+    const hero = h('section', { class: 'lr-hero' }, h('h1', { text: c.title }));
+    if (c.lead) hero.append(h('p', { class: 'lr-lead', text: c.lead }));
+    if (c.hero) hero.append(c.hero);
+    p.page.append(hero);
+    p.page.append(h('div', { class: 'lr-resume', id: 'lrResume', hidden: true }));
+    const grid = h('div', { class: 'lr-tiles' });
+    groups.forEach((g) => {
+      const list = h('ul', {}, ...g.pages.map((x) => h('li', { text: x.title })));
+      grid.append(h('a', { class: 'lr-tile', href: '#' + g.pages[0].id, 'data-tile': g.id },
+        h('span', { class: 'lr-ti', html: g.icon || '' }),
+        h('span', { class: 'lr-tt', text: g.title }),
+        h('span', { class: 'lr-td', text: g.pages.length === 1 ? '1 razlaga' : g.pages.length + (g.pages.length < 5 ? ' razlage' : ' razlag') }),
+        list,
+        h('span', { class: 'lr-tf', 'data-tf': g.id })));
+    });
+    const setList = h('ul', {}, ...sets.map((s) => h('li', { text: s.tag + ' · ' + s.title + ' (' + s.tasks.length + ')' })));
+    if (c.extra) setList.append(h('li', { text: setLabel(c.extra) }));
+    grid.append(h('a', { class: 'lr-tile lr-tile-vaje', href: '#' + sets[0].id, 'data-tile': 'vaje' },
+      h('span', { class: 'lr-ti', html: ICON.vaje }),
+      h('span', { class: 'lr-tt', text: 'Vaje' }),
+      h('span', { class: 'lr-td', text: TASKS.length + ' nalog v ' + sets.length + (sets.length < 5 ? ' sklopih' : ' sklopih') }),
+      setList,
+      h('span', { class: 'lr-tf', 'data-tf': 'vaje' })));
+    p.page.append(grid);
+    const rules = h('div', { class: 'lr-rules' },
+      h('h2', { text: 'Kako poteka' }),
+      h('ol', {},
+        h('li', { text: 'Najprej preglej vse razlage. Vaje se odklenejo, ko odpreš vsako stran razlage.' }),
+        h('li', { text: 'Pri vsaki nalogi oddaš en odgovor. Pravilen odgovor prinese vse točke, napačen 0 točk.' }),
+        h('li', { text: 'Namig odbije polovico točk naloge. Ogled rešitve prinese 0 točk in nalogo zaklene.' }),
+        TASKS.some((t) => t.self) ? h('li', { text: 'Naloge z oznako »Sam preveri« nimajo točk: rešitev narediš sam, jo preizkusiš in nalogo označiš s »Preveril sem«. Rešitev si lahko ogledaš brez posledic.' }) : null,
+        h('li', { text: 'Napredek se shranjuje v tvoj račun, zato lahko nadaljuješ na katerem koli računalniku.' })));
+    if (c.vajeNote) rules.append(h('p', { class: 'lr-just', html: c.vajeNote }));
+    p.page.append(rules);
+    if (c.source) p.page.append(h('p', { class: 'lr-src', text: c.source }));
+  }
+
+  function phead(p, theory) {
+    const k = theory.indexOf(p);
+    const dash = h('span', { class: 'lr-dash', 'aria-hidden': 'true' }, ...theory.map((x, j) => h('i', { class: j <= k ? 'on' : '' })));
+    return h('div', { class: 'lr-phead' },
+      h('span', { class: 'lr-pgrp' }, h('span', { class: 'lr-gi', html: p.group.icon || '' }), h('span', { text: p.group.title })),
+      h('span', { class: 'lr-count', text: 'Razlaga ' + (k + 1) + ' / ' + theory.length }),
+      dash);
+  }
+  function buildTheory(p, theory) {
+    p.page.append(phead(p, theory));
+    const el = p.el;
+    el.hidden = false;
+    const eyebrow = el.querySelector(':scope > .eyebrow');
+    if (eyebrow) eyebrow.remove();
+    p.page.append(el);
+  }
+
+  function buildSet(p, c) {
+    const s = p;
+    const head = h('header', { class: 'lr-shead' },
+      h('span', { class: 'lr-gi', html: ICON.vaje }),
+      h('div', {}, h('span', { class: 'lr-kick', text: 'Vaje · sklop ' + s.tag }), h('h2', { text: s.title }), s.note ? h('p', { class: 'lr-just', text: s.note }) : null));
+    const nums = h('div', { class: 'lr-nums', role: 'group', 'aria-label': 'Naloge v sklopu ' + s.title });
+    s.tasks.forEach((t, k) => {
+      const b = h('button', { type: 'button', class: 'lr-num', 'data-k': k, 'data-i': t.idx, text: String(k + 1) });
+      b.addEventListener('click', () => { location.hash = s.id + '/' + (k + 1); });
+      nums.append(b);
+    });
+    // A set of self tasks has only that state in its legend; a mixed set has both.
+    const allSelf = s.tasks.every((t) => TASKS[t.idx].self), anySelf = s.tasks.some((t) => TASKS[t.idx].self);
+    const legend = h('div', { class: 'lr-legend' },
+      ...[...(allSelf ? [] : [['ok', 'pravilno'], ['half', 'pravilno z namigom (50 %)'], ['bad', 'napačno'], ['seen', 'ogledana rešitev (0 točk)']]), ...(anySelf ? [['self', 'sam preveril (brez točk)']] : [])]
+        .map(([k, t]) => h('span', {}, h('i', { class: 'lr-sw lr-' + k }), t)));
+    const board = h('div', { class: 'lr-board' },
+      h('div', { class: 'lr-bh' }, h('b', { text: s.title }), h('span', { class: 'lr-done', 'data-done': s.id })),
+      nums, legend);
+    const list = h('div', { class: 'lr-cardlist' });
+    s.tasks.forEach((t, k) => {
+      const card = t.el;
+      cards.set(t.idx, card);
+      prepareCard(card, t.idx, k, s.tasks.length, c.sel);
+      list.append(card);
+    });
+    const prev = h('button', { type: 'button', class: 'lr-btn lr-ghost lr-prev', text: '‹ Prejšnja naloga' });
+    const next = h('button', { type: 'button', class: 'lr-btn lr-ghost lr-next', text: 'Naslednja naloga ›' });
+    prev.addEventListener('click', () => step(s, -1));
+    next.addEventListener('click', () => step(s, 1));
+    const tpager = h('nav', { class: 'lr-tpager', 'aria-label': 'Listanje po nalogah' }, prev, next);
+    const body = h('div', { class: 'lr-setbody' }, board, list, tpager);
+    const locked = h('div', { class: 'lr-locked', role: 'note' });
+    s.page.append(head, locked, body, buildPager(s));
+    if (s.el) s.el.remove();
+  }
+  function prepareCard(card, i, k, n, sel) {
+    const task = TASKS[i].task;
+    card.hidden = false;
+    card.id = 't' + i;
+    card.classList.add('lr-task');
+    if (task.self) card.dataset.self = task.type;
+    const head = card.querySelector(sel.head);
+    if (head) {
+      head.classList.add('crumb');
+      const num = head.querySelector(sel.num);
+      if (num) num.textContent = 'Naloga ' + (k + 1) + ' od ' + n;
+      const tags = head.querySelector(sel.tags);
+      if (tags) {
+        tags.classList.add('lv');
+        tags.prepend(h('span', { class: 'tag lr-st', hidden: true }));
+        // The points tag is the only one that names points: a self task has none.
+        if (task.self) tags.querySelectorAll('.tag:not(.lr-st)').forEach((t) => { if (/točk/.test(t.textContent)) t.textContent = 'Sam preveri · brez točk'; });
+        if (task.example) tags.append(h('span', { class: 'tag', text: 'Rešen primer' }));
+      }
+    }
+    const q = card.querySelector(sel.q);
+    if (q) q.classList.add('lr-q');
+    if (q) shapeTask(card, q, task);
+    let check = card.querySelector(sel.check);
+    if (task.self && check) {
+      // The artifact's own check goes away with its listener; ticking is the shell's.
+      const tick = check.cloneNode(false);
+      tick.textContent = 'Preveril sem';
+      tick.addEventListener('click', () => api.checked(i));
+      check.replaceWith(tick);
+      check = tick;
+    }
+    const hint = card.querySelector(sel.hint);
+    const sol = card.querySelector(sel.sol);
+    const fb = card.querySelector(sel.fb);
+    if (check) check.classList.add('lr-check');
+    if (hint) hint.classList.add('lr-hint');
+    if (sol) sol.classList.add('lr-sol');
+    // The artifact rewrites the feedback's classes, so the shell keeps its own reference.
+    if (fb) { fb.classList.add('lr-fb'); card.lrFb = fb; }
+    const actions = card.querySelector(sel.actions);
+    if (actions) {
+      actions.classList.add('lr-actions');
+      const left = h('div', { class: 'lr-left' });
+      const right = h('div', { class: 'lr-right' });
+      const extra = sel.extra ? [...card.querySelectorAll(sel.extra)] : [];
+      extra.forEach((x) => x.classList.add('lr-extra'));
+      [...extra, check, fb].forEach((x) => x && left.append(x));
+      [hint, sol].forEach((x) => x && right.append(x));
+      actions.prepend(left, right);
+      const ask = h('div', { class: 'lr-solask', hidden: true, role: 'alert' });
+      actions.after(ask);
+      if (sol) {
+        sol.addEventListener('click', (e) => {
+          if (task.self || (status(i) !== 'open' && status(i) !== 'hinted')) return;
+          if (card.dataset.solOk) return;
+          e.stopImmediatePropagation();
+          e.preventDefault();
+          const yes = h('button', { type: 'button', class: 'lr-btn lr-danger', text: 'Prikaži rešitev' });
+          const no = h('button', { type: 'button', class: 'lr-btn lr-ghost', text: 'Prekliči' });
+          ask.replaceChildren(h('span', { text: 'Ogled rešitve prinese 0 točk in nalogo zaklene.' }), yes, no);
+          ask.hidden = false;
+          yes.addEventListener('click', () => { ask.hidden = true; card.dataset.solOk = '1'; sol.click(); });
+          no.addEventListener('click', () => { ask.hidden = true; sol.focus(); });
+          no.focus();
+        }, true);
+        if (task.example) { quiet = true; sol.click(); quiet = false; }
+      }
+    }
+  }
+
+  // The options of a task (LavRac.prepare) shape the artifact's card.
+  function shapeTask(card, q, task) {
+    if (task.nobtn) {
+      q.querySelectorAll('.js-copy, a[href*="programiz"]').forEach((x) => x.remove());
+      q.querySelectorAll('.actions').forEach((a) => { if (!a.children.length) a.remove(); });
+    }
+    if (task.self && task.type === 'code') {
+      // The program is written elsewhere and the answer is already told: there is no output to type.
+      const out = q.querySelector('[id^="o-"]');
+      if (out) (out.closest('.blank') || out).remove();
+      const bar = q.querySelector('.editorbar span');
+      if (bar) bar.textContent = 'Program zaženi v poljubnem okolju (Eclipse, VS Code, Programiz …) in primerjaj njegov izpis s pričakovanim. V Programizu razred preimenuj v Main. Kodo lahko shraniš tu.';
+      // An output the artifact keeps hidden (it checked the typed output) is what the student compares with now.
+      if (task.hideExp && task.expected != null && task.expected !== '') {
+        const box = h('div', { class: 'lr-tests' }, h('b', { text: 'Pravilen izpis za preverjanje' }), h('pre', { class: 'code', text: String([].concat(task.expected)[0]) }));
+        const row = q.querySelector(':scope > .blank');
+        if (row) row.before(box); else q.append(box);
+      }
+    }
+    if (task.self && task.type === 'blanks') {
+      // No inputs: the known results are what the student compares with.
+      const rows = [...q.querySelectorAll(':scope > .blank')];
+      if (rows.length) {
+        const text = (b) => String(Array.isArray(b.acc) ? b.acc[0] : b.acc);
+        const box = h('div', { class: 'lr-tests' }, h('b', { text: 'Pravilni rezultati za preverjanje' }),
+          h('ul', {}, ...task.b.map((b) => h('li', {}, b.l + ': ', h('code', { text: text(b) })))));
+        rows[0].before(box);
+        rows.forEach((r) => r.remove());
+      }
+    }
+    if (task.cols) {
+      const rows = [...q.querySelectorAll(':scope > .blank')];
+      if (rows.length) { const g = h('div', { class: 'lr-cols' }); rows[0].before(g); rows.forEach((r) => g.append(r)); }
+    }
+    if (task.inline) gapFill(q, task);
+    if (task.list) {
+      const p = q.querySelector(':scope > p');
+      if (p) {
+        const out = [];
+        let ul = null;
+        p.textContent.split('\n').forEach((line) => {
+          if (line.startsWith('- ')) { if (!ul) { ul = h('ul', { class: 'lr-bul' }); out.push(ul); } ul.append(h('li', { text: line.slice(2) })); }
+          else { ul = null; out.push(h('p', { text: line })); }
+        });
+        p.replaceWith(...out);
+      }
+    }
+  }
+  // The blanks (___) of a code snippet become inputs in the code itself; the artifact still finds them by their ids.
+  function gapFill(q, task) {
+    const pre = q.querySelector('pre.code');
+    const rows = [...q.querySelectorAll(':scope > .blank')];
+    const inputs = rows.map((r) => r.querySelector('input'));
+    if (!pre || !inputs.length || inputs.some((x) => !x)) throw new Error('inline: no code or blanks in ' + task.id);
+    let k = 0;
+    const walker = document.createTreeWalker(pre, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach((n) => {
+      if (!n.nodeValue.includes('___')) return;
+      const frag = document.createDocumentFragment();
+      n.nodeValue.split('___').forEach((part, j) => {
+        if (j) {
+          const inp = inputs[k], b = task.b[k];
+          k++;
+          if (!inp) throw new Error('inline: more gaps than blanks in ' + task.id);
+          inp.classList.add('lr-gap');
+          inp.placeholder = String(k);
+          inp.setAttribute('aria-label', 'Vrzel ' + k + ': ' + b.l);
+          inp.title = b.l;
+          const len = Math.max(...(task.same ? task.b : [b]).flatMap((x) => [].concat(x.acc).map((a) => String(a).length)));
+          inp.style.width = Math.max(3, len + 2) + 'ch';
+          frag.append(inp);
+        }
+        if (part) frag.append(part);
+      });
+      n.replaceWith(frag);
+    });
+    if (k !== inputs.length) throw new Error('inline: ' + k + ' gaps for ' + inputs.length + ' blanks in ' + task.id);
+    rows.forEach((r) => r.remove());
+  }
+  function buildExtra(p) {
+    p.page.append(h('header', { class: 'lr-shead' }, h('span', { class: 'lr-gi', html: ICON.home }),
+      h('div', {}, h('span', { class: 'lr-kick', text: 'Vaje · sklop ' + p.tag }), h('h2', { text: p.title }), p.note ? h('p', { class: 'lr-just', text: p.note }) : null)));
+    p.page.append(h('div', { class: 'lr-locked', role: 'note' }));
+    const el = p.el;
+    el.hidden = false;
+    el.querySelectorAll(':scope > .eyebrow, :scope > h2, :scope > p.prose').forEach((x) => x.remove());
+    el.classList.add('lr-setbody');
+    p.page.append(el);
+  }
+  function buildPager(p) {
+    const k = pages.indexOf(p);
+    const nav = h('nav', { class: 'lr-pager', 'aria-label': 'Listanje po straneh' });
+    const prev = pages[k - 1], next = pages[k + 1];
+    const label = (x) => x.kind === 'set' || x.kind === 'extra' ? 'Vaje ' + setLabel(x) : x.title;
+    // The arrow and the side say the direction; screen readers still hear it.
+    if (prev) nav.append(h('a', { class: 'lr-prevp', href: '#' + prev.id, 'aria-label': 'Nazaj: ' + label(prev) }, h('span', { text: label(prev) })));
+    if (next) nav.append(h('a', { class: 'lr-nextp', href: '#' + next.id, 'data-to': next.id, 'aria-label': 'Naprej: ' + label(next) }, h('span', { text: label(next) })));
+    return nav;
+  }
+
+  // ---------- painting ----------
+  function paintTask(i, announce) {
+    const card = cards.get(i);
+    const s = status(i);
+    document.querySelectorAll('.lr-num[data-i="' + i + '"]').forEach((b) => { b.dataset.s = s; b.setAttribute('aria-label', 'Naloga ' + b.textContent + (LABEL[s] ? ', ' + LABEL[s].toLowerCase() : '')); });
+    if (!card) return;
+    card.dataset.lr = s;
+    const done = !['open', 'hinted'].includes(s);
+    const tag = card.querySelector('.lr-st');
+    if (tag) { tag.hidden = !done; tag.textContent = LABEL[s] || ''; tag.className = 'tag lr-st lr-' + s; }
+    const fb = card.lrFb;
+    if (done) {
+      card.querySelectorAll('.lr-q input, .lr-q select, .lr-q textarea, .lr-q button, .lr-check, .lr-extra').forEach((x) => { x.disabled = true; });
+      if (fb) { fb.textContent = MESSAGE[s](state.t[i], notes.get(i)); fb.className = 'feedback lr-fb ' + (s === 'ok' || s === 'half' || s === 'self' ? 'ok' : 'bad'); }
+    }
+    if (announce) {
+      const sb = card.querySelector('.lr-solask');
+      if (sb) sb.hidden = true;
+    }
+  }
+  function paintProgress() {
+    const r = totals();
+    const t = document.getElementById('lrPtxt');
+    if (t) t.textContent = r.done + ' / ' + r.n + ' nalog · ' + String(r.points).replace('.', ',') + ' / ' + r.max + ' točk';
+    ['ok', 'half', 'bad', 'seen', 'self'].forEach((k) => {
+      const el = document.querySelector('.lr-stack .lr-' + k);
+      if (el) el.style.width = (r.n ? 100 * r[k] / r.n : 0) + '%';
+    });
+    pages.filter((p) => p.kind === 'set').forEach((s) => {
+      const d = s.tasks.filter((x) => !['open', 'hinted'].includes(status(x.idx))).length;
+      paintPie(s);
+      document.querySelectorAll('[data-done="' + s.id + '"]').forEach((e) => { e.textContent = 'rešenih ' + d + ' / ' + s.tasks.length; });
+      document.querySelectorAll('[data-cnt="' + s.id + '"]').forEach((e) => { e.textContent = d + '/' + s.tasks.length; e.classList.toggle('full', d === s.tasks.length); });
+    });
+    const vt = document.querySelector('[data-tf="vaje"]');
+    if (vt && gateOpen()) vt.textContent = 'Rešenih ' + r.done + ' / ' + r.n + ', ' + String(r.points).replace('.', ',') + ' / ' + r.max + ' točk';
+  }
+  // The set's pie in the rail: one slice per state, clockwise from the top, in the order of the legend.
+  const PIE = [['ok', '--lr-ok', 'pravilno'], ['half', '--lr-half', 'pravilno z namigom'], ['bad', '--lr-bad', 'napačno'], ['seen', '--lr-seen', 'ogledana rešitev'], ['self', '--lr-self', 'sam preveril'], ['none', '--lr-none', 'brez odgovora']];
+  function paintPie(s) {
+    const n = s.tasks.length;
+    if (!n) return;
+    const c = { ok: 0, half: 0, bad: 0, seen: 0, self: 0, none: 0 };
+    s.tasks.forEach((x) => { const st = status(x.idx); c[c[st] === undefined ? 'none' : st]++; });
+    let cum = 0;
+    const parts = [];
+    PIE.forEach(([k, v]) => {
+      if (!c[k]) return;
+      const from = cum;
+      cum += c[k];
+      parts.push('var(' + v + ') ' + (100 * from / n).toFixed(2) + '% ' + (100 * cum / n).toFixed(2) + '%');
+    });
+    const text = PIE.filter(([k]) => c[k]).map(([k, , t]) => t + ' ' + c[k]).join(', ');
+    document.querySelectorAll('[data-pie="' + s.id + '"]').forEach((e) => {
+      e.style.background = 'conic-gradient(' + parts.join(',') + ')';
+      if (e.parentElement) e.parentElement.title = text;
+    });
+  }
+  function paintSeen() {
+    const open = gateOpen();
+    document.querySelectorAll('.lr-pg[data-page]').forEach((a) => a.classList.toggle('seen', state.seen.includes(a.dataset.page)));
+    document.querySelectorAll('.lr-gated').forEach((a) => { a.classList.toggle('locked', !open); a.setAttribute('aria-disabled', open ? 'false' : 'true'); });
+    document.querySelectorAll('.lr-vaje').forEach((g) => g.classList.toggle('locked', !open));
+    (cfg ? cfg.groups : []).forEach((g) => {
+      const n = g.pages.filter((p) => state.seen.includes(p.id)).length;
+      document.querySelectorAll('[data-gc="' + g.id + '"]').forEach((e) => { e.textContent = n + '/' + g.pages.length; e.classList.toggle('full', n === g.pages.length); });
+      document.querySelectorAll('[data-tf="' + g.id + '"]').forEach((e) => { e.textContent = n === g.pages.length ? 'Pregledano' : 'Pregledano ' + n + ' / ' + g.pages.length; e.classList.toggle('full', n === g.pages.length); });
+    });
+    const tile = document.querySelector('[data-tile="vaje"]');
+    if (tile) {
+      tile.classList.toggle('locked', !open);
+      const left = gate.filter((id) => !state.seen.includes(id)).length;
+      if (!open) tile.querySelector('[data-tf="vaje"]').textContent = 'Odklene se, ko pregledaš vse razlage. Še ' + left + '.';
+      tile.querySelector('.lr-ti').innerHTML = open ? ICON.vaje : ICON.lock;
+    }
+    document.querySelectorAll('#lrSel option').forEach((o) => {
+      const p = pages.find((x) => x.id === o.value);
+      if (p && (p.kind === 'set' || p.kind === 'extra')) o.textContent = setLabel(p) + (open ? '' : ' (zaklenjeno)');
+    });
+    paintProgress();
+  }
+  const gateOpen = () => gate.every((id) => state.seen.includes(id));
+
+  // ---------- routing ----------
+  function route() {
+    const raw = decodeURIComponent(location.hash.slice(1));
+    const [id, nRaw] = raw.split('/');
+    let p = pages.find((x) => x.id === id);
+    if (!p) {
+      p = pages[0];
+      if (raw) history.replaceState(null, '', '#' + p.id);
+    }
+    show(p, nRaw ? Number(nRaw) - 1 : null);
+  }
+  function show(p, k) {
+    pages.forEach((x) => { const on = x === p; x.page.classList.toggle('on', on); x.page.hidden = !on; });
+    if ((p.kind === 'theory' || p.kind === 'extra') && !state.seen.includes(p.id)) { state.seen.push(p.id); persist(); }
+    const locked = (p.kind === 'set' || p.kind === 'extra') && !gateOpen();
+    if (p.kind === 'set' || p.kind === 'extra') paintLock(p, locked);
+    if (p.kind === 'set' && !locked) {
+      const first = p.tasks.findIndex((t) => ['open', 'hinted'].includes(status(t.idx)));
+      const pos = k !== null && k >= 0 && k < p.tasks.length ? k : (setPos.has(p.id) ? setPos.get(p.id) : Math.max(0, first));
+      showTask(p, pos);
+    }
+    document.querySelectorAll('.lr-rail a').forEach((a) => { if (a.dataset.page === p.id) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    const sel = document.getElementById('lrSel');
+    if (sel) sel.value = p.id;
+    if (p.kind !== 'overview') { state.at = p.id; persist(); }
+    paintResume();
+    paintSeen();
+    window.scrollTo(0, 0);
+  }
+  function paintLock(p, locked) {
+    const box = p.page.querySelector('.lr-locked');
+    const body = p.page.querySelector('.lr-setbody');
+    if (body) body.hidden = locked;
+    box.hidden = !locked;
+    if (!locked) return;
+    const missing = pages.filter((x) => x.kind === 'theory' && !state.seen.includes(x.id));
+    box.replaceChildren(
+      h('span', { class: 'lr-gi', html: ICON.lock }),
+      h('div', {},
+        h('h3', { text: 'Vaje so še zaklenjene' }),
+        h('p', { text: 'Odklenejo se, ko pregledaš vse razlage. Ostalo jih je še ' + missing.length + ':' }),
+        h('ul', {}, ...missing.map((x) => h('li', {}, h('a', { href: '#' + x.id, text: x.group.title + ': ' + x.title })))),
+        h('a', { class: 'lr-btn lr-primary', href: '#' + missing[0].id, text: 'Na prvo nepregledano razlago' })));
+  }
+  function showTask(s, k) {
+    setPos.set(s.id, k);
+    s.tasks.forEach((t, j) => cards.get(t.idx).classList.toggle('lr-off', j !== k));
+    s.page.querySelectorAll('.lr-num').forEach((b) => { if (Number(b.dataset.k) === k) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+    s.page.querySelector('.lr-prev').disabled = k === 0;
+    const next = s.page.querySelector('.lr-next');
+    next.disabled = k === s.tasks.length - 1;
+  }
+  function step(s, d) {
+    const k = (setPos.get(s.id) || 0) + d;
+    if (k < 0 || k >= s.tasks.length) return;
+    location.hash = s.id + '/' + (k + 1);
+  }
+  function paintResume() {
+    const box = document.getElementById('lrResume');
+    if (!box) return;
+    const p = pages.find((x) => x.id === state.at);
+    box.hidden = !p || p.kind === 'overview';
+    if (!p) return;
+    box.replaceChildren(h('span', { text: 'Nazadnje si bil pri: ' }), h('a', { href: '#' + p.id, text: p.kind === 'set' || p.kind === 'extra' ? 'Vaje ' + setLabel(p) : p.title }));
+  }
+
+  // ---------- for the importer ----------
+  function catalog() {
+    const LEVEL = { 1: 'lažja', 2: 'srednja', 3: 'težja' };
+    const tasks = [];
+    pages.filter((p) => p.kind === 'set').forEach((s) => s.tasks.forEach((t) => {
+      const src = TASKS[t.idx].task;
+      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
+    }));
+    tasks.sort((a, b) => a.i - b.i);
+    return {
+      pages: pages.map((p) => ({ id: p.id, chapter: p.kind === 'theory' || p.kind === 'overview' ? 'Teorija' : 'Naloge', label: p.kind === 'set' || p.kind === 'extra' ? 'Vaje ' + setLabel(p) : p.title })),
+      tasks,
+      gate: gate.slice(),
+      tags: pages.filter((p) => p.kind === 'set' || p.kind === 'extra').map((p) => p.tag),
+    };
+  }
+})();
+
+</script>
+<link href="/static/fonts/fonts.css" rel="stylesheet">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<title>Relacijska algebra</title>
+<style>
+/* Layout: sticky chapter rail (desktop) + single reading column; theory first, then graded task cards, then homework. */
+:root{
+  --bg:#f4f6f8; --surface:#ffffff; --sunk:#e9edf1; --line:#d3dae1;
+  --fg:#18202b; --muted:#5a6675;
+  --accent:#8b4a1f; --accent-soft:#f3e4d8;
+  --ok:#11775f; --ok-soft:#dcf1ea; --bad:#b4372b; --bad-soft:#f8e1de; --seen:#8a6a00; --seen-soft:#f6edcc;
+  --code-bg:#1d2430; --code-fg:#e5e9f0; --k:#f0a868; --s:#9fd39a; --c:#8a96a8; --n:#d6a5f0;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11151b; --surface:#181e26; --sunk:#0d1116; --line:#2b3440;
+  --fg:#e4e8ee; --muted:#9aa5b3;
+  --accent:#e8a26f; --accent-soft:#3a2a1f;
+  --ok:#53c9a6; --ok-soft:#14322a; --bad:#f08578; --bad-soft:#3a1e1b; --seen:#e2c25a; --seen-soft:#352d12;
+  --code-bg:#0b0f14; --code-fg:#e5e9f0;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11151b; --surface:#181e26; --sunk:#0d1116; --line:#2b3440;
+  --fg:#e4e8ee; --muted:#9aa5b3;
+  --accent:#e8a26f; --accent-soft:#3a2a1f;
+  --ok:#53c9a6; --ok-soft:#14322a; --bad:#f08578; --bad-soft:#3a1e1b; --seen:#e2c25a; --seen-soft:#352d12;
+  --code-bg:#0b0f14; --code-fg:#e5e9f0;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:17px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:48px;padding-block:32px 80px}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr);gap:24px;padding-block:20px 60px}.wrap > .rail{display:none}}
+[hidden]{display:none!important}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(2rem,4.5vw,3rem);font-weight:700;letter-spacing:-.02em}
+h2{font-size:1.65rem;font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.2rem;font-weight:700}
+p{margin:0}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.eyebrow{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+main{min-width:0;display:flex;flex-direction:column;gap:56px}
+section{display:flex;flex-direction:column;gap:18px;scroll-margin-top:24px}
+.prose{max-width:68ch;display:flex;flex-direction:column;gap:14px}
+p.prose{display:block}
+.prose ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--sunk);padding:.08em .35em;border-radius:4px}
+pre{margin:0}
+.code{background:var(--code-bg);color:var(--code-fg);font-family:var(--f-mono);font-size:.84rem;line-height:1.55;padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.code .k{color:var(--k)} .code .s{color:var(--s)} .code .c{color:var(--c);font-style:italic} .code .n{color:var(--n)}
+.term .p{color:var(--k);user-select:none} .term .o{color:#a9b4c4}
+
+/* rail */
+.rail{position:sticky;top:max(24px,env(safe-area-inset-top,0px));align-self:start;display:flex;flex-direction:column;gap:20px;font-size:.93rem}
+.rail nav{display:flex;flex-direction:column;gap:2px}
+.rail nav a{color:var(--muted);text-decoration:none;padding:4px 10px;border-left:2px solid var(--line)}
+.rail nav a:hover{color:var(--fg);border-left-color:var(--accent)}
+.rail .grp{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 0 4px 12px}
+
+/* hero */
+.hero{display:flex;flex-direction:column;gap:16px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.hero .lead{font-size:1.15rem;color:var(--muted);max-width:62ch}
+.magic{font-family:var(--f-mono);font-size:clamp(.8rem,2.4vw,1rem);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.magic span{padding:3px 7px;border-radius:4px;background:var(--sunk);color:var(--muted)}
+.magic span.hi{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.magic small{color:var(--muted);font-family:var(--f-body);font-size:.85rem;margin-left:6px}
+
+/* progress */
+.progress{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.progress .row{display:flex;justify-content:space-between;gap:8px;font-variant-numeric:tabular-nums;font-size:.92rem}
+.bar{height:8px;background:var(--sunk);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.progress .tools{display:flex;gap:8px;flex-wrap:wrap}
+
+/* diagram + tables */
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;overflow-x:auto}
+.fig svg{display:block;min-width:640px;width:100%;height:auto}
+.fig figcaption{font-size:.88rem;color:var(--muted);margin-top:8px}
+figure{margin:0}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.95rem;min-width:520px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
+.note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 14px;border-radius:0 8px 8px 0;max-width:68ch;font-size:.97rem}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.two > *{min-width:0}
+
+/* task list */
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:inherit;font-size:.88rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:5px 12px;border-radius:99px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.level{display:flex;flex-direction:column;gap:14px}
+.level > header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding-top:8px}
+.level > header p{color:var(--muted);font-size:.95rem}
+.task{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px;scroll-margin-top:24px}
+.task[data-state="ok"]{border-color:var(--ok)}
+.task[data-state="seen"]{border-color:var(--seen)}
+.thead{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.tnum{font-family:var(--f-display);font-weight:700;font-size:1.05rem}
+.tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.tag{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.04em;padding:2px 8px;border-radius:4px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.tag.mat{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.tag.st-ok{background:var(--ok-soft);color:var(--ok)}
+.tag.st-seen{background:var(--seen-soft);color:var(--seen)}
+.q{display:flex;flex-direction:column;gap:10px;max-width:72ch}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 12px;border:1px solid var(--line);border-radius:8px;cursor:pointer;background:var(--bg)}
+.opt:hover{border-color:var(--muted)}
+.opt input{margin-top:5px;accent-color:var(--accent)}
+.opt b{font-family:var(--f-mono);font-weight:600;min-width:1.2em}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.blank{display:flex;flex-direction:column;gap:4px}
+.blank label{font-size:.93rem;color:var(--muted)}
+input[type="text"],textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 10px;width:100%}
+input.mono,textarea.mono{font-family:var(--f-mono);font-size:.86rem}
+textarea.editor{font-family:var(--f-mono);font-size:.84rem;line-height:1.5;min-height:180px;tab-size:4;white-space:pre;overflow:auto;resize:vertical}
+textarea.out{min-height:90px}
+input.right,textarea.right{border-color:var(--ok);background:var(--ok-soft)}
+input.wrong,textarea.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.cls{display:flex;flex-direction:column;gap:6px}
+.crow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.crow.right{border-color:var(--ok);background:var(--ok-soft)} .crow.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.crow .txt{min-width:0;font-size:.96rem}
+.seg{display:inline-flex;justify-self:start;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex-wrap:wrap}
+.seg button{font:inherit;font-size:.84rem;border:0;background:var(--surface);color:var(--fg);padding:4px 10px;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+@media (max-width:560px){.crow{grid-template-columns:minmax(0,1fr)}}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;font-size:.92rem;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:6px 14px;border-radius:6px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.feedback{font-weight:600;font-size:.95rem}
+.feedback.ok{color:var(--ok)} .feedback.bad{color:var(--bad)}
+.hints{display:flex;flex-direction:column;gap:6px}
+.hint{background:var(--sunk);border-radius:8px;padding:8px 12px;font-size:.95rem;max-width:72ch}
+.hint b{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);margin-right:6px}
+.sol{border-top:1px dashed var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px}
+.sol .ans{font-weight:700}
+.sol .why{max-width:72ch;color:var(--fg)}
+.editorbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.editorbar span{font-size:.85rem;color:var(--muted)}
+.confirm{display:inline-flex;gap:8px;align-items:center;font-size:.9rem}
+/* paging */
+.rail nav a[aria-current="page"]{color:var(--fg);border-left-color:var(--accent);font-weight:600;background:var(--surface)}
+.rail nav a{display:flex;justify-content:space-between;gap:8px}
+.rail nav a .cnt{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:400}
+.rail nav a .cnt.full{color:var(--ok)}
+.rprog{display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:.86rem;font-variant-numeric:tabular-nums}
+.sync{display:flex;gap:6px;align-items:flex-start;color:var(--muted);font-size:.8rem;line-height:1.35}
+.sync::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;margin-top:4px;background:var(--seen)}
+.sync[data-s="cloud"]::before{background:var(--ok)}
+.mtop{display:none;flex-direction:column;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.mtop select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 10px;width:100%}
+.mtop .row{display:flex;justify-content:space-between;gap:8px;font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+@media (max-width:900px){.mtop{display:flex}}
+.crumb{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-top:1px solid var(--line);padding-top:20px}
+.pager a{display:flex;flex-direction:column;gap:2px;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);text-decoration:none;min-width:0}
+.pager a:hover{border-color:var(--accent)}
+.pager a.next{text-align:right;grid-column:2}
+.pager a .t{font-family:var(--f-display);font-weight:700;font-size:1.05rem}
+.pager a.next .t::after{content:" \2192"} .pager a.prev .t::before{content:"\2190  "}
+.pager .eyebrow{font-size:.7rem}
+@media (max-width:560px){.pager{grid-template-columns:1fr}.pager a.next{grid-column:1}}
+.lvl-empty{color:var(--muted);font-style:italic}
+main{gap:40px}
+footer{color:var(--muted);font-size:.88rem;border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.fc{display:block;max-width:100%;height:auto;margin:0 auto}
+.fc .fn{fill:var(--surface);stroke:var(--fg);stroke-width:1.5}
+.fc .fl{fill:none;stroke:var(--fg);stroke-width:1.5}
+.fc .fa{fill:var(--fg);stroke:none}
+.fc .ft{font-family:var(--f-mono);font-size:13px;fill:var(--fg);text-anchor:middle;dominant-baseline:central}
+.fc .fl2{font-family:var(--f-body);font-size:12px;font-weight:600;fill:var(--muted)}
+.fc.sym{margin:0}
+.fc .fb{fill:var(--accent);stroke:var(--surface);stroke-width:1.5}
+.fc .fbt{font-family:var(--f-body);font-size:11px;font-weight:700;fill:var(--surface);text-anchor:middle;dominant-baseline:central}
+p.prose{display:block}
+.langsw{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.mtop .langsw{flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap}
+
+
+/* --- relacijska algebra --- */
+.ra{font-family:"Noto Sans Math","Cambria Math",var(--f-body)}
+.formula{font-family:"Noto Sans Math","Cambria Math",var(--f-body);font-size:1.22rem;background:var(--accent-soft);color:var(--fg);border-radius:8px;padding:10px 16px;overflow-x:auto;max-width:max-content}
+.keys{display:flex;gap:6px;flex-wrap:wrap}
+:root{--amber:#d98a1c}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--amber:#f0ae4e}}
+:root[data-theme="dark"]{--amber:#f0ae4e}
+.key{font-family:"Noto Sans Math",var(--f-mono);font-size:1.06rem;min-width:38px;height:36px;padding:0 9px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer}
+.key.sym{color:var(--amber);font-weight:700}
+.key:hover{border-color:var(--amber);background:var(--surface)}
+.key:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+textarea.expr{font-family:"Noto Sans Math",var(--f-mono);font-size:1rem;min-height:54px;line-height:1.5}
+.tcap{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.04em;color:var(--muted);padding:9px 12px 5px}
+.reswrap{max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.reswrap table{min-width:0}
+.ra-out{display:flex;flex-direction:column;gap:6px}
+.opt.code span{font-family:var(--f-mono);font-size:.9rem}
+:root{--amber-soft:#fbebd3}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--amber-soft:#3a2c17}}
+:root[data-theme="dark"]{--amber-soft:#3a2c17}
+.op{color:var(--amber);font-weight:700}
+table tr.hl td{background:var(--amber-soft)}
+.cols-hint{font-size:.92rem;color:var(--muted)}
+.cols-hint b{color:var(--fg);font-weight:600}
+.tag.from{border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+details.dbx{border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:9px 14px}
+details.dbx summary{cursor:pointer;font-size:.86rem;color:var(--muted);font-family:var(--f-mono)}
+details.dbx[open]{padding-bottom:14px}
+.play{display:flex;flex-direction:column;gap:10px;border:1px dashed var(--accent);border-radius:10px;padding:14px 16px;background:var(--surface)}
+.play .presets{display:flex;gap:6px;flex-wrap:wrap}
+
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+<style>
+/* LAV-RAČ exercise shell: light orange background with the portal's plum for text and buttons, and the same task colours as the teacher's results. The artifact's own content keeps its styles;
+   these rules own the frame (top progress, rail, pages, task paging) and the task buttons. */
+:root{
+  --lr-bg:#fffaf4;--lr-card:#fff;--lr-ink:#241433;--lr-mut:#5f5470;--lr-acc:#6b2a7a;--lr-acc-soft:#fdeedd;--lr-line:#f0e3d3;--lr-tile:#faf0e3;
+  --lr-hdr:#2e1a40;--lr-lamp:#ffc45c;
+  --lr-ok:#2b8a3e;--lr-ok-bg:#e3f5e8;--lr-half:#9a6416;--lr-half-bg:#f8eed9;--lr-bad:#c92a2a;--lr-bad-bg:#fde8e8;--lr-seen:#5f5470;--lr-seen-bg:#ece6f2;
+  --lr-self:#1f6f8b;--lr-self-bg:#e1f0f5;
+  --lr-none:#e6dccf;--lr-ring:#c3b5a3;
+  --lr-fb:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;--lr-fm:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --lr-bg:#171021;--lr-card:#231833;--lr-ink:#efe9f5;--lr-mut:#a99cba;--lr-acc:#d5a6e6;--lr-acc-soft:#3a2a4a;--lr-line:#3a2c4d;--lr-tile:#2f2242;
+  --lr-hdr:#1f1130;
+  --lr-ok:#6fd48a;--lr-ok-bg:#17352a;--lr-half:#f1b95a;--lr-half-bg:#3a2e17;--lr-bad:#ff8080;--lr-bad-bg:#3d2230;--lr-seen:#a99cba;--lr-seen-bg:#2f2242;
+  --lr-self:#6cc1dd;--lr-self-bg:#16313b;
+  --lr-none:#4a3a60;--lr-ring:#76648f;
+}}
+html body{background:var(--lr-bg);color:var(--lr-ink);font-family:var(--lr-fb);padding:0;margin:0}
+html body .lvs-bar{background:var(--lr-hdr)}
+[hidden]{display:none!important}
+.lr{min-height:100vh}
+.lr-btn{font:600 .9rem var(--lr-fb);border-radius:7px;padding:6px 14px;min-height:36px;cursor:pointer;border:1.5px solid var(--lr-acc);background:var(--lr-acc);color:var(--lr-card);text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.lr-btn.lr-ghost{background:transparent;color:var(--lr-acc)}
+/* the artifacts' text-only buttons get the same outline as their other buttons (agreed 10. 11. 2026); the reset link keeps its look */
+html:not(#lr) .btn.ghost:not(#resetBtn){border-color:var(--lr-line);background:var(--lr-card)}
+html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
+.lr-btn.lr-danger{background:var(--lr-bad);border-color:var(--lr-bad);color:#fff}
+.lr-btn:disabled{opacity:.4;cursor:default}
+.lr :focus-visible{outline:3px solid var(--lr-lamp);outline-offset:2px}
+
+/* top: always visible progress */
+.lr-top{position:sticky;top:0;z-index:20;background:var(--lr-card);border-bottom:1px solid var(--lr-line);box-shadow:0 2px 10px #24143312}
+/* the header spans the whole page: »Vse vaje« and »Odjava« sit at its edges, the title and progress in the middle (agreed 10. 11. 2026) */
+.lr-top-in{display:flex;flex-wrap:nowrap;align-items:center;gap:8px 24px;padding:10px max(clamp(16px,2vw,32px),env(safe-area-inset-right,0px)) 10px max(clamp(16px,2vw,32px),env(safe-area-inset-left,0px))}
+.lr-top-mid{flex:1 1 auto;min-width:0;max-width:920px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px}
+.lr-top-in .lvs-right{flex:none;display:flex;align-items:center;gap:4px 16px;color:var(--lr-ink)}
+.lr-top-in .lvs-back{flex:none}
+.lr-top-in .lvs-status{color:var(--lr-mut)}
+.lr-top-in .lvs-status:empty{display:none}
+@media (min-width:901px){.lr-top-mid .lr-name{flex:2 1 170px}.lr-top-mid .lr-prog{flex:1.5 1 240px}.lr-top-mid .lr-ptxt{white-space:nowrap}}
+/* the two links are tinted plates, the colour of a selected item in the left column */
+.lr-top-in .lvs-back,.lr-top-in .lvs-out button{display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border-radius:8px;background:var(--lr-acc-soft);border:1.5px solid var(--lr-acc-soft);color:var(--lr-acc);font:700 .9rem var(--lr-fb);text-decoration:none;cursor:pointer;white-space:nowrap}
+.lr-top-in .lvs-back:hover,.lr-top-in .lvs-out button:hover{border-color:var(--lr-acc)}
+.lr-top .lvs-warn,.lr-top .lvs-warn a{color:var(--lr-half)}
+.lr-top .lvs-exnote{max-width:1400px}
+.lr-top .lvs-exnote:not([hidden]){margin:0 auto;padding-bottom:10px}
+.lr-name{display:flex;flex-direction:column;min-width:0;flex:1 1 220px;line-height:1.25}
+.lr-name b{font-size:1.05rem}
+.lr-name span{font-size:.85rem;color:var(--lr-mut)}
+.lr-prog{flex:2 1 300px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.lr-stack{display:flex;height:12px;border-radius:99px;background:var(--lr-tile);overflow:hidden}
+.lr-stack i{display:block;height:100%;width:0;transition:width .35s ease-out}
+.lr-ptxt{font:500 .9rem var(--lr-fm);color:var(--lr-mut);font-variant-numeric:tabular-nums}
+.lr-reset{display:flex;align-items:center}
+.lr-confirm{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:.92rem;max-width:560px}
+.lr-ok{background:var(--lr-ok)}.lr-half{background:var(--lr-half)}.lr-bad{background:var(--lr-bad)}.lr-seen{background:var(--lr-seen)}.lr-self{background:var(--lr-self)}
+
+/* body: rail + page */
+.lr-body{max-width:1400px;margin:auto;display:grid;grid-template-columns:304px minmax(0,1fr);gap:40px;padding:24px max(16px,env(safe-area-inset-left,0px)) 80px}
+.lr-rail{position:sticky;top:96px;align-self:start;max-height:calc(100vh - 112px);overflow-y:auto;display:flex;flex-direction:column;gap:2px;padding-right:6px;font-size:.93rem}
+/* a label that wraps hangs under its text, and a counter sits at the right edge */
+.lr-rail a{color:var(--lr-mut);text-decoration:none;border-radius:8px;padding:5px 10px;display:flex;align-items:flex-start;gap:8px;justify-content:space-between;line-height:1.35}
+.lr-rail a:hover{background:var(--lr-tile);color:var(--lr-ink)}
+.lr-rail a[aria-current=page]{background:var(--lr-acc-soft);color:var(--lr-ink);font-weight:700;box-shadow:inset 3px 0 0 var(--lr-acc)}
+.lr-rail a.lr-pg{justify-content:flex-start}
+.lr-ov{font-weight:700;color:var(--lr-ink)!important}
+.lr-grp{display:flex;align-items:center;gap:10px;margin:18px 0 4px;padding:0 4px;color:var(--lr-ink)}
+.lr-grp b{font-size:1.08rem;letter-spacing:.005em;flex:1}
+.lr-grp .lr-gi{width:30px;height:30px;flex:none;border-radius:8px;background:var(--lr-acc-soft);display:grid;place-items:center}
+.lr-grp .lr-gi svg{width:22px;height:22px}
+.lr-gc,.lr-cnt{font:500 .78rem var(--lr-fm);color:var(--lr-mut);font-variant-numeric:tabular-nums}
+.lr-gc.full,.lr-cnt.full{color:var(--lr-ok)}
+.lr-lab{display:flex;gap:6px;flex:1;min-width:0}
+/* em, not ch: the open page is bold, and a bold zero is wider, which would shift its text */
+.lr-tg{flex:none;min-width:calc(var(--lr-tgd,1) * .7em + 1.1em);white-space:nowrap}
+.lr-tx{flex:1;min-width:0;overflow-wrap:anywhere}
+.lr-rail .lr-cnt{margin-left:auto;flex:none;white-space:nowrap;line-height:1.61}
+.lr-dot,.lr-pie{box-sizing:border-box;margin-top:calc((1.35em - 16px) / 2)}
+.lr-pie{flex:none;width:16px;height:16px;border-radius:50%;background:var(--lr-none);box-shadow:0 0 0 1px var(--lr-ring)}
+.lr-dot{flex:none;width:16px;height:16px;border-radius:50%;border:1.5px solid var(--lr-line);display:grid;place-items:center}
+.lr-dot svg{width:12px;height:12px;stroke:transparent;stroke-width:3;fill:none}
+.lr-pg.seen .lr-dot{background:var(--lr-ok);border-color:var(--lr-ok)}
+.lr-pg.seen .lr-dot svg{stroke:#fff}
+.lr-lock{display:none;width:18px;height:18px;color:var(--lr-mut)}
+.lr-lock svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.lr-vaje.locked .lr-lock{display:block}
+.lr-rail a.locked{opacity:.55}
+.lr-gi svg,.lr-ti svg{fill:none;stroke:var(--lr-acc);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.lr-gi svg text,.lr-ti svg text{fill:var(--lr-acc);stroke:none;font-family:var(--lr-fm);font-weight:600}
+.lr-gi svg .fill,.lr-ti svg .fill{fill:var(--lr-acc);stroke:none}
+.lr-mnav{display:none}
+.lr-rail .lr-tools{margin-top:18px;padding:0 10px}
+.lr-main{min-width:0}
+.lr-main .prose,.lr-main .note,.lr-main .q,.lr-main .qtext,.lr-main .hint,.lr-main .sol .why,.lr-main .wnote,.lr-main .think,.lr-main .lead,.lr-main p,.lr-main ul,.lr-main ol,.lr-shead>div{max-width:none}
+.lr-page{display:flex;flex-direction:column;gap:22px;scroll-margin-top:140px}
+.lr-just,.lr-main .prose p,.lr-main p.prose,.lr-main .note,.lr-main .qtext,.lr-main .wnote,.lr-main .hint,.lr-main .sol .why p,.lr-main .level>header p,.lr-main .think div{text-align:justify;hyphens:auto;-webkit-hyphens:auto}
+
+/* page head: where you are in the theory */
+.lr-phead{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding-bottom:12px;border-bottom:1px solid var(--lr-line)}
+.lr-pgrp{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--lr-acc);font-size:1.02rem}
+.lr-pgrp .lr-gi{width:36px;height:36px;border-radius:9px;background:var(--lr-acc-soft);display:grid;place-items:center}
+.lr-pgrp .lr-gi svg{width:26px;height:26px}
+.lr-count{font:500 .86rem var(--lr-fm);color:var(--lr-mut);margin-left:auto}
+.lr-dash{display:flex;gap:4px;flex:1 1 100%}
+.lr-dash i{height:5px;flex:1;border-radius:3px;background:var(--lr-tile)}
+.lr-dash i.on{background:var(--lr-acc)}
+
+/* overview */
+.lr-hero{display:flex;flex-direction:column;gap:14px;padding:4px 0 6px}
+.lr-hero h1{font-size:clamp(1.8rem,3.6vw,2.6rem);line-height:1.12;margin:0}
+.lr-lead{font-size:1.12rem;color:var(--lr-mut);text-align:justify;hyphens:auto}
+.lr-resume{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 14px;border-radius:10px;background:var(--lr-acc-soft)}
+.lr-resume a{color:var(--lr-acc);font-weight:700}
+.lr-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.lr-tile{display:flex;flex-direction:column;gap:6px;padding:18px;border-radius:14px;background:var(--lr-card);border:1px solid var(--lr-line);color:var(--lr-ink);text-decoration:none;min-width:0}
+.lr-tile:hover{border-color:var(--lr-acc);box-shadow:0 6px 18px #2414331a}
+.lr-ti{width:56px;height:56px;border-radius:14px;background:var(--lr-acc-soft);display:grid;place-items:center;margin-bottom:6px}
+.lr-ti svg{width:40px;height:40px}
+.lr-tt{font-size:1.25rem;font-weight:700}
+.lr-td{font-size:.9rem;color:var(--lr-mut)}
+.lr-tile ul{margin:4px 0 0;padding-left:18px;font-size:.9rem;color:var(--lr-mut);display:flex;flex-direction:column;gap:2px}
+.lr-tf{margin-top:auto;padding-top:10px;font-size:.88rem;font-weight:700;color:var(--lr-mut)}
+.lr-tf.full{color:var(--lr-ok)}
+.lr-tile-vaje{background:var(--lr-hdr);border-color:var(--lr-hdr);color:#fff}
+.lr-tile-vaje .lr-td,.lr-tile-vaje ul,.lr-tile-vaje .lr-tf{color:#e6d8ee}
+.lr-tile-vaje .lr-ti{background:#ffffff1f}
+.lr-tile-vaje .lr-ti svg{stroke:var(--lr-lamp)}
+.lr-tile-vaje.locked{background:var(--lr-tile);border-color:var(--lr-line);color:var(--lr-ink)}
+.lr-tile-vaje.locked .lr-td,.lr-tile-vaje.locked ul,.lr-tile-vaje.locked .lr-tf{color:var(--lr-mut)}
+.lr-tile-vaje.locked .lr-ti{background:var(--lr-card)}
+.lr-tile-vaje.locked .lr-ti svg{stroke:var(--lr-mut)}
+.lr-rules{padding:18px 20px;border-radius:14px;background:var(--lr-card);border:1px solid var(--lr-line)}
+.lr-rules h2{font-size:1.15rem;margin:0 0 6px}
+.lr-rules ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:4px}
+.lr-rules p{margin:10px 0 0;color:var(--lr-mut);font-size:.95rem}
+.lr-src{font-size:.88rem;color:var(--lr-mut);text-align:justify;hyphens:auto}
+
+/* set page */
+.lr-shead{display:flex;gap:16px;align-items:flex-start}
+.lr-shead>.lr-gi{flex:none;width:56px;height:56px;border-radius:14px;background:var(--lr-acc-soft);display:grid;place-items:center}
+.lr-shead>.lr-gi svg{width:40px;height:40px}
+.lr-shead>div{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
+.lr-shead h2{margin:0}
+.lr-kick{font-size:.9rem;font-weight:700;color:var(--lr-acc)}
+.lr-board{background:var(--lr-card);border:1px solid var(--lr-line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.lr-bh{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.lr-bh b{font-size:1rem}
+.lr-done{font-size:.92rem;color:var(--lr-mut);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lr-nums{display:flex;flex-wrap:wrap;gap:6px}
+.lr-num{width:36px;height:32px;border-radius:6px;border:1.5px solid var(--lr-line);background:var(--lr-card);color:var(--lr-ink);font:700 .82rem var(--lr-fb);cursor:pointer}
+.lr-num:hover{border-color:var(--lr-acc)}
+.lr-num[data-s=ok]{background:var(--lr-ok-bg);border-color:var(--lr-ok);color:var(--lr-ok)}
+.lr-num[data-s=half]{background:var(--lr-half-bg);border-color:var(--lr-half);color:var(--lr-half)}
+.lr-num[data-s=bad]{background:var(--lr-bad-bg);border-color:var(--lr-bad);color:var(--lr-bad)}
+.lr-num[data-s=seen]{background:var(--lr-seen-bg);border-color:var(--lr-seen);color:var(--lr-seen)}
+.lr-num[data-s=self]{background:var(--lr-self-bg);border-color:var(--lr-self);color:var(--lr-self)}
+.lr-num[aria-current=step]{box-shadow:0 0 0 3px var(--lr-acc);border-color:var(--lr-acc)}
+.lr-legend{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px 18px;font-size:.88rem;color:var(--lr-mut)}
+.lr-legend span{display:inline-flex;align-items:center;gap:6px}
+.lr-sw{width:14px;height:14px;border-radius:4px}
+.lr-setbody{display:flex;flex-direction:column;gap:16px}
+.lr-cardlist{display:flex;flex-direction:column}
+.lr-task.lr-off{display:none!important}
+.lr-tpager{display:flex;justify-content:space-between;gap:12px}
+.lr-locked{display:flex;gap:16px;padding:20px;border-radius:14px;background:var(--lr-card);border:1.5px dashed var(--lr-line)}
+.lr-locked .lr-gi{flex:none;width:48px;height:48px;border-radius:12px;background:var(--lr-tile);display:grid;place-items:center}
+.lr-locked .lr-gi svg{width:28px;height:28px;stroke:var(--lr-mut)}
+.lr-locked h3{margin:0 0 4px}
+.lr-locked ul{margin:8px 0 14px;padding-left:20px}
+.lr-locked a:not(.lr-btn){color:var(--lr-acc)}
+
+/* task card: check on the left, help on the right */
+.lr-task .crumb{align-items:center}
+.lr-actions{display:flex!important;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-top:6px}
+/* empty help boxes take no room, so the space above and below the buttons stays even */
+.lr-task .hints:empty,.lr-task .tests:empty{display:none}
+.lr-left,.lr-right{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.lr-right{margin-left:auto}
+.lr-task .lr-hint,.lr-task .lr-sol{background:transparent!important;border:1.5px solid var(--lr-acc)!important;color:var(--lr-acc)!important;border-radius:7px;min-height:36px;padding:5px 14px;font-size:.9rem;font-weight:600}
+.lr-task .lr-hint:disabled{opacity:.45}
+.lr-task[data-lr=open] .lr-hint::after,.lr-task[data-lr=open] .lr-sol::after,.lr-task[data-lr=hinted] .lr-sol::after{font:500 .74rem var(--lr-fm);margin-left:8px;padding:1px 6px;border-radius:99px;background:var(--lr-acc-soft)}
+.lr-task[data-lr=open] .lr-hint::after{content:"−50 %"}
+.lr-task[data-lr=open] .lr-sol::after,.lr-task[data-lr=hinted] .lr-sol::after{content:"0 točk"}
+.lr-task .lr-check{background:var(--lr-acc)!important;border-color:var(--lr-acc)!important;color:var(--lr-card)!important;border-radius:7px;min-height:36px;padding:5px 16px;font-size:.9rem}
+.lr-task .lr-check:disabled,.lr-task .lr-extra:disabled{opacity:.4;cursor:default}
+.lr-task .lr-extra{background:transparent!important;border:1.5px solid var(--lr-acc)!important;color:var(--lr-acc)!important;border-radius:7px;min-height:36px;padding:5px 14px;font-size:.9rem;font-weight:600}
+.lr-solask{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:flex-end;padding:10px 12px;border-radius:10px;background:var(--lr-bad-bg);font-size:.95rem}
+.lr-task[data-lr=ok]{border-color:var(--lr-ok)!important}
+.lr-task[data-lr=half]{border-color:var(--lr-half)!important}
+.lr-task[data-lr=bad]{border-color:var(--lr-bad)!important}
+.lr-task[data-lr=seen]{border-color:var(--lr-seen)!important}
+.lr-task[data-lr=self]{border-color:var(--lr-self)!important}
+.tag.lr-st{font-weight:700}
+.tag.lr-st.lr-ok{background:var(--lr-ok-bg);color:var(--lr-ok)}
+.tag.lr-st.lr-half{background:var(--lr-half-bg);color:var(--lr-half)}
+.tag.lr-st.lr-bad{background:var(--lr-bad-bg);color:var(--lr-bad)}
+.tag.lr-st.lr-seen{background:var(--lr-seen-bg);color:var(--lr-seen)}
+.tag.lr-st.lr-self{background:var(--lr-self-bg);color:var(--lr-self)}
+
+/* self tasks: no points, so the hint and the solution carry no price tag; the known results replace the inputs */
+.lr-task[data-self][data-lr] .lr-hint::after,.lr-task[data-self][data-lr] .lr-sol::after{content:none}
+.lr-task[data-self=blanks] .sol .ans{display:none}
+.lr-tests{margin:10px 0;padding:10px 14px;border-radius:10px;background:var(--lr-self-bg);border-left:4px solid var(--lr-self)}
+.lr-tests b{display:block;margin-bottom:4px}
+.lr-tests ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:2px}
+.lr-tests code{font-family:var(--lr-fm);font-weight:700}
+.lr-tests pre.code{margin:4px 0 0;padding:8px 12px;font-size:.9em}
+
+/* options of single tasks: bullets in a question, blanks in two columns, blanks typed in the code */
+.lr-q ul.lr-bul{margin:6px 0 10px;padding-left:22px;display:flex;flex-direction:column;gap:2px}
+.lr-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 28px;margin:6px 0}
+@media (max-width:640px){.lr-cols{grid-template-columns:minmax(0,1fr)}}
+/* the blanks typed in the code: they must beat the artifact's own input style (padding, border, width) */
+.lr-q input.lr-gap{font:inherit;font-family:var(--lr-fm);font-size:inherit;color:var(--lr-ink);background:var(--lr-acc-soft);border:0;border-bottom:2px solid var(--lr-acc);border-radius:4px 4px 0 0;padding:0 .3em;margin:0 .1em;height:1.45em;line-height:1.2;text-align:center;box-sizing:content-box;min-width:3ch;vertical-align:baseline}
+.lr-q input.lr-gap::placeholder{color:var(--lr-mut);opacity:.7}
+.lr-q input.lr-gap.right{border-bottom-color:var(--lr-ok);background:var(--lr-ok-bg)}
+.lr-q input.lr-gap.wrong{border-bottom-color:var(--lr-bad);background:var(--lr-bad-bg)}
+.lr-q input.lr-gap:disabled{opacity:1;color:var(--lr-ink);-webkit-text-fill-color:var(--lr-ink)}
+
+/* pager between pages, bottom right */
+.lr-pager{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--lr-line);padding-top:14px;margin-top:4px;flex-wrap:wrap}
+.lr-pager a{display:flex;flex-direction:column;gap:0;padding:7px 12px;border:1.5px solid var(--lr-line);border-radius:7px;background:var(--lr-card);color:var(--lr-ink);text-decoration:none;min-width:0;max-width:320px;line-height:1.3}
+.lr-pager a:hover{border-color:var(--lr-acc)}
+.lr-pager span{font-weight:700;font-size:.9rem}
+.lr-pager .lr-prevp span::before{content:"‹ "}
+.lr-pager .lr-nextp{border-color:var(--lr-acc);text-align:right;margin-left:auto}
+.lr-pager .lr-nextp span::after{content:" ›"}
+
+@media (max-width:900px){
+  /* the back link and the logout share the first header row; the title gets its own */
+  .lr-top-in{flex-wrap:wrap;gap:6px 16px}
+  .lr-top-mid{display:contents}
+  .lr-top-in .lvs-back{order:-2}
+  .lr-top-in .lvs-right{order:-1;margin-left:auto;gap:4px 10px}
+  .lr-top-in .lvs-back,.lr-top-in .lvs-out button{padding:0 10px}
+  /* on the narrowest phones the note keeps only its icon (the button still says what it does) */
+  .lr-top-in .lvn-btn span{display:var(--lr-notelab,inline)}
+  .lr-name{flex:1 1 100%}
+  .lr-body{grid-template-columns:minmax(0,1fr);gap:16px;padding-top:14px}
+  .lr-rail{display:none}
+  .lr-mnav{display:flex;flex-direction:column;gap:12px;font-size:.85rem;color:var(--lr-mut)}
+  .lr-msel{display:flex;flex-direction:column;gap:4px}
+  .lr-mnav select{font:inherit;font-size:.95rem;color:var(--lr-ink);background:var(--lr-card);border:1px solid var(--lr-line);border-radius:7px;padding:6px 10px;min-height:38px}
+  .lr-top{position:sticky}
+  .lr-reset{flex:1 1 100%}
+  .lr-shead>.lr-gi{display:none}
+  .lr-right{margin-left:0}
+}
+@media (max-width:340px){.lr-top-in{--lr-notelab:none}}
+@media (prefers-reduced-motion:reduce){.lr *{transition:none!important}}
+
+html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-tile);--line:var(--lr-line);--fg:var(--lr-ink);--muted:var(--lr-mut);
+  --accent:var(--lr-acc);--accent-soft:var(--lr-acc-soft);--ok:var(--lr-ok);--ok-soft:var(--lr-ok-bg);--bad:var(--lr-bad);--bad-soft:var(--lr-bad-bg);
+  --seen:var(--lr-seen);--seen-soft:var(--lr-seen-bg);--amber:var(--lr-half);--amber-soft:var(--lr-half-bg);
+  --f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}
+  body{padding-left:0;padding-right:0}
+</style>
+</head><body>
+<div class="wrap">
+  <aside class="rail" aria-label="Vsebina poglavja">
+    <div class="eyebrow">RAČ-LAV 4 · Poglavje 1 od 8</div>
+    <nav>
+      <div class="grp">Razlaga</div>
+      <a href="#uvod">Kaj je relacijska algebra</a>
+      <a href="#pojmi">Osnovni pojmi in baza</a>
+      <a href="#selekcija">Selekcija σ</a>
+      <a href="#projekcija">Projekcija π in ρ</a>
+      <a href="#mnozice">Unija, presek, razlika</a>
+      <a href="#stiki">Produkt in stika</a>
+      <a href="#kolicnik">Količnik ÷</a>
+      <a href="#prioriteta">Prioriteta in napake</a>
+      <a href="#sql">Od algebre do SQL</a>
+      <a href="#postopek">Postopek in igrišče</a>
+      <div class="grp">Vaje</div>
+      <a href="#naloge-a">A · Pojmi in operacije <span class="cnt" data-lv="A"></span></a>
+      <a href="#naloge-b">B · Branje izrazov <span class="cnt" data-lv="B"></span></a>
+      <a href="#naloge-c">C · Šolska baza <span class="cnt" data-lv="C"></span></a>
+      <a href="#naloge-d">D · Vaje (knjižnica) <span class="cnt" data-lv="D"></span></a>
+      <a href="#naloge-e">E · Dodatne vaje <span class="cnt" data-lv="E"></span></a>
+      <a href="#naloge-f">F · Težje naloge <span class="cnt" data-lv="F"></span></a>
+      <a href="#doma">Za doma <span class="cnt" data-lv="H"></span></a>
+    </nav>
+    <div class="rprog" aria-live="polite">
+      <strong>Tvoj napredek</strong>
+      <div class="bar"><i class="js-bar"></i></div>
+      <span class="js-progtxt"></span>
+      <span class="sync js-sync" data-s="local">Napredek se shranjuje v tem brskalniku.</span>
+    </div>
+  </aside>
+
+  <main>
+    <div class="mtop">
+      <label class="eyebrow" for="pageSel">Poglavje 1 · stran</label>
+      <select id="pageSel"></select>
+      <div class="bar"><i class="js-bar"></i></div>
+      <div class="row"><span class="js-progtxt"></span></div>
+      <span class="sync js-sync" data-s="local">Napredek se shranjuje v tem brskalniku.</span>
+    </div>
+    <div class="crumb" id="crumb"><span class="eyebrow">Poglavje 1 · Relacijska algebra</span><span class="eyebrow" id="crumbN"></span></div>
+    <header class="hero" id="hero">
+      <div class="eyebrow">Splošna matura · Računalništvo · Izpitna pola 2</div>
+      <h1>Relacijska algebra</h1>
+      <p class="lead">Preden se v naslednjih poglavjih lotimo jezika SQL, spoznajmo njegovo teoretično podlago: devet operacij, s katerimi iz tabel izračunamo odgovor na skoraj vsako vprašanje. Vsaka poizvedba, ki jo bo kdaj izvedla podatkovna baza, je v resnici izraz relacijske algebre.</p>
+      <div class="magic" aria-label="Teme poglavja">
+        <span class="hi ra">σ</span><span>·</span><span class="hi ra">π</span><span>·</span><span class="hi ra">⋈</span>
+        <small>selekcija, projekcija, stik — tri operacije, ki jih uporabiš skoraj v vsaki nalogi</small>
+      </div>
+    </header>
+
+<!-- ===================== RAZLAGA ===================== -->
+<section id="uvod">
+<div class="eyebrow">Razlaga 1</div>
+<h2>Kaj je relacijska algebra</h2>
+<div class="prose">
+  <p><strong>Relacijska algebra</strong> je množica operacij nad relacijami (tabelami). Vsaka operacija vzame eno ali dve relaciji in vrne <strong>novo relacijo</strong> — vhodne tabele ne spremeni. Ker je rezultat spet relacija, lahko operacije poljubno <strong>gnezdimo</strong>: rezultat ene je vhod naslednje, tako kot pri računanju s števili.</p>
+  <p>Uvedel jo je <strong>E. F. Codd leta 1970</strong> skupaj z relacijskim modelom podatkov. Je <strong>postopkovni povpraševalni jezik</strong>: korak za korakom povemo, katere operacije naj se izvedejo nad tabelami. Njegov nepostopkovni dvojček je relacijski račun, v katerem samo opišemo lastnosti želenega rezultata.</p>
+  <p>Zakaj se jo učimo? Relacijska algebra je <strong>teoretična osnova jezika SQL</strong>. Vsaka poizvedba SELECT, ki jo bomo pisali v poglavju 5, je v resnici izraz relacijske algebre — SUPB jo pred izvedbo prevede v zaporedje prav teh operacij. Kdor zna brati σ in π, razume, kaj počne baza.</p>
+</div>
+<div class="tbl"><table>
+<thead><tr><th>Simbol</th><th>Operacija</th><th>Kaj naredi</th></tr></thead>
+<tbody>
+<tr><td class="num"><span class="ra op">σ</span></td><td>selekcija</td><td>izbere vrstice, ki izpolnjujejo pogoj</td></tr>
+<tr><td class="num"><span class="ra op">π</span></td><td>projekcija</td><td>obdrži samo naštete stolpce</td></tr>
+<tr><td class="num"><span class="ra op">ρ</span></td><td>preimenovanje</td><td>preimenuje atribute</td></tr>
+<tr><td class="num"><span class="ra op">×</span></td><td>kartezični produkt</td><td>vse kombinacije vrstic dveh relacij</td></tr>
+<tr><td class="num"><span class="ra op">∪</span></td><td>unija</td><td>vrstice, ki so v p ali v r</td></tr>
+<tr><td class="num"><span class="ra op">∩</span></td><td>presek</td><td>vrstice, ki so v p in v r</td></tr>
+<tr><td class="num"><span class="ra op">−</span></td><td>razlika</td><td>vrstice, ki so v p in niso v r</td></tr>
+<tr><td class="num"><span class="ra op">⋈</span></td><td>stik</td><td>poveže vrstici po skupnem atributu</td></tr>
+<tr><td class="num"><span class="ra op">÷</span></td><td>količnik</td><td>vrstice, ki nastopajo z vsemi vrsticami druge relacije</td></tr>
+</tbody>
+</table></div>
+<p class="note"><strong>Zapis:</strong> pogoj ali seznam stolpcev pišemo v oglatih oklepajih, relacijo pa v okroglih: <span class="ra">σ[Kraj='Kranj'](Dijak)</span>. V literaturi in na maturi boš srečal tudi podpisani zapis <span class="ra">σ<sub>Kraj='Kranj'</sub>(Dijak)</span> — pomen je popolnoma enak, na tej strani pa povsod uporabljamo oglate oklepaje, ker jih zahteva tudi preverjalnik nalog.</p>
+<p class="note"><strong>Matura:</strong> relacijska algebra je del vsebin izpitne pole 2. Na dosedanjih izpitih sta bili dve nalogi: prevod stavka SQL v izraz relacijske algebre (2012) in prepoznavanje operacije za filtriranje (2013, jesen). Obe najdeš med nalogami tega poglavja.</p>
+</section>
+
+<section id="pojmi">
+<div class="eyebrow">Razlaga 2</div>
+<h2>Osnovni pojmi in šolska baza</h2>
+<div class="prose">
+  <p>Preden začnemo računati, se dogovorimo za besede. Vzemimo tabelo dijakov:</p>
+</div>
+<div class="two">
+<div class="tbl" data-rel="Dijak"></div>
+<div class="tbl"><table>
+<thead><tr><th>Pojem</th><th>Pomen</th><th>V primeru</th></tr></thead>
+<tbody>
+<tr><td><strong>relacija</strong></td><td>tabela z imenom</td><td>Dijak</td></tr>
+<tr><td><strong>atribut</strong></td><td>stolpec</td><td>Kraj</td></tr>
+<tr><td><strong>terka</strong> (n-terica)</td><td>ena vrstica</td><td>(1, Ana, Novak, 4A, Ljubljana)</td></tr>
+<tr><td><strong>shema</strong></td><td>ime + atributi</td><td>Dijak(ID, Ime, Priimek, Razred, Kraj)</td></tr>
+<tr><td><strong>ključ</strong></td><td>atribut, ki enolično določi terko</td><td>ID</td></tr>
+</tbody>
+</table></div>
+</div>
+<p class="note"><strong>Relacija je množica terk.</strong> Zato v njej ni dveh enakih vrstic in vrstni red vrstic ni pomemben. To bo kmalu pomembno: projekcija podvojene vrstice izloči, unija pa skupne terke šteje samo enkrat.</p>
+<div class="prose">
+  <p>Vse razlage in naloge sklopov B in C uporabljajo tole šolsko bazo. Relacija Ocena povezuje dijaka (ID) in predmet (PID) — to sta <strong>tuja ključa</strong>.</p>
+</div>
+<div class="two">
+<div class="tbl" data-rel="Predmet"></div>
+<div class="tbl" data-rel="Profesor"></div>
+</div>
+<div class="two">
+<div class="tbl" data-rel="Ocena"></div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div class="tbl" data-rel="Robotika"></div>
+<div class="tbl" data-rel="Sah"></div>
+</div>
+</div>
+<div class="prose"><p>V sklopih D in E (ter deloma v F in v Za doma) boš delal še z bazo šolske knjižnice — njene tabele so prikazane pri vsaki nalogi.</p></div>
+</section>
+
+<section id="selekcija">
+<div class="eyebrow">Razlaga 3</div>
+<h2>Selekcija σ — izbira vrstic</h2>
+<div class="formula ra">σ[Razred='4A'](Dijak)</div>
+<div class="prose">
+  <p>Selekcija obdrži samo vrstice, ki izpolnjujejo <strong>pogoj F</strong>. Stolpci ostanejo vsi — shema rezultata je enaka shemi vhoda.</p>
+  <p>Pogoj je sestavljen iz primerjav oblike <em>atribut Θ vrednost</em> ali <em>atribut Θ atribut</em>, kjer je Θ eden od <span class="ra">=, ≠, &lt;, &gt;, ≤, ≥</span>. Primerjave povezujemo z logičnimi operatorji <span class="ra">∧</span> (in), <span class="ra">∨</span> (ali) in <span class="ra">¬</span> (ne). Besedilo pišemo v narekovajih (<code>Kraj='Kranj'</code>), števila brez (<code>Starost&lt;17</code>).</p>
+</div>
+<div class="two">
+<div class="tbl" data-rel="Dijak" data-hl="0,2"></div>
+<div class="tbl" data-res="σ[Razred='4A'](Dijak)" data-cap="Rezultat"></div>
+</div>
+<pre class="code js-hl">SQL: SELECT * FROM Dijak WHERE Razred = '4A'</pre>
+<p class="note"><strong>Pozor:</strong> F v σ[F] je pogoj (formula), ne ime stolpca. σ nikoli ne spremeni števila stolpcev — če potrebuješ manj stolpcev, je na vrsti projekcija.</p>
+<div data-play='["σ[Kraj=&apos;Ljubljana&apos;](Dijak)","σ[Ocena≥4 ∧ PID=&apos;R&apos;](Ocena)","σ[Ure&lt;4](Predmet)"]'></div>
+</section>
+
+<section id="projekcija">
+<div class="eyebrow">Razlaga 4</div>
+<h2>Projekcija π in preimenovanje ρ</h2>
+<div class="formula ra">π[Kraj](Dijak)</div>
+<div class="prose">
+  <p>Projekcija obdrži samo <strong>naštete stolpce</strong>, v vrstnem redu z liste. Ker je rezultat spet množica, <strong>podvojene vrstice izginejo</strong> — Ljubljana se v tabeli Dijak pojavi trikrat, v rezultatu pa samo enkrat. Rezultat ima zato lahko manj vrstic kot vhod.</p>
+</div>
+<div class="two">
+<div class="tbl" data-rel="Dijak" data-cols="Kraj" data-hl="0,2,4" data-cap="Dijak (stolpec Kraj) — Ljubljana trikrat"></div>
+<div class="tbl" data-res="π[Kraj](Dijak)" data-cap="π[Kraj](Dijak) — 3 vrstice"></div>
+</div>
+<div class="prose"><p>Naštejemo lahko več stolpcev, ločenih z vejico, na primer <span class="ra">π[Ime,Priimek](Dijak)</span>:</p></div>
+<div class="two">
+<div class="tbl" data-res="π[Ime,Priimek](Dijak)" data-cap="π[Ime,Priimek](Dijak)"></div>
+</div>
+<pre class="code js-hl">SQL: SELECT DISTINCT Kraj FROM Dijak</pre>
+<h3 style="font-size:1.15rem;margin-top:8px">Sestavljanje: σ in π skupaj</h3>
+<div class="prose">
+  <p>Prava moč algebre je gnezdenje. Imena dijakov iz Ljubljane dobimo v dveh korakih — izraz beremo <strong>od znotraj navzven</strong>:</p>
+</div>
+<div class="formula ra">π[Ime](σ[Kraj='Ljubljana'](Dijak))</div>
+<div class="tbl"><table>
+<thead><tr><th>Korak</th><th>Izraz</th><th>Rezultat</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td><span class="ra">Dijak</span></td><td>5 vrstic, 5 stolpcev</td></tr>
+<tr><td class="num">2</td><td><span class="ra">σ[Kraj='Ljubljana'](…)</span></td><td>3 vrstice: Ana, Eva, Nika</td></tr>
+<tr><td class="num">3</td><td><span class="ra">π[Ime](…)</span></td><td>samo stolpec Ime</td></tr>
+</tbody>
+</table></div>
+<p class="note"><strong>Vrstni red je pomemben:</strong> π[Ime](σ[Kraj='Ljubljana'](Dijak)) deluje, obratni izraz σ[Kraj='Ljubljana'](π[Ime](Dijak)) pa ne — po projekciji na Ime stolpca Kraj ni več in pogoj nima s čim delati.</p>
+<div class="prose">
+  <p><strong>Preimenovanje ρ</strong> da atributom nova imena: <span class="ra">ρ[IDB,ImeB,PriimekB,RazredB,KrajB](Dijak)</span> vrne isto tabelo s preimenovanimi stolpci. Potrebujemo ga, kadar isto relacijo uporabimo dvakrat — na primer pri primerjanju dveh dijakov med seboj (naloga Za doma). V SQL mu ustreza <code>FROM Dijak AS B</code>.</p>
+</div>
+<div data-play='["π[Razred](Dijak)","π[Ime,Kraj](σ[Razred=&apos;4B&apos;](Dijak))","π[Naziv](Predmet)"]'></div>
+</section>
+
+<section id="mnozice">
+<div class="eyebrow">Razlaga 5</div>
+<h2>Unija, presek, razlika</h2>
+<div class="prose">
+  <p>Tri operacije delajo z relacijama kot z množicama vrstic. Vse tri so <strong>smiselne le, če imata relaciji enako shemo</strong> (ista imena in isti vrstni red atributov) — pravimo, da sta <em>združljivi</em>. Shema rezultata je ista.</p>
+</div>
+<div class="two">
+<div class="tbl" data-rel="Robotika"></div>
+<div class="tbl" data-rel="Sah"></div>
+</div>
+<div class="tbl"><table>
+<thead><tr><th>Operacija</th><th>Pomen</th><th>Rezultat (imena)</th><th>Lastnost</th></tr></thead>
+<tbody>
+<tr><td><span class="ra">Robotika ∪ Sah</span></td><td>obiskuje vsaj en krožek</td><td>Ana, Luka, Jan, Eva</td><td>komutativna; podvojene terke se izločijo</td></tr>
+<tr><td><span class="ra">Robotika ∩ Sah</span></td><td>obiskuje oba krožka</td><td>Luka, Jan</td><td>komutativna; izpeljana: p − (p − r)</td></tr>
+<tr><td><span class="ra">Robotika − Sah</span></td><td>robotika, a ne šah</td><td>Ana</td><td><strong>ni</strong> komutativna: Sah − Robotika = {Eva}</td></tr>
+</tbody>
+</table></div>
+<pre class="code js-hl">SQL: UNION   INTERSECT   EXCEPT (Oracle: MINUS)</pre>
+<p class="note"><strong>Najpogostejša napaka na tej strani:</strong> unija, presek in razlika nad relacijama z različnima shemama (npr. Dijak ∪ Predmet) niso definirane. Če se shemi razlikujeta, najprej z π ali ρ poskrbi, da se ujemata.</p>
+<div data-play='["Robotika ∪ Sah","Robotika ∩ Sah","Sah − Robotika","π[ID](σ[PID=&apos;M&apos;](Ocena)) ∩ π[ID](σ[PID=&apos;R&apos;](Ocena))"]'></div>
+</section>
+
+<section id="stiki">
+<div class="eyebrow">Razlaga 6</div>
+<h2>Kartezični produkt in stika</h2>
+<div class="prose">
+  <p><strong>Kartezični produkt</strong> <span class="ra">p × r</span> združi vsako vrstico prve relacije z vsako vrstico druge. Število vrstic se zmnoži (|p| · |r|), stolpci se seštejejo. Sam po sebi je redko uporaben — skoraj vedno mu sledi selekcija, ki obdrži samo smiselne kombinacije.</p>
+  <p><strong>Θ-stik</strong> je prav ta par operacij v enem zapisu: <span class="ra">p ⋈[F] r = σ[F](p × r)</span>. Pogoj F primerja atribut leve in atribut desne relacije s poljubno primerjavo Θ.</p>
+</div>
+<div class="two">
+<div class="tbl" data-rel="Ponudba"></div>
+<div class="tbl" data-rel="Kupec"></div>
+</div>
+<div class="formula ra">Ponudba ⋈[Cena ≤ Proracun] Kupec</div>
+<div class="tbl" data-res="Ponudba ⋈[Cena≤Proracun] Kupec" data-cap="Pari izdelek–kupec, kjer si kupec izdelek lahko privošči"></div>
+<div class="prose">
+  <p><strong>Naravni stik</strong> <span class="ra">p ⋈ r</span> (brez pogoja) je najpogostejša oblika: poveže vrstici, ki imata <strong>enako vrednost skupnih atributov</strong> (atributov z istim imenom). Skupni stolpec se v rezultatu pojavi samo enkrat. Definicija: <span class="ra">p ⋈ r = π[X](σ[F](p × r))</span>, kjer F zahteva enakost istoimenskih atributov.</p>
+</div>
+<div class="two">
+<div class="tbl" data-res="Dijak ⋈ Ocena" data-cap="Dijak ⋈ Ocena — povezava po ID (8 vrstic)"></div>
+<div class="tbl" data-res="π[Ime,Naziv,Ocena](Dijak ⋈ Ocena ⋈ Predmet)" data-cap="… ⋈ Predmet in projekcija: kdo ima katero oceno"></div>
+</div>
+<pre class="code js-hl">SQL: SELECT * FROM Dijak NATURAL JOIN Ocena</pre>
+<p class="note"><strong>Dve pasti naravnega stika:</strong> ① vrstice brez para izginejo iz rezultata (dijak brez ocene se v Dijak ⋈ Ocena ne pojavi); ② če skupnih atributov ni, je p ⋈ r = p × r, ker je pogoj prazen in vedno resničen.</p>
+<div data-play='["Dijak ⋈ Ocena","Ocena ⋈ Predmet","π[Ime,Profesor](Dijak ⋈ Ocena ⋈ Profesor)","Ponudba ⋈[Cena≤Proracun] Kupec"]'></div>
+</section>
+
+<section id="kolicnik">
+<div class="eyebrow">Razlaga 7</div>
+<h2>Količnik ÷ — »z vsemi«</h2>
+<div class="formula ra">p ÷ r</div>
+<div class="prose">
+  <p>Količnik odgovarja na vprašanja z besedo <strong>»vse«</strong>: kdo si je izposodil <em>vse</em> fantazijske knjige, kdo ima oceno pri <em>vseh</em> predmetih. Shema desne relacije mora biti prava podmnožica leve (R ⊂ P); shema rezultata je X = P − R.</p>
+  <p>Terka t je v rezultatu natanko tedaj, ko se v p pojavi <strong>v paru z vsako terko iz r</strong>.</p>
+</div>
+<div class="two">
+<div class="tbl" data-res="π[CID,KID](Izposoja)" data-cap="p = π[CID,KID](Izposoja)"></div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div class="tbl" data-res="π[KID](σ[Zanr='fantazija'](Knjiga))" data-cap="r = KID-ji fantazijskih knjig"></div>
+<div class="tbl" data-res="π[CID,KID](Izposoja) ÷ π[KID](σ[Zanr='fantazija'](Knjiga))" data-cap="p ÷ r — član 3 ima vse tri"></div>
+</div>
+</div>
+<div class="prose">
+  <p>Količnik je izpeljana operacija: <span class="ra">p ÷ r = π[X](p) − π[X]((π[X](p) × r) − p)</span>. Formule se ni treba učiti na pamet — razumi idejo: od vseh kandidatov odštejemo tiste, ki jim kakšna terka iz r manjka. V SQL količnik najpogosteje zapišemo z dvojno negacijo (NOT EXISTS) ali z GROUP BY … HAVING COUNT.</p>
+</div>
+<p class="note"><strong>Kdaj NE uporabiš količnika:</strong> »izposodil je K1 in K3« za dve konkretni vrednosti rešiš tudi s presekom dveh množic CID-jev. Količnik zasije, ko je desna stran rezultat poizvedbe (»vse Cankarjeve«, »vsi predmeti«) in se njen obseg lahko spreminja.</p>
+<div data-play='["π[CID,KID](Izposoja) ÷ π[KID](σ[Zanr=&apos;fantazija&apos;](Knjiga))","π[ID,PID](Ocena) ÷ π[PID](σ[ID=1](Ocena))"]'></div>
+</section>
+
+<section id="prioriteta">
+<div class="eyebrow">Razlaga 8</div>
+<h2>Prioriteta in pogoste napake</h2>
+<div class="prose">
+  <p>Kadar v izrazu nastopa več operacij, se izvajajo v tem vrstnem redu (z oklepaji je izraz vedno jasnejši — in na maturi varnejši):</p>
+</div>
+<div class="tbl"><table>
+<thead><tr><th>Prioriteta</th><th>Operacije</th></tr></thead>
+<tbody>
+<tr><td class="num">1 (najvišja)</td><td>projekcija π, selekcija σ</td></tr>
+<tr><td class="num">2</td><td>kartezični produkt ×, Θ-stik, naravni stik ⋈, količnik ÷</td></tr>
+<tr><td class="num">3</td><td>presek ∩</td></tr>
+<tr><td class="num">4 (najnižja)</td><td>unija ∪ in razlika − (z leve proti desni)</td></tr>
+</tbody>
+</table></div>
+<div class="tbl"><table>
+<thead><tr><th>Napaka</th><th>Zakaj je narobe</th><th>Popravek</th></tr></thead>
+<tbody>
+<tr><td>∪, ∩, − nad različnima shemama</td><td>operaciji nista definirani</td><td>z π ali ρ izenači shemi</td></tr>
+<tr><td>σ[PID='M' ∧ PID='R'](Ocena) za »ima obe oceni«</td><td>ista vrstica ima samo en PID — rezultat je vedno prazen</td><td>presek dveh množic ID-jev</td></tr>
+<tr><td>σ za projekcijo: σ[Kraj='…'](π[Ime](Dijak))</td><td>po π[Ime] stolpca Kraj ni več</td><td>najprej σ, nato π</td></tr>
+<tr><td>pozabljeno: π izloči podvojene vrstice</td><td>rezultat je lahko manjši od vhoda</td><td>pri štetju vrstic to upoštevaj</td></tr>
+<tr><td>pričakovanje, da ⋈ obdrži vrstice brez para</td><td>naravni stik jih izgubi</td><td>preveri, katere vrstice imajo par</td></tr>
+<tr><td>pri ÷: R ni prava podmnožica P</td><td>količnik ni definiran</td><td>levo stran pripravi s π (npr. π[CID,KID])</td></tr>
+</tbody>
+</table></div>
+</section>
+
+<section id="sql">
+<div class="eyebrow">Razlaga 9</div>
+<h2>Od algebre do SQL</h2>
+<div class="prose">
+  <p>Vsaka operacija relacijske algebre ima neposreden prevod v SQL. Ta tabela je most med tem poglavjem in poglavjem 5 (SQL poizvedbe) — na maturi jo potrebuješ v obe smeri.</p>
+</div>
+<div class="tbl"><table>
+<thead><tr><th>Relacijska algebra</th><th>SQL</th></tr></thead>
+<tbody>
+<tr><td><span class="ra">σ[F](r)</span></td><td><code>SELECT * FROM r WHERE F</code></td></tr>
+<tr><td><span class="ra">π[A,B](r)</span></td><td><code>SELECT DISTINCT A, B FROM r</code></td></tr>
+<tr><td><span class="ra">ρ[…](r)</span></td><td><code>FROM r AS s</code></td></tr>
+<tr><td><span class="ra">p × r</span></td><td><code>FROM p CROSS JOIN r</code></td></tr>
+<tr><td><span class="ra">p ⋈ r</span></td><td><code>FROM p NATURAL JOIN r</code></td></tr>
+<tr><td><span class="ra">p ⋈[i Θ j] r</span></td><td><code>FROM p JOIN r ON p.i Θ r.j</code></td></tr>
+<tr><td><span class="ra">p ∪ r &nbsp;·&nbsp; p ∩ r &nbsp;·&nbsp; p − r</span></td><td><code>UNION</code> · <code>INTERSECT</code> · <code>EXCEPT</code></td></tr>
+<tr><td><span class="ra">p ÷ r</span></td><td><code>NOT EXISTS</code> (dvojna negacija) ali <code>GROUP BY … HAVING COUNT</code></td></tr>
+</tbody>
+</table></div>
+<p class="note"><strong>Zakaj DISTINCT?</strong> SQL obravnava tabele kot <em>multimnožice</em> — podvojene vrstice dovoli. Relacija v algebri je množica, zato projekciji π v SQL ustreza SELECT z DISTINCT.</p>
+<div class="prose">
+  <p>Prevod v obe smeri je tudi maturitetna naloga. Primer iz pole (2012): stavek <code>SELECT Ime FROM Vaja WHERE Tocke &gt; 8;</code> zapiši kot izraz relacijske algebre. Rešitev: <span class="ra">π[Ime](σ[Tocke&gt;8](Vaja))</span> — WHERE postane σ, seznam stolpcev pa π. Celotna naloga te čaka v sklopu C.</p>
+</div>
+</section>
+
+<section id="postopek">
+<div class="eyebrow">Razlaga 10</div>
+<h2>Postopek reševanja in igrišče</h2>
+<div class="prose">
+  <p>Vsako besedilno nalogo rešuj v štirih korakih:</p>
+</div>
+<div class="tbl"><table>
+<thead><tr><th>Korak</th><th>Vprašanje</th><th>Operacija</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td>Katere tabele potrebujem?</td><td>poišči jih v shemi baze</td></tr>
+<tr><td class="num">2</td><td>Kako jih povežem?</td><td>⋈ po skupnih atributih</td></tr>
+<tr><td class="num">3</td><td>Katere vrstice obdržim?</td><td>σ s pogojem</td></tr>
+<tr><td class="num">4</td><td>Katere stolpce izpišem?</td><td>π na koncu</td></tr>
+</tbody>
+</table></div>
+<div class="prose"><p>Primer: <em>kdo je pri matematiki dobil oceno 5?</em> — ① Dijak, Ocena, Predmet; ② Dijak ⋈ Ocena ⋈ Predmet; ③ σ[Naziv='Matematika' ∧ Ocena=5]; ④ π[Ime, Priimek].</p></div>
+<div class="formula ra">π[Ime,Priimek](σ[Naziv='Matematika' ∧ Ocena=5](Dijak ⋈ Ocena ⋈ Predmet))</div>
+<div class="tbl" data-res="π[Ime,Priimek](σ[Naziv='Matematika' ∧ Ocena=5](Dijak ⋈ Ocena ⋈ Predmet))" data-cap="Rezultat"></div>
+<p class="note"><strong>Besede v nalogi:</strong> »<strong>nobene</strong>«, »<strong>nihče</strong>« ali »<strong>ne</strong>« skoraj vedno pomeni <strong>razliko</strong> (vsi minus tisti, ki pogoj izpolnjujejo); »<strong>oba</strong>« pomeni <strong>presek</strong>; »<strong>vsaj eden</strong>« <strong>unijo</strong>; »<strong>vse</strong>« pa <strong>količnik</strong>.</p>
+<h3 style="font-size:1.15rem;margin-top:8px">Igrišče</h3>
+<div class="prose">
+  <p>Tu lahko izračunaš <strong>poljuben izraz</strong> nad obema bazama (šolsko in knjižnično). Simbole vstaviš z gumbi ali z besedami <code>sigma</code>, <code>pi</code>, <code>join</code>, <code>union</code>, <code>intersect</code>, <code>minus</code>, <code>div</code>, <code>and</code>, <code>or</code>, <code>not</code>; namesto ≤ in ≥ lahko pišeš &lt;= in &gt;=.</p>
+</div>
+<div data-play='["π[Ime](σ[Kraj=&apos;Ljubljana&apos;](Dijak))","π[Naslov](σ[Avtor=&apos;Cankar&apos;](Knjiga))","Debata ∪ Gledalisce"]' data-open="1"></div>
+</section>
+
+
+    <!-- ===================== NALOGE ===================== -->
+    <section id="naloge" style="gap:24px">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="eyebrow">Vaje</div>
+        <h2>Naloge od lažjih do težjih</h2>
+        <p class="prose" style="color:var(--muted)">Naloge z oznako <span class="tag mat">Matura</span> sta iz izpitnih pol 2 (2012 in 2013), z enakim številom točk kot na izpitu. Naloge z oznako <span class="tag from">Vaje · n</span> in <span class="tag from">Dodatne vaje · n</span> so prevzete iz obeh zbirk vaj, številka pa je mesto naloge v izvirni zbirki; točke so tu 1 do 3 glede na število operacij. Pri nalogah <em>zapiši izraz</em> stran tvoj izraz izračuna na vzorčni bazi in rezultat primerja s pravilnim — sprejet je vsak enakovreden izraz. S tipko <em>Izračunaj</em> izraz le preizkusiš, brez ocenjevanja.</p>
+        <div class="filters" role="group" aria-label="Prikaži naloge">
+          <button class="chip" data-f="all" aria-pressed="true" type="button">Vse</button>
+          <button class="chip" data-f="mat" aria-pressed="false" type="button">Samo maturitetne</button>
+          <button class="chip" data-f="vaje" aria-pressed="false" type="button">Iz zbirk vaj</button>
+          <button class="chip" data-f="own" aria-pressed="false" type="button">Samo dodatne</button>
+          <button class="chip" data-f="open" aria-pressed="false" type="button">Še nerešene</button>
+        </div>
+      </div>
+      <div id="levels" style="display:flex;flex-direction:column;gap:40px"></div>
+    </section>
+
+    <section id="doma">
+      <div class="eyebrow">Za doma</div>
+      <h2>Vaje za doma</h2>
+      <p class="prose" style="color:var(--muted)">Najprej kombinirane naloge za ponavljanje (štejejo k točkam), nato praktične vaje z igriščem in prevodi v SQL.</p>
+      <div id="homeMat"></div>
+      <div class="level"><header><span class="eyebrow">Praktične vaje</span><h3 style="font-size:1.35rem">Razišči sam</h3></header><div id="home" class="level"></div></div>
+    </section>
+
+    <nav class="pager" id="pager" aria-label="Listanje po straneh"></nav>
+
+    <footer>
+      <span>Vira maturitetnih nalog: Državni izpitni center (RIC), izpitni poli 2 iz računalništva 2012 (spomladanski rok, naloga 21) in 2013 (jesenski rok, naloga 18). Predmetni izpitni katalog za splošno maturo – računalništvo 2023 (velja do 2028). Razlaga povzeta po gradivih »Relacijska algebra« (uvod in vaje) za 4. letnik.</span>
+      <span>Naloge tipa »zapiši izraz« stran izračuna na vzorčni bazi in rezultat primerja s pravilnim, zato je sprejet vsak enakovreden izraz. Vzorčni podatki relacij so izmišljeni.</span>
+      <span id="resetWrap"></span>
+    </footer>
+  </main>
+</div>
+<script>
+(function(){
+"use strict";
+const PROGRAMIZ = "https://www.programiz.com/java-programming/online-compiler/";
+const STORE = "rac-matura-p2-poglavje1-v1";
+
+/* ===== Relacijska algebra: baza + izračun izrazov (Node + brskalnik) ===== */
+const RA = (function(){
+"use strict";
+
+/* ---------- podatki ---------- */
+/* Šolska baza (razlaga + sklopa B in C) */
+const BAZA = {
+  Dijak: { attrs: ["ID","Ime","Priimek","Razred","Kraj"], rows: [
+    [1,"Ana","Novak","4A","Ljubljana"],
+    [2,"Luka","Kovač","4B","Kranj"],
+    [3,"Eva","Horvat","4A","Ljubljana"],
+    [4,"Jan","Krajnc","4B","Domžale"],
+    [5,"Nika","Zupan","4B","Ljubljana"]] },
+  Predmet: { attrs: ["PID","Naziv","Ure"], rows: [
+    ["M","Matematika",4],
+    ["R","Računalništvo",3],
+    ["F","Fizika",2]] },
+  Ocena: { attrs: ["ID","PID","Ocena"], rows: [
+    [1,"M",5],[1,"R",4],[2,"M",3],[2,"R",5],[3,"F",4],[4,"M",2],[5,"R",5],[5,"M",4]] },
+  Profesor: { attrs: ["PID","Profesor"], rows: [
+    ["M","Kralj"],["R","Mlakar"],["F","Zupan"]] },
+  Robotika: { attrs: ["ID","Ime"], rows: [[1,"Ana"],[2,"Luka"],[4,"Jan"]] },
+  Sah: { attrs: ["ID","Ime"], rows: [[2,"Luka"],[3,"Eva"],[4,"Jan"]] },
+  Vaja: { attrs: ["VajaID","Ime","Opis","Tocke"], rows: [
+    [1,"Spremenljivke","uvodna vaja",6],
+    [2,"Vejitve","if in switch",9],
+    [3,"Zanke","while in for",12],
+    [4,"Tabele","1D tabele",10],
+    [5,"Nizi","metode nizov",7]] },
+  Ponudba: { attrs: ["Izdelek","Cena"], rows: [
+    ["Telefon",300],["Tablica",450],["Slušalke",120]] },
+  Kupec: { attrs: ["Kupec","Proracun"], rows: [
+    ["Maja",350],["Rok",500],["Nik",250]] },
+  /* Knjižnica (sklopa D in E; ista baza kot v vajalnih artefaktih) */
+  Clan: { attrs: ["CID","Ime","Priimek","Kraj","Starost"], rows: [
+    [1,"Maja","Kos","Ljubljana",17],[2,"Tim","Bizjak","Maribor",16],[3,"Zala","Petek","Ljubljana",18],
+    [4,"Nejc","Vidmar","Celje",17],[5,"Lara","Golob","Maribor",15],[6,"Rok","Kralj","Ljubljana",16],
+    [7,"Sara","Jerman","Kranj",16]] },
+  Knjiga: { attrs: ["KID","Naslov","Avtor","Leto","Zanr"], rows: [
+    ["K1","Hobit","Tolkien",1937,"fantazija"],["K2","Alamut","Bartol",1938,"zgodovinski"],
+    ["K3","Harry Potter","Rowling",1997,"fantazija"],["K4","Na klancu","Cankar",1902,"roman"],
+    ["K5","Kekec","Vandot",1918,"mladinski"],["K6","Igra prestolov","Martin",1996,"fantazija"],
+    ["K7","Martin Krpan","Levstik",1858,"mladinski"]] },
+  Izposoja: { attrs: ["CID","KID","Mesec"], rows: [
+    [1,"K1",9],[1,"K3",10],[2,"K2",9],[2,"K3",10],[3,"K1",10],[3,"K3",9],[3,"K6",10],
+    [4,"K3",9],[5,"K5",10],[6,"K4",9]] },
+  Debata: { attrs: ["CID","Ime"], rows: [[1,"Maja"],[3,"Zala"],[4,"Nejc"],[6,"Rok"]] },
+  Gledalisce: { attrs: ["CID","Ime"], rows: [[2,"Tim"],[3,"Zala"],[6,"Rok"],[7,"Sara"]] },
+};
+const ALIAS = {};
+Object.keys(BAZA).forEach(k => ALIAS[k.toLowerCase()] = k);
+ALIAS["član"] = "Clan"; ALIAS["šah"] = "Sah"; ALIAS["gledališče"] = "Gledalisce";
+
+class RAError extends Error {}
+const fold = s => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+
+/* ---------- tokenizacija ---------- */
+function tokenize(src){
+  const t = []; let i = 0;
+  const two = { "!=":"≠", "<>":"≠", "<=":"≤", ">=":"≥" };
+  const single = "()[]{},σπρ⋈×∪∩−÷∧∨¬=≠<>≤≥";
+  while(i < src.length){
+    const c = src[i];
+    if(/\s/.test(c)){ i++; continue; }
+    if(two[src.substr(i,2)]){ t.push({k:"op", v:two[src.substr(i,2)]}); i += 2; continue; }
+    if(c==="-"||c==="–"||c==="—"){ t.push({k:"op", v:"−"}); i++; continue; }
+    if(c==="*"){ t.push({k:"op", v:"×"}); i++; continue; }
+    if(c==="/"){ t.push({k:"op", v:"÷"}); i++; continue; }
+    if(single.includes(c)){ t.push({k:"op", v:c}); i++; continue; }
+    if("'\"‘’„“”".includes(c)){
+      let j = i+1, s = "";
+      while(j < src.length && !"'\"‘’„“”".includes(src[j])) s += src[j++];
+      if(j >= src.length) throw new RAError("Niz, ki se začne z narekovajem, ni zaprt.");
+      t.push({k:"str", v:s}); i = j+1; continue;
+    }
+    if(/[0-9]/.test(c)){ let j = i; while(j < src.length && /[0-9.]/.test(src[j])) j++; t.push({k:"num", v:Number(src.slice(i,j))}); i = j; continue; }
+    if(/[A-Za-zČŠŽčšžĆćĐđ_]/.test(c)){
+      let j = i; while(j < src.length && /[A-Za-z0-9ČŠŽčšžĆćĐđ_]/.test(src[j])) j++;
+      const w = src.slice(i,j), lw = fold(w);
+      const kw = { sigma:"σ", pi:"π", rho:"ρ", join:"⋈", stik:"⋈", union:"∪", unija:"∪", intersect:"∩", presek:"∩", minus:"−", razlika:"−", and:"∧", in:"∧", or:"∨", ali:"∨", not:"¬", ne:"¬", times:"×", produkt:"×", div:"÷", kolicnik:"÷" };
+      if(kw[lw]) t.push({k:"op", v:kw[lw]}); else t.push({k:"id", v:w});
+      i = j; continue;
+    }
+    throw new RAError("Neznan znak »" + c + "«.");
+  }
+  return t;
+}
+
+/* ---------- razčlenjevanje ---------- */
+function parse(src){
+  const t = tokenize(src); let p = 0;
+  const peek = () => t[p], next = () => t[p++];
+  const isOp = v => t[p] && t[p].k==="op" && t[p].v===v;
+  const expect = (v,msg) => { if(!isOp(v)) throw new RAError(msg || ("Pričakujem »"+v+"«.")); p++; };
+  const openSub = () => { if(isOp("[")){ p++; return "]"; } if(isOp("{")){ p++; return "}"; } throw new RAError("Za σ, π in ρ zapiši pogoj ali stolpce v oglatih oklepajih, npr. σ[Kraj='Kranj'](Dijak)."); };
+
+  function cond(){
+    let l = andc();
+    while(isOp("∨")){ p++; l = { c:"or", l, r:andc() }; }
+    return l;
+  }
+  function andc(){
+    let l = notc();
+    while(isOp("∧")){ p++; l = { c:"and", l, r:notc() }; }
+    return l;
+  }
+  function notc(){
+    if(isOp("¬")){ p++; return { c:"not", e:notc() }; }
+    if(isOp("(")){ p++; const e = cond(); expect(")","Manjka zaklepaj »)« v pogoju."); return e; }
+    return atom();
+  }
+  function atom(){
+    const a = next();
+    if(!a || a.k!=="id") throw new RAError("V pogoju pričakujem ime atributa.");
+    const op = next();
+    if(!op || op.k!=="op" || !"=≠<>≤≥".includes(op.v)) throw new RAError("Za atributom »"+a.v+"« pričakujem primerjavo (=, ≠, <, >, ≤, ≥).");
+    const b = next();
+    if(!b) throw new RAError("Pogoj se nepričakovano konča.");
+    if(b.k==="str" || b.k==="num") return { c:"cmp", op:op.v, a:a.v, v:b.v };
+    if(b.k==="id") return { c:"cmp2", op:op.v, a:a.v, b:b.v };
+    throw new RAError("Desna stran primerjave mora biti vrednost ali atribut.");
+  }
+
+  function expr(){
+    let left = term();
+    while(peek() && peek().k==="op" && "⋈×∪∩−÷".includes(peek().v)){
+      const op = next().v;
+      let theta = null;
+      if(op==="⋈" && (isOp("[")||isOp("{"))){ const close = openSub(); theta = cond(); expect(close,"Manjka zaklepaj za pogoj Θ-stika."); }
+      left = { op, l:left, r:term(), theta };
+    }
+    return left;
+  }
+  function term(){
+    const tk = peek();
+    if(!tk) throw new RAError("Izraz se nepričakovano konča.");
+    if(tk.k==="op" && (tk.v==="σ"||tk.v==="π"||tk.v==="ρ")){
+      p++; const close = openSub(); let arg;
+      if(tk.v==="σ") arg = cond();
+      else { arg = []; for(;;){ const a = next(); if(!a || a.k!=="id") throw new RAError("V "+tk.v+"[...] pričakujem imena stolpcev, ločena z vejico."); arg.push(a.v); if(isOp(",")){ p++; continue; } break; } }
+      expect(close,"Manjka zaklepaj »"+close+"« za "+tk.v+".");
+      expect("(","Za "+tk.v+"[...] mora slediti relacija v okroglih oklepajih, npr. "+tk.v+"[...](Dijak).");
+      const e = expr(); expect(")","Manjka zaklepaj »)«.");
+      return { op:tk.v, arg, e };
+    }
+    if(tk.k==="op" && tk.v==="("){ p++; const e = expr(); expect(")","Manjka zaklepaj »)«."); return e; }
+    if(tk.k==="id"){ p++; const n = ALIAS[fold(tk.v)]; if(!n) throw new RAError("Relacija »"+tk.v+"« ne obstaja. Preveri seznam relacij pri nalogi."); return { rel:n }; }
+    throw new RAError("Na tem mestu ne pričakujem »"+(tk.v!==undefined?tk.v:tk.k)+"«.");
+  }
+
+  const e = expr();
+  if(p < t.length) throw new RAError("Za koncem izraza je odvečno besedilo (preveri oklepaje).");
+  return e;
+}
+
+/* ---------- izračun ---------- */
+function colIx(rel, name){
+  const f = fold(name);
+  const i = rel.attrs.findIndex(a => fold(a)===f);
+  if(i < 0) throw new RAError("Relacija nima atributa »"+name+"«. Na voljo: "+rel.attrs.join(", ")+".");
+  return i;
+}
+function cmp(op, x, y){
+  if(typeof x==="string" || typeof y==="string"){ x = fold(x); y = fold(y); }
+  switch(op){
+    case "=": return x===y; case "≠": return x!==y;
+    case "<": return x<y;  case ">": return x>y;
+    case "≤": return x<=y; case "≥": return x>=y;
+  }
+}
+function evalCond(c, rel, row){
+  switch(c.c){
+    case "or":  return evalCond(c.l,rel,row) || evalCond(c.r,rel,row);
+    case "and": return evalCond(c.l,rel,row) && evalCond(c.r,rel,row);
+    case "not": return !evalCond(c.e,rel,row);
+    case "cmp": return cmp(c.op, row[colIx(rel,c.a)], c.v);
+    case "cmp2":return cmp(c.op, row[colIx(rel,c.a)], row[colIx(rel,c.b)]);
+  }
+}
+function dedup(rel){
+  const seen = new Set(), rows = [];
+  rel.rows.forEach(r => { const k = JSON.stringify(r); if(!seen.has(k)){ seen.add(k); rows.push(r); } });
+  return { attrs: rel.attrs, rows };
+}
+function sameSchema(a, b, opName){
+  if(a.attrs.length !== b.attrs.length || a.attrs.some((x,i) => fold(x)!==fold(b.attrs[i])))
+    throw new RAError(opName+" je mogoča le nad relacijama z enako shemo. Levi del ima ("+a.attrs.join(", ")+"), desni ("+b.attrs.join(", ")+").");
+}
+function evalNode(n){
+  if(n.rel) return { attrs: BAZA[n.rel].attrs.slice(), rows: BAZA[n.rel].rows.map(r=>r.slice()) };
+  if(n.op==="σ"){ const R = evalNode(n.e); return { attrs:R.attrs, rows:R.rows.filter(r => evalCond(n.arg, R, r)) }; }
+  if(n.op==="π"){
+    const R = evalNode(n.e);
+    const ix = n.arg.map(a => colIx(R,a));
+    return dedup({ attrs: ix.map(i=>R.attrs[i]), rows: R.rows.map(r => ix.map(i=>r[i])) });
+  }
+  if(n.op==="ρ"){
+    const R = evalNode(n.e);
+    if(n.arg.length !== R.attrs.length) throw new RAError("ρ[...] mora našteti toliko novih imen, kot ima relacija atributov ("+R.attrs.length+").");
+    return { attrs: n.arg.slice(), rows: R.rows };
+  }
+  const L = evalNode(n.l), R = evalNode(n.r);
+  if(n.op==="∪"){ sameSchema(L,R,"Unija"); return dedup({ attrs:L.attrs, rows:L.rows.concat(R.rows) }); }
+  if(n.op==="∩"){ sameSchema(L,R,"Presek"); const set = new Set(R.rows.map(r=>JSON.stringify(r))); return { attrs:L.attrs, rows:L.rows.filter(r=>set.has(JSON.stringify(r))) }; }
+  if(n.op==="−"){ sameSchema(L,R,"Razlika"); const set = new Set(R.rows.map(r=>JSON.stringify(r))); return { attrs:L.attrs, rows:L.rows.filter(r=>!set.has(JSON.stringify(r))) }; }
+  if(n.op==="×"){
+    const clash = L.attrs.filter(a => R.attrs.some(b => fold(a)===fold(b)));
+    if(clash.length) throw new RAError("Pri × imata relaciji skupni atribut ("+clash.join(", ")+") – uporabi naravni stik ⋈ ali ρ za preimenovanje.");
+    return { attrs: L.attrs.concat(R.attrs), rows: L.rows.flatMap(a => R.rows.map(b => a.concat(b))) };
+  }
+  if(n.op==="⋈"){
+    if(n.theta){
+      const attrs = L.attrs.concat(R.attrs);
+      const clash = L.attrs.filter(a => R.attrs.some(b => fold(a)===fold(b)));
+      if(clash.length) throw new RAError("Pri Θ-stiku imata relaciji skupni atribut ("+clash.join(", ")+") – preimenuj z ρ.");
+      const joined = { attrs, rows: L.rows.flatMap(a => R.rows.map(b => a.concat(b))) };
+      return { attrs, rows: joined.rows.filter(r => evalCond(n.theta, joined, r)) };
+    }
+    const common = L.attrs.map((a,i)=>({a,i,j:R.attrs.findIndex(b=>fold(b)===fold(a))})).filter(x=>x.j>=0);
+    if(!common.length){ // brez skupnih atributov = kartezični produkt
+      return { attrs: L.attrs.concat(R.attrs), rows: L.rows.flatMap(a => R.rows.map(b => a.concat(b))) };
+    }
+    const rKeep = R.attrs.map((_,j)=>j).filter(j => !common.some(c=>c.j===j));
+    const attrs = L.attrs.concat(rKeep.map(j=>R.attrs[j]));
+    const rows = [];
+    L.rows.forEach(a => R.rows.forEach(b => {
+      if(common.every(c => { let x=a[c.i], y=b[c.j]; if(typeof x==="string"||typeof y==="string"){x=fold(x);y=fold(y);} return x===y; }))
+        rows.push(a.concat(rKeep.map(j=>b[j])));
+    }));
+    return dedup({ attrs, rows });
+  }
+  if(n.op==="÷"){
+    const rIn = R.attrs.map(b => { const i = L.attrs.findIndex(a=>fold(a)===fold(b)); if(i<0) throw new RAError("Pri količniku mora levi del vsebovati vse atribute desnega (manjka »"+b+"«)."); return i; });
+    const keep = L.attrs.map((_,i)=>i).filter(i => !rIn.includes(i));
+    if(!keep.length) throw new RAError("Pri količniku mora imeti levi del vsaj en atribut več od desnega.");
+    const groups = new Map();
+    L.rows.forEach(r => {
+      const k = JSON.stringify(keep.map(i=>r[i]));
+      if(!groups.has(k)) groups.set(k, new Set());
+      groups.get(k).add(JSON.stringify(rIn.map(i=>r[i])));
+    });
+    const need = R.rows.map(r => JSON.stringify(r));
+    const rows = [];
+    groups.forEach((set, k) => { if(need.every(x => set.has(x))) rows.push(JSON.parse(k)); });
+    return { attrs: keep.map(i=>L.attrs[i]), rows };
+  }
+  throw new RAError("Neznana operacija.");
+}
+
+function run(src){
+  if(!String(src).trim()) throw new RAError("Izraz je prazen.");
+  return evalNode(parse(src));
+}
+
+/* ---------- primerjava rezultatov ---------- */
+function canon(rel){
+  const order = rel.attrs.map((a,i)=>({f:fold(a), i})).sort((x,y)=> x.f<y.f?-1:x.f>y.f?1:0);
+  const attrs = order.map(o=>o.f);
+  const rows = rel.rows.map(r => JSON.stringify(order.map(o => typeof r[o.i]==="string" ? fold(r[o.i]) : r[o.i]))).sort();
+  return JSON.stringify({ attrs, rows: Array.from(new Set(rows)) });
+}
+function equal(a, b){ return canon(a)===canon(b); }
+
+return { BAZA, ALIAS, run, parse, equal, canon, RAError };
+})();
+
+
+/* ===== Poglavje 1: Relacijska algebra — sklopi in naloge ===== */
+const LEVELS = [
+ {"id":"naloge-a","tag":"A","title":"Pojmi in operacije","note":"Osnovni pojmi relacijskega modela in pregled operacij (razlagi 1 in 2)."},
+ {"id":"naloge-b","tag":"B","title":"Branje izrazov","note":"Dan je izraz — ugotovi, kaj vrne: koliko vrstic, katere stolpce, katere vrednosti (razlage 3 do 7). Vse naloge uporabljajo šolsko bazo z razlage 2."},
+ {"id":"naloge-c","tag":"C","title":"Pisanje izrazov · šolska baza","note":"Zapiši izraz relacijske algebre nad šolsko bazo (Dijak, Predmet, Ocena, Profesor). Stran izraz izračuna in preveri rezultat, zato je pravilen vsak enakovreden izraz."},
+ {"id":"naloge-d","tag":"D","title":"Vaje · knjižnica","note":"Prva zbirka vaj: razumevanje operacij, pisanje izrazov in izziv nad bazo šolske knjižnice (Clan, Knjiga, Izposoja, Debata, Gledalisce). Oznaka ob nalogi je številka v izvirni zbirki."},
+ {"id":"naloge-e","tag":"E","title":"Dodatne vaje · knjižnica","note":"Druga zbirka vaj nad isto bazo: več stikov treh relacij, razlika in presek ter izziv na koncu."},
+ {"id":"naloge-f","tag":"F","title":"Težje naloge","note":"Presek prek razlike, Θ-stik, količnik in kombinirane naloge (razlage 5 do 8)."},
+ {"id":"doma-mat","tag":"H","title":"Ponavljanje","note":"Kombinirane naloge za samostojno ponavljanje. Vsaka zahteva dve ali tri operacije.","home":true}
+];
+
+const T = [
+/* ---------- A · Pojmi in operacije ---------- */
+{"src":"M132/18","pts":2,"lv":"A","type":"mc",
+ "q":"Katera operacija relacijske algebre se uporablja za filtriranje podatkov (določanje pogojev, ki jim morajo ustrezati podatki)?",
+ "o":["Projekcija.","Selekcija.","Kartezični produkt.","Unija."],"a":[1],
+ "h":["Filtriranje pomeni, da obdržimo samo nekatere vrstice.","Pogoj F zapišemo v σ[F]."],
+ "why":"Selekcija σ[F](r) obdrži samo tiste vrstice, ki izpolnjujejo pogoj F. Projekcija izbira stolpce, kartezični produkt kombinira relaciji, unija pa združuje vrstice dveh relacij."},
+
+{"own":true,"pts":1,"lv":"A","type":"mc",
+ "q":"S katero operacijo iz relacije obdržimo samo nekatere stolpce (atribute)?",
+ "o":["σ (selekcija)","π (projekcija)","⋈ (naravni stik)","∪ (unija)"],"a":[1],
+ "h":["Stolpce naštejemo v oglatih oklepajih: π[Ime, Priimek](Dijak)."],
+ "why":"Projekcija π[X](r) obdrži samo atribute z liste X. Selekcija izbira vrstice, ne stolpcev."},
+
+{"own":true,"pts":2,"lv":"A","type":"cls",
+ "q":"Razvrsti opise k operacijam relacijske algebre.",
+ "cats":["σ","π","×","⋈"],
+ "items":[["izbere vrstice, ki izpolnjujejo pogoj",0],["obdrži samo naštete stolpce",1],["vsako vrstico prve relacije združi z vsako vrstico druge",2],["poveže vrstici z enako vrednostjo skupnega atributa",3],["podvojene vrstice rezultata se izločijo, zato je vrstic lahko manj kot v vhodu",1]],
+ "h":["Selekcija in projekcija imata po eno relacijo, produkt in stik pa dve.","Kateri operaciji se lahko zmanjša število vrstic, čeprav ne preverja nobenega pogoja?"],
+ "why":"σ filtrira vrstice, π izbira stolpce (in izloči podvojene vrstice, ker je rezultat množica), × naredi vse kombinacije, ⋈ pa poveže vrstici prek skupnega atributa."},
+
+{"own":true,"pts":1,"lv":"A","type":"mc",
+ "q":"Kaj je rezultat vsake operacije relacijske algebre?",
+ "o":["Nova relacija.","Seznam vrednosti.","Spremenjena vhodna relacija.","Logična vrednost (true/false)."],"a":[0],
+ "h":["Prav zato lahko operacije gnezdimo: rezultat ene je vhod naslednje."],
+ "why":"Rezultat je vedno nova relacija; vhodna relacija se ne spremeni. Ker je rezultat spet relacija, lahko nanj uporabimo naslednjo operacijo — izraze gnezdimo."},
+
+{"own":true,"pts":2,"lv":"A","type":"mc",
+ "q":"Za katere operacije morata imeti obe relaciji enako shemo (enake atribute)? Izberi vse pravilne odgovore.",
+ "o":["∪ (unija)","× (kartezični produkt)","∩ (presek)","⋈ (naravni stik)","− (razlika)"],"a":[0,2,4],
+ "h":["Pri teh operacijah vrstice obeh relacij pristanejo v istem rezultatu, zato morajo imeti enake stolpce.","Produkt in stik delata ravno obratno: shemi združita."],
+ "why":"Unija, presek in razlika primerjajo oziroma združujejo cele vrstice, zato je Sh(p) = Sh(r) pogoj za smiselnost. Produkt in stik shemi sestavita v širšo."},
+
+{"own":true,"pts":2,"lv":"A","type":"cls",
+ "q":"Razvrsti pojme relacijskega modela k opisom. (Primer: v relaciji Dijak(ID, Ime, Priimek, Razred, Kraj) je ID ključ.)",
+ "cats":["relacija","atribut","terka","ključ"],
+ "items":[["tabela z imenom, npr. Dijak",0],["stolpec, npr. Kraj",1],["ena vrstica — en dijak",2],["atribut, ki enolično določi vrstico",3]],
+ "h":["Shema relacije je ime + atributi: Dijak(ID, Ime, Priimek, Razred, Kraj)."],
+ "why":"Relacija je tabela, atribut stolpec, terka (n-terica) vrstica, ključ pa atribut, ki vrstico enolično določi."},
+
+{"own":true,"pts":1,"lv":"A","type":"mc",
+ "q":"Zakaj v relaciji ni dveh enakih vrstic?",
+ "o":["Ker je relacija množica terk.","Ker SUPB tega ne dovoli.","Ker so vrstice urejene po ključu.","Dve enaki vrstici sta dovoljeni."],"a":[0],
+ "h":["Množica vsak element vsebuje največ enkrat."],
+ "why":"Relacija je definirana kot množica terk — množica pa vsak element vsebuje največ enkrat in vrstni red elementov ni pomemben. Zato tudi projekcija izloči podvojene vrstice."},
+
+{"own":true,"pts":2,"lv":"A","type":"cls",
+ "q":"Razvrsti operacije: osnovnih pet ali izpeljane (izraziti jih je mogoče z osnovnimi)?",
+ "cats":["osnovna","izpeljana"],
+ "items":[["∪ unija",0],["− razlika",0],["× kartezični produkt",0],["π projekcija",0],["σ selekcija",0],["∩ presek",1],["⋈ naravni stik",1],["÷ količnik",1]],
+ "h":["Osnovne: ∪, −, ×, π, σ.","Presek lahko zapišemo kot p − (p − r), stik kot σ nad ×."],
+ "why":"Osnovne operacije so ∪, −, ×, π in σ. Presek, stik in količnik so izpeljani: p ∩ r = p − (p − r), naravni stik je π(σ(p × r)), količnik pa kombinacija π, × in −."},
+
+/* ---------- B · Branje izrazov ---------- */
+{"own":true,"pts":1,"lv":"B","type":"blanks",
+ "q":"Koliko vrstic vrne izraz σ[Razred='4B'](Dijak)?",
+ "b":[{"l":"število vrstic","acc":["3"]}],
+ "h":["Preštej dijake razreda 4B v tabeli Dijak.","Selekcija ohrani vse stolpce, vrstice pa le tiste, ki izpolnjujejo pogoj."],
+ "why":"V 4B so Luka, Jan in Nika — 3 vrstice. Stolpci ostanejo vsi (ID, Ime, Priimek, Razred, Kraj)."},
+
+{"own":true,"pts":2,"lv":"B","type":"mc",
+ "q":"Kaj vrne izraz π[Kraj](Dijak)?",
+ "o":["Stolpec Kraj s 5 vrsticami: Ljubljana, Kranj, Ljubljana, Domžale, Ljubljana.","Stolpec Kraj s 3 vrsticami: Ljubljana, Kranj, Domžale.","Vse podatke dijakov, urejene po kraju.","Stolpec Kraj z eno vrstico za vsak razred."],"a":[1],
+ "h":["Rezultat je množica — podvojene vrstice izginejo.","Ljubljana se v tabeli Dijak pojavi trikrat, v rezultatu pa …"],
+ "why":"Projekcija izloči podvojene vrstice, ker je rezultat spet množica. Ljubljana se zato pojavi samo enkrat: rezultat ima 3 vrstice."},
+
+{"own":true,"pts":2,"lv":"B","type":"blanks",
+ "q":"Relacija Dijak ima 5 vrstic in 5 stolpcev, Predmet pa 3 vrstice in 3 stolpce. Koliko vrstic in koliko stolpcev ima Dijak × Predmet?",
+ "b":[{"l":"število vrstic","acc":["15"]},{"l":"število stolpcev","acc":["8"]}],
+ "h":["Vsaka vrstica prve relacije se združi z vsako vrstico druge.","Vrstice se množijo, stolpci se seštejejo."],
+ "why":"Vrstic je 5 · 3 = 15, stolpcev pa 5 + 3 = 8. Kartezični produkt sam po sebi redko koristi — skoraj vedno mu sledi selekcija."},
+
+{"own":true,"pts":2,"lv":"B","type":"blanks",
+ "q":"Krožka obiskujejo: Robotika = {Ana, Luka, Jan}, Sah = {Luka, Eva, Jan}. Koliko vrstic imajo rezultati?",
+ "b":[{"l":"Robotika ∪ Sah","acc":["4"]},{"l":"Robotika ∩ Sah","acc":["2"]},{"l":"Robotika − Sah","acc":["1"]}],
+ "h":["Luka in Jan sta v obeh krožkih — v uniji se pojavita samo enkrat.","Razlika: kdo je pri robotiki, a ne pri šahu?"],
+ "why":"∪: Ana, Luka, Eva, Jan (4). ∩: Luka, Jan (2). −: samo Ana (1). Pri uniji se podvojeni terki izločita."},
+
+{"own":true,"pts":2,"lv":"B","type":"blanks",
+ "q":"Izraz Dijak ⋈ Ocena poveže relaciji po skupnem atributu. Po katerem atributu ju poveže in koliko vrstic ima rezultat?",
+ "b":[{"l":"skupni atribut","acc":["ID"]},{"l":"število vrstic","acc":["8"]}],
+ "h":["Skupni atribut je tisti, ki nastopa v obeh shemah.","Vsaka ocena pripada natanko enemu dijaku."],
+ "why":"Skupni atribut je ID. Vsaka od 8 vrstic relacije Ocena dobi natanko en par v relaciji Dijak, zato ima rezultat 8 vrstic. Skupni stolpec ID se v rezultatu pojavi samo enkrat."},
+
+{"own":true,"pts":2,"lv":"B","type":"blanks",
+ "q":"Katere vrednosti vrne izraz π[Naziv](σ[Ure≥3](Predmet))? Naštej jih, ločene z vejico.",
+ "b":[{"l":"rezultat","acc":["Matematika, Računalništvo","Racunalnistvo, Matematika","Matematika, Racunalnistvo"],"list":true}],
+ "h":["Najprej selekcija: predmeti z vsaj 3 urami.","Nato projekcija obdrži samo stolpec Naziv."],
+ "why":"σ[Ure≥3] obdrži matematiko (4 ure) in računalništvo (3 ure), π[Naziv] pa izpiše naziva. Fizika ima samo 2 uri."},
+
+{"own":true,"pts":2,"lv":"B","type":"mc",
+ "q":"Dijak ⋈ Robotika (skupna atributa ID in Ime). Koliko vrstic ima rezultat in kaj se zgodi z dijaki, ki krožka ne obiskujejo?",
+ "o":["3 vrstice; dijaki brez para v rezultatu niso.","5 vrstic; dijaki brez para dobijo prazne vrednosti.","15 vrstic; stik naredi vse kombinacije.","3 vrstice; dijaki brez para so na koncu rezultata."],"a":[0],
+ "h":["Naravni stik obdrži samo vrstice, ki najdejo par z enako vrednostjo skupnih atributov.","Robotiko obiskujejo trije dijaki."],
+ "why":"V rezultatu so samo Ana, Luka in Jan — vrstice brez para naravni stik izgubi. To je pomembna razlika v primerjavi s produktom, ki kombinira vse."},
+
+{"own":true,"pts":2,"lv":"B","type":"mc",
+ "q":"Kateri izraz je enakovreden izrazu σ[Razred='4B'](σ[Kraj='Ljubljana'](Dijak))?",
+ "o":["σ[Razred='4B' ∧ Kraj='Ljubljana'](Dijak)","σ[Razred='4B' ∨ Kraj='Ljubljana'](Dijak)","π[Razred,Kraj](Dijak)","σ[Razred='4B'](Dijak) ∪ σ[Kraj='Ljubljana'](Dijak)"],"a":[0],
+ "h":["Vrstica mora preživeti obe selekciji — izpolniti mora oba pogoja.","Kateri logični operator zahteva, da veljata oba pogoja?"],
+ "why":"Zaporedni selekciji lahko združimo z ∧ (in): vrstica ostane, če izpolni oba pogoja. Z ∨ ali unijo bi dobili dijake, ki izpolnijo vsaj enega."},
+
+{"own":true,"pts":2,"lv":"B","type":"blanks",
+ "q":"Relaciji p in r imata enako shemo; p ima 4 terke, r pa 3. Najmanj in največ koliko terk ima lahko p ∪ r?",
+ "b":[{"l":"najmanj","acc":["4"]},{"l":"največ","acc":["7"]}],
+ "h":["Največ: nobena terka ni skupna.","Najmanj: vse terke relacije r so že v p."],
+ "why":"Če so vse terke r že v p, ima unija 4 terke; če ni nobena skupna, jih ima 4 + 3 = 7."},
+
+{"own":true,"pts":2,"lv":"B","type":"blanks",
+ "q":"Isti relaciji: p ima 4 terke, r pa 3. Koliko terk ima natanko p × r in največ koliko p ∩ r?",
+ "b":[{"l":"p × r (natanko)","acc":["12"]},{"l":"p ∩ r (največ)","acc":["3"]}],
+ "h":["Produkt vedno zmnoži števili terk.","Presek ne more biti večji od manjše relacije."],
+ "why":"Produkt ima natanko 4 · 3 = 12 terk. Presek ima največ 3 terke (vse terke r so tudi v p), najmanj pa 0."},
+
+/* ---------- C · Pisanje izrazov · šolska baza ---------- */
+{"own":true,"pts":1,"lv":"C","type":"ra","db":["Dijak"],
+ "q":"Izpiši vse podatke o dijakih iz razreda 4B.",
+ "sol":"σ[Razred='4B'](Dijak)",
+ "h":["Potrebuješ samo selekcijo — vsi stolpci ostanejo.","Besedilo v pogoju piši v narekovajih: Razred='4B'."],
+ "why":"Vse podatke pomeni vse stolpce, zato projekcije ne potrebujemo. σ[Razred='4B'](Dijak) vrne Luko, Jana in Niko."},
+
+{"own":true,"pts":1,"lv":"C","type":"ra","db":["Predmet"],
+ "q":"Izpiši nazive predmetov, ki imajo vsaj 3 ure.",
+ "sol":"π[Naziv](σ[Ure≥3](Predmet))",
+ "h":["Najprej izberi vrstice (σ), nato obdrži stolpec Naziv (π).","Vsaj 3 pomeni Ure ≥ 3."],
+ "why":"σ[Ure≥3] izbere matematiko in računalništvo, π[Naziv] pa obdrži samo naziv."},
+
+{"own":true,"pts":2,"lv":"C","type":"ra","db":["Dijak"],
+ "q":"Izpiši imena in priimke dijakov, ki živijo v Ljubljani.",
+ "sol":"π[Ime,Priimek](σ[Kraj='Ljubljana'](Dijak))",
+ "h":["Izraz beremo od znotraj navzven: najprej σ, nato π.","V π naštej oba stolpca, ločena z vejico."],
+ "why":"Rezultat: Ana Novak, Eva Horvat, Nika Zupan."},
+
+{"own":true,"pts":2,"lv":"C","type":"ra","db":["Dijak"],
+ "q":"Izpiši imena in priimke dijakov iz razreda 4B, ki živijo v Ljubljani.",
+ "sol":"π[Ime,Priimek](σ[Razred='4B' ∧ Kraj='Ljubljana'](Dijak))",
+ "h":["Oba pogoja združi z ∧ (in).","Namesto ∧ lahko pišeš besedo and."],
+ "why":"Pogoja povežemo z ∧: dijak mora izpolniti oba. Rezultat: Nika Zupan."},
+
+{"own":true,"pts":2,"lv":"C","type":"ra","db":["Ocena","Predmet"],
+ "q":"Izpiši ID dijakov in nazive predmetov, pri katerih so dobili oceno 5.",
+ "sol":"π[ID,Naziv](σ[Ocena=5](Ocena ⋈ Predmet))",
+ "h":["Ocena in Predmet imata skupni atribut PID — poveži ju z ⋈.","Po stiku izberi petice in projiciraj ID ter Naziv."],
+ "why":"Stik doda vsaki oceni naziv predmeta, σ[Ocena=5] obdrži petice, π pa izpiše (1, Matematika), (2, Računalništvo), (5, Računalništvo)."},
+
+{"own":true,"pts":2,"lv":"C","type":"ra","db":["Dijak","Ocena","Predmet"],
+ "q":"Izpiši imena dijakov, ki so pri računalništvu dobili oceno 5.",
+ "sol":"π[Ime](σ[Naziv='Računalništvo' ∧ Ocena=5](Dijak ⋈ Ocena ⋈ Predmet))",
+ "h":["Poveži vse tri relacije: Dijak ⋈ Ocena ⋈ Predmet.","V pogoju nastopata Naziv in Ocena."],
+ "why":"Trojni stik poveže dijaka, oceno in predmet; pogoj izbere petice pri računalništvu. Rezultat: Luka, Nika."},
+
+{"own":true,"pts":2,"lv":"C","type":"ra","db":["Ocena"],
+ "q":"Izpiši ID dijakov, ki imajo oceno iz matematike (PID 'M') IN oceno iz računalništva (PID 'R').",
+ "sol":"π[ID](σ[PID='M'](Ocena)) ∩ π[ID](σ[PID='R'](Ocena))",
+ "h":["En sam pogoj PID='M' ∧ PID='R' ne deluje — ista vrstica ne more imeti obeh vrednosti.","Naredi dve množici ID-jev in ju preseci."],
+ "why":"Pogoj velja za eno vrstico, dijak pa ima oceni v dveh različnih vrsticah. Zato naredimo množico ID-jev z oceno iz M in množico z oceno iz R ter vzamemo presek: 1, 2, 5."},
+
+{"own":true,"pts":2,"lv":"C","type":"ra","db":["Dijak","Ocena"],
+ "q":"Izpiši ID dijakov, ki NIMAJO nobene ocene iz matematike (PID 'M').",
+ "sol":"π[ID](Dijak) − π[ID](σ[PID='M'](Ocena))",
+ "h":["»Nimajo« pomeni razliko: vsi dijaki minus tisti z oceno iz M.","Obe strani razlike morata imeti enako shemo — samo ID."],
+ "why":"Od množice vseh ID-jev odštejemo ID-je z oceno iz matematike. Rezultat: 3 (Eva)."},
+
+{"own":true,"pts":3,"lv":"C","type":"ra","db":["Ocena","Predmet"],
+ "q":"Izpiši nazive predmetov, pri katerih nihče ni dobil ocene, nižje od 4.",
+ "sol":"π[Naziv](Predmet) − π[Naziv](σ[Ocena<4](Ocena ⋈ Predmet))",
+ "h":["»Nihče ni dobil manj kot 4« obrni: predmeti, kjer JE kdo dobil manj kot 4, ne smejo biti v rezultatu.","Vsi predmeti minus slabi predmeti."],
+ "why":"Poiščemo predmete z vsaj eno oceno pod 4 (matematika) in jih odštejemo od vseh predmetov. Rezultat: Računalništvo, Fizika."},
+
+{"own":true,"pts":2,"lv":"C","type":"ra","db":["Robotika","Sah"],
+ "q":"Krožka vodita seznama Robotika(ID, Ime) in Sah(ID, Ime). Izpiši imena dijakov, ki obiskujejo oba krožka.",
+ "sol":"π[Ime](Robotika ∩ Sah)",
+ "h":["Relaciji imata enako shemo — dovoljen je presek.","Po preseku obdrži samo stolpec Ime."],
+ "why":"Presek vrne terke, ki so v obeh relacijah: Luka in Jan. Enakovredno je tudi π[Ime](Robotika) ∩ π[Ime](Sah)."},
+
+{"own":true,"pts":2,"lv":"C","type":"ra","db":["Dijak","Ocena","Profesor"],
+ "q":"Izpiši profesorje, ki učijo Evo (predmete, pri katerih ima Eva oceno, uči ta profesor).",
+ "sol":"π[Profesor](σ[Ime='Eva'](Dijak) ⋈ Ocena ⋈ Profesor)",
+ "h":["Najprej izberi Evo, nato jo poveži z ocenami in profesorji.","Stik je asociativen: najprej po ID, nato po PID."],
+ "why":"Eva (ID 3) ima oceno le pri fiziki, fiziko pa uči Zupan. Selekcija pred stikom naredi vmesne rezultate manjše."},
+
+{"src":"M121/21","pts":2,"lv":"C","type":"ra","db":["Vaja"],
+ "snip":"SELECT Ime FROM Vaja WHERE Tocke > 8;",
+ "q":"Dana je relacija Vaja(VajaID, Ime, Opis, Tocke). Zgornji stavek SQL zapiši kot izraz relacijske algebre.",
+ "sol":"π[Ime](σ[Tocke>8](Vaja))",
+ "h":["WHERE ustreza selekciji σ, seznam stolpcev za SELECT pa projekciji π.","Vrstni red: najprej σ, nato π."],
+ "why":"SELECT Ime = π[Ime], WHERE Tocke > 8 = σ[Tocke>8]. Skupaj: π[Ime](σ[Tocke>8](Vaja)). Na tej strani se izraz preveri na vzorčnih podatkih relacije Vaja."},
+
+/* ---------- D · Vaje · knjižnica (izvirna zbirka vaj) ---------- */
+{"key":"v1","own":true,"lab":"Vaje · 1","pts":1,"lv":"D","type":"mc","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Katera operacija iz relacije izbere **vrstice**, ki izpolnjujejo pogoj?","o":["π – projekcija","σ – selekcija","⋈ – stik","× – kartezični produkt"],"a":[1],"h":[],"why":"Selekcija σ deluje kot filter vrstic. Stolpci ostanejo enaki."},
+{"key":"v2","own":true,"lab":"Vaje · 2","pts":1,"lv":"D","type":"mc","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Katera operacija iz relacije izbere **stolpce**?","o":["σ – selekcija","∪ – unija","π – projekcija","ρ – preimenovanje"],"a":[2],"h":[],"why":"Projekcija π obdrži le naštete stolpce (atribute)."},
+{"key":"v3","own":true,"lab":"Vaje · 3","pts":1,"lv":"D","type":"mc","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Projekcija lahko vrne **manj vrstic**, kot jih ima vhodna relacija.","o":["Drži","Ne drži"],"a":[0],"h":[],"why":"Drži. Relacija je množica, zato projekcija odstrani podvojene vrstice. π[Kraj](Clan) vrne 4 vrstice, čeprav ima Clan 7 članov."},
+{"key":"v4","own":true,"lab":"Vaje · 4","pts":1,"lv":"D","type":"mc","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Selekcija lahko spremeni **število stolpcev** relacije.","o":["Drži","Ne drži"],"a":[1],"h":[],"why":"Ne drži. Selekcija izbira samo vrstice, vsi stolpci ostanejo. Stolpce spreminja projekcija."},
+{"key":"v5","own":true,"lab":"Vaje · 5","pts":1,"lv":"D","type":"mc","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Koliko vrstic ima rezultat izraza `Clan × Knjiga`?","o":["14","7","49","10"],"a":[2],"h":[],"why":"Kartezični produkt združi vsako vrstico z vsako: 7 članov · 7 knjig = 49 vrstic."},
+{"key":"v6","own":true,"lab":"Vaje · 6","pts":1,"lv":"D","type":"mc","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Koliko vrstic ima rezultat izraza `π[Kraj](Clan)`?","o":["7","3","4","1"],"a":[2],"h":[],"why":"Kraji so Ljubljana, Maribor, Celje in Kranj. Ljubljana in Maribor se ponovita, a v rezultatu sta le enkrat: 4 vrstice."},
+{"key":"v7","own":true,"lab":"Vaje · 7","pts":1,"lv":"D","type":"mc","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Unijo, presek in razliko lahko naredimo le nad relacijama, ki imata **enake atribute**.","o":["Drži","Ne drži"],"a":[0],"h":[],"why":"Drži. Relaciji morata biti združljivi: imeti morata enake stolpce. Debata ∪ Gledalisce gre, Debata ∪ Clan pa ne."},
+{"key":"v8","own":true,"lab":"Vaje · 8","pts":1,"lv":"D","type":"mc","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Za poljubni relaciji R in S velja `R − S = S − R`.","o":["Drži","Ne drži"],"a":[1],"h":[],"why":"Ne drži. Debata − Gledalisce vrne Majo in Nejca, Gledalisce − Debata pa Tima in Saro."},
+{"key":"v9","own":true,"lab":"Vaje · 9","pts":1,"lv":"D","type":"mc","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Po katerem atributu se poveže `Clan ⋈ Izposoja`?","o":["KID","CID","Ime","po vseh atributih"],"a":[1],"h":[],"why":"Naravni stik poveže vrstice po skupnih atributih. Clan in Izposoja imata skupen samo CID."},
+{"key":"v10","own":true,"lab":"Vaje · 10","pts":1,"lv":"D","type":"mc","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Kateri izraz **ni** veljaven?","o":["π[Ime](σ[Starost>16](Clan))","σ[Starost>16](π[Ime](Clan))","σ[Starost>16](σ[Kraj='Celje'](Clan))","π[Ime,Starost](Clan)"],"a":[1],"ocode":true,"h":[],"why":"Po projekciji π[Ime] ostane samo stolpec Ime, zato selekcija po Starost nima česa preveriti. Najprej selekcija, nato projekcija."},
+{"key":"v11","own":true,"lab":"Vaje · 11","pts":1,"lv":"D","type":"mc","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Kateri SQL stavek ustreza izrazu `π[Naslov](σ[Leto<1900](Knjiga))`?","o":["SELECT * FROM Knjiga WHERE Leto < 1900","SELECT DISTINCT Naslov FROM Knjiga WHERE Leto < 1900","SELECT Leto FROM Knjiga WHERE Naslov < 1900","SELECT DISTINCT Naslov FROM Knjiga"],"a":[1],"ocode":true,"h":[],"why":"π ustreza SELECT DISTINCT (izbira stolpcev brez ponavljanja), σ pa WHERE."},
+{"key":"v12","own":true,"lab":"Vaje · 12","pts":1,"lv":"D","type":"mc","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Naravni stik dveh relacij, ki **nimata skupnih atributov**, je enak njunemu kartezičnemu produktu.","o":["Drži","Ne drži"],"a":[0],"h":[],"why":"Drži. Ker ni skupnega atributa, ni pogoja za povezovanje, zato se vsaka vrstica poveže z vsako."},
+{"key":"v13","own":true,"lab":"Vaje · 13","pts":1,"lv":"D","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Vsi podatki o članih, ki živijo v **Mariboru**.","cols":"vsi stolpci relacije Clan","sol":"σ[Kraj='Maribor'](Clan)","h":["Potrebuješ samo selekcijo."]},
+{"key":"v14","own":true,"lab":"Vaje · 14","pts":1,"lv":"D","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Naslovi vseh knjig.","cols":"Naslov","sol":"π[Naslov](Knjiga)","h":["Potrebuješ samo projekcijo."]},
+{"key":"v15","own":true,"lab":"Vaje · 15","pts":2,"lv":"D","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Ime in priimek članov, ki so **starejši od 16** let.","cols":"Ime, Priimek","sol":"π[Ime,Priimek](σ[Starost>16](Clan))","h":["Najprej selekcija, nato projekcija."]},
+{"key":"v16","own":true,"lab":"Vaje · 16","pts":2,"lv":"D","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Naslov in avtor knjig, izdanih **po letu 1950**.","cols":"Naslov, Avtor","sol":"π[Naslov,Avtor](σ[Leto>1950](Knjiga))","h":["Pogoj je Leto > 1950."]},
+{"key":"v17","own":true,"lab":"Vaje · 17","pts":1,"lv":"D","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Vsi podatki o knjigah žanra **fantazija**, izdanih **pred letom 1990**.","cols":"vsi stolpci relacije Knjiga","sol":"σ[Zanr='fantazija' ∧ Leto<1990](Knjiga)","h":["Dva pogoja poveži z ∧ (in)."]},
+{"key":"v18","own":true,"lab":"Vaje · 18","pts":2,"lv":"D","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Imena članov, ki živijo v **Ljubljani ali Celju**.","cols":"Ime","sol":"π[Ime](σ[Kraj='Ljubljana' ∨ Kraj='Celje'](Clan))","h":["Uporabi ∨ (ali)."]},
+{"key":"v19","own":true,"lab":"Vaje · 19","pts":2,"lv":"D","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"CID članov, ki so si izposodili knjigo **K3**.","cols":"CID","sol":"π[CID](σ[KID='K3'](Izposoja))","h":["Vse potrebno je v relaciji Izposoja."]},
+{"key":"v20","own":true,"lab":"Vaje · 20","pts":2,"lv":"D","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Naslovi knjig, ki so bile izposojene v **septembru** (Mesec = 9).","cols":"Naslov","sol":"π[Naslov](σ[Mesec=9](Izposoja ⋈ Knjiga))","h":["Naslov je v Knjiga, mesec v Izposoja – poveži ju s stikom."]},
+{"key":"v21","own":true,"lab":"Vaje · 21","pts":2,"lv":"D","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Imena članov, ki so si izposodili knjigo **Hobit**.","cols":"Ime","sol":"π[Ime](σ[Naslov='Hobit'](Clan ⋈ Izposoja ⋈ Knjiga))","h":["Potrebuješ vse tri relacije."]},
+{"key":"v22","own":true,"lab":"Vaje · 22","pts":2,"lv":"D","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Imena članov **iz Ljubljane**, ki so si izposodili knjigo žanra **fantazija**.","cols":"Ime","sol":"π[Ime](σ[Kraj='Ljubljana' ∧ Zanr='fantazija'](Clan ⋈ Izposoja ⋈ Knjiga))","h":["Stik vseh treh relacij, nato selekcija z dvema pogojema."]},
+{"key":"v23","own":true,"lab":"Vaje · 23","pts":1,"lv":"D","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"CID in Ime članov, ki obiskujejo **vsaj enega** od krožkov (debata, gledališče).","cols":"CID, Ime","sol":"Debata ∪ Gledalisce","h":["Vsaj eden = unija."]},
+{"key":"v24","own":true,"lab":"Vaje · 24","pts":1,"lv":"D","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"CID in Ime članov, ki obiskujejo **oba** krožka.","cols":"CID, Ime","sol":"Debata ∩ Gledalisce","h":["Oba = presek."]},
+{"key":"v25","own":true,"lab":"Vaje · 25","pts":2,"lv":"D","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"CID članov, ki si **niso izposodili nobene** knjige.","cols":"CID","sol":"π[CID](Clan) − π[CID](Izposoja)","h":["Vsi člani minus tisti, ki so si kaj izposodili."]},
+{"key":"v26","own":true,"lab":"Vaje · 26","pts":2,"lv":"D","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Naslovi knjig, ki si jih **ni izposodil nihče**.","cols":"Naslov","sol":"π[Naslov](Knjiga) − π[Naslov](Knjiga ⋈ Izposoja)","h":["Vse knjige minus izposojene knjige."]},
+{"key":"v27","own":true,"lab":"Vaje · 27","pts":3,"lv":"D","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Naslovi knjig, ki sta si jih izposodili **tako Maja (CID 1) kot Zala (CID 3)**.","cols":"Naslov","sol":"π[Naslov](σ[CID=1](Izposoja) ⋈ Knjiga) ∩ π[Naslov](σ[CID=3](Izposoja) ⋈ Knjiga)","h":["Majine knjige ∩ Zaline knjige."]},
+{"key":"v28","own":true,"lab":"Vaje · 28","pts":1,"lv":"D","type":"mc","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Kaj vrne izraz `π[Avtor](σ[Zanr='fantazija'](Knjiga))`?","o":["Tolkien, Rowling, Martin","Hobit, Harry Potter, Igra prestolov","Tolkien, Bartol, Rowling","vse podatke o treh knjigah"],"a":[0],"h":[],"why":"Selekcija obdrži tri fantazijske knjige, projekcija pa od njih le stolpec Avtor."},
+{"key":"v29","own":true,"lab":"Vaje · 29","pts":1,"lv":"D","type":"mc","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Koliko vrstic ima rezultat `Clan ⋈ Izposoja`?","o":["7","10","70","17"],"a":[1],"h":[],"why":"Vsaka izposoja pripada natanko enemu članu, zato ima stik toliko vrstic kot Izposoja: 10. Sara (CID 7) si ni nič izposodila, zato je v stiku ni."},
+{"key":"v30","own":true,"lab":"Vaje · 30","pts":3,"lv":"D","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"**Izziv:** imena članov, ki so si knjigo izposodili v **oktobru** (10), v **septembru** (9) pa nobene.","cols":"Ime","sol":"π[Ime]((π[CID](σ[Mesec=10](Izposoja)) − π[CID](σ[Mesec=9](Izposoja))) ⋈ Clan)","h":["Najprej razlika CID-jev (oktober − september), nato stik s Clan za imena."]},
+/* ---------- E · Dodatne vaje · knjižnica (izvirna zbirka dodatnih vaj) ---------- */
+{"key":"d1","own":true,"lab":"Dodatne vaje · 1","pts":1,"lv":"E","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Vsi podatki o članih, ki so **mlajši od 17** let.","cols":"vsi stolpci relacije Clan","sol":"σ[Starost<17](Clan)","h":["Samo selekcija s pogojem Starost < 17."]},
+{"key":"d2","own":true,"lab":"Dodatne vaje · 2","pts":2,"lv":"E","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Avtorji knjig žanra **mladinski**.","cols":"Avtor","sol":"π[Avtor](σ[Zanr='mladinski'](Knjiga))","h":["Najprej selekcija po žanru, nato projekcija."]},
+{"key":"d3","own":true,"lab":"Dodatne vaje · 3","pts":2,"lv":"E","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Ime, priimek in kraj članov, ki **ne živijo v Ljubljani**.","cols":"Ime, Priimek, Kraj","sol":"π[Ime,Priimek,Kraj](σ[Kraj≠'Ljubljana'](Clan))","h":["Uporabi ≠ ali ¬(Kraj='Ljubljana')."]},
+{"key":"d4","own":true,"lab":"Dodatne vaje · 4","pts":2,"lv":"E","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"KID knjig, ki so bile izposojene v **oktobru** (Mesec = 10).","cols":"KID","sol":"π[KID](σ[Mesec=10](Izposoja))","h":["Vse potrebno je v relaciji Izposoja."]},
+{"key":"d5","own":true,"lab":"Dodatne vaje · 5","pts":1,"lv":"E","type":"mc","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Koliko vrstic ima rezultat `Debata ∪ Gledalisce`?","o":["8","6","2","4"],"a":[1],"h":[],"why":"Debata ima 4 člane, Gledalisce tudi 4, a Zala in Rok sta v obeh. V uniji sta le enkrat: 4 + 4 − 2 = 6."},
+{"key":"d6","own":true,"lab":"Dodatne vaje · 6","pts":2,"lv":"E","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Naslovi knjig, ki si jih je izposodil **Tim**.","cols":"Naslov","sol":"π[Naslov](σ[Ime='Tim'](Clan ⋈ Izposoja ⋈ Knjiga))","h":["Ime je v Clan, naslov v Knjiga – poveži vse tri."]},
+{"key":"d7","own":true,"lab":"Dodatne vaje · 7","pts":2,"lv":"E","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Ime in kraj članov, ki so si izposodili knjigo, izdano **pred letom 1920**.","cols":"Ime, Kraj","sol":"π[Ime,Kraj](σ[Leto<1920](Clan ⋈ Izposoja ⋈ Knjiga))","h":["Stik treh relacij, selekcija po Leto, projekcija."]},
+{"key":"d8","own":true,"lab":"Dodatne vaje · 8","pts":2,"lv":"E","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Žanri knjig, ki so bile izposojene v **septembru** (Mesec = 9).","cols":"Zanr","sol":"π[Zanr](σ[Mesec=9](Izposoja ⋈ Knjiga))","h":["Pazi: vsak žanr se v rezultatu pojavi le enkrat."]},
+{"key":"d9","own":true,"lab":"Dodatne vaje · 9","pts":1,"lv":"E","type":"mc","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Izraz `σ[A](σ[B](R))` vrne enak rezultat kot `σ[A ∧ B](R)`.","o":["Drži","Ne drži"],"a":[0],"h":[],"why":"Drži. Dve zaporedni selekciji obdržita vrstice, ki izpolnjujejo oba pogoja, kar je enako enemu pogoju z ∧."},
+{"key":"d10","own":true,"lab":"Dodatne vaje · 10","pts":2,"lv":"E","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Imena članov, ki obiskujejo **gledališki** krožek, **debatnega pa ne**.","cols":"Ime","sol":"π[Ime](Gledalisce − Debata)","h":["»Ta, a ne oni« pomeni razliko."]},
+{"key":"d11","own":true,"lab":"Dodatne vaje · 11","pts":3,"lv":"E","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Ime in priimek članov, ki obiskujejo **gledališki** krožek in so si izposodili **vsaj eno** knjigo.","cols":"Ime, Priimek","sol":"π[Ime,Priimek]((π[CID](Gledalisce) ∩ π[CID](Izposoja)) ⋈ Clan)","h":["Presek CID-jev, nato stik s Clan za priimke."]},
+{"key":"d12","own":true,"lab":"Dodatne vaje · 12","pts":1,"lv":"E","type":"mc","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Kateri izraz vrne imena članov, ki si **niso izposodili nobene** knjige?","o":["π[Ime](Clan) − π[Ime](Izposoja)","π[Ime](Clan ⋈ Izposoja)","π[Ime]((π[CID](Clan) − π[CID](Izposoja)) ⋈ Clan)","π[Ime](σ[KID≠'K1'](Clan ⋈ Izposoja))"],"a":[2],"ocode":true,"h":[],"why":"Najprej razlika CID-jev (vsi člani minus tisti z izposojo), nato stik s Clan za imena. Prvi izraz ne gre, ker Izposoja nima stolpca Ime; drugi vrne ravno tiste, ki so si kaj izposodili."},
+{"key":"d13","own":true,"lab":"Dodatne vaje · 13","pts":2,"lv":"E","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Naslovi knjig, ki si jih je izposodil kdo **iz Maribora**.","cols":"Naslov","sol":"π[Naslov](σ[Kraj='Maribor'](Clan ⋈ Izposoja ⋈ Knjiga))","h":["Stik vseh treh relacij, selekcija po Kraj."]},
+{"key":"d14","own":true,"lab":"Dodatne vaje · 14","pts":1,"lv":"E","type":"mc","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"Izraz `π[Ime](Clan ⋈ Izposoja)` vrne imena **vseh 7** članov.","o":["Drži","Ne drži"],"a":[1],"h":[],"why":"Ne drži. Stik obdrži le člane, ki imajo vsaj eno izposojo. Sara (CID 7) si ni nič izposodila, zato je rezultat 6 imen."},
+{"key":"d15","own":true,"lab":"Dodatne vaje · 15","pts":3,"lv":"E","type":"ra","db":["Clan","Knjiga","Izposoja","Debata","Gledalisce"],"q":"**Izziv:** naslovi knjig, ki si jih **ni izposodil nihče iz Maribora**.","cols":"Naslov","sol":"π[Naslov](Knjiga) − π[Naslov](σ[Kraj='Maribor'](Clan ⋈ Izposoja ⋈ Knjiga))","h":["Vse knjige minus knjige, ki so si jih izposodili Mariborčani (rešitev prejšnje naloge)."]},
+/* ---------- F · Težje naloge ---------- */
+{"own":true,"pts":2,"lv":"F","type":"mc",
+ "q":"Presek je izpeljana operacija. Kateri izraz je enakovreden izrazu p ∩ r?",
+ "o":["p − (p − r)","p − (r − p)","(p − r) − p","p ∪ (r − p)"],"a":[0],
+ "h":["p − r so terke iz p, ki niso v r. Kaj ostane, če te odštejemo od p?","Preveri na primeru: Robotika in Sah."],
+ "why":"p − r vrne terke iz p brez skupnih; če te odštejemo od p, ostanejo ravno skupne terke — presek."},
+
+{"own":true,"pts":2,"lv":"F","type":"ra","db":["Ponudba","Kupec"],
+ "q":"Trgovina ima relaciji Ponudba(Izdelek, Cena) in Kupec(Kupec, Proracun). Izpiši vse pare izdelek–kupec, pri katerih si kupec izdelek lahko privošči (Cena ≤ Proracun). Uporabi Θ-stik.",
+ "sol":"Ponudba ⋈[Cena≤Proracun] Kupec",
+ "h":["Pogoj Θ-stika zapiši v oglatih oklepajih za ⋈: p ⋈[pogoj] r.","Θ-stik je okrajšava za σ[pogoj](p × r)."],
+ "why":"Rezultat ima 6 vrstic — Nik (250) si lahko privošči samo slušalke. Enakovredno: σ[Cena≤Proracun](Ponudba × Kupec)."},
+
+{"own":true,"pts":3,"lv":"F","type":"ra","db":["Clan","Izposoja","Knjiga"],
+ "q":"Izpiši imena članov, ki so si izposodili VSE fantazijske knjige. Uporabi količnik.",
+ "sol":"π[Ime](Clan ⋈ (π[CID,KID](Izposoja) ÷ π[KID](σ[Zanr='fantazija'](Knjiga))))",
+ "h":["Količnik p ÷ r vrne terke, ki nastopajo z VSEMI terkami iz r.","Levi del: pari (CID, KID) iz izposoj. Desni del: KID-ji fantazijskih knjig."],
+ "why":"Fantazijske knjige so K1, K3 in K6. Vse tri si je izposodila samo Zala (CID 3)."},
+
+{"own":true,"pts":3,"lv":"F","type":"ra","db":["Clan","Izposoja"],
+ "q":"Izpiši imena članov, ki so si izposodili kakšno knjigo septembra (Mesec 9) IN kakšno oktobra (Mesec 10).",
+ "sol":"π[Ime](Clan ⋈ (π[CID](σ[Mesec=9](Izposoja)) ∩ π[CID](σ[Mesec=10](Izposoja))))",
+ "h":["Spet presek dveh množic CID-jev.","Septembrske in oktobrske izposoje izbereš z dvema selekcijama."],
+ "why":"September: 1, 2, 3, 4, 6. Oktober: 1, 2, 3, 5. Presek: 1, 2, 3 — Maja, Tim, Zala."},
+
+{"own":true,"pts":2,"lv":"F","type":"ra","db":["Knjiga","Izposoja"],
+ "q":"Izpiši naslove knjig, ki sta si jih izposodila član 1 ALI član 4. Uporabi unijo.",
+ "sol":"π[Naslov](Knjiga ⋈ (π[KID](σ[CID=1](Izposoja)) ∪ π[KID](σ[CID=4](Izposoja))))",
+ "h":["Množici KID-jev obeh članov združi z ∪.","Enakovredno je tudi σ[CID=1 ∨ CID=4] — tu sta pogoja na isti vrstici dovoljena, ker sprašujemo po ALI."],
+ "why":"Član 1: K1, K3. Član 4: K3. Unija: K1, K3 — Hobit in Harry Potter. Pri ALI deluje tudi en sam pogoj z ∨, pri IN pa ne."},
+
+{"own":true,"pts":1,"lv":"F","type":"mc",
+ "q":"Kakšna je shema rezultata količnika p ÷ r, če je Sh(p) = P in Sh(r) = R (R ⊂ P)?",
+ "o":["P − R","P ∪ R","P ∩ R","R"],"a":[0],
+ "h":["Količnik »deli« po atributih, ki jih desna relacija nima.","Pri π[CID,KID](Izposoja) ÷ π[KID](…) je rezultat samo CID."],
+ "why":"Rezultat ima atribute P − R: tiste iz leve relacije, ki jih desna nima. Zato je rezultat deljenja parov (CID, KID) s KID-ji množica CID-jev."},
+
+/* ---------- H · Za doma ---------- */
+{"own":true,"pts":3,"lv":"H","type":"ra","db":["Dijak","Ocena"],
+ "q":"Izpiši imena dijakov, ki imajo oceno pri vseh predmetih, pri katerih ima oceno Ana. Uporabi količnik.",
+ "sol":"π[Ime](Dijak ⋈ (π[ID,PID](Ocena) ÷ π[PID](σ[ID=1](Ocena))))",
+ "h":["Desni del količnika: predmeti, pri katerih ima Ana (ID 1) oceno.","Levi del: pari (ID, PID) vseh ocen."],
+ "why":"Ana ima oceni pri M in R. Oceni pri obeh imajo dijaki 1, 2 in 5 — Ana, Luka in Nika."},
+
+{"own":true,"pts":2,"lv":"H","type":"ra","db":["Dijak","Ocena"],
+ "q":"Izpiši imena dijakov, ki nimajo nobene petice.",
+ "sol":"π[Ime](Dijak ⋈ (π[ID](Dijak) − π[ID](σ[Ocena=5](Ocena))))",
+ "h":["Vsi dijaki minus dijaki z vsaj eno peteico.","Razliko ID-jev poveži nazaj z relacijo Dijak."],
+ "why":"Petico imajo dijaki 1, 2 in 5; brez nje sta Eva in Jan."},
+
+{"own":true,"pts":3,"lv":"H","type":"ra","db":["Dijak"],
+ "q":"Izpiši kraje, iz katerih prihajata vsaj dva dijaka. Namig: potreboval boš ρ (preimenovanje) in kartezični produkt.",
+ "sol":"π[Kraj](σ[Kraj=KrajB ∧ ID≠IDB](Dijak × ρ[IDB,ImeB,PriimekB,RazredB,KrajB](Dijak)))",
+ "h":["Relacijo Dijak primerjaš samo s sabo — druga kopija potrebuje nova imena atributov: ρ[IDB,ImeB,PriimekB,RazredB,KrajB](Dijak).","Par različnih dijakov iz istega kraja: Kraj=KrajB ∧ ID≠IDB."],
+ "why":"Produkt z lastno preimenovano kopijo tvori pare dijakov; pogoj obdrži pare različnih dijakov iz istega kraja. Rezultat: Ljubljana. Prav to v SQL naredi FROM Dijak AS A, Dijak AS B."},
+
+{"own":true,"pts":2,"lv":"H","type":"ra","db":["Clan","Izposoja","Knjiga"],
+ "q":"Izpiši imena članov, ki so si izposodili kakšno knjigo, izdano pred letom 1940.",
+ "sol":"π[Ime](Clan ⋈ Izposoja ⋈ σ[Leto<1940](Knjiga))",
+ "h":["Stare knjige izberi s selekcijo nad Knjigo, nato poveži prek izposoj do članov."],
+ "why":"Pred 1940 so izšli Hobit, Alamut, Na klancu, Kekec in Martin Krpan; izposodili so si jih Maja, Tim, Zala, Lara in Rok."},
+
+{"own":true,"pts":3,"lv":"H","type":"ra","db":["Knjiga","Izposoja"],
+ "snip":"SELECT DISTINCT Naslov\nFROM Knjiga NATURAL JOIN Izposoja\nWHERE Mesec = 10;",
+ "q":"Zgornji stavek SQL zapiši kot izraz relacijske algebre.",
+ "sol":"π[Naslov](σ[Mesec=10](Knjiga ⋈ Izposoja))",
+ "h":["NATURAL JOIN je ⋈, WHERE je σ, SELECT DISTINCT pa π.","Vrstni red: stik, selekcija, projekcija."],
+ "why":"Oktobrske izposoje so K3, K3, K1, K6, K5 — naslovi: Harry Potter, Hobit, Igra prestolov, Kekec. DISTINCT v SQL ustreza temu, da je rezultat projekcije množica."},
+{"own":true,"pts":2,"lv":"H","type":"ra","db":["Clan","Izposoja","Knjiga"],
+ "q":"Izpiši imena članov, ki so si izposodili vsaj eno Tolkienovo ali Rowlingovo knjigo.",
+ "sol":"π[Ime](Clan ⋈ Izposoja ⋈ σ[Avtor='Tolkien' ∨ Avtor='Rowling'](Knjiga))",
+ "h":["Avtorja izbereš z ∨ (ali) v selekciji nad relacijo Knjiga.","Nato knjigo poveži z izposojami in člani."],
+ "why":"Tolkien je napisal Hobita (K1), Rowling Harryja Potterja (K3). Izposodili so ju Maja, Tim, Zala in Nejc."},
+
+{"own":true,"pts":3,"lv":"H","type":"ra","db":["Clan","Izposoja"],
+ "q":"Izpiši imena članov, ki so si izposodili knjigo K1 IN knjigo K3.",
+ "sol":"π[Ime](Clan ⋈ (π[CID](σ[KID='K1'](Izposoja)) ∩ π[CID](σ[KID='K3'](Izposoja))))",
+ "h":["Dve množici CID-jev (ena za K1, ena za K3) in njun presek.","Pogoj KID='K1' ∧ KID='K3' v eni selekciji ne deluje — ista vrstica ima samo en KID."],
+ "why":"K1 so si izposodili člana 1 in 3, K3 pa 1, 2, 3 in 4. Presek: 1 in 3 — Maja in Zala."},
+
+{"own":true,"pts":2,"lv":"H","type":"ra","db":["Clan","Izposoja","Knjiga"],
+ "q":"Izpiši avtorje (brez ponavljanja), katerih knjige si je izposodil Rok.",
+ "sol":"π[Avtor](σ[Ime='Rok'](Clan) ⋈ Izposoja ⋈ Knjiga)",
+ "h":["Enako kot pri Zali, le da projiciraš avtorja.","Projekcija podvojene avtorje izloči sama."],
+ "why":"Rok (CID 6) si je izposodil K4 (Na klancu) — avtor je Cankar."},
+];
+
+/* Praktične vaje (brez točk) */
+const HOME = [
+ {"id":"h1","title":"Igrišče: preveri svoje ideje",
+  "q":"Na strani Postopek reševanja je igrišče, ki izračuna poljuben izraz. Preizkusi: (1) Kaj vrne π[Razred](Dijak)? Koliko vrstic ima? (2) Primerjaj σ[Ocena≥4](Ocena ⋈ Predmet) in σ[Ocena≥4](Ocena) ⋈ Predmet — sta rezultata enaka? Zakaj?",
+  "sol":"π[Razred](Dijak) vrne 2 vrstici (4A in 4B) — podvojeni razredi se izločijo. Izraza pod (2) vrneta enak rezultat: selekcija po atributu Ocena se lahko izvede pred stikom ali po njem, ker stik tega atributa ne spreminja. Zgodnja selekcija je hitrejša, ker stik dela z manj vrsticami."},
+ {"id":"h2","title":"Od algebre do SQL",
+  "q":"Izraz π[Ime,Priimek](σ[Kraj='Ljubljana'](Dijak)) prevedi v stavek SQL. Če imaš na računalniku MySQL ali SQLite, ustvari tabelo Dijak s podatki z razlage 2 in poizvedbo zaženi.",
+  "sol":"SELECT DISTINCT Ime, Priimek FROM Dijak WHERE Kraj = 'Ljubljana'; — DISTINCT ustreza temu, da projekcija izloči podvojene vrstice. V poglavju 5 (SQL poizvedbe) bomo ta prevod uporabljali v obe smeri."},
+ {"id":"h3","title":"Sestavi svojo nalogo",
+  "q":"Za sošolca sestavi besedilo naloge nad knjižnično bazo, ki zahteva natanko dve operaciji (σ in π ali ⋈ in π), ter zapiši rešitev. Nalogi preveri na igrišču.",
+  "sol":"Primer: »Izpiši naslove knjig, izdanih po letu 1990.« Rešitev: π[Naslov](σ[Leto>1990](Knjiga)) — vrne Harry Potter in Igra prestolov. Dobra naloga ima enolično rešitev in smiselno vprašanje."}
+];
+
+
+
+
+
+/* ---------- storage: browser always, user account when available ---------- */
+let S = {}, localT = 0;
+let remote = null, pushTimer = null, pushing = false, dirty = false;
+function saveLocal(){ LavRac.saveUi(S); }
+function save(){ LavRac.saveUi(S); }
+function st(id){ return S[id] || (S[id] = {}); }
+const RANK = {ok:2, seen:1};
+function summary(){
+  const r = {resenih:0, tock:0, vseh:T.length, vsehTock:T.reduce((a,t)=>a+t.pts,0), sklopi:{}};
+  T.forEach(t=>{ const k=t.lv; r.sklopi[k] = r.sklopi[k] || {resenih:0, vseh:0}; r.sklopi[k].vseh++;
+    if(S[t.id] && S[t.id].state==="ok"){ r.resenih++; r.tock+=t.pts; r.sklopi[k].resenih++; } });
+  return r;
+}
+async function push(){
+  if(!remote || pushing || !dirty) return;
+  pushing = true; dirty = false;
+  try { await remote.ref.set({poglavje:1, naloge:S, povzetek:summary(), posodobljeno:localT}); setSync("cloud"); }
+  catch(e){ if(e && e.code==="invalid_argument"){ remote = null; setSync("local"); } else { setSync("err"); dirty = true; } }
+  pushing = false;
+  if(dirty && remote){ clearTimeout(pushTimer); pushTimer = setTimeout(push, 4000); }
+}
+function merge(R, rT){
+  let changed = false;
+  const newer = rT > localT;
+  Object.keys(R).forEach(id=>{
+    const r = R[id] || {}, l = S[id];
+    if(!l){ S[id] = r; changed = true; return; }
+    const base = newer ? Object.assign({}, l, r) : Object.assign({}, r, l);
+    const rs = Math.max(RANK[l.state]||0, RANK[r.state]||0);
+    base.state = rs===2 ? "ok" : rs===1 ? "seen" : undefined;
+    base.h = Math.max(l.h||0, r.h||0);
+    if(JSON.stringify(base)!==JSON.stringify(l)){ S[id] = base; changed = true; }
+  });
+  if(newer) localT = rT;
+  return changed;
+}
+const SYNC_TXT = {
+  local:"Napredek se shranjuje v tem brskalniku. Na drugem računalniku ga ne boš videl.",
+  cloud:"Napredek se shranjuje v tvojem računu in je na voljo na vseh napravah.",
+  err:"Shranjevanje v račun trenutno ne deluje. Napredek je varen v tem brskalniku."
+};
+function setSync(k){ document.querySelectorAll(".js-sync").forEach(e=>{ e.dataset.s=k; e.textContent=SYNC_TXT[k]; }); }
+
+/* ---------- helpers ---------- */
+const $ = (s,el=document)=>el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const KW = new Set("SELECT DISTINCT FROM WHERE AS AND OR NOT NATURAL JOIN CROSS ON UNION INTERSECT EXCEPT MINUS GROUP BY HAVING COUNT EXISTS IN SQL".split(" "));
+function hl(code){
+  const re = /(\/\/[^\n]*)|("(?:\\.|[^"\\])*")|('(?:\\.|[^'\\])')|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_]\w*)\b/g;
+  let out="", last=0, m;
+  while((m=re.exec(code))){
+    out += esc(code.slice(last, m.index));
+    if(m[1]) out += '<span class="c">'+esc(m[1])+'</span>';
+    else if(m[2]||m[3]) out += '<span class="s">'+esc(m[2]||m[3])+'</span>';
+    else if(m[4]) out += '<span class="n">'+m[4]+'</span>';
+    else if(KW.has(m[5])) out += '<span class="k">'+m[5]+'</span>';
+    else out += esc(m[5]);
+    last = re.lastIndex;
+  }
+  return out + esc(code.slice(last));
+}
+const fold = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+function norm(s, o){
+  let x = String(s).trim();
+  if(o.code) return x.replace(/\s+/g,"");
+  x = x.replace(/\s+/g," ");
+  if(!o.cs) x = fold(x.toLowerCase()).replace(/[.]$/,"");
+  if(o.list) x = x.split(/\s*,\s*/).sort().join(",");
+  return x;
+}
+function matchBlank(val, b){
+  if(b.pool){ const set = new Set(String(val).split(/[\s,;]+/).map(x=>x.trim().toLowerCase()).filter(Boolean)); const n = [...set].filter(x=>b.pool.includes(x)).length; return n>=b.min && n===set.size; }
+  const v = norm(val,b); return b.acc.some(a => norm(a,b) === v); }
+const normOut = s => String(s).replace(/\r/g,"").split("\n").map(l=>l.replace(/\s+$/,"")).join("\n").replace(/\n+$/,"");
+const srcLabel = s => { const r = /^MRAC\/(\d+)$/.exec(s); if(r) return `Katalog 2023 · primer · ${r[1]}. nal.`; const m = /^M(\d\d)(\d)\/(\d+)$/.exec(s); return m ? `Matura 20${m[1]} · ${m[2]==="1"?"spomladi":"jeseni"} · ${m[3]}. nal.` : s; };
+const fmtQ = s => esc(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/`(.+?)`/g,'<span class="ra">$1</span>');
+const ptsLabel = p => p===1 ? "1 točka" : p===2 ? "2 točki" : (p<5 ? p+" točke" : p+" točk");
+
+/* ---------- render tasks ---------- */
+LavRac.prepare(T, LEVELS, {});
+T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : t.key ? t.key : "own-"+i; });
+LavRac.tasks(LEVELS.flatMap(L=>T.filter(t=>t.lv===L.tag)), { level: (t) => t.pts });
+S = LavRac.loadUi();
+const levelsEl = $("#levels");
+let counter = 0;
+function renderAll(){
+levelsEl.innerHTML = ""; $("#homeMat").innerHTML = ""; counter = 0;
+LEVELS.forEach(L=>{
+  const wrap = document.createElement("div");
+  wrap.className = "level"; wrap.id = L.id;
+  wrap.innerHTML = `<header><span class="eyebrow">Sklop ${L.tag}</span><h3 style="font-size:1.35rem">${esc(L.title)}</h3><p>${esc(L.note)}</p></header>`;
+  T.filter(t=>t.lv===L.tag).forEach(t=>{ counter++; t.n = counter; wrap.appendChild(card(t)); });
+  const em = document.createElement("p"); em.className = "lvl-empty"; em.hidden = true; em.textContent = "V tem sklopu ni nalog za izbrani filter.";
+  wrap.appendChild(em);
+  (L.home ? $("#homeMat") : levelsEl).appendChild(wrap);
+});
+applyFilter();
+}
+
+function card(t){
+  const el = document.createElement("article");
+  el.className = "task"; el.id = "t-"+t.id; el.dataset.kind = t.key ? "vaje" : t.own ? "own" : "mat";
+  const tags = (t.lab ? `<span class="tag from">${esc(t.lab)}</span>` : t.own ? `<span class="tag">Dodatna</span>` : `<span class="tag mat">${esc(srcLabel(t.src))}</span>`) + (t.adapt?`<span class="tag">Prirejeno</span>`:"") + (t.redr?`<span class="tag">Diagram prerisan</span>`:"") + (t.draw?`<span class="tag">Nariši diagram</span>`:"") + `<span class="tag">${ptsLabel(t.pts)}</span><span class="tag js-st" hidden></span>`;
+  let body = "";
+  if(t.code) body += `<pre class="code">${hl(t.code)}</pre>`;
+  if(t.code && t.type!=="output") body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="code">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`;
+  body += `<p>${fmtQ(t.q)}</p>`;
+  if(t.snip) body += `<pre class="code">${hl(t.snip)}</pre>`;
+  if(t.type==="ra") body += `<div class="cols-hint">Stolpci v rezultatu: <b>${esc(t.cols || RA.run(t.sol).attrs.join(", "))}</b></div>`;
+  if(t.db && t.type!=="ra") body += dbDetails(t.db);
+  if(t.type==="ra"){
+    body += dbDetails(t.db);
+    body += `<div class="keys" role="toolbar" aria-label="Vstavi simbol">` + RAKEYS.map(keyBtn).join("") + `</div>`;
+    body += `<div class="blank"><label for="ra-${t.id}">Tvoj izraz</label><textarea id="ra-${t.id}" class="expr" rows="2" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="npr. π[Ime](σ[Kraj='Celje'](Clan))"></textarea></div>`;
+    body += `<div class="ra-out" hidden></div>`;
+  } else if(t.type==="mc"){
+    const multi = t.a.length>1;
+    body += `<div class="opts">` + t.o.map((o,k)=>`<label class="opt${t.ocode?" code":""}"><input type="${multi?"checkbox":"radio"}" name="r-${t.id}" id="r-${t.id}-${k}" value="${k}"><b>${"ABCDEF"[k]}</b><span>${esc(o)}</span></label>`).join("") + `</div>`;
+  } else if(t.type==="blanks"){
+    body += t.b.map((b,k)=>`<div class="blank"><label for="b-${t.id}-${k}">${esc(b.l)}</label><input type="text" id="b-${t.id}-${k}" class="${b.code||b.cs?"mono":""}" autocomplete="off" spellcheck="false"></div>`).join("");
+  } else if(t.type==="cls"){
+    body += `<div class="cls">` + t.items.map((it,k)=>`<div class="crow" data-k="${k}"><span class="txt">${esc(it[0])}</span><div class="seg" role="group" aria-label="Izberi">${t.cats.map((c,ci)=>`<button type="button" data-ci="${ci}" aria-pressed="false">${esc(c)}</button>`).join("")}</div></div>`).join("") + `</div>`;
+  } else if(t.type==="output"){
+    body += `<div class="blank"><label for="o-${t.id}">Tvoj odgovor (izpis)</label><textarea id="o-${t.id}" class="mono out" spellcheck="false"></textarea></div>`;
+    if(t.code) body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="code">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`;
+  } else if(t.type==="code"){
+    if(!t.hideExp) body += `<pre class="code">${esc(t.expected)}</pre>`;
+    body += `<div class="blank"><div class="editorbar"><label for="e-${t.id}">Tvoja koda</label><span>Zaženi v Eclipse, VS Code ali Programizu (tam razred preimenuj v Main), izpis prilepi spodaj.</span></div><textarea id="e-${t.id}" class="editor" spellcheck="false"></textarea></div>`;
+    body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="editor">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a><button class="btn ghost js-restore" type="button">Ponastavi kodo</button></div>`;
+    body += `<div class="blank"><label for="o-${t.id}">Izpis tvojega programa</label><textarea id="o-${t.id}" class="mono out" spellcheck="false"></textarea></div>`;
+  }
+  el.innerHTML = `
+    <div class="thead"><span class="tnum">${t.n}. naloga</span><div class="tags">${tags}</div></div>
+    <div class="q">${body}</div>
+    <div class="actions">
+      ${t.type==="ra" ? '<button class="btn js-run" type="button">Izračunaj</button>' : ''}
+      <button class="btn primary js-check" type="button">Preveri</button>
+      ${t.h && t.h.length ? '<button class="btn js-hint" type="button">Namig</button>' : ''}
+      <button class="btn ghost js-sol" type="button">Prikaži rešitev</button>
+      <span class="feedback" aria-live="polite"></span>
+    </div>
+    <div class="hints"></div>
+    <div class="sol" hidden></div>`;
+  wire(el,t);
+  return el;
+}
+
+function wire(el,t){
+  const s = st(t.id);
+  const fb = $(".feedback",el), hintsEl = $(".hints",el), solEl = $(".sol",el);
+  // restore inputs
+  if(t.type==="mc" && s.v) s.v.forEach(k=>{ const i=$(`#r-${t.id}-${k}`,el); if(i) i.checked=true; });
+  const raEl = $(`#ra-${t.id}`,el);
+  if(raEl){
+    if(s.v) raEl.value = s.v;
+    el.querySelectorAll(".key").forEach(b=>b.addEventListener("click",()=>{
+      const a = raEl.selectionStart||0, z = raEl.selectionEnd||0;
+      raEl.value = raEl.value.slice(0,a) + b.dataset.ch + raEl.value.slice(z);
+      raEl.focus(); raEl.selectionStart = raEl.selectionEnd = a + b.dataset.ch.length;
+      raEl.classList.remove("right","wrong"); collect();
+    }));
+  }
+  if(t.type==="blanks" && s.v) s.v.forEach((v,k)=>{ const i=$(`#b-${t.id}-${k}`,el); if(i) i.value=v; });
+  if(t.type==="cls"){
+    el.querySelectorAll(".crow").forEach(row=>{
+      const k = +row.dataset.k;
+      row.querySelectorAll("button").forEach(b=>{
+        if(s.v && s.v[k]===+b.dataset.ci) b.setAttribute("aria-pressed","true");
+        b.addEventListener("click",()=>{ row.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed","false")); b.setAttribute("aria-pressed","true"); row.classList.remove("right","wrong"); collect(); });
+      });
+    });
+  }
+  const ed = $(`#e-${t.id}`,el), out = $(`#o-${t.id}`,el);
+  if(ed){ ed.value = s.code != null ? s.code : t.starter;
+    ed.addEventListener("keydown",e=>{ if(e.key==="Tab" && !e.shiftKey){ e.preventDefault(); const a=ed.selectionStart,b=ed.selectionEnd; ed.value=ed.value.slice(0,a)+"    "+ed.value.slice(b); ed.selectionStart=ed.selectionEnd=a+4; collect(); }});
+    ed.addEventListener("input",collect);
+    $(".js-restore",el).addEventListener("click",()=>{ ed.value=t.starter; collect(); });
+  }
+  if(out){ if(s.out) out.value=s.out; out.addEventListener("input",collect); }
+  el.querySelectorAll("input").forEach(i=>i.addEventListener("input",()=>{ i.classList.remove("right","wrong"); collect(); }));
+  el.querySelectorAll("input[type=radio],input[type=checkbox]").forEach(i=>i.addEventListener("change",()=>{ el.querySelectorAll(".opt").forEach(o=>o.classList.remove("right","wrong")); collect(); }));
+
+  function collect(){
+    if(t.type==="ra") s.v = raEl.value;
+    if(t.type==="mc") s.v = [...el.querySelectorAll(`input[name="r-${t.id}"]:checked`)].map(i=>+i.value);
+    if(t.type==="blanks") s.v = t.b.map((_,k)=>$(`#b-${t.id}-${k}`,el).value);
+    if(t.type==="cls") s.v = [...el.querySelectorAll(".crow")].map(r=>{ const p=r.querySelector('button[aria-pressed="true"]'); return p ? +p.dataset.ci : null; });
+    if(ed) s.code = ed.value;
+    if(out) s.out = out.value;
+    save();
+  }
+
+  el.querySelectorAll(".js-copy").forEach(btn=>btn.addEventListener("click",()=>{
+    const text = btn.dataset.copy==="editor" ? ed.value : runnable(t.code);
+    const done = ()=>{ const o=btn.textContent; btn.textContent="Kopirano"; setTimeout(()=>btn.textContent=o,1400); };
+    try { navigator.clipboard.writeText(text).then(done, ()=>fallback(text,done)); } catch(e){ fallback(text,done); }
+  }));
+
+  $(".js-check",el).addEventListener("click",()=>{
+    collect();
+    let ok=false, msg="";
+    if(t.type==="mc"){
+      const v = new Set(s.v||[]);
+      if(!v.size){ show(false,"Najprej izberi odgovor."); return; }
+      ok = v.size===t.a.length && t.a.every(k=>v.has(k));
+      el.querySelectorAll(".opt").forEach((o,k)=>{ o.classList.remove("right","wrong"); if(v.has(k)) o.classList.add(t.a.includes(k)?"right":"wrong"); });
+      if(!ok && t.a.length>1 && v.size!==t.a.length) msg = `Pravilnih odgovorov je ${t.a.length}.`;
+    }
+    if(t.type==="blanks"){
+      let all=true;
+      t.b.forEach((b,k)=>{ const i=$(`#b-${t.id}-${k}`,el); const good = matchBlank(i.value,b); i.classList.remove("right","wrong"); if(i.value.trim()) i.classList.add(good?"right":"wrong"); if(!good) all=false; });
+      ok = all;
+    }
+    if(t.type==="cls"){
+      let all=true, any=false;
+      el.querySelectorAll(".crow").forEach(r=>{ const k=+r.dataset.k; r.classList.remove("right","wrong"); if(s.v[k]==null){ all=false; return; } any=true; const good = s.v[k]===t.items[k][1]; r.classList.add(good?"right":"wrong"); if(!good) all=false; });
+      if(!any){ show(false,"Najprej razvrsti vsaj eno trditev."); return; }
+      ok = all; if(!ok && s.v.includes(null)) msg="Razvrsti vse trditve.";
+    }
+    if(t.type==="ra"){
+      const outEl = $(".ra-out",el);
+      if(!raEl.value.trim()){ show(false,"Najprej napiši izraz."); return; }
+      let mine;
+      raEl.classList.remove("right","wrong");
+      try { mine = RA.run(raEl.value); }
+      catch(e){ outEl.hidden = true; raEl.classList.add("wrong"); show(false, (e && e.message) ? e.message : "Izraza ni mogoče izračunati."); return; }
+      const exp = RA.run(t.sol);
+      ok = RA.equal(mine, exp);
+      raEl.classList.add(ok ? "right" : "wrong");
+      outEl.hidden = false;
+      outEl.innerHTML = `<div class="eyebrow">Rezultat tvojega izraza (${mine.rows.length} ${vrstic(mine.rows.length)})</div><div class="reswrap">` + relTable(mine) + `</div>`;
+      if(!ok){
+        const sameAttrs = RA.equal({attrs:mine.attrs,rows:[]},{attrs:exp.attrs,rows:[]});
+        msg = !sameAttrs ? "Rezultat nima pravih stolpcev (preveri projekcijo)."
+            : mine.rows.length!==exp.rows.length ? `Izraz se izračuna, a vrne ${mine.rows.length} ${vrstic(mine.rows.length)}, pravilni rezultat pa ${exp.rows.length}.`
+            : "Stolpci in število vrstic so pravi, vrednosti pa ne.";
+      }
+    }
+    if(t.type==="output" || t.type==="code"){
+      if(!out.value.trim()){ show(false, t.type==="code" ? "Zaženi program in prilepi njegov izpis." : "Napiši izpis."); return; }
+      const exps = [].concat(t.expected); ok = exps.some(e=>normOut(out.value)===normOut(e));
+      out.classList.remove("right","wrong"); out.classList.add(ok?"right":"wrong");
+      if(!ok){ const a=normOut(out.value).split("\n"), b=normOut(exps[0]).split("\n"); const k=b.findIndex((l,j)=>a[j]!==l); msg = k<0 ? "Izpis ima preveč vrstic." : `Razlika v ${k+1}. vrstici.`; }
+    }
+    if(!ok && t.type==="blanks" && t.b.every((_,k)=>!$(`#b-${t.id}-${k}`,el).value.trim())){ show(false,"Najprej vpiši odgovor."); return; }
+    if(!ok && /^Razvrsti/.test(msg)){ show(false,msg); return; }
+    save(); LavRac.answered(t.idx, ok, msg);
+  });
+
+  let hi = s.h || 0;
+  const drawHints = ()=>{ hintsEl.innerHTML = t.h.slice(0,hi).map((h,k)=>`<div class="hint"><b>NAMIG ${k+1}/${t.h.length}</b>${esc(h)}</div>`).join(""); const b=$(".js-hint",el); if(!b) return; b.disabled = hi>=t.h.length; b.textContent = hi>=t.h.length ? "Ni več namigov" : (hi? "Naslednji namig":"Namig"); };
+  drawHints();
+  const hintB = $(".js-hint",el);
+  if(hintB) hintB.addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h=hi; save(); LavRac.hinted(t.idx); drawHints(); }});
+  const runB = $(".js-run",el);
+  if(runB) runB.addEventListener("click",()=>{
+    const outEl = $(".ra-out",el);
+    if(!raEl.value.trim()){ show(false,"Najprej napiši izraz."); return; }
+    raEl.classList.remove("right","wrong");
+    try {
+      const r = RA.run(raEl.value);
+      outEl.hidden = false;
+      outEl.innerHTML = `<div class="eyebrow">Rezultat tvojega izraza (${r.rows.length} ${vrstic(r.rows.length)})</div><div class="reswrap">` + relTable(r) + `</div>`;
+      fb.textContent = "Izraz je izračunan, rezultat pa še ni preverjen. Za točke pritisni Preveri."; fb.className = "feedback";
+    } catch(e){ outEl.hidden = true; raEl.classList.add("wrong"); show(false,(e && e.message) ? e.message : "Izraza ni mogoče izračunati."); }
+  });
+
+  function drawSol(){
+    let ans="";
+    if(t.type==="mc") ans = "Pravilno: " + t.a.map(k=>"ABCDEF"[k]).join(", ");
+    if(t.type==="blanks") ans = t.b.map(b=>`${b.l} ${b.acc[0]}`).join(" · ");
+    if(t.type==="cls") ans = t.items.map(it=>`${it[0]} → ${t.cats[it[1]]}`).join("\n");
+    let html = "";
+    if(t.type==="cls") html += `<div class="ans" style="white-space:pre-line;font-weight:400">${esc(ans)}</div>`;
+    else if(ans) html += `<div class="ans">${esc(ans)}</div>`;
+    if(t.type==="ra"){
+      const r = RA.run(t.sol);
+      html += `<div class="ans ra" style="font-weight:400">${esc(t.sol)}</div><div class="eyebrow">Rezultat (${r.rows.length} ${vrstic(r.rows.length)})</div><div class="reswrap">` + relTable(r) + `</div>`;
+    }
+    if(t.jsolCode) html += `<div><div class="eyebrow">Primer v Javi</div><pre class="code">${hl(t.jsolCode)}</pre></div>`;
+    if(t.type==="output") html += `<div><div class="eyebrow">Pravilen izpis</div><pre class="code">${esc(t.expected)}</pre></div>`;
+    if(t.type==="code") html += `<div><div class="eyebrow">Ena od možnih rešitev</div><pre class="code">${hl(t.sol)}</pre></div>`;
+    if(t.why) html += `<p class="why">${fmtQ(t.why)}</p>`;
+    solEl.innerHTML = html;
+  }
+  $(".js-sol",el).addEventListener("click",()=>{
+    if(solEl.hidden){ drawSol(); solEl.hidden=false; LavRac.solution(t.idx); $(".js-sol",el).textContent="Skrij rešitev"; }
+    else { solEl.hidden=true; $(".js-sol",el).textContent="Prikaži rešitev"; }
+  });
+
+  function show(ok,m){ fb.textContent=m; fb.className="feedback "+(ok?"ok":"bad"); }
+  function paint(){
+    el.dataset.state = s.state||"";
+    const tg = $(".js-st",el);
+    if(s.state==="ok"){ tg.hidden=false; tg.className="tag js-st st-ok"; tg.textContent="Rešeno"; }
+    else if(s.state==="seen"){ tg.hidden=false; tg.className="tag js-st st-seen"; tg.textContent="Rešitev ogledana"; }
+    else tg.hidden=true;
+  }
+  paint();
+}
+
+function runnable(c){ return /\bclass\s+\w+/.test(c) ? c.replace(/public\s+class\s+\w+/, "public class Main") : "public class Main {\n    public static void main(String[] args) {\n" + c.split("\n").map(l=>l?"        "+l:l).join("\n") + "\n    }\n}"; }
+function fallback(text,done){
+  const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); done(); }catch(e){} ta.remove();
+}
+
+/* ---------- home ---------- */
+const homeEl = $("#home");
+HOME.forEach((h,k)=>{
+  const el = document.createElement("article"); el.className="task";
+  el.innerHTML = `<div class="thead"><span class="tnum">D${k+1}. ${esc(h.title)}</span><div class="tags"><span class="tag">Za doma</span></div></div>
+   <div class="q">${h.code?`<pre class="code">${hl(h.code)}</pre>`:""}<p>${esc(h.q)}</p>
+   ${h.code?`<div class="actions"><button class="btn js-c" type="button">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`:""}</div>
+   <div class="actions"><button class="btn ghost js-s" type="button">Prikaži rešitev</button></div>
+   <div class="sol" hidden>${h.jsolCode?`<pre class="code">${hl(h.jsolCode)}</pre>`:""}<p class="why">${esc(h.sol)}</p></div>`;
+  const sol=$(".sol",el), b=$(".js-s",el);
+  b.addEventListener("click",()=>{ sol.hidden=!sol.hidden; b.textContent= sol.hidden?"Prikaži rešitev":"Skrij rešitev"; });
+  const c=$(".js-c",el); if(c) c.addEventListener("click",()=>{ const done=()=>{c.textContent="Kopirano";setTimeout(()=>c.textContent="Kopiraj kodo",1400)}; try{navigator.clipboard.writeText(h.code).then(done,()=>fallback(h.code,done));}catch(e){fallback(h.code,done);} });
+  homeEl.appendChild(el);
+});
+
+/* ---------- static highlighting ---------- */
+document.querySelectorAll(".js-hl").forEach(p=>{ p.innerHTML = hl(p.textContent); });
+
+/* ---------- progress ---------- */
+function progress(){
+  const r = summary();
+  const txt = `${r.resenih} / ${r.vseh} nalog · ${r.tock} / ${r.vsehTock} točk`;
+  document.querySelectorAll(".js-progtxt").forEach(e=>e.textContent=txt);
+  document.querySelectorAll(".js-bar").forEach(e=>e.style.width=(100*r.tock/r.vsehTock)+"%");
+  document.querySelectorAll(".cnt[data-lv]").forEach(e=>{ const k=r.sklopi[e.dataset.lv]; if(!k) return; e.textContent=`${k.resenih}/${k.vseh}`; e.classList.toggle("full", k.resenih===k.vseh); });
+  const nm = T.filter(t=>!t.own).length, nv = T.filter(t=>t.key).length, ps = $("#progSrc"); if(ps) ps.textContent = `Matura: ${nm} · iz zbirk vaj: ${nv} · dodatne: ${T.length-nm-nv}`;
+}
+
+/* ---------- filters ---------- */
+let curFilter = "all";
+function applyFilter(){
+  document.querySelectorAll("#levels .task, #homeMat .task").forEach(el=>{
+    const s = S[el.id.slice(2)] || {};
+    el.hidden = (curFilter==="mat" && el.dataset.kind!=="mat") || (curFilter==="own" && el.dataset.kind!=="own") || (curFilter==="vaje" && el.dataset.kind!=="vaje") || (curFilter==="open" && s.state==="ok");
+  });
+  document.querySelectorAll("#levels .level, #homeMat .level").forEach(l=>{ const e=l.querySelector(".lvl-empty"); if(e) e.hidden = !!l.querySelector(".task:not([hidden])"); });
+}
+document.querySelectorAll(".chip").forEach(c=>c.addEventListener("click",()=>{
+  document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed","false"));
+  c.setAttribute("aria-pressed","true");
+  curFilter = c.dataset.f; applyFilter();
+}));
+
+/* ---------- pages ---------- */
+const PAGES = [["uvod","Kaj je relacijska algebra"],["pojmi","Osnovni pojmi in baza"],["selekcija","Selekcija σ"],["projekcija","Projekcija π in ρ"],["mnozice","Unija, presek, razlika"],["stiki","Produkt in stika"],["kolicnik","Količnik ÷"],["prioriteta","Prioriteta in napake"],["sql","Od algebre do SQL"],["postopek","Postopek in igrišče"],["naloge-a","Naloge A · Pojmi in operacije"],["naloge-b","Naloge B · Branje izrazov"],["naloge-c","Naloge C · Šolska baza"],["naloge-d","Naloge D · Vaje (knjižnica)"],["naloge-e","Naloge E · Dodatne vaje"],["naloge-f","Naloge F · Težje naloge"],["doma","Za doma"]];
+const sel = $("#pageSel");
+sel.innerHTML = PAGES.map((p,k)=>`<option value="${p[0]}">${k+1}. ${esc(p[1])}</option>`).join("");
+sel.addEventListener("change",()=>{ location.hash = sel.value; });
+let cur = PAGES[0][0];
+function showPage(id, quiet){
+  const k0 = PAGES.findIndex(p=>p[0]===id); const k = k0<0 ? 0 : k0; cur = PAGES[k][0];
+  document.querySelectorAll("main > section").forEach(sec=>{ sec.hidden = sec.id==="naloge" ? !cur.startsWith("naloge-") : sec.id!==cur; });
+  document.querySelectorAll("#levels > .level").forEach(l=>{ l.hidden = l.id!==cur; });
+  $("#hero").hidden = k!==0; $("#crumb").hidden = k===0;
+  $("#crumbN").textContent = `Stran ${k+1} od ${PAGES.length}`;
+  document.querySelectorAll(".rail nav a").forEach(a=>{ if(a.getAttribute("href")==="#"+cur) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
+  sel.value = cur;
+  const pv = PAGES[k-1], nx = PAGES[k+1];
+  $("#pager").innerHTML = (pv?`<a class="prev" href="#${pv[0]}"><span class="eyebrow">Nazaj</span><span class="t">${esc(pv[1])}</span></a>`:"") + (nx?`<a class="next" href="#${nx[0]}"><span class="eyebrow">Naprej</span><span class="t">${esc(nx[1])}</span></a>`:"");
+  if(!quiet) window.scrollTo(0,0);
+}
+
+
+/* ---------- reset with inline confirm ---------- */
+const rw = $("#resetWrap");
+function resetIdle(){ rw.innerHTML = `<button class="btn ghost" id="resetBtn" type="button" style="padding-left:0">Počisti ves napredek v tem poglavju</button>`; $("#resetBtn").addEventListener("click",resetAsk); }
+function resetAsk(){ rw.innerHTML = `<span class="confirm">Res izbrišem vse odgovore? <button class="btn" id="rY" type="button">Da, počisti</button><button class="btn ghost" id="rN" type="button">Prekliči</button></span>`;
+  $("#rY").addEventListener("click", async ()=>{ S = {}; localT = Date.now(); saveLocal();
+    if(remote){ try { await remote.ref.set({poglavje:1, naloge:{}, povzetek:summary(), posodobljeno:localT}); } catch(e){} }
+    location.hash = "uvod"; location.reload(); });
+  $("#rN").addEventListener("click",resetIdle); }
+resetIdle();
+
+/* ---------- start ---------- */
+const RAKEYS = ["σ","π","ρ","⋈","×","∪","∩","−","÷","∧","∨","¬","=","≠","<",">","≤","≥","[","]","(",")","'",","];
+const RASYM = "σπρ⋈×∪∩−÷∧∨¬";
+const keyBtn = ch => `<button type="button" class="key${RASYM.includes(ch)?" sym":""}" data-ch="${ch}" tabindex="-1" aria-label="${ch}">${ch}</button>`;
+const vrstic = n => n % 100 === 1 ? "vrstico" : n % 100 === 2 ? "vrstici" : (n % 100 === 3 || n % 100 === 4) ? "vrstice" : "vrstic";
+function relTable(rel, cap, hl){
+  let h = "<table>";
+  if(cap) h = `<div class="tcap">${esc(cap)}</div>` + h;
+  h += "<thead><tr>" + rel.attrs.map(a=>`<th>${esc(a)}</th>`).join("") + "</tr></thead><tbody>";
+  if(!rel.rows.length) h += `<tr><td colspan="${rel.attrs.length}" style="color:var(--muted);font-style:italic">prazna relacija (0 vrstic)</td></tr>`;
+  else h += rel.rows.map((r,i)=>"<tr" + (hl && hl.includes(i) ? ' class="hl"' : "") + ">" + r.map(v=>`<td${typeof v==="number"?' class="num"':''}>${esc(v)}</td>`).join("") + "</tr>").join("");
+  return h + "</tbody></table>";
+}
+function dbDetails(db){
+  if(!db || !db.length) return "";
+  const sh = db.map(n=>n + "(" + RA.BAZA[n].attrs.join(", ") + ")").join("  ·  ");
+  return `<details class="dbx"><summary>Shema: ${esc(sh)} — klikni za podatke</summary><div class="two" style="margin-top:12px">` +
+    db.map(n=>`<div class="tbl">${relTable(RA.BAZA[n], n)}</div>`).join("") + `</div></details>`;
+}
+function fillRels(){
+  document.querySelectorAll("[data-rel]").forEach(e=>{
+    const n = e.dataset.rel; let R = RA.BAZA[n];
+    const hl = e.dataset.hl ? e.dataset.hl.split(",").map(Number) : null;
+    if(e.dataset.cols){
+      const cs = e.dataset.cols.split(","), ix = cs.map(c=>R.attrs.indexOf(c));
+      R = { attrs: cs, rows: R.rows.map(r=>ix.map(i=>r[i])) };
+    }
+    e.innerHTML = relTable(R, e.dataset.cap || (n + "(" + R.attrs.join(", ") + ")"), hl);
+  });
+  document.querySelectorAll("[data-res]").forEach(e=>{
+    e.innerHTML = relTable(RA.run(e.dataset.res), e.dataset.cap || e.dataset.res);
+  });
+}
+function fillFormulas(){
+  document.querySelectorAll(".formula").forEach(e=>{
+    if(e.children.length) return;
+    e.innerHTML = esc(e.textContent).replace(/[σπρ⋈×∪∩−÷∧∨¬]/g, m=>`<span class="op">${m}</span>`);
+  });
+}
+function fillPlay(){
+  document.querySelectorAll("[data-play]").forEach((e,pi)=>{
+    let presets = [];
+    try { presets = JSON.parse(e.dataset.play || "[]"); } catch(_){}
+    e.className = "play";
+    e.innerHTML = `<div class="eyebrow">Igrišče — vpiši izraz in ga izračunaj</div>
+      <div class="keys">${RAKEYS.map(keyBtn).join("")}</div>
+      <textarea class="expr" rows="2" id="play-${pi}" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Izraz"></textarea>
+      <div class="actions"><button class="btn primary js-run" type="button">Izračunaj</button><span class="feedback" aria-live="polite"></span></div>
+      <div class="presets">${presets.map((x,k)=>`<button type="button" class="chip js-preset" data-k="${k}">${esc(x)}</button>`).join("")}</div>
+      <div class="ra-out" hidden></div>`;
+    const ta = $("textarea", e), out = $(".ra-out", e), fb = $(".feedback", e);
+    const run = ()=>{
+      fb.textContent = ""; fb.className = "feedback";
+      if(!ta.value.trim()){ out.hidden = true; return; }
+      try {
+        const r = RA.run(ta.value);
+        out.hidden = false;
+        out.innerHTML = `<div class="eyebrow">${r.rows.length} ${vrstic(r.rows.length)}</div><div class="reswrap">` + relTable(r) + `</div>`;
+      } catch(err){ out.hidden = true; fb.textContent = err.message || "Izraza ni mogoče izračunati."; fb.className = "feedback bad"; }
+    };
+    $(".js-run", e).addEventListener("click", run);
+    ta.addEventListener("keydown", ev=>{ if(ev.key==="Enter" && !ev.shiftKey){ ev.preventDefault(); run(); } });
+    e.querySelectorAll(".key").forEach(b=>b.addEventListener("click",()=>{
+      const a = ta.selectionStart||0, z = ta.selectionEnd||0;
+      ta.value = ta.value.slice(0,a) + b.dataset.ch + ta.value.slice(z);
+      ta.focus(); ta.selectionStart = ta.selectionEnd = a + b.dataset.ch.length;
+    }));
+    e.querySelectorAll(".js-preset").forEach(b=>b.addEventListener("click",()=>{ ta.value = presets[+b.dataset.k]; run(); }));
+    if(e.dataset.open) { /* odprto igrišče na strani Postopek */ }
+  });
+}
+fillRels(); fillPlay(); fillFormulas();
+renderAll();
+{
+  const title = id => (PAGES.find(p=>p[0]===id) || [id, id])[1];
+  const home = document.getElementById("doma");
+  const sets = LEVELS.map(L=>({ id: L.id, tag: L.home ? "G" : L.tag, title: L.title, note: L.note, el: document.getElementById(L.id),
+    tasks: T.filter(t=>t.lv===L.tag).map(t=>({ idx: t.idx, el: document.getElementById("t-"+t.id) })) }));
+  LavRac.mount({
+    title: "Relacijska algebra",
+    kicker: "LAV-RAČ4 · 1. poglavje",
+    root: ".wrap",
+    lead: document.querySelector("#hero .lead").textContent.trim(),
+    hero: document.querySelector("#hero .magic"),
+    source: [...document.querySelectorAll("footer > span:not(#resetWrap)")].map(e=>e.textContent.trim()).join(" "),
+    vajeNote: document.querySelector("#naloge .prose").innerHTML,
+    groups: [{"id":"g-baza","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><rect x=\"6\" y=\"8\" width=\"36\" height=\"32\" rx=\"3\"/><path d=\"M6 18h36M6 28h36M18 8v32\"/><rect x=\"6\" y=\"8\" width=\"36\" height=\"10\" rx=\"3\" class=\"fill\" opacity=\".35\"/></svg>","title":"Pojmi in baza","pages":["uvod","pojmi"]},{"id":"g-oper","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><path d=\"M6 8h36L28 26v13l-8-4V26z\"/><path d=\"M6 8h36l-5 6H11z\" class=\"fill\" opacity=\".35\"/></svg>","title":"Osnovne operacije","pages":["selekcija","projekcija","mnozice"]},{"id":"g-stik","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><circle cx=\"18\" cy=\"24\" r=\"12\"/><circle cx=\"30\" cy=\"24\" r=\"12\"/><path d=\"M24 13.6A12 12 0 0 0 24 34.4A12 12 0 0 0 24 13.6z\" class=\"fill\" opacity=\".35\"/></svg>","title":"Stiki in količnik","pages":["stiki","kolicnik"]},{"id":"g-izraz","icon":"<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><path d=\"M17 8H9v32h8M31 8h8v32h-8\"/><circle cx=\"24\" cy=\"24\" r=\"3.5\" class=\"fill\" opacity=\".35\"/></svg>","title":"Izrazi v praksi","pages":["prioriteta","sql","postopek"]}].map(g=>({ ...g, pages: g.pages.map(id=>({ id, title: title(id), el: document.getElementById(id) })) })),
+    sets,
+    extra: { id: "doma", title: "Za doma", note: home.querySelector(":scope > .prose").textContent.trim().replace(/^Najprej .*?, nato praktične vaje/, "Vaje"), el: home },
+    sel: { head: ".thead", num: ".tnum", tags: ".tags", q: ".q", check: ".js-check", hint: ".js-hint", sol: ".js-sol", fb: ".feedback", actions: ":scope > .actions", extra: ".js-run" },
+  });
+}
+
+/* ---------- account sync (db) ---------- */
+(async ()=>{
+  try {
+    return;
+    const user = await window.claude.use("user");
+    const db = await window.claude.use("db");
+    if(!user || !db) return;
+    const id = await user.id(); if(!id) return;
+    if(await user.can("data.write") === false) return;
+    const ref = db.doc("napredek/" + id);
+    const snap = await ref.get();
+    remote = { ref };
+    if(snap.exists){
+      const d = snap.data() || {};
+      if(merge(d.naloge || {}, +d.posodobljeno || 0)){ saveLocal(); renderAll(); progress(); }
+    }
+    setSync("cloud");
+    dirty = true; push();
+    document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden" && dirty){ clearTimeout(pushTimer); push(); } });
+  } catch(e){ remote = null; setSync("local"); }
+})();
+})();
+</script>
+</body></html>
