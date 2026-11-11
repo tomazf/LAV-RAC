@@ -1651,6 +1651,41 @@ test('tables are as wide as their content and the options of a choice as wide as
   await a.close();
 });
 
+test('blocks narrower than the text sit in the middle: tables, figures, choices, class rows, register figures and steps (not the ones side by side in a row)', async () => {
+  const a = await login('Sara Skrbnik');
+  let checked = 0;
+  for (const width of [1100, 375]) {
+    await a.setViewportSize({ width, height: 900 });
+    for (const ex of catalog.exercises) {
+      await a.goto(`${APP}/vaje/${ex.id}#pregled`);
+      await at(a, 'pregled');
+      const r = await a.evaluate(() => {
+        document.querySelectorAll('.page, .lr-task').forEach((e) => { e.hidden = false; e.style.display = 'block'; });
+        const off = []; let n = 0;
+        const blocks = [
+          ...document.querySelectorAll('.lr-main :not(.two) > :is(.tbl, .reswrap, figure.fig, .regfig, .tbits, ol.st4)'),
+          ...document.querySelectorAll('.lr-main .opts > .opt, .lr-main .cls > .crow'),
+        ];
+        for (const e of blocks) {
+          const par = e.parentElement, cs = getComputedStyle(par), r = e.getBoundingClientRect(), pr = par.getBoundingClientRect();
+          if (r.width < 60 || r.height < 20) continue;
+          const l = r.left - pr.left - parseFloat(cs.paddingLeft) - parseFloat(cs.borderLeftWidth);
+          const rt = pr.right - parseFloat(cs.paddingRight) - parseFloat(cs.borderRightWidth) - r.right;
+          // the options of one choice are as wide as the longest, so they share the same gaps; only blocks narrower than the text count
+          if (l + rt < 40) continue;
+          n++;
+          if (Math.abs(l - rt) > 3) off.push(`${e.tagName.toLowerCase()}.${e.className} left ${Math.round(l)} right ${Math.round(rt)}`);
+        }
+        return { n, off: off.slice(0, 5), count: off.length };
+      });
+      assert.equal(r.count, 0, `${ex.id} at ${width}px: not in the middle: ${r.off.join('; ')}`);
+      checked += r.n;
+    }
+  }
+  assert.ok(checked > 200, `blocks are measured (${checked})`);
+  await a.close();
+});
+
 test('no exercise carries an inline event handler attribute (the portal does not run them)', () => {
   for (const e of catalog.exercises) {
     const html = readFileSync(path.join(root, 'content/exercises', `${e.id}.html`), 'utf8');

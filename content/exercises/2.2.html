@@ -1399,8 +1399,13 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 .lr-main .opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
 .lr-main .opt.right:has(input:checked){border-color:var(--ok);background:var(--ok-soft)}
 .lr-main .opt.wrong:has(input:checked){border-color:var(--bad);background:var(--bad-soft)}
+/* blocks that are narrower than the text sit in the middle (agreed 11. 11. 2026): tables, figures, choices, register figures with their bit row,
+   steps; the text inside a block stays left-aligned. Running text, code, notes and work areas keep the full width */
+.lr-main :not(.two)>.tbl,.lr-main :not(.two)>.reswrap,.lr-main :not(.two)>figure.fig,.lr-main :not(.two)>.regfig,.lr-main :not(.two)>.tbits,.lr-main :not(.two)>ol.st4{margin-left:auto;margin-right:auto} /* blocks side by side in a .two row are not spread apart */
+.lr-main .tbits{width:fit-content;max-width:100%}
+.lr-main .opts,.lr-main .two{justify-content:center}
 @media (min-width:561px){
-  .lr-main .cls{display:grid;grid-template-columns:fit-content(62ch) auto;justify-content:start;gap:6px 0}
+  .lr-main .cls{display:grid;grid-template-columns:fit-content(62ch) auto;justify-content:center;gap:6px 0}
   .lr-main .crow{display:grid;grid-template-columns:subgrid;grid-column:1/-1;column-gap:16px}
 }
 @media (max-width:560px){
