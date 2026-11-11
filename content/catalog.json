@@ -6016,119 +6016,119 @@
      "i": 13,
      "level": "težja",
      "max": 3,
-     "section": "Arhitektura ANSI/SPARC",
+     "section": "Zgradba baze in jeziki",
      "q": "Naštejte vse tri nivoje ANSI/SPARC arhitekture podatkovne baze."
     },
     {
      "i": 14,
      "level": "srednja",
      "max": 2,
-     "section": "Arhitektura ANSI/SPARC",
+     "section": "Zgradba baze in jeziki",
      "q": "Pri podatkovnih bazah govorimo o trinivojski arhitekturi. Namen je ločiti načine fizičnega shranjevanja podatkov od načinov modeliranja okolja in le-te od upora"
     },
     {
      "i": 15,
      "level": "težja",
      "max": 3,
-     "section": "Arhitektura ANSI/SPARC",
+     "section": "Zgradba baze in jeziki",
      "q": "Povežite vsak nivo ANSI/SPARC arhitekture podatkovne baze z ustreznimi opisi, ki za povezani nivo veljajo. Vsakemu nivoju pripadata natanko dva ustrezna opisa."
     },
     {
      "i": 16,
      "level": "lažja",
      "max": 1,
-     "section": "Arhitektura ANSI/SPARC",
+     "section": "Zgradba baze in jeziki",
      "q": "Kaj določa fizični sloj v arhitekturi ANSI/SPARC podatkovne baze?"
     },
     {
      "i": 17,
      "level": "srednja",
      "max": 2,
-     "section": "Arhitektura ANSI/SPARC",
+     "section": "Zgradba baze in jeziki",
      "q": "ANSI/SPARC-arhitektura podatkovne baze opredeljuje, da je podatkovna baza opisana na treh nivojih: notranjem, konceptualnem in zunanjem. Dopolni število shem na"
     },
     {
      "i": 18,
      "level": "srednja",
      "max": 2,
-     "section": "Arhitektura ANSI/SPARC",
+     "section": "Zgradba baze in jeziki",
      "q": "Z besedama DA ali NE odgovorite na spodnji vprašanji."
     },
     {
      "i": 19,
      "level": "lažja",
      "max": 1,
-     "section": "Arhitektura ANSI/SPARC",
+     "section": "Zgradba baze in jeziki",
      "q": "ANSI/SPARC-arhitektura podatkovne baze opredeljuje, da je podatkovna baza (PB) opisana na treh nivojih: notranjem, konceptualnem in zunanjem. Kateri nivo je odv"
     },
     {
      "i": 20,
      "level": "srednja",
      "max": 2,
-     "section": "Arhitektura ANSI/SPARC",
+     "section": "Zgradba baze in jeziki",
      "q": "ANSI/SPARC-arhitektura podatkovne baze opredeljuje, da je podatkovna baza opisana na treh nivojih: notranjem, konceptualnem in zunanjem. Dopolni povedi."
     },
     {
      "i": 21,
      "level": "lažja",
      "max": 1,
-     "section": "Arhitektura ANSI/SPARC",
+     "section": "Zgradba baze in jeziki",
      "q": "V tabelo Dijak dodamo stolpec Email. Pogled tajništva in tajniška aplikacija delujeta naprej brez sprememb. To je …"
     },
     {
      "i": 22,
      "level": "srednja",
      "max": 2,
-     "section": "Arhitektura ANSI/SPARC",
+     "section": "Zgradba baze in jeziki",
      "q": "Na kateri nivo arhitekture ANSI/SPARC spada?"
     },
     {
      "i": 23,
      "level": "srednja",
      "max": 2,
-     "section": "Relacijski model in jeziki SUPB",
+     "section": "Zgradba baze in jeziki",
      "q": "S katerim stavkom SQL spremenimo strukturo podatkov v podatkovni bazi?"
     },
     {
      "i": 24,
      "level": "srednja",
      "max": 2,
-     "section": "Relacijski model in jeziki SUPB",
+     "section": "Zgradba baze in jeziki",
      "q": "Katera stavka SQL spreminjata metapodatke podatkovne baze?"
     },
     {
      "i": 25,
      "level": "srednja",
      "max": 2,
-     "section": "Relacijski model in jeziki SUPB",
+     "section": "Zgradba baze in jeziki",
      "q": "Katera stavka SQL spadata v skupino stavkov SQL DML?"
     },
     {
      "i": 26,
      "level": "srednja",
      "max": 2,
-     "section": "Relacijski model in jeziki SUPB",
+     "section": "Zgradba baze in jeziki",
      "q": "Razvrsti stavke v skupine."
     },
     {
      "i": 27,
      "level": "srednja",
      "max": 2,
-     "section": "Relacijski model in jeziki SUPB",
+     "section": "Zgradba baze in jeziki",
      "q": "Dana je relacijska shema Izdelek(IzdelekID:N, Naziv:A30, Cena:R, Opomba°:A100). Dopolni."
     },
     {
      "i": 28,
      "level": "lažja",
      "max": 1,
-     "section": "Relacijski model in jeziki SUPB",
+     "section": "Zgradba baze in jeziki",
      "q": "Kaj pomeni zapis PID:A1→Predmet v shemi Ocena?"
     },
     {
      "i": 29,
      "level": "lažja",
      "max": 1,
-     "section": "Relacijski model in jeziki SUPB",
+     "section": "Zgradba baze in jeziki",
      "q": "Kaj se zgodi s stavkom DROP TABLE Ocena?"
     },
     {
@@ -6457,37 +6457,32 @@
     {
      "id": "naloge-b",
      "chapter": "Naloge",
-     "label": "Vaje B · Arhitektura ANSI/SPARC"
-    },
-    {
-     "id": "naloge-c",
-     "chapter": "Naloge",
-     "label": "Vaje C · Relacijski model in jeziki SUPB"
+     "label": "Vaje B · Zgradba baze in jeziki"
     },
     {
      "id": "naloge-d",
      "chapter": "Naloge",
-     "label": "Vaje D · Uporabniki in pravice"
+     "label": "Vaje C · Uporabniki in pravice"
     },
     {
      "id": "naloge-e",
      "chapter": "Naloge",
-     "label": "Vaje E · Informacijski sistemi"
+     "label": "Vaje D · Informacijski sistemi"
     },
     {
      "id": "naloge-f",
      "chapter": "Naloge",
-     "label": "Vaje F · Zapiši stavke SQL"
+     "label": "Vaje E · Zapiši stavke SQL"
     },
     {
      "id": "doma-mat",
      "chapter": "Naloge",
-     "label": "Vaje G · Ponavljanje"
+     "label": "Vaje F · Ponavljanje"
     },
     {
      "id": "doma",
      "chapter": "Naloge",
-     "label": "Vaje H · Za doma"
+     "label": "Vaje G · Za doma"
     }
    ],
    "gate": [

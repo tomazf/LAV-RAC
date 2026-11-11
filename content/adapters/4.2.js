@@ -10,8 +10,8 @@ const ICONS = {
   prav: '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="19" cy="15" r="7"/><path d="M5 40a14 14 0 0 1 22-11.5"/><circle cx="36" cy="30" r="4.5"/><path d="M36 34.5V43M36 39h4"/><circle cx="19" cy="15" r="7" class="fill" opacity=".35"/></svg>',
   is: '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="11" r="5"/><circle cx="10" cy="36" r="5"/><circle cx="38" cy="36" r="5"/><path d="M21.5 15.5L12.5 31.5M26.5 15.5L35.5 31.5M15 36h18"/><circle cx="24" cy="11" r="5" class="fill" opacity=".35"/></svg>',
 };
-// Theory groups (proposed 11. 11. 2026, not yet confirmed by the teacher): pages in the artifact's own order, matching the task sets
-// A (1-5), B (6-7), C (8-9), D (10-14), E (15).
+// Theory groups (proposed 11. 11. 2026, confirmed by the teacher 12. 11. 2026): pages in the artifact's own order, matching the task sets
+// A (1-5), B (6-9, after the merge below), C (10-14), D (15).
 const GROUPS = [
   { id: 'g-baza', icon: 'baza', title: 'Podatki in podatkovna baza', pages: ['uvod', 'datoteke'] },
   { id: 'g-supb', icon: 'supb', title: 'Naloge SUPB', pages: ['supb', 'integriteta', 'transakcije'] },
@@ -26,7 +26,7 @@ renderAll();
 {
   const title = id => (PAGES.find(p=>p[0]===id) || [id, id])[1];
   const home = document.getElementById("doma");
-  const sets = LEVELS.map(L=>({ id: L.id, tag: L.home ? "G" : L.tag, title: L.title, note: L.note, el: document.getElementById(L.id),
+  const sets = LEVELS.map((L,i)=>({ id: L.id, tag: String.fromCharCode(65+i), title: L.title, note: L.note, el: document.getElementById(L.id),
     tasks: T.filter(t=>t.lv===L.tag).map(t=>({ idx: t.idx, el: document.getElementById("t-"+t.id) })) }));
   LavRac.mount({
     title: ${JSON.stringify(TITLE)},
@@ -54,6 +54,12 @@ export default {
   body{padding-left:0;padding-right:0}`,
   patches: [
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
+    // Sets B (Arhitektura ANSI/SPARC, 10 tasks) and C (Relacijski model in jeziki SUPB, 7 tasks) become one set, "Zgradba baze in jeziki",
+    // like the theory group of the same name (asked by the teacher 12. 11. 2026). The order of the tasks, their points and numbers stay; the shell
+    // letters the sets by their place (A, B, C ...), so nothing else has to be renamed.
+    ['{"id": "naloge-b", "tag": "B", "title": "Arhitektura ANSI/SPARC", "note": "Trije nivoji, število shem in podatkovna neodvisnost (razlagi 6 in 7)."}, {"id": "naloge-c", "tag": "C", "title": "Relacijski model in jeziki SUPB", "note": "Zapis shem ter razvrščanje stavkov v DDL, DML in DCL (razlagi 8 in 9)."}',
+      '{"id": "naloge-b", "tag": "B", "title": "Zgradba baze in jeziki", "note": "Trije nivoji, število shem, podatkovna neodvisnost, zapis shem ter razvrščanje stavkov v DDL, DML in DCL (razlage 6 do 9)."}'],
+    ['"lv": "C"', '"lv": "B"', 'all'],
     // The revision set (artifact id "doma", which is also the id of the Za doma section) is "Ponavljanje" and gets its
     // own id; the shell lettering puts it after the sets A–F, and Za doma takes the next letter.
     ['{"id": "doma", "tag": "H", "title": "Za doma", "note": "Naloge za samostojno ponavljanje, med njimi dve maturitetni, ki sta se na maturi ponovili z enakim besedilom.", "home": true}',

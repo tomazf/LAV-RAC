@@ -1564,10 +1564,11 @@ test('4.2: databases and DBMS: five theory groups, the revision set is last, an 
   const ex = catalog.exercises.find((e) => e.id === '4.2');
   assert.equal(ex.module, 'LAV-RAČ4');
   const sections = [...new Set(ex.tasks.map((t) => t.section))];
-  assert.deepEqual(sections, ['Podatki, podatkovna baza in SUPB', 'Arhitektura ANSI/SPARC', 'Relacijski model in jeziki SUPB', 'Uporabniki in pravice', 'Informacijski sistemi', 'Zapiši stavke SQL', 'Ponavljanje']);
-  assert.deepEqual(sections.map((n) => ex.tasks.filter((t) => t.section === n).length), [13, 10, 7, 10, 11, 7, 5]);
-  // the points of the artifact: 23 + 19 + 12 + 17 + 21 + 13, and the 5 revision tasks with 8 (the practice items of Za doma have none)
-  assert.deepEqual(sections.map((n) => ex.tasks.filter((t) => t.section === n).reduce((a, t) => a + t.max, 0)), [23, 19, 12, 17, 21, 13, 8]);
+  // the sets B (Arhitektura ANSI/SPARC) and C (Relacijski model in jeziki SUPB) of the artifact are one set, like the theory group of the same name
+  assert.deepEqual(sections, ['Podatki, podatkovna baza in SUPB', 'Zgradba baze in jeziki', 'Uporabniki in pravice', 'Informacijski sistemi', 'Zapiši stavke SQL', 'Ponavljanje']);
+  assert.deepEqual(sections.map((n) => ex.tasks.filter((t) => t.section === n).length), [13, 17, 10, 11, 7, 5]);
+  // the points of the artifact: 23 + (19 + 12) + 17 + 21 + 13, and the 5 revision tasks with 8 (the practice items of Za doma have none)
+  assert.deepEqual(sections.map((n) => ex.tasks.filter((t) => t.section === n).reduce((a, t) => a + t.max, 0)), [23, 31, 17, 21, 13, 8]);
   assert.equal(ex.maxPoints, 113);
   assert.equal(ex.tasks.filter((t) => t.self).length, 0);
   assert.ok(ex.tasks.every((t) => !/\*\*/.test(t.q)), 'the catalog keeps plain statements');
@@ -1575,7 +1576,7 @@ test('4.2: databases and DBMS: five theory groups, the revision set is last, an 
   await a.goto(`${APP}/vaje/4.2#pregled`);
   await at(a, 'pregled');
   assert.deepEqual(await a.locator('.lr-rail .lr-grp b').allTextContents(), ['Podatki in podatkovna baza', 'Naloge SUPB', 'Zgradba baze in jeziki', 'Uporabniki in pravice', 'Informacijski sistemi in povzetek', 'Vaje']);
-  assert.deepEqual(await a.locator('.lr-rail a.lr-gated .lr-tg').allTextContents(), ['A ·', 'B ·', 'C ·', 'D ·', 'E ·', 'F ·', 'G ·', 'H ·']);
+  assert.deepEqual(await a.locator('.lr-rail a.lr-gated .lr-tg').allTextContents(), ['A ·', 'B ·', 'C ·', 'D ·', 'E ·', 'F ·', 'G ·']);
   assert.equal((await a.locator('.lr-rail a.lr-gated .lr-tx').last().textContent()).trim(), 'Za doma');
   const rail = await a.locator('.lr-rail').evaluate((nav) => {
     const out = [];
@@ -1607,6 +1608,10 @@ test('4.2: databases and DBMS: five theory groups, the revision set is last, an 
   await tries.nth(1).locator('.js-check').click();
   assert.equal((await tries.nth(1).locator('.feedback').innerText()).trim(), 'Pravilno.');
   assert.equal(await a.textContent('#lrPtxt'), before);
+  // the merged set B: the 17 tasks of the old sets B and C in one set
+  await go(a, 'naloge-b/11');
+  assert.equal(await a.locator('.page.on .lr-num').count(), 17);
+  assert.match(await a.locator('.page.on .lr-shead').innerText(), /sklop B[\s\S]*Zgradba baze in jeziki/);
   // F1: nothing typed is no answer; the statement is accepted in lower case and without the semicolon
   const fb = async () => (await card(a).locator('.lr-left .feedback').textContent()).trim();
   await go(a, 'naloge-f/1');
@@ -1640,11 +1645,11 @@ test('4.2: databases and DBMS: five theory groups, the revision set is last, an 
   await a.reload();
   await at(a, 'naloge-a/4');
   assert.match(await a.textContent('#lrPtxt'), /^3 \/ 63 nalog · 3 \/ 113 točk$/);
-  // the revision set has the letter G, the practice items are Za doma with the letter H
+  // the revision set has the letter F, the practice items are Za doma with the letter G
   await go(a, 'doma-mat');
-  assert.match(await a.locator('.page.on .lr-shead').innerText(), /sklop G[\s\S]*Ponavljanje/);
+  assert.match(await a.locator('.page.on .lr-shead').innerText(), /sklop F[\s\S]*Ponavljanje/);
   await go(a, 'doma');
-  assert.match(await a.locator('.page.on .lr-shead').innerText(), /sklop H[\s\S]*Za doma/);
+  assert.match(await a.locator('.page.on .lr-shead').innerText(), /sklop G[\s\S]*Za doma/);
   const homeSols = a.locator('.page.on .js-s');
   assert.equal(await homeSols.count(), 4);
   for (let i = 0; i < 4; i++) await homeSols.nth(i).click();
