@@ -1216,6 +1216,25 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 .lr-main .lr-qf>:last-child{margin-bottom:0}
 .lr-main .lr-qf strong{font-weight:700}
 
+/* shared look of tables and choices (taken over from the artifact of 4.1, 11. 11. 2026): a table is as wide as its content and the options of
+   a choice are as wide as the longest one, so there is no empty stretch to the right; running text keeps the full width */
+.lr-main .tbl,.lr-main .reswrap{width:fit-content;max-width:100%}
+.lr-main .tbl table,.lr-main .reswrap table{width:auto;min-width:0}
+.lr-main .tbl th,.lr-main .tbl td{padding-left:16px;padding-right:16px}
+.lr-main .opts{display:grid;grid-template-columns:fit-content(100%);justify-content:start;gap:6px}
+.lr-main .opt{min-width:min(100%,12rem);align-items:baseline;padding:8px 14px 8px 12px}
+.lr-main .opt input{margin-top:7px;margin-bottom:0;align-self:flex-start} /* the radio sits on the first line when an option wraps (17px text, 27px line) */
+.lr-main .opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.lr-main .opt.right:has(input:checked){border-color:var(--ok);background:var(--ok-soft)}
+.lr-main .opt.wrong:has(input:checked){border-color:var(--bad);background:var(--bad-soft)}
+@media (min-width:561px){
+  .lr-main .cls{display:grid;grid-template-columns:fit-content(62ch) auto;justify-content:start;gap:6px 0}
+  .lr-main .crow{display:grid;grid-template-columns:subgrid;grid-column:1/-1;column-gap:16px}
+}
+@media (max-width:560px){
+  .lr-main .tbl th,.lr-main .tbl td{padding-left:9px;padding-right:9px}
+}
+
 html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-tile);--line:var(--lr-line);--fg:var(--lr-ink);--muted:var(--lr-mut);
   --accent:var(--lr-acc);--accent-soft:var(--lr-acc-soft);--ok:var(--lr-ok);--ok-soft:var(--lr-ok-bg);--bad:var(--lr-bad);--bad-soft:var(--lr-bad-bg);
   --seen:var(--lr-seen);--seen-soft:var(--lr-seen-bg);--f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}

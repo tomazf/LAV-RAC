@@ -1077,6 +1077,58 @@ ol.st4 .n{color:var(--amber);font-weight:700}
 .two{align-items:start}
 ol.st4{grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr))}
 
+/* ===== tabele in izbire: širina po vsebini, besedilo ostane čez celo širino ===== */
+.tbl,.reswrap{width:fit-content;max-width:100%}
+.tbl table,.reswrap table{width:auto;min-width:0}
+table.rel th,table.rel td,.tbl th,.tbl td{padding:7px 16px}
+.two,.two.sm{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start}
+.two > *{flex:0 1 auto;min-width:0;max-width:100%}
+.vrow{width:min(100%,230px);flex:none}
+@media (max-width:560px){
+  table.rel th,table.rel td,.tbl th,.tbl td{padding:6px 9px}
+}
+
+/* izbirne naloge (A, B, C, D): vse možnosti enako široke, a le toliko kot najdaljša */
+.opts{display:grid;grid-template-columns:fit-content(100%);justify-content:start;gap:6px}
+.opt{min-width:min(100%,12rem);align-items:baseline;padding:8px 14px 8px 12px}
+.opt input{margin-top:0;align-self:center}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.opt.right:has(input:checked){border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong:has(input:checked){border-color:var(--bad);background:var(--bad-soft)}
+
+/* hitri preizkus: možnosti kot lepi žetoni ali enako široki bloki */
+.qopts{display:grid;grid-template-columns:fit-content(100%);justify-content:start;gap:6px}
+.qopts.short{display:flex;flex-wrap:wrap;gap:8px}
+.qopt{min-width:min(100%,12rem);align-items:baseline;padding:8px 14px 8px 12px}
+.qopts.short .qopt{min-width:4.6rem}
+
+/* razvrščanje (opis → pojem): besedilo in gumbi v dveh stolpcih, brez praznine vmes */
+@media (min-width:561px){
+  .cls{display:grid;grid-template-columns:fit-content(62ch) auto;justify-content:start;gap:6px 0}
+  .crow{display:grid;grid-template-columns:subgrid;grid-column:1/-1;column-gap:16px}
+}
+
+/* štirje koraki rešenega primera: en kompakten blok */
+ol.st4{display:grid;grid-template-columns:auto auto minmax(0,1fr);width:fit-content;max-width:100%;gap:0;border:1px solid var(--line);border-radius:10px;background:var(--bg);overflow:hidden}
+ol.st4 li{display:grid;grid-template-columns:subgrid;grid-column:1/-1;column-gap:8px;align-items:baseline;padding:8px 16px 8px 12px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent}
+ol.st4 li:last-child{border-bottom:0}
+ol.st4 li b{color:var(--muted);font-weight:600}
+
+/* koraki izračuna: časovnica */
+ol.steplist li{border-left:2px solid var(--line);padding-left:14px}
+ol.steplist li:last-child{border-left-color:var(--amber)}
+
+/* glave ročno pisanih tabel se ne lomijo sredi besede */
+.tbl table:not(.rel) th{overflow-wrap:normal;word-break:normal}
+@media (max-width:560px){
+  .tbl th{font-size:.62rem;letter-spacing:.02em}
+}
+@media (max-width:560px){
+  table.rel th,table.rel td{padding:6px 5px}
+  .tbl table:not(.rel) th,.tbl table:not(.rel) td{padding:6px 9px}
+  details.steps table.rel{font-size:.74rem}
+}
+
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 </style>
 <style>
@@ -1338,6 +1390,25 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 .lr-main .lr-qf li{margin:.2em 0}
 .lr-main .lr-qf>:last-child{margin-bottom:0}
 .lr-main .lr-qf strong{font-weight:700}
+
+/* shared look of tables and choices (taken over from the artifact of 4.1, 11. 11. 2026): a table is as wide as its content and the options of
+   a choice are as wide as the longest one, so there is no empty stretch to the right; running text keeps the full width */
+.lr-main .tbl,.lr-main .reswrap{width:fit-content;max-width:100%}
+.lr-main .tbl table,.lr-main .reswrap table{width:auto;min-width:0}
+.lr-main .tbl th,.lr-main .tbl td{padding-left:16px;padding-right:16px}
+.lr-main .opts{display:grid;grid-template-columns:fit-content(100%);justify-content:start;gap:6px}
+.lr-main .opt{min-width:min(100%,12rem);align-items:baseline;padding:8px 14px 8px 12px}
+.lr-main .opt input{margin-top:7px;margin-bottom:0;align-self:flex-start} /* the radio sits on the first line when an option wraps (17px text, 27px line) */
+.lr-main .opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.lr-main .opt.right:has(input:checked){border-color:var(--ok);background:var(--ok-soft)}
+.lr-main .opt.wrong:has(input:checked){border-color:var(--bad);background:var(--bad-soft)}
+@media (min-width:561px){
+  .lr-main .cls{display:grid;grid-template-columns:fit-content(62ch) auto;justify-content:start;gap:6px 0}
+  .lr-main .crow{display:grid;grid-template-columns:subgrid;grid-column:1/-1;column-gap:16px}
+}
+@media (max-width:560px){
+  .lr-main .tbl th,.lr-main .tbl td{padding-left:9px;padding-right:9px}
+}
 
 html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-tile);--line:var(--lr-line);--fg:var(--lr-ink);--muted:var(--lr-mut);
   --accent:var(--lr-acc);--accent-soft:var(--lr-acc-soft);--ok:var(--lr-ok);--ok-soft:var(--lr-ok-bg);--bad:var(--lr-bad);--bad-soft:var(--lr-bad-bg);
@@ -2925,7 +2996,8 @@ function fillQuiz(){
   document.querySelectorAll("[data-quiz]").forEach(e=>{
     let q; try { q = JSON.parse(e.dataset.quiz); } catch(_){ return; }
     e.className = "quiz";
-    e.innerHTML = `<div class="eyebrow">Hitri preizkus</div><p class="qq">${esc(q.q)}</p><div class="qopts">` +
+    const short = q.o.every(o => String(o).length <= 16);
+    e.innerHTML = `<div class="eyebrow">Hitri preizkus</div><p class="qq">${esc(q.q)}</p><div class="qopts${short ? " short" : ""}">` +
       q.o.map((o,k)=>`<button type="button" class="qopt" data-k="${k}"><b>${"ABCD"[k]}</b><span>${esc(o)}</span></button>`).join("") +
       `</div><div class="feedback" aria-live="polite"></div>`;
     const fb = $(".feedback", e);

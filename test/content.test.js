@@ -1619,6 +1619,38 @@ test('long task statements are laid out as paragraphs, lists and bold words in e
   await a.close();
 });
 
+test('tables are as wide as their content and the options of a choice as wide as the longest one, in every chapter (text keeps the full width)', async () => {
+  const a = await login('Sara Skrbnik');
+  await a.setViewportSize({ width: 1100, height: 900 });
+  let measured = 0;
+  for (const ex of catalog.exercises) {
+    await a.goto(`${APP}/vaje/${ex.id}#pregled`);
+    await at(a, 'pregled');
+    const r = await a.evaluate(() => {
+      // show every page and task so that everything can be measured
+      document.querySelectorAll('.page, .lr-task').forEach((e) => { e.hidden = false; e.style.display = 'block'; });
+      const shown = (e) => e.getBoundingClientRect().width > 0;
+      const natural = (e) => { const old = e.style.width; e.style.width = 'max-content'; const w = e.getBoundingClientRect().width; e.style.width = old; return w; };
+      const wideTables = [...document.querySelectorAll('.lr-main table')].filter(shown)
+        .filter((t) => t.getBoundingClientRect().width - natural(t) > 60 && t.getBoundingClientRect().width > 200).length;
+      let wideOptions = 0; let groups = 0;
+      for (const g of document.querySelectorAll('.lr-main .opts')) {
+        const opts = [...g.querySelectorAll(':scope > .opt')].filter(shown);
+        if (!opts.length) continue;
+        groups++;
+        const limit = Math.min(g.getBoundingClientRect().width, Math.max(...opts.map(natural)));
+        if (Math.max(...opts.map((o) => o.getBoundingClientRect().width)) > limit + 2) wideOptions++;
+      }
+      return { wideTables, wideOptions, groups };
+    });
+    assert.equal(r.wideTables, 0, `${ex.id}: tables stretched wider than their content`);
+    assert.equal(r.wideOptions, 0, `${ex.id}: choices stretched wider than their longest option`);
+    measured += r.groups;
+  }
+  assert.ok(measured > 100, `choices are measured (${measured})`);
+  await a.close();
+});
+
 test('no exercise carries an inline event handler attribute (the portal does not run them)', () => {
   for (const e of catalog.exercises) {
     const html = readFileSync(path.join(root, 'content/exercises', `${e.id}.html`), 'utf8');
