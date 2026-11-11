@@ -76,6 +76,13 @@
       "artifactTitle": "Relacijska algebra",
       "version": 1,
       "no": "1"
+    },
+    {
+      "id": "4.2",
+      "artifact": "https://claude.ai/artifact/CcHFj1LWu2MQegisWZhzAh",
+      "artifactTitle": "Podatkovne baze in SUPB",
+      "version": 1,
+      "no": "2"
     }
   ],
   "planned": [

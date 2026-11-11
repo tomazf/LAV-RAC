@@ -5909,6 +5909,605 @@
     "sql",
     "postopek"
    ]
+  },
+  {
+   "id": "4.2",
+   "no": "2",
+   "module": "LAV-RAČ4",
+   "title": "Podatkovne baze in SUPB",
+   "fullTitle": "Podatkovne baze in SUPB",
+   "key": "scnm_lavrac_4_2_v1",
+   "version": 1,
+   "format": "short",
+   "maxPoints": 113,
+   "tasks": [
+    {
+     "i": 0,
+     "level": "lažja",
+     "max": 1,
+     "section": "Podatki, podatkovna baza in SUPB",
+     "q": "Kateri termin se uporablja za dejstvo, ki se shranjuje v računalnik?"
+    },
+    {
+     "i": 1,
+     "level": "srednja",
+     "max": 2,
+     "section": "Podatki, podatkovna baza in SUPB",
+     "q": "Kateri trditvi najbolje opisujeta pojem podatkovne baze?"
+    },
+    {
+     "i": 2,
+     "level": "srednja",
+     "max": 2,
+     "section": "Podatki, podatkovna baza in SUPB",
+     "q": "V podatkovni bazi s terminom redundanca podatkov opišemo stanje, ko so isti podatki v bazi shranjeni večkrat. Obkrožite črki pred resničnima trditvama."
+    },
+    {
+     "i": 3,
+     "level": "težja",
+     "max": 3,
+     "section": "Podatki, podatkovna baza in SUPB",
+     "q": "Obkrožite črko D, če je trditev pravilna, sicer obkrožite črko N."
+    },
+    {
+     "i": 4,
+     "level": "srednja",
+     "max": 2,
+     "section": "Podatki, podatkovna baza in SUPB",
+     "q": "Kateri od navedenih programov spada med SUPB?"
+    },
+    {
+     "i": 5,
+     "level": "srednja",
+     "max": 2,
+     "section": "Podatki, podatkovna baza in SUPB",
+     "q": "Kaj preprečuje kršenje integritetnih omejitev v podatkovni bazi?"
+    },
+    {
+     "i": 6,
+     "level": "lažja",
+     "max": 1,
+     "section": "Podatki, podatkovna baza in SUPB",
+     "q": "Katera vrsta programske opreme zagotavlja spoštovanje integritetnih omejitev, ki so opredeljene za tabele podatkovne baze?"
+    },
+    {
+     "i": 7,
+     "level": "težja",
+     "max": 3,
+     "section": "Podatki, podatkovna baza in SUPB",
+     "q": "Podatkovna baza je nameščena na podatkovnem strežniku, ki ga upravlja sistem za upravljanje podatkovne baze (SUPB). Obkrožite resničnost izjave."
+    },
+    {
+     "i": 8,
+     "level": "lažja",
+     "max": 1,
+     "section": "Podatki, podatkovna baza in SUPB",
+     "q": "Sistem za upravljanje podatkovne baze"
+    },
+    {
+     "i": 9,
+     "level": "lažja",
+     "max": 1,
+     "section": "Podatki, podatkovna baza in SUPB",
+     "q": "Kaj so metapodatki?"
+    },
+    {
+     "i": 10,
+     "level": "srednja",
+     "max": 2,
+     "section": "Podatki, podatkovna baza in SUPB",
+     "q": "Razvrsti težave k opisom."
+    },
+    {
+     "i": 11,
+     "level": "srednja",
+     "max": 2,
+     "section": "Podatki, podatkovna baza in SUPB",
+     "q": "Razvrsti opise k lastnostim transakcij (ACID)."
+    },
+    {
+     "i": 12,
+     "level": "lažja",
+     "max": 1,
+     "section": "Podatki, podatkovna baza in SUPB",
+     "q": "Kateri stavek prekliče vse spremembe v trenutni transakciji?"
+    },
+    {
+     "i": 13,
+     "level": "težja",
+     "max": 3,
+     "section": "Arhitektura ANSI/SPARC",
+     "q": "Naštejte vse tri nivoje ANSI/SPARC arhitekture podatkovne baze."
+    },
+    {
+     "i": 14,
+     "level": "srednja",
+     "max": 2,
+     "section": "Arhitektura ANSI/SPARC",
+     "q": "Pri podatkovnih bazah govorimo o trinivojski arhitekturi. Namen je ločiti načine fizičnega shranjevanja podatkov od načinov modeliranja okolja in le-te od upora"
+    },
+    {
+     "i": 15,
+     "level": "težja",
+     "max": 3,
+     "section": "Arhitektura ANSI/SPARC",
+     "q": "Povežite vsak nivo ANSI/SPARC arhitekture podatkovne baze z ustreznimi opisi, ki za povezani nivo veljajo. Vsakemu nivoju pripadata natanko dva ustrezna opisa."
+    },
+    {
+     "i": 16,
+     "level": "lažja",
+     "max": 1,
+     "section": "Arhitektura ANSI/SPARC",
+     "q": "Kaj določa fizični sloj v arhitekturi ANSI/SPARC podatkovne baze?"
+    },
+    {
+     "i": 17,
+     "level": "srednja",
+     "max": 2,
+     "section": "Arhitektura ANSI/SPARC",
+     "q": "ANSI/SPARC-arhitektura podatkovne baze opredeljuje, da je podatkovna baza opisana na treh nivojih: notranjem, konceptualnem in zunanjem. Dopolni število shem na"
+    },
+    {
+     "i": 18,
+     "level": "srednja",
+     "max": 2,
+     "section": "Arhitektura ANSI/SPARC",
+     "q": "Z besedama DA ali NE odgovorite na spodnji vprašanji."
+    },
+    {
+     "i": 19,
+     "level": "lažja",
+     "max": 1,
+     "section": "Arhitektura ANSI/SPARC",
+     "q": "ANSI/SPARC-arhitektura podatkovne baze opredeljuje, da je podatkovna baza (PB) opisana na treh nivojih: notranjem, konceptualnem in zunanjem. Kateri nivo je odv"
+    },
+    {
+     "i": 20,
+     "level": "srednja",
+     "max": 2,
+     "section": "Arhitektura ANSI/SPARC",
+     "q": "ANSI/SPARC-arhitektura podatkovne baze opredeljuje, da je podatkovna baza opisana na treh nivojih: notranjem, konceptualnem in zunanjem. Dopolni povedi."
+    },
+    {
+     "i": 21,
+     "level": "lažja",
+     "max": 1,
+     "section": "Arhitektura ANSI/SPARC",
+     "q": "V tabelo Dijak dodamo stolpec Email. Pogled tajništva in tajniška aplikacija delujeta naprej brez sprememb. To je …"
+    },
+    {
+     "i": 22,
+     "level": "srednja",
+     "max": 2,
+     "section": "Arhitektura ANSI/SPARC",
+     "q": "Na kateri nivo arhitekture ANSI/SPARC spada?"
+    },
+    {
+     "i": 23,
+     "level": "srednja",
+     "max": 2,
+     "section": "Relacijski model in jeziki SUPB",
+     "q": "S katerim stavkom SQL spremenimo strukturo podatkov v podatkovni bazi?"
+    },
+    {
+     "i": 24,
+     "level": "srednja",
+     "max": 2,
+     "section": "Relacijski model in jeziki SUPB",
+     "q": "Katera stavka SQL spreminjata metapodatke podatkovne baze?"
+    },
+    {
+     "i": 25,
+     "level": "srednja",
+     "max": 2,
+     "section": "Relacijski model in jeziki SUPB",
+     "q": "Katera stavka SQL spadata v skupino stavkov SQL DML?"
+    },
+    {
+     "i": 26,
+     "level": "srednja",
+     "max": 2,
+     "section": "Relacijski model in jeziki SUPB",
+     "q": "Razvrsti stavke v skupine."
+    },
+    {
+     "i": 27,
+     "level": "srednja",
+     "max": 2,
+     "section": "Relacijski model in jeziki SUPB",
+     "q": "Dana je relacijska shema Izdelek(IzdelekID:N, Naziv:A30, Cena:R, Opomba°:A100). Dopolni."
+    },
+    {
+     "i": 28,
+     "level": "lažja",
+     "max": 1,
+     "section": "Relacijski model in jeziki SUPB",
+     "q": "Kaj pomeni zapis PID:A1→Predmet v shemi Ocena?"
+    },
+    {
+     "i": 29,
+     "level": "lažja",
+     "max": 1,
+     "section": "Relacijski model in jeziki SUPB",
+     "q": "Kaj se zgodi s stavkom DROP TABLE Ocena?"
+    },
+    {
+     "i": 30,
+     "level": "srednja",
+     "max": 2,
+     "section": "Uporabniki in pravice",
+     "q": "Skrbnik podatkovne baze (administrator) skrbi za"
+    },
+    {
+     "i": 31,
+     "level": "lažja",
+     "max": 1,
+     "section": "Uporabniki in pravice",
+     "q": "Skrb za izdelavo arhivskih kopij podatkovne baze (PB) je naloga"
+    },
+    {
+     "i": 32,
+     "level": "srednja",
+     "max": 2,
+     "section": "Uporabniki in pravice",
+     "q": "Kateri izmed naštetih sta nalogi skrbnika podatkovne baze?"
+    },
+    {
+     "i": 33,
+     "level": "srednja",
+     "max": 2,
+     "section": "Uporabniki in pravice",
+     "q": "Kateri sta značilni opravili, ki ju izvaja administrator oz. skrbnik podatkovnega strežnika?"
+    },
+    {
+     "i": 34,
+     "level": "srednja",
+     "max": 2,
+     "section": "Uporabniki in pravice",
+     "q": "Obkrožite črki pred resničnima trditvama."
+    },
+    {
+     "i": 35,
+     "level": "srednja",
+     "max": 2,
+     "section": "Uporabniki in pravice",
+     "q": "Povežite skupine uporabnikov SUPB in njihove tipične naloge."
+    },
+    {
+     "i": 36,
+     "level": "lažja",
+     "max": 1,
+     "section": "Uporabniki in pravice",
+     "q": "Kateri stavek SQL je namenjen dodeljevanju uporabniških pravic za delo s podatki?"
+    },
+    {
+     "i": 37,
+     "level": "lažja",
+     "max": 1,
+     "section": "Uporabniki in pravice",
+     "q": "Skrbnik je izvedel CREATE USER 'ana'@'localhost' IDENTIFIED BY 'Ana123!'; Kaj lahko ana zdaj naredi v bazi sola?"
+    },
+    {
+     "i": 38,
+     "level": "srednja",
+     "max": 2,
+     "section": "Uporabniki in pravice",
+     "q": "SHOW GRANTS FOR 'profesor'@'%' izpiše vrstico GRANT SELECT, INSERT ON `sola`.`Ocena` TO `profesor`@`%`. Kaj profesor sme? Izberi vse pravilne odgovore."
+    },
+    {
+     "i": 39,
+     "level": "srednja",
+     "max": 2,
+     "section": "Uporabniki in pravice",
+     "q": "Kateri stavek uporabiš?"
+    },
+    {
+     "i": 40,
+     "level": "lažja",
+     "max": 1,
+     "section": "Informacijski sistemi",
+     "q": "Elektronska redovalnica je primer"
+    },
+    {
+     "i": 41,
+     "level": "srednja",
+     "max": 2,
+     "section": "Informacijski sistemi",
+     "q": "Kateri izmed naštetih lastnosti lahko opredelimo kot lastnost transakcijskega informacijskega sistema (TIS)?"
+    },
+    {
+     "i": 42,
+     "level": "srednja",
+     "max": 2,
+     "section": "Informacijski sistemi",
+     "q": "Obkrožite črko R, če je trditev resnična, oziroma N, če je neresnična. Za transakcijske informacijske sisteme je značilno:"
+    },
+    {
+     "i": 43,
+     "level": "lažja",
+     "max": 1,
+     "section": "Informacijski sistemi",
+     "q": "Katera od navedenih značilnosti velja za transakcijske informacijske sisteme?"
+    },
+    {
+     "i": 44,
+     "level": "srednja",
+     "max": 2,
+     "section": "Informacijski sistemi",
+     "q": "Obkrožite dve značilnosti transakcijskega informacijskega sistema."
+    },
+    {
+     "i": 45,
+     "level": "srednja",
+     "max": 2,
+     "section": "Informacijski sistemi",
+     "q": "Pred vsako trditvijo obkrožite R, če je trditev resnična, in N, če je trditev neresnična."
+    },
+    {
+     "i": 46,
+     "level": "srednja",
+     "max": 2,
+     "section": "Informacijski sistemi",
+     "q": "Transakcijski informacijski sistem (TIS) je programska oprema, ki omogoča izvajanje in upravljanje poslovnih transakcij v računalniškem okolju. Kateri od naštet"
+    },
+    {
+     "i": 47,
+     "level": "lažja",
+     "max": 1,
+     "section": "Informacijski sistemi",
+     "q": "Informacijski sistem (IS), katerega namen je pomoč uporabnikom pri nakupu novega izdelka, sodi"
+    },
+    {
+     "i": 48,
+     "level": "težja",
+     "max": 3,
+     "section": "Informacijski sistemi",
+     "q": "Povežite vrsto informacijskega sistema s pravilnim opisom ali lastnostjo tega sistema."
+    },
+    {
+     "i": 49,
+     "level": "težja",
+     "max": 3,
+     "section": "Informacijski sistemi",
+     "q": "Povežite tip informacijskega sistema z njegovo pomembno značilnostjo."
+    },
+    {
+     "i": 50,
+     "level": "srednja",
+     "max": 2,
+     "section": "Informacijski sistemi",
+     "q": "Kaj je značilno za transakcijske informacijske sisteme? Izberi štiri lastnosti. (V izvirniku jih je treba našteti.)"
+    },
+    {
+     "i": 51,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zapiši stavke SQL",
+     "q": "Zapiši stavek, ki ustvari uporabnika ravnatelj, ki se prijavlja z lokalnega računalnika (localhost), z geslom Ravn4telj!."
+    },
+    {
+     "i": 52,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zapiši stavke SQL",
+     "q": "Uporabniku 'ravnatelj'@'localhost' dodeli pravico branja vseh tabel v bazi sola."
+    },
+    {
+     "i": 53,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zapiši stavke SQL",
+     "q": "Uporabniku 'profesor'@'%' dodeli pravice branja, vnašanja in popravljanja v tabeli Ocena baze sola."
+    },
+    {
+     "i": 54,
+     "level": "srednja",
+     "max": 2,
+     "section": "Zapiši stavke SQL",
+     "q": "Uporabniku 'profesor'@'%' odvzemi pravico brisanja v tabeli Ocena baze sola."
+    },
+    {
+     "i": 55,
+     "level": "težja",
+     "max": 3,
+     "section": "Zapiši stavke SQL",
+     "q": "Ustvari vlogo ucitelj, ji dodeli pravico branja vseh tabel baze sola in vanjo dodaj uporabnika 'profesor'@'%'."
+    },
+    {
+     "i": 56,
+     "level": "lažja",
+     "max": 1,
+     "section": "Zapiši stavke SQL",
+     "q": "Zapiši stavek, ki izpiše vse pravice uporabnika 'ravnatelj'@'localhost'."
+    },
+    {
+     "i": 57,
+     "level": "lažja",
+     "max": 1,
+     "section": "Zapiši stavke SQL",
+     "q": "Zapiši stavek, ki izbriše uporabnika 'ravnatelj'@'localhost'."
+    },
+    {
+     "i": 58,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Pri podatkovnih bazah govorimo o trinivojski arhitekturi. Namen je ločiti načine fizičnega shranjevanja podatkov od načinov modeliranja okolja in le-te od upora"
+    },
+    {
+     "i": 59,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Kaj določa fizični sloj v arhitekturi ANSI/SPARC podatkovne baze?"
+    },
+    {
+     "i": 60,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Katere trditve o SUPB so resnične? Izberi vse pravilne odgovore."
+    },
+    {
+     "i": 61,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Kdo opravi nalogo?"
+    },
+    {
+     "i": 62,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Bančna aplikacija odšteje denar z enega računa, pred prištevanjem na drug račun pa zmanjka elektrike. Katera lastnost transakcije poskrbi, da denar ne izgine?"
+    }
+   ],
+   "pages": [
+    {
+     "id": "pregled",
+     "chapter": "Teorija",
+     "label": "Pregled"
+    },
+    {
+     "id": "uvod",
+     "chapter": "Teorija",
+     "label": "Podatki in podatkovna baza"
+    },
+    {
+     "id": "datoteke",
+     "chapter": "Teorija",
+     "label": "Od datotek do PB"
+    },
+    {
+     "id": "supb",
+     "chapter": "Teorija",
+     "label": "SUPB"
+    },
+    {
+     "id": "integriteta",
+     "chapter": "Teorija",
+     "label": "Integriteta"
+    },
+    {
+     "id": "transakcije",
+     "chapter": "Teorija",
+     "label": "Transakcije (ACID)"
+    },
+    {
+     "id": "ansi",
+     "chapter": "Teorija",
+     "label": "Arhitektura ANSI/SPARC"
+    },
+    {
+     "id": "neodvisnost",
+     "chapter": "Teorija",
+     "label": "Podatkovna neodvisnost"
+    },
+    {
+     "id": "relmodel",
+     "chapter": "Teorija",
+     "label": "Relacijski model in zapis"
+    },
+    {
+     "id": "jeziki",
+     "chapter": "Teorija",
+     "label": "Jeziki SUPB"
+    },
+    {
+     "id": "uporabniki",
+     "chapter": "Teorija",
+     "label": "Uporabniki PB"
+    },
+    {
+     "id": "racuni",
+     "chapter": "Teorija",
+     "label": "Računi: CREATE USER"
+    },
+    {
+     "id": "grant",
+     "chapter": "Teorija",
+     "label": "Pravice: GRANT"
+    },
+    {
+     "id": "revoke",
+     "chapter": "Teorija",
+     "label": "Odvzem: REVOKE"
+    },
+    {
+     "id": "vloge",
+     "chapter": "Teorija",
+     "label": "Vloge: ROLE"
+    },
+    {
+     "id": "is",
+     "chapter": "Teorija",
+     "label": "Informacijski sistemi"
+    },
+    {
+     "id": "utrjevanje",
+     "chapter": "Teorija",
+     "label": "Povzetek in primeri"
+    },
+    {
+     "id": "naloge-a",
+     "chapter": "Naloge",
+     "label": "Vaje A · Podatki, podatkovna baza in SUPB"
+    },
+    {
+     "id": "naloge-b",
+     "chapter": "Naloge",
+     "label": "Vaje B · Arhitektura ANSI/SPARC"
+    },
+    {
+     "id": "naloge-c",
+     "chapter": "Naloge",
+     "label": "Vaje C · Relacijski model in jeziki SUPB"
+    },
+    {
+     "id": "naloge-d",
+     "chapter": "Naloge",
+     "label": "Vaje D · Uporabniki in pravice"
+    },
+    {
+     "id": "naloge-e",
+     "chapter": "Naloge",
+     "label": "Vaje E · Informacijski sistemi"
+    },
+    {
+     "id": "naloge-f",
+     "chapter": "Naloge",
+     "label": "Vaje F · Zapiši stavke SQL"
+    },
+    {
+     "id": "doma-mat",
+     "chapter": "Naloge",
+     "label": "Vaje G · Ponavljanje"
+    },
+    {
+     "id": "doma",
+     "chapter": "Naloge",
+     "label": "Vaje H · Za doma"
+    }
+   ],
+   "gate": [
+    "uvod",
+    "datoteke",
+    "supb",
+    "integriteta",
+    "transakcije",
+    "ansi",
+    "neodvisnost",
+    "relmodel",
+    "jeziki",
+    "uporabniki",
+    "racuni",
+    "grant",
+    "revoke",
+    "vloge",
+    "is",
+    "utrjevanje"
+   ]
   }
  ],
  "planned": [
