@@ -5,15 +5,18 @@
 
 const ICONS = {
   baza: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="8" width="36" height="32" rx="3"/><path d="M6 18h36M6 28h36M18 8v32"/><rect x="6" y="8" width="36" height="10" rx="3" class="fill" opacity=".35"/></svg>',
+  mnoz: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 8v17a12 12 0 0 0 24 0V8"/><path d="M12 8v17a12 12 0 0 0 24 0V8z" class="fill" opacity=".35"/></svg>',
   oper: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M6 8h36L28 26v13l-8-4V26z"/><path d="M6 8h36l-5 6H11z" class="fill" opacity=".35"/></svg>',
   stik: '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="18" cy="24" r="12"/><circle cx="30" cy="24" r="12"/><path d="M24 13.6A12 12 0 0 0 24 34.4A12 12 0 0 0 24 13.6z" class="fill" opacity=".35"/></svg>',
   izraz: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17 8H9v32h8M31 8h8v32h-8"/><circle cx="24" cy="24" r="3.5" class="fill" opacity=".35"/></svg>',
 };
 // Theory groups (proposed 11. 11. 2026, to be confirmed by the teacher): pages in the artifact's own order. Since the artifact has a page
-// per operation (11. 11. 2026, evening), the set operations and the product join the basic operations, and both joins the quotient.
+// per operation (11. 11. 2026, evening), the set operations and the product are a group of their own (the teacher asked for it), and both
+// joins go with the quotient.
 const GROUPS = [
   { id: 'g-baza', icon: 'baza', title: 'Pojmi in baza', pages: ['uvod', 'pojmi'] },
-  { id: 'g-oper', icon: 'oper', title: 'Osnovne operacije', pages: ['selekcija', 'projekcija', 'preimenovanje', 'unija', 'presek', 'razlika', 'produkt'] },
+  { id: 'g-oper', icon: 'oper', title: 'Osnovne operacije', pages: ['selekcija', 'projekcija', 'preimenovanje'] },
+  { id: 'g-mnoz', icon: 'mnoz', title: 'Množične operacije', pages: ['unija', 'presek', 'razlika', 'produkt'] },
   { id: 'g-stik', icon: 'stik', title: 'Stiki in količnik', pages: ['stik', 'thetastik', 'kolicnik'] },
   { id: 'g-izraz', icon: 'izraz', title: 'Izrazi v praksi', pages: ['prioriteta', 'sql', 'postopek'] },
 ];

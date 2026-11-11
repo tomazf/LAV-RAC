@@ -544,7 +544,7 @@ test('corrected chapter and topic titles (10. 11. 2026) are the same in the cata
 });
 
 test('2.2, 2.3, 3.1 to 3.5 and 4.1: every page opens without errors, with their theory groups', async () => {
-  const want = { '2.2': [85, ['Logična vrata', 'Funkcije in poenostavljanje', 'Aritmetična vezja', 'Vaje']], '2.3': [129, ['Podatki in procesor', 'Zbirnik', 'Prekinitve in pomnilniki', 'Vhod, izhod in cevovod', 'Vaje']], '3.1': [52, ['Jezik in prevajanje', 'Orodja, zagon in napake', 'Vaje']], '3.2': [53, ['Algoritem in zapis', 'Gradniki in sled', 'Od diagrama do programa', 'Vaje']], '3.3': [55, ['Program in podatki', 'Izpis in vnos', 'Računanje in potek programa', 'Vaje']], '3.4': [76, ['Tipi in pretvorbe', 'Znaki in nizi', 'Operatorji', 'Vaje']], '3.5': [50, ['Stavek IF', 'Več možnosti', 'Vaje']], '4.1': [89, ['Pojmi in baza', 'Osnovne operacije', 'Stiki in količnik', 'Izrazi v praksi', 'Vaje']] };
+  const want = { '2.2': [85, ['Logična vrata', 'Funkcije in poenostavljanje', 'Aritmetična vezja', 'Vaje']], '2.3': [129, ['Podatki in procesor', 'Zbirnik', 'Prekinitve in pomnilniki', 'Vhod, izhod in cevovod', 'Vaje']], '3.1': [52, ['Jezik in prevajanje', 'Orodja, zagon in napake', 'Vaje']], '3.2': [53, ['Algoritem in zapis', 'Gradniki in sled', 'Od diagrama do programa', 'Vaje']], '3.3': [55, ['Program in podatki', 'Izpis in vnos', 'Računanje in potek programa', 'Vaje']], '3.4': [76, ['Tipi in pretvorbe', 'Znaki in nizi', 'Operatorji', 'Vaje']], '3.5': [50, ['Stavek IF', 'Več možnosti', 'Vaje']], '4.1': [89, ['Pojmi in baza', 'Osnovne operacije', 'Množične operacije', 'Stiki in količnik', 'Izrazi v praksi', 'Vaje']] };
   for (const [id, [n, groups]] of Object.entries(want)) {
     const ex = catalog.exercises.find((e) => e.id === id);
     assert.equal(ex.module, { 2: 'LAV-RAČ2', 3: 'LAV-RAČ3', 4: 'LAV-RAČ4' }[id[0]]);
@@ -1438,7 +1438,7 @@ test('3.5: two theory groups, laboratory exercises are not mentioned, set E is "
   assert.deepEqual(errors, []);
 });
 
-test('4.1: relational algebra: four theory groups, the revision set is last, an expression is checked by its result, one that cannot be read is no answer', async () => {
+test('4.1: relational algebra: five theory groups, the revision set is last, an expression is checked by its result, one that cannot be read is no answer', async () => {
   const ex = catalog.exercises.find((e) => e.id === '4.1');
   assert.equal(ex.module, 'LAV-RAČ4');
   const sections = [...new Set(ex.tasks.map((t) => t.section))];
@@ -1451,7 +1451,7 @@ test('4.1: relational algebra: four theory groups, the revision set is last, an 
   const a = await login('Sara Skrbnik');
   await a.goto(`${APP}/vaje/4.1#pregled`);
   await at(a, 'pregled');
-  assert.deepEqual(await a.locator('.lr-rail .lr-grp b').allTextContents(), ['Pojmi in baza', 'Osnovne operacije', 'Stiki in količnik', 'Izrazi v praksi', 'Vaje']);
+  assert.deepEqual(await a.locator('.lr-rail .lr-grp b').allTextContents(), ['Pojmi in baza', 'Osnovne operacije', 'Množične operacije', 'Stiki in količnik', 'Izrazi v praksi', 'Vaje']);
   assert.deepEqual(await a.locator('.lr-rail a.lr-gated .lr-tg').allTextContents(), ['A ·', 'B ·', 'C ·', 'D ·', 'E ·', 'F ·', 'G ·', 'H ·']);
   assert.equal((await a.locator('.lr-rail a.lr-gated .lr-tx').last().textContent()).trim(), 'Za doma');
   // the portal's rules say how hints count; the artifact's own sentence about hints is gone
@@ -1475,7 +1475,7 @@ test('4.1: relational algebra: four theory groups, the revision set is last, an 
     }
     return out;
   });
-  assert.deepEqual(rail, [['Pojmi in baza', ['uvod', 'pojmi']], ['Osnovne operacije', ['selekcija', 'projekcija', 'preimenovanje', 'unija', 'presek', 'razlika', 'produkt']], ['Stiki in količnik', ['stik', 'thetastik', 'kolicnik']], ['Izrazi v praksi', ['prioriteta', 'sql', 'postopek']]]);
+  assert.deepEqual(rail, [['Pojmi in baza', ['uvod', 'pojmi']], ['Osnovne operacije', ['selekcija', 'projekcija', 'preimenovanje']], ['Množične operacije', ['unija', 'presek', 'razlika', 'produkt']], ['Stiki in količnik', ['stik', 'thetastik', 'kolicnik']], ['Izrazi v praksi', ['prioriteta', 'sql', 'postopek']]]);
   // the quick quiz at the end of a page: a wrong answer can be tried again, the right one closes it
   await go(a, 'selekcija');
   const quiz = a.locator('.page.on .quiz');
