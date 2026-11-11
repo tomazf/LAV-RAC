@@ -3,6 +3,7 @@
 // utrjevanje" and the matura revision set kept last as "Ponavljanje" (agreed 8. 11. 2026), no mention of laboratory
 // exercises, and the matura's diagram labels only (agreed 10. 11. 2026).
 
+import { statements, QTEXT } from './qformat.js';
 const ICONS = {
   if: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5l12 10-12 10-12-10z"/><path d="M12 15H6v21M36 15h6v21"/><rect x="1.5" y="36" width="9" height="8" rx="1.5" class="fill" opacity=".35"/><rect x="37.5" y="36" width="9" height="8" rx="1.5"/></svg>',
   vec: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4v12"/><path d="M24 16L8 30M24 16v14M24 16l16 14"/><rect x="2" y="30" width="12" height="9" rx="1.5"/><rect x="18" y="30" width="12" height="9" rx="1.5" class="fill" opacity=".35"/><rect x="34" y="30" width="12" height="9" rx="1.5"/></svg>',
@@ -166,5 +167,41 @@ S = LavRac.loadUi();`],
 }));
 `, ''],
     ['paintLang(); fillFigs();\nrenderAll();\nprogress();\nif(location.hash) setTimeout(()=>window.scrollTo(0,0), 0);', ZAGON],
+    // Long statements: paragraphs and bold key words (11. 11. 2026), the same way as in LAV-RAČ2 chapter 2.
+    QTEXT,
+    ...statements([
+      [
+        "Sestavi program, ki ugotovi, ali se premici y1 = k1·x + n1 in y2 = k2·x + n2 sečeta. Možnosti so tri: premici sta vzporedni (se ne sečeta), se ujemata (neskončno skupnih točk) ali se sečeta v eni točki. V kodi nastavi k1 = 2, n1 = 1, k2 = -1, n2 = 4 (tip double). Izpiši »Premici sta vzporedni«, »Premici se ujemata« ali »Presek: (x, y)«.",
+        "Sestavi program, ki ugotovi, ali se **premici** y1 = k1·x + n1 in y2 = k2·x + n2 sečeta. Možnosti so tri:\n- premici sta **vzporedni** (se ne sečeta)\n- premici se **ujemata** (neskončno skupnih točk)\n- premici se **sečeta v eni točki**\nV kodi nastavi **k1 = 2, n1 = 1, k2 = -1, n2 = 4** (tip double).\nIzpiši »Premici sta vzporedni«, »Premici se ujemata« ali »Presek: (x, y)«.",
+      ],
+      [
+        "Določi, ali točka leži znotraj, zunaj ali na robu pravokotnika. Pravokotnik je podan z nasprotnima ogliščema (5, 4) in (1, 1), stranice so vzporedne koordinatnima osema. V kodi nastavi točko (5, 2). Izpiši »znotraj«, »zunaj« ali »na robu«.",
+        "Določi, ali točka leži **znotraj**, **zunaj** ali **na robu** pravokotnika. Pravokotnik je podan z nasprotnima ogliščema **(5, 4)** in **(1, 1)**, stranice so vzporedne koordinatnima osema.\nV kodi nastavi točko **(5, 2)**.\nIzpiši »znotraj«, »zunaj« ali »na robu«.",
+      ],
+      [
+        "Sestavi program Interval: dani sta celi števili a = 7 in b = 2 ter realno število x = 4.5. Preveri, ali x leži na zaprtem intervalu, ki ga določata a in b (spodnja meja je manjše, zgornja večje število). Izpiši »4.5 je na intervalu [2, 7]« ali »4.5 ni na intervalu [2, 7]«. Manjše in večje število določi s stavkom if.",
+        "**Sestavi program Interval:** dani sta celi števili **a = 7** in **b = 2** ter realno število **x = 4.5**. Preveri, ali x leži na **zaprtem intervalu**, ki ga določata a in b (spodnja meja je manjše, zgornja večje število).\nIzpiši »4.5 je na intervalu [2, 7]« ali »4.5 ni na intervalu [2, 7]«.\nManjše in večje število določi s stavkom **if**.",
+      ],
+      [
+        "Sestavi program Kipci: Indiana Jones najde tri zlate kipce, vzame pa lahko le dva. Vrednosti kipcev so 120, 75 in 300. Izpiši, katera dva kipca se najbolj splača vzeti, v obliki »Vzemi kipca 1 in 3« (manjša številka najprej).",
+        "**Sestavi program Kipci:** Indiana Jones najde **tri zlate kipce**, vzame pa lahko le **dva**. Vrednosti kipcev so **120, 75 in 300**.\nIzpiši, katera dva kipca se najbolj splača vzeti, v obliki »Vzemi kipca 1 in 3« (manjša številka najprej).",
+      ],
+      [
+        "Sestavi program Datum: dana sta letnica 2024 in zaporedna številka dneva v letu 61. Izpiši, kateri dan in mesec je to, v obliki »1. 3. 2024«. Upoštevaj prestopno leto. Pri tej nalogi ne uporabljaj zank in tabel.",
+        "**Sestavi program Datum:** dana sta letnica **2024** in zaporedna številka dneva v letu **61**.\nIzpiši, kateri dan in mesec je to, v obliki »1. 3. 2024«. Upoštevaj **prestopno leto**. Pri tej nalogi **ne uporabljaj zank in tabel**.",
+      ],
+      [
+        "Napiši preprost kalkulator z operacijami +, -, * in /. V kodi nastavi a = 12.0, b = 4.0 in znak op = '/'. Izpiši »12.0 / 4.0 = 3.0«. Pri deljenju z nič izpiši »Deljenje z 0 ni mogoce«, pri neznanem znaku »Neznana operacija«.",
+        "Napiši preprost **kalkulator** z operacijami +, -, * in /. V kodi nastavi **a = 12.0**, **b = 4.0** in znak **op = '/'**.\nIzpiši »12.0 / 4.0 = 3.0«.\nPri **deljenju z nič** izpiši »Deljenje z 0 ni mogoce«, pri **neznanem znaku** »Neznana operacija«.",
+      ],
+      [
+        "Napiši program, ki za dano leto pove, ali je prestopno. Leto je prestopno, če je deljivo s 400 ali če je deljivo s 4 in ni deljivo s 100. V kodi nastavi leto = 1900. Izpiši »1900 je prestopno leto« ali »1900 ni prestopno leto«.",
+        "Napiši program, ki za dano leto pove, ali je **prestopno**. Leto je prestopno, če je deljivo s **400** ali če je deljivo s **4** in ni deljivo s **100**.\nV kodi nastavi **leto = 1900**.\nIzpiši »1900 je prestopno leto« ali »1900 ni prestopno leto«.",
+      ],
+      [
+        "Spremenljivkama x in y tipa double smo že določili neničelne vrednosti. Zapišite pogojne stavke, s katerimi izpišemo, v katerem kvadrantu se nahaja točka s koordinatama x in y. (Prirejeno: v kodi nastavi x = -2.5 in y = 3.0, izpiši samo številko kvadranta.)",
+        "Spremenljivkama **x** in **y** tipa double smo že določili neničelne vrednosti. Zapišite pogojne stavke, s katerimi izpišemo, v katerem **kvadrantu** se nahaja točka s koordinatama x in y.\n(Prirejeno: v kodi nastavi **x = -2.5** in **y = 3.0**, izpiši samo **številko kvadranta**.)",
+      ],
+    ]),
   ],
 };

@@ -2,6 +2,7 @@
 // answers typed as program output), one answer per task, three theory groups, the matura revision set moved among
 // the graded sets as "Ponavljanje" (agreed 8. 11. 2026), and the matura's diagram labels only (the switch was dropped 10. 11. 2026).
 
+import { statements, QTEXT } from './qformat.js';
 const ICONS = {
   podatki: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17 7c-4 0-5 2-5 5v5c0 3-2 5-5 7 3 2 5 4 5 7v5c0 3 1 5 5 5"/><path d="M31 7c4 0 5 2 5 5v5c0 3 2 5 5 7-3 2-5 4-5 7v5c0 3-1 5-5 5"/><rect x="19.5" y="19.5" width="9" height="9" rx="1.5" class="fill" opacity=".35"/></svg>',
   izpis: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="7" width="40" height="28" rx="3"/><path d="M12 16l7 5-7 5M23 27h9"/><path d="M16 42h16M24 35v7"/></svg>',
@@ -132,5 +133,33 @@ S = LavRac.loadUi();`],
 }));
 `, ''],
     ['paintLang(); fillFigs();\nrenderAll();\nprogress();\nif(location.hash) setTimeout(()=>window.scrollTo(0,0), 0);', ZAGON],
+    // Long statements: paragraphs and bold key words (11. 11. 2026), the same way as in LAV-RAČ2 chapter 2.
+    QTEXT,
+    ...statements([
+      [
+        "Dopolni najmanjši program v Javi: manjkajoče dele vpiši kar v kodo. Vrzeli so po vrsti od zgoraj navzdol: 1. ključna beseda, ki uvede razred, 2. ime metode, v kateri se izvajanje začne, 3. znak na koncu stavka.",
+        "Dopolni **najmanjši program v Javi**: manjkajoče dele vpiši kar v kodo.\n**Vrzeli** so po vrsti od zgoraj navzdol:\n- **1.** ključna beseda, ki uvede razred\n- **2.** ime metode, v kateri se izvajanje začne\n- **3.** znak na koncu stavka",
+      ],
+      [
+        "Napiši izsek programa, ki ustvari konstanto konst z vrednostjo 1.23456 in jo izpiše na dve decimalni mesti. Pričakovan izpis: 1.23 (na računalniku s slovenskimi nastavitvami printf izpiše vejico: 1,23, tudi to je pravilno).",
+        "Napiši izsek programa, ki ustvari **konstanto konst** z vrednostjo **1.23456** in jo izpiše na **dve decimalni mesti**.\n**Pričakovan izpis:** 1.23 (na računalniku s slovenskimi nastavitvami printf izpiše vejico: 1,23, tudi to je pravilno).",
+      ],
+      [
+        "Ana, rojena leta 2008, je visoka 1.68 m. Shrani podatke v spremenljivke ustreznih tipov (ime je String, leto int, višina double; vrednosti zapiši kar v kodo) in izpiši natanko to besedilo, pri čemer vrednosti vzemi iz spremenljivk.",
+        "**Ana**, rojena leta **2008**, je visoka **1.68 m**.\nShrani podatke v spremenljivke ustreznih tipov (ime je **String**, leto **int**, višina **double**; vrednosti zapiši kar v kodo) in izpiši natanko to besedilo, pri čemer vrednosti vzemi **iz spremenljivk**.",
+      ],
+      [
+        "V programu imamo celoštevilsko spremenljivko stevilo. Zapišite stavek, ki vrednosti v spremenljivki stevilo odreže najbolj desno števko (števko, ki predstavlja enice). Primer: vrednost 123456 po taki operaciji postane 12345.",
+        "V programu imamo celoštevilsko spremenljivko **stevilo**. Zapišite stavek, ki vrednosti v spremenljivki stevilo **odreže najbolj desno števko** (števko, ki predstavlja enice).\n**Primer:** vrednost 123456 po taki operaciji postane 12345.",
+      ],
+      [
+        "Podani sta deklaraciji int a = 10; in int b;. Zapišite vrednosti obeh spremenljivk po izvedbi vsakega od stavkov b = a++; in b = ++a; (stavka se izvedeta drug za drugim).",
+        "Podani sta deklaraciji **int a = 10;** in **int b;**.\nZapišite vrednosti obeh spremenljivk po izvedbi vsakega od stavkov **b = a++;** in **b = ++a;** (stavka se izvedeta **drug za drugim**).",
+      ],
+      [
+        "Napišite naslednji izraz v programskem jeziku Java: x = (b + √(b² − 4ac)) / (2a). Izračunaj ga za a = 2, b = 6, c = 4. Pričakovan izpis: 2.0. Korenjenje: Math.sqrt(...).",
+        "Napišite naslednji izraz v programskem jeziku Java: **x = (b + √(b² − 4ac)) / (2a)**.\nIzračunaj ga za **a = 2, b = 6, c = 4**. **Pričakovan izpis:** 2.0.\n**Korenjenje:** Math.sqrt(...).",
+      ],
+    ]),
   ],
 };

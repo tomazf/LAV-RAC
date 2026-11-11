@@ -396,8 +396,28 @@
     s.page.append(head, locked, body, buildPager(s));
     if (s.el) s.el.remove();
   }
+  // Long task statements can carry light markup: **bold** words, one paragraph per line, lines starting with "- " as a list.
+  // Only statements that contain ** are rebuilt; the markers are not part of the text the importer stores.
+  function formatQ(q) {
+    if (q.children.length || !/\*\*/.test(q.textContent)) return;
+    const box = h('div', { class: q.className + ' lr-qf' });
+    const inline = (parent, text) => text.split(/\*\*(.+?)\*\*/).forEach((part, j) => { if (part) parent.append(j % 2 ? h('strong', null, part) : part); });
+    let ul = null;
+    q.textContent.split('\n').map((l) => l.trim()).filter(Boolean).forEach((line) => {
+      if (/^- /.test(line)) {
+        if (!ul) { ul = h('ul'); box.append(ul); }
+        const li = h('li'); inline(li, line.slice(2)); ul.append(li);
+        return;
+      }
+      ul = null;
+      const p = h('p'); inline(p, line); box.append(p);
+    });
+    q.replaceWith(box);
+  }
+
   function prepareCard(card, i, k, n, sel) {
     const task = TASKS[i].task;
+    card.querySelectorAll('.qtext').forEach(formatQ);
     card.hidden = false;
     card.id = 't' + i;
     card.classList.add('lr-task');
@@ -724,7 +744,7 @@
     const tasks = [];
     pages.filter((p) => p.kind === 'set').forEach((s) => s.tasks.forEach((t) => {
       const src = TASKS[t.idx].task;
-      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
+      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\*\*/g, '').replace(/\n- /g, '\n').replace(/\s+/g, ' ').trim().slice(0, 160) });
     }));
     tasks.sort((a, b) => a.i - b.i);
     return {

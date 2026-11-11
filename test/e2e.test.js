@@ -141,6 +141,10 @@ test('admin creates classes; a teacher joins, chooses exercises and adds student
   await t.click('text=Dodaj izbrane');
   await t.waitForLoadState();
   assert.equal(await t.locator('.matrix tbody tr').count(), 2);
+  // students are numbered in the order shown; the class page has no »Razredi« link above its title; the note is one line
+  assert.deepEqual(await t.locator('.matrix td.stick .rn').allTextContents(), ['1.', '2.']);
+  assert.equal(await t.locator('.crumbs').count(), 0);
+  assert.equal(await t.locator('p.note.one-line').evaluate((e) => getComputedStyle(e).whiteSpace), 'nowrap');
   assert.equal(await t.locator('#cakajo li').count(), 1);
   // a new class shows students nothing
   const s = await login('Ana Kovač');
@@ -850,6 +854,11 @@ test('backup from the admin page: download, warning, restore keeps deleted users
   await sql(`UPDATE audit_log SET created_at = now() WHERE action='Prenesel varnostno kopijo'`);
 
   // after the backup: Cene is deleted for good, Daša becomes a teacher
+  await a.goto(`${APP}/admin`);
+  // the user list is numbered across pages (the number counts rows of the list, not roles)
+  const nums = await a.locator('.data tbody td.n').allTextContents();
+  assert.ok(nums.length > 1);
+  assert.deepEqual(nums, nums.map((_, i) => String(i + 1)));
   await a.goto(`${APP}/admin?q=cene`);
   const row = a.locator('tr', { hasText: 'cene.zupan@sola.test' });
   await row.locator('summary:text("Izbriši za vedno")').click();

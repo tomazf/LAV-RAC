@@ -36,6 +36,92 @@ const HOME_PLUS = [
  }
 ];
 
+// Long task statements get light markup (**bold**, one paragraph per line, "- " lists), which the shell draws (formatQ in
+// content/shell/vaja.js); D12's siren sentence says outright that the gas must be present together with one of the two
+// conditions, and the brackets missing in E6, E8 are closed (11. 11. 2026). Old text, new text; the points stay the same.
+const STATEMENTS = [
+ [
+  "Motor se vrti (Q = 1), če sta pritisnjeni obe tipki, A in B. Zapiši funkcijo Q.",
+  "**Motor** se vrti (**Q = 1**), če sta pritisnjeni **obe tipki**, A in B.\nZapiši funkcijo Q."
+ ],
+ [
+  "Alarm piska (Q = 1), če voznik sedi (A = 1) in pas ni pripet (B = 0). Zapiši funkcijo Q in jo preveri s tabelo.",
+  "**Alarm** piska (**Q = 1**), če **voznik sedi** (A = 1) **in** pas **ni pripet** (B = 0).\nZapiši funkcijo Q in jo preveri s tabelo."
+ ],
+ [
+  "Vrata se odprejo (Q = 1), če je pritisnjena tipka A ali tipka B in sistem ni zaklenjen (C = 1 pomeni zaklenjen). Zapiši Q.",
+  "Vrata se odprejo (**Q = 1**), če je pritisnjena **vsaj ena od tipk, A ali B**, in hkrati sistem **ni zaklenjen** (C = 1 pomeni zaklenjen).\nZapiši Q."
+ ],
+ [
+  "Glasovanje: Q = 1, če sta vsaj dva od treh članov (A, B, C) za. Zapiši Q.",
+  "**Glasovanje:** Q = 1, če sta **vsaj dva od treh** članov (A, B, C) **za**.\nZapiši Q."
+ ],
+ [
+  "Seštevalnik sešteva bite A, B in prenos C. Bit vsote S je 1, kadar je med A, B, C liho število enic. Zapiši S z operatorjem ⊕.",
+  "**Seštevalnik** sešteva bite **A**, **B** in prenos **C**. Bit vsote **S** je 1, kadar je med A, B, C **liho število enic**.\nZapiši S z operatorjem **⊕**."
+ ],
+ [
+  "Krmilnik črpalke ima tri vhode A, B in C. Njegova funkcija Q (Q = 1: črpalka teče) je že vpisana v Veitchev diagram. Z miško ali prstom povleci čez celice ene skupine enic in pritisni »Dodaj skupino«. Ko imaš vse skupine, zapiši minimalno PDNO.",
+  "**Krmilnik črpalke** ima tri vhode A, B in C. Njegova funkcija **Q** (Q = 1: črpalka teče) je že vpisana v Veitchev diagram.\nZ miško ali prstom **povleci čez celice ene skupine** enic in pritisni **»Dodaj skupino«**. Ko imaš vse skupine, zapiši **minimalno PDNO**."
+ ],
+ [
+  "Prezračevanje strojnice. Vhodi: A = temperatura je previsoka, B = zaznan je plin, C = vrata strojnice so odprta, D = vklopljen je ročni preklic. Izhoda: Q1 = ventilator teče, Q2 = sirena se oglaša.\nVentilator teče, če je temperatura previsoka ali je zaznan plin, razen kadar je vklopljen ročni preklic.\nSirena se oglaša, če je zaznan plin in je hkrati temperatura previsoka ali so vrata odprta.\nDopolni oba stolpca pravilnostne tabele.",
+  "**Prezračevanje strojnice.** Vezje ima štiri vhode in dva izhoda.\n**Vhodi** (1 = da):\n- **A**: temperatura je previsoka\n- **B**: zaznan je plin\n- **C**: vrata strojnice so odprta\n- **D**: vklopljen je ročni preklic\n**Izhoda:**\n- **Q1**: ventilator teče\n- **Q2**: sirena se oglaša\n**Ventilator** teče, če je temperatura previsoka **ali** je zaznan plin, **razen** kadar je vklopljen ročni preklic.\n**Sirena** se oglaša, kadar je zaznan **plin** in je hkrati izpolnjen vsaj eden od obeh pogojev: temperatura je previsoka **ali** so vrata odprta.\nDopolni oba stolpca pravilnostne tabele."
+ ],
+ [
+  "Ventilator iz prejšnje naloge: funkcija Q1 je vpisana v Veitchev diagram (A, B, C, D). Označi skupine enic in zapiši minimalno PDNO.",
+  "**Ventilator** iz prejšnje naloge: funkcija **Q1** je vpisana v Veitchev diagram (A, B, C, D).\nOznači **skupine enic** in zapiši **minimalno PDNO**."
+ ],
+ [
+  "Sirena iz iste strojnice: funkcija Q2 je vpisana v diagram. Označi skupine enic in zapiši minimalno PDNO. Zapiši vsoto produktov (PDNO).",
+  "**Sirena** iz iste strojnice: funkcija **Q2** je vpisana v diagram.\nOznači **skupine enic** in zapiši **minimalno PDNO** (vsoto produktov)."
+ ],
+ [
+  "Signalna lučka L ima štiri vhode A, B, C, D in sveti v vrsticah 0, 4, 5, 7, 8 in 12 pravilnostne tabele (Q = 1). Funkcija je vpisana v diagram. Označi skupine enic in zapiši minimalno PDNO.",
+  "**Signalna lučka L** ima štiri vhode A, B, C, D in sveti (**Q = 1**) v vrsticah **0, 4, 5, 7, 8 in 12** pravilnostne tabele. Funkcija je vpisana v diagram.\nOznači **skupine enic** in zapiši **minimalno PDNO**."
+ ],
+ [
+  "Zapiši ¬A samo z vrati NEIN. Vrata NEIN zapišemo kot negacijo produkta dveh vhodov, vhoda lahko združiš.",
+  "Zapiši **¬A** samo z vrati **NEIN**.\nVrata NEIN zapišemo kot negacijo produkta dveh vhodov; vhoda lahko združiš."
+ ],
+ [
+  "Zapiši A·B samo z vrati NEIN (dovoljeno: spremenljivke, negacija in produkt · samo neposredno pod negacijo. Uporabi največ dve vrati.",
+  "Zapiši **A·B** samo z vrati **NEIN**.\nDovoljeno: spremenljivke, negacija in produkt (·), a produkt samo neposredno pod negacijo.\nUporabi največ **dve vrati**."
+ ],
+ [
+  "Zapiši A + B samo z vrati NEALI (dovoljeno: spremenljivke, negacija in vsota + samo neposredno pod negacijo. Uporabi največ dve vrati.",
+  "Zapiši **A + B** samo z vrati **NEALI**.\nDovoljeno: spremenljivke, negacija in vsota (+), a vsota samo neposredno pod negacijo.\nUporabi največ **dve vrati**."
+ ],
+ [
+  "Zapiši A·B samo z vrati NEALI (dovoljeno: spremenljivke, negacija in vsota + samo neposredno pod negacijo). Uporabi največ tri vrata.",
+  "Zapiši **A·B** samo z vrati **NEALI**.\nDovoljeno: spremenljivke, negacija in vsota (+), a vsota samo neposredno pod negacijo.\nUporabi največ **tri vrata**."
+ ],
+ [
+  "Zapiši A⊕B samo z vrati NEIN (znana rešitev uporablja štiri vrata, ker enak podizraz X = ¬(A·B) uporabiš dvakrat). Dovoljeno je poljubno število vrat.",
+  "Zapiši **A⊕B** samo z vrati **NEIN**.\nZnana rešitev uporablja **štiri vrata**, ker enak podizraz X = ¬(A·B) uporabiš dvakrat. Dovoljeno je poljubno število vrat."
+ ],
+ [
+  "Funkcijo Q = A·B + C·D realiziraš z vrati IN in ALI (čipi 7408 z 4×IN in 7432 z 4×ALI, tri vrata) ali samo z vrati NEIN (čip 7400 s 4×NEIN, tri vrata). Koliko čipov potrebuješ v vsakem primeru?",
+  "Funkcijo **Q = A·B + C·D** realiziraš na dva načina:\n- z vrati **IN in ALI** (čip 7408 s 4×IN in čip 7432 s 4×ALI; skupaj tri vrata),\n- samo z vrati **NEIN** (čip 7400 s 4×NEIN; tri vrata).\nKoliko **čipov** potrebuješ v vsakem primeru?"
+ ],
+ [
+  "Zapiši najkrajšo PDNO za prenos Cout polnega seštevalnika (vhoda A, B in prenos C). Cout = 1, kadar sta vsaj dva od A, B, C enaka 1.",
+  "Zapiši **najkrajšo PDNO** za prenos **Cout** polnega seštevalnika (vhoda A, B in prenos C).\nCout = 1, kadar sta **vsaj dva** od A, B, C enaka 1."
+ ],
+ [
+  "Zapiši izraz za izposojo Bout polovičnega odštevalnika (A − B). Izposoja je 1, kadar odštevamo 1 od 0.",
+  "Zapiši izraz za **izposojo Bout** polovičnega odštevalnika (A − B).\nIzposoja je 1, kadar odštevamo **1 od 0**."
+ ],
+ [
+  "Polni odštevalnik izračuna A − B − Bin (v tabeli je Bin stolpec C). Izhoda sta D (razlika) in Bout (izposoja). Izposoja je 1, kadar je A manjši od B + Bin. Dopolni oba stolpca.",
+  "**Polni odštevalnik** izračuna **A − B − Bin** (v tabeli je Bin stolpec C).\nIzhoda: **D** (razlika) in **Bout** (izposoja).\nIzposoja je **1**, kadar je **A manjši od B + Bin**.\nDopolni oba stolpca."
+ ],
+ [
+  "Prenos Cout polnega seštevalnika sestavljata dva polovična seštevalnika in vrata ALI. Prvi sešteje A in B (S1 = A⊕B, C1 = A·B), drugi S1 in Cin (v nalogi C). Zapiši Cout z izrazi, ki jih ti seštevalniki izračunajo.",
+  "**Prenos Cout** polnega seštevalnika sestavljata **dva polovična seštevalnika** in vrata **ALI**.\n- prvi sešteje **A in B** (S1 = A⊕B, C1 = A·B),\n- drugi sešteje **S1 in Cin** (v nalogi C).\nZapiši **Cout** z izrazi, ki jih ti seštevalniki izračunajo."
+ ]
+];
+
 export default {
   module: 'LAV-RAČ2',
   title: TITLE,
@@ -54,6 +140,18 @@ export default {
   patches: [
     ['HOME.forEach((h,k)=>{', `HOME.push(...${JSON.stringify(HOME_PLUS)});\nHOME.forEach((h,k)=>{`],
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
+    ...STATEMENTS.map(([from, to]) => [`q:${JSON.stringify(from)}`, `q:${JSON.stringify(to)}`]),
+    // The symbol keys keep the focus of the input field with a listener in the page: the artifact's inline onmousedown is blocked by
+    // the portal's CSP, the field lost the focus on the second click and the key moved away with the preview line (11. 11. 2026).
+    [' onmousedown="event.preventDefault()"', ''],
+    ['function insertAt(inp,txt){',
+      'document.addEventListener("mousedown",e=>{ if(e.target.closest && e.target.closest(".kp button")) e.preventDefault(); });\nfunction insertAt(inp,txt){'],
+    // A15 (gate names and expressions): a drop-down cannot draw a bar over a whole expression, so each row has the expressions as buttons.
+    ['body += `<div class="cls">` + t.rows.map((r,k)=>`<div class="crow sel match" data-k="${k}"><span class="txt">${esc(r[0])}</span><select aria-label="Izberi izraz za ${esc(r[0])}"><option value="">— izberi izraz —</option>${opts}</select></div>`).join("") + `</div>`;',
+      'body += `<div class="cls">` + t.rows.map((r,k)=>`<div class="crow" data-k="${k}"><span class="txt">${esc(r[0])}</span><div class="seg" role="group" aria-label="Izberi izraz za ${esc(r[0])}">${t.lab.map((c,ci)=>`<button type="button" data-ci="${ci}" aria-pressed="false">${esc(c)}</button>`).join("")}</div></div>`).join("") + `</div>`;'],
+    ['if(t.type==="cls") row.querySelectorAll("button").forEach(b=>{', 'if(t.type==="cls"||t.type==="sel") row.querySelectorAll("button").forEach(b=>{'],
+    ['if(t.type==="cls") s.v = [...el.querySelectorAll(".crow")].map(r=>{', 'if(t.type==="cls"||t.type==="sel") s.v = [...el.querySelectorAll(".crow")].map(r=>{'],
+    ['    if(t.type==="sel") s.v = [...el.querySelectorAll(".crow select")].map(x=>x.value==="" ? null : +x.value);\n', ''],
     // The table of gate expressions on the first page sits in a scrolling frame like every other table, so a phone does not widen the page.
     ['<table class="eqtab" style="margin-top:6px">', '<div class="tbl"><table class="eqtab">'],
     ['je vhod 0</td></tr>\n          </tbody>\n        </table>', 'je vhod 0</td></tr>\n          </tbody>\n        </table></div>'],

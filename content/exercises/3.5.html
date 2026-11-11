@@ -403,8 +403,28 @@
     s.page.append(head, locked, body, buildPager(s));
     if (s.el) s.el.remove();
   }
+  // Long task statements can carry light markup: **bold** words, one paragraph per line, lines starting with "- " as a list.
+  // Only statements that contain ** are rebuilt; the markers are not part of the text the importer stores.
+  function formatQ(q) {
+    if (q.children.length || !/\*\*/.test(q.textContent)) return;
+    const box = h('div', { class: q.className + ' lr-qf' });
+    const inline = (parent, text) => text.split(/\*\*(.+?)\*\*/).forEach((part, j) => { if (part) parent.append(j % 2 ? h('strong', null, part) : part); });
+    let ul = null;
+    q.textContent.split('\n').map((l) => l.trim()).filter(Boolean).forEach((line) => {
+      if (/^- /.test(line)) {
+        if (!ul) { ul = h('ul'); box.append(ul); }
+        const li = h('li'); inline(li, line.slice(2)); ul.append(li);
+        return;
+      }
+      ul = null;
+      const p = h('p'); inline(p, line); box.append(p);
+    });
+    q.replaceWith(box);
+  }
+
   function prepareCard(card, i, k, n, sel) {
     const task = TASKS[i].task;
+    card.querySelectorAll('.qtext').forEach(formatQ);
     card.hidden = false;
     card.id = 't' + i;
     card.classList.add('lr-task');
@@ -731,7 +751,7 @@
     const tasks = [];
     pages.filter((p) => p.kind === 'set').forEach((s) => s.tasks.forEach((t) => {
       const src = TASKS[t.idx].task;
-      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
+      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\*\*/g, '').replace(/\n- /g, '\n').replace(/\s+/g, ' ').trim().slice(0, 160) });
     }));
     tasks.sort((a, b) => a.i - b.i);
     return {
@@ -1187,6 +1207,14 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 }
 @media (max-width:340px){.lr-top-in{--lr-notelab:none}}
 @media (prefers-reduced-motion:reduce){.lr *{transition:none!important}}
+
+/* long task statements with light markup (formatQ in vaja.js): paragraphs, bold key words, short lists */
+.lr-main .lr-qf{white-space:normal;text-align:left}
+.lr-main .lr-qf p{margin:0 0 .6em}
+.lr-main .lr-qf ul{margin:.1em 0 .6em;padding-left:1.3em}
+.lr-main .lr-qf li{margin:.2em 0}
+.lr-main .lr-qf>:last-child{margin-bottom:0}
+.lr-main .lr-qf strong{font-weight:700}
 
 html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-tile);--line:var(--lr-line);--fg:var(--lr-ink);--muted:var(--lr-mut);
   --accent:var(--lr-acc);--accent-soft:var(--lr-acc-soft);--ok:var(--lr-ok);--ok-soft:var(--lr-ok-bg);--bad:var(--lr-bad);--bad-soft:var(--lr-bad-bg);
@@ -1792,7 +1820,7 @@ const T = [
  h:["Uporabi ostanek pri deljenju z 2.","Ker sta možnosti dve, uporabi if – else."],
  why:"14 % 2 je 0, zato se izpiše sodo. Pri -3 je ostanek -1, zato je pogoj n % 2 == 0 pravilna izbira (n % 2 == 1 bi za -3 dal napačen rezultat)."},
 {src:"M171/7", pts:2, lv:"B", type:"code", adapt:true,
- q:"Spremenljivkama x in y tipa double smo že določili neničelne vrednosti. Zapišite pogojne stavke, s katerimi izpišemo, v katerem kvadrantu se nahaja točka s koordinatama x in y. (Prirejeno: v kodi nastavi x = -2.5 in y = 3.0, izpiši samo številko kvadranta.)",
+ q:"Spremenljivkama **x** in **y** tipa double smo že določili neničelne vrednosti. Zapišite pogojne stavke, s katerimi izpišemo, v katerem **kvadrantu** se nahaja točka s koordinatama x in y.\n(Prirejeno: v kodi nastavi **x = -2.5** in **y = 3.0**, izpiši samo **številko kvadranta**.)",
  hideExp:true, expected:"2", starter:"public class Main {\n    public static void main(String[] args) {\n        double x = -2.5;\n        double y = 3.0;\n        // tvoja koda\n    }\n}",
  sol:"public class Main {\n    public static void main(String[] args) {\n        double x = -2.5;\n        double y = 3.0;\n        if (x > 0 && y > 0) System.out.println(1);\n        else if (x < 0 && y > 0) System.out.println(2);\n        else if (x < 0 && y < 0) System.out.println(3);\n        else System.out.println(4);\n    }\n}",
  h:["1. kvadrant: x > 0 in y > 0; kvadranti se štejejo v nasprotni smeri urinega kazalca.","Ker vrednosti nista 0, za zadnji primer zadošča else."],
@@ -1898,31 +1926,31 @@ const T = [
 
 /* ----- E: naloge za utrjevanje ----- */
 {lv:"E", own:true, pts:3, type:"code",
- q:"Sestavi program, ki ugotovi, ali se premici y1 = k1·x + n1 in y2 = k2·x + n2 sečeta. Možnosti so tri: premici sta vzporedni (se ne sečeta), se ujemata (neskončno skupnih točk) ali se sečeta v eni točki. V kodi nastavi k1 = 2, n1 = 1, k2 = -1, n2 = 4 (tip double). Izpiši »Premici sta vzporedni«, »Premici se ujemata« ali »Presek: (x, y)«.",
+ q:"Sestavi program, ki ugotovi, ali se **premici** y1 = k1·x + n1 in y2 = k2·x + n2 sečeta. Možnosti so tri:\n- premici sta **vzporedni** (se ne sečeta)\n- premici se **ujemata** (neskončno skupnih točk)\n- premici se **sečeta v eni točki**\nV kodi nastavi **k1 = 2, n1 = 1, k2 = -1, n2 = 4** (tip double).\nIzpiši »Premici sta vzporedni«, »Premici se ujemata« ali »Presek: (x, y)«.",
  hideExp:true, expected:"Presek: (1.0, 3.0)", starter:ST,
  sol:"public class Main {\n    public static void main(String[] args) {\n        double k1 = 2, n1 = 1, k2 = -1, n2 = 4;\n        if (k1 == k2) {\n            if (n1 == n2) System.out.println(\"Premici se ujemata\");\n            else System.out.println(\"Premici sta vzporedni\");\n        } else {\n            double x = (n2 - n1) / (k1 - k2);\n            double y = k1 * x + n1;\n            System.out.println(\"Presek: (\" + x + \", \" + y + \")\");\n        }\n    }\n}",
  h:["Premici z enakim naklonom k sta vzporedni ali se ujemata, odvisno od n.","Presek dobiš iz k1·x + n1 = k2·x + n2, torej x = (n2 − n1) / (k1 − k2)."],
  why:"k1 ≠ k2, zato se premici sečeta: x = (4 − 1) / (2 − (−1)) = 1, y = 2 · 1 + 1 = 3. Preizkusi še k2 = 2 z n2 = 1 (ujemata se) in z n2 = 5 (vzporedni)."},
 {lv:"E", own:true, pts:3, type:"code",
- q:"Določi, ali točka leži znotraj, zunaj ali na robu pravokotnika. Pravokotnik je podan z nasprotnima ogliščema (5, 4) in (1, 1), stranice so vzporedne koordinatnima osema. V kodi nastavi točko (5, 2). Izpiši »znotraj«, »zunaj« ali »na robu«.",
+ q:"Določi, ali točka leži **znotraj**, **zunaj** ali **na robu** pravokotnika. Pravokotnik je podan z nasprotnima ogliščema **(5, 4)** in **(1, 1)**, stranice so vzporedne koordinatnima osema.\nV kodi nastavi točko **(5, 2)**.\nIzpiši »znotraj«, »zunaj« ali »na robu«.",
  hideExp:true, expected:"na robu", starter:ST,
  sol:"public class Main {\n    public static void main(String[] args) {\n        int x1 = 5, y1 = 4, x2 = 1, y2 = 1;\n        int x = 5, y = 2;\n        int xmin = Math.min(x1, x2), xmax = Math.max(x1, x2);\n        int ymin = Math.min(y1, y2), ymax = Math.max(y1, y2);\n        if (x < xmin || x > xmax || y < ymin || y > ymax)\n            System.out.println(\"zunaj\");\n        else if (x == xmin || x == xmax || y == ymin || y == ymax)\n            System.out.println(\"na robu\");\n        else\n            System.out.println(\"znotraj\");\n    }\n}",
  h:["Oglišči nista nujno podani kot »spodaj levo« in »zgoraj desno«. Najprej določi manjši in večji x ter y.","Najprej izloči točke zunaj, nato preveri, ali točka leži na kateri od stranic."],
  why:"x leži med 1 in 5, y med 1 in 4, zato točka ni zunaj. Ker je x = 5 enak desni stranici, točka leži na robu. Preizkusi še (3, 2) (znotraj) in (6, 2) (zunaj)."},
 {lv:"E", own:true, pts:2, type:"code",
- q:"Sestavi program Interval: dani sta celi števili a = 7 in b = 2 ter realno število x = 4.5. Preveri, ali x leži na zaprtem intervalu, ki ga določata a in b (spodnja meja je manjše, zgornja večje število). Izpiši »4.5 je na intervalu [2, 7]« ali »4.5 ni na intervalu [2, 7]«. Manjše in večje število določi s stavkom if.",
+ q:"**Sestavi program Interval:** dani sta celi števili **a = 7** in **b = 2** ter realno število **x = 4.5**. Preveri, ali x leži na **zaprtem intervalu**, ki ga določata a in b (spodnja meja je manjše, zgornja večje število).\nIzpiši »4.5 je na intervalu [2, 7]« ali »4.5 ni na intervalu [2, 7]«.\nManjše in večje število določi s stavkom **if**.",
  hideExp:true, expected:"4.5 je na intervalu [2, 7]", starter:ST,
  sol:"public class Main {\n    public static void main(String[] args) {\n        int a = 7, b = 2;\n        double x = 4.5;\n        int sp, zg;\n        if (a < b) { sp = a; zg = b; }\n        else { sp = b; zg = a; }\n        if (x >= sp && x <= zg)\n            System.out.println(x + \" je na intervalu [\" + sp + \", \" + zg + \"]\");\n        else\n            System.out.println(x + \" ni na intervalu [\" + sp + \", \" + zg + \"]\");\n    }\n}",
  h:["Ker je a večji od b, je spodnja meja b.","Zaprt interval vključuje tudi meji, zato uporabi >= in <=."],
  why:"Spodnja meja je 2, zgornja 7. 4.5 je med njima, zato je na intervalu. Preizkusi še x = 2 (meja, še vedno na intervalu) in x = 7.5."},
 {lv:"E", own:true, pts:2, type:"code",
- q:"Sestavi program Kipci: Indiana Jones najde tri zlate kipce, vzame pa lahko le dva. Vrednosti kipcev so 120, 75 in 300. Izpiši, katera dva kipca se najbolj splača vzeti, v obliki »Vzemi kipca 1 in 3« (manjša številka najprej).",
+ q:"**Sestavi program Kipci:** Indiana Jones najde **tri zlate kipce**, vzame pa lahko le **dva**. Vrednosti kipcev so **120, 75 in 300**.\nIzpiši, katera dva kipca se najbolj splača vzeti, v obliki »Vzemi kipca 1 in 3« (manjša številka najprej).",
  hideExp:true, expected:"Vzemi kipca 1 in 3", starter:ST,
  sol:"public class Main {\n    public static void main(String[] args) {\n        int k1 = 120, k2 = 75, k3 = 300;\n        if (k1 <= k2 && k1 <= k3)\n            System.out.println(\"Vzemi kipca 2 in 3\");\n        else if (k2 <= k1 && k2 <= k3)\n            System.out.println(\"Vzemi kipca 1 in 3\");\n        else\n            System.out.println(\"Vzemi kipca 1 in 2\");\n    }\n}",
  h:["Namesto da iščeš dva največja, poišči najmanj vrednega.","Pusti kipec, ki je manjši ali enak obema ostalima."],
  why:"Najmanj vreden je kipec 2 (75), zato vzamemo kipca 1 in 3. Pogoj z <= poskrbi, da program deluje tudi pri enakih vrednostih."},
 {lv:"E", own:true, pts:3, type:"code",
- q:"Sestavi program Datum: dana sta letnica 2024 in zaporedna številka dneva v letu 61. Izpiši, kateri dan in mesec je to, v obliki »1. 3. 2024«. Upoštevaj prestopno leto. Pri tej nalogi ne uporabljaj zank in tabel.",
+ q:"**Sestavi program Datum:** dana sta letnica **2024** in zaporedna številka dneva v letu **61**.\nIzpiši, kateri dan in mesec je to, v obliki »1. 3. 2024«. Upoštevaj **prestopno leto**. Pri tej nalogi **ne uporabljaj zank in tabel**.",
  hideExp:true, expected:"1. 3. 2024", starter:ST,
  sol:"public class Main {\n    public static void main(String[] args) {\n        int leto = 2024, dan = 61;\n        boolean prestopno = (leto % 4 == 0 && leto % 100 != 0) || leto % 400 == 0;\n        int p = prestopno ? 1 : 0;\n        int m, d;\n        if (dan <= 31)            { m = 1;  d = dan; }\n        else if (dan <= 59 + p)   { m = 2;  d = dan - 31; }\n        else if (dan <= 90 + p)   { m = 3;  d = dan - 59 - p; }\n        else if (dan <= 120 + p)  { m = 4;  d = dan - 90 - p; }\n        else if (dan <= 151 + p)  { m = 5;  d = dan - 120 - p; }\n        else if (dan <= 181 + p)  { m = 6;  d = dan - 151 - p; }\n        else if (dan <= 212 + p)  { m = 7;  d = dan - 181 - p; }\n        else if (dan <= 243 + p)  { m = 8;  d = dan - 212 - p; }\n        else if (dan <= 273 + p)  { m = 9;  d = dan - 243 - p; }\n        else if (dan <= 304 + p)  { m = 10; d = dan - 273 - p; }\n        else if (dan <= 334 + p)  { m = 11; d = dan - 304 - p; }\n        else                      { m = 12; d = dan - 334 - p; }\n        System.out.println(d + \". \" + m + \". \" + leto);\n    }\n}",
  h:["Seštej dni mesecev: do konca januarja 31, do konca februarja 59 (v prestopnem letu 60), do konca marca 90 (91) …","Od februarja naprej vsem mejam prištej 1, če je leto prestopno."],
@@ -1946,13 +1974,13 @@ const T = [
  h:["April, junij, september in november imajo 30 dni, februar 28 ali 29, ostali 31.","Več oznak case lahko zapišeš eno za drugo: case 4: case 6: …"],
  why:"Leto 2024 je prestopno, zato ima februar 29 dni. Preizkusi še mesec = 2 z letom 1900 (28) in mesec = 11 (30)."},
 {lv:"E", own:true, pts:2, type:"code",
- q:"Napiši preprost kalkulator z operacijami +, -, * in /. V kodi nastavi a = 12.0, b = 4.0 in znak op = '/'. Izpiši »12.0 / 4.0 = 3.0«. Pri deljenju z nič izpiši »Deljenje z 0 ni mogoce«, pri neznanem znaku »Neznana operacija«.",
+ q:"Napiši preprost **kalkulator** z operacijami +, -, * in /. V kodi nastavi **a = 12.0**, **b = 4.0** in znak **op = '/'**.\nIzpiši »12.0 / 4.0 = 3.0«.\nPri **deljenju z nič** izpiši »Deljenje z 0 ni mogoce«, pri **neznanem znaku** »Neznana operacija«.",
  hideExp:true, expected:"12.0 / 4.0 = 3.0", starter:ST,
  sol:"public class Main {\n    public static void main(String[] args) {\n        double a = 12.0, b = 4.0;\n        char op = '/';\n        switch (op) {\n            case '+': System.out.println(a + \" + \" + b + \" = \" + (a + b)); break;\n            case '-': System.out.println(a + \" - \" + b + \" = \" + (a - b)); break;\n            case '*': System.out.println(a + \" * \" + b + \" = \" + (a * b)); break;\n            case '/':\n                if (b == 0) System.out.println(\"Deljenje z 0 ni mogoce\");\n                else System.out.println(a + \" / \" + b + \" = \" + (a / b));\n                break;\n            default: System.out.println(\"Neznana operacija\");\n        }\n    }\n}",
  h:["Uporabi switch na znaku op (tip char).","Vsoto pri izpisu zapiši v oklepaje: (a + b), sicer se števili zlepita v niz."],
  why:"12.0 / 4.0 = 3.0. Brez oklepajev bi pri + dobili »12.0 + 4.0 = 12.04.0«, ker se z nizom vse zlepi. Deljenje realnih števil z 0 ne sproži izjeme (dobimo Infinity), zato ga preverimo sami."},
 {lv:"E", own:true, pts:2, type:"code",
- q:"Napiši program, ki za dano leto pove, ali je prestopno. Leto je prestopno, če je deljivo s 400 ali če je deljivo s 4 in ni deljivo s 100. V kodi nastavi leto = 1900. Izpiši »1900 je prestopno leto« ali »1900 ni prestopno leto«.",
+ q:"Napiši program, ki za dano leto pove, ali je **prestopno**. Leto je prestopno, če je deljivo s **400** ali če je deljivo s **4** in ni deljivo s **100**.\nV kodi nastavi **leto = 1900**.\nIzpiši »1900 je prestopno leto« ali »1900 ni prestopno leto«.",
  hideExp:true, expected:"1900 ni prestopno leto", starter:ST,
  sol:"public class Main {\n    public static void main(String[] args) {\n        int leto = 1900;\n        if (leto % 400 == 0 || (leto % 4 == 0 && leto % 100 != 0))\n            System.out.println(leto + \" je prestopno leto\");\n        else\n            System.out.println(leto + \" ni prestopno leto\");\n    }\n}",
  h:["Pravilo zapiši z || in &&: deljivo s 400 ALI (deljivo s 4 IN ni deljivo s 100).","1900 je deljivo s 4 in s 100, ni pa deljivo s 400."],
@@ -2105,7 +2133,7 @@ function card(t){
   let body = "";
   if(t.code) body += `<pre class="code">${hl(t.code)}</pre>`;
   if(t.code && t.type!=="output") body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="code">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`;
-  body += `<p>${esc(t.q)}</p>`;
+  body += `<p class="qtext">${esc(t.q)}</p>`;
   if(t.snip) body += `<pre class="code">${hl(t.snip)}</pre>`;
   if(t.fcq) body += `<div class="fig">${FLOW.svg(t.fcq)}</div>`;
   if(t.type==="mc"){

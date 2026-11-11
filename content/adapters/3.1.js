@@ -2,6 +2,7 @@
 // answers typed as program output), one answer per task, two theory groups, and the matura revision set moved
 // among the graded sets as "Ponavljanje" (agreed 8. 11. 2026).
 
+import { statements, QTEXT } from './qformat.js';
 const ICONS = {
   jezik: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17 14L7 24l10 10M31 14l10 10-10 10"/><path d="M27 10l-6 28"/></svg>',
   orodja: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="6" width="40" height="36" rx="3"/><rect x="10" y="14" width="28" height="22" rx="2"/><rect x="16" y="21" width="16" height="10" rx="2" class="fill" opacity=".35"/></svg>',
@@ -95,5 +96,29 @@ function save(){ LavRac.saveUi(S); }`],
     ['applyFilter(); showPage(cur, true);\n}', 'applyFilter();\n}'],
     ['window.addEventListener("hashchange",()=>showPage(location.hash.slice(1)));', ''],
     ['cur = location.hash.slice(1) || "jezik";\nrenderAll();\nprogress();\nif(location.hash) setTimeout(()=>window.scrollTo(0,0), 0);', ZAGON],
+    // Long statements: paragraphs and bold key words (11. 11. 2026), the same way as in LAV-RAČ2 chapter 2.
+    QTEXT,
+    ...statements([
+      [
+        "Napisali smo program v programskem jeziku Java. Datoteka z napisanim programom ima končnico java. Programu v taki obliki pravimo (1) ___. S prevajalnikom prevedemo program in dobimo datoteko s končnico class. Programu v taki obliki pravimo (2) ___.",
+        "Napisali smo program v programskem jeziku Java. Datoteka z napisanim programom ima končnico **java**. Programu v taki obliki pravimo (1) ___.\nS **prevajalnikom** prevedemo program in dobimo datoteko s končnico **class**. Programu v taki obliki pravimo (2) ___.",
+      ],
+      [
+        "V urejevalniku imamo zapisano programsko kodo (zgoraj). Zapišite ukaz, s katerim prevedemo program v vmesno kodo, in ime ter končnico dobljene datoteke.",
+        "V urejevalniku imamo zapisano programsko kodo (zgoraj).\nZapišite **ukaz**, s katerim prevedemo program v vmesno kodo, in **ime ter končnico** dobljene datoteke.",
+      ],
+      [
+        "V urejevalniku je zapisan javanski program (zgoraj). Zapišite ime in končnico datoteke, v katero je treba shraniti program, in ukaz, s katerim iz konzole prevedemo program v vmesno kodo.",
+        "V urejevalniku je zapisan javanski program (zgoraj).\nZapišite **ime in končnico datoteke**, v katero je treba shraniti program, in **ukaz**, s katerim iz konzole prevedemo program v vmesno kodo.",
+      ],
+      [
+        "V mapi C:\\vaje je samo datoteka Pozdrav.java. Zapiši ukaz za prevajanje, ukaz za zagon in imena VSEH datotek, ki so v mapi po prevajanju (ločene z vejico).",
+        "V mapi **C:\\vaje** je samo datoteka **Pozdrav.java**. Zapiši:\n- **ukaz za prevajanje**\n- **ukaz za zagon**\n- imena **VSEH datotek**, ki so v mapi po prevajanju (ločene z vejico)",
+      ],
+      [
+        "Pri prevajanju prevajalnik javi napake: Syntax error, insert \";\" to complete Statement (line 5); x cannot be resolved to a variable (line 9); x cannot be resolved to a variable (line 10). Napake lahko odpravimo, če pravilno dopolnimo vrstici 5 in 9. Napišite celotni dopolnjeni vrstici. (Številke vrstic niso del kode.)",
+        "Pri prevajanju prevajalnik javi napake:\n- Syntax error, insert \";\" to complete Statement (line 5)\n- x cannot be resolved to a variable (line 9)\n- x cannot be resolved to a variable (line 10)\nNapake lahko odpravimo, če pravilno dopolnimo **vrstici 5 in 9**. Napišite **celotni dopolnjeni vrstici**. (Številke vrstic niso del kode.)",
+      ],
+    ]),
   ],
 };

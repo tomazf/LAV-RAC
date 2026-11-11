@@ -2,6 +2,7 @@
 // answers typed as program output), one answer per task, three theory groups, the operator set split in two (E and F)
 // with the matura revision set moved after it as "Ponavljanje" (agreed 8. 11. 2026), and no mention of laboratory exercises.
 
+import { statements, QTEXT } from './qformat.js';
 const ICONS = {
   tipi: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="8" width="12" height="8" rx="1.5"/><rect x="6" y="20" width="24" height="8" rx="1.5"/><rect x="6" y="32" width="36" height="8" rx="1.5" class="fill" opacity=".35"/></svg>',
   znaki: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M5 36L15 10l10 26M9.5 27h11"/><circle cx="35" cy="30" r="5"/><path d="M40 25v11"/></svg>',
@@ -149,5 +150,21 @@ S = LavRac.loadUi();`],
 }));
 `, ''],
     ['paintLang(); fillFigs();\nrenderAll();\nprogress();\nif(location.hash) setTimeout(()=>window.scrollTo(0,0), 0);', ZAGON],
+    // Long statements: paragraphs and bold key words (11. 11. 2026), the same way as in LAV-RAČ2 chapter 2.
+    QTEXT,
+    ...statements([
+      [
+        "Program Stirimestno: napiši program, ki za število 1234 zamenja prvo in zadnjo števko, drugo in tretjo pa kvadrira in ohrani samo enice kvadrata. Izpiši dobljeno število.",
+        "**Program Stirimestno:** napiši program, ki za število **1234**:\n- **zamenja** prvo in zadnjo števko\n- drugo in tretjo števko **kvadrira** in ohrani samo **enice kvadrata**\nIzpiši dobljeno število.",
+      ],
+      [
+        "Program Zlitje: za trimestni števili 123 in 456 sestavi šestmestno število. Prva števka naj bo stotica prvega, druga stotica drugega, tretja in četrta desetici obeh, peta in šesta enici obeh. Izpiši rezultat.",
+        "**Program Zlitje:** za trimestni števili **123** in **456** sestavi **šestmestno število**:\n- **prva** števka naj bo stotica prvega\n- **druga** stotica drugega\n- **tretja in četrta** desetici obeh\n- **peta in šesta** enici obeh\nIzpiši rezultat.",
+      ],
+      [
+        "V programu je x celoštevilska spremenljivka. Za vsakega izmed navedenih logičnih izrazov zapiši enakovreden logični izraz, pri čemer ne smeš uporabiti negacije.",
+        "V programu je **x** celoštevilska spremenljivka.\nZa vsakega izmed navedenih logičnih izrazov zapiši **enakovreden** logični izraz, pri čemer **ne smeš uporabiti negacije**.",
+      ],
+    ]),
   ],
 };

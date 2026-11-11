@@ -1019,7 +1019,7 @@
      "level": "srednja",
      "max": 2,
      "section": "Zapis funkcij",
-     "q": "Vrata se odprejo (Q = 1), če je pritisnjena tipka A ali tipka B in sistem ni zaklenjen (C = 1 pomeni zaklenjen). Zapiši Q."
+     "q": "Vrata se odprejo (Q = 1), če je pritisnjena vsaj ena od tipk, A ali B, in hkrati sistem ni zaklenjen (C = 1 pomeni zaklenjen). Zapiši Q."
     },
     {
      "i": 22,
@@ -1208,7 +1208,7 @@
      "level": "težja",
      "max": 3,
      "section": "Veitchev diagram",
-     "q": "Prezračevanje strojnice. Vhodi: A = temperatura je previsoka, B = zaznan je plin, C = vrata strojnice so odprta, D = vklopljen je ročni preklic. Izhoda: Q1 = ve"
+     "q": "Prezračevanje strojnice. Vezje ima štiri vhode in dva izhoda. Vhodi (1 = da): A: temperatura je previsoka B: zaznan je plin C: vrata strojnice so odprta D: vklo"
     },
     {
      "i": 49,
@@ -1222,14 +1222,14 @@
      "level": "težja",
      "max": 3,
      "section": "Veitchev diagram",
-     "q": "Sirena iz iste strojnice: funkcija Q2 je vpisana v diagram. Označi skupine enic in zapiši minimalno PDNO. Zapiši vsoto produktov (PDNO)."
+     "q": "Sirena iz iste strojnice: funkcija Q2 je vpisana v diagram. Označi skupine enic in zapiši minimalno PDNO (vsoto produktov)."
     },
     {
      "i": 51,
      "level": "težja",
      "max": 3,
      "section": "Veitchev diagram",
-     "q": "Signalna lučka L ima štiri vhode A, B, C, D in sveti v vrsticah 0, 4, 5, 7, 8 in 12 pravilnostne tabele (Q = 1). Funkcija je vpisana v diagram. Označi skupine e"
+     "q": "Signalna lučka L ima štiri vhode A, B, C, D in sveti (Q = 1) v vrsticah 0, 4, 5, 7, 8 in 12 pravilnostne tabele. Funkcija je vpisana v diagram. Označi skupine e"
     },
     {
      "i": 52,
@@ -1264,14 +1264,14 @@
      "level": "srednja",
      "max": 2,
      "section": "De Morgan, NAND in NOR",
-     "q": "Zapiši ¬A samo z vrati NEIN. Vrata NEIN zapišemo kot negacijo produkta dveh vhodov, vhoda lahko združiš."
+     "q": "Zapiši ¬A samo z vrati NEIN. Vrata NEIN zapišemo kot negacijo produkta dveh vhodov; vhoda lahko združiš."
     },
     {
      "i": 57,
      "level": "srednja",
      "max": 2,
      "section": "De Morgan, NAND in NOR",
-     "q": "Zapiši A·B samo z vrati NEIN (dovoljeno: spremenljivke, negacija in produkt · samo neposredno pod negacijo. Uporabi največ dve vrati."
+     "q": "Zapiši A·B samo z vrati NEIN. Dovoljeno: spremenljivke, negacija in produkt (·), a produkt samo neposredno pod negacijo. Uporabi največ dve vrati."
     },
     {
      "i": 58,
@@ -1285,14 +1285,14 @@
      "level": "srednja",
      "max": 2,
      "section": "De Morgan, NAND in NOR",
-     "q": "Zapiši A + B samo z vrati NEALI (dovoljeno: spremenljivke, negacija in vsota + samo neposredno pod negacijo. Uporabi največ dve vrati."
+     "q": "Zapiši A + B samo z vrati NEALI. Dovoljeno: spremenljivke, negacija in vsota (+), a vsota samo neposredno pod negacijo. Uporabi največ dve vrati."
     },
     {
      "i": 60,
      "level": "srednja",
      "max": 2,
      "section": "De Morgan, NAND in NOR",
-     "q": "Zapiši A·B samo z vrati NEALI (dovoljeno: spremenljivke, negacija in vsota + samo neposredno pod negacijo). Uporabi največ tri vrata."
+     "q": "Zapiši A·B samo z vrati NEALI. Dovoljeno: spremenljivke, negacija in vsota (+), a vsota samo neposredno pod negacijo. Uporabi največ tri vrata."
     },
     {
      "i": 61,
@@ -1334,14 +1334,14 @@
      "level": "težja",
      "max": 3,
      "section": "De Morgan, NAND in NOR",
-     "q": "Zapiši A⊕B samo z vrati NEIN (znana rešitev uporablja štiri vrata, ker enak podizraz X = ¬(A·B) uporabiš dvakrat). Dovoljeno je poljubno število vrat."
+     "q": "Zapiši A⊕B samo z vrati NEIN. Znana rešitev uporablja štiri vrata, ker enak podizraz X = ¬(A·B) uporabiš dvakrat. Dovoljeno je poljubno število vrat."
     },
     {
      "i": 67,
      "level": "srednja",
      "max": 2,
      "section": "De Morgan, NAND in NOR",
-     "q": "Funkcijo Q = A·B + C·D realiziraš z vrati IN in ALI (čipi 7408 z 4×IN in 7432 z 4×ALI, tri vrata) ali samo z vrati NEIN (čip 7400 s 4×NEIN, tri vrata). Koliko č"
+     "q": "Funkcijo Q = A·B + C·D realiziraš na dva načina: z vrati IN in ALI (čip 7408 s 4×IN in čip 7432 s 4×ALI; skupaj tri vrata), samo z vrati NEIN (čip 7400 s 4×NEIN"
     },
     {
      "i": 68,
@@ -1446,7 +1446,7 @@
      "level": "težja",
      "max": 3,
      "section": "Seštevalnik in odštevalnik",
-     "q": "Polni odštevalnik izračuna A − B − Bin (v tabeli je Bin stolpec C). Izhoda sta D (razlika) in Bout (izposoja). Izposoja je 1, kadar je A manjši od B + Bin. Dopo"
+     "q": "Polni odštevalnik izračuna A − B − Bin (v tabeli je Bin stolpec C). Izhoda: D (razlika) in Bout (izposoja). Izposoja je 1, kadar je A manjši od B + Bin. Dopolni"
     },
     {
      "i": 83,
@@ -1460,7 +1460,7 @@
      "level": "srednja",
      "max": 2,
      "section": "Seštevalnik in odštevalnik",
-     "q": "Prenos Cout polnega seštevalnika sestavljata dva polovična seštevalnika in vrata ALI. Prvi sešteje A in B (S1 = A⊕B, C1 = A·B), drugi S1 in Cin (v nalogi C). Za"
+     "q": "Prenos Cout polnega seštevalnika sestavljata dva polovična seštevalnika in vrata ALI. prvi sešteje A in B (S1 = A⊕B, C1 = A·B), drugi sešteje S1 in Cin (v nalog"
     }
    ],
    "pages": [
@@ -1670,7 +1670,7 @@
      "level": "težja",
      "max": 3,
      "section": "Podatki in števila",
-     "q": "Za preverjanje pravilnosti prenosa izračunaj sodo pariteto: paritetni bit za vsako vrstico (desni stolpec, od zgoraj navzdol), paritetni bit za vsak stolpec (sp"
+     "q": "Za preverjanje pravilnosti prenosa izračunaj sodo pariteto: paritetni bit za vsako vrstico (desni stolpec, od zgoraj navzdol) paritetni bit za vsak stolpec (spo"
     },
     {
      "i": 15,
@@ -1908,7 +1908,7 @@
      "level": "srednja",
      "max": 2,
      "section": "Ukaz in naslavljanje",
-     "q": "Program se začne na naslovu $0100. Ukazi so po vrsti dolgi: LDAA #$0A (2 bajta), ADDA $20 (2 bajta), LDX #$0030 (3 bajti), WAI (1 bajt). Kakšen je PC, ko CPE pr"
+     "q": "Program se začne na naslovu $0100. Ukazi so po vrsti dolgi: LDAA #$0A (2 bajta) ADDA $20 (2 bajta) LDX #$0030 (3 bajti) WAI (1 bajt) Kakšen je PC, ko CPE prevze"
     },
     {
      "i": 49,
@@ -1978,7 +1978,7 @@
      "level": "težja",
      "max": 3,
      "section": "Zbirnik in sklad",
-     "q": "Sklad raste proti nižjim naslovom: ukaz PSH zapiše podatek na naslov SP in nato SP zmanjša, ukaz PUL najprej SP poveča in nato prebere podatek. Na kateri naslov"
+     "q": "Sklad raste proti nižjim naslovom: ukaz PSH zapiše podatek na naslov SP in nato SP zmanjša ukaz PUL najprej SP poveča in nato prebere podatek Na kateri naslov s"
     },
     {
      "i": 59,
@@ -2815,7 +2815,7 @@
      "level": "težja",
      "max": 3,
      "section": "Prevajanje in zagon programa",
-     "q": "V mapi C:\\vaje je samo datoteka Pozdrav.java. Zapiši ukaz za prevajanje, ukaz za zagon in imena VSEH datotek, ki so v mapi po prevajanju (ločene z vejico)."
+     "q": "V mapi C:\\vaje je samo datoteka Pozdrav.java. Zapiši: ukaz za prevajanje ukaz za zagon imena VSEH datotek, ki so v mapi po prevajanju (ločene z vejico)"
     },
     {
      "i": 29,
@@ -2921,7 +2921,7 @@
      "level": "srednja",
      "max": 2,
      "section": "Sintaksa, semantika in napake",
-     "q": "Pri prevajanju prevajalnik javi napake: Syntax error, insert \";\" to complete Statement (line 5); x cannot be resolved to a variable (line 9); x cannot be resolv"
+     "q": "Pri prevajanju prevajalnik javi napake: Syntax error, insert \";\" to complete Statement (line 5) x cannot be resolved to a variable (line 9) x cannot be resolved"
     },
     {
      "i": 44,
@@ -3247,7 +3247,7 @@
      "level": "srednja",
      "max": 2,
      "section": "Sled algoritma",
-     "q": "Bloki so oštevilčeni od zgoraj navzdol: 1 je i = 1, 2 je pogoj i <= 3, 3 je izpis vrednosti i, 4 je i = i + 1. Zapiši zaporedje blokov, ki se izvedejo (številke"
+     "q": "Bloki so oštevilčeni od zgoraj navzdol: 1: i = 1 2: pogoj i <= 3 3: izpis vrednosti i 4: i = i + 1 Zapiši zaporedje blokov, ki se izvedejo (številke ločene s pr"
     },
     {
      "i": 25,
@@ -3569,7 +3569,7 @@
      "level": "srednja",
      "max": 2,
      "section": "Struktura programa in komentarji",
-     "q": "Dopolni najmanjši program v Javi: manjkajoče dele vpiši kar v kodo. Vrzeli so po vrsti od zgoraj navzdol: 1. ključna beseda, ki uvede razred, 2. ime metode, v k"
+     "q": "Dopolni najmanjši program v Javi: manjkajoče dele vpiši kar v kodo. Vrzeli so po vrsti od zgoraj navzdol: 1. ključna beseda, ki uvede razred 2. ime metode, v ka"
     },
     {
      "i": 1,
@@ -3674,7 +3674,7 @@
      "level": "srednja",
      "max": 2,
      "section": "Spremenljivke in primitivni tipi",
-     "q": "Vsakemu pojmu ustreza natanko en opis. Opisi: - A – ime spremenljivke - B – znakovna vrednost - C – celoštevilska vrednost - D – poljuben podatkovni tip - E – n"
+     "q": "Vsakemu pojmu ustreza natanko en opis. Opisi: A – ime spremenljivke B – znakovna vrednost C – celoštevilska vrednost D – poljuben podatkovni tip E – niz F – klj"
     },
     {
      "i": 16,
@@ -4445,7 +4445,7 @@
      "max": 0,
      "self": true,
      "section": "Računanje s programi in logični izrazi",
-     "q": "Program Stirimestno: napiši program, ki za število 1234 zamenja prvo in zadnjo števko, drugo in tretjo pa kvadrira in ohrani samo enice kvadrata. Izpiši dobljen"
+     "q": "Program Stirimestno: napiši program, ki za število 1234: zamenja prvo in zadnjo števko drugo in tretjo števko kvadrira in ohrani samo enice kvadrata Izpiši dobl"
     },
     {
      "i": 56,
@@ -4453,7 +4453,7 @@
      "max": 0,
      "self": true,
      "section": "Računanje s programi in logični izrazi",
-     "q": "Program Zlitje: za trimestni števili 123 in 456 sestavi šestmestno število. Prva števka naj bo stotica prvega, druga stotica drugega, tretja in četrta desetici "
+     "q": "Program Zlitje: za trimestni števili 123 in 456 sestavi šestmestno število: prva števka naj bo stotica prvega druga stotica drugega tretja in četrta desetici ob"
     },
     {
      "i": 57,
@@ -4952,7 +4952,7 @@
      "max": 0,
      "self": true,
      "section": "Naloge za utrjevanje",
-     "q": "Sestavi program, ki ugotovi, ali se premici y1 = k1·x + n1 in y2 = k2·x + n2 sečeta. Možnosti so tri: premici sta vzporedni (se ne sečeta), se ujemata (neskončn"
+     "q": "Sestavi program, ki ugotovi, ali se premici y1 = k1·x + n1 in y2 = k2·x + n2 sečeta. Možnosti so tri: premici sta vzporedni (se ne sečeta) premici se ujemata (n"
     },
     {
      "i": 37,
@@ -5361,28 +5361,28 @@
      "level": "lažja",
      "max": 1,
      "section": "Vaje · knjižnica",
-     "q": "Katera operacija iz relacije izbere **vrstice**, ki izpolnjujejo pogoj?"
+     "q": "Katera operacija iz relacije izbere vrstice, ki izpolnjujejo pogoj?"
     },
     {
      "i": 31,
      "level": "lažja",
      "max": 1,
      "section": "Vaje · knjižnica",
-     "q": "Katera operacija iz relacije izbere **stolpce**?"
+     "q": "Katera operacija iz relacije izbere stolpce?"
     },
     {
      "i": 32,
      "level": "lažja",
      "max": 1,
      "section": "Vaje · knjižnica",
-     "q": "Projekcija lahko vrne **manj vrstic**, kot jih ima vhodna relacija."
+     "q": "Projekcija lahko vrne manj vrstic, kot jih ima vhodna relacija."
     },
     {
      "i": 33,
      "level": "lažja",
      "max": 1,
      "section": "Vaje · knjižnica",
-     "q": "Selekcija lahko spremeni **število stolpcev** relacije."
+     "q": "Selekcija lahko spremeni število stolpcev relacije."
     },
     {
      "i": 34,
@@ -5403,7 +5403,7 @@
      "level": "lažja",
      "max": 1,
      "section": "Vaje · knjižnica",
-     "q": "Unijo, presek in razliko lahko naredimo le nad relacijama, ki imata **enake atribute**."
+     "q": "Unijo, presek in razliko lahko naredimo le nad relacijama, ki imata enake atribute."
     },
     {
      "i": 37,
@@ -5424,7 +5424,7 @@
      "level": "lažja",
      "max": 1,
      "section": "Vaje · knjižnica",
-     "q": "Kateri izraz **ni** veljaven?"
+     "q": "Kateri izraz ni veljaven?"
     },
     {
      "i": 40,
@@ -5438,14 +5438,14 @@
      "level": "lažja",
      "max": 1,
      "section": "Vaje · knjižnica",
-     "q": "Naravni stik dveh relacij, ki **nimata skupnih atributov**, je enak njunemu kartezičnemu produktu."
+     "q": "Naravni stik dveh relacij, ki nimata skupnih atributov, je enak njunemu kartezičnemu produktu."
     },
     {
      "i": 42,
      "level": "lažja",
      "max": 1,
      "section": "Vaje · knjižnica",
-     "q": "Vsi podatki o članih, ki živijo v **Mariboru**."
+     "q": "Vsi podatki o članih, ki živijo v Mariboru."
     },
     {
      "i": 43,
@@ -5459,91 +5459,91 @@
      "level": "srednja",
      "max": 2,
      "section": "Vaje · knjižnica",
-     "q": "Ime in priimek članov, ki so **starejši od 16** let."
+     "q": "Ime in priimek članov, ki so starejši od 16 let."
     },
     {
      "i": 45,
      "level": "srednja",
      "max": 2,
      "section": "Vaje · knjižnica",
-     "q": "Naslov in avtor knjig, izdanih **po letu 1950**."
+     "q": "Naslov in avtor knjig, izdanih po letu 1950."
     },
     {
      "i": 46,
      "level": "lažja",
      "max": 1,
      "section": "Vaje · knjižnica",
-     "q": "Vsi podatki o knjigah žanra **fantazija**, izdanih **pred letom 1990**."
+     "q": "Vsi podatki o knjigah žanra fantazija, izdanih pred letom 1990."
     },
     {
      "i": 47,
      "level": "srednja",
      "max": 2,
      "section": "Vaje · knjižnica",
-     "q": "Imena članov, ki živijo v **Ljubljani ali Celju**."
+     "q": "Imena članov, ki živijo v Ljubljani ali Celju."
     },
     {
      "i": 48,
      "level": "srednja",
      "max": 2,
      "section": "Vaje · knjižnica",
-     "q": "CID članov, ki so si izposodili knjigo **K3**."
+     "q": "CID članov, ki so si izposodili knjigo K3."
     },
     {
      "i": 49,
      "level": "srednja",
      "max": 2,
      "section": "Vaje · knjižnica",
-     "q": "Naslovi knjig, ki so bile izposojene v **septembru** (Mesec = 9)."
+     "q": "Naslovi knjig, ki so bile izposojene v septembru (Mesec = 9)."
     },
     {
      "i": 50,
      "level": "srednja",
      "max": 2,
      "section": "Vaje · knjižnica",
-     "q": "Imena članov, ki so si izposodili knjigo **Hobit**."
+     "q": "Imena članov, ki so si izposodili knjigo Hobit."
     },
     {
      "i": 51,
      "level": "srednja",
      "max": 2,
      "section": "Vaje · knjižnica",
-     "q": "Imena članov **iz Ljubljane**, ki so si izposodili knjigo žanra **fantazija**."
+     "q": "Imena članov iz Ljubljane, ki so si izposodili knjigo žanra fantazija."
     },
     {
      "i": 52,
      "level": "lažja",
      "max": 1,
      "section": "Vaje · knjižnica",
-     "q": "CID in Ime članov, ki obiskujejo **vsaj enega** od krožkov (debata, gledališče)."
+     "q": "CID in Ime članov, ki obiskujejo vsaj enega od krožkov (debata, gledališče)."
     },
     {
      "i": 53,
      "level": "lažja",
      "max": 1,
      "section": "Vaje · knjižnica",
-     "q": "CID in Ime članov, ki obiskujejo **oba** krožka."
+     "q": "CID in Ime članov, ki obiskujejo oba krožka."
     },
     {
      "i": 54,
      "level": "srednja",
      "max": 2,
      "section": "Vaje · knjižnica",
-     "q": "CID članov, ki si **niso izposodili nobene** knjige."
+     "q": "CID članov, ki si niso izposodili nobene knjige."
     },
     {
      "i": 55,
      "level": "srednja",
      "max": 2,
      "section": "Vaje · knjižnica",
-     "q": "Naslovi knjig, ki si jih **ni izposodil nihče**."
+     "q": "Naslovi knjig, ki si jih ni izposodil nihče."
     },
     {
      "i": 56,
      "level": "težja",
      "max": 3,
      "section": "Vaje · knjižnica",
-     "q": "Naslovi knjig, ki sta si jih izposodili **tako Maja (CID 1) kot Zala (CID 3)**."
+     "q": "Naslovi knjig, ki sta si jih izposodili tako Maja (CID 1) kot Zala (CID 3)."
     },
     {
      "i": 57,
@@ -5564,35 +5564,35 @@
      "level": "težja",
      "max": 3,
      "section": "Vaje · knjižnica",
-     "q": "**Izziv:** imena članov, ki so si knjigo izposodili v **oktobru** (10), v **septembru** (9) pa nobene."
+     "q": "Izziv: imena članov, ki so si knjigo izposodili v oktobru (10), v septembru (9) pa nobene."
     },
     {
      "i": 60,
      "level": "lažja",
      "max": 1,
      "section": "Dodatne vaje · knjižnica",
-     "q": "Vsi podatki o članih, ki so **mlajši od 17** let."
+     "q": "Vsi podatki o članih, ki so mlajši od 17 let."
     },
     {
      "i": 61,
      "level": "srednja",
      "max": 2,
      "section": "Dodatne vaje · knjižnica",
-     "q": "Avtorji knjig žanra **mladinski**."
+     "q": "Avtorji knjig žanra mladinski."
     },
     {
      "i": 62,
      "level": "srednja",
      "max": 2,
      "section": "Dodatne vaje · knjižnica",
-     "q": "Ime, priimek in kraj članov, ki **ne živijo v Ljubljani**."
+     "q": "Ime, priimek in kraj članov, ki ne živijo v Ljubljani."
     },
     {
      "i": 63,
      "level": "srednja",
      "max": 2,
      "section": "Dodatne vaje · knjižnica",
-     "q": "KID knjig, ki so bile izposojene v **oktobru** (Mesec = 10)."
+     "q": "KID knjig, ki so bile izposojene v oktobru (Mesec = 10)."
     },
     {
      "i": 64,
@@ -5606,21 +5606,21 @@
      "level": "srednja",
      "max": 2,
      "section": "Dodatne vaje · knjižnica",
-     "q": "Naslovi knjig, ki si jih je izposodil **Tim**."
+     "q": "Naslovi knjig, ki si jih je izposodil Tim."
     },
     {
      "i": 66,
      "level": "srednja",
      "max": 2,
      "section": "Dodatne vaje · knjižnica",
-     "q": "Ime in kraj članov, ki so si izposodili knjigo, izdano **pred letom 1920**."
+     "q": "Ime in kraj članov, ki so si izposodili knjigo, izdano pred letom 1920."
     },
     {
      "i": 67,
      "level": "srednja",
      "max": 2,
      "section": "Dodatne vaje · knjižnica",
-     "q": "Žanri knjig, ki so bile izposojene v **septembru** (Mesec = 9)."
+     "q": "Žanri knjig, ki so bile izposojene v septembru (Mesec = 9)."
     },
     {
      "i": 68,
@@ -5634,42 +5634,42 @@
      "level": "srednja",
      "max": 2,
      "section": "Dodatne vaje · knjižnica",
-     "q": "Imena članov, ki obiskujejo **gledališki** krožek, **debatnega pa ne**."
+     "q": "Imena članov, ki obiskujejo gledališki krožek, debatnega pa ne."
     },
     {
      "i": 70,
      "level": "težja",
      "max": 3,
      "section": "Dodatne vaje · knjižnica",
-     "q": "Ime in priimek članov, ki obiskujejo **gledališki** krožek in so si izposodili **vsaj eno** knjigo."
+     "q": "Ime in priimek članov, ki obiskujejo gledališki krožek in so si izposodili vsaj eno knjigo."
     },
     {
      "i": 71,
      "level": "lažja",
      "max": 1,
      "section": "Dodatne vaje · knjižnica",
-     "q": "Kateri izraz vrne imena članov, ki si **niso izposodili nobene** knjige?"
+     "q": "Kateri izraz vrne imena članov, ki si niso izposodili nobene knjige?"
     },
     {
      "i": 72,
      "level": "srednja",
      "max": 2,
      "section": "Dodatne vaje · knjižnica",
-     "q": "Naslovi knjig, ki si jih je izposodil kdo **iz Maribora**."
+     "q": "Naslovi knjig, ki si jih je izposodil kdo iz Maribora."
     },
     {
      "i": 73,
      "level": "lažja",
      "max": 1,
      "section": "Dodatne vaje · knjižnica",
-     "q": "Izraz `π[Ime](Clan ⋈ Izposoja)` vrne imena **vseh 7** članov."
+     "q": "Izraz `π[Ime](Clan ⋈ Izposoja)` vrne imena vseh 7 članov."
     },
     {
      "i": 74,
      "level": "težja",
      "max": 3,
      "section": "Dodatne vaje · knjižnica",
-     "q": "**Izziv:** naslovi knjig, ki si jih **ni izposodil nihče iz Maribora**."
+     "q": "Izziv: naslovi knjig, ki si jih ni izposodil nihče iz Maribora."
     },
     {
      "i": 75,

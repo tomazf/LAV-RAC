@@ -13,5 +13,5 @@ Portal z laboratorijskimi vajami iz računalništva za 2., 3. in 4. letnik Tehni
 - Razrede in vloge učiteljev določa samo skrbnik. Učitelj se razredu pridruži sam, izpisa ni.
 - Seznami oseb so v slovenski abecedi (`byName`, `bySurname` v `src/format.js`), ne po vrstnem redu baze.
 - Brisanje uporabnika je trajno in ostane tudi po obnovi kopije (`erased_users`).
-- Sprememba, ki jo vidi uporabnik, dobi preizkus. Preden se kaj objavi: `npm test` (potrebuje `TEST_DATABASE_URL`, ki se izbriše, in `pg_dump` iste različice kot baza).
+- Sprememba, ki jo vidi uporabnik, dobi preizkus. Pred objavo se poženejo preizkusi, ki jih sprememba zadeva (`node --test --test-name-pattern='…' test/content.test.js`). Celoten `npm test` (potrebuje `TEST_DATABASE_URL`, ki se izbriše, in `pg_dump` iste različice kot baza) je obvezen, kadar se spremeni skupna koda (`src/`, `content/shell/`, `content/portal.json`, skupni izgled) ali se vaja ali del doda ali odstrani. Pri spremembi vsebine ene vaje (vir, adapter) ga ob objavi požene CI; rezultat se pogleda po objavi, brez čakanja.
 - Ko je pri delu na čem treba odločiti, kar ni zapisano, najprej poročaj, nato spreminjaj. Nov dogovor se zapiše v `docs/NACRT_PORTALA.md`.

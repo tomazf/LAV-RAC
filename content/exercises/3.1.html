@@ -403,8 +403,28 @@
     s.page.append(head, locked, body, buildPager(s));
     if (s.el) s.el.remove();
   }
+  // Long task statements can carry light markup: **bold** words, one paragraph per line, lines starting with "- " as a list.
+  // Only statements that contain ** are rebuilt; the markers are not part of the text the importer stores.
+  function formatQ(q) {
+    if (q.children.length || !/\*\*/.test(q.textContent)) return;
+    const box = h('div', { class: q.className + ' lr-qf' });
+    const inline = (parent, text) => text.split(/\*\*(.+?)\*\*/).forEach((part, j) => { if (part) parent.append(j % 2 ? h('strong', null, part) : part); });
+    let ul = null;
+    q.textContent.split('\n').map((l) => l.trim()).filter(Boolean).forEach((line) => {
+      if (/^- /.test(line)) {
+        if (!ul) { ul = h('ul'); box.append(ul); }
+        const li = h('li'); inline(li, line.slice(2)); ul.append(li);
+        return;
+      }
+      ul = null;
+      const p = h('p'); inline(p, line); box.append(p);
+    });
+    q.replaceWith(box);
+  }
+
   function prepareCard(card, i, k, n, sel) {
     const task = TASKS[i].task;
+    card.querySelectorAll('.qtext').forEach(formatQ);
     card.hidden = false;
     card.id = 't' + i;
     card.classList.add('lr-task');
@@ -731,7 +751,7 @@
     const tasks = [];
     pages.filter((p) => p.kind === 'set').forEach((s) => s.tasks.forEach((t) => {
       const src = TASKS[t.idx].task;
-      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
+      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\*\*/g, '').replace(/\n- /g, '\n').replace(/\s+/g, ' ').trim().slice(0, 160) });
     }));
     tasks.sort((a, b) => a.i - b.i);
     return {
@@ -1174,6 +1194,14 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 @media (max-width:340px){.lr-top-in{--lr-notelab:none}}
 @media (prefers-reduced-motion:reduce){.lr *{transition:none!important}}
 
+/* long task statements with light markup (formatQ in vaja.js): paragraphs, bold key words, short lists */
+.lr-main .lr-qf{white-space:normal;text-align:left}
+.lr-main .lr-qf p{margin:0 0 .6em}
+.lr-main .lr-qf ul{margin:.1em 0 .6em;padding-left:1.3em}
+.lr-main .lr-qf li{margin:.2em 0}
+.lr-main .lr-qf>:last-child{margin-bottom:0}
+.lr-main .lr-qf strong{font-weight:700}
+
 html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-tile);--line:var(--lr-line);--fg:var(--lr-ink);--muted:var(--lr-mut);
   --accent:var(--lr-acc);--accent-soft:var(--lr-acc-soft);--ok:var(--lr-ok);--ok-soft:var(--lr-ok-bg);--bad:var(--lr-bad);--bad-soft:var(--lr-bad-bg);
   --seen:var(--lr-seen);--seen-soft:var(--lr-seen-bg);--f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}
@@ -1547,7 +1575,7 @@ const T = [
  h:["Isto ime kot ključna beseda, s katero začnemo razred."],
  why:"Končnica je .class. Iz Pozdrav.java nastane Pozdrav.class."},
 {lv:"A", src:"M181/3", pts:2, type:"blanks",
- q:"Napisali smo program v programskem jeziku Java. Datoteka z napisanim programom ima končnico java. Programu v taki obliki pravimo (1) ___. S prevajalnikom prevedemo program in dobimo datoteko s končnico class. Programu v taki obliki pravimo (2) ___.",
+ q:"Napisali smo program v programskem jeziku Java. Datoteka z napisanim programom ima končnico **java**. Programu v taki obliki pravimo (1) ___.\nS **prevajalnikom** prevedemo program in dobimo datoteko s končnico **class**. Programu v taki obliki pravimo (2) ___.",
  b:[{l:"(1)", acc:["izvorna koda","izvorni program","izvorna","izvorna koda programa","source code"]},
     {l:"(2)", acc:["vmesna koda","bajtna koda","byte koda","vmesna (byte) koda","vmesna","bajtna","bytecode","byte code","zložna koda"]}],
  h:["Prvi pojem: iz česa izvira vse ostalo?","Drugi pojem: koda, ki je »vmes« med človekom in procesorjem."],
@@ -1647,14 +1675,14 @@ const T = [
  why:"Javni razred mora biti v datoteki z enakim imenom: Primer.java. Metoda main je potrebna za zagon, ne za prevajanje. java.lang se uvozi samodejno."},
 {lv:"C", src:"M182/2", pts:2, type:"blanks",
  code:"public class MojProgram {\n    public static void main(String []args) {\n        //koda programa\n    }\n}",
- q:"V urejevalniku imamo zapisano programsko kodo (zgoraj). Zapišite ukaz, s katerim prevedemo program v vmesno kodo, in ime ter končnico dobljene datoteke.",
+ q:"V urejevalniku imamo zapisano programsko kodo (zgoraj).\nZapišite **ukaz**, s katerim prevedemo program v vmesno kodo, in **ime ter končnico** dobljene datoteke.",
  b:[{l:"C:\\...(pot)...>", acc:["javac MojProgram.java"], cs:true},
     {l:"Ime in končnica dobljene datoteke", acc:["MojProgram.class"], cs:true}],
  h:["Prevajalniku podamo ime datoteke z izvorno kodo, s končnico.","Pazi na velike in male črke."],
  why:"javac MojProgram.java, nastane MojProgram.class."},
 {lv:"C", src:"M192/4", pts:2, type:"blanks",
  code:"class Matura {\n    public static void main (String args[])\n    {\n        System.out.print(\"Matura\");\n    }\n}",
- q:"V urejevalniku je zapisan javanski program (zgoraj). Zapišite ime in končnico datoteke, v katero je treba shraniti program, in ukaz, s katerim iz konzole prevedemo program v vmesno kodo.",
+ q:"V urejevalniku je zapisan javanski program (zgoraj).\nZapišite **ime in končnico datoteke**, v katero je treba shraniti program, in **ukaz**, s katerim iz konzole prevedemo program v vmesno kodo.",
  b:[{l:"Ime in končnica datoteke", acc:["Matura.java"], cs:true},
     {l:"Ukaz za prevajanje", acc:["javac Matura.java"], cs:true}],
  h:["Razred ni javen (ni public), vendar je običajno, da je datoteka poimenovana po razredu."],
@@ -1665,7 +1693,7 @@ const T = [
  h:["Ukaz java z možnostjo (stikalom) v angleščini."],
  why:"java -version (ali java --version). Ukaz javac -version izpiše različico prevajalnika, ki je enaka, če je nameščen JDK."},
 {lv:"C", own:true, pts:3, type:"blanks",
- q:"V mapi C:\\vaje je samo datoteka Pozdrav.java. Zapiši ukaz za prevajanje, ukaz za zagon in imena VSEH datotek, ki so v mapi po prevajanju (ločene z vejico).",
+ q:"V mapi **C:\\vaje** je samo datoteka **Pozdrav.java**. Zapiši:\n- **ukaz za prevajanje**\n- **ukaz za zagon**\n- imena **VSEH datotek**, ki so v mapi po prevajanju (ločene z vejico)",
  b:[{l:"Prevajanje", acc:["javac Pozdrav.java"], cs:true},
     {l:"Zagon", acc:["java Pozdrav"], cs:true},
     {l:"Datoteke v mapi", acc:["Pozdrav.java, Pozdrav.class","Pozdrav.class, Pozdrav.java"], cs:true, list:true}],
@@ -1762,7 +1790,7 @@ const T = [
  why:"javac javi: class Primer is public, should be declared in a file named Primer.java. Datoteko je treba preimenovati v Primer.java ali odstraniti public."},
 {lv:"D", src:"M182/10", pts:2, type:"blanks",
  code:"1  import java.util.Random;\n2  public class Naloga {\n3      public static void main(String[] args) {\n4          Random r = new Random();\n5          System.out.println(\"Izbrana števila so: \")\n6          for(int i=0; i<10; i++) {\n7              // določi naključno celo število\n8              // med -10 in 10 vključno z mejama\n9              x = r.nextInt(21)-10;\n10             System.out.print(x+\" \");\n11         }\n12     }\n13 }",
- q:"Pri prevajanju prevajalnik javi napake: Syntax error, insert \";\" to complete Statement (line 5); x cannot be resolved to a variable (line 9); x cannot be resolved to a variable (line 10). Napake lahko odpravimo, če pravilno dopolnimo vrstici 5 in 9. Napišite celotni dopolnjeni vrstici. (Številke vrstic niso del kode.)",
+ q:"Pri prevajanju prevajalnik javi napake:\n- Syntax error, insert \";\" to complete Statement (line 5)\n- x cannot be resolved to a variable (line 9)\n- x cannot be resolved to a variable (line 10)\nNapake lahko odpravimo, če pravilno dopolnimo **vrstici 5 in 9**. Napišite **celotni dopolnjeni vrstici**. (Številke vrstic niso del kode.)",
  b:[{l:"Vrstica 5", acc:["System.out.println(\"Izbrana števila so: \");"], cs:true, code:true},
     {l:"Vrstica 9", acc:["int x = r.nextInt(21)-10;"], cs:true, code:true}],
  h:["Prvo sporočilo pove, kaj manjka.","Spremenljivke v Javi je treba pred uporabo deklarirati, s tipom."],
@@ -1939,7 +1967,7 @@ function card(t){
   let body = "";
   if(t.code) body += `<pre class="code">${hl(t.code)}</pre>`;
   if(t.code && t.type!=="output") body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="code">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`;
-  body += `<p>${esc(t.q)}</p>`;
+  body += `<p class="qtext">${esc(t.q)}</p>`;
   if(t.type==="mc"){
     const multi = t.a.length>1;
     body += `<div class="opts">` + t.o.map((o,k)=>`<label class="opt"><input type="${multi?"checkbox":"radio"}" name="r-${t.id}" id="r-${t.id}-${k}" value="${k}"><b>${"ABCDEF"[k]}</b><span>${esc(o)}</span></label>`).join("") + `</div>`;

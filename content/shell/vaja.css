@@ -248,3 +248,11 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 }
 @media (max-width:340px){.lr-top-in{--lr-notelab:none}}
 @media (prefers-reduced-motion:reduce){.lr *{transition:none!important}}
+
+/* long task statements with light markup (formatQ in vaja.js): paragraphs, bold key words, short lists */
+.lr-main .lr-qf{white-space:normal;text-align:left}
+.lr-main .lr-qf p{margin:0 0 .6em}
+.lr-main .lr-qf ul{margin:.1em 0 .6em;padding-left:1.3em}
+.lr-main .lr-qf li{margin:.2em 0}
+.lr-main .lr-qf>:last-child{margin-bottom:0}
+.lr-main .lr-qf strong{font-weight:700}

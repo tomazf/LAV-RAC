@@ -403,8 +403,28 @@
     s.page.append(head, locked, body, buildPager(s));
     if (s.el) s.el.remove();
   }
+  // Long task statements can carry light markup: **bold** words, one paragraph per line, lines starting with "- " as a list.
+  // Only statements that contain ** are rebuilt; the markers are not part of the text the importer stores.
+  function formatQ(q) {
+    if (q.children.length || !/\*\*/.test(q.textContent)) return;
+    const box = h('div', { class: q.className + ' lr-qf' });
+    const inline = (parent, text) => text.split(/\*\*(.+?)\*\*/).forEach((part, j) => { if (part) parent.append(j % 2 ? h('strong', null, part) : part); });
+    let ul = null;
+    q.textContent.split('\n').map((l) => l.trim()).filter(Boolean).forEach((line) => {
+      if (/^- /.test(line)) {
+        if (!ul) { ul = h('ul'); box.append(ul); }
+        const li = h('li'); inline(li, line.slice(2)); ul.append(li);
+        return;
+      }
+      ul = null;
+      const p = h('p'); inline(p, line); box.append(p);
+    });
+    q.replaceWith(box);
+  }
+
   function prepareCard(card, i, k, n, sel) {
     const task = TASKS[i].task;
+    card.querySelectorAll('.qtext').forEach(formatQ);
     card.hidden = false;
     card.id = 't' + i;
     card.classList.add('lr-task');
@@ -731,7 +751,7 @@
     const tasks = [];
     pages.filter((p) => p.kind === 'set').forEach((s) => s.tasks.forEach((t) => {
       const src = TASKS[t.idx].task;
-      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
+      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\*\*/g, '').replace(/\n- /g, '\n').replace(/\s+/g, ' ').trim().slice(0, 160) });
     }));
     tasks.sort((a, b) => a.i - b.i);
     return {
@@ -1359,6 +1379,14 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 }
 @media (max-width:340px){.lr-top-in{--lr-notelab:none}}
 @media (prefers-reduced-motion:reduce){.lr *{transition:none!important}}
+
+/* long task statements with light markup (formatQ in vaja.js): paragraphs, bold key words, short lists */
+.lr-main .lr-qf{white-space:normal;text-align:left}
+.lr-main .lr-qf p{margin:0 0 .6em}
+.lr-main .lr-qf ul{margin:.1em 0 .6em;padding-left:1.3em}
+.lr-main .lr-qf li{margin:.2em 0}
+.lr-main .lr-qf>:last-child{margin-bottom:0}
+.lr-main .lr-qf strong{font-weight:700}
 
 html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-tile);--line:var(--lr-line);--fg:var(--lr-ink);--muted:var(--lr-mut);
   --accent:var(--lr-acc);--accent-soft:var(--lr-acc-soft);--ok:var(--lr-ok);--ok-soft:var(--lr-ok-bg);--bad:var(--lr-bad);--bad-soft:var(--lr-bad-bg);
@@ -2126,13 +2154,13 @@ add({id:"a19", lv:"A", d:2, type:"blanks", q:"Pravilnostna tabela ima 32 vrstic.
  why:"Tabela ima 2ⁿ vrstic. Ker je 2⁵ = 32, ima funkcija pet vhodov."});
 
 /* B · zapis funkcij */
-add({id:"b01", lv:"B", d:1, type:"ex", k:"eq", f:"A·B", q:"Motor se vrti (Q = 1), če sta pritisnjeni obe tipki, A in B. Zapiši funkcijo Q.",
+add({id:"b01", lv:"B", d:1, type:"ex", k:"eq", f:"A·B", q:"**Motor** se vrti (**Q = 1**), če sta pritisnjeni **obe tipki**, A in B.\nZapiši funkcijo Q.",
  h:["Obe tipki morata biti hkrati pritisnjeni.","Pogoj »in« zapišeš s produktom."], why:"Obe tipki sta pogoj hkrati, zato je Q = A·B (vrata IN)."});
-add({id:"b02", lv:"B", d:2, type:"ex", k:"eq", f:"A·¬B", tb:1, q:"Alarm piska (Q = 1), če voznik sedi (A = 1) in pas ni pripet (B = 0). Zapiši funkcijo Q in jo preveri s tabelo.",
+add({id:"b02", lv:"B", d:2, type:"ex", k:"eq", f:"A·¬B", tb:1, q:"**Alarm** piska (**Q = 1**), če **voznik sedi** (A = 1) **in** pas **ni pripet** (B = 0).\nZapiši funkcijo Q in jo preveri s tabelo.",
  h:["Pas ni pripet pomeni B = 0, torej ¬B.","Oba pogoja morata veljati hkrati."], why:"Voznik sedi (A) in pas ni pripet (¬B): Q = A·¬B. V tabeli je edina enica pri A = 1 in B = 0."});
-add({id:"b03", lv:"B", d:2, type:"ex", k:"eq", f:"(A+B)·¬C", q:"Vrata se odprejo (Q = 1), če je pritisnjena tipka A ali tipka B in sistem ni zaklenjen (C = 1 pomeni zaklenjen). Zapiši Q.",
+add({id:"b03", lv:"B", d:2, type:"ex", k:"eq", f:"(A+B)·¬C", q:"Vrata se odprejo (**Q = 1**), če je pritisnjena **vsaj ena od tipk, A ali B**, in hkrati sistem **ni zaklenjen** (C = 1 pomeni zaklenjen).\nZapiši Q.",
  h:["»A ali B« zapiši v oklepaju.","Nezaklenjen pomeni C = 0."], why:"Pogoj »A ali B« je A+B, nezaklenjenost je ¬C. Oba morata veljati: Q = (A+B)·¬C."});
-add({id:"b04", lv:"B", d:2, type:"ex", k:"eq", f:"A·B+A·C+B·C", q:"Glasovanje: Q = 1, če sta vsaj dva od treh članov (A, B, C) za. Zapiši Q.",
+add({id:"b04", lv:"B", d:2, type:"ex", k:"eq", f:"A·B+A·C+B·C", q:"**Glasovanje:** Q = 1, če sta **vsaj dva od treh** članov (A, B, C) **za**.\nZapiši Q.",
  h:["Naštej vse pare članov, ki sta lahko za.","Pari so AB, AC in BC. Povezuješ jih z »ali«."], why:"Vsaj dva sta za, če velja AB ali AC ali BC: Q = A·B + A·C + B·C. Če so za vsi trije, so izpolnjeni vsi pari in je Q = 1."});
 add({id:"b05", lv:"B", d:2, type:"ex", k:"pd", f:"A⊕C", n:3, tb:1, q:"Funkcija ima tabelo, prikazano spodaj (Q = A⊕C, B je poljuben). Zapiši njeno PDNO: v vsakem produktu so vse tri spremenljivke.",
  h:["Vzemi samo vrstice, kjer je Q = 1.","Spremenljivka pri 1 ostane, pri 0 jo negiraš. Produkte seštej."],
@@ -2149,7 +2177,7 @@ add({id:"b08", lv:"B", d:2, type:"blanks", q:"Koliko različnih funkcij z dvema 
 add({id:"b09", lv:"B", d:2, type:"blanks", q:"Funkcija treh vhodov ima v tabeli 5 enic. Koliko členov ima njena PDNO in koliko njena PKNO?", b:[{l:"Členov PDNO", acc:["5"], num:true},{l:"Členov PKNO", acc:["3"], num:true}],
  h:["Tabela ima 8 vrstic.","PDNO ima en člen na enico, PKNO en člen na ničlo."],
  why:"PDNO ima 5 produktov (po en za vsako enico). Ničel je 8 − 5 = 3, zato ima PKNO 3 vsote."});
-add({id:"b10", lv:"B", d:3, type:"ex", k:"eq", f:"A⊕B⊕C", q:"Seštevalnik sešteva bite A, B in prenos C. Bit vsote S je 1, kadar je med A, B, C liho število enic. Zapiši S z operatorjem ⊕.",
+add({id:"b10", lv:"B", d:3, type:"ex", k:"eq", f:"A⊕B⊕C", q:"**Seštevalnik** sešteva bite **A**, **B** in prenos **C**. Bit vsote **S** je 1, kadar je med A, B, C **liho število enic**.\nZapiši S z operatorjem **⊕**.",
  h:["Dva bita seštevaš z A⊕B.","Dodaj še tretji bit: (A⊕B)⊕C."],
  why:"XOR je seštevanje po modulu 2: enice se sodo število krat izničijo. Zato je S = A⊕B⊕C, kar je 1 pri lihem številu enic."});
 
@@ -2208,23 +2236,23 @@ add({id:"d10", lv:"D", d:3, type:"km", f:"A·¬C+¬B·¬C·D", n:4, q:"Vnesi fun
  why:"A·¬C pokrije štiri celice (1000, 1001, 1100, 1101), ¬B·¬C·D dve (0001, 1001). Ena celica je skupna, zato je enic skupaj pet."});
 
 add({id:"d11", lv:"D", d:2, type:"grp", k:"mn", n:3, m:[0,2,4,6,7],
- q:"Krmilnik črpalke ima tri vhode A, B in C. Njegova funkcija Q (Q = 1: črpalka teče) je že vpisana v Veitchev diagram. Z miško ali prstom povleci čez celice ene skupine enic in pritisni »Dodaj skupino«. Ko imaš vse skupine, zapiši minimalno PDNO.",
+ q:"**Krmilnik črpalke** ima tri vhode A, B in C. Njegova funkcija **Q** (Q = 1: črpalka teče) je že vpisana v Veitchev diagram.\nZ miško ali prstom **povleci čez celice ene skupine** enic in pritisni **»Dodaj skupino«**. Ko imaš vse skupine, zapiši **minimalno PDNO**.",
  h:["Poišči največjo skupino: štiri enice, ki so skupaj.","Prvi in zadnji stolpec sta sosednja čez rob diagrama. Enice v njiju tvorijo eno skupino.","Skupini sta dve. Ena ima štiri celice, druga dve."],
  why:"Štiri enice v prvem in zadnjem stolpcu (C = 0) se stikajo čez rob diagrama in dajo ¬C. Celici 110 in 111 sta v zgornji vrstici levo in dasta A·B. Q = ¬C + A·B."});
 add({id:"d12", lv:"D", d:3, type:"tt2", n:4, outs:[{name:"Q1",f:"(A+B)·¬D"},{name:"Q2",f:"B·(A+C)"}],
- q:"Prezračevanje strojnice. Vhodi: A = temperatura je previsoka, B = zaznan je plin, C = vrata strojnice so odprta, D = vklopljen je ročni preklic. Izhoda: Q1 = ventilator teče, Q2 = sirena se oglaša.\nVentilator teče, če je temperatura previsoka ali je zaznan plin, razen kadar je vklopljen ročni preklic.\nSirena se oglaša, če je zaznan plin in je hkrati temperatura previsoka ali so vrata odprta.\nDopolni oba stolpca pravilnostne tabele.",
+ q:"**Prezračevanje strojnice.** Vezje ima štiri vhode in dva izhoda.\n**Vhodi** (1 = da):\n- **A**: temperatura je previsoka\n- **B**: zaznan je plin\n- **C**: vrata strojnice so odprta\n- **D**: vklopljen je ročni preklic\n**Izhoda:**\n- **Q1**: ventilator teče\n- **Q2**: sirena se oglaša\n**Ventilator** teče, če je temperatura previsoka **ali** je zaznan plin, **razen** kadar je vklopljen ročni preklic.\n**Sirena** se oglaša, kadar je zaznan **plin** in je hkrati izpolnjen vsaj eden od obeh pogojev: temperatura je previsoka **ali** so vrata odprta.\nDopolni oba stolpca pravilnostne tabele.",
  h:["Vrstice štej kot dvojiško število ABCD. Vrstica 0110 pomeni A = 0, B = 1, C = 1, D = 0.","Q1: najprej poglej D. Pri D = 1 ventilator ne teče, ne glede na ostale vhode.","Q2: sirena je tiha povsod, kjer je B = 0."],
  why:"Q1 = (A + B)·¬D: ventilator teče v vrsticah 4, 6, 8, 10, 12 in 14 (D = 0 ter A = 1 ali B = 1). Q2 = B·(A + C): sirena je vklopljena pri B = 1 in A = 1 ali C = 1, to je v vrsticah 6, 7, 12, 13, 14 in 15."});
 add({id:"d13", lv:"D", d:3, type:"grp", k:"mn", f:"(A+B)·¬D", n:4,
- q:"Ventilator iz prejšnje naloge: funkcija Q1 je vpisana v Veitchev diagram (A, B, C, D). Označi skupine enic in zapiši minimalno PDNO.",
+ q:"**Ventilator** iz prejšnje naloge: funkcija **Q1** je vpisana v Veitchev diagram (A, B, C, D).\nOznači **skupine enic** in zapiši **minimalno PDNO**.",
  h:["Poišči skupini po štiri celice.","Ena skupina je cela zgornja vrstica.","Druga skupina je kvadrat 2 × 2 v levih dveh stolpcih, ki zajema zgornjo in spodnjo vrstico (čez rob).","Skupini imata dve skupni celici. To je dovoljeno."],
  why:"Skupina B·¬D (B = 1, D = 0) je cela zgornja vrstica. Skupina A·¬D (A = 1, D = 0) je kvadrat v levih dveh stolpcih, ki zajema zgornjo in spodnjo vrstico čez rob diagrama. Skupni sta celici 1100 in 1110. Q1 = A·¬D + B·¬D."});
 add({id:"d14", lv:"D", d:3, type:"grp", k:"mn", f:"B·(A+C)", n:4,
- q:"Sirena iz iste strojnice: funkcija Q2 je vpisana v diagram. Označi skupine enic in zapiši minimalno PDNO. Zapiši vsoto produktov (PDNO).",
+ q:"**Sirena** iz iste strojnice: funkcija **Q2** je vpisana v diagram.\nOznači **skupine enic** in zapiši **minimalno PDNO** (vsoto produktov).",
  h:["Obe skupini sta kvadrata 2 × 2 v zgornjih dveh vrsticah.","Prvi kvadrat je v levih dveh stolpcih (A = 1), drugi v srednjih dveh (C = 1).","Sirena molči, kjer je B = 0."],
  why:"Skupina A·B je kvadrat 2 × 2 v zgornjih dveh vrsticah in levih dveh stolpcih (A = 1, B = 1). Skupina B·C je kvadrat 2 × 2 v zgornjih dveh vrsticah in srednjih dveh stolpcih (B = 1, C = 1). Skupni sta celici 1110 in 1111. Q2 = A·B + B·C."});
 add({id:"d15", lv:"D", d:3, type:"grp", k:"mn", n:4, m:[0,4,5,7,8,12],
- q:"Signalna lučka L ima štiri vhode A, B, C, D in sveti v vrsticah 0, 4, 5, 7, 8 in 12 pravilnostne tabele (Q = 1). Funkcija je vpisana v diagram. Označi skupine enic in zapiši minimalno PDNO.",
+ q:"**Signalna lučka L** ima štiri vhode A, B, C, D in sveti (**Q = 1**) v vrsticah **0, 4, 5, 7, 8 in 12** pravilnostne tabele. Funkcija je vpisana v diagram.\nOznači **skupine enic** in zapiši **minimalno PDNO**.",
  h:["Štiri enice v vogalih diagrama so ena skupina: zgornji in spodnji rob se stikata, levi in desni tudi.","Vogale klikaj ločeno ali jih povleci ločeno, saj niso skupaj.","Celici 5 in 7 sta sosedi v isti vrstici. Skupini sta dve."],
  why:"Štiri vogalne celice (0000, 0100, 1000, 1100) imajo C = 0 in D = 0, to je ¬C·¬D. Celici 0101 in 0111 imata A = 0, B = 1, D = 1, to je ¬A·B·D. L = ¬C·¬D + ¬A·B·D."});
 
@@ -2237,15 +2265,15 @@ add({id:"e03", lv:"E", d:1, type:"mc", q:"Katera od naštetih vrat sama zadošč
  h:["Iz teh vrat moraš dobiti negacijo in ALI/IN.","¬(A·A) = ¬A."], why:"Z vrati NEIN dobimo NE (¬(A·A)), IN (¬(¬(A·B))) in ALI (¬(¬A·¬B)). IN, ALI in XOR sama ne omogočajo negacije."});
 add({id:"e04", lv:"E", d:2, type:"mc", q:"Podan je izraz Q = ¬(A·B). Kateri simbol vrat ustreza De Morganovi obliki ¬A + ¬B?", o:["ALI z negiranima vhodoma","IN z negiranima vhodoma","NEALI","XOR"], a:[0],
  h:["Najprej De Morgan: ¬(A·B) = ¬A + ¬B.","Vsota negiranih vhodov je ALI s krožcema na vhodih."], why:"¬A + ¬B je ALI, ki mu vhoda negiramo, to je simbol NEIN v drugi obliki."});
-add({id:"e05", lv:"E", d:2, type:"ex", k:"nand", f:"¬A", n:1, max:1, s:"¬(A·A)", q:"Zapiši ¬A samo z vrati NEIN. Vrata NEIN zapišemo kot negacijo produkta dveh vhodov, vhoda lahko združiš.",
+add({id:"e05", lv:"E", d:2, type:"ex", k:"nand", f:"¬A", n:1, max:1, s:"¬(A·A)", q:"Zapiši **¬A** samo z vrati **NEIN**.\nVrata NEIN zapišemo kot negacijo produkta dveh vhodov; vhoda lahko združiš.",
  h:["Ko oba vhoda vrat NEIN povežeš skupaj, dobiš ¬(A·A).","A·A = A, zato je ¬(A·A) = ¬A."], why:"¬(A·A) = ¬A. Vrata NEIN z združenima vhodoma so negacija."});
-add({id:"e06", lv:"E", d:2, type:"ex", k:"nand", f:"A·B", n:2, max:2, s:"¬(¬(A·B))", q:"Zapiši A·B samo z vrati NEIN (dovoljeno: spremenljivke, negacija in produkt · samo neposredno pod negacijo. Uporabi največ dve vrati.",
+add({id:"e06", lv:"E", d:2, type:"ex", k:"nand", f:"A·B", n:2, max:2, s:"¬(¬(A·B))", q:"Zapiši **A·B** samo z vrati **NEIN**.\nDovoljeno: spremenljivke, negacija in produkt (·), a produkt samo neposredno pod negacijo.\nUporabi največ **dve vrati**.",
  h:["IN je negiran NEIN.","Negacijo dobiš z ¬(X·X), kar je enako ¬X."], why:"A·B = ¬(¬(A·B)). Notranja negacija je prvi NEIN, zunanja drugi (negator). Potrebuješ dva NEIN."});
 add({id:"e07", lv:"E", d:2, type:"mc", q:"Kako z vrati NEIN dobiš ALI (A + B)?", o:["¬(¬A·¬B)","¬(A·B)","¬(¬(A·B))","¬(¬A + ¬B)"], a:[0],
  h:["A + B = ¬(¬A·¬B).","Negacijo spremenljivke dobiš z vrati NEIN z združenima vhodoma."], why:"¬(¬A·¬B) = A + B (De Morgan). Potrebuješ tri NEIN: dva negatorja in končna vrata."});
-add({id:"e08", lv:"E", d:2, type:"ex", k:"nor", f:"A+B", n:2, max:2, s:"¬(¬(A+B))", q:"Zapiši A + B samo z vrati NEALI (dovoljeno: spremenljivke, negacija in vsota + samo neposredno pod negacijo. Uporabi največ dve vrati.",
+add({id:"e08", lv:"E", d:2, type:"ex", k:"nor", f:"A+B", n:2, max:2, s:"¬(¬(A+B))", q:"Zapiši **A + B** samo z vrati **NEALI**.\nDovoljeno: spremenljivke, negacija in vsota (+), a vsota samo neposredno pod negacijo.\nUporabi največ **dve vrati**.",
  h:["ALI je negiran NEALI.","Negacijo dobiš z ¬(X + X) = ¬X."], why:"A + B = ¬(¬(A+B)). Potrebuješ dva NEALI."});
-add({id:"e09", lv:"E", d:2, type:"ex", k:"nor", f:"A·B", n:2, max:3, s:"¬(¬A + ¬B)", q:"Zapiši A·B samo z vrati NEALI (dovoljeno: spremenljivke, negacija in vsota + samo neposredno pod negacijo). Uporabi največ tri vrata.",
+add({id:"e09", lv:"E", d:2, type:"ex", k:"nor", f:"A·B", n:2, max:3, s:"¬(¬A + ¬B)", q:"Zapiši **A·B** samo z vrati **NEALI**.\nDovoljeno: spremenljivke, negacija in vsota (+), a vsota samo neposredno pod negacijo.\nUporabi največ **tri vrata**.",
  h:["A·B = ¬(¬A + ¬B).","Najprej negiraj A in B."], why:"¬(¬A + ¬B) = A·B (De Morgan). Potrebuješ tri NEALI: dva negatorja in končna vrata."});
 add({id:"e10", lv:"E", d:2, type:"blanks", q:"Koliko vrat NEIN potrebuješ, če z njimi realiziraš vrata IN (A·B) in vrata ALI (A+B)?", b:[{l:"Vrat NEIN za IN", acc:["2"], num:true},{l:"Vrat NEIN za ALI", acc:["3"], num:true}],
  h:["IN = ¬(¬(A·B)): preštej vrata.","ALI = ¬(¬A·¬B): preštej vrata."], why:"IN potrebuje 2 vrata (NEIN in negator), ALI 3 (dva negatorja vhodov in končna vrata)."});
@@ -2257,9 +2285,9 @@ add({id:"e13", lv:"E", d:3, type:"ex", k:"nor", f:"(A+B)·(C+D)", n:4, max:3, s:
  h:["Za NEALI uporabi PKNO: IN dveh vsot.","(A + B)·(C + D) = ¬(¬(A+B) + ¬(C+D))."], why:"(A + B)·(C + D) = ¬(¬(A+B) + ¬(C+D)). Dvonivojska vezava NEALI–NEALI ustreza produktu vsot."});
 add({id:"e14", lv:"E", d:3, type:"ex", k:"nand", f:"A·¬B+¬C", n:3, max:3, s:"¬(¬(A·¬B)·C)", q:"Zapiši Q = A·¬B + ¬C samo z vrati NEIN. Uporabi največ tri vrata (negator ¬B šteje kot vrata).",
  h:["Dvakrat negiraj celoten izraz: Q = ¬(¬(A·¬B)·¬(¬C)).","Člen ¬C je en sam: njegova negacija ¬(¬C) je kar C."], why:"Q = ¬(¬(A·¬B)·C). Notranja vrata ¬(A·¬B) potrebujejo še negator za ¬B, zunanja vrata imajo na vhodu C, ker je ¬(¬C) = C. Skupaj tri vrata."});
-add({id:"e15", lv:"E", d:3, type:"ex", k:"nand", f:"A⊕B", n:2, s:"¬(¬(A·¬(A·B))·¬(B·¬(A·B)))", q:"Zapiši A⊕B samo z vrati NEIN (znana rešitev uporablja štiri vrata, ker enak podizraz X = ¬(A·B) uporabiš dvakrat). Dovoljeno je poljubno število vrat.",
+add({id:"e15", lv:"E", d:3, type:"ex", k:"nand", f:"A⊕B", n:2, s:"¬(¬(A·¬(A·B))·¬(B·¬(A·B)))", q:"Zapiši **A⊕B** samo z vrati **NEIN**.\nZnana rešitev uporablja **štiri vrata**, ker enak podizraz X = ¬(A·B) uporabiš dvakrat. Dovoljeno je poljubno število vrat.",
  h:["Označi X = ¬(A·B).","Poskusi ¬(¬(A·X)·¬(B·X))."], why:"Z X = ¬(A·B) je A·X = A·¬B in B·X = ¬A·B. Zunanja vrata seštejeta oba produkta: A·¬B + ¬A·B = A⊕B."});
-add({id:"e16", lv:"E", d:2, type:"blanks", q:"Funkcijo Q = A·B + C·D realiziraš z vrati IN in ALI (čipi 7408 z 4×IN in 7432 z 4×ALI, tri vrata) ali samo z vrati NEIN (čip 7400 s 4×NEIN, tri vrata). Koliko čipov potrebuješ v vsakem primeru?", b:[{l:"Čipov IN + ALI", acc:["2"], num:true},{l:"Čipov samo NEIN", acc:["1"], num:true}],
+add({id:"e16", lv:"E", d:2, type:"blanks", q:"Funkcijo **Q = A·B + C·D** realiziraš na dva načina:\n- z vrati **IN in ALI** (čip 7408 s 4×IN in čip 7432 s 4×ALI; skupaj tri vrata),\n- samo z vrati **NEIN** (čip 7400 s 4×NEIN; tri vrata).\nKoliko **čipov** potrebuješ v vsakem primeru?", b:[{l:"Čipov IN + ALI", acc:["2"], num:true},{l:"Čipov samo NEIN", acc:["1"], num:true}],
  h:["Vrata IN in ALI sta na različnih čipih.","Tri vrata NEIN stanejo v čip s štirimi vrati NEIN."], why:"IN in ALI sta različna čipa (7408 in 7432), zato 2 čipa. Vsa tri vrata NEIN stanejo v en čip 7400."});
 add({id:"e17", lv:"E", d:1, type:"mc", q:"Zakaj v praksi pogosto gradimo vezja samo iz vrat NEIN ali NEALI?", o:["Imajo najmanj tranzistorjev in so enotna, zato je manj različnih čipov","Ker vrat IN in ALI ni mogoče izdelati","Ker NEIN računa hitreje kot vsaka druga funkcija","Ker potrebujejo manj vhodov kot NE"], a:[0],
  h:["V tehnologiji CMOS ima NEIN z dvema vhodoma 4 tranzistorje, IN pa 6.","Ena vrsta vrat pomeni en čip."], why:"NEIN in NEALI sta v CMOS najcenejši vrati (IN in ALI sta v resnici NEIN oziroma NEALI z negatorjem), univerzalna sta, zato lahko vse zgradimo iz enega tipa vrat."});
@@ -2277,7 +2305,7 @@ add({id:"f04", lv:"F", d:1, type:"ex", k:"eq", f:"A·B", n:2, s:"A·B", q:"Zapi�
 add({id:"f05", lv:"F", d:2, type:"tt2", n:3, outs:[{name:"S",f:"A⊕B⊕C"},{name:"Cout",f:"A·B+A·C+B·C"}],
  q:"Polni seštevalnik sešteje bita A in B ter prenos Cin (v tabeli je to stolpec C). Dopolni stolpca S (bit vsote) in Cout (prenos naprej).",
  h:["Prešteti enice v vrstici: A + B + C je od 0 do 3. Zapiši to število dvojiško.","Pri eni ali treh enicah je S = 1, pri dveh ali treh je Cout = 1."], why:"A + B + C = število enic v vrstici (0 do 3). Dvojiški zapis CoutS: 00, 01, 01, 10, 01, 10, 10, 11."});
-add({id:"f06", lv:"F", d:2, type:"ex", k:"mn", f:"A·B+A·C+B·C", n:3, q:"Zapiši najkrajšo PDNO za prenos Cout polnega seštevalnika (vhoda A, B in prenos C). Cout = 1, kadar sta vsaj dva od A, B, C enaka 1.",
+add({id:"f06", lv:"F", d:2, type:"ex", k:"mn", f:"A·B+A·C+B·C", n:3, q:"Zapiši **najkrajšo PDNO** za prenos **Cout** polnega seštevalnika (vhoda A, B in prenos C).\nCout = 1, kadar sta **vsaj dva** od A, B, C enaka 1.",
  h:["To je večinska funkcija.","Poišči tri dvojice sosednjih enic v Veitchevem diagramu."], why:"Cout = A·B + A·C + B·C. Pri prenosu iz polnega seštevalnika je dovolj, da sta vsaj dva vhoda 1."});
 add({id:"f07", lv:"F", d:2, type:"ex", k:"eq", need:"⊕", f:"A⊕B⊕C", n:3, s:"A⊕B⊕C", q:"Zapiši bit vsote S polnega seštevalnika (A, B in C kot vhodi) z operatorjem XOR (⊕).",
  h:["S je 1, kadar je med A, B, C liho število enic.","XOR dveh vhodov XOR-aj še s tretjim."], why:"S = A⊕B⊕C. XOR s tremi vhodi je 1 pri liho mnogo enicah, kar je natanko bit vsote."});
@@ -2291,14 +2319,14 @@ add({id:"f11", lv:"F", d:3, type:"blanks", q:"Odštej s komplementom: A = 0111, 
  h:["Obrni vsak bit števila 0010.","0111 + 1101 + 1 = 10101 dvojiško."], why:"¬B = 1101. 0111 + 1101 + 1 = 10101, spodnji štirje biti 0101 = 5 = 7 − 2. Cout = 1 pomeni A ≥ B."});
 add({id:"f12", lv:"F", d:3, type:"mc", q:"Pri odštevanju A − B s seštevalnikom (A + ¬B + 1) je prenos iz najvišjega mesta Cout = 0. Kaj to pomeni?", o:["A < B: rezultat je negativen (zapisan v dvojiškem komplementu)","A ≥ B: rezultat je pozitiven","Rezultat je 0","Seštevalnik je pokvarjen"], a:[0],
  h:["Primerjaj z računom 3 − 5.","Cout = 1 pomeni, da izposoje ni bilo."], why:"Cout = 0 pomeni izposojo: A < B. Rezultat je 2ⁿ − (B − A), kar je negativno število v dvojiškem komplementu. Tako procesor primerja števili."});
-add({id:"f13", lv:"F", d:2, type:"ex", k:"eq", f:"¬A·B", n:2, s:"¬A·B", q:"Zapiši izraz za izposojo Bout polovičnega odštevalnika (A − B). Izposoja je 1, kadar odštevamo 1 od 0.",
+add({id:"f13", lv:"F", d:2, type:"ex", k:"eq", f:"¬A·B", n:2, s:"¬A·B", q:"Zapiši izraz za **izposojo Bout** polovičnega odštevalnika (A − B).\nIzposoja je 1, kadar odštevamo **1 od 0**.",
  h:["Izposoja je samo pri 0 − 1.","A = 0 in B = 1."], why:"Bout = ¬A·B: izposoja nastane samo pri 0 − 1."});
 add({id:"f14", lv:"F", d:3, type:"tt2", n:3, outs:[{name:"D",f:"A⊕B⊕C"},{name:"Bout",f:"¬A·B+¬A·C+B·C"}],
- q:"Polni odštevalnik izračuna A − B − Bin (v tabeli je Bin stolpec C). Izhoda sta D (razlika) in Bout (izposoja). Izposoja je 1, kadar je A manjši od B + Bin. Dopolni oba stolpca.",
+ q:"**Polni odštevalnik** izračuna **A − B − Bin** (v tabeli je Bin stolpec C).\nIzhoda: **D** (razlika) in **Bout** (izposoja).\nIzposoja je **1**, kadar je **A manjši od B + Bin**.\nDopolni oba stolpca.",
  h:["Izračunaj A − B − C kot celo število (lahko je negativno).","D je 1, kadar je razlika liha. Bout je 1, kadar je razlika negativna."], why:"Razlika A − B − C je med −2 in 1. Bout = 1, če je razlika negativna (vrstice 1, 2, 3 in 7), D je razlika modulo 2."});
 add({id:"f15", lv:"F", d:3, type:"mc", q:"Zakaj je bit vsote S polnega seštevalnika enak XOR vseh treh vhodov?", o:["Ker je S = 1, kadar je med vhodi liho število enic","Ker XOR računa prenos","Ker je S = 1 samo pri A = B = C = 1","Ker XOR ni mogoče nadomestiti z drugimi vrati"], a:[0],
  h:["Preštej enice: 0, 1, 2 ali 3.","Pri koliko enicah je desna števka vsote 1?"], why:"Število enic je 0, 1, 2 ali 3 (dvojiško 00, 01, 10, 11). Desna števka je 1 pri 1 in 3 enicah, to je lih število, kar je funkcija XOR."});
-add({id:"f16", lv:"F", d:2, type:"ex", k:"eq", f:"A·B+C·(A⊕B)", n:3, s:"A·B+C·(A⊕B)", q:"Prenos Cout polnega seštevalnika sestavljata dva polovična seštevalnika in vrata ALI. Prvi sešteje A in B (S1 = A⊕B, C1 = A·B), drugi S1 in Cin (v nalogi C). Zapiši Cout z izrazi, ki jih ti seštevalniki izračunajo.",
+add({id:"f16", lv:"F", d:2, type:"ex", k:"eq", f:"A·B+C·(A⊕B)", n:3, s:"A·B+C·(A⊕B)", q:"**Prenos Cout** polnega seštevalnika sestavljata **dva polovična seštevalnika** in vrata **ALI**.\n- prvi sešteje **A in B** (S1 = A⊕B, C1 = A·B),\n- drugi sešteje **S1 in Cin** (v nalogi C).\nZapiši **Cout** z izrazi, ki jih ti seštevalniki izračunajo.",
  h:["Drugi seštevalnik ustvari prenos C2 = C·S1.","Cout = C1 + C2."], why:"Cout = C1 + C2 = A·B + C·(A⊕B). Prenos nastane, če ga ustvari prvi ali drugi polovični seštevalnik."});
 
 /* ---------- za doma ---------- */
@@ -2793,7 +2821,8 @@ function kmGrid(n,o,opt){
 const staticTT = (n,out) => `<div class="tbl" style="width:fit-content;max-width:100%"><table class="pgrid"><thead><tr>${VARS.slice(0,n).split("").map(v=>`<th>${v}</th>`).join("")}<th>Q</th></tr></thead><tbody>${out.map((q,m)=>`<tr>${bn(m,n).split("").map(b=>`<td>${b}</td>`).join("")}<td class="pb">${q}</td></tr>`).join("")}</tbody></table></div>`;
 const staticTT2 = t => `<div class="tbl" style="width:fit-content;max-width:100%"><table class="pgrid"><thead><tr>${VARS.slice(0,t.n).split("").map(v=>`<th>${v}</th>`).join("")}${t.outs.map(o=>`<th>${o.name}</th>`).join("")}</tr></thead><tbody>${t.outs[0].out.map((_,m)=>`<tr>${bn(m,t.n).split("").map(b=>`<td>${b}</td>`).join("")}${t.outs.map(o=>`<td class="pb">${o.out[m]}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 const groupChips = (sel,n) => sel.length ? `<div class="legendg">${sel.map((s,i)=>`<span class="gchip" style="border-color:var(--g${i%6+1})">${litList(s,n,0).join("·")||"1"}</span>`).join("")}</div>` : "";
-const kpad = (keys) => `<div class="kp" role="group" aria-label="Znaki za vnos">${keys.map(k=>`<button type="button" data-ins="${k}" ${k==="¬"?'title="Negacija (vpiše ¬, izraz se pokaže s črtico)" aria-label="Negacija"':""} onmousedown="event.preventDefault()">${k==="¬"?'<span class="ov" aria-hidden="true">X</span>':k}</button>`).join("")}</div>`;
+const kpad = (keys) => `<div class="kp" role="group" aria-label="Znaki za vnos">${keys.map(k=>`<button type="button" data-ins="${k}" ${k==="¬"?'title="Negacija (vpiše ¬, izraz se pokaže s črtico)" aria-label="Negacija"':""}>${k==="¬"?'<span class="ov" aria-hidden="true">X</span>':k}</button>`).join("")}</div>`;
+document.addEventListener("mousedown",e=>{ if(e.target.closest && e.target.closest(".kp button")) e.preventDefault(); });
 function insertAt(inp,txt){ if(!inp) return; const a = inp.selectionStart==null ? inp.value.length : inp.selectionStart, b = inp.selectionEnd==null ? a : inp.selectionEnd; inp.setRangeText(txt,a,b,"end"); inp.focus(); inp.dispatchEvent(new Event("input",{bubbles:true})); }
 
 /* ---------- prikaz nalog ---------- */
@@ -2827,7 +2856,7 @@ function card(t){
     body += `<div class="cls">` + t.items.map((it,k)=>`<div class="crow" data-k="${k}"><span class="txt">${esc(it[0])}</span><div class="seg" role="group" aria-label="Izberi">${t.cats.map((c,ci)=>`<button type="button" data-ci="${ci}" aria-pressed="false">${esc(c)}</button>`).join("")}</div></div>`).join("") + `</div>`;
   } else if(t.type==="sel"){
     const opts = t.lab.map((l,i)=>`<option value="${i}">${esc(ovPlain(l))}</option>`).join("");
-    body += `<div class="cls">` + t.rows.map((r,k)=>`<div class="crow sel match" data-k="${k}"><span class="txt">${esc(r[0])}</span><select aria-label="Izberi izraz za ${esc(r[0])}"><option value="">— izberi izraz —</option>${opts}</select></div>`).join("") + `</div>`;
+    body += `<div class="cls">` + t.rows.map((r,k)=>`<div class="crow" data-k="${k}"><span class="txt">${esc(r[0])}</span><div class="seg" role="group" aria-label="Izberi izraz za ${esc(r[0])}">${t.lab.map((c,ci)=>`<button type="button" data-ci="${ci}" aria-pressed="false">${esc(c)}</button>`).join("")}</div></div>`).join("") + `</div>`;
   } else if(t.type==="tt"){
     body += `<div class="tbl" style="width:fit-content;max-width:100%"><table class="pgrid"><thead><tr>${VARS.slice(0,t.n).split("").map(v=>`<th>${v}</th>`).join("")}<th>Q</th></tr></thead><tbody>${t.out.map((_,m)=>`<tr>${bn(m,t.n).split("").map(b=>`<td>${b}</td>`).join("")}<td><button type="button" class="pc tcell" data-m="${m}" data-v="?" aria-label="Izhod v vrstici ${m}">?</button></td></tr>`).join("")}</tbody></table></div><p class="wnote">Klikaj celice stolpca Q: ? → 0 → 1 → 0.</p>`;
   } else if(t.type==="km"){
@@ -2871,7 +2900,7 @@ function wire(el,t){
   if(t.type==="cls" || t.type==="sel"){
     el.querySelectorAll(".crow").forEach(row=>{
       const k = +row.dataset.k;
-      if(t.type==="cls") row.querySelectorAll("button").forEach(b=>{
+      if(t.type==="cls"||t.type==="sel") row.querySelectorAll("button").forEach(b=>{
         if(s.v && s.v[k]===+b.dataset.ci) b.setAttribute("aria-pressed","true");
         b.addEventListener("click",()=>{ row.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed","false")); b.setAttribute("aria-pressed","true"); row.classList.remove("right","wrong"); collect(); });
       });
@@ -2938,8 +2967,7 @@ function wire(el,t){
   function collect(){
     if(t.type==="mc") s.v = [...el.querySelectorAll(`input[name="r-${t.id}"]:checked`)].map(i=>+i.value);
     if(t.type==="blanks") s.v = t.b.map((_,k)=>$(`#b-${t.id}-${k}`,el).value);
-    if(t.type==="cls") s.v = [...el.querySelectorAll(".crow")].map(r=>{ const p = r.querySelector('button[aria-pressed="true"]'); return p ? +p.dataset.ci : null; });
-    if(t.type==="sel") s.v = [...el.querySelectorAll(".crow select")].map(x=>x.value==="" ? null : +x.value);
+    if(t.type==="cls"||t.type==="sel") s.v = [...el.querySelectorAll(".crow")].map(r=>{ const p = r.querySelector('button[aria-pressed="true"]'); return p ? +p.dataset.ci : null; });
     if(t.type==="tt") s.v = tcells.map(b=>b.dataset.v==="?" ? null : +b.dataset.v);
     if(t.type==="km") s.v = kmV.slice();
     if(t.type==="tt2"){ const a = Array(t.flat.length).fill(null); tcells.forEach(b=>{ a[+b.dataset.i] = b.dataset.v==="?" ? null : +b.dataset.v; }); s.v = a; }

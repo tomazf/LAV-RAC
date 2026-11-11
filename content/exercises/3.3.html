@@ -403,8 +403,28 @@
     s.page.append(head, locked, body, buildPager(s));
     if (s.el) s.el.remove();
   }
+  // Long task statements can carry light markup: **bold** words, one paragraph per line, lines starting with "- " as a list.
+  // Only statements that contain ** are rebuilt; the markers are not part of the text the importer stores.
+  function formatQ(q) {
+    if (q.children.length || !/\*\*/.test(q.textContent)) return;
+    const box = h('div', { class: q.className + ' lr-qf' });
+    const inline = (parent, text) => text.split(/\*\*(.+?)\*\*/).forEach((part, j) => { if (part) parent.append(j % 2 ? h('strong', null, part) : part); });
+    let ul = null;
+    q.textContent.split('\n').map((l) => l.trim()).filter(Boolean).forEach((line) => {
+      if (/^- /.test(line)) {
+        if (!ul) { ul = h('ul'); box.append(ul); }
+        const li = h('li'); inline(li, line.slice(2)); ul.append(li);
+        return;
+      }
+      ul = null;
+      const p = h('p'); inline(p, line); box.append(p);
+    });
+    q.replaceWith(box);
+  }
+
   function prepareCard(card, i, k, n, sel) {
     const task = TASKS[i].task;
+    card.querySelectorAll('.qtext').forEach(formatQ);
     card.hidden = false;
     card.id = 't' + i;
     card.classList.add('lr-task');
@@ -731,7 +751,7 @@
     const tasks = [];
     pages.filter((p) => p.kind === 'set').forEach((s) => s.tasks.forEach((t) => {
       const src = TASKS[t.idx].task;
-      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
+      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\*\*/g, '').replace(/\n- /g, '\n').replace(/\s+/g, ' ').trim().slice(0, 160) });
     }));
     tasks.sort((a, b) => a.i - b.i);
     return {
@@ -1187,6 +1207,14 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 }
 @media (max-width:340px){.lr-top-in{--lr-notelab:none}}
 @media (prefers-reduced-motion:reduce){.lr *{transition:none!important}}
+
+/* long task statements with light markup (formatQ in vaja.js): paragraphs, bold key words, short lists */
+.lr-main .lr-qf{white-space:normal;text-align:left}
+.lr-main .lr-qf p{margin:0 0 .6em}
+.lr-main .lr-qf ul{margin:.1em 0 .6em;padding-left:1.3em}
+.lr-main .lr-qf li{margin:.2em 0}
+.lr-main .lr-qf>:last-child{margin-bottom:0}
+.lr-main .lr-qf strong{font-weight:700}
 
 html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-tile);--line:var(--lr-line);--fg:var(--lr-ink);--muted:var(--lr-mut);
   --accent:var(--lr-acc);--accent-soft:var(--lr-acc-soft);--ok:var(--lr-ok);--ok-soft:var(--lr-ok-bg);--bad:var(--lr-bad);--bad-soft:var(--lr-bad-bg);
@@ -1734,7 +1762,7 @@ const T = [
 /* ----- A: Struktura programa in komentarji ----- */
 {lv:"A", own:true, pts:2, type:"blanks",
  snip:"public ___ Main {\n    public static void ___(String[] args) {\n        System.out.println(\"Pozdrav\")___\n    }\n}",
- q:"Dopolni najmanjši program v Javi: manjkajoče dele vpiši kar v kodo. Vrzeli so po vrsti od zgoraj navzdol: 1. ključna beseda, ki uvede razred, 2. ime metode, v kateri se izvajanje začne, 3. znak na koncu stavka.",
+ q:"Dopolni **najmanjši program v Javi**: manjkajoče dele vpiši kar v kodo.\n**Vrzeli** so po vrsti od zgoraj navzdol:\n- **1.** ključna beseda, ki uvede razred\n- **2.** ime metode, v kateri se izvajanje začne\n- **3.** znak na koncu stavka",
  b:[{l:"1. mesto: ključna beseda, ki uvede razred", acc:["class"], cs:true},
     {l:"2. mesto: ime metode, v kateri se izvajanje začne", acc:["main"], cs:true},
     {l:"3. mesto: znak na koncu stavka", acc:[";"], cs:true}],
@@ -1864,7 +1892,7 @@ const T = [
  why:"100 · 63 / 900 = 6300 / 900 = 7. Ker so vse spremenljivke tipa double, je rezultat double in se izpiše kot 7.0."},
 {lv:"C", src:"M252/4", pts:2, type:"code", hideExp:true,
  starter:ST, expected:["1.23","1,23"], solKey:"c6",
- q:"Napiši izsek programa, ki ustvari konstanto konst z vrednostjo 1.23456 in jo izpiše na dve decimalni mesti. Pričakovan izpis: 1.23 (na računalniku s slovenskimi nastavitvami printf izpiše vejico: 1,23, tudi to je pravilno).",
+ q:"Napiši izsek programa, ki ustvari **konstanto konst** z vrednostjo **1.23456** in jo izpiše na **dve decimalni mesti**.\n**Pričakovan izpis:** 1.23 (na računalniku s slovenskimi nastavitvami printf izpiše vejico: 1,23, tudi to je pravilno).",
  h:["Konstanta: final double konst = 1.23456;","Izpis na dve decimalni mesti: System.out.printf(\"%.2f%n\", konst);"],
  why:"Konstanto deklariramo z final. Format %.2f zaokroži in izpiše dve decimalni mesti, %n pa preskoči v novo vrstico."},
 {lv:"C", own:true, pts:2, type:"cls", cats:["nextInt()","nextDouble()","nextBoolean()","next()","next().charAt(0)"],
@@ -1898,7 +1926,7 @@ const T = [
  why:"nextInt() prebere število 5, znak za novo vrstico pa ostane v vhodu. nextLine() prebere preostanek te vrstice, ki je prazen. Zato po nextInt() pred nextLine() pogosto dodamo še en klic sc.nextLine()."},
 {lv:"C", own:true, pts:2, type:"code",
  starter:ST, expected:"Ana (2008): 1.68 m", solKey:"c12",
- q:"Ana, rojena leta 2008, je visoka 1.68 m. Shrani podatke v spremenljivke ustreznih tipov (ime je String, leto int, višina double; vrednosti zapiši kar v kodo) in izpiši natanko to besedilo, pri čemer vrednosti vzemi iz spremenljivk.",
+ q:"**Ana**, rojena leta **2008**, je visoka **1.68 m**.\nShrani podatke v spremenljivke ustreznih tipov (ime je **String**, leto **int**, višina **double**; vrednosti zapiši kar v kodo) in izpiši natanko to besedilo, pri čemer vrednosti vzemi **iz spremenljivk**.",
  h:["String ime = \"Ana\"; int leto = 2008; double visina = 1.68;","Izpis sestavi z operatorjem +: ime + \" (\" + leto + \"): \" + visina + \" m\""],
  why:"Če bi bila leto ali višina tipa String, bi izpis izgledal enako, vendar s tem ne bi mogli računati. Pravilni tipi so String, int in double. Pri vnosu s Scannerjem bi uporabili next(), nextInt() in nextDouble()."},
 
@@ -1927,7 +1955,7 @@ const T = [
  h:["Stavek mora vrednost 36 spremeniti v 12, torej jo deliti s 3 in rezultat shraniti nazaj v x.","Ali je x / 3; sam zase veljaven stavek?"],
  why:"x /= 3; je enako kot x = x / 3;, torej 36 / 3 = 12. Stavka x % 3; in x / 3; ne spremenita x (prvi sploh ni veljaven stavek). x = x % 3; da 0, x = (x / 3) % 3; pa 12 % 3 = 0."},
 {lv:"D", src:"M212/9", pts:1, type:"blanks",
- q:"V programu imamo celoštevilsko spremenljivko stevilo. Zapišite stavek, ki vrednosti v spremenljivki stevilo odreže najbolj desno števko (števko, ki predstavlja enice). Primer: vrednost 123456 po taki operaciji postane 12345.",
+ q:"V programu imamo celoštevilsko spremenljivko **stevilo**. Zapišite stavek, ki vrednosti v spremenljivki stevilo **odreže najbolj desno števko** (števko, ki predstavlja enice).\n**Primer:** vrednost 123456 po taki operaciji postane 12345.",
  b:[{l:"Stavek", acc:["stevilo = stevilo / 10;","stevilo = stevilo / 10","stevilo /= 10;","stevilo /= 10","stevilo = (stevilo - stevilo % 10) / 10;"], code:true}],
  h:["Pri celoštevilskem deljenju se decimalni del odreže.","Katero število moramo deliti, da odrežemo eno števko?"],
  why:"Celoštevilsko deljenje z 10 odreže zadnjo števko: 123456 / 10 = 12345. Zapišemo stevilo = stevilo / 10; ali krajše stevilo /= 10;."},
@@ -1944,7 +1972,7 @@ const T = [
  why:"a = x++ shrani staro vrednost (a = 1), nato se x poveča na 2. b = ++x najprej poveča x na 3 in to vrednost shrani v b (b = 3)."},
 {lv:"D", src:"M202/5", pts:2, type:"blanks",
  snip:"int a = 10;\nint b;\nb = a++;\nb = ++a;",
- q:"Podani sta deklaraciji int a = 10; in int b;. Zapišite vrednosti obeh spremenljivk po izvedbi vsakega od stavkov b = a++; in b = ++a; (stavka se izvedeta drug za drugim).",
+ q:"Podani sta deklaraciji **int a = 10;** in **int b;**.\nZapišite vrednosti obeh spremenljivk po izvedbi vsakega od stavkov **b = a++;** in **b = ++a;** (stavka se izvedeta **drug za drugim**).",
  b:[{l:"po b = a++;  a =", acc:["11"]},{l:"po b = a++;  b =", acc:["10"]},{l:"po b = ++a;  a =", acc:["12"]},{l:"po b = ++a;  b =", acc:["12"]}],
  h:["Začni z a = 10. Po prvem stavku ima a novo vrednost, ki jo uporabi drugi stavek."],
  why:"b = a++: b dobi staro vrednost 10, a postane 11. b = ++a: a postane 12, b dobi novo vrednost 12."},
@@ -1957,7 +1985,7 @@ const T = [
 {lv:"D", src:"M202/2", pts:2, type:"code", adapt:true, hideExp:true,
  starter:"public class Main {\n    public static void main(String[] args) {\n        double a = 2, b = 6, c = 4;\n        double x = 0; // namesto 0 zapiši izraz\n        System.out.println(x);\n    }\n}",
  expected:"2.0", solKey:"d10",
- q:"Napišite naslednji izraz v programskem jeziku Java: x = (b + √(b² − 4ac)) / (2a). Izračunaj ga za a = 2, b = 6, c = 4. Pričakovan izpis: 2.0. Korenjenje: Math.sqrt(...).",
+ q:"Napišite naslednji izraz v programskem jeziku Java: **x = (b + √(b² − 4ac)) / (2a)**.\nIzračunaj ga za **a = 2, b = 6, c = 4**. **Pričakovan izpis:** 2.0.\n**Korenjenje:** Math.sqrt(...).",
  h:["Števec in imenovalec vzemi vsakega posebej, potem ju deli. Ne pozabi na oklepaje.","Imenovalec je 2 * a, v oklepajih: (2 * a). Števec je celoten izraz b + Math.sqrt(...), tudi v oklepajih.","Kvadrat b zapišemo kot b * b ali Math.pow(b, 2)."],
  why:"Izraz (b + Math.sqrt(b * b - 4 * a * c)) / (2 * a) za dane vrednosti da (6 + 2) / 4 = 2.0. Uradna rešitev uporablja Math.pow(b, 2). Brez oklepajev okoli imenovalca bi program delil samo z 2 in nato množil z a (8 / 2 · 2 = 8.0), brez oklepajev okoli števca pa bi delil samo koren (6 + 2 / 4 = 6.5)."},
 
@@ -2187,7 +2215,7 @@ function card(t){
   if(t.code) body += `<pre class="code">${hl(t.code)}</pre>`;
   if(t.code && t.type!=="output") body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="code">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`;
   if(t.snip) body += `<pre class="code">${hl(t.snip)}</pre>`;
-  body += `<p>${esc(t.q)}</p>`;
+  body += `<p class="qtext">${esc(t.q)}</p>`;
   if(t.fcq) body += `<div class="fig">${FLOW.svg(t.fcq)}</div>`;
   if(t.type==="mc"){
     const multi = t.a.length>1;

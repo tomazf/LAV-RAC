@@ -403,8 +403,28 @@
     s.page.append(head, locked, body, buildPager(s));
     if (s.el) s.el.remove();
   }
+  // Long task statements can carry light markup: **bold** words, one paragraph per line, lines starting with "- " as a list.
+  // Only statements that contain ** are rebuilt; the markers are not part of the text the importer stores.
+  function formatQ(q) {
+    if (q.children.length || !/\*\*/.test(q.textContent)) return;
+    const box = h('div', { class: q.className + ' lr-qf' });
+    const inline = (parent, text) => text.split(/\*\*(.+?)\*\*/).forEach((part, j) => { if (part) parent.append(j % 2 ? h('strong', null, part) : part); });
+    let ul = null;
+    q.textContent.split('\n').map((l) => l.trim()).filter(Boolean).forEach((line) => {
+      if (/^- /.test(line)) {
+        if (!ul) { ul = h('ul'); box.append(ul); }
+        const li = h('li'); inline(li, line.slice(2)); ul.append(li);
+        return;
+      }
+      ul = null;
+      const p = h('p'); inline(p, line); box.append(p);
+    });
+    q.replaceWith(box);
+  }
+
   function prepareCard(card, i, k, n, sel) {
     const task = TASKS[i].task;
+    card.querySelectorAll('.qtext').forEach(formatQ);
     card.hidden = false;
     card.id = 't' + i;
     card.classList.add('lr-task');
@@ -731,7 +751,7 @@
     const tasks = [];
     pages.filter((p) => p.kind === 'set').forEach((s) => s.tasks.forEach((t) => {
       const src = TASKS[t.idx].task;
-      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
+      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\*\*/g, '').replace(/\n- /g, '\n').replace(/\s+/g, ' ').trim().slice(0, 160) });
     }));
     tasks.sort((a, b) => a.i - b.i);
     return {
@@ -1345,6 +1365,14 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 }
 @media (max-width:340px){.lr-top-in{--lr-notelab:none}}
 @media (prefers-reduced-motion:reduce){.lr *{transition:none!important}}
+
+/* long task statements with light markup (formatQ in vaja.js): paragraphs, bold key words, short lists */
+.lr-main .lr-qf{white-space:normal;text-align:left}
+.lr-main .lr-qf p{margin:0 0 .6em}
+.lr-main .lr-qf ul{margin:.1em 0 .6em;padding-left:1.3em}
+.lr-main .lr-qf li{margin:.2em 0}
+.lr-main .lr-qf>:last-child{margin-bottom:0}
+.lr-main .lr-qf strong{font-weight:700}
 
 html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-tile);--line:var(--lr-line);--fg:var(--lr-ink);--muted:var(--lr-mut);
   --accent:var(--lr-acc);--accent-soft:var(--lr-acc-soft);--ok:var(--lr-ok);--ok-soft:var(--lr-ok-bg);--bad:var(--lr-bad);--bad-soft:var(--lr-bad-bg);
@@ -2207,7 +2235,7 @@ er(flipAt(fullM([[1,1,0,1,0],[0,1,1,0,1],[1,0,0,1,1],[0,0,1,1,1]],"even"),1,5),"
   add(3, 2, {
     t: "num", fixed: 1, ans: d[1], lab: "Obnovljeni Disk 2 (8 bitov)",
     fig: al([{ l: "Disk 1", s: d[0] }, { l: "Disk 2", s: "????????" }, { l: "Disk 3", s: d[2], ln: true }, { l: "Disk P", s: P }]),
-    q: "Sistem RAID 5 ima tri diske s podatki in paritetni disk P. Paritetni disk je izbran tako, da je v vsakem stolpcu število enic na vseh štirih diskih sodo. Disk 2 je odpovedal. Iz preostalih diskov obnovi njegovih 8 bitov.",
+    q: "**Sistem RAID 5** ima tri diske s podatki in **paritetni disk P**. Paritetni disk je izbran tako, da je v vsakem stolpcu število enic na vseh štirih diskih **sodo**.\n**Disk 2** je odpovedal. Iz preostalih diskov obnovi njegovih **8 bitov**.",
     h: ["V vsakem stolpcu je število enic na vseh štirih diskih sodo. Če manjka en bit, ga dopolniš do sodega števila enic.",
       `Računaj stolpec za stolpcem: Disk 1 XOR Disk 3 XOR Disk P. V prvem stolpcu je ${d[0][0]} XOR ${d[2][0]} XOR ${P[0]} = ${d[1][0]}.`],
     sol: `<p>Vsak bit Diska 2 je XOR istoležnih bitov preostalih treh diskov:</p>${al([{ l: "Disk 1", s: d[0] }, { l: "Disk 3", s: d[2] }, { l: "Disk P", s: P, ln: true }, { l: "XOR = Disk 2", s: d[1], k: "res" }])}<p>Prvi stolpec: ${d[0][0]} XOR ${d[2][0]} XOR ${P[0]} = ${d[1][0]}. Tako dobiš vseh osem bitov: <b>${d[1]}</b>.</p>`

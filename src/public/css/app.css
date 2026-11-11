@@ -152,6 +152,9 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 .matrix th a{font-family:var(--fm)}
 .matrix td{padding:6px 8px;text-align:center}
 .matrix .l{text-align:left}
+.matrix .rn{display:inline-block;min-width:1.6em;margin-right:2px;color:var(--mut);font-variant-numeric:tabular-nums;text-align:right}
+.data .n{width:1%;white-space:nowrap;text-align:right;color:var(--mut);font-variant-numeric:tabular-nums}
+.note.one-line{white-space:nowrap;overflow-x:auto}
 .matrix .stick{position:sticky;left:0;background:var(--bg);z-index:1;white-space:nowrap;max-width:210px;overflow:hidden;text-overflow:ellipsis}
 .heat{position:relative;width:58px;min-width:52px;height:42px;border-radius:4px;padding:0!important;background:rgba(var(--heat),calc(.08 + var(--p) * .0052));font:500 .95rem var(--fm)}
 .hn{color:var(--mut)}

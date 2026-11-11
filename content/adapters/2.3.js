@@ -2,6 +2,7 @@
 // one answer per task, four theory groups, and for the assembler tasks a test run that does not count before
 // the answer is handed in ("Oddaj" counts and locks, also when tests fail).
 
+import { statements } from './qformat.js';
 const ICONS = {
   procesor: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="12" y="12" width="24" height="24" rx="3"/><rect x="19" y="19" width="10" height="10" class="fill" opacity=".35"/><path d="M18 5v7M24 5v7M30 5v7M18 36v7M24 36v7M30 36v7M5 18h7M5 24h7M5 30h7M36 18h7M36 24h7M36 30h7"/></svg>',
   zbirnik: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="8" width="38" height="32" rx="3"/><text x="10" y="22" font-size="10">LDAA</text><text x="10" y="34" font-size="10">STAA</text></svg>',
@@ -70,5 +71,64 @@ export default {
     ['  applyFilter(); showPage(cur, true);\n', '  applyFilter();\n'],
     ['window.addEventListener("hashchange",()=>showPage(location.hash.slice(1)));', ''],
     ["cur = location.hash.slice(1) || PAGES[0][0];\nrenderAll();\nprogress();\nmountWidgets();\nif(location.hash){ setTimeout(()=>window.scrollTo(0,0), 0); window.addEventListener(\"load\",()=>window.scrollTo(0,0)); }", ZAGON],
+    // Long statements: paragraphs and bold key words (11. 11. 2026), the same way as in LAV-RAČ2 chapter 2.
+    ...statements([
+      [
+        "Beseda Dijak ima 5 znakov. Koliko bitov porabi, če jo kodiramo z osnovno ASCII (7 bitov na znak)? Koliko, če uporabimo razširjeno ASCII (8 bitov na znak)?",
+        "Beseda **Dijak** ima **5 znakov**. Koliko bitov porabi, če jo kodiramo z **osnovno ASCII** (7 bitov na znak)?\nKoliko, če uporabimo **razširjeno ASCII** (8 bitov na znak)?",
+      ],
+      [
+        "Pošiljatelj je poslal 10-bitno nenegativno celo število 300, prejemnik pa je prejel 316. Pri prenosu je bil napačen natanko en bit. Najbolj desni bit ima zaporedno številko 0. V katerem bitu je napaka?",
+        "**Pošiljatelj** je poslal 10-bitno nenegativno celo število **300**, **prejemnik** pa je prejel **316**. Pri prenosu je bil napačen **natanko en bit**.\nNajbolj desni bit ima zaporedno številko **0**. V katerem bitu je napaka?",
+      ],
+      [
+        "Za preverjanje pravilnosti prenosa izračunaj sodo pariteto: paritetni bit za vsako vrstico (desni stolpec, od zgoraj navzdol), paritetni bit za vsak stolpec (spodnja vrstica, od leve) in vogalni bit.",
+        "Za preverjanje pravilnosti prenosa izračunaj **sodo pariteto**:\n- **paritetni bit za vsako vrstico** (desni stolpec, od zgoraj navzdol)\n- **paritetni bit za vsak stolpec** (spodnja vrstica, od leve)\n- **vogalni bit**",
+      ],
+      [
+        "Pri prenosu smo izračunali sodo pariteto (zadnji stolpec in zadnja vrstica sta paritetna). Pri prenosu je bil napačen natanko en bit. V kateri vrstici in v katerem stolpcu je napaka? Štej od 1, od zgoraj in od leve.",
+        "Pri prenosu smo izračunali **sodo pariteto** (zadnji stolpec in zadnja vrstica sta paritetna). Pri prenosu je bil napačen **natanko en bit**.\nV kateri **vrstici** in v katerem **stolpcu** je napaka? Štej od 1, od zgoraj in od leve.",
+      ],
+      [
+        "Naslovno vodilo je široko 12 bitov. Koliko pomnilniških lokacij lahko CPE naslovi? Koliko bitov mora imeti naslovno vodilo, da naslovimo 1 MiB (1 048 576) bajtnih lokacij?",
+        "Naslovno vodilo je široko **12 bitov**. Koliko pomnilniških lokacij lahko CPE naslovi?\nKoliko bitov mora imeti naslovno vodilo, da naslovimo **1 MiB** (1 048 576) bajtnih lokacij?",
+      ],
+      [
+        "Program se začne na naslovu $0100. Ukazi so po vrsti dolgi: LDAA #$0A (2 bajta), ADDA $20 (2 bajta), LDX #$0030 (3 bajti), WAI (1 bajt). Kakšen je PC, ko CPE prevzema ukaz WAI? Koliko bajtov zavzame ves program?",
+        "Program se začne na naslovu **$0100**. Ukazi so po vrsti dolgi:\n- **LDAA #$0A** (2 bajta)\n- **ADDA $20** (2 bajta)\n- **LDX #$0030** (3 bajti)\n- **WAI** (1 bajt)\nKakšen je **PC**, ko CPE prevzema ukaz WAI?\nKoliko bajtov zavzame **ves program**?",
+      ],
+      [
+        "Na naslovu $30 je število 23 (desetiško). Kaj je po izvedbi treh ukazov v registru B? Zapiši šestnajstiško in desetiško kot predznačeno število (dvojiški komplement).",
+        "Na naslovu **$30** je število **23** (desetiško). Kaj je po izvedbi treh ukazov v registru B?\nZapiši **šestnajstiško** in **desetiško kot predznačeno število** (dvojiški komplement).",
+      ],
+      [
+        "Sklad raste proti nižjim naslovom: ukaz PSH zapiše podatek na naslov SP in nato SP zmanjša, ukaz PUL najprej SP poveča in nato prebere podatek. Na kateri naslov se zapiše A? Kaj je po koncu v A? Kakšen je SP? (šestnajstiško)",
+        "Sklad raste proti **nižjim naslovom**:\n- ukaz **PSH** zapiše podatek na naslov SP in nato SP **zmanjša**\n- ukaz **PUL** najprej SP **poveča** in nato prebere podatek\nNa kateri **naslov** se zapiše A? Kaj je po koncu v **A**? Kakšen je **SP**? (šestnajstiško)",
+      ],
+      [
+        "Dostop do predpomnilnika traja 2 ns, do glavnega pomnilnika 100 ns. Predpomnilnik je zadel pri 95 % dostopov. Koliko je povprečni čas dostopa (v ns)? Kolikokrat je to hitreje od dostopa samo do glavnega pomnilnika (zaokroži na eno decimalko)?",
+        "Dostop do **predpomnilnika** traja **2 ns**, do **glavnega pomnilnika** **100 ns**. Predpomnilnik je zadel pri **95 %** dostopov.\nKoliko je **povprečni čas dostopa** (v ns)?\nKolikokrat je to hitreje od dostopa samo do glavnega pomnilnika (zaokroži na eno decimalko)?",
+      ],
+      [
+        "Predpomnilnik hrani bloke po 4 bajte (naslovi 0–3 so blok 0, 4–7 blok 1 …) in je na začetku prazen. Program po vrsti bere naslove na sliki. Ob zgrešku se v predpomnilnik prenese cel blok. Koliko je zadetkov in koliko zgreškov?",
+        "Predpomnilnik hrani bloke po **4 bajte** (naslovi 0–3 so blok 0, 4–7 blok 1 …) in je na začetku **prazen**. Program po vrsti bere naslove na sliki. Ob **zgrešku** se v predpomnilnik prenese **cel blok**.\nKoliko je **zadetkov** in koliko **zgreškov**?",
+      ],
+      [
+        "Pri dostopih iz prejšnje naloge je delež zadetkov 6/8 = 75 %. Dostop do predpomnilnika traja 1 ns, do glavnega pomnilnika 100 ns. Koliko je povprečni čas dostopa (ns)?",
+        "Pri dostopih iz prejšnje naloge je delež zadetkov 6/8 = **75 %**. Dostop do predpomnilnika traja **1 ns**, do glavnega pomnilnika **100 ns**.\nKoliko je **povprečni čas dostopa** (ns)?",
+      ],
+      [
+        "Procesor ima cevovod s 5 stopnjami. V tabeli sta vrisana prva dva ukaza. V katerem taktu se konča 4. ukaz? V katerem taktu bi se končal 4. ukaz brez cevovoda?",
+        "Procesor ima **cevovod s 5 stopnjami**. V tabeli sta vrisana prva dva ukaza.\nV katerem taktu se konča **4. ukaz**?\nV katerem taktu bi se končal 4. ukaz **brez cevovoda**?",
+      ],
+      [
+        "Prenesti moramo 4 bajte. Vzporedna povezava ima 8 podatkovnih linij, serijska eno. V vsakem taktu gre po vsaki liniji en bit. Koliko taktov potrebuje vzporedni in koliko serijski prenos (pri enakem taktu)?",
+        "Prenesti moramo **4 bajte**. **Vzporedna** povezava ima 8 podatkovnih linij, **serijska** eno. V vsakem taktu gre po vsaki liniji en bit.\nKoliko taktov potrebuje **vzporedni** in koliko **serijski** prenos (pri enakem taktu)?",
+      ],
+      [
+        "Za vsak opis zapiši primer dveh binarnih števil z osmimi biti (x in y) ali NE OBSTAJA, če takih števil ni.\n1) x je večji od y in ima manj enic kot y.\n2) x in y sta različni števili z enako liho pariteto (liho število enic).\n3) Najbolj levi bit x je različen od najbolj levega bita y, obe števili sta večji od 127.",
+        "Za vsak opis zapiši primer dveh **binarnih števil z osmimi biti** (x in y) ali **NE OBSTAJA**, če takih števil ni.\n**1)** x je večji od y in ima **manj enic** kot y.\n**2)** x in y sta **različni** števili z enako **liho pariteto** (liho število enic).\n**3)** **Najbolj levi bit** x je različen od najbolj levega bita y, obe števili sta večji od 127.",
+      ],
+    ]),
   ],
 };

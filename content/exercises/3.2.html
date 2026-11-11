@@ -403,8 +403,28 @@
     s.page.append(head, locked, body, buildPager(s));
     if (s.el) s.el.remove();
   }
+  // Long task statements can carry light markup: **bold** words, one paragraph per line, lines starting with "- " as a list.
+  // Only statements that contain ** are rebuilt; the markers are not part of the text the importer stores.
+  function formatQ(q) {
+    if (q.children.length || !/\*\*/.test(q.textContent)) return;
+    const box = h('div', { class: q.className + ' lr-qf' });
+    const inline = (parent, text) => text.split(/\*\*(.+?)\*\*/).forEach((part, j) => { if (part) parent.append(j % 2 ? h('strong', null, part) : part); });
+    let ul = null;
+    q.textContent.split('\n').map((l) => l.trim()).filter(Boolean).forEach((line) => {
+      if (/^- /.test(line)) {
+        if (!ul) { ul = h('ul'); box.append(ul); }
+        const li = h('li'); inline(li, line.slice(2)); ul.append(li);
+        return;
+      }
+      ul = null;
+      const p = h('p'); inline(p, line); box.append(p);
+    });
+    q.replaceWith(box);
+  }
+
   function prepareCard(card, i, k, n, sel) {
     const task = TASKS[i].task;
+    card.querySelectorAll('.qtext').forEach(formatQ);
     card.hidden = false;
     card.id = 't' + i;
     card.classList.add('lr-task');
@@ -731,7 +751,7 @@
     const tasks = [];
     pages.filter((p) => p.kind === 'set').forEach((s) => s.tasks.forEach((t) => {
       const src = TASKS[t.idx].task;
-      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
+      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\*\*/g, '').replace(/\n- /g, '\n').replace(/\s+/g, ' ').trim().slice(0, 160) });
     }));
     tasks.sort((a, b) => a.i - b.i);
     return {
@@ -1187,6 +1207,14 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 }
 @media (max-width:340px){.lr-top-in{--lr-notelab:none}}
 @media (prefers-reduced-motion:reduce){.lr *{transition:none!important}}
+
+/* long task statements with light markup (formatQ in vaja.js): paragraphs, bold key words, short lists */
+.lr-main .lr-qf{white-space:normal;text-align:left}
+.lr-main .lr-qf p{margin:0 0 .6em}
+.lr-main .lr-qf ul{margin:.1em 0 .6em;padding-left:1.3em}
+.lr-main .lr-qf li{margin:.2em 0}
+.lr-main .lr-qf>:last-child{margin-bottom:0}
+.lr-main .lr-qf strong{font-weight:700}
 
 html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-tile);--line:var(--lr-line);--fg:var(--lr-ink);--muted:var(--lr-mut);
   --accent:var(--lr-acc);--accent-soft:var(--lr-acc-soft);--ok:var(--lr-ok);--ok-soft:var(--lr-ok-bg);--bad:var(--lr-bad);--bad-soft:var(--lr-bad-bg);
@@ -1818,7 +1846,7 @@ const T = [
  why:"Če je ostanek pri deljenju z 2 enak 0, je število sodo. Za 7 je ostanek 1 (liho), za 12 je 0 (sodo)."},
 {lv:"D", own:true, pts:2, type:"blanks",
  fcq:[p("i = 1"), wh("i <= 3",[out("i"), p("i = i + 1")])],
- q:"Bloki so oštevilčeni od zgoraj navzdol: 1 je i = 1, 2 je pogoj i <= 3, 3 je izpis vrednosti i, 4 je i = i + 1. Zapiši zaporedje blokov, ki se izvedejo (številke ločene s presledki). Pogoj šteje kot blok vsakič, ko ga preverimo.",
+ q:"Bloki so oštevilčeni od zgoraj navzdol:\n- **1**: i = 1\n- **2**: pogoj i <= 3\n- **3**: izpis vrednosti i\n- **4**: i = i + 1\nZapiši **zaporedje blokov**, ki se izvedejo (številke ločene s presledki). **Pogoj** šteje kot blok **vsakič**, ko ga preverimo.",
  b:[{l:"Zaporedje blokov", acc:["1 2 3 4 2 3 4 2 3 4 2","1, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2"], code:true},{l:"Koliko jih je skupaj", acc:["11"]}],
  h:["Blok 1 se izvede samo enkrat, na začetku. Nato se ponavlja trojica 2, 3, 4.","Zanka se konča, ko pogoj (blok 2) ne drži: to je zadnji blok v zaporedju."],
  why:"Najprej blok 1 (i = 1). Nato pogoj 2 preverimo štirikrat: za i = 1, 2, 3 drži (izvedeta se bloka 3 in 4), za i = 4 ne drži. Zaporedje je 1 2 3 4 2 3 4 2 3 4 2, torej 11 blokov. Izpiše se 1, 2, 3."},
@@ -1863,7 +1891,7 @@ const T = [
 
 /* ----- E: Narišem diagram poteka ----- */
 {lv:"E", own:true, pts:1, type:"blanks", draw:true,
- q:"Rešen primer: diagram poteka za program, ki prebere dve celi števili ter izpiše njuno vsoto in nato njun zmnožek, je spodaj. Nariši ga v Flowgorithm in preveri, ali za vhod 6 in 7 izpiše pravilno.",
+ q:"**Rešen primer:** diagram poteka za program, ki prebere **dve celi števili** ter izpiše njuno **vsoto** in nato njun **zmnožek**, je spodaj.\nNariši ga v **Flowgorithm** in preveri, ali za vhod **6 in 7** izpiše pravilno.",
  b:[{l:"Za vhod 6 in 7 se izpiše (vsota in zmnožek, ločena s presledkom)", acc:sp(13,42)}],
  h:["Potrebuješ simbol za vhod in simbola za izhod. Pravokotnik ni nujen: izraz a + b lahko zapišeš kar v izpisu."],
  fc:[inp("a", "b"), out("a + b"), out("a * b")], jsol:"e1",
@@ -1917,7 +1945,7 @@ const T = [
  fc:[inp("a", "b"), IF("a < 0",[p("k = -a")],[p("k = a")]), p("i = 0"), wh("i < k",[out("b"), p("i = i + 1")])], jsol:"e6",
  why:"k je absolutna vrednost prvega števila. Zanka izpiše b natanko k-krat. Pri a = −6 je k = 6, pri a = 0 pa se ne izpiše nič."},
 {lv:"E", src:"M211/5", pts:2, type:"blanks", draw:true,
- q:"Nariši diagram poteka, s katerim prebereš 2 naravni števili in znak. Algoritem naj izpiše prebrani znak tolikokrat, kot je razlika med manjšo in večjo prebrano vrednostjo. Primer: če je vrednost prvega prebranega števila 5, drugega 8 in prebrani znak G, algoritem izpiše GGG.",
+ q:"Nariši diagram poteka, s katerim prebereš **2 naravni števili** in **znak**. Algoritem naj izpiše prebrani znak **tolikokrat, kot je razlika** med manjšo in večjo prebrano vrednostjo.\n**Primer:** če je vrednost prvega prebranega števila 5, drugega 8 in prebrani znak G, algoritem izpiše **GGG**.",
  b:[{l:"Za 12, 4 in * se znak izpiše ... krat", acc:["8"]},{l:"Za 7, 7 in X se znak izpiše ... krat", acc:["0"]}],
  h:["Razlika mora biti vedno pozitivna, ne glede na to, katero število je večje. Uporabi vejitev.","Ko imaš razliko k, je preostanek enak kot pri prejšnji nalogi: zanka s števcem."],
  fc:[inp("a", "b", "z"), IF("a > b",[p("k = a - b")],[p("k = b - a")]), p("i = 0"), wh("i < k",[out("z"), p("i = i + 1")])], jsol:"e7",
@@ -1935,7 +1963,7 @@ const T = [
  fc:[p("s = 0"), p("n = 0"), inp("x"), wh("x != 0",[p("s = s + x"), p("n = n + 1"), inp("x")]), out("s / n")], jsol:"e11",
  why:"Branje naredimo pred zanko in še enkrat na koncu vsakega kroga, tako da pogoj vedno preverja zadnje prebrano število. Povprečje je s / n. Pazi, da pri celih številih deljenje v Javi zaokroži navzdol: za 7,5 mora biti vsaj eno število realno."},
 {lv:"E", src:"M212/2", pts:3, type:"blanks", draw:true,
- q:"Uporabnik vnaša pare celih števil. Program vsoti prišteje obe števili iz para le, če je prvo število v paru večje kot drugo. Postopek se konča, ko je dobljena vsota večja kot 50. Nato program izpiše, koliko parov števil je bilo vpisanih. Nariši diagram poteka za ta program.",
+ q:"Uporabnik vnaša **pare celih števil**. Program vsoti prišteje obe števili iz para **le, če je prvo število v paru večje** kot drugo.\nPostopek se konča, ko je dobljena **vsota večja kot 50**. Nato program izpiše, **koliko parov števil** je bilo vpisanih.\nNariši diagram poteka za ta program.",
  b:[{l:"Za pare (5, 2), (1, 9), (30, 10), (40, 3) izpiše", acc:["4"]},{l:"Če je prvi par (60, 1), izpiše", acc:["1"]}],
  h:["Potrebuješ vsoto in števec parov. Vsak par prebereš in prešteješ, ne glede na to, ali ga prišteješ vsoti.","Pogoj za konec (vsota > 50) preveriš po vsakem prebranem paru. Primerna je zanka s pogojem na koncu."],
  fc:[p("vsota = 0"), p("n = 0"), dw("vsota <= 50",[inp("a", "b"), p("n = n + 1"), IF("a > b",[p("vsota = vsota + a + b")])]), out("n")], jsol:"e10",
@@ -1948,7 +1976,7 @@ const T = [
  fc:[p("x = 3"), p("y = x + 7"), p("x = x + 1"), wh("x < 9",[p("y = x + 7"), out("x"), p("x = x + 1")]), out("x")], jsol:"e12",
  why:"Zanka while postane romb s pogojem x < 9. Program izpiše 4, 5, 6, 7, 8 (v zanki) in nato še 9 (za zanko)."},
 {lv:"E", own:true, pts:3, type:"blanks", draw:true,
- q:"Nariši diagram poteka Evklidovega algoritma: prebere dve naravni števili a in b in izpiše njun največji skupni delitelj. Postopek: dokler b ni 0, izračunaj ostanek t = a % b, nato a postane b in b postane t. Rezultat je a.",
+ q:"Nariši diagram poteka **Evklidovega algoritma**: prebere dve naravni števili **a** in **b** in izpiše njun **največji skupni delitelj**.\n**Postopek:** dokler b ni 0, izračunaj ostanek **t = a % b**, nato a postane b in b postane t.\n**Rezultat** je a.",
  b:[{l:"Za 48 in 36 se izpiše", acc:["12"]},{l:"Za 17 in 5 se izpiše", acc:["1"]}],
  h:["Pogoj zanke je b != 0.","V telesu zanke potrebuješ pomožno spremenljivko t, da ne izgubiš stare vrednosti."],
  fc:[inp("a", "b"), wh("b != 0",[p("t = a % b"), p("a = b"), p("b = t")]), out("a")], jsol:"e13",
@@ -2133,7 +2161,7 @@ function card(t){
   let body = "";
   if(t.code) body += `<pre class="code">${hl(t.code)}</pre>`;
   if(t.code && t.type!=="output") body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="code">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`;
-  body += `<p>${esc(t.q)}</p>`;
+  body += `<p class="qtext">${esc(t.q)}</p>`;
   if(t.fcq) body += `<div class="fig">${FLOW.svg(t.fcq,{num:t.lv==="D"||(t.lv==="C")})}</div>`;
   if(t.type==="mc"){
     const multi = t.a.length>1;

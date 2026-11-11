@@ -1529,6 +1529,73 @@ test('4.1: relational algebra: four theory groups, the revision set is last, an 
   assert.deepEqual(errors, []);
 });
 
+test('2.2: A15 has its expressions as buttons with a bar over the whole expression, the symbol keys work on the first click, long statements are laid out', async () => {
+  const ex = catalog.exercises.find((e) => e.id === '2.2');
+  // the markup of the statements is never stored in the catalog
+  assert.ok(ex.tasks.every((t) => !/\*\*/.test(t.q)));
+  const a = await login('Sara Skrbnik');
+  await a.goto(`${APP}/vaje/2.2#pregled`);
+  await at(a, 'pregled');
+  // A15: no drop-down, four expression buttons per gate, every expression has one bar (an .ov frame), not one mark per letter
+  await go(a, 'naloge-a/15');
+  assert.equal(await card(a).locator('select').count(), 0);
+  assert.equal(await card(a).locator('.crow').count(), 4);
+  const first = card(a).locator('.crow').first().locator('button');
+  assert.equal(await first.count(), 4);
+  assert.equal(await first.first().locator('.ov').count(), 1);
+  assert.doesNotMatch(await card(a).locator('.q').innerHTML(), /̅/);
+  // the right answers are accepted (NEIN, NEALI, XNOR, NE are expressions 1, 2, 3, 4)
+  const rows = card(a).locator('.crow');
+  for (let k = 0; k < 4; k++) await rows.nth(k).locator('button').nth(k).click();
+  await card(a).locator('.lr-check').click();
+  assert.equal(await card(a).getAttribute('data-lr'), 'ok');
+  // D13: a key pressed right after the negation key is entered the first time (the field keeps its focus)
+  await go(a, 'naloge-d/13');
+  const field = card(a).locator('input[data-prev]');
+  for (const k of ['¬', 'A', '·', '¬', 'D']) await card(a).locator(`.kp button[data-ins="${k}"]`).click();
+  assert.equal(await field.inputValue(), '¬A·¬D');
+  // D12: the statement is a list of inputs and outputs and paragraphs with the key words in bold
+  await go(a, 'naloge-d/12');
+  const q = card(a).locator('.lr-qf');
+  assert.equal(await q.locator('ul li').count(), 6);
+  assert.deepEqual(await q.locator('p strong').allTextContents(), ['Prezračevanje strojnice.', 'Vhodi', 'Izhoda:', 'Ventilator', 'ali', 'razen', 'Sirena', 'plin', 'ali']);
+  assert.match(await q.innerText(), /Sirena se oglaša, kadar je zaznan plin in je hkrati izpolnjen vsaj eden od obeh pogojev: temperatura je previsoka ali so vrata odprta\./);
+  assert.ok((await q.locator('p').count()) >= 5);
+  await a.context().close();
+  assert.deepEqual(errors, []);
+});
+
+test('long task statements are laid out as paragraphs, lists and bold words in every chapter that has them, and the markup never reaches the catalog', async () => {
+  // number of statements that carry the light markup (content/adapters/qformat.js, content/shell/vaja.js formatQ)
+  const laid = { '2.1': 1, '2.2': 20, '2.3': 14, '3.1': 5, '3.2': 5, '3.3': 6, '3.4': 3, '3.5': 8, '4.1': 0 };
+  assert.deepEqual(Object.keys(laid).sort(), catalog.exercises.map((e) => e.id).sort());
+  for (const ex of catalog.exercises) assert.ok(ex.tasks.every((t) => !/\*\*/.test(t.q) && !/\n/.test(t.q)), `${ex.id}: the catalog keeps plain one-line statements`);
+  const a = await login('Sara Skrbnik');
+  for (const [id, n] of Object.entries(laid)) {
+    await a.goto(`${APP}/vaje/${id}#pregled`);
+    await at(a, 'pregled');
+    assert.equal(await a.locator('.lr-qf').count(), n, `${id}: formatted statements`);
+    assert.equal(await a.locator('.lr-qf strong').count() > 0 || n === 0, true, `${id}: key words in bold`);
+    // the markers are consumed: no ** is left in any statement
+    assert.equal(await a.locator('.lr-task .qtext').evaluateAll((els) => els.filter((e) => e.textContent.includes('**')).length), 0, `${id}: no ** left in a statement`);
+  }
+  // 3.5 E1: the three possibilities are a list, the data to set are bold
+  await a.goto(`${APP}/vaje/3.5#pregled`);
+  await at(a, 'pregled');
+  await go(a, 'naloge-e/1');
+  assert.equal(await card(a).locator('.lr-qf ul li').count(), 3);
+  assert.match(await card(a).locator('.lr-qf strong').allInnerTexts().then((x) => x.join('|')), /k1 = 2, n1 = 1, k2 = -1, n2 = 4/);
+  await a.close();
+});
+
+test('no exercise carries an inline event handler attribute (the portal does not run them)', () => {
+  for (const e of catalog.exercises) {
+    const html = readFileSync(path.join(root, 'content/exercises', `${e.id}.html`), 'utf8');
+    const found = [...html.matchAll(/<[a-z][^<>]*\son[a-z]+\s*=\s*["'][^<>]*>/gi)].map((m) => m[0].slice(0, 80));
+    assert.deepEqual(found, [], `exercise ${e.id}`);
+  }
+});
+
 test('a self-checked task counts as done but never as points: the server forces 0, the teacher sees it apart', async () => {
   const ex = catalog.exercises.find((e) => e.id === '3.2');
   const selfIdx = ex.tasks.filter((t) => t.self).map((t) => t.i);

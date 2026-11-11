@@ -8,8 +8,9 @@
 </form>
 <% const assign = kind === 'waiting' && classes.length && users.length; %>
 <div class="scroll"><table class="data">
-  <thead><tr><th class="l">Uporabnik</th><th class="l">Vloga</th><th class="l">Razredi</th><th class="l">Zadnja prijava</th><% if (assign) { %><th class="l">Dodaj v razred</th><% } %><th class="l">Dejanja</th></tr></thead>
-  <tbody><% users.forEach((u) => { %><tr>
+  <thead><tr><th class="n">Št.</th><th class="l">Uporabnik</th><th class="l">Vloga</th><th class="l">Razredi</th><th class="l">Zadnja prijava</th><% if (assign) { %><th class="l">Dodaj v razred</th><% } %><th class="l">Dejanja</th></tr></thead>
+  <tbody><% users.forEach((u, i) => { %><tr>
+    <td class="n"><%= pg.from + i %></td>
     <td class="l"><strong><%= u.name %></strong><br><span class="dim"><%= u.username %></span></td>
     <td class="l nw"><span class="tag t-<%= u.kind %>"><%= ROLES[u.kind] %></span></td>
     <td class="l"><%= u.teaching || u.class_names || '' %></td>

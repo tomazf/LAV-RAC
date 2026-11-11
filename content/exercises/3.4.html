@@ -403,8 +403,28 @@
     s.page.append(head, locked, body, buildPager(s));
     if (s.el) s.el.remove();
   }
+  // Long task statements can carry light markup: **bold** words, one paragraph per line, lines starting with "- " as a list.
+  // Only statements that contain ** are rebuilt; the markers are not part of the text the importer stores.
+  function formatQ(q) {
+    if (q.children.length || !/\*\*/.test(q.textContent)) return;
+    const box = h('div', { class: q.className + ' lr-qf' });
+    const inline = (parent, text) => text.split(/\*\*(.+?)\*\*/).forEach((part, j) => { if (part) parent.append(j % 2 ? h('strong', null, part) : part); });
+    let ul = null;
+    q.textContent.split('\n').map((l) => l.trim()).filter(Boolean).forEach((line) => {
+      if (/^- /.test(line)) {
+        if (!ul) { ul = h('ul'); box.append(ul); }
+        const li = h('li'); inline(li, line.slice(2)); ul.append(li);
+        return;
+      }
+      ul = null;
+      const p = h('p'); inline(p, line); box.append(p);
+    });
+    q.replaceWith(box);
+  }
+
   function prepareCard(card, i, k, n, sel) {
     const task = TASKS[i].task;
+    card.querySelectorAll('.qtext').forEach(formatQ);
     card.hidden = false;
     card.id = 't' + i;
     card.classList.add('lr-task');
@@ -731,7 +751,7 @@
     const tasks = [];
     pages.filter((p) => p.kind === 'set').forEach((s) => s.tasks.forEach((t) => {
       const src = TASKS[t.idx].task;
-      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
+      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\*\*/g, '').replace(/\n- /g, '\n').replace(/\s+/g, ' ').trim().slice(0, 160) });
     }));
     tasks.sort((a, b) => a.i - b.i);
     return {
@@ -1187,6 +1207,14 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 }
 @media (max-width:340px){.lr-top-in{--lr-notelab:none}}
 @media (prefers-reduced-motion:reduce){.lr *{transition:none!important}}
+
+/* long task statements with light markup (formatQ in vaja.js): paragraphs, bold key words, short lists */
+.lr-main .lr-qf{white-space:normal;text-align:left}
+.lr-main .lr-qf p{margin:0 0 .6em}
+.lr-main .lr-qf ul{margin:.1em 0 .6em;padding-left:1.3em}
+.lr-main .lr-qf li{margin:.2em 0}
+.lr-main .lr-qf>:last-child{margin-bottom:0}
+.lr-main .lr-qf strong{font-weight:700}
 
 html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-tile);--line:var(--lr-line);--fg:var(--lr-ink);--muted:var(--lr-mut);
   --accent:var(--lr-acc);--accent-soft:var(--lr-acc-soft);--ok:var(--lr-ok);--ok-soft:var(--lr-ok-bg);--bad:var(--lr-bad);--bad-soft:var(--lr-bad-bg);
@@ -1934,13 +1962,13 @@ const T = [
  h:["Števke dobiš z / in %: n / 1000 je prva števka.","Obrnjeno število sestavi iz d, c, b, a po vrsti."],
  why:"Števke: a = 1, b = 2, c = 3, d = 4. Obrnjeno: 4 · 1000 + 3 · 100 + 2 · 10 + 1 = 4321."},
 {lv:"E", own:true, pts:2, type:"code", 
- q:"Program Stirimestno: napiši program, ki za število 1234 zamenja prvo in zadnjo števko, drugo in tretjo pa kvadrira in ohrani samo enice kvadrata. Izpiši dobljeno število.",
+ q:"**Program Stirimestno:** napiši program, ki za število **1234**:\n- **zamenja** prvo in zadnjo števko\n- drugo in tretjo števko **kvadrira** in ohrani samo **enice kvadrata**\nIzpiši dobljeno število.",
  hideExp:true, expected:"4491", starter:ST,
  sol:"public class Main {\n    public static void main(String[] args) {\n        int n = 1234;\n        int a = n / 1000, b = n / 100 % 10, c = n / 10 % 10, d = n % 10;\n        System.out.println(d * 1000 + (b * b % 10) * 100 + (c * c % 10) * 10 + a);\n    }\n}",
  h:["Enice kvadrata dobiš z ostankom pri deljenju z 10.","2 na kvadrat je 4, 3 na kvadrat je 9."],
  why:"Števke so 4, 2, 3, 1 po zamenjavi prve in zadnje. 2 · 2 = 4 (enice 4), 3 · 3 = 9. Rezultat je 4491."},
 {lv:"E", own:true, pts:2, type:"code", 
- q:"Program Zlitje: za trimestni števili 123 in 456 sestavi šestmestno število. Prva števka naj bo stotica prvega, druga stotica drugega, tretja in četrta desetici obeh, peta in šesta enici obeh. Izpiši rezultat.",
+ q:"**Program Zlitje:** za trimestni števili **123** in **456** sestavi **šestmestno število**:\n- **prva** števka naj bo stotica prvega\n- **druga** stotica drugega\n- **tretja in četrta** desetici obeh\n- **peta in šesta** enici obeh\nIzpiši rezultat.",
  hideExp:true, expected:"142536", starter:ST,
  sol:"public class Main {\n    public static void main(String[] args) {\n        int a = 123, b = 456;\n        int z = (a / 100) * 100000 + (b / 100) * 10000 + (a / 10 % 10) * 1000 + (b / 10 % 10) * 100 + (a % 10) * 10 + b % 10;\n        System.out.println(z);\n    }\n}",
  h:["Stotice dobiš z / 100, enice z % 10.","Desetice dobiš z / 10 in nato % 10."],
@@ -2054,7 +2082,7 @@ const T = [
  h:["Operator && deluje samo med logičnimi vrednostmi.","Ostanek pri deljenju z 2 je pri sodih številih 0."],
  why:"x % 2 == 0 in (x & 1) == 0 sta pravilna. (x / 2) == 0 velja samo za 0 in 1, (x - 2) == 0 samo za 2, izraz x && 1 se ne prevede, ker && ni definiran za cela števila."},
 {src:"M191/9", pts:2, lv:"E", type:"blanks",
- q:"V programu je x celoštevilska spremenljivka. Za vsakega izmed navedenih logičnih izrazov zapiši enakovreden logični izraz, pri čemer ne smeš uporabiti negacije.",
+ q:"V programu je **x** celoštevilska spremenljivka.\nZa vsakega izmed navedenih logičnih izrazov zapiši **enakovreden** logični izraz, pri čemer **ne smeš uporabiti negacije**.",
  b:[{l:"!(x >= 0)", acc:["x<0","0>x"], code:true},{l:"!(x != 0)", acc:["x==0","0==x"], code:true}],
  h:["Nasprotje od večji ali enak je manjši.","Negacija od različen je enak."],
  why:"!(x >= 0) je x < 0, !(x != 0) je x == 0."},
@@ -2208,7 +2236,7 @@ function card(t){
   if(t.code) body += `<pre class="code">${hl(t.code)}</pre>`;
   if(t.code && t.type!=="output") body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="code">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`;
   if(t.snip) body += `<pre class="code">${hl(t.snip)}</pre>`;
-  body += `<p>${esc(t.q)}</p>`;
+  body += `<p class="qtext">${esc(t.q)}</p>`;
   if(t.fcq) body += `<div class="fig">${FLOW.svg(t.fcq)}</div>`;
   if(t.type==="mc"){
     const multi = t.a.length>1;

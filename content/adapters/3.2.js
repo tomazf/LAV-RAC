@@ -2,6 +2,7 @@
 // answers typed as program output), one answer per task, three theory groups, the matura revision set moved among
 // the graded sets as "Ponavljanje" (agreed 8. 11. 2026), and the matura's diagram labels only (the switch was dropped 10. 11. 2026).
 
+import { statements, QTEXT } from './qformat.js';
 const ICONS = {
   zapis: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="10" y="5" width="28" height="38" rx="3"/><path d="M16 15h16M16 22h16M16 29h16M16 36h9"/></svg>',
   gradniki: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="14" y="4" width="20" height="9" rx="2"/><path d="M24 13v5"/><path d="M24 18l10 8-10 8-10-8z"/><path d="M24 34v4"/><rect x="14" y="38" width="20" height="7" rx="2" class="fill" opacity=".35"/></svg>',
@@ -147,5 +148,29 @@ S = LavRac.loadUi();`],
 }));
 `, ''],
     ['paintLang(); fillFigs();\nrenderAll();\nprogress();\nif(location.hash) setTimeout(()=>window.scrollTo(0,0), 0);', ZAGON],
+    // Long statements: paragraphs and bold key words (11. 11. 2026), the same way as in LAV-RAČ2 chapter 2.
+    QTEXT,
+    ...statements([
+      [
+        "Bloki so oštevilčeni od zgoraj navzdol: 1 je i = 1, 2 je pogoj i <= 3, 3 je izpis vrednosti i, 4 je i = i + 1. Zapiši zaporedje blokov, ki se izvedejo (številke ločene s presledki). Pogoj šteje kot blok vsakič, ko ga preverimo.",
+        "Bloki so oštevilčeni od zgoraj navzdol:\n- **1**: i = 1\n- **2**: pogoj i <= 3\n- **3**: izpis vrednosti i\n- **4**: i = i + 1\nZapiši **zaporedje blokov**, ki se izvedejo (številke ločene s presledki). **Pogoj** šteje kot blok **vsakič**, ko ga preverimo.",
+      ],
+      [
+        "Rešen primer: diagram poteka za program, ki prebere dve celi števili ter izpiše njuno vsoto in nato njun zmnožek, je spodaj. Nariši ga v Flowgorithm in preveri, ali za vhod 6 in 7 izpiše pravilno.",
+        "**Rešen primer:** diagram poteka za program, ki prebere **dve celi števili** ter izpiše njuno **vsoto** in nato njun **zmnožek**, je spodaj.\nNariši ga v **Flowgorithm** in preveri, ali za vhod **6 in 7** izpiše pravilno.",
+      ],
+      [
+        "Nariši diagram poteka, s katerim prebereš 2 naravni števili in znak. Algoritem naj izpiše prebrani znak tolikokrat, kot je razlika med manjšo in večjo prebrano vrednostjo. Primer: če je vrednost prvega prebranega števila 5, drugega 8 in prebrani znak G, algoritem izpiše GGG.",
+        "Nariši diagram poteka, s katerim prebereš **2 naravni števili** in **znak**. Algoritem naj izpiše prebrani znak **tolikokrat, kot je razlika** med manjšo in večjo prebrano vrednostjo.\n**Primer:** če je vrednost prvega prebranega števila 5, drugega 8 in prebrani znak G, algoritem izpiše **GGG**.",
+      ],
+      [
+        "Uporabnik vnaša pare celih števil. Program vsoti prišteje obe števili iz para le, če je prvo število v paru večje kot drugo. Postopek se konča, ko je dobljena vsota večja kot 50. Nato program izpiše, koliko parov števil je bilo vpisanih. Nariši diagram poteka za ta program.",
+        "Uporabnik vnaša **pare celih števil**. Program vsoti prišteje obe števili iz para **le, če je prvo število v paru večje** kot drugo.\nPostopek se konča, ko je dobljena **vsota večja kot 50**. Nato program izpiše, **koliko parov števil** je bilo vpisanih.\nNariši diagram poteka za ta program.",
+      ],
+      [
+        "Nariši diagram poteka Evklidovega algoritma: prebere dve naravni števili a in b in izpiše njun največji skupni delitelj. Postopek: dokler b ni 0, izračunaj ostanek t = a % b, nato a postane b in b postane t. Rezultat je a.",
+        "Nariši diagram poteka **Evklidovega algoritma**: prebere dve naravni števili **a** in **b** in izpiše njun **največji skupni delitelj**.\n**Postopek:** dokler b ni 0, izračunaj ostanek **t = a % b**, nato a postane b in b postane t.\n**Rezultat** je a.",
+      ],
+    ]),
   ],
 };

@@ -117,6 +117,7 @@ Strani: Uporabniki (filter, iskanje, vloge, izbris; dijakom brez razreda skrbnik
 - Baza `TEST_DATABASE_URL` se ob vsakem zagonu izbriše. Preizkus kopij potrebuje `pg_dump`, `pg_restore` in `psql` iste različice kot baza (`PG_BIN`).
 - GitHub Actions: `test` (postgres:17, odjemalec 17) in `docker` (gradnja demo slike, preverjanje orodij v sliki in produkcijske datoteke Compose).
 - Vsaka sprememba, ki jo vidi uporabnik, dobi preizkus. Spremembe gredo v `main`, portal na strežniku pa se posodobi šele, ko je CI zelen.
+- Koliko se preizkuša pred objavo (dogovor 11. 11. 2026): sprememba, ki zadeva samo eno vajo (njen vir, adapter), pred objavo požene preizkuse, ki jo zadevajo (`node --test --test-name-pattern='…' test/content.test.js`). Celoten `npm test` je obvezen, kadar se spremeni skupna koda (`src/`, `content/shell/`, `content/portal.json`, skupni izgled) ali se vaja ali del doda ali odstrani. CI teče ob vsaki objavi in preveri vse; njegov rezultat se pogleda po objavi, brez čakanja. Pri portalih, ki so v CLAUDE.md zapisali drugače, velja njihov zapis.
 
 ## 12. Vezano na vsebino LAV-ELS (v novem portalu zamenjaj)
 

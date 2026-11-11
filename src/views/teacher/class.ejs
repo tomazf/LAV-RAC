@@ -1,6 +1,5 @@
 <%- include('../partials/head', { pageTitle: cls.name, mainClass: 'wide' }) %>
 <% const f = fmt; const sl = (key, text) => `<a href="?sort=${key}" ${sort===key?'aria-current="true"':''}>${text}</a>`; %>
-<p class="crumbs"><a href="/ucitelj">Razredi</a></p>
 <div class="title-row"><h1><%= cls.name %></h1>
   <div class="row"><a class="btn" href="/ucitelj/razredi/<%= cls.id %>/vaje">Vaje razreda (<%= openCount %> od <%= list.length %>)</a>
   <a class="btn ghost" href="#dodaj">Dodaj dijake (<%= unassigned.length %>)</a>
@@ -23,8 +22,8 @@
     <% list.forEach((e) => { %><th class="<%= e.visible ? '' : 'closed' %>" title="<%= e.title %><%= e.visible ? '' : ' (zaprta)' %>"><a href="/ucitelj/razredi/<%= cls.id %>/rezultati/<%= e.id %>"><%= e.no %></a></th><% }) %>
     <th>Odprte vaje</th><th>Čas</th><th class="l">Zadnja aktivnost</th></tr></thead>
   <tbody>
-  <% rows.forEach((r) => { %><tr>
-    <td class="l stick"><a href="/ucitelj/razredi/<%= cls.id %>/dijaki/<%= r.id %>"><%= r.name %></a></td>
+  <% rows.forEach((r, i) => { %><tr>
+    <td class="l stick"><span class="rn"><%= i + 1 %>.</span> <a href="/ucitelj/razredi/<%= cls.id %>/dijaki/<%= r.id %>"><%= r.name %></a></td>
     <% list.forEach((e) => { const c = cell(r.cells, e.id); const p = f.pct(c.score, e.maxPoints); const d = f.pct(c.done, e.tasks.length); %>
     <td class="heat <%= e.visible ? '' : 'closed' %>" style="--p:<%= p %>" title="<%= e.no %> <%= e.title %>: <%= f.num(c.score) %> od <%= e.maxPoints %> t, <%= c.done %> od <%= e.tasks.length %> nalog, <%= f.duration(c.seconds) %><%= c.prev?.counts ? ', točke pred ponastavitvijo' : '' %>">
       <% if (c.started) { %><span class="hv"><%= p %></span><span class="hb" style="width:<%= d %>%"></span><% } else { %><span class="hn">–</span><% } %>
@@ -35,7 +34,7 @@
   </tr><% }) %>
   </tbody>
 </table></div>
-<p class="dim note">Število je delež doseženih točk v odstotkih, črta pod njim delež rešenih nalog. Zatemnjene vaje so za dijake zaprte. Pomakni miško nad celico za podrobnosti.</p>
+<p class="dim note one-line">Število je delež doseženih točk v odstotkih, črta pod njim delež rešenih nalog. Zatemnjene vaje so za dijake zaprte. Pomakni miško nad celico za podrobnosti.</p>
 <% } %>
 <section class="block" id="dodaj">
   <h2>Dodaj dijake brez razreda</h2>

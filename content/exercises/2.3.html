@@ -403,8 +403,28 @@
     s.page.append(head, locked, body, buildPager(s));
     if (s.el) s.el.remove();
   }
+  // Long task statements can carry light markup: **bold** words, one paragraph per line, lines starting with "- " as a list.
+  // Only statements that contain ** are rebuilt; the markers are not part of the text the importer stores.
+  function formatQ(q) {
+    if (q.children.length || !/\*\*/.test(q.textContent)) return;
+    const box = h('div', { class: q.className + ' lr-qf' });
+    const inline = (parent, text) => text.split(/\*\*(.+?)\*\*/).forEach((part, j) => { if (part) parent.append(j % 2 ? h('strong', null, part) : part); });
+    let ul = null;
+    q.textContent.split('\n').map((l) => l.trim()).filter(Boolean).forEach((line) => {
+      if (/^- /.test(line)) {
+        if (!ul) { ul = h('ul'); box.append(ul); }
+        const li = h('li'); inline(li, line.slice(2)); ul.append(li);
+        return;
+      }
+      ul = null;
+      const p = h('p'); inline(p, line); box.append(p);
+    });
+    q.replaceWith(box);
+  }
+
   function prepareCard(card, i, k, n, sel) {
     const task = TASKS[i].task;
+    card.querySelectorAll('.qtext').forEach(formatQ);
     card.hidden = false;
     card.id = 't' + i;
     card.classList.add('lr-task');
@@ -731,7 +751,7 @@
     const tasks = [];
     pages.filter((p) => p.kind === 'set').forEach((s) => s.tasks.forEach((t) => {
       const src = TASKS[t.idx].task;
-      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\s+/g, ' ').trim().slice(0, 160) });
+      tasks.push({ i: t.idx, level: LEVEL[TASKS[t.idx].level] || '', max: TASKS[t.idx].max, ...(TASKS[t.idx].self ? { self: true } : {}), section: s.title, q: String(src.q || '').replace(/\*\*/g, '').replace(/\n- /g, '\n').replace(/\s+/g, ' ').trim().slice(0, 160) });
     }));
     tasks.sort((a, b) => a.i - b.i);
     return {
@@ -1618,6 +1638,14 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 }
 @media (max-width:340px){.lr-top-in{--lr-notelab:none}}
 @media (prefers-reduced-motion:reduce){.lr *{transition:none!important}}
+
+/* long task statements with light markup (formatQ in vaja.js): paragraphs, bold key words, short lists */
+.lr-main .lr-qf{white-space:normal;text-align:left}
+.lr-main .lr-qf p{margin:0 0 .6em}
+.lr-main .lr-qf ul{margin:.1em 0 .6em;padding-left:1.3em}
+.lr-main .lr-qf li{margin:.2em 0}
+.lr-main .lr-qf>:last-child{margin-bottom:0}
+.lr-main .lr-qf strong{font-weight:700}
 
 html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-tile);--line:var(--lr-line);--fg:var(--lr-ink);--muted:var(--lr-mut);
   --accent:var(--lr-acc);--accent-soft:var(--lr-acc-soft);--ok:var(--lr-ok);--ok-soft:var(--lr-ok-bg);--bad:var(--lr-bad);--bad-soft:var(--lr-bad-bg);
@@ -2848,7 +2876,7 @@ add({id:"a11", lv:"A", pts:1, type:"mc", keep:true,
  h:["Območje je od −2ⁿ⁻¹ do 2ⁿ⁻¹ − 1."],
  why:"Z n biti zapišemo od −2ⁿ⁻¹ do 2ⁿ⁻¹ − 1. Pri n = 8 je to od −128 do 127. Zapis 10000000 predstavlja −128."});
 add({id:"a12", lv:"A", src:"M121/19", pts:2, type:"blanks",
- q:"Beseda Dijak ima 5 znakov. Koliko bitov porabi, če jo kodiramo z osnovno ASCII (7 bitov na znak)? Koliko, če uporabimo razširjeno ASCII (8 bitov na znak)?",
+ q:"Beseda **Dijak** ima **5 znakov**. Koliko bitov porabi, če jo kodiramo z **osnovno ASCII** (7 bitov na znak)?\nKoliko, če uporabimo **razširjeno ASCII** (8 bitov na znak)?",
  b:[{l:"Osnovna ASCII (bitov)", acc:["35"], num:true},{l:"Razširjena ASCII (bitov)", acc:["40"], num:true}],
  h:["Število znakov pomnoži z bitov na znak."],
  why:"Osnovna ASCII: 5 · 7 = 35 bitov. Razširjena ASCII: 5 · 8 = 40 bitov (5 bajtov)."});
@@ -2858,7 +2886,7 @@ add({id:"a13", lv:"A", src:"M212/1", pts:2, type:"blanks",
  h:["01000100 pretvori v desetiško število in štej od črke A naprej.","Šestnajstiško: 0100 0100."],
  why:"01000100 = 64 + 4 = 68. A je 65, B 66, C 67, zato je 68 črka D. Šestnajstiško: 0100 = 4 in 0100 = 4, torej 44₁₆."});
 add({id:"a14", lv:"A", src:"M211/1", pts:2, type:"blanks",
- q:"Pošiljatelj je poslal 10-bitno nenegativno celo število 300, prejemnik pa je prejel 316. Pri prenosu je bil napačen natanko en bit. Najbolj desni bit ima zaporedno številko 0. V katerem bitu je napaka?",
+ q:"**Pošiljatelj** je poslal 10-bitno nenegativno celo število **300**, **prejemnik** pa je prejel **316**. Pri prenosu je bil napačen **natanko en bit**.\nNajbolj desni bit ima zaporedno številko **0**. V katerem bitu je napaka?",
  b:[{l:"Bit z zaporedno številko", acc:["4"], num:true}],
  h:["Izračunaj razliko 316 − 300.","Razlika je potenca števila 2. Katera?"],
  why:"Razlika je 316 − 300 = 16 = 2⁴. Število se je povečalo za težo bita 4: 0100101100 → 0100111100. Pri prenosu se je bit 4 spremenil iz 0 v 1."});
@@ -2866,7 +2894,7 @@ add({id:"a14", lv:"A", src:"M211/1", pts:2, type:"blanks",
  const d = [[1,0,1,1],[0,1,1,0],[1,1,0,0]], ft = fullTable(d,"even");
  const show = ft.map((r,i)=> r.map((v,j)=> (i===ft.length-1||j===r.length-1) ? null : v)); // paritetni biti skriti
  add({id:"a15", lv:"A", src:"M261/2", pts:3, type:"blanks",
-  q:"Za preverjanje pravilnosti prenosa izračunaj sodo pariteto: paritetni bit za vsako vrstico (desni stolpec, od zgoraj navzdol), paritetni bit za vsak stolpec (spodnja vrstica, od leve) in vogalni bit.",
+  q:"Za preverjanje pravilnosti prenosa izračunaj **sodo pariteto**:\n- **paritetni bit za vsako vrstico** (desni stolpec, od zgoraj navzdol)\n- **paritetni bit za vsak stolpec** (spodnja vrstica, od leve)\n- **vogalni bit**",
   fig: pgrid(show,{rowPar:true,colPar:true}),
   b:[{l:"Desni stolpec (3 biti, brez presledkov)", acc:[ft.slice(0,3).map(r=>r[4]).join("")], code:true},
      {l:"Spodnja vrstica (4 biti, brez presledkov)", acc:[ft[3].slice(0,4).join("")], code:true},
@@ -2878,7 +2906,7 @@ add({id:"a14", lv:"A", src:"M211/1", pts:2, type:"blanks",
  const d = [[1,0,1,1],[0,1,1,0],[1,1,0,0],[0,0,1,1]], ft = fullTable(d,"even"), bad=[1,2];
  const rcv = ft.map((r,i)=>r.map((v,j)=> (i===bad[0]&&j===bad[1]) ? 1-v : v));
  add({id:"a16", lv:"A", src:"M141/2", pts:2, type:"blanks",
-  q:"Pri prenosu smo izračunali sodo pariteto (zadnji stolpec in zadnja vrstica sta paritetna). Pri prenosu je bil napačen natanko en bit. V kateri vrstici in v katerem stolpcu je napaka? Štej od 1, od zgoraj in od leve.",
+  q:"Pri prenosu smo izračunali **sodo pariteto** (zadnji stolpec in zadnja vrstica sta paritetna). Pri prenosu je bil napačen **natanko en bit**.\nV kateri **vrstici** in v katerem **stolpcu** je napaka? Štej od 1, od zgoraj in od leve.",
   fig: pgrid(rcv,{rowPar:true,colPar:true}),
   b:[{l:"Vrstica", acc:[String(bad[0]+1)], num:true},{l:"Stolpec", acc:[String(bad[1]+1)], num:true}],
   h:["Preštej enice v vsaki vrstici. Katera ima liho število?","Enako naredi za stolpce. Napaka je na presečišču."],
@@ -2953,7 +2981,7 @@ add({id:"b08", lv:"B", src:"M211/4", pts:2, type:"mc",
  h:["Če CPE čaka na podatke, je pomnilnik počasnejši od nje.","Kaj naredi predpomnilnik?"],
  why:"CPE je hitrejša od pomnilnika in vodila, zato čaka na podatke. Ublažimo to s predpomnilnikom, registri in širšimi vodili. Velikost pomnilnika ne vpliva na obstoj ozkega grla."});
 add({id:"b09", lv:"B", pts:2, type:"blanks",
- q:"Naslovno vodilo je široko 12 bitov. Koliko pomnilniških lokacij lahko CPE naslovi? Koliko bitov mora imeti naslovno vodilo, da naslovimo 1 MiB (1 048 576) bajtnih lokacij?",
+ q:"Naslovno vodilo je široko **12 bitov**. Koliko pomnilniških lokacij lahko CPE naslovi?\nKoliko bitov mora imeti naslovno vodilo, da naslovimo **1 MiB** (1 048 576) bajtnih lokacij?",
  b:[{l:"Število lokacij", acc:["4096"], num:true},{l:"Širina vodila (bitov)", acc:["20"], num:true}],
  h:["n-bitno naslovno vodilo naslovi 2ⁿ lokacij.","1 048 576 = 2²⁰."],
  why:"2¹² = 4096 lokacij. 1 MiB = 2²⁰ bajtov, zato je potrebnih 20 naslovnih linij."});
@@ -3069,7 +3097,7 @@ add({id:"d03", lv:"D", src:"M131/4", pts:2, type:"blanks",
  const src = "; na naslovu $30 je število 23\n        LDAB $30\n        COMB\n        INCB";
  const m = traceRun("        ORG $30\n        FCB 23\n        ORG $100\n        LDAB $30\n        COMB\n        INCB\n        WAI");
  add({id:"d05", lv:"D", pts:2, type:"blanks", lang:"asm", code:src, simInit:"$30=23",
-  q:"Na naslovu $30 je število 23 (desetiško). Kaj je po izvedbi treh ukazov v registru B? Zapiši šestnajstiško in desetiško kot predznačeno število (dvojiški komplement).",
+  q:"Na naslovu **$30** je število **23** (desetiško). Kaj je po izvedbi treh ukazov v registru B?\nZapiši **šestnajstiško** in **desetiško kot predznačeno število** (dvojiški komplement).",
   b:[{l:"B (šestnajstiško)", acc:[hx(m.B)], hex:true},{l:"B kot predznačeno število (desetiško)", acc:["-23"], num:true}],
   h:["COMB obrne vse bite (eniški komplement), INCB prišteje 1.","23 = 00010111."],
   why:"LDAB $30: B = 23 = 00010111. COMB: 11101000. INCB: 11101001 = $E9. To je dvojiški komplement, zato je B = −23. Zaporedje je pravilen način izračuna dvojiškega komplementa."});
@@ -3107,7 +3135,7 @@ add({id:"d06", lv:"D", src:"M121/8", pts:2, type:"mc", lang:"asm",
 }
 {
  add({id:"d10", lv:"D", pts:3, type:"blanks", lang:"asm", simInit:"A=$11 B=$22", code:"; začetno SP = $01FF, A = $11, B = $22\n        PSHA\n        PSHB\n        PULA",
-  q:"Sklad raste proti nižjim naslovom: ukaz PSH zapiše podatek na naslov SP in nato SP zmanjša, ukaz PUL najprej SP poveča in nato prebere podatek. Na kateri naslov se zapiše A? Kaj je po koncu v A? Kakšen je SP? (šestnajstiško)",
+  q:"Sklad raste proti **nižjim naslovom**:\n- ukaz **PSH** zapiše podatek na naslov SP in nato SP **zmanjša**\n- ukaz **PUL** najprej SP **poveča** in nato prebere podatek\nNa kateri **naslov** se zapiše A? Kaj je po koncu v **A**? Kakšen je **SP**? (šestnajstiško)",
   b:[{l:"Naslov, kamor se zapiše A", acc:["01FF","1FF"], hex:true},{l:"Register A", acc:["22"], hex:true},{l:"SP", acc:["01FE","1FE"], hex:true}],
   h:["PSHA: zapiši na $01FF, SP = $01FE. PSHB: zapiši na $01FE, SP = $01FD.","PULA: SP = $01FE, preberi $01FE."],
   why:"PSHA zapiše A na $01FF in SP postane $01FE. PSHB zapiše B ($22) na $01FE in SP postane $01FD. PULA poveča SP na $01FE in prebere B-jevo vrednost ($22) v A. SP je po vseh treh ukazih $01FE."});
@@ -3289,7 +3317,7 @@ add({id:"f15", lv:"F", src:"M222/3", pts:1, type:"blanks",
  h:["Podpira tudi diske GPT."],
  why:"UEFI (Unified Extensible Firmware Interface) nadomešča BIOS. Podpira večje diske (GPT), hitrejši zagon in grafični vmesnik."});
 add({id:"f16", lv:"F", pts:3, type:"blanks",
- q:"Dostop do predpomnilnika traja 2 ns, do glavnega pomnilnika 100 ns. Predpomnilnik je zadel pri 95 % dostopov. Koliko je povprečni čas dostopa (v ns)? Kolikokrat je to hitreje od dostopa samo do glavnega pomnilnika (zaokroži na eno decimalko)?",
+ q:"Dostop do **predpomnilnika** traja **2 ns**, do **glavnega pomnilnika** **100 ns**. Predpomnilnik je zadel pri **95 %** dostopov.\nKoliko je **povprečni čas dostopa** (v ns)?\nKolikokrat je to hitreje od dostopa samo do glavnega pomnilnika (zaokroži na eno decimalko)?",
  b:[{l:"Povprečni čas (ns)", acc:["6,9","6.9"], num:true},{l:"Kolikokrat hitreje", acc:["14,5","14.5"], num:true}],
  h:["t = h · t(cache) + (1 − h) · t(RAM).","100 / povprečni čas."],
  why:"t = 0,95 · 2 + 0,05 · 100 = 1,9 + 5 = 6,9 ns. Pospešek je 100 / 6,9 = 14,5. Čeprav je predpomnilnik majhen, pospeši dostop več kot desetkrat."});
@@ -3348,7 +3376,7 @@ add({id:"g08", lv:"G", pts:2, type:"blanks",
 
 /* ===================== H · Še več maturitetnih nalog ===================== */
 add({id:"h01", lv:"H", src:"M221/1", pts:3, type:"blanks",
- q:"Za vsak opis zapiši primer dveh binarnih števil z osmimi biti (x in y) ali NE OBSTAJA, če takih števil ni.\n1) x je večji od y in ima manj enic kot y.\n2) x in y sta različni števili z enako liho pariteto (liho število enic).\n3) Najbolj levi bit x je različen od najbolj levega bita y, obe števili sta večji od 127.",
+ q:"Za vsak opis zapiši primer dveh **binarnih števil z osmimi biti** (x in y) ali **NE OBSTAJA**, če takih števil ni.\n**1)** x je večji od y in ima **manj enic** kot y.\n**2)** x in y sta **različni** števili z enako **liho pariteto** (liho število enic).\n**3)** **Najbolj levi bit** x je različen od najbolj levega bita y, obe števili sta večji od 127.",
  b:[{l:"1) x"},{l:"1) y"},{l:"2) x"},{l:"2) y"},{l:"3) x ali NE OBSTAJA"},{l:"3) y ali NE OBSTAJA"}],
  chk:v=>{
   const ok8 = s => /^[01]{8}$/.test(s.replace(/\s/g,""));
@@ -3515,7 +3543,7 @@ add({id:"b17", lv:"B", pts:1, type:"hot", a:"pc", names:VN_NAMES, svg:()=>domSvg
  h:["Po izvedbi ukaza se poveča za dolžino ukaza."],
  why:"Programski števec (PC) vsebuje naslov naslednjega ukaza. Njegova vsebina gre na naslovno vodilo v prvem koraku prevzema."});
 add({id:"c11", lv:"C", pts:2, type:"blanks",
- q:"Program se začne na naslovu $0100. Ukazi so po vrsti dolgi: LDAA #$0A (2 bajta), ADDA $20 (2 bajta), LDX #$0030 (3 bajti), WAI (1 bajt). Kakšen je PC, ko CPE prevzema ukaz WAI? Koliko bajtov zavzame ves program?",
+ q:"Program se začne na naslovu **$0100**. Ukazi so po vrsti dolgi:\n- **LDAA #$0A** (2 bajta)\n- **ADDA $20** (2 bajta)\n- **LDX #$0030** (3 bajti)\n- **WAI** (1 bajt)\nKakšen je **PC**, ko CPE prevzema ukaz WAI?\nKoliko bajtov zavzame **ves program**?",
  fig:`<div class="pcs">${["86","0A","9B","20","CE","00","30","3E"].map((b,i)=>`<div class="pcb${i===0||i===2||i===4||i===7?" op":""}"><small>$${hx(0x100+i,4)}</small><b>${b}</b></div>`).join("")}</div>`,
  b:[{l:"PC pred ukazom WAI (šestnajstiško)", acc:["0107","107"], hex:true},{l:"Velikost programa (bajtov)", acc:["8"], num:true}],
  h:["Seštej dolžine ukazov pred WAI: 2 + 2 + 3.","Obarvani bajti so operacijske kode."],
@@ -3533,18 +3561,18 @@ add({id:"e10", lv:"E", pts:1, type:"hot", a:"vec", names:{dev:"naprava (tipkovni
  h:["Vsaka vrsta prekinitve ima svoj vnos z naslovom."],
  why:"V tabeli prekinitvenih vektorjev je za vsako vrsto prekinitve shranjen naslov njenega strežnega programa. CPE ga prebere in vpiše v PC."});
 add({id:"f19", lv:"F", pts:2, type:"blanks",
- q:"Predpomnilnik hrani bloke po 4 bajte (naslovi 0–3 so blok 0, 4–7 blok 1 …) in je na začetku prazen. Program po vrsti bere naslove na sliki. Ob zgrešku se v predpomnilnik prenese cel blok. Koliko je zadetkov in koliko zgreškov?",
+ q:"Predpomnilnik hrani bloke po **4 bajte** (naslovi 0–3 so blok 0, 4–7 blok 1 …) in je na začetku **prazen**. Program po vrsti bere naslove na sliki. Ob **zgrešku** se v predpomnilnik prenese **cel blok**.\nKoliko je **zadetkov** in koliko **zgreškov**?",
  fig:addrFig([0,1,2,3,4,5,6,7]),
  b:[{l:"Zadetkov", acc:["6"], num:true},{l:"Zgreškov", acc:["2"], num:true}],
  h:["Prvi dostop do bloka je vedno zgrešek.","Koliko različnih blokov je na sliki?"],
  why:"Zgrešek je samo pri naslovih 0 in 4 (prvi dostop do bloka 0 in bloka 1). Ostalih 6 dostopov najde podatek v predpomnilniku: to je krajevna lokalnost."});
 add({id:"f20", lv:"F", pts:2, type:"blanks",
- q:"Pri dostopih iz prejšnje naloge je delež zadetkov 6/8 = 75 %. Dostop do predpomnilnika traja 1 ns, do glavnega pomnilnika 100 ns. Koliko je povprečni čas dostopa (ns)?",
+ q:"Pri dostopih iz prejšnje naloge je delež zadetkov 6/8 = **75 %**. Dostop do predpomnilnika traja **1 ns**, do glavnega pomnilnika **100 ns**.\nKoliko je **povprečni čas dostopa** (ns)?",
  b:[{l:"Povprečni čas (ns)", acc:["25.75"], num:true}],
  h:["t = h · t_cache + (1 − h) · t_RAM","0,75 · 1 + 0,25 · 100"],
  why:"t = 0,75 · 1 + 0,25 · 100 = 0,75 + 25 = 25,75 ns. Brez predpomnilnika bi bil vsak dostop 100 ns."});
 add({id:"g10", lv:"G", pts:2, type:"blanks",
- q:"Procesor ima cevovod s 5 stopnjami. V tabeli sta vrisana prva dva ukaza. V katerem taktu se konča 4. ukaz? V katerem taktu bi se končal 4. ukaz brez cevovoda?",
+ q:"Procesor ima **cevovod s 5 stopnjami**. V tabeli sta vrisana prva dva ukaza.\nV katerem taktu se konča **4. ukaz**?\nV katerem taktu bi se končal 4. ukaz **brez cevovoda**?",
  fig:pipeFig(4, 2),
  b:[{l:"S cevovodom (takt)", acc:["8"], num:true},{l:"Brez cevovoda (takt)", acc:["20"], num:true}],
  h:["Vsak naslednji ukaz se v cevovodu začne en takt pozneje.","Brez cevovoda se ukaz začne šele, ko se prejšnji konča: 4 · 5."],
@@ -3555,7 +3583,7 @@ add({id:"g11", lv:"G", pts:1, type:"hot", a:"gpu", names:{cpu:"CPE", ram:"RAM", 
  h:["Monitor je izhodna naprava, priključen je s kablom HDMI ali DisplayPort."],
  why:"Sliko na monitor pošilja grafični krmilnik (grafična kartica). CPE mu po sistemskem vodilu pošlje podatke, krmilnik pa jih pretvori v signal za zaslon."});
 add({id:"g12", lv:"G", pts:2, type:"blanks",
- q:"Prenesti moramo 4 bajte. Vzporedna povezava ima 8 podatkovnih linij, serijska eno. V vsakem taktu gre po vsaki liniji en bit. Koliko taktov potrebuje vzporedni in koliko serijski prenos (pri enakem taktu)?",
+ q:"Prenesti moramo **4 bajte**. **Vzporedna** povezava ima 8 podatkovnih linij, **serijska** eno. V vsakem taktu gre po vsaki liniji en bit.\nKoliko taktov potrebuje **vzporedni** in koliko **serijski** prenos (pri enakem taktu)?",
  fig:`<div class="spfig"><div><b>Vzporedno</b>${Array.from({length:8},()=>`<i></i>`).join("")}</div><div><b>Serijsko</b><i></i></div></div>`,
  b:[{l:"Vzporedno (taktov)", acc:["4"], num:true},{l:"Serijsko (taktov)", acc:["32"], num:true}],
  h:["4 bajti so 32 bitov.","Vzporedno gre v enem taktu cel bajt."],
