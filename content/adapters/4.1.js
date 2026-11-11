@@ -10,7 +10,7 @@ const ICONS = {
   stik: '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="18" cy="24" r="12"/><circle cx="30" cy="24" r="12"/><path d="M24 13.6A12 12 0 0 0 24 34.4A12 12 0 0 0 24 13.6z" class="fill" opacity=".35"/></svg>',
   izraz: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17 8H9v32h8M31 8h8v32h-8"/><circle cx="24" cy="24" r="3.5" class="fill" opacity=".35"/></svg>',
 };
-// Theory groups (proposed 11. 11. 2026, to be confirmed by the teacher): pages in the artifact's own order. Since the artifact has a page
+// Theory groups (proposed and confirmed by the teacher 11. 11. 2026): pages in the artifact's own order. Since the artifact has a page
 // per operation (11. 11. 2026, evening), the set operations and the product are a group of their own (the teacher asked for it), and both
 // joins go with the quotient.
 const GROUPS = [

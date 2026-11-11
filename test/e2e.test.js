@@ -37,6 +37,15 @@ async function loginIn(ctx, name) {
   await page.waitForURL(`${APP}/**`);
   return page;
 }
+// The status text can still be the one of an earlier save, so a test that reads the database polls it for what it expects.
+const eventually = async (read, ok, ms = 8000) => {
+  const end = Date.now() + ms;
+  for (;;) {
+    const v = await read();
+    if (ok(v) || Date.now() > end) return v;
+    await new Promise((r) => setTimeout(r, 100));
+  }
+};
 const synced = (page) => page.waitForFunction(() => document.querySelector('.lvs-status')?.textContent === 'Shranjeno', null, { timeout: 8000 });
 const openTasks = async (page, id) => {
   await page.goto(`${APP}/vaje/${id}`);
@@ -179,7 +188,10 @@ test('all 9 exercises: tracked score matches the page, survives reload and anoth
       return { sc: document.getElementById('sc').textContent };
     });
     await synced(s);
-    const row = (await sql(`SELECT * FROM progress WHERE exercise_id=$1 AND user_id=(SELECT id FROM users WHERE oid='u-ana')`, [ex.id]))[0];
+    const row = await eventually(
+      async () => (await sql(`SELECT * FROM progress WHERE exercise_id=$1 AND user_id=(SELECT id FROM users WHERE oid='u-ana')`, [ex.id]))[0],
+      (r) => r && r.done_count >= 1 && r.solution_count === 1 && r.hint_count >= 1 && String(r.score).replace('.', ',') === page.sc,
+    );
     assert.equal(String(row.score).replace('.', ','), page.sc, `${ex.id} score`);
     assert.ok(row.done_count >= 1, `${ex.id} done`);
     assert.ok(row.solution_count === 1, `${ex.id} solution`);
@@ -245,7 +257,10 @@ test('reset: the student can restart; the earlier score counts until a new answe
   await openTasks(s, '1.1');
   await s.evaluate(() => { document.querySelectorAll('.task')[1].querySelector('[data-act=sol]').click(); });
   await synced(s);
-  assert.equal((await sql(`SELECT done_count FROM progress WHERE exercise_id='1.1' AND user_id=(SELECT id FROM users WHERE oid='u-ana')`))[0].done_count, 1);
+  assert.equal((await eventually(
+    async () => (await sql(`SELECT done_count FROM progress WHERE exercise_id='1.1' AND user_id=(SELECT id FROM users WHERE oid='u-ana')`))[0],
+    (r) => r && r.done_count === 1,
+  )).done_count, 1);
   const t = await login('Tomaž Učitelj');
   await t.goto(`${APP}/ucitelj/razredi/${classId}`);
   assert.equal(await t.locator('.matrix .rs').count(), 0); // how often is not shown
