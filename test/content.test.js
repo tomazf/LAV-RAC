@@ -2023,3 +2023,46 @@ test('contrast fixes of 12. 11. 2026 in two simulations: white digit on the acce
   assert.doesNotMatch(read('2.1'), /b\.on\{background:var\(--accent\);color:#fff\}/);
   assert.match(read('2.3'), /\.rc\.on small\{color:inherit\}/);
 });
+
+test('only a change is saved: paging through the tasks or loading a page again sends nothing, an answer and a new page do', async () => {
+  const a = await login('Sara Skrbnik');
+  let posts = 0;
+  a.on('request', (r) => { if (r.method() === 'POST' && r.url().includes('/api/progress/')) posts++; });
+  const quiet = (ms = 900) => a.waitForTimeout(ms);
+  try {
+    await a.goto(`${APP}/vaje/4.2#naloge-a/1`);
+    await at(a, 'naloge-a/1');
+    await a.waitForFunction(() => document.querySelector('.lvs-status'));
+    await quiet(1500);
+    // the number buttons, and the previous and next buttons: nothing is saved, the header says nothing
+    await a.evaluate(() => { window.__status = []; new MutationObserver(() => window.__status.push(document.querySelector('.lvs-status').textContent)).observe(document.querySelector('.lvs-status'), { childList: true, characterData: true, subtree: true }); });
+    const before = posts;
+    for (const n of [2, 3, 4, 2, 1]) { await a.locator(`.page.on .lr-num[data-k="${n - 1}"]`).click(); await at(a, `naloge-a/${n}`); }
+    await a.locator('.page.on .lr-next').click();
+    await at(a, 'naloge-a/2');
+    await a.locator('.page.on .lr-prev').click();
+    await at(a, 'naloge-a/1');
+    await quiet();
+    assert.equal(posts - before, 0, 'paging through the tasks saves nothing');
+    assert.deepEqual(await a.evaluate(() => window.__status), [], 'and the header does not say »Shranjujem«');
+    // loading the page again is no change either
+    await a.reload();
+    await at(a, 'naloge-a/1');
+    await quiet(1500);
+    assert.equal(posts - before, 0, 'a plain reload saves nothing');
+    // an answer is saved
+    await go(a, 'naloge-a/13');
+    await quiet();
+    const beforeAnswer = posts;
+    await a.locator('.page.on .lr-task:not(.lr-off) .opt').nth(1).click();
+    await a.locator('.page.on .lr-task:not(.lr-off) .js-check').click();
+    await a.waitForFunction(() => document.querySelector('.lvs-status')?.textContent === 'Shranjeno', null, { timeout: 8000 });
+    assert.ok(posts > beforeAnswer, 'an answer is saved');
+    // another page is a change (the place where the student stopped), and so is a page seen for the first time
+    const beforePage = posts;
+    await go(a, 'datoteke');
+    await a.waitForFunction((n) => document.querySelector('.lvs-status')?.textContent === 'Shranjeno', null, { timeout: 8000 });
+    await quiet();
+    assert.ok(posts > beforePage, 'another page is saved');
+  } finally { await a.context().close(); }
+});

@@ -900,7 +900,8 @@
     document.querySelectorAll('.lr-rail a').forEach((a) => { if (a.dataset.page === p.id) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     const sel = document.getElementById('lrSel');
     if (sel) sel.value = p.id;
-    if (p.kind !== 'overview') { state.at = p.id; persist(); }
+    // Only a change is saved (every save shows »Shranjujem …« and goes to the server): paging through the tasks of a set, or loading the page again, changes nothing.
+    if (p.kind !== 'overview' && state.at !== p.id) { state.at = p.id; persist(); }
     paintResume();
     paintSeen();
     window.scrollTo(0, 0);
