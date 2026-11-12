@@ -308,7 +308,8 @@ test('»Vse vaje« and »Odjava« sit in the exercise header, which stays on scr
 test('overview lists the parts; the tasks open only after every theory page', async () => {
   const p = await login('Ana Kovač');
   const outside = [];
-  p.on('request', (r) => { if (!r.url().startsWith(APP)) outside.push(r.url()); });
+  let posts = 0;
+  p.on('request', (r) => { if (!r.url().startsWith(APP)) outside.push(r.url()); if (r.method() === 'POST' && r.url().includes('/api/progress/')) posts++; });
   await p.goto(EX);
   assert.equal(await p.locator('.page.on').getAttribute('id'), 'pregled');
   assert.deepEqual(await p.locator('.lr-tile .lr-tt').allTextContents(), ['Pretvorbe', 'Računanje', 'Kodiranje', 'Pariteta', 'Vaje']);
@@ -324,6 +325,8 @@ test('overview lists the parts; the tasks open only after every theory page', as
   await at(p, 'bcd');
   assert.equal(await p.locator('.page.on').getAttribute('id'), 'bcd');
   assert.match(await p.textContent('.page.on .lr-count'), /Razlaga 11 \/ 17/);
+  await settled(p);
+  assert.ok(posts > 0, 'a page seen for the first time is saved (it opens the tasks)');
   await readAll(p);
   await go(p, 'naloge-a');
   assert.ok(await p.locator('.page.on .lr-locked').isHidden());
@@ -331,6 +334,20 @@ test('overview lists the parts; the tasks open only after every theory page', as
   assert.equal(await p.locator('.page.on .lr-task:not(.lr-off)').count(), 1);
   await settled(p);
   assert.deepEqual((await progressRow('Ana Kovač')).state.seen.sort(), [...ex21.gate, 'pregled'].filter((x) => x !== 'pregled').sort());
+  // going back to pages that are already read saves nothing, not even a »Shranjujem …« in the header
+  await p.waitForTimeout(800);
+  const beforeBack = posts;
+  await p.evaluate(() => { window.__status = []; new MutationObserver(() => window.__status.push(document.querySelector('.lvs-status').textContent)).observe(document.querySelector('.lvs-status'), { childList: true, characterData: true, subtree: true }); });
+  for (const id of [...ex21.gate].reverse()) await go(p, id);
+  await go(p, 'pregled');
+  await p.waitForTimeout(1200);
+  assert.equal(posts - beforeBack, 0, 'pages that are read already are not saved again');
+  assert.deepEqual(await p.evaluate(() => window.__status), [], 'and the header says nothing');
+  // the place where the student stopped is saved when the exercise is left
+  await p.goto(`${APP}/vaje`);
+  let row;
+  for (let i = 0; i < 30; i++) { row = await progressRow('Ana Kovač'); if (row.state.at === ex21.gate[0]) break; await new Promise((r) => setTimeout(r, 100)); }
+  assert.equal(row.state.at, ex21.gate[0], 'leaving the exercise saves the place where the student stopped');
   assert.deepEqual(outside, []);
   await p.context().close();
 });
@@ -2024,7 +2041,7 @@ test('contrast fixes of 12. 11. 2026 in two simulations: white digit on the acce
   assert.match(read('2.3'), /\.rc\.on small\{color:inherit\}/);
 });
 
-test('only a change is saved: paging through the tasks or loading a page again sends nothing, an answer and a new page do', async () => {
+test('only a change is saved: paging through the tasks, loading a page again or going to a page that is read sends nothing, an answer does', async () => {
   const a = await login('Sara Skrbnik');
   let posts = 0;
   a.on('request', (r) => { if (r.method() === 'POST' && r.url().includes('/api/progress/')) posts++; });
@@ -2045,11 +2062,15 @@ test('only a change is saved: paging through the tasks or loading a page again s
     await quiet();
     assert.equal(posts - before, 0, 'paging through the tasks saves nothing');
     assert.deepEqual(await a.evaluate(() => window.__status), [], 'and the header does not say »Shranjujem«');
-    // loading the page again is no change either
+    // loading the page again is no change either (the first reload may save the place where the student stopped: that is leaving the page)
     await a.reload();
     await at(a, 'naloge-a/1');
     await quiet(1500);
-    assert.equal(posts - before, 0, 'a plain reload saves nothing');
+    const beforeReload = posts;
+    await a.reload();
+    await at(a, 'naloge-a/1');
+    await quiet(1500);
+    assert.equal(posts - beforeReload, 0, 'a plain reload saves nothing');
     // an answer is saved
     await go(a, 'naloge-a/13');
     await quiet();
@@ -2058,11 +2079,11 @@ test('only a change is saved: paging through the tasks or loading a page again s
     await a.locator('.page.on .lr-task:not(.lr-off) .js-check').click();
     await a.waitForFunction(() => document.querySelector('.lvs-status')?.textContent === 'Shranjeno', null, { timeout: 8000 });
     assert.ok(posts > beforeAnswer, 'an answer is saved');
-    // another page is a change (the place where the student stopped), and so is a page seen for the first time
-    const beforePage = posts;
-    await go(a, 'datoteke');
-    await a.waitForFunction((n) => document.querySelector('.lvs-status')?.textContent === 'Shranjeno', null, { timeout: 8000 });
+    // a page that is read already is no change either (staff have every theory page read; a first view is tested with a student)
     await quiet();
-    assert.ok(posts > beforePage, 'another page is saved');
+    const beforePage = posts;
+    for (const h of ['datoteke', 'uvod', 'naloge-b', 'datoteke']) await go(a, h);
+    await quiet(1200);
+    assert.equal(posts - beforePage, 0, 'moving to another page saves nothing');
   } finally { await a.context().close(); }
 });

@@ -14,6 +14,7 @@
   const cards = new Map();     // index -> card element
   const notes = new Map();     // index -> why the answer was wrong (only until the page is reloaded)
   let state = read();
+  let savedAt = state.at;      // the position that went to the server with the last save
   let cfg = null;
   let quiet = false;           // true while the shell itself opens a solution at the start: nothing is recorded
   let pages = [];              // every page in order: { id, kind, title, group, el, set }
@@ -30,8 +31,14 @@
     return s;
   }
   function persist() {
+    savedAt = state.at;
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* the tracker shows saving problems */ }
   }
+  // Moving between pages is not saved (every save shows »Shranjujem …« and goes to the server): the position rides along with the next real change
+  // (an answer, a first view of a theory page) or is saved when the student leaves the exercise.
+  function leave() { if (state.at !== savedAt) persist(); }
+  window.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') leave(); }, true);
+  window.addEventListener('pagehide', leave);
   const rec = (i) => state.t[i] || (state.t[i] = {});
   const half = (n) => Math.round(n * 50) / 100;
 
@@ -889,6 +896,7 @@
   }
   function show(p, k) {
     pages.forEach((x) => { const on = x === p; x.page.classList.toggle('on', on); x.page.hidden = !on; });
+    if (p.kind !== 'overview') state.at = p.id; // in memory only; a first view below saves it together with the page
     if ((p.kind === 'theory' || p.kind === 'extra') && !state.seen.includes(p.id)) { state.seen.push(p.id); persist(); }
     const locked = (p.kind === 'set' || p.kind === 'extra') && !gateOpen();
     if (p.kind === 'set' || p.kind === 'extra') paintLock(p, locked);
@@ -900,8 +908,6 @@
     document.querySelectorAll('.lr-rail a').forEach((a) => { if (a.dataset.page === p.id) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     const sel = document.getElementById('lrSel');
     if (sel) sel.value = p.id;
-    // Only a change is saved (every save shows »Shranjujem …« and goes to the server): paging through the tasks of a set, or loading the page again, changes nothing.
-    if (p.kind !== 'overview' && state.at !== p.id) { state.at = p.id; persist(); }
     paintResume();
     paintSeen();
     window.scrollTo(0, 0);
