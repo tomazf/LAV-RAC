@@ -25,6 +25,7 @@
   let quiet = false;           // true while the shell itself opens a solution at the start: nothing is recorded
   let pages = [];              // every page in order: { id, kind, title, group, el, set }
   let gate = [];               // theory page ids that open the tasks
+  let resetBox = null;         // the »Ponastavi vajo« button with its confirmation; mount() puts it in the left column (or on the overview page on a phone)
   const setPos = new Map();    // set id -> shown task position
 
   function read() {
@@ -219,6 +220,15 @@
       if (p.kind !== 'set') p.page.append(buildPager(p));
       main.append(p.page);
     });
+    // One button with one set of ids: in the left column, and on the overview page when the column is hidden (a phone).
+    const phone = window.matchMedia('(max-width:900px)');
+    const placeReset = () => {
+      if (!phone.matches) { rail.append(resetBox); return; }
+      const ov = pages[0].page;
+      ov.insertBefore(resetBox, ov.querySelector('.lr-pager'));
+    };
+    placeReset();
+    if (phone.addEventListener) phone.addEventListener('change', placeReset);
     const lr = h('div', { class: 'lr' }, top, h('div', { class: 'lr-body' }, rail, main));
     if (old) old.replaceWith(lr); else document.body.append(lr);
     TASKS.forEach((_, i) => paintTask(i));
@@ -246,13 +256,14 @@
       no.focus();
     };
     idle();
-    // The title, progress and reset sit in the middle; the portal's tracker adds »Vse vaje« before them and »Odjava« after them,
-    // so those two stay at the edges of the page, away from the content.
+    resetBox = reset;
+    // The title, progress and search sit in the middle; the portal's tracker adds »Vse vaje« before them and »Odjava« after them,
+    // so those two stay at the edges of the page, away from the content. The reset button is in the left column (12. 11. 2026).
     return h('div', { class: 'lr-top' }, h('div', { class: 'lr-top-in' },
       h('div', { class: 'lr-top-mid' },
         h('div', { class: 'lr-name' }, h('b', { text: c.title }), c.kicker ? h('span', { text: c.kicker }) : null),
         h('div', { class: 'lr-prog', role: 'status' }, bar, h('span', { class: 'lr-ptxt', id: 'lrPtxt' })),
-        reset)));
+        buildSearch())));
   }
   function doReset() {
     state = { t: {}, seen: state.seen.slice() };
@@ -678,6 +689,199 @@
     paintProgress();
   }
   const gateOpen = () => gate.every((id) => state.seen.includes(id));
+
+  // ---------- search in the explanations (agreed 12. 11. 2026) ----------
+  // Only the explanation pages are searched: not the tasks, and not the quizzes and »Poskusi sam« blocks inside an explanation.
+  // A word is found by its beginning ("tabel" finds tabela, tabele, tabelo), without regard to capitals or marks (s finds š).
+  const SKIP = 'script,style,svg,canvas,button,select,textarea,input,[data-quiz],[data-try],.quiz,.lr-phead,.lr-pager';
+  const isW = (c) => /[\p{L}\p{N}_]/u.test(c);
+  // Lower case and without marks, one letter for one letter, so a place in the folded text is the same place in the original.
+  const fold = (s) => {
+    let o = '';
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i];
+      o += c === 'đ' || c === 'Đ' ? 'd' : c.normalize('NFD')[0].toLowerCase()[0];
+    }
+    return o;
+  };
+  // A typed word, and the shorter beginnings of it that also count (for the other endings of a Slovene word).
+  const variants = (t) => {
+    const v = [t];
+    for (let n = t.length - 1; t.length >= 5 && n >= Math.max(4, t.length - 3); n--) v.push(t.slice(0, n));
+    return v;
+  };
+  // Where words begin with `v`: [start, end of the whole word].
+  const wordHits = (norm, v) => {
+    const out = [];
+    for (let i = norm.indexOf(v); i !== -1; i = norm.indexOf(v, i + 1)) {
+      if (i > 0 && isW(norm[i - 1])) continue;
+      let e = i + v.length;
+      while (e < norm.length && isW(norm[e])) e++;
+      out.push([i, e]);
+    }
+    return out;
+  };
+  // Merge overlapping ranges of several words.
+  const merge = (r) => r.sort((a, b) => a[0] - b[0]).reduce((m, x) => { const l = m[m.length - 1]; if (l && x[0] <= l[1]) l[1] = Math.max(l[1], x[1]); else m.push(x.slice()); return m; }, []);
+  let searchIndex = null;
+  const indexPages = () => {
+    if (searchIndex) return searchIndex;
+    const theory = pages.filter((p) => p.kind === 'theory');
+    const BLOCK = 'p,li,td,th,tr,div,h1,h2,h3,h4,h5,h6,pre,figcaption,section,ul,ol,table,blockquote,dd,dt';
+    searchIndex = theory.map((p, k) => {
+      let text = '', last = null;
+      const walk = document.createTreeWalker(p.page, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentElement.closest(SKIP) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT) });
+      while (walk.nextNode()) {
+        // Text of one block runs on as written (so »<code>CREATE</code>,« stays »CREATE,«); another block starts after a space.
+        const n = walk.currentNode, block = n.parentElement.closest(BLOCK);
+        if (block !== last) { text += ' '; last = block; }
+        text += n.nodeValue;
+      }
+      text = text.replace(/\s+/g, ' ').trim();
+      return { p, no: k + 1, text, norm: fold(text), title: fold(p.title), group: fold(p.group.title) };
+    });
+    return searchIndex;
+  };
+  // The pages that have every typed word, the best first. `use` is, for every word, the longest form that was found in that page.
+  function searchPages(query) {
+    const words = fold(query).split(/[^\p{L}\p{N}_]+/u).filter((w) => w.length > 1 || (w && w.charCodeAt(0) > 127));
+    if (!words.length) return [];
+    const found = [];
+    indexPages().forEach((e) => {
+      let score = 0;
+      const use = [];
+      for (const w of words) {
+        let best = null;
+        for (const [j, v] of variants(w).entries()) {
+          const inBody = wordHits(e.norm, v).length, inTitle = wordHits(e.title, v).length, inGroup = wordHits(e.group, v).length;
+          if (!inBody && !inTitle && !inGroup) continue;
+          const weight = j === 0 ? 1 : 0.3;
+          score += weight * (Math.min(inBody, 10) + 8 * (inTitle ? 1 : 0) + 2 * (inGroup ? 1 : 0));
+          best = v;
+          break;
+        }
+        if (!best) return;
+        use.push(best);
+      }
+      found.push({ e, score, use });
+    });
+    return found.sort((a, b) => b.score - a.score || a.e.no - b.e.no);
+  }
+  // A short piece of the page around the first match, with the matched words marked.
+  function snippet(r) {
+    const { e, use } = r;
+    let at = -1;
+    for (const v of use) { const h0 = wordHits(e.norm, v)[0]; if (h0 && (at < 0 || h0[0] < at)) at = h0[0]; }
+    const from = at < 0 ? 0 : Math.max(0, at - 50);
+    let a = from, b = Math.min(e.text.length, from + 150);
+    if (a > 0) { const s = e.text.indexOf(' ', a); if (s !== -1 && s < at) a = s + 1; }
+    if (b < e.text.length) { const s = e.text.lastIndexOf(' ', b); if (s > a) b = s; }
+    const part = e.text.slice(a, b), norm = e.norm.slice(a, b);
+    const frag = document.createDocumentFragment();
+    if (a > 0) frag.append('… ');
+    let pos = 0;
+    merge(use.flatMap((v) => wordHits(norm, v))).forEach(([x, y]) => {
+      frag.append(part.slice(pos, x), h('mark', { text: part.slice(x, y) }));
+      pos = y;
+    });
+    frag.append(part.slice(pos));
+    if (b < e.text.length) frag.append(' …');
+    return frag;
+  }
+  // The matched words are marked on the page itself, until the next search, the end of the search or another page.
+  function clearMarks() {
+    const parents = new Set();
+    document.querySelectorAll('mark.lr-hit').forEach((m) => { parents.add(m.parentNode); m.replaceWith(document.createTextNode(m.textContent)); });
+    parents.forEach((n) => n.normalize());
+  }
+  function markPage(p, use) {
+    clearMarks();
+    const walk = document.createTreeWalker(p.page, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.nodeValue.trim() && !n.parentElement.closest(SKIP) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT) });
+    const nodes = [];
+    while (walk.nextNode()) nodes.push(walk.currentNode);
+    nodes.forEach((n) => {
+      const ranges = merge(use.flatMap((v) => wordHits(fold(n.nodeValue), v)));
+      if (!ranges.length) return;
+      const frag = document.createDocumentFragment();
+      let pos = 0;
+      ranges.forEach(([x, y]) => { frag.append(n.nodeValue.slice(pos, x), h('mark', { class: 'lr-hit', text: n.nodeValue.slice(x, y) })); pos = y; });
+      frag.append(n.nodeValue.slice(pos));
+      n.replaceWith(frag);
+    });
+    return p.page.querySelector('mark.lr-hit');
+  }
+  function buildSearch() {
+    const input = h('input', { type: 'search', id: 'lrSearch', class: 'lr-sq', placeholder: 'Išči po razlagah', autocomplete: 'off', spellcheck: 'false', role: 'combobox', 'aria-label': 'Iskanje po razlagah', 'aria-controls': 'lrSres', 'aria-expanded': 'false', 'aria-autocomplete': 'list' });
+    const list = h('ul', { class: 'lr-sres', id: 'lrSres', role: 'listbox', 'aria-label': 'Zadetki v razlagah', hidden: true });
+    const live = h('span', { class: 'lr-sr', role: 'status' });
+    const icon = h('span', { class: 'lr-sicon', 'aria-hidden': 'true', html: '<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>' });
+    const form = h('form', { class: 'lr-search', role: 'search' }, icon, input, live, list);
+    let shown = [], active = -1, pending = null;
+    const close = () => { list.hidden = true; input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant'); active = -1; };
+    const setActive = (i) => {
+      const items = list.querySelectorAll('a');
+      active = items.length ? (i + items.length) % items.length : -1;
+      items.forEach((a, j) => { a.classList.toggle('on', j === active); a.setAttribute('aria-selected', j === active ? 'true' : 'false'); });
+      if (active >= 0) { input.setAttribute('aria-activedescendant', items[active].id); items[active].scrollIntoView({ block: 'nearest' }); } else input.removeAttribute('aria-activedescendant');
+    };
+    function render() {
+      const q = input.value.trim();
+      clearMarks();
+      if (!q) { shown = []; close(); live.textContent = ''; return; }
+      shown = searchPages(q);
+      list.replaceChildren();
+      if (!fold(q).split(/[^\p{L}\p{N}_]+/u).some((w) => w.length > 1 || (w && w.charCodeAt(0) > 127))) { close(); live.textContent = ''; return; } // one letter is not a search yet
+      if (!shown.length) {
+        list.append(h('li', { class: 'lr-sno', role: 'presentation', text: 'Ni zadetkov med razlagami.' }));
+        live.textContent = 'Ni zadetkov med razlagami.';
+      } else {
+        shown.slice(0, 20).forEach((r, i) => {
+          const a = h('a', { href: '#' + r.e.p.id, id: 'lrR' + i, role: 'option', 'aria-selected': 'false', 'data-i': i },
+            h('span', { class: 'lr-st' }, h('b', { text: r.e.no + ' · ' + r.e.p.title }), h('small', { text: r.e.p.group.title })),
+            h('span', { class: 'lr-ss' }, snippet(r)));
+          list.append(h('li', { role: 'presentation' }, a));
+        });
+        live.textContent = shown.length === 1 ? '1 stran z zadetki.' : shown.length + ' strani z zadetki.';
+      }
+      list.hidden = false;
+      input.setAttribute('aria-expanded', 'true');
+      active = -1;
+    }
+    // Going to a page from the list: the words are marked there and the page opens at the first of them.
+    function open(i) {
+      const r = shown[i];
+      if (!r) return;
+      pending = r;
+      close();
+      const go = () => { const m = markPage(r.e.p, r.use); pending = null; if (m) m.scrollIntoView({ block: 'center' }); };
+      if (location.hash.slice(1).split('/')[0] === r.e.p.id) go(); else location.hash = r.e.p.id;
+    }
+    // Another page clears the marks; a page opened from the list gets them. This runs after the router (a timeout), which has
+    // shown the page and scrolled to the top by then.
+    window.addEventListener('hashchange', () => setTimeout(() => {
+      if (!pending) { clearMarks(); return; }
+      const r = pending;
+      pending = null;
+      const m = markPage(r.e.p, r.use);
+      if (m) m.scrollIntoView({ block: 'center' });
+    }, 0));
+    input.addEventListener('input', render);
+    input.addEventListener('focus', () => { if (list.childElementCount && input.value.trim()) { list.hidden = false; input.setAttribute('aria-expanded', 'true'); } });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); if (list.hidden) render(); setActive(active + 1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(active - 1); }
+      else if (e.key === 'Escape') { e.preventDefault(); if (!list.hidden) close(); else if (input.value) { input.value = ''; clearMarks(); } } // the first press closes the list (a search field would also clear itself)
+    });
+    form.addEventListener('submit', (e) => { e.preventDefault(); if (!list.hidden) open(active >= 0 ? active : 0); });
+    list.addEventListener('click', (e) => {
+      const a = e.target.closest('a');
+      if (!a) return;
+      e.preventDefault();
+      open(Number(a.dataset.i));
+    });
+    document.addEventListener('click', (e) => { if (!form.contains(e.target)) close(); });
+    return form;
+  }
 
   // ---------- routing ----------
   function route() {
@@ -1175,7 +1379,7 @@ table.rel td.mono{font-family:var(--f-mono);font-size:.8rem;overflow-wrap:anywhe
   --lr-hdr:#2e1a40;--lr-lamp:#ffc45c;
   --lr-ok:#2b8a3e;--lr-ok-bg:#e3f5e8;--lr-half:#9a6416;--lr-half-bg:#f8eed9;--lr-bad:#c92a2a;--lr-bad-bg:#fde8e8;--lr-seen:#5f5470;--lr-seen-bg:#ece6f2;
   --lr-self:#1f6f8b;--lr-self-bg:#e1f0f5;
-  --lr-none:#e6dccf;--lr-ring:#c3b5a3;
+  --lr-none:#e6dccf;--lr-ring:#c3b5a3;--lr-mark:#ffe08a;--lr-onmark:#241433;
   --lr-fb:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;--lr-fm:"IBM Plex Mono",ui-monospace,Consolas,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
@@ -1183,7 +1387,7 @@ table.rel td.mono{font-family:var(--f-mono);font-size:.8rem;overflow-wrap:anywhe
   --lr-hdr:#1f1130;
   --lr-ok:#6fd48a;--lr-ok-bg:#17352a;--lr-half:#f1b95a;--lr-half-bg:#3a2e17;--lr-bad:#ff8080;--lr-bad-bg:#3d2230;--lr-seen:#a99cba;--lr-seen-bg:#2f2242;
   --lr-self:#6cc1dd;--lr-self-bg:#16313b;
-  --lr-none:#4a3a60;--lr-ring:#76648f;
+  --lr-none:#4a3a60;--lr-ring:#76648f;--lr-mark:#5c470c;--lr-onmark:#fff3cf;
 }}
 html body{background:var(--lr-bg);color:var(--lr-ink);font-family:var(--lr-fb);padding:0;margin:0}
 html body .lvs-bar{background:var(--lr-hdr)}
@@ -1223,6 +1427,31 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 .lr-ptxt{font:500 .9rem var(--lr-fm);color:var(--lr-mut);font-variant-numeric:tabular-nums}
 .lr-reset{display:flex;align-items:center}
 .lr-confirm{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:.92rem;max-width:560px}
+/* the reset button is at the bottom of the left column (agreed 12. 11. 2026), on the overview page when the column is hidden */
+.lr-rail .lr-reset{margin:18px 10px 4px;flex-direction:column;align-items:stretch}
+.lr-rail .lr-reset .lr-btn{justify-content:center}
+.lr-rail .lr-confirm{flex-direction:column;align-items:stretch;max-width:none}
+.lr-page>.lr-reset{flex:none;margin-top:4px}
+/* search in the explanations, in the header (agreed 12. 11. 2026); the words found are marked on the page */
+.lr-search{position:relative;flex:1 1 200px;min-width:160px;max-width:300px;display:flex;align-items:center}
+.lr-sicon{position:absolute;left:11px;top:50%;width:18px;height:18px;margin-top:-9px;color:var(--lr-mut);pointer-events:none;display:flex}
+.lr-sicon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.lr-sq{width:100%;box-sizing:border-box;min-height:38px;padding:0 12px 0 36px;border:1.5px solid var(--lr-line);border-radius:8px;background:var(--lr-card);color:var(--lr-ink);font:500 .92rem var(--lr-fb)}
+.lr-sq::placeholder{color:var(--lr-mut);opacity:1}
+.lr-sq:hover{border-color:var(--lr-ring)}
+.lr-sq::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;width:16px;height:16px;margin-left:6px;cursor:pointer;background:var(--lr-mut);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 3.5l9 9M12.5 3.5l-9 9' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 3.5l9 9M12.5 3.5l-9 9' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat}
+.lr-sq:focus{outline:none;border-color:var(--lr-acc);box-shadow:0 0 0 3px var(--lr-acc-soft)}
+.lr-sres{position:absolute;top:calc(100% + 6px);right:0;z-index:30;width:min(540px,calc(100vw - 32px));max-height:min(70vh,520px);overflow-y:auto;list-style:none;margin:0;padding:6px;background:var(--lr-card);border:1.5px solid var(--lr-line);border-radius:10px;box-shadow:0 10px 30px #24143333}
+.lr-sres a{display:flex;flex-direction:column;gap:3px;padding:8px 10px;border-radius:8px;color:var(--lr-ink);text-decoration:none;line-height:1.35}
+.lr-sres a:hover,.lr-sres a.on{background:var(--lr-acc-soft)}
+.lr-st{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
+.lr-st b{font-size:.95rem}
+.lr-st small{color:var(--lr-mut);font-size:.8rem}
+.lr-ss{font-size:.88rem;color:var(--lr-mut)}
+.lr-sres mark,mark.lr-hit{background:var(--lr-mark);color:var(--lr-onmark);border-radius:3px;padding:0 1px}
+mark.lr-hit{scroll-margin-top:170px}
+.lr-sno{padding:10px;color:var(--lr-mut);font-size:.9rem}
+.lr-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .lr-ok{background:var(--lr-ok)}.lr-half{background:var(--lr-half)}.lr-bad{background:var(--lr-bad)}.lr-seen{background:var(--lr-seen)}.lr-self{background:var(--lr-self)}
 
 /* body: rail + page */
@@ -1412,7 +1641,8 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
   .lr-msel{display:flex;flex-direction:column;gap:4px}
   .lr-mnav select{font:inherit;font-size:.95rem;color:var(--lr-ink);background:var(--lr-card);border:1px solid var(--lr-line);border-radius:7px;padding:6px 10px;min-height:38px}
   .lr-top{position:sticky}
-  .lr-reset{flex:1 1 100%}
+  .lr-search{flex:1 1 100%;max-width:none;order:5}
+  .lr-sres{left:0;right:0;width:auto}
   .lr-shead>.lr-gi{display:none}
   .lr-right{margin-left:0}
 }
@@ -1438,6 +1668,13 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 .lr-main .opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
 .lr-main .opt.right:has(input:checked){border-color:var(--ok);background:var(--ok-soft)}
 .lr-main .opt.wrong:has(input:checked){border-color:var(--bad);background:var(--bad-soft)}
+/* labels of the worked steps and definitions in 4.x ("1 · Kaj želimo doseči", "Podatek"): headings like h3.sub of the other years, not 11px
+   capitals in grey (agreed 12. 11. 2026) */
+.lr-main .lbl{font-family:var(--f-display);font-size:1.15rem;font-weight:700;line-height:1.15;letter-spacing:0;text-transform:none;color:var(--fg)}
+/* options written as code: the artifact gives them the colour of a code block (light text) but the light background of an option, so the text could
+   not be read in the light scheme (4.1 D.10, D.11, E.12; 4.2 A.13, B.11 to B.13, D.7); the text takes the colour of the page */
+.lr-main .opt.code{color:var(--fg)}
+.lr-main .opt.code b{color:var(--muted)}
 /* blocks that are narrower than the text sit in the middle (agreed 11. 11. 2026): tables, figures, choices, register figures with their bit row,
    steps; the text inside a block stays left-aligned. Running text, code, notes and work areas keep the full width */
 .lr-main :not(.two)>.tbl,.lr-main :not(.two)>.reswrap,.lr-main :not(.two)>figure.fig,.lr-main :not(.two)>.regfig,.lr-main :not(.two)>.tbits,.lr-main :not(.two)>ol.st4{margin-left:auto;margin-right:auto} /* blocks side by side in a .two row are not spread apart */

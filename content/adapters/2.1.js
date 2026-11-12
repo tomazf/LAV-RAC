@@ -44,7 +44,7 @@ export default {
   .al.cs td.ar{min-width:.8rem;padding:3px 0;color:var(--accent);font-size:.72rem}
   .al.cs td.ch{padding:2px 4px}
   .al.cs td.ch b{display:inline-flex;align-items:center;justify-content:center;min-width:1.35rem;height:1.35rem;border-radius:999px;font-size:.78rem;font-weight:700}
-  .al.cs td.ch b.on{background:var(--accent);color:#fff}
+  .al.cs td.ch b.on{background:var(--accent);color:var(--surface)}
   .al.cs td.ch b.none{border:1px dashed var(--line);color:var(--muted);font-weight:500}
   .al.cs td.ch b.disc{text-decoration:line-through;opacity:.75}
   .al tr.dn td{color:var(--muted);font-size:.8rem}

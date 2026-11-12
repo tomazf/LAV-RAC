@@ -276,9 +276,11 @@ test('»Vse vaje« and »Odjava« sit in the exercise header, which stays on scr
   // scrolled to the bottom, the header still starts at the top of the screen
   await p.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   assert.equal(await p.evaluate(() => document.querySelector('.lr-top').getBoundingClientRect().top), 0);
-  // existing parts stay: title, progress and the reset button
+  // existing parts stay: title and progress; the search is in the header, the reset button at the bottom of the left column (agreed 12. 11. 2026)
   assert.match(await p.textContent('.lr-top .lr-name'), /Številski sistemi/);
-  assert.ok(await p.locator('.lr-top #resetBtn').isVisible());
+  assert.ok(await p.locator('.lr-top input[type=search]').isVisible());
+  assert.equal(await p.locator('.lr-top #resetBtn').count(), 0);
+  assert.equal(await p.locator('.lr-rail > .lr-reset #resetBtn').count(), 1);
   // both links are tinted plates at the edges of the page, well away from the title (agreed 10. 11. 2026)
   await p.setViewportSize({ width: 1500, height: 900 });
   await p.evaluate(() => window.scrollTo(0, 0));
@@ -1865,4 +1867,159 @@ test('a self-checked task counts as done but never as points: the server forces 
     await db.end();
   }
   assert.deepEqual(errors, []);
+});
+
+test('search in the explanations: found by the beginning of a word and without marks, not in tasks or quizzes, marked on the page, cleared when leaving', async () => {
+  const a = await login('Sara Skrbnik');
+  const results = async (q) => {
+    await a.fill('#lrSearch', q);
+    return a.$$eval('#lrSres a', (as) => as.map((x) => x.getAttribute('href').slice(1)));
+  };
+  try {
+    await a.goto(`${APP}/vaje/4.2#pregled`);
+    await at(a, 'pregled');
+    // the field is in the header, always on top, and the reset button is not there any more
+    assert.equal(await a.locator('.lr-top #lrSearch').count(), 1);
+    assert.equal(await a.locator('.lr-top #resetBtn').count(), 0);
+    assert.equal(await a.locator('#lrSearch').getAttribute('placeholder'), 'Išči po razlagah');
+    await a.evaluate(() => window.scrollTo(0, 600));
+    assert.ok(await a.locator('#lrSearch').isVisible());
+    // the beginning of a word finds all its endings, capitals and marks do not matter (s finds š)
+    const tab = await results('tabel');
+    assert.ok(tab.includes('supb') && tab.includes('relmodel'), `tabel: ${tab}`);
+    assert.deepEqual(await results('TABELO'), tab.length ? await results('tabelo') : []);
+    assert.ok((await results('sola')).includes('grant'), 'sola finds the word šola');
+    assert.ok((await results('SOLA')).includes('grant'));
+    // the page that is about the word comes first (its title has it)
+    assert.equal((await results('transakc'))[0], 'transakcije');
+    // all typed words must be in the page; a page is listed once
+    const two = await results('relacijski model');
+    assert.ok(two.includes('relmodel') && new Set(two).size === two.length);
+    assert.deepEqual(await results('relacijski žirafa'), []);
+    assert.match(await a.textContent('#lrSres'), /Ni zadetkov/);
+    // one letter is not a search yet
+    assert.deepEqual(await results('t'), []);
+    assert.equal(await a.locator('#lrSres').isHidden(), true);
+    // only explanations: the text of a task, the quizzes and »Poskusi sam« are not searched
+    assert.deepEqual(await results('Kateri stavek prekliče vse spremembe'), [], 'the statement of task A.13 is not found');
+    assert.deepEqual(await results('vedno hitrejše'), [], 'an option of a quiz is not found');
+    // opening a result: the page, the words marked, the first of them in view, the list closed
+    await results('transakc');
+    await a.keyboard.press('ArrowDown');
+    await a.keyboard.press('Enter');
+    await at(a, 'transakcije');
+    await a.waitForFunction(() => document.querySelectorAll('.page.on mark.lr-hit').length > 3);
+    assert.equal(await a.locator('#lrSres').isHidden(), true);
+    assert.deepEqual([...new Set((await a.locator('.page.on mark.lr-hit').allTextContents()).map((x) => x.toLowerCase().slice(0, 9)))].sort().filter((x) => x.startsWith('transakc')).length > 0, true);
+    const inView = await a.evaluate(() => { const r = document.querySelector('mark.lr-hit').getBoundingClientRect(); return r.top >= 58 && r.bottom <= innerHeight; });
+    assert.ok(inView, 'the first mark is in view, below the header');
+    // the marks are readable in both colour schemes
+    for (const scheme of ['light', 'dark']) {
+      await a.emulateMedia({ colorScheme: scheme });
+      const c = await a.evaluate(() => { const s = getComputedStyle(document.querySelector('mark.lr-hit')); return [s.color, s.backgroundColor]; });
+      const lum = (rgb) => { const v = rgb.match(/\d+/g).slice(0, 3).map((x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; }); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; };
+      const [l1, l2] = [lum(c[0]), lum(c[1])];
+      assert.ok((Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05) >= 7, `${scheme}: marks are readable`);
+    }
+    await a.emulateMedia({ colorScheme: null });
+    // another page, and the marks are gone; the page itself is as it was (no leftover pieces of text)
+    await go(a, 'supb');
+    assert.equal(await a.locator('mark.lr-hit').count(), 0);
+    assert.equal(await a.evaluate(() => document.querySelector('#transakcije').querySelectorAll('mark').length), 0);
+    // Escape closes the list, then clears the field
+    await results('tabel');
+    await a.keyboard.press('Escape');
+    assert.equal(await a.locator('#lrSres').isHidden(), true);
+    assert.equal(await a.inputValue('#lrSearch'), 'tabel');
+    await a.keyboard.press('Escape');
+    assert.equal(await a.inputValue('#lrSearch'), '');
+    // the same on every exercise that has explanations: nothing breaks, and no page of tasks is ever offered
+    for (const e of catalog.exercises) {
+      await a.goto(`${APP}/vaje/${e.id}#pregled`);
+      await at(a, 'pregled');
+      const pageIds = await a.$$eval('.lr-rail a.lr-pg:not(.lr-gated)', (as) => as.map((x) => x.dataset.page));
+      const found = await results('podat');
+      assert.ok(found.every((id) => pageIds.includes(id)), `${e.id}: only explanation pages are offered (${found})`);
+    }
+  } finally { await a.context().close(); }
+});
+
+test('the reset button is in the left column, on a phone at the end of the overview page; one button, working in both', async () => {
+  const a = await login('Sara Skrbnik');
+  try {
+    await a.goto(`${EX}#pregled`);
+    await at(a, 'pregled');
+    assert.equal(await a.locator('#resetBtn').count(), 1);
+    assert.equal(await a.locator('.lr-rail #resetBtn').count(), 1);
+    await a.locator('#resetBtn').scrollIntoViewIfNeeded();
+    assert.ok(await a.locator('#resetBtn').isVisible());
+    // the confirmation fits the column
+    await a.click('#resetBtn');
+    const fits = await a.evaluate(() => { const col = document.querySelector('.lr-rail').getBoundingClientRect(); const b = document.querySelector('#resetYes').getBoundingClientRect(); return b.left >= col.left && b.right <= col.right; });
+    assert.ok(fits, 'the confirmation fits the left column');
+    await a.click('.lr-confirm .lr-btn:not(#resetYes)');
+    assert.equal(await a.locator('#resetBtn').count(), 1);
+    // a phone: the column is hidden, the button follows the overview page (the same element), and the header has the search in its own row
+    await a.setViewportSize({ width: 390, height: 800 });
+    await a.waitForFunction(() => document.querySelector('.lr-page.lr-overview #resetBtn'));
+    assert.equal(await a.locator('#resetBtn').count(), 1);
+    assert.equal(await a.locator('.lr-rail #resetBtn').count(), 0);
+    await a.locator('#resetBtn').scrollIntoViewIfNeeded();
+    assert.ok(await a.locator('#resetBtn').isVisible());
+    const row = await a.evaluate(() => { const s = document.querySelector('.lr-search').getBoundingClientRect(); const n = document.querySelector('.lr-name').getBoundingClientRect(); return { below: s.top >= n.bottom, width: s.width, inner: innerWidth, scrolls: document.documentElement.scrollWidth > innerWidth }; });
+    assert.ok(row.below && row.width > 300 && !row.scrolls, `the search has its own row on a phone: ${JSON.stringify(row)}`);
+    // back to a wide window: the button returns to the column
+    await a.setViewportSize({ width: 1280, height: 900 });
+    await a.waitForFunction(() => document.querySelector('.lr-rail #resetBtn'));
+    assert.equal(await a.locator('#resetBtn').count(), 1);
+  } finally { await a.context().close(); }
+});
+
+test('4.x: the labels of the steps are headings like in the other years, and options written as code can be read in both colour schemes', async () => {
+  const a = await login('Sara Skrbnik');
+  const lum = (rgb) => { const v = rgb.match(/\d+(\.\d+)?/g).slice(0, 3).map((x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; }); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; };
+  const ratio = (c1, c2) => { const [l1, l2] = [lum(c1), lum(c2)]; return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05); };
+  try {
+    // the labels: not small capitals, the same size as h3.sub (1.15rem = 18.4px)
+    for (const [id, page] of [['4.1', 'selekcija'], ['4.2', 'uvod']]) {
+      await a.goto(`${APP}/vaje/${id}#${page}`);
+      await at(a, page);
+      const labels = await a.$$eval('.page.on .lbl', (els) => els.map((e) => { const s = getComputedStyle(e); return { size: parseFloat(s.fontSize), transform: s.textTransform, weight: Number(s.fontWeight), family: s.fontFamily }; }));
+      assert.ok(labels.length >= 3, `${id}: labels found`);
+      for (const l of labels) {
+        assert.ok(l.size >= 18, `${id}: ${l.size}px`);
+        assert.equal(l.transform, 'none');
+        assert.ok(l.weight >= 700);
+        assert.doesNotMatch(l.family, /Plex Mono|monospace/);
+      }
+    }
+    // options in the font of code: 4.1 D.10, D.11, E.12 and 4.2 A.13, B.11 to B.13, D.7 (the artifact painted their text as light as a code block)
+    const withCode = { '4.1': ['naloge-d/10', 'naloge-d/11', 'naloge-e/12'], '4.2': ['naloge-a/13', 'naloge-b/11', 'naloge-b/12', 'naloge-b/13', 'naloge-d/7'] };
+    let seen = 0;
+    for (const scheme of ['light', 'dark']) {
+      await a.emulateMedia({ colorScheme: scheme });
+      for (const [id, hashes] of Object.entries(withCode)) {
+        await a.goto(`${APP}/vaje/${id}#pregled`);
+        await at(a, 'pregled');
+        for (const h of hashes) {
+          await go(a, h);
+          const opts = await a.$$eval('.page.on .lr-task:not(.lr-off) .opt.code', (els) => els.map((e) => {
+            const bg = (el) => { for (let n = el; n; n = n.parentElement) { const c = getComputedStyle(n).backgroundColor; if (!/rgba\(.*, 0\)|transparent/.test(c)) return c; } return 'rgb(255, 255, 255)'; };
+            return { fg: getComputedStyle(e).color, bg: bg(e), text: e.textContent.trim().slice(0, 30), mono: /Plex Mono/.test(getComputedStyle(e.querySelector('span')).fontFamily) };
+          }));
+          assert.ok(opts.length >= 3, `${id} ${h}: options in code`);
+          for (const o of opts) { seen++; assert.ok(ratio(o.fg, o.bg) >= 7, `${scheme} ${id} ${h} "${o.text}": ${ratio(o.fg, o.bg).toFixed(2)}`); }
+        }
+      }
+    }
+    assert.ok(seen >= 40);
+    await a.emulateMedia({ colorScheme: null });
+  } finally { await a.context().close(); }
+});
+
+test('contrast fixes of 12. 11. 2026 in two simulations: white digit on the accent of the dark scheme (2.1), the small label on the green carry cell (2.3)', () => {
+  const read = (id) => readFileSync(path.join(root, `content/exercises/${id}.html`), 'utf8');
+  assert.match(read('2.1'), /\.al\.cs td\.ch b\.on\{background:var\(--accent\);color:var\(--surface\)\}/);
+  assert.doesNotMatch(read('2.1'), /b\.on\{background:var\(--accent\);color:#fff\}/);
+  assert.match(read('2.3'), /\.rc\.on small\{color:inherit\}/);
 });

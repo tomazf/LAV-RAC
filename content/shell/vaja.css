@@ -5,7 +5,7 @@
   --lr-hdr:#2e1a40;--lr-lamp:#ffc45c;
   --lr-ok:#2b8a3e;--lr-ok-bg:#e3f5e8;--lr-half:#9a6416;--lr-half-bg:#f8eed9;--lr-bad:#c92a2a;--lr-bad-bg:#fde8e8;--lr-seen:#5f5470;--lr-seen-bg:#ece6f2;
   --lr-self:#1f6f8b;--lr-self-bg:#e1f0f5;
-  --lr-none:#e6dccf;--lr-ring:#c3b5a3;
+  --lr-none:#e6dccf;--lr-ring:#c3b5a3;--lr-mark:#ffe08a;--lr-onmark:#241433;
   --lr-fb:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;--lr-fm:"IBM Plex Mono",ui-monospace,Consolas,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
@@ -13,7 +13,7 @@
   --lr-hdr:#1f1130;
   --lr-ok:#6fd48a;--lr-ok-bg:#17352a;--lr-half:#f1b95a;--lr-half-bg:#3a2e17;--lr-bad:#ff8080;--lr-bad-bg:#3d2230;--lr-seen:#a99cba;--lr-seen-bg:#2f2242;
   --lr-self:#6cc1dd;--lr-self-bg:#16313b;
-  --lr-none:#4a3a60;--lr-ring:#76648f;
+  --lr-none:#4a3a60;--lr-ring:#76648f;--lr-mark:#5c470c;--lr-onmark:#fff3cf;
 }}
 html body{background:var(--lr-bg);color:var(--lr-ink);font-family:var(--lr-fb);padding:0;margin:0}
 html body .lvs-bar{background:var(--lr-hdr)}
@@ -53,6 +53,31 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 .lr-ptxt{font:500 .9rem var(--lr-fm);color:var(--lr-mut);font-variant-numeric:tabular-nums}
 .lr-reset{display:flex;align-items:center}
 .lr-confirm{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:.92rem;max-width:560px}
+/* the reset button is at the bottom of the left column (agreed 12. 11. 2026), on the overview page when the column is hidden */
+.lr-rail .lr-reset{margin:18px 10px 4px;flex-direction:column;align-items:stretch}
+.lr-rail .lr-reset .lr-btn{justify-content:center}
+.lr-rail .lr-confirm{flex-direction:column;align-items:stretch;max-width:none}
+.lr-page>.lr-reset{flex:none;margin-top:4px}
+/* search in the explanations, in the header (agreed 12. 11. 2026); the words found are marked on the page */
+.lr-search{position:relative;flex:1 1 200px;min-width:160px;max-width:300px;display:flex;align-items:center}
+.lr-sicon{position:absolute;left:11px;top:50%;width:18px;height:18px;margin-top:-9px;color:var(--lr-mut);pointer-events:none;display:flex}
+.lr-sicon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.lr-sq{width:100%;box-sizing:border-box;min-height:38px;padding:0 12px 0 36px;border:1.5px solid var(--lr-line);border-radius:8px;background:var(--lr-card);color:var(--lr-ink);font:500 .92rem var(--lr-fb)}
+.lr-sq::placeholder{color:var(--lr-mut);opacity:1}
+.lr-sq:hover{border-color:var(--lr-ring)}
+.lr-sq::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;width:16px;height:16px;margin-left:6px;cursor:pointer;background:var(--lr-mut);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 3.5l9 9M12.5 3.5l-9 9' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 3.5l9 9M12.5 3.5l-9 9' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat}
+.lr-sq:focus{outline:none;border-color:var(--lr-acc);box-shadow:0 0 0 3px var(--lr-acc-soft)}
+.lr-sres{position:absolute;top:calc(100% + 6px);right:0;z-index:30;width:min(540px,calc(100vw - 32px));max-height:min(70vh,520px);overflow-y:auto;list-style:none;margin:0;padding:6px;background:var(--lr-card);border:1.5px solid var(--lr-line);border-radius:10px;box-shadow:0 10px 30px #24143333}
+.lr-sres a{display:flex;flex-direction:column;gap:3px;padding:8px 10px;border-radius:8px;color:var(--lr-ink);text-decoration:none;line-height:1.35}
+.lr-sres a:hover,.lr-sres a.on{background:var(--lr-acc-soft)}
+.lr-st{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
+.lr-st b{font-size:.95rem}
+.lr-st small{color:var(--lr-mut);font-size:.8rem}
+.lr-ss{font-size:.88rem;color:var(--lr-mut)}
+.lr-sres mark,mark.lr-hit{background:var(--lr-mark);color:var(--lr-onmark);border-radius:3px;padding:0 1px}
+mark.lr-hit{scroll-margin-top:170px}
+.lr-sno{padding:10px;color:var(--lr-mut);font-size:.9rem}
+.lr-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .lr-ok{background:var(--lr-ok)}.lr-half{background:var(--lr-half)}.lr-bad{background:var(--lr-bad)}.lr-seen{background:var(--lr-seen)}.lr-self{background:var(--lr-self)}
 
 /* body: rail + page */
@@ -242,7 +267,8 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
   .lr-msel{display:flex;flex-direction:column;gap:4px}
   .lr-mnav select{font:inherit;font-size:.95rem;color:var(--lr-ink);background:var(--lr-card);border:1px solid var(--lr-line);border-radius:7px;padding:6px 10px;min-height:38px}
   .lr-top{position:sticky}
-  .lr-reset{flex:1 1 100%}
+  .lr-search{flex:1 1 100%;max-width:none;order:5}
+  .lr-sres{left:0;right:0;width:auto}
   .lr-shead>.lr-gi{display:none}
   .lr-right{margin-left:0}
 }
@@ -268,6 +294,13 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 .lr-main .opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
 .lr-main .opt.right:has(input:checked){border-color:var(--ok);background:var(--ok-soft)}
 .lr-main .opt.wrong:has(input:checked){border-color:var(--bad);background:var(--bad-soft)}
+/* labels of the worked steps and definitions in 4.x ("1 · Kaj želimo doseči", "Podatek"): headings like h3.sub of the other years, not 11px
+   capitals in grey (agreed 12. 11. 2026) */
+.lr-main .lbl{font-family:var(--f-display);font-size:1.15rem;font-weight:700;line-height:1.15;letter-spacing:0;text-transform:none;color:var(--fg)}
+/* options written as code: the artifact gives them the colour of a code block (light text) but the light background of an option, so the text could
+   not be read in the light scheme (4.1 D.10, D.11, E.12; 4.2 A.13, B.11 to B.13, D.7); the text takes the colour of the page */
+.lr-main .opt.code{color:var(--fg)}
+.lr-main .opt.code b{color:var(--muted)}
 /* blocks that are narrower than the text sit in the middle (agreed 11. 11. 2026): tables, figures, choices, register figures with their bit row,
    steps; the text inside a block stays left-aligned. Running text, code, notes and work areas keep the full width */
 .lr-main :not(.two)>.tbl,.lr-main :not(.two)>.reswrap,.lr-main :not(.two)>figure.fig,.lr-main :not(.two)>.regfig,.lr-main :not(.two)>.tbits,.lr-main :not(.two)>ol.st4{margin-left:auto;margin-right:auto} /* blocks side by side in a .two row are not spread apart */

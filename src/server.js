@@ -7,7 +7,7 @@ import { config } from './config.js';
 import { migrate, pool } from './db.js';
 import { isMaintenance } from './backup.js';
 import { portal } from './portal.js';
-import { asset } from './assets.js';
+import { asset, fontPreloads } from './assets.js';
 import { pastLabel, yearsOn } from './catalog.js';
 import { listUrl, pageNumbers, PER_PAGE } from './paging.js';
 import * as fmt from './format.js';
@@ -25,6 +25,7 @@ app.set('views', path.join(import.meta.dirname, 'views'));
 app.locals.fmt = fmt;
 app.locals.portal = portal;
 app.locals.asset = asset;
+app.locals.fontPreloads = fontPreloads;
 app.locals.yearsOn = yearsOn;
 app.locals.pastLabel = pastLabel;
 Object.assign(app.locals, { listUrl, pageNumbers, PER_PAGE });
@@ -40,10 +41,14 @@ app.get('/favicon.ico', (req, res) => {
 app.get('/healthz', async (req, res) => {
   try { await pool.query('SELECT 1'); res.json({ ok: true }); } catch { res.status(503).json({ ok: false }); }
 });
-// Versioned links can be kept for a long time; anything else is checked with the server first.
+// Versioned links can be kept for a long time; anything else is checked with the server first. Font files are named for
+// what they hold and are requested from fonts.css without a version, but they are kept too: checking them with the
+// server on every load (and every F5) draws the text in the fallback font first, and the page jumps when the font
+// arrives. A changed font file needs a new name.
 app.use('/static', express.static(path.join(import.meta.dirname, 'public'), {
-  setHeaders: (res) => {
-    res.setHeader('Cache-Control', res.req.query.v ? 'public, max-age=31536000, immutable' : 'no-cache');
+  setHeaders: (res, file) => {
+    const keep = res.req.query.v || file.endsWith('.woff2');
+    res.setHeader('Cache-Control', keep ? 'public, max-age=31536000, immutable' : 'no-cache');
   },
 }));
 

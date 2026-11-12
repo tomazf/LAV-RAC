@@ -13,3 +13,9 @@ for (const entry of fs.readdirSync(root, { recursive: true, withFileTypes: true 
 }
 export const assetVersion = hash.digest('hex').slice(0, 12);
 export const asset = (file) => `/static/${file}?v=${assetVersion}`;
+// The text font (both subsets, both weights) is on every page. Preloading it starts the download with the page, so the
+// text is not drawn in the fallback font first and then jumps when the real font arrives. The address must be the one
+// fonts.css uses (no ?v=), and a font preload always needs crossorigin.
+export const fontPreloads = ['latin-400', 'latin-ext-400', 'latin-700', 'latin-ext-700']
+  .map((f) => `<link rel="preload" href="/static/fonts/atkinson-hyperlegible-${f}-normal.woff2" as="font" type="font/woff2" crossorigin>`)
+  .join('\n');

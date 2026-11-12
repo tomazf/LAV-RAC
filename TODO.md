@@ -1,5 +1,6 @@
 # TODO
 
+- [ ] Iskanje po razlagah čez več vaj (predlog 12. 11. 2026): v vaji je iskanje narejeno (polje v glavi, samo razlage te vaje). Za iskanje čez poglavja: strežnik ob uvozu zgradi indeks razlag (`content/search.json`), stran `/iskanje` vrne samo vaje, ki jih dijak sme odpreti (`canOpen` v `src/routes/exercises.js`), zadetek vodi na `/vaje/<id>#<stran>`; strani brez skript, polje v glavi portala. Odločiti: ali zajeti tudi strani »Simulacija«, kje naj bo polje.
 - [x] Gumbi v vajah malo večji (6. 11. 2026).
 - [x] Gumbi za listanje med stranmi brez napisa Naprej/Nazaj (6. 11. 2026).
 - [x] Odpiranje dela poglavja: ne delamo (6. 11. 2026). Poglavje je odprto v celoti; če bo treba, se vsebina razdeli v ločene artifacte, ki postanejo ločene vaje.

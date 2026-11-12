@@ -150,10 +150,17 @@ test('admin creates classes; a teacher joins, chooses exercises and adds student
   await t.click('text=Dodaj izbrane');
   await t.waitForLoadState();
   assert.equal(await t.locator('.matrix tbody tr').count(), 2);
-  // students are numbered in the order shown; the class page has no »Razredi« link above its title; the note is one line
+  // students are numbered in the order shown; the class page has no »Razredi« link above its title; the note under the table wraps over the full width, with no scroller of its own
   assert.deepEqual(await t.locator('.matrix td.stick .rn').allTextContents(), ['1.', '2.']);
   assert.equal(await t.locator('.crumbs').count(), 0);
-  assert.equal(await t.locator('p.note.one-line').evaluate((e) => getComputedStyle(e).whiteSpace), 'nowrap');
+  const note = await t.locator('.matrix-wrap + p.note').evaluate((e) => {
+    const main = e.closest('main'); const cs = getComputedStyle(main); const inner = main.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    return { white: getComputedStyle(e).whiteSpace, overflowX: getComputedStyle(e).overflowX, scrolls: e.scrollWidth > e.clientWidth, width: e.getBoundingClientRect().width, inner };
+  });
+  assert.equal(note.white, 'normal');
+  assert.equal(note.overflowX, 'visible');
+  assert.equal(note.scrolls, false);
+  assert.ok(Math.abs(note.width - note.inner) <= 1, `the note spans the full width (${note.width} of ${note.inner})`);
   assert.equal(await t.locator('#cakajo li').count(), 1);
   // a new class shows students nothing
   const s = await login('Ana Kovač');
@@ -1076,4 +1083,35 @@ test('nothing is loaded from other sites, and there were no page errors', async 
   assert.ok(w);
   await s.context().close();
   assert.deepEqual(pageErrors, []);
+});
+test('fonts do not make the page jump: kept by the browser, preloaded, and not asked for again after F5', async () => {
+  const a = await login('Sara Skrbnik');
+  try {
+    const FACES = ['latin-400', 'latin-ext-400', 'latin-700', 'latin-ext-700'].map((f) => `/static/fonts/atkinson-hyperlegible-${f}-normal.woff2`);
+    for (const f of FACES) {
+      const res = await a.request.get(`${APP}${f}`);
+      assert.equal(res.status(), 200, f);
+      assert.equal(res.headers()['cache-control'], 'public, max-age=31536000, immutable', f);
+    }
+    const loads = async () => a.evaluate(() => performance.getEntriesByType('resource').filter((r) => r.name.includes('.woff2')).map((r) => ({ name: new URL(r.name).pathname, transfer: r.transferSize })));
+    for (const url of ['/vaje', `/vaje/${catalog.exercises[0].id}`, '/admin']) {
+      await a.goto(`${APP}${url}`);
+      // the text font is announced in the head, before the style sheet, the way the browser needs it (crossorigin)
+      const links = await a.$$eval('head link[rel=preload][as=font]', (ls) => ls.map((l) => [new URL(l.href).pathname, l.type, l.crossOrigin]));
+      assert.deepEqual(links.map((l) => l[0]), FACES, url);
+      assert.ok(links.every((l) => l[1] === 'font/woff2' && l[2] === 'anonymous'), url);
+      const order = await a.$$eval('head link[rel=preload][as=font], head link[rel=stylesheet][href*="fonts.css"]', (ls) => ls.map((l) => l.rel));
+      assert.equal(order.at(-1), 'stylesheet', `${url}: preloads come before fonts.css`);
+      // fonts.css has a version, so it is kept as well (the exercises link it without one in their own file)
+      assert.match(await a.getAttribute('head link[href*="fonts.css"]', 'href'), /fonts\.css\?v=/, url);
+      // F5: the fonts come from the cache, not from the server
+      await a.waitForLoadState('load');
+      await a.reload();
+      await a.waitForLoadState('load');
+      await a.waitForTimeout(300);
+      const after = await loads();
+      assert.ok(after.length >= 2, `${url}: fonts are used`);
+      assert.deepEqual(after.filter((r) => r.transfer !== 0), [], `${url}: no font was fetched again after F5`);
+    }
+  } finally { await a.context().close(); }
 });

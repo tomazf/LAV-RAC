@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { asset } from './assets.js';
+import { asset, fontPreloads } from './assets.js';
 import { many, one, q } from './db.js';
 import { portal } from './portal.js';
 
@@ -26,10 +26,14 @@ export const CHAPTERS = ['Teorija', 'Simulacija', 'Naloge'];
 export const totalPoints = exercises.reduce((a, e) => a + e.maxPoints, 0);
 export const totalTasks = exercises.reduce((a, e) => a + e.tasks.length, 0);
 
+// The exercises link fonts.css without a version, which makes the browser check it with the server on every load.
+const FONTS_LINK = /<link[^>]*href="\/static\/fonts\/fonts\.css"[^>]*>/;
 export function renderExercise(ex, boot) {
   const json = JSON.stringify(boot).replace(/</g, '\\u003c');
   const variants = ex.hasVariants ? `<script src="${asset('js/variants/core.js')}"></script>\n<script src="${asset(`js/variants/${ex.id}.js`)}"></script>` : '';
-  return ex.html.replace(PLACEHOLDER, () => `<script>window.__LAVELS=${json}</script>\n<script src="${asset('js/notes.js')}"></script>\n<script src="${asset('js/tracker.js')}"></script>`).replace(VARIANTS, () => variants);
+  return ex.html
+    .replace(FONTS_LINK, () => `${fontPreloads}\n<link href="${asset('fonts/fonts.css')}" rel="stylesheet">`)
+    .replace(PLACEHOLDER, () => `<script>window.__LAVELS=${json}</script>\n<script src="${asset('js/notes.js')}"></script>\n<script src="${asset('js/tracker.js')}"></script>`).replace(VARIANTS, () => variants);
 }
 // Chapters with a place in a group but no content yet; shown only to teachers and admins.
 export const plannedExercises = raw.planned ?? [];
