@@ -281,19 +281,51 @@ test('»Vse vaje« and »Odjava« sit in the exercise header, which stays on scr
   assert.ok(await p.locator('.lr-top input[type=search]').isVisible());
   assert.equal(await p.locator('.lr-top #resetBtn').count(), 0);
   assert.equal(await p.locator('.lr-rail > .lr-reset #resetBtn').count(), 1);
-  // both links are tinted plates at the edges of the page, well away from the title (agreed 10. 11. 2026)
-  await p.setViewportSize({ width: 1500, height: 900 });
-  await p.evaluate(() => window.scrollTo(0, 0));
-  const box = await p.evaluate(() => {
-    const r = (s) => { const b = document.querySelector(s).getBoundingClientRect(); return { left: b.left, right: b.right, top: b.top }; };
+  // one row at every desktop width (agreed 13. 11. 2026): »Vse vaje«, title with its line, progress, search, note icon, »Odjava«; the two links are tinted plates
+  const measure = () => p.evaluate(() => {
+    const r = (s) => { const b = document.querySelector(s).getBoundingClientRect(); return { left: b.left, right: b.right, top: b.top, bottom: b.bottom }; };
     const bg = (s) => getComputedStyle(document.querySelector(s)).backgroundColor;
-    return { top: r('.lr-top'), back: r('.lvs-back'), name: r('.lr-name'), out: r('.lvs-out button'), backBg: bg('.lvs-back'), outBg: bg('.lvs-out button'), width: innerWidth };
+    const t = document.querySelector('.lr-name b');
+    return { top: r('.lr-top'), back: r('.lvs-back'), name: r('.lr-name'), prog: r('.lr-prog'), search: r('.lr-search'), note: r('.lvn-btn'), out: r('.lvs-out button'), rail: r('.lr-rail'), main: r('.lr-main'),
+      backBg: bg('.lvs-back'), outBg: bg('.lvs-out button'), width: innerWidth, noteText: document.querySelector('.lr-top-in .lvn-btn').innerText.trim(), noteSvg: !!document.querySelector('.lr-top-in .lvn-btn svg'),
+      lineH: t.getBoundingClientRect().height, fontPx: parseFloat(getComputedStyle(t).fontSize), cut: t.scrollWidth > t.clientWidth, full: t.title === t.textContent, sideways: document.documentElement.scrollWidth > innerWidth };
   });
-  assert.equal(box.top.left, 0, 'the header spans the whole page');
-  assert.ok(box.back.left <= 40 && box.width - box.out.right <= 40, `the links sit at the edges: ${box.back.left}, ${box.width - box.out.right}`);
-  assert.ok(box.name.left - box.back.right >= 80, `room between »Vse vaje« and the title: ${box.name.left - box.back.right}`);
-  assert.notEqual(box.backBg, 'rgba(0, 0, 0, 0)');
-  assert.equal(box.backBg, box.outBg, 'the two plates look the same');
+  for (const width of [1372, 1100]) {
+    await p.setViewportSize({ width, height: 900 });
+    await p.evaluate(() => window.scrollTo(0, 0));
+    const m = await measure();
+    assert.equal(m.top.left, 0, 'the header spans the whole page');
+    assert.ok(m.top.bottom - m.top.top <= 70, `${width}px: the header is one row (${m.top.bottom - m.top.top} px)`);
+    assert.ok(m.back.left < m.name.left && m.name.right <= m.prog.left && m.prog.right <= m.search.left && m.search.right <= m.note.left && m.note.right <= m.out.left, `${width}px: in one row, left to right, nothing overlaps`);
+    for (const k of ['back', 'name', 'prog', 'search', 'note', 'out']) assert.ok(m[k].top >= m.top.top && m[k].bottom <= m.top.bottom, `${width}px: ${k} sits inside the header`);
+    assert.ok(m.lineH < m.fontPx * 1.5, `${width}px: the title is one line`);
+    assert.ok(m.full, 'the whole title is in its tooltip');
+    if (width === 1372) assert.ok(!m.cut, 'the longest title fits whole at 1372 px');
+    assert.ok(!m.sideways, `${width}px: no sideways scroll`);
+    assert.notEqual(m.backBg, 'rgba(0, 0, 0, 0)');
+    assert.equal(m.backBg, m.outBg, 'the two plates look the same');
+    assert.equal(m.noteText, '', 'the note is only an icon in the header');
+    assert.ok(m.noteSvg);
+    assert.equal(await p.getAttribute('.lr-top-in .lvn-btn', 'aria-label'), 'Dodaj opombo');
+  }
+  // a wide screen: the title starts where the left column does, the search ends where the page does, the links stay at the edges of the window
+  await p.setViewportSize({ width: 1920, height: 900 });
+  const wide = await measure();
+  assert.ok(Math.abs(wide.name.left - wide.rail.left) <= 1, `the title lines up with the left column: ${wide.name.left} / ${wide.rail.left}`);
+  assert.ok(Math.abs(wide.search.right - wide.main.right) <= 1, `the search lines up with the page: ${wide.search.right} / ${wide.main.right}`);
+  assert.ok(wide.back.left <= 40 && wide.width - wide.out.right <= 40, 'the links sit at the edges of the window');
+  // the save message hangs under the header and moves nothing
+  const left = await p.evaluate(() => document.querySelector('.lr-search').getBoundingClientRect().left);
+  await p.evaluate(() => { document.querySelector('.lvs-status').textContent = 'Shranjujem …'; });
+  assert.equal(await p.evaluate(() => document.querySelector('.lr-search').getBoundingClientRect().left), left, 'a save message does not move the search');
+  const msg = await p.evaluate(() => { const b = document.querySelector('.lvs-status').getBoundingClientRect(); return { top: b.top, header: document.querySelector('.lr-top').getBoundingClientRect().bottom }; });
+  assert.ok(msg.top >= msg.header - 1, 'the message is below the header');
+  await p.evaluate(() => { document.querySelector('.lvs-status').textContent = ''; });
+  // the progress: tasks on the left, points on the right, bold numbers; the text still reads in one piece
+  const prog = await p.evaluate(() => { const t = document.getElementById('lrPtxt'); return { text: t.textContent, bold: [...t.querySelectorAll('b')].map((b) => b.textContent), order: t.compareDocumentPosition(document.querySelector('.lr-stack')) & Node.DOCUMENT_POSITION_FOLLOWING }; });
+  assert.match(prog.text, /^\d+ \/ 99 nalog · [\d,]+ \/ 218 točk$/);
+  assert.equal(prog.bold.length, 2);
+  assert.ok(prog.order, 'the numbers are above the bar');
   // on a phone the two plates share the first row
   for (const width of [360, 320]) {
     await p.setViewportSize({ width, height: 740 });

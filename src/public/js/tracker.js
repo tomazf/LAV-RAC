@@ -197,7 +197,7 @@
     }
     if (exNote) LavelsNotes.show(exNote, B.notes.exercise, exBtn);
   }
-  // A letter icon opens the note; a saved note is shown next to what it belongs to.
+  // A note icon opens the note; a saved note is shown next to what it belongs to.
   function noteButton(heading, task, box, label) {
     var value = task === null ? B.notes.exercise : (B.notes.tasks[task] || '');
     var btn = LavelsNotes.button(label, !!value);

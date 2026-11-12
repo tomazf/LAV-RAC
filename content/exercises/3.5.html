@@ -268,8 +268,8 @@
     // so those two stay at the edges of the page, away from the content. The reset button is in the left column (12. 11. 2026).
     return h('div', { class: 'lr-top' }, h('div', { class: 'lr-top-in' },
       h('div', { class: 'lr-top-mid' },
-        h('div', { class: 'lr-name' }, h('b', { text: c.title }), c.kicker ? h('span', { text: c.kicker }) : null),
-        h('div', { class: 'lr-prog', role: 'status' }, bar, h('span', { class: 'lr-ptxt', id: 'lrPtxt' })),
+        h('div', { class: 'lr-name' }, h('b', { text: c.title, title: c.title }), c.kicker ? h('span', { text: c.kicker }) : null),
+        h('div', { class: 'lr-prog', role: 'status' }, h('div', { class: 'lr-ptxt', id: 'lrPtxt' }), bar),
         buildSearch())));
   }
   function doReset() {
@@ -637,7 +637,12 @@
   function paintProgress() {
     const r = totals();
     const t = document.getElementById('lrPtxt');
-    if (t) t.textContent = r.done + ' / ' + r.n + ' nalog · ' + String(r.points).replace('.', ',') + ' / ' + r.max + ' točk';
+    if (t) {
+      // bold numbers, the separator is hidden by the stylesheet but stays in the text
+      t.replaceChildren(h('span', { class: 'lr-pn' }, h('b', { text: String(r.done) }), ' / ' + r.n + ' nalog'),
+        h('span', { class: 'lr-pd', text: ' · ' }),
+        h('span', { class: 'lr-pp' }, h('b', { text: String(r.points).replace('.', ',') }), ' / ' + r.max + ' točk'));
+    }
     ['ok', 'half', 'bad', 'seen', 'self'].forEach((k) => {
       const el = document.querySelector('.lr-stack .lr-' + k);
       if (el) el.style.width = (r.n ? 100 * r[k] / r.n : 0) + '%';
@@ -1200,14 +1205,32 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 
 /* top: always visible progress */
 .lr-top{position:sticky;top:0;z-index:20;background:var(--lr-card);border-bottom:1px solid var(--lr-line);box-shadow:0 2px 10px #24143312}
-/* the header spans the whole page: »Vse vaje« and »Odjava« sit at its edges, the title and progress in the middle (agreed 10. 11. 2026) */
+/* the header spans the whole page: »Vse vaje« on the left, the note and »Odjava« on the right, title, progress and search in the middle (agreed 10. and 13. 11. 2026) */
 .lr-top-in{display:flex;flex-wrap:nowrap;align-items:center;gap:8px 24px;padding:10px max(clamp(16px,2vw,32px),env(safe-area-inset-right,0px)) 10px max(clamp(16px,2vw,32px),env(safe-area-inset-left,0px))}
 .lr-top-mid{flex:1 1 auto;min-width:0;max-width:920px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px}
 .lr-top-in .lvs-right{flex:none;display:flex;align-items:center;gap:4px 16px;color:var(--lr-ink)}
 .lr-top-in .lvs-back{flex:none}
 .lr-top-in .lvs-status{color:var(--lr-mut)}
 .lr-top-in .lvs-status:empty{display:none}
-@media (min-width:901px){.lr-top-mid .lr-name{flex:2 1 170px}.lr-top-mid .lr-prog{flex:1.5 1 240px}.lr-top-mid .lr-ptxt{white-space:nowrap}}
+/* desktop: one row (agreed 13. 11. 2026). The middle part is as wide as the content at most: on a wide screen the title starts where the left column does and the search ends where the page does, on a narrower one it fills the room between the two groups */
+@media (min-width:901px){
+  .lr-top-in{display:grid;grid-template-columns:minmax(auto,1fr) minmax(0,1368px) minmax(auto,1fr);align-items:center;gap:0;padding-top:0;padding-bottom:0}
+  .lr-top-in .lvs-back{grid-column:1;justify-self:start;margin-right:24px}
+  .lr-top-in .lvs-right{grid-column:3;justify-self:end;margin-left:24px;position:relative;flex-wrap:nowrap;gap:2px 8px}
+  /* the save message hangs under the header: it never pushes the search sideways */
+  .lr-top-in .lvs-status{position:absolute;right:0;top:calc(100% + 16px);z-index:1;max-width:min(420px,60vw);padding:4px 10px;border-radius:8px;background:var(--lr-card);border:1px solid var(--lr-line);box-shadow:0 2px 8px #24143318;font-size:.84rem;text-align:right}
+  /* the note is only an icon here; its label stays in the tooltip */
+  .lr-top-in .lvn-btn{min-width:36px;min-height:36px;justify-content:center;border-radius:8px;color:var(--lr-mut)}
+  .lr-top-in .lvn-btn:hover{background:var(--lr-tile);color:var(--lr-acc)}
+  .lr-top-in .lvn-btn.lvn-has{color:var(--lr-acc)}
+  .lr-top-in .lvn-btn span{display:none}
+  .lr-top-mid{grid-column:2;max-width:none;margin:0;flex-wrap:nowrap;gap:0 28px;padding:10px 0 11px}
+  .lr-top-mid .lr-name{flex:0 1 auto}
+  .lr-top-mid .lr-name b{font-size:1.2rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lr-top-mid .lr-name span{margin-top:1px}
+  .lr-top-mid .lr-prog{flex:1 1 240px;max-width:440px;margin-left:auto}
+  .lr-top-mid .lr-search{flex:0 0 260px;max-width:none}
+}
 /* the two links are tinted plates, the colour of a selected item in the left column */
 .lr-top-in .lvs-back,.lr-top-in .lvs-out button{display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border-radius:8px;background:var(--lr-acc-soft);border:1.5px solid var(--lr-acc-soft);color:var(--lr-acc);font:700 .9rem var(--lr-fb);text-decoration:none;cursor:pointer;white-space:nowrap}
 .lr-top-in .lvs-back:hover,.lr-top-in .lvs-out button:hover{border-color:var(--lr-acc)}
@@ -1217,10 +1240,14 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 .lr-name{display:flex;flex-direction:column;min-width:0;flex:1 1 220px;line-height:1.25}
 .lr-name b{font-size:1.05rem}
 .lr-name span{font-size:.85rem;color:var(--lr-mut)}
-.lr-prog{flex:2 1 300px;display:flex;flex-direction:column;gap:4px;min-width:0}
-.lr-stack{display:flex;height:12px;border-radius:99px;background:var(--lr-tile);overflow:hidden}
-.lr-stack i{display:block;height:100%;width:0;transition:width .35s ease-out}
-.lr-ptxt{font:500 .9rem var(--lr-fm);color:var(--lr-mut);font-variant-numeric:tabular-nums}
+/* progress: the numbers above the bar (tasks on the left, points on the right), the bar shows the tasks by outcome */
+.lr-prog{flex:2 1 300px;display:flex;flex-direction:column;gap:7px;min-width:0}
+.lr-stack{display:flex;gap:2px;height:10px;border-radius:99px;background:var(--lr-tile);box-shadow:inset 0 0 0 1px var(--lr-line);overflow:hidden}
+.lr-stack i{display:block;height:100%;width:0;border-radius:99px;transition:width .35s ease-out}
+.lr-ptxt{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font:500 .84rem var(--lr-fb);color:var(--lr-mut)}
+.lr-ptxt span{white-space:nowrap}
+.lr-ptxt b{font:700 .95rem var(--lr-fm);color:var(--lr-ink);font-variant-numeric:tabular-nums}
+.lr-ptxt .lr-pd{display:none} /* only there so that the text reads »4 / 99 nalog · 1,5 / 218 točk« */
 .lr-reset{display:flex;align-items:center}
 .lr-confirm{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:.92rem;max-width:560px}
 /* the reset button is at the bottom of the left column (agreed 12. 11. 2026), on the overview page when the column is hidden */
@@ -1252,7 +1279,7 @@ mark.lr-hit{scroll-margin-top:170px}
 
 /* body: rail + page */
 .lr-body{max-width:1400px;margin:auto;display:grid;grid-template-columns:304px minmax(0,1fr);gap:40px;padding:24px max(16px,env(safe-area-inset-left,0px)) 80px}
-.lr-rail{position:sticky;top:96px;align-self:start;max-height:calc(100vh - 112px);overflow-y:auto;display:flex;flex-direction:column;gap:2px;padding-right:6px;font-size:.93rem}
+.lr-rail{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 96px);overflow-y:auto;display:flex;flex-direction:column;gap:2px;padding-right:6px;font-size:.93rem}
 /* a label that wraps hangs under its text, and a counter sits at the right edge */
 .lr-rail a{color:var(--lr-mut);text-decoration:none;border-radius:8px;padding:5px 10px;display:flex;align-items:flex-start;gap:8px;justify-content:space-between;line-height:1.35}
 .lr-rail a:hover{background:var(--lr-tile);color:var(--lr-ink)}

@@ -1,11 +1,11 @@
-// Student notes: a letter icon, a popup to write in, and the saved text shown next to the item.
+// Student notes: a note icon (a page with lines), a popup to write in, and the saved text shown next to the item.
 (function () {
   'use strict';
   var sheet = document.createElement('link');
   var own = document.currentScript ? document.currentScript.src.split('?')[1] : '';
   sheet.rel = 'stylesheet'; sheet.href = '/static/css/notes.css' + (own ? '?' + own : '');
   (document.head || document.documentElement).appendChild(sheet);
-  var ICON = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 6.5 12 13l8.5-6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
+  var ICON = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 3.5h9.5L19 8v12.5H5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M14.5 3.5V8H19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M8.5 12.5h7M8.5 16h4.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>';
 
   function button(label, has) {
     var b = document.createElement('button');

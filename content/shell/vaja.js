@@ -261,8 +261,8 @@
     // so those two stay at the edges of the page, away from the content. The reset button is in the left column (12. 11. 2026).
     return h('div', { class: 'lr-top' }, h('div', { class: 'lr-top-in' },
       h('div', { class: 'lr-top-mid' },
-        h('div', { class: 'lr-name' }, h('b', { text: c.title }), c.kicker ? h('span', { text: c.kicker }) : null),
-        h('div', { class: 'lr-prog', role: 'status' }, bar, h('span', { class: 'lr-ptxt', id: 'lrPtxt' })),
+        h('div', { class: 'lr-name' }, h('b', { text: c.title, title: c.title }), c.kicker ? h('span', { text: c.kicker }) : null),
+        h('div', { class: 'lr-prog', role: 'status' }, h('div', { class: 'lr-ptxt', id: 'lrPtxt' }), bar),
         buildSearch())));
   }
   function doReset() {
@@ -630,7 +630,12 @@
   function paintProgress() {
     const r = totals();
     const t = document.getElementById('lrPtxt');
-    if (t) t.textContent = r.done + ' / ' + r.n + ' nalog · ' + String(r.points).replace('.', ',') + ' / ' + r.max + ' točk';
+    if (t) {
+      // bold numbers, the separator is hidden by the stylesheet but stays in the text
+      t.replaceChildren(h('span', { class: 'lr-pn' }, h('b', { text: String(r.done) }), ' / ' + r.n + ' nalog'),
+        h('span', { class: 'lr-pd', text: ' · ' }),
+        h('span', { class: 'lr-pp' }, h('b', { text: String(r.points).replace('.', ',') }), ' / ' + r.max + ' točk'));
+    }
     ['ok', 'half', 'bad', 'seen', 'self'].forEach((k) => {
       const el = document.querySelector('.lr-stack .lr-' + k);
       if (el) el.style.width = (r.n ? 100 * r[k] / r.n : 0) + '%';
