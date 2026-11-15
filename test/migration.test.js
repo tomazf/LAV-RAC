@@ -1,7 +1,7 @@
 // The update from the first version must keep all data and start every class with no exercises open.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import pg from 'pg';
 
@@ -58,5 +58,39 @@ test('migration 002 keeps data, one class per student, all exercises closed', as
     assert.equal((await q(`SELECT to_regclass('public.student_notes') AS t`))[0].t, null);
     await c.query(read('010_drop_student_notes.sql')); // running it again is harmless
     assert.equal(Number((await q(`SELECT score FROM progress WHERE exercise_id='1.1'`))[0].score), 1);
+  } finally { await c.end(); }
+});
+
+// 011: show_past (all lower years or none) becomes a list of years; a class name is unique unless the data already holds a pair
+async function schemaBefore011(c) {
+  await c.query('DROP SCHEMA public CASCADE; CREATE SCHEMA public;');
+  for (const f of readdirSync(dir).filter((x) => x.endsWith('.sql') && x < '011').sort()) await c.query(read(f));
+}
+test('migration 011: lower years are listed, and the class name becomes unique', async () => {
+  const c = new pg.Client({ connectionString: DB });
+  await c.connect();
+  try {
+    await schemaBefore011(c);
+    await c.query(`INSERT INTO classes(id, name, year, show_past) VALUES (1,'R2A',2,FALSE),(2,'R3A',3,TRUE),(3,'R4A',4,TRUE),(4,'R4B',4,FALSE),(5,'Brez',NULL,TRUE)`);
+    await c.query(read('011_class_past_years.sql'));
+    const q = async (s) => (await c.query(s)).rows;
+    assert.deepEqual((await q('SELECT id, past_years FROM classes ORDER BY id')).map((r) => [Number(r.id), r.past_years]),
+      [[1, []], [2, [1, 2]], [3, [1, 2, 3]], [4, []], [5, []]]);
+    await assert.rejects(c.query('SELECT show_past FROM classes'));
+    // the same name with other case or spaces is refused by the database
+    await c.query(`SELECT setval(pg_get_serial_sequence('classes','id'), 10)`);
+    await assert.rejects(c.query(`INSERT INTO classes(name) VALUES ('  r3a ')`), /classes_name_key/);
+    await c.query(`INSERT INTO classes(name) VALUES ('R3B')`);
+  } finally { await c.end(); }
+});
+test('migration 011 does not stop an update on names that are already doubled', async () => {
+  const c = new pg.Client({ connectionString: DB });
+  await c.connect();
+  try {
+    await schemaBefore011(c);
+    await c.query(`INSERT INTO classes(name, year) VALUES ('R3A',3),('r3a ',3)`);
+    await c.query(read('011_class_past_years.sql'));
+    assert.equal((await c.query('SELECT count(*)::int n FROM classes')).rows[0].n, 2);
+    assert.equal((await c.query(`SELECT to_regclass('public.classes_name_key') AS i`)).rows[0].i, null);
   } finally { await c.end(); }
 });

@@ -125,6 +125,15 @@ async function adminMakesClass(a, name) {
   await a.waitForLoadState();
   return Number((await sql('SELECT id FROM classes WHERE name=$1', [name]))[0].id);
 }
+// Opens the edit window of a class on the admin page, lets the caller change it, and saves.
+async function editClass(a, name, change) {
+  await a.goto(`${APP}/admin/razredi`);
+  await a.locator('tr', { hasText: name }).locator('.icon-btn').click();
+  const dlg = a.locator('dialog[open]');
+  await change(dlg);
+  await dlg.locator('button:text-is("Shrani")').click();
+  await a.waitForLoadState();
+}
 async function openAll(t, id) {
   for (const ex of catalog.exercises) {
     await t.goto(`${APP}/ucitelj/razredi/${id}/vaje`);
@@ -599,10 +608,7 @@ test('several teachers per class and classes per teacher; removing the role ends
   const a = await login('Sara Skrbnik');
   const second = await adminMakesClass(a, 'R3B');
   await a.goto(`${APP}/admin/razredi`);
-  const row = a.locator('tr', { hasText: 'E4A' });
-  await row.locator('select[name=user]').selectOption({ label: 'Cene Zupan' });
-  await row.locator('button:text("Dodaj")').click();
-  await a.waitForLoadState();
+  await editClass(a, 'E4A', async (dlg) => { await dlg.locator('label', { hasText: 'Cene Zupan' }).locator('input').check(); });
   const c = await login('Cene Zupan');
   await c.goto(`${APP}/ucitelj/razredi/${classId}`); // assigned by the admin
   assert.match(await c.textContent('.team'), /Cene Zupan.*Tomaž Učitelj/);
@@ -616,8 +622,7 @@ test('several teachers per class and classes per teacher; removing the role ends
   assert.equal(await c.locator('text=Zapusti razred').count(), 0);
   assert.equal((await c.request.post(`${APP}/ucitelj/razredi/${second}/zapusti`, { form: {} })).status(), 404);
   await a.goto(`${APP}/admin/razredi`);
-  await a.locator('tr', { hasText: 'R3B' }).locator('.teacher-chip', { hasText: 'Cene Zupan' }).locator('button').click();
-  await a.waitForLoadState();
+  await editClass(a, 'R3B', async (dlg) => { await dlg.locator('label', { hasText: 'Cene Zupan' }).locator('input').uncheck(); });
   assert.equal((await c.goto(`${APP}/ucitelj/razredi/${second}`)).status(), 404);
   // the admin can open any class without joining
   assert.equal((await a.goto(`${APP}/ucitelj/razredi/${second}`)).status(), 200);
@@ -629,6 +634,77 @@ test('several teachers per class and classes per teacher; removing the role ends
   await c.goto(APP);
   assert.match(await c.textContent('h1'), /Čakaš/);
   await c.context().close();
+  await a.context().close();
+});
+test('classes: one pencil opens one window that saves name and teachers together; names are unique; a class without a teacher is marked', async () => {
+  const a = await login('Sara Skrbnik');
+  const csrf = async () => a.inputValue('form[action="/admin/razredi"] input[name=_csrf]');
+  const count = async (name) => (await sql('SELECT count(*)::int n FROM classes WHERE lower(btrim(name))=lower(btrim($1))', [name]))[0].n;
+  await adminMakesClass(a, 'R9X');
+  await a.goto(`${APP}/admin/razredi`);
+  // the rows hold no forms any more: only the pencil, named after its class
+  assert.equal(await a.locator('table.classes select, table.classes input, table.classes form').count(), 0);
+  const row = a.locator('tr', { hasText: 'R9X' });
+  assert.equal(await row.locator('button').count(), 1);
+  assert.equal(await row.locator('button').getAttribute('aria-label'), 'Uredi razred R9X');
+  // a class without a teacher says so in its row and in a notice above the table
+  assert.match(await row.locator('.tag.warn').textContent(), /Brez učitelja/);
+  assert.match(await a.locator('p.notice-warn[role=status]').textContent(), /Brez učitelja:.*R9X/);
+  // Cancel and Escape close the window without saving
+  await row.locator('.icon-btn').click();
+  await a.locator('dialog[open] input[name=name]').fill('Nekaj drugega');
+  await a.locator('dialog[open] button:text-is("Prekliči")').click();
+  assert.equal(await a.locator('dialog[open]').count(), 0);
+  await row.locator('.icon-btn').click();
+  await a.keyboard.press('Escape');
+  assert.equal(await a.locator('dialog[open]').count(), 0);
+  assert.equal(await count('Nekaj drugega'), 0);
+  // the name and a teacher are saved in one go, and every change is in the log
+  await editClass(a, 'R9X', async (dlg) => {
+    assert.equal(await dlg.locator('input[name=past], select[name=year]').count(), 0); // this portal run has no years
+    await dlg.locator('input[name=name]').fill('  R9Y ');
+    await dlg.locator('label', { hasText: 'Tomaž Učitelj' }).locator('input').check();
+  });
+  assert.match(await a.textContent('.notice'), /Razred R9Y je shranjen/);
+  assert.equal(await count('R9X'), 0);
+  assert.equal((await sql(`SELECT count(*)::int n FROM class_teachers t JOIN classes c ON c.id=t.class_id JOIN users u ON u.id=t.user_id WHERE c.name='R9Y' AND u.oid='u-teacher'`))[0].n, 1);
+  assert.deepEqual((await sql(`SELECT action, detail FROM audit_log WHERE detail LIKE 'R9%' ORDER BY id`)).map((l) => [l.action, l.detail]),
+    [['Ustvaril razred', 'R9X'], ['Preimenoval razred', 'R9X: R9Y'], ['Dodal učitelja razredu', 'R9Y: Tomaž Učitelj']]);
+  assert.equal(await a.locator('tr', { hasText: 'R9Y' }).locator('.tag.warn').count(), 0);
+  // names are unique, whatever the case and spaces, when creating and when renaming
+  const before = (await sql('SELECT count(*)::int n FROM classes'))[0].n;
+  for (const same of ['R9Y', 'r9y', '  R9Y  ']) {
+    await a.goto(`${APP}/admin/razredi`);
+    await a.fill('#novi', same);
+    await a.click('text=Ustvari razred');
+    await a.waitForLoadState();
+    assert.match(await a.textContent('[role=alert]'), /Razred z imenom R9Y že obstaja/);
+  }
+  await editClass(a, 'R9Y', async (dlg) => { await dlg.locator('input[name=name]').fill('r3b'); });
+  assert.match(await a.textContent('[role=alert]'), /Razred z imenom r3b že obstaja/);
+  assert.equal((await sql('SELECT count(*)::int n FROM classes'))[0].n, before);
+  assert.equal(await count('R9Y'), 1);
+  await assert.rejects(sql(`INSERT INTO classes(name) VALUES ('  r9y')`)); // the database holds the same rule
+  // a class may change its own spelling
+  await editClass(a, 'R9Y', async (dlg) => { await dlg.locator('input[name=name]').fill('r9y'); });
+  assert.match(await a.textContent('.notice'), /Razred r9y je shranjen/);
+  // only a teacher or the admin can be added to a class, even when the form is sent by hand
+  const id = Number((await sql(`SELECT id FROM classes WHERE name='r9y'`))[0].id);
+  const ana = (await sql(`SELECT id FROM users WHERE oid='u-ana'`))[0].id;
+  await a.request.post(`${APP}/admin/razredi/${id}/uredi`, { form: { _csrf: await csrf(), name: 'r9y', teacher: [String(ana)] } });
+  assert.equal((await sql('SELECT count(*)::int n FROM class_teachers WHERE class_id=$1', [id]))[0].n, 0); // and Tomaž was unticked, so he is out
+  // a form for a class that does not exist, and an empty name, change nothing
+  const gone = await a.request.post(`${APP}/admin/razredi/999999/uredi`, { form: { _csrf: await csrf(), name: 'Nov' } });
+  assert.match(decodeURIComponent(gone.url()), /Razred ne obstaja/);
+  await a.request.post(`${APP}/admin/razredi/${id}/uredi`, { form: { _csrf: await csrf(), name: '   ' } });
+  assert.equal(await count('r9y'), 1);
+  // the window also deletes the class
+  await a.goto(`${APP}/admin/razredi`);
+  await a.locator('tr', { hasText: 'r9y' }).locator('.icon-btn').click();
+  await a.locator('dialog[open] summary', { hasText: 'Izbriši razred' }).click();
+  await a.locator('dialog[open] button:text-is("Da, izbriši razred r9y")').click();
+  await a.waitForLoadState();
+  assert.equal(await count('r9y'), 0);
   await a.context().close();
 });
 test('a student can be in one class only and cannot be taken from another', async () => {

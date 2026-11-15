@@ -1,23 +1,48 @@
 <%- include('../partials/head', { pageTitle: 'Razredi', mainClass: 'wide' }) %>
 <%- include('../partials/adminnav') %>
+<% if (error) { %><p class="notice-warn" role="alert"><%= error %></p><% } %>
 <form class="inline" method="post" action="/admin/razredi"><input type="hidden" name="_csrf" value="<%= csrf %>">
   <label class="sr" for="novi">Ime novega razreda</label><input id="novi" name="name" required maxlength="80" placeholder="npr. R2A">
   <% if (YEARS.length) { %><label class="sr" for="novi-letnik">Letnik</label><select id="novi-letnik" name="year" required><option value="">Letnik …</option><% YEARS.forEach((y) => { %><option value="<%= y.year %>"><%= y.year %>. letnik</option><% }) %></select><% } %><button class="btn">Ustvari razred</button></form>
 <% if (!classes.length) { %><p class="empty">Še ni razredov. Vpiši ime zgoraj. Učitelji se nato sami pridružijo ali jih dodaš ti.</p><% } else { %>
-<div class="scroll block"><table class="data"><thead><tr><th class="l">Razred</th><% if (YEARS.length) { %><th class="l">Letnik</th><% } %><th>Dijaki</th><th class="l">Učitelji</th><th class="l">Dodaj učitelja</th><th class="l">Urejanje</th></tr></thead><tbody>
-<% classes.forEach((c) => { const free = teachers.filter((t) => !c.teachers.some((x) => x.id === t.id)); %><tr>
-  <td class="l"><a href="/ucitelj/razredi/<%= c.id %>"><strong><%= c.name %></strong></a></td>
-  <% if (YEARS.length) { %><td class="l"><form class="inline tight year-form" method="post" action="/admin/razredi/<%= c.id %>/letnik"><input type="hidden" name="_csrf" value="<%= csrf %>">
-    <label class="sr" for="y<%= c.id %>">Letnik razreda <%= c.name %></label><select id="y<%= c.id %>" name="year"><% if (!c.year) { %><option value="">brez letnika</option><% } %><% YEARS.forEach((y) => { %><option value="<%= y.year %>" <%= c.year === y.year ? 'selected' : '' %>><%= y.year %>. letnik</option><% }) %></select>
-    <% if (pastLabel(c.year)) { %><label class="switch"><input type="checkbox" name="show_past" <%= c.show_past ? 'checked' : '' %>> vidi <%= pastLabel(c.year) %></label><% } %><button class="btn ghost small">Shrani</button></form></td><% } %>
-  <td><%= c.students %></td>
-  <td class="l"><% if (!c.teachers.length) { %><span class="dim">še brez učitelja</span><% } %><% c.teachers.forEach((t) => { %>
-    <form class="teacher-chip" method="post" action="/admin/razredi/<%= c.id %>/ucitelji/<%= t.id %>/odstrani"><input type="hidden" name="_csrf" value="<%= csrf %>"><span><%= t.name %></span><button aria-label="Odstrani učitelja <%= t.name %> iz razreda <%= c.name %>" title="Odstrani iz razreda">×</button></form><% }) %></td>
-  <td class="l"><% if (free.length) { %><form class="inline tight add-teacher" method="post" action="/admin/razredi/<%= c.id %>/ucitelji"><input type="hidden" name="_csrf" value="<%= csrf %>">
-    <label class="sr" for="u<%= c.id %>">Učitelj za razred <%= c.name %></label><select id="u<%= c.id %>" name="user"><% free.forEach((t) => { %><option value="<%= t.id %>"><%= t.name %></option><% }) %></select><button class="btn ghost small">Dodaj</button></form><% } else { %><span class="dim">ni drugih učiteljev</span><% } %></td>
-  <td class="l"><details class="danger-zone inline-details"><summary>Preimenuj ali izbriši</summary>
-    <form class="inline tight" method="post" action="/admin/razredi/<%= c.id %>/preimenuj"><input type="hidden" name="_csrf" value="<%= csrf %>"><label class="sr" for="n<%= c.id %>">Novo ime</label><input id="n<%= c.id %>" name="name" value="<%= c.name %>" required maxlength="80"><button class="btn ghost small">Preimenuj</button></form>
-    <p>Če izbrišeš razred, dijaki obdržijo napredek, a nimajo dostopa, dokler jih učitelj ne doda v drug razred.</p>
-    <form method="post" action="/admin/razredi/<%= c.id %>/izbrisi"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn danger small">Da, izbriši razred <%= c.name %></button></form></details></td>
-</tr><% }) %></tbody></table></div><% } %>
+<% if (noTeacher.length) { %><p class="notice-warn" role="status"><strong>Brez učitelja:</strong> <%= noTeacher.map((c) => c.name).join(', ') %>. Učitelja dodaš s svinčnikom v vrstici razreda.</p><% } %>
+<noscript><p class="notice-warn">Za urejanje razredov je potreben JavaScript.</p></noscript>
+<div class="scroll block"><table class="data classes">
+  <thead><tr><th class="l">Razred</th><th>Dijaki</th><th class="l">Učitelji</th><th class="l"><span class="sr">Urejanje</span></th></tr></thead>
+  <% groups.forEach((g) => { %><tbody>
+    <% if (g.title) { %><tr class="grp"><th colspan="4" scope="colgroup" class="l"><h2><%= g.title %></h2>
+      <span class="dim"><%= fmt.count(g.classes.length, ['razred', 'razreda', 'razredi', 'razredov']) %> · <%= fmt.count(g.students, fmt.DIJAKOV) %></span>
+      <% if (g.noTeacher) { %><span class="tag warn"><%- include('../partials/icon', { name: 'warn' }) %> <%= g.noTeacher === 1 ? '1 razred brez učitelja' : `${g.noTeacher} razredov brez učitelja` %></span><% } %></th></tr><% } %>
+    <% if (!g.classes.length) { %><tr><td colspan="4" class="l dim">Ni razredov.</td></tr><% } %>
+    <% g.classes.forEach((c) => { const pt = pastText(c.year, c.past_years); %><tr id="r<%= c.id %>" class="<%= c.teachers.length ? '' : 'no-teacher' %>">
+      <td class="l"><a href="/ucitelj/razredi/<%= c.id %>"><strong><%= c.name %></strong></a><% if (pt) { %><br><span class="dim">vidi <%= pt %></span><% } %></td>
+      <td><%= c.students %></td>
+      <td class="l"><% if (!c.teachers.length) { %><span class="tag warn"><%- include('../partials/icon', { name: 'warn' }) %> Brez učitelja</span><% } %><% c.teachers.forEach((t) => { %><span class="chip"><%= t.name %></span><% }) %></td>
+      <td class="r"><button type="button" class="icon-btn" data-edit="e<%= c.id %>" aria-label="Uredi razred <%= c.name %>" title="Uredi"><%- include('../partials/icon', { name: 'edit' }) %></button></td>
+    </tr><% }) %>
+  </tbody><% }) %>
+</table></div>
+<% groups.forEach((g) => g.classes.forEach((c) => { %>
+<dialog class="edit-dlg" id="e<%= c.id %>" aria-labelledby="t<%= c.id %>">
+  <form class="edit-form" method="post" action="/admin/razredi/<%= c.id %>/uredi"><input type="hidden" name="_csrf" value="<%= csrf %>">
+    <h2 id="t<%= c.id %>">Uredi razred <%= c.name %></h2>
+    <div class="field"><label for="n<%= c.id %>">Ime razreda</label><input id="n<%= c.id %>" name="name" value="<%= c.name %>" required maxlength="80"></div>
+    <% if (YEARS.length) { %>
+    <div class="field"><label for="y<%= c.id %>">Letnik</label><select id="y<%= c.id %>" name="year" data-year><% if (!c.year) { %><option value="">brez letnika</option><% } %><% YEARS.forEach((y) => { %><option value="<%= y.year %>" <%= c.year === y.year ? 'selected' : '' %>><%= y.year %>. letnik</option><% }) %></select></div>
+    <fieldset class="field" data-past><legend>Dijaki vidijo tudi prejšnje letnike</legend>
+      <div class="row"><% YEARS.slice(0, -1).forEach((y) => { %><label class="switch"><input type="checkbox" name="past" value="<%= y.year %>" <%= c.past_years.includes(y.year) ? 'checked' : '' %> <%= y.year >= (c.year || 0) ? 'disabled' : '' %>> <%= y.year %>. letnik</label><% }) %></div>
+      <span class="dim">Vidijo samo letnike pod letnikom razreda. Napredek se nikoli ne izbriše, možnost samo skrije ali pokaže vaje.</span></fieldset>
+    <% } %>
+    <fieldset class="field"><legend>Učitelji</legend>
+      <% if (!teachers.length) { %><span class="dim">Ni učiteljev. Vlogo učitelja določiš pod Uporabniki.</span><% } %>
+      <ul class="checks"><% teachers.forEach((t) => { %><li><label class="switch"><input type="checkbox" name="teacher" value="<%= t.id %>" <%= c.teachers.some((x) => x.id === t.id) ? 'checked' : '' %>> <%= t.name %></label></li><% }) %></ul></fieldset>
+    <div class="dlg-actions"><button class="btn">Shrani</button><button type="button" class="btn ghost" data-close>Prekliči</button></div>
+    <details class="danger-zone"><summary>Izbriši razred</summary>
+      <p>Če izbrišeš razred, dijaki obdržijo napredek, a nimajo dostopa, dokler jih učitelj ne doda v drug razred.</p>
+      <button class="btn danger small" formaction="/admin/razredi/<%= c.id %>/izbrisi" formnovalidate>Da, izbriši razred <%= c.name %></button></details>
+  </form>
+</dialog>
+<% })) %>
+<% } %>
+<script src="<%= asset('js/admin-edit.js') %>"></script>
 <%- include('../partials/foot') %>

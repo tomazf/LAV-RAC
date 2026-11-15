@@ -31,6 +31,8 @@ export function duration(sec) {
   return `${Math.floor(m / 60)} h ${m % 60} min`;
 }
 export const date = (d) => (d ? dateFmt.format(new Date(d)) : '');
+// A class name as it is kept: no stray spaces.
+export const cleanName = (s) => String(s ?? '').trim().replace(/\s+/g, ' ').slice(0, 80);
 export const time = (d) => (d ? timeFmt.format(new Date(d)) : '');
 export const dayLabel = (key) => dayLabelFmt.format(new Date(`${key}T12:00:00Z`));
 export const dateTime = (d) => (d ? dateTimeFmt.format(new Date(d)) : '');

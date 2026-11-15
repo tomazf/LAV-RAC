@@ -2,7 +2,7 @@
 // moves up a year. Preview first, a fresh backup, a typed confirmation, then everything in one transaction.
 import express from 'express';
 import { checkCsrf, isAdmin } from '../auth.js';
-import { finalYear, yearsOn } from '../catalog.js';
+import { finalYear, lowerYears, yearsOn } from '../catalog.js';
 import { audit, eraseUser, many, one, tx } from '../db.js';
 import { recentBackup } from '../backup.js';
 import { byName } from '../format.js';
@@ -74,7 +74,7 @@ yearRouter.post('/', checkCsrf, async (req, res, next) => {
       await c.query('DELETE FROM classes WHERE id = ANY($1)', [leaving.map((x) => x.id)]);
       for (const x of moving) {
         const name = String(req.body[`name_${x.id}`] ?? '').trim().slice(0, 80) || nextName(x);
-        await c.query('UPDATE classes SET year=$2, name=$3, show_past=TRUE WHERE id=$1', [x.id, x.year + 1, name]);
+        await c.query('UPDATE classes SET year=$2, name=$3, past_years=$4 WHERE id=$1', [x.id, x.year + 1, name, lowerYears(x.year + 1)]);
         // The new year starts closed and without teachers; the admin assigns them, the teachers open the chapters.
         await c.query('DELETE FROM class_teachers WHERE class_id=$1', [x.id]);
         await c.query('DELETE FROM class_exercises WHERE class_id=$1', [x.id]);

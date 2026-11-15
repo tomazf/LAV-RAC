@@ -51,6 +51,15 @@ after(async () => {
   mock?.server.close();
 });
 
+// Opens the edit window of a class on the admin page, lets the caller change it, and saves.
+async function editClass(a, name, change) {
+  await a.goto(`${APP}/admin/razredi`);
+  await a.locator('tr', { hasText: name }).locator('.icon-btn').click();
+  const dlg = a.locator('dialog[open]');
+  await change(dlg);
+  await dlg.locator('button:text-is("Shrani")').click();
+  await a.waitForLoadState();
+}
 test('the panel spells the portal name in Windows-1250 bytes', async () => {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 } });
   const p = await ctx.newPage();
@@ -941,19 +950,54 @@ test('a class works on its year; lower years open for revision; the admin closes
   assert.equal(await c.locator('.past-years').count(), 0);
   assert.equal((await c.goto(`${APP}/vaje/2.1`)).status(), 404);
   await a.goto(`${APP}/admin/razredi`);
-  const row = a.locator('tr', { has: a.locator(`a[href="/ucitelj/razredi/${r3}"]`) });
-  // the lowest year has nothing to look back on; higher years say what opens
-  const pastOf = (id) => a.locator('tr', { has: a.locator(`a[href="/ucitelj/razredi/${id}"]`) }).locator('label.switch');
-  assert.equal(await pastOf(r2).count(), 0);
-  assert.equal((await pastOf(r4).textContent()).trim(), 'vidi 2. in 3. letnik');
-  await row.locator('input[name=show_past]').check();
-  await row.locator('button:text-is("Shrani")').click();
-  await a.waitForLoadState();
-  assert.match(await a.textContent('.notice'), /R3A: 3\. letnik, vidi 2\. letnik/);
+  // one group per year, each with its classes, and a pencil instead of buttons in the rows
+  const groupsNow = () => a.evaluate(() => [...document.querySelectorAll('table.classes tbody')].map((tb) => ({
+    title: tb.querySelector('.grp h2')?.textContent, names: [...tb.querySelectorAll('tr[id] td:first-child strong')].map((e) => e.textContent),
+  })));
+  assert.deepEqual(await groupsNow(), [{ title: '2. letnik', names: ['R2A'] }, { title: '3. letnik', names: ['R3A'] }, { title: '4. letnik', names: ['R4A'] }]);
+  assert.equal(await a.locator('table.classes select, table.classes input, table.classes form').count(), 0);
+  // the lowest year has nothing to look back on; a higher year can look back on each lower year on its own
+  const pastBoxes = async (id) => {
+    await a.goto(`${APP}/admin/razredi`);
+    await a.locator('tr', { has: a.locator(`a[href="/ucitelj/razredi/${id}"]`) }).locator('.icon-btn').click();
+    return a.locator('dialog[open] [data-past] input');
+  };
+  let boxes = await pastBoxes(r2);
+  assert.deepEqual(await boxes.evaluateAll((l) => l.map((b) => [b.value, b.disabled])), [['2', true], ['3', true]]);
+  boxes = await pastBoxes(r3);
+  assert.deepEqual(await boxes.evaluateAll((l) => l.map((b) => [b.value, b.disabled])), [['2', false], ['3', true]]);
+  boxes = await pastBoxes(r4);
+  assert.deepEqual(await boxes.evaluateAll((l) => l.map((b) => [b.value, b.disabled, b.checked])), [['2', false, false], ['3', false, false]]);
+  // changing the year in the window enables the boxes of the years below it
+  await a.locator('dialog[open] select[name=year]').selectOption('2');
+  assert.deepEqual(await boxes.evaluateAll((l) => l.map((b) => b.disabled)), [true, true]);
+  await a.locator('dialog[open] select[name=year]').selectOption('4');
+  assert.deepEqual(await boxes.evaluateAll((l) => l.map((b) => b.disabled)), [false, false]);
+  await a.keyboard.press('Escape');
+  await editClass(a, 'R3A', async (dlg) => { await dlg.locator('[data-past] input[value="2"]').check(); });
+  assert.match(await a.textContent('.notice'), /Razred R3A je shranjen/);
+  assert.equal((await a.locator('tr', { has: a.locator(`a[href="/ucitelj/razredi/${r3}"]`) }).locator('td:first-child .dim').textContent()).trim(), 'vidi 2. letnik');
+  assert.deepEqual((await db.query(`SELECT year, past_years FROM classes WHERE id=$1`, [r3])).rows, [{ year: 3, past_years: [2] }]);
+  assert.match((await db.query(`SELECT detail FROM audit_log WHERE action='Nastavil letnik razreda' ORDER BY id DESC LIMIT 1`)).rows[0].detail, /R3A: 3\. letnik, prejšnji letniki vidni \(2\. letnik\)/);
   await c.goto(`${APP}/vaje`);
   assert.deepEqual(await c.locator('.past-years .ex-no').allTextContents(), ['1', '2', '3']);
   assert.match(await c.textContent('.hello'), /0 od 0 točk/); // lower years are not in this year's totals
   assert.equal((await c.goto(`${APP}/vaje/2.1`)).status(), 200);
+
+  // a 4th-year class opens the 3rd and the 2nd year one by one, never both unless both are chosen
+  const d = await login('Daša Horvat');
+  const pastOf = async () => (await d.goto(`${APP}/vaje`), d.locator('.past-years .ex-no').allTextContents());
+  assert.deepEqual(await pastOf(), []);
+  for (const [years, shown, open2, open3] of [[['3'], ['1', '2', '3', '4', '5'], 404, 200], [['2'], ['1', '2', '3'], 200, 404], [['2', '3'], ['1', '2', '3', '1', '2', '3', '4', '5'], 200, 200], [[], [], 404, 404]]) {
+    await editClass(a, 'R4A', async (dlg) => {
+      for (const y of ['2', '3']) await dlg.locator(`[data-past] input[value="${y}"]`)[years.includes(y) ? 'check' : 'uncheck']();
+    });
+    assert.deepEqual(await pastOf(), shown, `shown for ${years}`);
+    assert.equal((await d.goto(`${APP}/vaje/2.1`)).status(), open2, `2.1 for ${years}`);
+    assert.equal((await d.goto(`${APP}/vaje/3.1`)).status(), open3, `3.1 for ${years}`);
+  }
+  assert.deepEqual((await db.query(`SELECT past_years FROM classes WHERE id=$1`, [r4])).rows, [{ past_years: [] }]);
+  await d.context().close();
 
   // the teacher sees only the class's year: not its progress in lower years, not their results
   await a.goto(`${APP}/ucitelj/razredi/${r3}`);
@@ -998,8 +1042,8 @@ test('a class works on its year; lower years open for revision; the admin closes
   // 4th year gone for good; the others moved up, without teachers, with nothing open, and see lower years
   assert.equal(await uid('u-dasa'), undefined);
   assert.equal((await db.query('SELECT count(*)::int AS n FROM erased_users')).rows[0].n >= 1, true);
-  const classes = (await db.query('SELECT id, name, year, show_past FROM classes ORDER BY name')).rows;
-  assert.deepEqual(classes, [{ id: r2, name: 'R3A', year: 3, show_past: true }, { id: r3, name: 'R4A', year: 4, show_past: true }]);
+  const classes = (await db.query('SELECT id, name, year, past_years FROM classes ORDER BY name')).rows;
+  assert.deepEqual(classes, [{ id: r2, name: 'R3A', year: 3, past_years: [2] }, { id: r3, name: 'R4A', year: 4, past_years: [2, 3] }]); // each lower year is open
   assert.equal((await db.query('SELECT count(*)::int AS n FROM class_teachers')).rows[0].n, 0);
   assert.equal((await db.query('SELECT count(*)::int AS n FROM class_exercises')).rows[0].n, 0);
   const left = (await db.query('SELECT u.oid FROM class_members m JOIN users u ON u.id=m.user_id ORDER BY u.oid')).rows.map((r) => r.oid);

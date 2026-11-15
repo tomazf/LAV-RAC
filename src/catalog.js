@@ -46,10 +46,12 @@ export const plannedModules = portal.plannedModules.filter((id) => !modules.some
 export const YEARS = Object.entries(portal.years).map(([y, module]) => ({ year: Number(y), module })).sort((a, b) => a.year - b.year);
 export const yearsOn = YEARS.some((y) => modules.some((m) => m.id === y.module));
 export const finalYear = yearsOn ? YEARS.at(-1).year : null;
-// What "sees past years" opens for a class: "2. letnik", "2. in 3. letnik"; empty when there is no lower year.
-export const pastLabel = (year) => {
-  const lower = YEARS.filter((y) => year && y.year < year).map((y) => `${y.year}.`);
-  return lower.length ? `${lower.length > 1 ? `${lower.slice(0, -1).join(', ')} in ${lower.at(-1)}` : lower[0]} letnik` : '';
+// The lower years a class of this year can be allowed to revisit (the lowest year has none).
+export const lowerYears = (year) => (year ? YEARS.filter((y) => y.year < year).map((y) => y.year) : []);
+// What a class may revisit, as text: "2. letnik", "2. in 3. letnik"; empty when nothing.
+export const pastText = (year, allowed = []) => {
+  const list = lowerYears(year).filter((y) => allowed.includes(y)).map((y) => `${y}.`);
+  return list.length ? `${list.length > 1 ? `${list.slice(0, -1).join(', ')} in ${list.at(-1)}` : list[0]} letnik` : '';
 };
 export const yearOf = (moduleId) => YEARS.find((y) => y.module === moduleId)?.year ?? null;
 export const inYear = (year, moduleId) => !yearsOn || !year || yearOf(moduleId) === year;
@@ -76,7 +78,7 @@ export async function classGroups(classId, { openOnly = false } = {}) {
   return grouped(items);
 }
 // Everything from lower years, in the standard order; open regardless of what the teachers opened.
-export const pastGroups = (year) => grouped(exercises.filter((e) => pastYear(year, e.module)).map((e, i) => light(e, { visible: true, order: i })));
+export const pastGroups = (year, allowed = []) => grouped(exercises.filter((e) => pastYear(year, e.module) && allowed.includes(yearOf(e.module))).map((e, i) => light(e, { visible: true, order: i })));
 export async function ensureClassRows(classId) {
   for (const [i, e] of exercises.entries()) {
     await q('INSERT INTO class_exercises(class_id, exercise_id, sort_order) VALUES($1,$2,$3) ON CONFLICT DO NOTHING', [classId, e.id, i]);

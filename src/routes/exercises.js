@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import express from 'express';
-import { byId, inYear, pastYear, renderExercise } from '../catalog.js';
+import { byId, inYear, pastYear, renderExercise, yearOf } from '../catalog.js';
 import { csrfValid, requireAccess } from '../auth.js';
 import { many, one, tx } from '../db.js';
 import { merge, summarize, recordReset } from '../progress.js';
@@ -11,12 +11,12 @@ const canOpen = async (user, ex) => {
   if (!ex) return false;
   if (user.isTeacher) return true;
   const s = await one(
-    `SELECT c.year, c.show_past, x.visible FROM classes c LEFT JOIN class_exercises x ON x.class_id=c.id AND x.exercise_id=$2 WHERE c.id=$1`,
+    `SELECT c.year, c.past_years, x.visible FROM classes c LEFT JOIN class_exercises x ON x.class_id=c.id AND x.exercise_id=$2 WHERE c.id=$1`,
     [user.class_id, ex.id],
   );
   if (!s) return false;
-  // Lower years are open as a whole when the class may revisit them; the class's own year only as the teacher opened it.
-  if (pastYear(s.year, ex.module)) return s.show_past;
+  // A lower year is open as a whole when the class may revisit it; the class's own year only as the teacher opened it.
+  if (pastYear(s.year, ex.module)) return s.past_years.includes(yearOf(ex.module));
   return inYear(s.year, ex.module) && s.visible === true;
 };
 const stateOk = (s) => s && typeof s === 'object' && !Array.isArray(s) && (s.t === undefined || (typeof s.t === 'object' && !Array.isArray(s.t)));

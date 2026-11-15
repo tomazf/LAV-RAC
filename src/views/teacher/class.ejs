@@ -5,7 +5,7 @@
   <a class="btn ghost" href="#dodaj">Dodaj dijake (<%= unassigned.length %>)</a>
   <a class="btn ghost" href="/ucitelj/razredi/<%= cls.id %>/izvoz.csv">Izvozi CSV</a></div>
 </div>
-<p class="dim team"><% if (cls.year) { %><%= cls.year %>. letnik<%= cls.show_past && pastLabel(cls.year) ? `, dijaki vidijo tudi ${pastLabel(cls.year)}` : '' %> · <% } %>Učitelji: <%= teachers.map((t) => t.name).join(', ') || 'še brez učitelja' %></p>
+<p class="dim team"><% if (cls.year) { %><%= cls.year %>. letnik<%= pastText(cls.year, cls.past_years) ? `, dijaki vidijo tudi ${pastText(cls.year, cls.past_years)}` : '' %> · <% } %>Učitelji: <%= teachers.map((t) => t.name).join(', ') || 'še brez učitelja' %></p>
 <% if (!openCount) { %><p class="notice-warn">Dijaki tega razreda še ne vidijo nobene vaje. <a href="/ucitelj/razredi/<%= cls.id %>/vaje">Izberi vaje</a>.</p><% } %>
 <dl class="stats">
   <div><dt>Dijaki</dt><dd><%= rows.length %></dd></div>

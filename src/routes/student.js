@@ -16,8 +16,8 @@ studentRouter.get('/vaje', requireAccess, async (req, res, next) => {
   try {
     const mods = req.user.isTeacher ? standardGroups() : await classGroups(req.user.class_id, { openOnly: true });
     // A class that may revisit lower years sees them in a section of their own, outside this year's totals.
-    const cls = req.user.isTeacher ? null : await one('SELECT year, show_past FROM classes WHERE id=$1', [req.user.class_id]);
-    const past = cls?.show_past ? pastGroups(cls.year) : [];
+    const cls = req.user.isTeacher ? null : await one('SELECT year, past_years FROM classes WHERE id=$1', [req.user.class_id]);
+    const past = cls ? pastGroups(cls.year, cls.past_years) : [];
     const map = (await progressFor([req.user.id])).get(req.user.id);
     const list = mods.flatMap((m) => m.exercises);
     const rows = new Map([...list, ...past.flatMap((m) => m.exercises)].map((e) => {

@@ -1,9 +1,9 @@
 import express from 'express';
 import { checkCsrf, isAdmin, requireAdmin } from '../auth.js';
-import { pastLabel, plannedIn, plannedModules, standardGroups, YEARS, yearsOn } from '../catalog.js';
+import { lowerYears, pastText, plannedIn, plannedModules, standardGroups, YEARS, yearsOn } from '../catalog.js';
 import { audit, eraseUser, many, one, q, tx } from '../db.js';
 import { ACTION_BACKUP, backupWarning } from '../backup.js';
-import { byName } from '../format.js';
+import { byName, cleanName } from '../format.js';
 import { paging } from '../paging.js';
 import { backupRouter } from './backup.js';
 import { ACTION_YEAR, yearRouter } from './year.js';
@@ -106,6 +106,13 @@ adminRouter.post('/ciscenje', checkCsrf, async (req, res, next) => {
 adminRouter.get('/vaje', (req, res) => {
   res.render('admin/exercises', { mods: standardGroups(), plannedModules, plannedIn, tab: 'exercises', message: null });
 });
+const fail = (res, msg) => res.redirect(`/admin/razredi?napaka=${encodeURIComponent(msg)}`);
+const TAKEN = (name) => `Razred z imenom ${name} že obstaja. Izberi drugo ime.`;
+const asList = (v) => [].concat(v ?? []);
+// Two classes never share a name, ignoring case and spaces (the database has the same rule as an index).
+const nameTaken = async (name, exceptId = 0, run = q) => (await run('SELECT 1 FROM classes WHERE lower(btrim(name))=lower($1) AND id<>$2', [name, exceptId])).rowCount > 0;
+const isDuplicate = (e) => e?.code === '23505';
+
 adminRouter.get('/razredi', async (req, res, next) => {
   try {
     const classes = await many(
@@ -114,67 +121,71 @@ adminRouter.get('/razredi', async (req, res, next) => {
     const links = await many(`SELECT t.class_id, u.id, u.name FROM class_teachers t JOIN users u ON u.id=t.user_id ORDER BY u.name`);
     for (const c of classes) c.teachers = links.filter((l) => l.class_id === c.id);
     const all = await many('SELECT id, name, username, role FROM users ORDER BY name');
-    const teachers = all.filter((u) => u.role === 'teacher' || isAdmin(u));
-    res.render('admin/classes', { classes, teachers, YEARS: yearsOn ? YEARS : [], pastLabel, tab: 'classes', message: req.query.sporocilo || null });
+    const teachers = all.filter((u) => u.role === 'teacher' || isAdmin(u)).sort(byName);
+    // With years, one group per year (also when empty, so it is clear what is missing), then the classes without a year.
+    const groups = (yearsOn
+      ? [...YEARS.map((y) => ({ year: y.year, title: `${y.year}. letnik` })), { year: null, title: 'Brez letnika' }]
+      : [{ year: null, title: null }]
+    ).map((g) => ({ ...g, classes: yearsOn ? classes.filter((c) => (c.year ?? null) === g.year) : classes }))
+      .filter((g) => !yearsOn || g.year !== null || g.classes.length)
+      .map((g) => ({ ...g, students: g.classes.reduce((n, c) => n + c.students, 0), noTeacher: g.classes.filter((c) => !c.teachers.length).length }));
+    res.render('admin/classes', {
+      classes, groups, teachers, noTeacher: classes.filter((c) => !c.teachers.length), YEARS: yearsOn ? YEARS : [],
+      tab: 'classes', message: req.query.sporocilo || null, error: req.query.napaka || null,
+    });
   } catch (e) { next(e); }
 });
 adminRouter.post('/razredi', checkCsrf, async (req, res, next) => {
   try {
-    const name = String(req.body.name || '').trim().slice(0, 80);
+    const name = cleanName(req.body.name);
     if (!name) return res.redirect('/admin/razredi');
     const year = yearIn(req.body.year);
     if (yearsOn && !year) return flash(res, '/admin/razredi', 'Izberi letnik razreda.');
-    await q('INSERT INTO classes(name, year) VALUES($1,$2)', [name, year]);
+    if (await nameTaken(name)) return fail(res, TAKEN(name));
+    try { await q('INSERT INTO classes(name, year) VALUES($1,$2)', [name, year]); } catch (e) { if (isDuplicate(e)) return fail(res, TAKEN(name)); throw e; }
     await audit(req.user, 'Ustvaril razred', year ? `${name} (${year}. letnik)` : name);
     flash(res, '/admin/razredi', `Razred ${name} je ustvarjen.`);
   } catch (e) { next(e); }
 });
-adminRouter.post('/razredi/:id/preimenuj', checkCsrf, async (req, res, next) => {
+// One form edits the whole class: name, year, the lower years its students may revisit, and its teachers.
+adminRouter.post('/razredi/:id/uredi', checkCsrf, async (req, res, next) => {
   try {
-    const name = String(req.body.name || '').trim().slice(0, 80);
-    if (name) {
-      const before = await one('SELECT name FROM classes WHERE id=$1', [Number(req.params.id) || 0]);
-      await q('UPDATE classes SET name=$2 WHERE id=$1', [Number(req.params.id) || 0, name]);
-      if (before) await audit(req.user, 'Preimenoval razred', `${before.name}: ${name}`);
+    const id = Number(req.params.id) || 0;
+    const name = cleanName(req.body.name);
+    if (!name) return fail(res, 'Vpiši ime razreda.');
+    const wanted = new Set(asList(req.body.teacher).map(Number).filter(Boolean));
+    const out = await tx(async (c) => {
+      const cur = (await c.query('SELECT * FROM classes WHERE id=$1 FOR UPDATE', [id])).rows[0];
+      if (!cur) return { missing: true };
+      if (await nameTaken(name, id, (sql, args) => c.query(sql, args))) return { taken: true };
+      // Without years in the portal the year stays as it is; a missing choice keeps the current year.
+      const year = yearsOn ? (yearIn(req.body.year) ?? cur.year) : cur.year;
+      const past = yearsOn && year ? lowerYears(year).filter((y) => asList(req.body.past).map(Number).includes(y)) : [];
+      await c.query('UPDATE classes SET name=$2, year=$3, past_years=$4 WHERE id=$1', [id, name, year, past]);
+      const have = (await c.query('SELECT t.user_id, u.name FROM class_teachers t JOIN users u ON u.id=t.user_id WHERE t.class_id=$1', [id])).rows;
+      const valid = (await c.query('SELECT * FROM users WHERE id = ANY($1)', [[...wanted]])).rows.filter((u) => u.role === 'teacher' || isAdmin(u));
+      const removed = have.filter((h) => !valid.some((v) => v.id === h.user_id));
+      const added = valid.filter((v) => !have.some((h) => h.user_id === v.id));
+      if (removed.length) await c.query('DELETE FROM class_teachers WHERE class_id=$1 AND user_id = ANY($2)', [id, removed.map((r) => r.user_id)]);
+      for (const t of added) await c.query('INSERT INTO class_teachers(class_id, user_id) VALUES($1,$2) ON CONFLICT DO NOTHING', [id, t.id]);
+      return { cur, name, year, past, added, removed };
+    });
+    if (out.missing) return fail(res, 'Razred ne obstaja.');
+    if (out.taken) return fail(res, TAKEN(name));
+    const { cur, year, past, added, removed } = out;
+    if (cur.name !== name) await audit(req.user, 'Preimenoval razred', `${cur.name}: ${name}`);
+    if (yearsOn && (cur.year !== year || [...cur.past_years].join() !== past.join())) {
+      await audit(req.user, 'Nastavil letnik razreda', `${name}: ${year}. letnik, prejšnji letniki ${past.length ? `vidni (${pastText(year, past)})` : 'skriti'}`);
     }
-    res.redirect('/admin/razredi');
-  } catch (e) { next(e); }
-});
-adminRouter.post('/razredi/:id/letnik', checkCsrf, async (req, res, next) => {
-  try {
-    const year = yearIn(req.body.year);
-    if (!yearsOn || !year) return res.redirect('/admin/razredi');
-    // The lowest year has nothing to look back on.
-    const past = req.body.show_past === 'on' && !!pastLabel(year);
-    const c = await one('UPDATE classes SET year=$2, show_past=$3 WHERE id=$1 RETURNING name', [Number(req.params.id) || 0, year, past]);
-    if (c) await audit(req.user, 'Nastavil letnik razreda', `${c.name}: ${year}. letnik, prejšnji letniki ${past ? 'vidni' : 'skriti'}`);
-    flash(res, '/admin/razredi', c ? `Razred ${c.name}: ${year}. letnik${past ? `, vidi ${pastLabel(year)}` : ''}.` : 'Razred ne obstaja.');
-  } catch (e) { next(e); }
+    for (const t of added) await audit(req.user, 'Dodal učitelja razredu', `${name}: ${t.name}`);
+    for (const t of removed) await audit(req.user, 'Odstranil učitelja iz razreda', `${name}: ${t.name}`);
+    flash(res, '/admin/razredi', `Razred ${name} je shranjen.`);
+  } catch (e) { if (isDuplicate(e)) return fail(res, 'Razred s tem imenom že obstaja.'); next(e); }
 });
 adminRouter.post('/razredi/:id/izbrisi', checkCsrf, async (req, res, next) => {
   try {
     const c = await one('DELETE FROM classes WHERE id=$1 RETURNING name', [Number(req.params.id) || 0]);
     if (c) await audit(req.user, 'Izbrisal razred', c.name);
-    res.redirect('/admin/razredi');
-  } catch (e) { next(e); }
-});
-adminRouter.post('/razredi/:id/ucitelji', checkCsrf, async (req, res, next) => {
-  try {
-    const c = await one('SELECT id, name FROM classes WHERE id=$1', [Number(req.params.id) || 0]);
-    const t = await one('SELECT * FROM users WHERE id=$1', [Number(req.body.user) || 0]);
-    if (c && t && (t.role === 'teacher' || isAdmin(t))) {
-      await q('INSERT INTO class_teachers(class_id, user_id) VALUES($1,$2) ON CONFLICT DO NOTHING', [c.id, t.id]);
-      await audit(req.user, 'Dodal učitelja razredu', `${c.name}: ${t.name}`);
-    }
-    res.redirect('/admin/razredi');
-  } catch (e) { next(e); }
-});
-adminRouter.post('/razredi/:id/ucitelji/:uid/odstrani', checkCsrf, async (req, res, next) => {
-  try {
-    const c = await one('SELECT name FROM classes WHERE id=$1', [Number(req.params.id) || 0]);
-    const t = await one('SELECT name FROM users WHERE id=$1', [Number(req.params.uid) || 0]);
-    await q('DELETE FROM class_teachers WHERE class_id=$1 AND user_id=$2', [Number(req.params.id) || 0, Number(req.params.uid) || 0]);
-    if (c && t) await audit(req.user, 'Odstranil učitelja iz razreda', `${c.name}: ${t.name}`);
     res.redirect('/admin/razredi');
   } catch (e) { next(e); }
 });
