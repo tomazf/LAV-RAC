@@ -19,7 +19,6 @@ const canOpen = async (user, ex) => {
   if (pastYear(s.year, ex.module)) return s.show_past;
   return inYear(s.year, ex.module) && s.visible === true;
 };
-const MAX_NOTE = 5000;
 const stateOk = (s) => s && typeof s === 'object' && !Array.isArray(s) && (s.t === undefined || (typeof s.t === 'object' && !Array.isArray(s.t)));
 
 // Tasks already started when numbers are first assigned keep their original numbers.
@@ -58,13 +57,9 @@ exerciseRouter.get('/vaje/:id', requireAccess, async (req, res, next) => {
     const ex = byId.get(req.params.id);
     if (!(await canOpen(req.user, ex))) return res.status(404).render('error', { title: 'Vaja ni na voljo', message: 'Učitelj te vaje še ni odprl za tvoj razred.' });
     const p = await openAttempt(req.user, ex);
-    const noteRows = req.user.isAdmin ? [] : await many('SELECT task_index, body FROM student_notes WHERE user_id=$1 AND exercise_id=$2', [req.user.id, ex.id]);
-    const tasks = {};
-    for (const n of noteRows) if (n.task_index >= 0) tasks[n.task_index] = n.body;
     res.type('html').send(renderExercise(ex, {
       id: ex.id, no: ex.no, title: ex.title, key: ex.key, attempt: p.attempt, uid: req.user.id, name: req.user.name, state: p.state, csrf: req.session.csrf, staff: req.user.isTeacher,
       variant: ex.hasVariants ? { seed: p.variant_seed, keep: p.variant_keep } : null,
-      notes: req.user.isAdmin ? null : { exercise: noteRows.find((n) => n.task_index === -1)?.body ?? '', tasks },
     }));
   } catch (e) { next(e); }
 });
@@ -125,36 +120,5 @@ exerciseRouter.post('/api/time/:id', async (req, res, next) => {
       [req.user.id, ex.id, page.id, page.chapter, seconds],
     );
     res.json({ ok: true });
-  } catch (e) { next(e); }
-});
-
-// Notes belong to the student. No teacher or admin page reads them.
-exerciseRouter.post('/api/notes', async (req, res, next) => {
-  try {
-    if (!req.user || req.user.isWaiting) return res.status(401).json({ ok: false, code: 'login' });
-    if (!csrfValid(req)) return res.status(403).json({ ok: false, code: 'csrf' });
-    if (req.user.isAdmin) return res.status(403).json({ ok: false, code: 'admin' });
-    let exerciseId = '';
-    let task = -1;
-    if (req.body.exercise) {
-      const ex = byId.get(String(req.body.exercise));
-      if (!(await canOpen(req.user, ex))) return res.status(404).json({ ok: false, code: 'closed' });
-      exerciseId = ex.id;
-      if (req.body.task !== undefined && req.body.task !== null) {
-        task = Number(req.body.task);
-        if (!ex.tasks.some((t) => t.i === task)) return res.status(400).json({ ok: false, code: 'bad' });
-      }
-    }
-    const body = String(req.body.body ?? '').trim();
-    if (body.length > MAX_NOTE) return res.status(400).json({ ok: false, code: 'long' });
-    if (!body) await many('DELETE FROM student_notes WHERE user_id=$1 AND exercise_id=$2 AND task_index=$3', [req.user.id, exerciseId, task]);
-    else {
-      await many(
-        `INSERT INTO student_notes(user_id, exercise_id, task_index, body) VALUES($1,$2,$3,$4)
-         ON CONFLICT (user_id, exercise_id, task_index) DO UPDATE SET body=$4, updated_at=now()`,
-        [req.user.id, exerciseId, task, body],
-      );
-    }
-    res.json({ ok: true, body });
   } catch (e) { next(e); }
 });

@@ -30,7 +30,7 @@
 <section class="block">
   <h2>Ponastavitev</h2>
   <details class="danger-zone"><summary>Ponastavi vajo <%= ex.no %> celemu razredu</summary>
-    <p>Vsem dijakom v razredu se izbrišejo odgovori in točke te vaje, začnejo znova. Točke pred ponastavitvijo štejejo, dokler dijak ne odgovori na nalogo v novem poskusu. Porabljen čas in opombe ostanejo.</p>
+    <p>Vsem dijakom v razredu se izbrišejo odgovori in točke te vaje, začnejo znova. Točke pred ponastavitvijo štejejo, dokler dijak ne odgovori na nalogo v novem poskusu. Porabljen čas ostane.</p>
     <form method="post" action="/ucitelj/razredi/<%= cls.id %>/rezultati/<%= ex.id %>/ponastavi"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn danger">Da, ponastavi vajo <%= ex.id %> za razred <%= cls.name %></button></form>
   </details>
 </section>

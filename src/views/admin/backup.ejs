@@ -4,7 +4,7 @@
 <% if (error) { %><p class="notice-warn" role="alert"><%= error %></p><% } %>
 <section class="block">
   <h2>Varnostna kopija</h2>
-  <p>Prenese se celotna baza: uporabniki, razredi, napredek, opombe in dnevnik. Vaje in program so na GitHubu, nastavitve (<code>.env</code>) pa niso del kopije. Datoteka se ne shrani na strežnik, ampak samo na tvoj računalnik.</p>
+  <p>Prenese se celotna baza: uporabniki, razredi, napredek in dnevnik. Vaje in program so na GitHubu, nastavitve (<code>.env</code>) pa niso del kopije. Datoteka se ne shrani na strežnik, ampak samo na tvoj računalnik.</p>
   <p>Zadnja kopija: <strong><%= last ? f.dateTime(last) + ' (' + f.ago(last) + ')' : 'še ni bila prenesena' %></strong></p>
   <form method="post" action="/admin/kopije/prenesi"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn">Prenesi varnostno kopijo</button></form>
 </section>

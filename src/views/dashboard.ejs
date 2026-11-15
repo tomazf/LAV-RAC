@@ -9,10 +9,6 @@
   <a class="btn big" href="/vaje/<%= next_.id %>"><%= nextStarted ? 'Nadaljuj' : 'Začni' %> vajo <%= next_.no %>: <%= next_.title %></a>
   <% } else if (maxTasks) { %><p class="all-done">Vse naloge so rešene.</p><% } %>
 </section>
-<% if (!user.isAdmin) { %><section class="my-note">
-  <span data-note-slot data-box="note-general" data-heading="Moja splošna opomba" data-csrf="<%= csrf %>" data-label="Moja splošna opomba"></span>
-  <div class="lvn-text" id="note-general" <%- generalNote ? '' : 'hidden' %>><%= generalNote %></div>
-</section><% } %>
 <% if (!mods.length) { %><p class="empty">Učitelj še ni odprl nobene vaje. Ko jih odpre, se pojavijo tukaj.</p><% } %>
 <%- include('partials/rail', { groups: mods }) %>
 <% if (past.length) { %>
@@ -23,5 +19,4 @@
 </section>
 <% } %>
 <%- include('partials/legend') %>
-<script src="<%= asset('js/notes.js') %>"></script>
 <%- include('partials/foot') %>

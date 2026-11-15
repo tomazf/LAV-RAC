@@ -53,5 +53,10 @@ test('migration 002 keeps data, one class per student, all exercises closed', as
     assert.deepEqual((await q(`SELECT attempt, task_index FROM task_events WHERE exercise_id='3.2' ORDER BY attempt, task_index`)).map((e) => [e.attempt, e.task_index]), [[2, 4], [4, 0]]);
     assert.deepEqual((await q(`SELECT task_index FROM student_notes WHERE exercise_id='3.2' ORDER BY 1`)).map((n) => n.task_index), [-1, 0]);
     assert.equal(Number((await q(`SELECT score FROM progress WHERE exercise_id='1.1'`))[0].score), 1, 'other exercises untouched');
+    // 010: the notes are removed for good, the rest stays
+    await c.query(read('010_drop_student_notes.sql'));
+    assert.equal((await q(`SELECT to_regclass('public.student_notes') AS t`))[0].t, null);
+    await c.query(read('010_drop_student_notes.sql')); // running it again is harmless
+    assert.equal(Number((await q(`SELECT score FROM progress WHERE exercise_id='1.1'`))[0].score), 1);
   } finally { await c.end(); }
 });

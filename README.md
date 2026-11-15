@@ -10,7 +10,7 @@ Portal bo na `lavrac.sc-nm.si`. Zgrajen je na ogrodju [LAV-ELS](https://github.c
 |---|---|---|
 | Skrbnik | uporabniško ime v `ADMIN_EMAILS` | ustvarja, preimenuje in briše razrede, določa učitelje in jih dodeljuje razredom, briše uporabnike, vidi dnevnik dejanj, lahko dela vse kot učitelj v vsakem razredu |
 | Učitelj | določi ga skrbnik | se pridruži razredom (iz razreda ga lahko odstrani samo skrbnik), v svojih razredih dodaja in odstranjuje dijake, izbira odprte vaje in vrstni red, vidi rezultate in dijake brez razreda, ponastavi vajo dijaku ali celemu razredu, izvozi rezultate v CSV |
-| Dijak | učitelj ali skrbnik ga doda v en razred | rešuje odprte vaje, vidi svoj napredek, sam ponastavi vajo in piše svoje zasebne opombe. Razreda ne more zapustiti sam |
+| Dijak | učitelj ali skrbnik ga doda v en razred | rešuje odprte vaje, vidi svoj napredek, sam ponastavi vajo. Razreda ne more zapustiti sam |
 | Brez razreda | vsak nov ali odstranjen uporabnik | vidi samo obvestilo, da čaka na razred |
 
 ## Hitri predogled brez Microsoftovega računa
@@ -82,7 +82,7 @@ Podatki ostanejo, ker so v trajnem nosilcu `db-data`. Spremembe baze (`src/migra
 
 ### Varnostna kopija in obnovitev
 
-Skrbnik ju naredi sam pod **Administracija > Kopije**. Kopija je ena datoteka z vso bazo (uporabniki, razredi, napredek, opombe, dnevnik). Prenese se na skrbnikov računalnik, na strežniku se ne shrani. Vaje in program so na GitHubu, `.env` pa v kopijo ni vključen, zato si ga shrani posebej. Datoteka vsebuje osebne podatke dijakov, zato jo hrani varno in jo po izteku roka hrambe izbriši. Če kopije ni ali je starejša od sedmih dni, skrbniške strani pokažejo opozorilo.
+Skrbnik ju naredi sam pod **Administracija > Kopije**. Kopija je ena datoteka z vso bazo (uporabniki, razredi, napredek, dnevnik). Prenese se na skrbnikov računalnik, na strežniku se ne shrani. Vaje in program so na GitHubu, `.env` pa v kopijo ni vključen, zato si ga shrani posebej. Datoteka vsebuje osebne podatke dijakov, zato jo hrani varno in jo po izteku roka hrambe izbriši. Če kopije ni ali je starejša od sedmih dni, skrbniške strani pokažejo opozorilo.
 
 Obnovitev naloži datoteko, jo preveri in pokaže, kaj vsebuje, šele nato (z vpisom OBNOVI) zamenja vse podatke. Pred tem mora skrbnik prenesti trenutno stanje ali izrecno označiti, da ga ne potrebuje. Med obnovitvijo (nekaj sekund) portal odgovarja z obvestilom o posodabljanju, po njej so vsi odjavljeni. Če obnovitev ne uspe, ostane stara baza nespremenjena. Kopija iz starejše različice portala se po obnovitvi sama posodobi, kopije iz novejše pa portal zavrne.
 
@@ -107,13 +107,13 @@ Skrivnost v Entra poteče. Pred iztekom ustvari novo in posodobi `OIDC_CLIENT_SE
 
 ## Osebni podatki
 
-Portal hrani podatke dijakov, zato se pred uporabo pogovori s pooblaščeno osebo za varstvo podatkov in določi rok hrambe. Odstranitev iz razreda podatkov ne izbriše, izbris uporabnika pod **Administracija** pa je trajen (račun, napredek, opombe, zgodovina in ime v dnevniku), v varnostnih kopijah pa podatki ostanejo, dokler jih skrbnik ne izbriše.
+Portal hrani podatke dijakov, zato se pred uporabo pogovori s pooblaščeno osebo za varstvo podatkov in določi rok hrambe. Odstranitev iz razreda podatkov ne izbriše, izbris uporabnika pod **Administracija** pa je trajen (račun, napredek, zgodovina in ime v dnevniku), v varnostnih kopijah pa podatki ostanejo, dokler jih skrbnik ne izbriše.
 
 ## Napredek in ponastavitev
 
 Vsak dijak ima pri vaji en trenutni poskus. Rešena naloga je zaklenjena, namig odbije polovico točk, prikaz rešitve pomeni 0 točk. Ta pravila preveri tudi strežnik.
 
-Ponastavitev začne nov poskus. Lahko jo sproži dijak sam, učitelj posameznemu dijaku ali celemu razredu, ali nova različica vaje. Shrani se samo rezultat tik pred zadnjo ponastavitvijo: šteje, dokler dijak v novem poskusu ne odgovori na nobeno nalogo (varovalka za ponastavitev po nesreči). Učitelj ga vidi pri dijaku. Opombe ostanejo.
+Ponastavitev začne nov poskus. Lahko jo sproži dijak sam, učitelj posameznemu dijaku ali celemu razredu, ali nova različica vaje. Shrani se samo rezultat tik pred zadnjo ponastavitvijo: šteje, dokler dijak v novem poskusu ne odgovori na nobeno nalogo (varovalka za ponastavitev po nesreči). Učitelj ga vidi pri dijaku. Porabljen čas ostane.
 
 Novi razred nima odprte nobene vaje, učitelj jih odpre sam. Če učitelj vajo zapre, se novi odgovori ne shranijo.
 

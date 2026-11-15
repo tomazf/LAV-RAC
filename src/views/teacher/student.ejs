@@ -3,7 +3,7 @@
 <p class="crumbs"><a href="/ucitelj">Razredi</a> / <a href="/ucitelj/razredi/<%= cls.id %>"><%= cls.name %></a></p>
 <div class="title-row"><div><h1><%= m.name %></h1><p class="dim"><%= m.email || m.username %></p></div>
   <details class="danger-zone right"><summary>Odstrani iz razreda</summary>
-  <p>Dijak ostane v sistemu in obdrži napredek in opombe. Nima dostopa do vaj, dokler ga učitelj ne doda v razred, tudi v drugega.</p>
+  <p>Dijak ostane v sistemu in obdrži napredek. Nima dostopa do vaj, dokler ga učitelj ne doda v razred, tudi v drugega.</p>
   <form method="post" action="/ucitelj/razredi/<%= cls.id %>/odstrani"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="user" value="<%= m.id %>"><button class="btn danger">Da, odstrani</button></form></details>
 </div>
 <dl class="stats">
@@ -33,7 +33,7 @@
     <div class="exd-body">
       <% if (e.c.prev) { %><p class="prev-score">Pred zadnjo ponastavitvijo (<%= f.dateTime(e.c.prev.at) %>): <%= f.num(e.c.prev.score) %> od <%= e.maxPoints %> t, <%= e.c.prev.done %> nalog. <%= e.c.prev.counts ? 'Te točke štejejo, dokler dijak ne odgovori na nalogo v novem poskusu.' : 'Dijak rešuje znova, šteje novi poskus.' %></p><% } %>
       <% if (e.c.done || e.c.hints) { %><details class="danger-zone"><summary>Ponastavi to vajo dijaku</summary>
-        <p>Dijaku se izbrišejo odgovori in točke te vaje, začne znova. Točke pred ponastavitvijo štejejo, dokler dijak ne odgovori na nalogo v novem poskusu. Porabljen čas in opombe ostanejo.</p>
+        <p>Dijaku se izbrišejo odgovori in točke te vaje, začne znova. Točke pred ponastavitvijo štejejo, dokler dijak ne odgovori na nalogo v novem poskusu. Porabljen čas ostane.</p>
         <form method="post" action="/ucitelj/razredi/<%= cls.id %>/dijaki/<%= m.id %>/vaje/<%= e.id %>/ponastavi"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn danger small">Da, ponastavi vajo <%= e.no %> dijaku <%= m.name %></button></form>
       </details><% } %>
       <h3>Naloge</h3>

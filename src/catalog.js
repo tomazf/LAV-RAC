@@ -33,7 +33,7 @@ export function renderExercise(ex, boot) {
   const variants = ex.hasVariants ? `<script src="${asset('js/variants/core.js')}"></script>\n<script src="${asset(`js/variants/${ex.id}.js`)}"></script>` : '';
   return ex.html
     .replace(FONTS_LINK, () => `${fontPreloads}\n<link href="${asset('fonts/fonts.css')}" rel="stylesheet">`)
-    .replace(PLACEHOLDER, () => `<script>window.__LAVELS=${json}</script>\n<script src="${asset('js/notes.js')}"></script>\n<script src="${asset('js/tracker.js')}"></script>`).replace(VARIANTS, () => variants);
+    .replace(PLACEHOLDER, () => `<script>window.__LAVELS=${json}</script>\n<script src="${asset('js/tracker.js')}"></script>`).replace(VARIANTS, () => variants);
 }
 // Chapters with a place in a group but no content yet; shown only to teachers and admins.
 export const plannedExercises = raw.planned ?? [];

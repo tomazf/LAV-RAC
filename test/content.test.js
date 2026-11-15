@@ -281,13 +281,13 @@ test('»Vse vaje« and »Odjava« sit in the exercise header, which stays on scr
   assert.ok(await p.locator('.lr-top input[type=search]').isVisible());
   assert.equal(await p.locator('.lr-top #resetBtn').count(), 0);
   assert.equal(await p.locator('.lr-rail > .lr-reset #resetBtn').count(), 1);
-  // one row at every desktop width (agreed 13. 11. 2026): »Vse vaje«, title with its line, progress, search, note icon, »Odjava«; the two links are tinted plates
+  // one row at every desktop width (agreed 13. 11. 2026): »Vse vaje«, title with its line, progress, search, »Odjava«; the two links are tinted plates
   const measure = () => p.evaluate(() => {
     const r = (s) => { const b = document.querySelector(s).getBoundingClientRect(); return { left: b.left, right: b.right, top: b.top, bottom: b.bottom }; };
     const bg = (s) => getComputedStyle(document.querySelector(s)).backgroundColor;
     const t = document.querySelector('.lr-name b');
-    return { top: r('.lr-top'), back: r('.lvs-back'), name: r('.lr-name'), prog: r('.lr-prog'), search: r('.lr-search'), note: r('.lvn-btn'), out: r('.lvs-out button'), rail: r('.lr-rail'), main: r('.lr-main'),
-      backBg: bg('.lvs-back'), outBg: bg('.lvs-out button'), width: innerWidth, noteText: document.querySelector('.lr-top-in .lvn-btn').innerText.trim(), noteSvg: !!document.querySelector('.lr-top-in .lvn-btn svg'),
+    return { top: r('.lr-top'), back: r('.lvs-back'), name: r('.lr-name'), prog: r('.lr-prog'), search: r('.lr-search'), out: r('.lvs-out button'), rail: r('.lr-rail'), main: r('.lr-main'),
+      backBg: bg('.lvs-back'), outBg: bg('.lvs-out button'), width: innerWidth,
       lineH: t.getBoundingClientRect().height, fontPx: parseFloat(getComputedStyle(t).fontSize), cut: t.scrollWidth > t.clientWidth, full: t.title === t.textContent, sideways: document.documentElement.scrollWidth > innerWidth };
   });
   for (const width of [1372, 1100]) {
@@ -296,17 +296,15 @@ test('»Vse vaje« and »Odjava« sit in the exercise header, which stays on scr
     const m = await measure();
     assert.equal(m.top.left, 0, 'the header spans the whole page');
     assert.ok(m.top.bottom - m.top.top <= 70, `${width}px: the header is one row (${m.top.bottom - m.top.top} px)`);
-    assert.ok(m.back.left < m.name.left && m.name.right <= m.prog.left && m.prog.right <= m.search.left && m.search.right <= m.note.left && m.note.right <= m.out.left, `${width}px: in one row, left to right, nothing overlaps`);
-    for (const k of ['back', 'name', 'prog', 'search', 'note', 'out']) assert.ok(m[k].top >= m.top.top && m[k].bottom <= m.top.bottom, `${width}px: ${k} sits inside the header`);
+    assert.ok(m.back.left < m.name.left && m.name.right <= m.prog.left && m.prog.right <= m.search.left && m.search.right <= m.out.left, `${width}px: in one row, left to right, nothing overlaps`);
+    for (const k of ['back', 'name', 'prog', 'search', 'out']) assert.ok(m[k].top >= m.top.top && m[k].bottom <= m.top.bottom, `${width}px: ${k} sits inside the header`);
     assert.ok(m.lineH < m.fontPx * 1.5, `${width}px: the title is one line`);
     assert.ok(m.full, 'the whole title is in its tooltip');
     if (width === 1372) assert.ok(!m.cut, 'the longest title fits whole at 1372 px');
     assert.ok(!m.sideways, `${width}px: no sideways scroll`);
     assert.notEqual(m.backBg, 'rgba(0, 0, 0, 0)');
     assert.equal(m.backBg, m.outBg, 'the two plates look the same');
-    assert.equal(m.noteText, '', 'the note is only an icon in the header');
-    assert.ok(m.noteSvg);
-    assert.equal(await p.getAttribute('.lr-top-in .lvn-btn', 'aria-label'), 'Dodaj opombo');
+    assert.equal(await p.locator('.lr-top-in .lvn-btn').count(), 0, 'there is no note button in the header');
   }
   // a wide screen: the title starts where the left column does, the search ends where the page does, the links stay at the edges of the window
   await p.setViewportSize({ width: 1920, height: 900 });

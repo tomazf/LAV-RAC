@@ -442,7 +442,7 @@ test('removing a student returns them to waiting; progress comes back when they 
   await s.context().close();
   await t.context().close();
 });
-test('a teacher resets an exercise for one student or the whole class; the score before it and notes stay', async () => {
+test('a teacher resets an exercise for one student or the whole class; the score before it stays', async () => {
   const ana = (await sql(`SELECT id FROM users WHERE oid='u-ana'`))[0].id;
   const bor = (await sql(`SELECT id FROM users WHERE oid='u-bor'`))[0].id;
   const row = async (uid, ex) => (await sql('SELECT attempt, score, done_count, state FROM progress WHERE user_id=$1 AND exercise_id=$2', [uid, ex]))[0];
@@ -500,7 +500,7 @@ test('a teacher resets an exercise for one student or the whole class; the score
   await t.click('button:text("Da, ponastavi vajo 3.2")');
   await t.waitForLoadState();
   assert.match(await t.textContent('.notice'), /Dijakov: 0/);
-  // only the last reset is kept per student and exercise; the log says who did it; notes stay
+  // only the last reset is kept per student and exercise; the log says who did it
   assert.deepEqual(await sql(`SELECT user_id, exercise_id FROM resets GROUP BY 1,2 HAVING count(*) > 1`), []);
   const log = await sql(`SELECT action, actor_name, detail FROM audit_log WHERE action LIKE 'Ponastavil vajo%' ORDER BY id`);
   assert.deepEqual(log.map((l) => [l.action, l.actor_name]), [['Ponastavil vajo dijaku', 'Tomaž Učitelj'], ['Ponastavil vajo razredu', 'Tomaž Učitelj']]);
@@ -669,76 +669,26 @@ test('each class has its own open exercises and order; closed exercises stay in 
   await s.context().close();
   await t.context().close();
 });
-test('notes: general, exercise and task; private, kept after reset, shown as text', async () => {
+test('notes are gone: no icon, no slot, no route, no script, no table, and the privacy page does not mention them', async () => {
   const s = await login('Ana Kovač');
   await s.goto(`${APP}/vaje`);
-  await s.locator('.my-note .lvn-btn').click();
-  await s.fill('.lvn-dialog textarea', 'Splošno <b>x</b>');
-  await s.click('.lvn-save');
-  await s.waitForSelector('#note-general:not([hidden])');
-  assert.equal(await s.textContent('#note-general'), 'Splošno <b>x</b>');
-  await s.reload();
-  assert.equal(await s.textContent('#note-general'), 'Splošno <b>x</b>');
+  assert.equal(await s.locator('.lvn-btn, .my-note, .lvn-text, [data-note-slot]').count(), 0);
+  assert.doesNotMatch(await s.textContent('main'), /opomb/i);
   await openTasks(s, '1.1');
-  const card = s.locator('.task').nth(4);
-  await card.locator('.lvn-btn').click();
-  await s.fill('.lvn-dialog textarea', 'Pri tej nalogi pazi na predznak');
-  await s.click('.lvn-save');
-  await card.locator('.lvn-text:not([hidden])').waitFor();
-  await s.locator('.lvs-bar .lvn-btn').click();
-  await s.fill('.lvn-dialog textarea', 'Ponovi teorijo');
-  await s.click('.lvn-save');
-  await s.locator('.lvs-exnote:not([hidden])').waitFor();
-  await s.reload();
-  assert.equal(await s.locator('.task').nth(4).locator('.lvn-text').textContent(), 'Pri tej nalogi pazi na predznak');
-  assert.equal(await s.textContent('.lvs-exnote'), 'Ponovi teorijo');
-  // the reset rebuilds the tasks; notes stay and the icons come back
-  await s.evaluate(() => { [...document.querySelectorAll('#nav .chap')].find((c) => /Naloge/.test(c.textContent)).click(); document.querySelectorAll('.task')[0].querySelector('[data-act=sol]').click(); });
-  await synced(s);
-  await s.click('#resetBtn');
-  await Promise.all([s.waitForEvent('load'), s.click('#resetYes')]);
-  await s.waitForFunction(() => document.querySelectorAll('.task .lvn-btn').length === document.querySelectorAll('.task').length);
-  assert.equal(await s.locator('.task').nth(4).locator('.lvn-text').textContent(), 'Pri tej nalogi pazi na predznak');
-  // deleting a note, then a dashboard exercise note
-  await s.goto(`${APP}/vaje`);
-  assert.match(await s.textContent('#note-1\\.1'), /Ponovi teorijo/);
-  assert.match(await s.locator('.node', { hasText: '1.1' }).textContent(), /opombe pri nalogah: 1/);
-  await s.locator('.node', { hasText: '1.1' }).locator('.lvn-btn').click();
-  await s.click('.lvn-del');
-  await s.waitForSelector('#note-1\\.1', { state: 'hidden' });
-  // limits and tampering
-  const csrf = await s.locator('[data-note-slot]').first().getAttribute('data-csrf');
-  const send = (data) => s.request.post(`${APP}/api/notes`, { data: { csrf, ...data } });
-  assert.equal((await send({ body: 'x'.repeat(5001) })).status(), 400);
-  assert.equal((await send({ exercise: '1.1', task: 9999, body: 'x' })).status(), 400);
-  assert.equal((await send({ exercise: '2.2', body: 'x' })).status(), 404); // closed for this class
-  assert.equal((await s.request.post(`${APP}/api/notes`, { data: { body: 'x' } })).status(), 403);
-  // another student sees nothing; the teacher pages do not include notes
-  const t = await login('Tomaž Učitelj');
-  await t.goto(`${APP}/ucitelj/razredi/${classId}`);
-  await t.locator('.matrix a', { hasText: 'Ana Kovač' }).click();
-  await t.waitForURL(/dijaki/);
-  const html = await t.content();
-  assert.ok(!html.includes('pazi na predznak') && !html.includes('Splošno'));
-  const b = await login('Bor Novak');
-  await b.goto(`${APP}/vaje`);
-  assert.equal(await b.locator('#note-general').isHidden(), true);
-  await b.goto(`${APP}/vaje/1.1`);
-  assert.equal(await b.locator('.task .lvn-text:not([hidden])').count(), 0);
-  await b.context().close();
-  await t.context().close();
+  assert.equal(await s.locator('.lvn-btn, .lvn-text, .lvs-exnote').count(), 0);
+  const csrf = await s.evaluate(() => window.__LAVELS.csrf);
+  assert.equal(await s.evaluate(() => 'notes' in window.__LAVELS), false);
+  assert.equal((await s.request.post(`${APP}/api/notes`, { data: { csrf, body: 'x' } })).status(), 404);
+  assert.equal((await s.request.get(`${APP}/static/js/notes.js`)).status(), 404);
+  assert.equal((await sql(`SELECT to_regclass('public.student_notes') AS t`))[0].t, null);
+  await s.goto(`${APP}/zasebnost`);
+  assert.doesNotMatch(await s.textContent('main'), /opomb/i);
   await s.context().close();
-});
-test('the admin view has no notes', async () => {
+  // the admin and teacher views have none either
   const a = await login('Sara Skrbnik');
-  await a.goto(`${APP}/vaje`);
-  assert.equal(await a.locator('.rail li').count(), 9);
-  assert.equal(await a.locator('.lvn-btn, .my-note, .lvn-text').count(), 0);
   await a.goto(`${APP}/vaje/1.1`);
   await a.waitForSelector('.lvs-bar');
   assert.equal(await a.locator('.lvn-btn, .lvn-text').count(), 0);
-  const csrf = await a.evaluate(() => window.__LAVELS.csrf);
-  assert.equal((await a.request.post(`${APP}/api/notes`, { data: { csrf, body: 'x' } })).status(), 403);
   await a.context().close();
 });
 test('browsers load new static files right after an update', async () => {
@@ -777,7 +727,7 @@ test('removing from a class keeps the user; deleting from the system erases them
   const uid = async (oid) => (await sql('SELECT id FROM users WHERE oid=$1', [oid]))[0]?.id;
   const counts = async (id) => {
     const out = {};
-    for (const tbl of ['progress', 'resets', 'task_events', 'page_time', 'student_notes', 'class_members', 'class_teachers']) {
+    for (const tbl of ['progress', 'resets', 'task_events', 'page_time', 'class_members', 'class_teachers']) {
       out[tbl] = (await sql(`SELECT count(*)::int n FROM ${tbl} WHERE user_id=$1`, [id]))[0].n;
     }
     return out;
@@ -785,10 +735,6 @@ test('removing from a class keeps the user; deleting from the system erases them
   const bor = await uid('u-bor');
   const s = await login('Bor Novak');
   await s.goto(`${APP}/vaje`);
-  await s.locator('.my-note .lvn-btn').click();
-  await s.fill('.lvn-dialog textarea', 'Borova zasebna opomba');
-  await s.click('.lvn-save');
-  await s.waitForSelector('#note-general:not([hidden])');
   // removed from a class: everything stays, and another class can take the student
   const t = await login('Tomaž Učitelj');
   await t.goto(`${APP}/ucitelj/razredi/${classId}/dijaki/${bor}`);
@@ -797,7 +743,7 @@ test('removing from a class keeps the user; deleting from the system erases them
   await t.waitForURL(/razredi\/\d+$/);
   let c = await counts(bor);
   assert.equal(c.class_members, 0);
-  assert.ok(c.progress > 0 && c.task_events > 0 && c.student_notes === 1);
+  assert.ok(c.progress > 0 && c.task_events > 0);
   const a = await login('Sara Skrbnik');
   const second = (await sql(`SELECT id FROM classes WHERE name='R3B'`))[0].id;
   await a.goto(`${APP}/ucitelj/razredi/${second}`);
@@ -814,7 +760,7 @@ test('removing from a class keeps the user; deleting from the system erases them
   await u.locator('button:text("Da, izbriši za vedno")').click();
   await a.waitForURL(/sporocilo/);
   assert.ok(!decodeURIComponent(a.url()).includes('Bor'), 'name is not in the address');
-  assert.deepEqual(Object.values(await counts(bor)), [0, 0, 0, 0, 0, 0, 0]);
+  assert.deepEqual(Object.values(await counts(bor)), [0, 0, 0, 0, 0, 0]);
   assert.equal(await uid('u-bor'), undefined);
   assert.equal((await sql(`SELECT count(*)::int n FROM audit_log WHERE detail LIKE '%Bor Novak%' OR actor_name LIKE '%Bor Novak%'`))[0].n, 0);
   assert.equal((await sql(`SELECT count(*)::int n FROM session WHERE (sess->>'uid')::bigint=$1`, [bor]))[0].n, 0);
@@ -827,7 +773,7 @@ test('removing from a class keeps the user; deleting from the system erases them
   assert.match(await s.textContent('h1'), /Čakaš/);
   const fresh = await uid('u-bor');
   assert.notEqual(fresh, bor);
-  assert.deepEqual(Object.values(await counts(fresh)), [0, 0, 0, 0, 0, 0, 0]);
+  assert.deepEqual(Object.values(await counts(fresh)), [0, 0, 0, 0, 0, 0]);
   await s.context().close();
   // a teacher can be deleted too; the class stays and the log no longer names them
   await a.goto(`${APP}/admin`);

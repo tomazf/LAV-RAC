@@ -16,15 +16,15 @@ Splošen dogovor za portal z vajami, razredi in spremljanjem napredka, kakršen 
 |---|---|---|
 | Skrbnik | uporabniško ime (UPN) v `ADMIN_EMAILS` (brez razlikovanja velikih in malih črk) | ustvarja, preimenuje in briše razrede, določa učitelje in jih dodeljuje razredom, briše uporabnike, vidi dnevnik dejanj, dela kopije, lahko dela vse kot učitelj v vsakem razredu |
 | Učitelj | določi ga skrbnik, domena ne odloča | se sam pridruži razredu, **iz razreda ga odstrani samo skrbnik** (izpisa ni, dogovorjeno 4. 11. 2026). V svojih razredih dodaja in odstranjuje dijake, izbira odprte vaje in vrstni red, vidi rezultate in dijake brez razreda, ponastavi vajo dijaku ali celemu razredu, izvozi CSV. Razredov ne ustvarja |
-| Dijak | učitelj ali skrbnik ga doda v en razred | rešuje odprte vaje, vidi svoj napredek, sam ponastavi vajo, piše zasebne opombe. Razreda ne more zapustiti |
+| Dijak | učitelj ali skrbnik ga doda v en razred | rešuje odprte vaje, vidi svoj napredek, sam ponastavi vajo. Razreda ne more zapustiti |
 | Brez razreda | vsak nov ali odstranjen uporabnik | vidi samo obvestilo, da čaka na razred |
 
 Pravila:
 - Razrede ustvarja in briše samo skrbnik; vlogo učitelja določa samo skrbnik. Vloga nikoli ne pride iz žetona Microsoft, vedno iz baze in `ADMIN_EMAILS`.
 - Razred ima lahko več učiteljev, učitelj več razredov. Dijake dodajajo in odstranjujejo vsi učitelji razreda; učitelj, ki se razredu ni pridružil, ga ne more odpreti (skrbnik lahko vse).
-- Dodati je mogoče samo uporabnika brez razreda in brez vloge učitelja. Dijak je v enem razredu. Odstranjen dijak ostane v sistemu, napredek in opombe se ohranijo in se vrnejo z njim.
+- Dodati je mogoče samo uporabnika brez razreda in brez vloge učitelja. Dijak je v enem razredu. Odstranjen dijak ostane v sistemu, napredek se ohrani in se vrne z njim.
 - Uporabnika se ob vsaki zahtevi znova prebere iz baze, zato sprememba vloge ali odstranitev veljata takoj.
-- Skrbnika ni mogoče izbrisati, dokler je v `ADMIN_EMAILS`. Skrbnik ne piše opomb.
+- Skrbnika ni mogoče izbrisati, dokler je v `ADMIN_EMAILS`.
 
 ## 3. Vaje in razredi
 
@@ -39,11 +39,11 @@ Pravila:
 ## 4. Napredek, točke, ponastavitve
 
 - Vsak dijak ima pri vaji en trenutni **poskus**. Rešena naloga je zaklenjena, namig odbije polovico točk, prikaz rešitve pomeni 0 točk. Pravila preveri tudi strežnik (`src/progress.js`): naloge, ki so bile rešene, se ne spremenijo, uporabljen namig ostane uporabljen, točke so omejene.
-- **Ponastavitev** začne nov poskus. Sproži jo dijak, učitelj (posameznemu dijaku ali celemu razredu) ali nova različica vaje. Hrani se samo rezultat tik pred zadnjo ponastavitvijo (`resets`, ena vrstica na dijaka in vajo), kot varovalka za ponastavitev po nesreči: dokler dijak v novem poskusu ne odgovori na nobeno nalogo, štejejo te točke; ko začne reševati, šteje novi poskus. Ponastavitev poskusa brez odgovorov obdrži prej shranjene točke. Učitelj prejšnje točke vidi pri dijaku samo kot podatek; števila ponastavitev in zgodovine poskusov ni (8. 11. 2026). Opombe ostanejo.
+- **Ponastavitev** začne nov poskus. Sproži jo dijak, učitelj (posameznemu dijaku ali celemu razredu) ali nova različica vaje. Hrani se samo rezultat tik pred zadnjo ponastavitvijo (`resets`, ena vrstica na dijaka in vajo), kot varovalka za ponastavitev po nesreči: dokler dijak v novem poskusu ne odgovori na nobeno nalogo, štejejo te točke; ko začne reševati, šteje novi poskus. Ponastavitev poskusa brez odgovorov obdrži prej shranjene točke. Učitelj prejšnje točke vidi pri dijaku samo kot podatek; števila ponastavitev in zgodovine poskusov ni (8. 11. 2026). Porabljen čas ostane.
 - **Naloga »Sam preveri«** (dogovorjeno 10. 11. 2026): naloga, pri kateri dijak sam preveri svoje delo (npr. program ali diagram, ki ga naredi v drugem orodju), nima točk in ni nikoli napačna. V katalogu ima `self: true` in `max: 0`. Gumb se imenuje »Preveril sem«, s klikom je naloga opravljena in zaklenjena; rešitev je prosto na voljo, brez vprašanja, ne zaklene naloge in ne stane točk. Strežnik točke vedno postavi na 0, ne glede na to, kaj pošlje stran, ogledana rešitev se ne šteje (`legalPoints`, `summarize` v `src/progress.js`). Dogodek v `task_events` ima vrsto `self` (migracija 009). Učitelj jo vidi z lastno barvo (»sam preveril«), brez odstotka pravilnih in z oznako »sam preveri, brez točk«; v seštevku točk je ni.
 - Napredek je vezan na zaporedno številko naloge. Če se vrstni red ali število nalog spremeni, se poveča različica v ključu vaje (`_v1` v `_v2`) in dijaki začnejo nov poskus. Popravek besedila različice ne potrebuje.
 - **Čas** šteje brskalnik samo, ko je zavihek viden in je bila v zadnji minuti aktivnost (utrip na 15 s, mirovanje po 60 s). Strežnik omeji posamezen prispevek na 60 s. Čas se beleži po straneh in poglavjih; to je ocena.
-- **Opombe**: pri nalogi, pri vaji in splošna, do 5000 znakov, kot navadno besedilo. Vidi jih samo dijak; učitelji in skrbniki jih v portalu ne vidijo. Ponastavitev jih ne izbriše.
+- **Opombe** so odstranjene (dogovor 15. 11. 2026, migracija `010_drop_student_notes.sql`): dijaki jih po vtisu učitelja niso uporabljali. Tabela `student_notes` se izbriše za vedno, tudi iz starih kopij, ker se po obnovi požene `migrate()` in jo izbriše znova. Datoteke s kopijami, ki jih skrbnik že ima, opombe še vsebujejo.
 - **Pogoj pred nalogami** (`gate` v katalogu, neobvezno): seznam strani, ki jih mora dijak odpreti, preden naloge štejejo. Odprte strani so v stanju (`seen`), se samo dodajajo in jih ponastavitev ne izbriše; strežnik naloge, oddane pred tem, zavrže (`src/progress.js`). Učitelji in skrbniki pogoj preskočijo.
 - **Spremenljiva števila**: del nalog ima za vsakega dijaka svoja števila. Naključno seme poskusa je v bazi (`progress.variant_seed`), zato so števila enaka po osvežitvi in na drugem računalniku, ponastavitev da nova. Naloge, začete pred dodelitvijo semena, obdržijo izvirna števila (`variant_keep`). Naloge s tega seznama so v `content/variants.json`, razponi v `src/public/js/variants/`, vsaka je preverjena z neodvisnim izračunom v `test/variants.test.js`.
 
@@ -52,10 +52,10 @@ Pravila:
 Vaja je ena HTML datoteka (`content/exercises/<id>.html`), seznam nalog in strani pa je v `content/catalog.json`.
 
 - **Katalog**: `modules` (`id`, `title`) in `exercises`. Vsaka vaja: `id`, `no` (številka, ki jo vidijo ljudje; brez nje se pokaže `id`), `module`, `title`, `fullTitle`, `key`, `version`, `format` (`short` ali `long`, določa imena polj v stanju), `maxPoints`, `tasks` (`i`, `level`, `max`, `section`, `q`, neobvezno `self`, glej razdelek 4), `pages` (`id`, `chapter`, `label`).
-- **Zagon**: datoteka mora vsebovati oznako `<!--LAVELS:BOOT-->` v `<head>`. Strežnik jo nadomesti s `window.__LAVELS` (`id`, `title`, `key`, `attempt`, `uid`, `name`, `state`, `csrf`, `staff`, `variant`, `notes`) in skripti `notes.js` in `tracker.js`. Oznaka `<!--LAVELS:VARIANTS-->` je za spremenljiva števila.
+- **Zagon**: datoteka mora vsebovati oznako `<!--LAVELS:BOOT-->` v `<head>`. Strežnik jo nadomesti s `window.__LAVELS` (`id`, `title`, `key`, `attempt`, `uid`, `name`, `state`, `csrf`, `staff`, `variant`) in skript `tracker.js`. Oznaka `<!--LAVELS:VARIANTS-->` je za spremenljiva števila.
 - **Shranjevanje**: vaja stanje shranjuje v `localStorage` pod `key` kot JSON `{ t: { <indeks naloge>: {...} } }`. Sledilnik ob zagonu postavi stanje s strežnika, vsako spremembo pošlje na `/api/progress/<id>` in šteje čas na `/api/time/<id>`. Pri poskusu, ki ga je spremenil drug zavihek ali ponastavitev, strežnik odgovori 409.
 - **Obvezni elementi vaje**: gumb `#resetBtn` s potrditvijo `#resetYes` (v LAV-RAČ je na dnu levega stolpca, ne v glavi), naloge `.task`, strani `.page`. Poglavja (`Teorija`, `Simulacija`, `Naloge`) so zapisana v kodi (`CHAPTERS` v `src/catalog.js`).
-- **Vrstica sledilnika**: sledilnik vaji doda povezavo »‹ Vse vaje«, stanje shranjevanja, opombo k vaji in gumb Odjava. Če ima vaja svojo vedno vidno glavo z elementom `.lr-top-in`, se vgradijo vanjo (povezava levo, opomba in odjava desno, brez ločenega temnega traku; 10. 11. 2026; v LAV-RAČ je glava ena vrstica, opomba je v njej samo ikona, sporočilo o shranjevanju visi pod glavo; 13. 11. 2026); sicer dobijo svoj temni trak na vrhu strani.
+- **Vrstica sledilnika**: sledilnik vaji doda povezavo »‹ Vse vaje«, stanje shranjevanja in gumb Odjava. Če ima vaja svojo vedno vidno glavo z elementom `.lr-top-in`, se vgradijo vanjo (povezava levo, odjava desno, brez ločenega temnega traku; 10. 11. 2026; v LAV-RAČ je glava ena vrstica, sporočilo o shranjevanju visi pod glavo; 13. 11. 2026); sicer dobijo svoj temni trak na vrhu strani.
 - **Pisave in tresenje strani ob osvežitvi** (dogovorjeno in izvedeno 12. 11. 2026, enako kot pri LAV-ELS): ob F5 ali ob ponovnem kliku na isto povezavo se je stran malo stresla, ker se je besedilo najprej izrisalo z nadomestno pisavo in nato skočilo, ko je prispela prava. Vzrok: datoteke `.woff2` so se strežile z `no-cache` (pri vsakem nalaganju so šle na strežnik), vaje pa so `fonts.css` povezale brez različice. Zdaj so `.woff2` nespremenljive (`immutable`, eno leto; **spremenjena pisava dobi novo ime datoteke** in `fontPreloads` v `src/assets.js` se popravi), vsaka stran (portal in vaje) najavi štiri datoteke pisave Atkinson (`preload`, `crossorigin`) pred `fonts.css`, vaje pa dobijo `fonts.css` z različico (zamenjava v `renderExercise`, `src/catalog.js`). V vaji povezave na `fonts.css` ne spreminjaj (`/static/fonts/fonts.css`). Preizkus: pisave pridejo po F5 iz predpomnilnika.
 - **Ključi**: `scnm_lavele_*` in `window.__LAVELS` so tehnična imena in ostanejo tudi v novem portalu, razen če se spremeni tudi sledilnik.
 - Vaje 3.1 in 3.2 imata v svoji kodi vrstico `LavelsVariants.apply(...)`, ki jo orodje za uvoz ne doda.
@@ -73,8 +73,8 @@ Vaja je ena HTML datoteka (`content/exercises/<id>.html`), seznam nalog in stran
 ## 7. Zasebnost
 
 - Portal hrani podatke dijakov, zato se pred uporabo pogovori s pooblaščeno osebo za varstvo podatkov in določi rok hrambe.
-- Stran **Kateri podatki se beležijo** (`/zasebnost`) našteje shranjeno: ime, uporabniško ime, e-pošta in čas prijave; odgovori, točke, namigi, rešitve; ogledane strani in čas; ponastavitve; opombe. Opis portala je na vrhu strani (iz `content/portal.json`).
-- Odstranitev iz razreda podatkov ne izbriše. **Izbris uporabnika** pod Administracija je trajen: račun, napredek, opombe, zgodovina, ime v dnevniku (nadomesti ga »izbrisan uporabnik«) in seje. Skrbnik lahko izbriše tudi neaktivne dijake (najmanj 30 dni).
+- Stran **Kateri podatki se beležijo** (`/zasebnost`) našteje shranjeno: ime, uporabniško ime, e-pošta in čas prijave; odgovori, točke, namigi, rešitve; ogledane strani in čas; ponastavitve. Opis portala je na vrhu strani (iz `content/portal.json`).
+- Odstranitev iz razreda podatkov ne izbriše. **Izbris uporabnika** pod Administracija je trajen: račun, napredek, zgodovina, ime v dnevniku (nadomesti ga »izbrisan uporabnik«) in seje. Skrbnik lahko izbriše tudi neaktivne dijake (najmanj 30 dni).
 - Izbrisani uporabnik ostane izbrisan tudi po obnovi stare kopije: baza hrani samo zgoščeno vrednost njihovega `oid` (`erased_users`, ne ime ali račun), po obnovi pa uporabnike, ki so starejši od izbrisa, znova izbriše.
 
 ## 8. Skrbnik

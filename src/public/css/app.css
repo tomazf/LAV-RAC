@@ -54,8 +54,6 @@ input[type=checkbox]{width:20px;height:20px;min-height:0;accent-color:var(--acc)
 .notice{background:var(--okbg);border-left:5px solid var(--ok);padding:10px 14px;border-radius:6px}
 .notice-warn{background:var(--sigbg);border-left:5px solid var(--sig);padding:10px 14px;border-radius:6px;max-width:none}
 .team{margin:-10px 0 16px}
-.my-note{margin:-10px 0 18px}
-.ex-meta [data-note-slot]{margin-left:4px}
 .matrix .closed,.matrix th.closed a{opacity:.55}
 .ex-table{table-layout:fixed;min-width:640px}
 .ex-table .c-title{width:auto}

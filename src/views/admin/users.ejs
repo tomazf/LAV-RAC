@@ -19,7 +19,7 @@
     <td class="l"><div class="row">
       <% if (u.kind !== 'admin') { %>
       <form method="post" action="/admin/uporabniki/<%= u.id %>/vloga"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="role" value="<%= u.role === 'teacher' ? 'user' : 'teacher' %>"><button class="btn ghost small"><%= u.role === 'teacher' ? 'Odvzemi vlogo učitelja' : 'Določi za učitelja' %></button></form>
-      <details class="danger-zone"><summary>Izbriši za vedno</summary><p>Račun, napredek, opombe in zgodovina bodo trajno izbrisani. Tega ni mogoče razveljaviti. Če želiš dijaka samo premakniti, ga odstrani iz razreda.</p><form method="post" action="/admin/uporabniki/<%= u.id %>/izbrisi"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn danger small">Da, izbriši za vedno: <%= u.name %></button></form></details>
+      <details class="danger-zone"><summary>Izbriši za vedno</summary><p>Račun, napredek in zgodovina bodo trajno izbrisani. Tega ni mogoče razveljaviti. Če želiš dijaka samo premakniti, ga odstrani iz razreda.</p><form method="post" action="/admin/uporabniki/<%= u.id %>/izbrisi"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn danger small">Da, izbriši za vedno: <%= u.name %></button></form></details>
       <% } else { %><span class="dim">Določen v nastavitvah strežnika</span><% } %>
     </div></td>
   </tr><% }) %></tbody>
