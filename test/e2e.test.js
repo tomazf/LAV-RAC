@@ -823,6 +823,26 @@ test('exercise groups line up on the admin overview and class page; empty groups
   await s.context().close();
   await a.context().close();
 });
+test('text paragraphs run across the whole width of their page, on the admin, teacher and student pages', async () => {
+  // A paragraph is as wide as the block it sits in (no 72-character column); the privacy page keeps its own narrow column.
+  const narrow = (page) => page.evaluate(() => [...document.querySelectorAll('main p')].filter((e) => {
+    const parent = e.parentElement;
+    const cs = getComputedStyle(parent);
+    if (!e.offsetParent || cs.display.includes('flex') || cs.display.includes('grid') || getComputedStyle(e).display !== 'block') return false;
+    const inner = parent.getBoundingClientRect().width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    return e.getBoundingClientRect().width < inner - 2;
+  }).map((e) => e.textContent.trim().slice(0, 50)));
+  const a = await login('Sara Skrbnik');
+  for (const path of ['/admin', '/admin/vaje', '/admin/razredi', '/admin/solsko-leto', '/admin/kopije', '/admin/dnevnik', '/admin/ciscenje', `/ucitelj/razredi/${classId}`, `/ucitelj/razredi/${classId}/vaje`]) {
+    await a.goto(`${APP}${path}`);
+    assert.deepEqual(await narrow(a), [], path);
+  }
+  const s = await login('Ana Kovač');
+  await s.goto(`${APP}/vaje`);
+  assert.deepEqual(await narrow(s), [], '/vaje');
+  await s.context().close();
+  await a.context().close();
+});
 test('removing from a class keeps the user; deleting from the system erases them forever', async () => {
   const uid = async (oid) => (await sql('SELECT id FROM users WHERE oid=$1', [oid]))[0]?.id;
   const counts = async (id) => {

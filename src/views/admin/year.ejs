@@ -13,7 +13,7 @@
     <% if (other.length) { %><li>Ostane brez spremembe: <b><%= f.count(other.length, RAZREDOV) %></b> brez letnika (<%= other.map((c) => c.name).join(', ') %>)</li><% } %>
   </ul>
   <details class="year-what"><summary>Kaj se zgodi ob potrditvi</summary><ul>
-    <li>Označeni dijaki <%= finalYear %>. letnikov se <strong>trajno izbrišejo</strong> z napredkom in vsemi zapisi, njihovi razredi tudi. Odznačeni ostanejo brez razreda. Razveljaviti je mogoče samo z obnovitvijo kopije.</li>
+    <li>Označeni dijaki <%= finalYear %>. letnikov se <strong>trajno izbrišejo</strong> z napredkom in vsemi zapisi, njihovi razredi tudi. Odznačeni ostanejo brez razreda. Izbrisanih dijakov ne vrne niti obnovitev kopije.</li>
     <li>Drugi razredi preidejo v višji letnik in dobijo novo ime. Poglavja novega letnika so zaprta, dokler jih učitelj ne odpre. Razredi vidijo prejšnje letnike za ponavljanje.</li>
     <li>Učitelji se odstranijo iz razredov, ki napredujejo; po prehodu jih dodeliš na strani Razredi.</li>
     <li>Napredek dijakov ostane. Odznačeni dijaki ostanejo brez razreda.</li>
@@ -55,7 +55,7 @@
 </div>
 <section class="block year-confirm">
   <h2>Potrditev</h2>
-  <% if (fresh) { %><p class="dim">Trenutno stanje je bilo pred kratkim preneseno, zato ga lahko vrneš z obnovitvijo.</p>
+  <% if (fresh) { %><p class="dim">Trenutno stanje je bilo pred kratkim preneseno, zato lahko razrede, učitelje in odprta poglavja vrneš z obnovitvijo; izbrisani dijaki ostanejo izbrisani.</p>
   <% } else { %><p class="notice-warn">Najprej <a href="/admin/kopije">prenesi svežo varnostno kopijo</a>. Brez nje prehoda ni mogoče potrditi.</p><% } %>
   <div class="stack">
     <% if (lastRun && Date.now() - new Date(lastRun) < againDays * 864e5) { %><p class="notice-warn">Šolsko leto je bilo zaključeno <%= f.ago(lastRun) %>. Drugi zaključek bi razrede premaknil še za en letnik.</p>
