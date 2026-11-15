@@ -45,7 +45,7 @@ h3{font-size:1.05rem;margin:0}
 @media (prefers-color-scheme:dark){.btn.danger{color:#2a0d0d}}
 .btn:disabled{opacity:.4;cursor:default}
 input,select{font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:8px;padding:8px 10px;min-height:44px;max-width:100%}
-input[type=checkbox]{width:20px;height:20px;min-height:0;accent-color:var(--acc);vertical-align:-4px}
+input[type=checkbox],input[type=radio]{width:20px;height:20px;min-height:0;accent-color:var(--acc);vertical-align:-4px}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .inline{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0}
 .title-row{display:flex;flex-wrap:wrap;gap:12px 20px;justify-content:space-between;align-items:center;margin:0 0 18px}
@@ -249,6 +249,8 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 .edit-form legend,.edit-form .field>label{font-weight:700;padding:0}
 .edit-form .field>.switch{font-weight:400}
 .edit-form .checks{columns:2 12rem;margin:0}
+.edit-form [hidden]{display:none}
+.edit-form .grp-name{margin-top:4px}
 .dlg-actions{display:flex;flex-wrap:wrap;gap:10px}
 /* Admin lists: filter, search and button in one row; paging below */
 form.user-filter{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}

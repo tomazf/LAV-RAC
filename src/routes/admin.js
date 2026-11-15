@@ -19,6 +19,20 @@ adminRouter.use('/solsko-leto', yearRouter);
 
 const yearIn = (v) => (YEARS.some((y) => y.year === Number(v)) ? Number(v) : null);
 const flash = (res, path, msg) => res.redirect(`${path}${path.includes('?') ? '&' : '?'}sporocilo=${encodeURIComponent(msg)}`);
+// The class lists of the edit windows: one group per year (the classes without a year last), each in the order of the alphabet.
+const classGroups = (classes) => (yearsOn
+  ? [...YEARS.map((y) => ({ year: y.year, title: `${y.year}. letnik` })), { year: null, title: 'Brez letnika' }]
+  : [{ year: null, title: '' }]
+).map((g) => ({ ...g, classes: classes.filter((c) => !yearsOn || (c.year ?? null) === g.year).sort(byName) })).filter((g) => g.classes.length);
+// Where the admin returns to after saving: the same list with the same filter and page, without an old message.
+const listBack = (req) => {
+  const u = new URL(req.originalUrl, 'http://x');
+  u.searchParams.delete('sporocilo');
+  return u.pathname + u.search;
+};
+const backTo = (v) => {
+  try { const u = new URL(String(v || ''), 'http://x'); return u.origin === 'http://x' && u.pathname === '/admin' ? u.pathname + u.search : '/admin'; } catch { return '/admin'; }
+};
 const ROLES = { admin: 'Skrbnik', teacher: 'Učitelj', student: 'Dijak', waiting: 'Brez razreda' };
 const roleOf = (u) => (isAdmin(u) ? 'admin' : u.role === 'teacher' ? 'teacher' : u.class_names ? 'student' : 'waiting');
 
@@ -36,36 +50,87 @@ adminRouter.get('/', async (req, res, next) => {
     const all = rows.map((u) => ({ ...u, kind: roleOf(u) })).filter((u) => !kind || u.kind === kind).sort(byName);
     const pg = paging(req.query, all.length);
     const users = all.slice(pg.offset, pg.offset + pg.per);
-    // Students without a class can be put into one right here.
-    const classes = kind === 'waiting' ? await many('SELECT id, name, year FROM classes ORDER BY year NULLS LAST, name') : [];
+    // Every edit window offers the classes: students without one can also be put into one from the list itself.
+    const classes = await many('SELECT id, name, year FROM classes');
+    const teaching = new Map((await many('SELECT t.user_id, t.class_id FROM class_teachers t WHERE t.user_id = ANY($1)', [users.map((u) => u.id)])).reduce((m, t) => m.set(t.user_id, [...(m.get(t.user_id) ?? []), t.class_id]), new Map()));
+    const memberOf = new Map((await many('SELECT user_id, class_id FROM class_members WHERE user_id = ANY($1)', [users.map((u) => u.id)])).map((m) => [m.user_id, m.class_id]));
+    for (const u of users) { u.teach_ids = teaching.get(u.id) ?? []; u.class_id = memberOf.get(u.id) ?? null; }
     const params = { vloga: kind, q: search, na: pg.per === 50 ? '' : pg.per };
-    res.render('admin/users', { users, search, kind, ROLES, pg, params, classes, message: req.query.sporocilo || null, tab: 'users' });
+    res.render('admin/users', {
+      users, search, kind, ROLES, pg, params, groups: classGroups(classes), classes, back: listBack(req),
+      message: req.query.sporocilo || null, tab: 'users',
+    });
   } catch (e) { next(e); }
 });
-adminRouter.post('/uporabniki/:id/vloga', checkCsrf, async (req, res, next) => {
+// One window for everything about a person: the role, the class of a student or the classes of a teacher.
+adminRouter.post('/uporabniki/:id/uredi', checkCsrf, async (req, res, next) => {
+  const to = backTo(req.body.back);
   try {
-    const role = req.body.role === 'teacher' ? 'teacher' : 'user';
     const id = Number(req.params.id) || 0;
-    const u = await tx(async (c) => {
-      const row = (await c.query('UPDATE users SET role=$2 WHERE id=$1 RETURNING name', [id, role])).rows[0];
-      if (!row) return null;
-      // A teacher is not a student, and a former teacher no longer has classes.
-      if (role === 'teacher') await c.query('DELETE FROM class_members WHERE user_id=$1', [id]);
-      else await c.query('DELETE FROM class_teachers WHERE user_id=$1', [id]);
-      return row;
+    const role = req.body.role === 'teacher' ? 'teacher' : 'user';
+    const out = await tx(async (c) => {
+      const u = (await c.query('SELECT * FROM users WHERE id=$1 FOR UPDATE', [id])).rows[0];
+      if (!u) return { missing: true };
+      if (isAdmin(u)) return { admin: true };
+      const mine = (await c.query('SELECT m.class_id, c.name FROM class_members m JOIN classes c ON c.id=m.class_id WHERE m.user_id=$1', [id])).rows[0] ?? null;
+      const teaching = (await c.query('SELECT t.class_id, c.name FROM class_teachers t JOIN classes c ON c.id=t.class_id WHERE t.user_id=$1', [id])).rows;
+      const log = [];
+      if (role !== u.role) {
+        await c.query('UPDATE users SET role=$2 WHERE id=$1', [id, role]);
+        log.push([role === 'teacher' ? 'Določil učitelja' : 'Odvzel vlogo učitelja', u.name]);
+      }
+      if (role === 'teacher') {
+        // A teacher is not a student; the classes they teach are exactly the ticked ones.
+        if (mine) {
+          await c.query('DELETE FROM class_members WHERE user_id=$1', [id]);
+          log.push(['Odstranil dijaka iz razreda', `${mine.name}: ${u.name}`]);
+        }
+        const wanted = asList(req.body.teach).map(Number).filter(Boolean);
+        const valid = (await c.query('SELECT id, name FROM classes WHERE id = ANY($1)', [wanted])).rows;
+        for (const t of teaching.filter((x) => !valid.some((v) => v.id === x.class_id))) {
+          await c.query('DELETE FROM class_teachers WHERE user_id=$1 AND class_id=$2', [id, t.class_id]);
+          log.push(['Odstranil učitelja iz razreda', `${t.name}: ${u.name}`]);
+        }
+        for (const v of valid.filter((x) => !teaching.some((t) => t.class_id === x.id))) {
+          await c.query('INSERT INTO class_teachers(class_id, user_id) VALUES($1,$2) ON CONFLICT DO NOTHING', [v.id, id]);
+          log.push(['Dodal učitelja razredu', `${v.name}: ${u.name}`]);
+        }
+      } else {
+        // A former teacher no longer has classes. A student has one class or none; the progress stays with the student.
+        for (const t of teaching) log.push(['Odstranil učitelja iz razreda', `${t.name}: ${u.name}`]);
+        if (teaching.length) await c.query('DELETE FROM class_teachers WHERE user_id=$1', [id]);
+        const want = Number(req.body.class_id) || null;
+        const target = want ? (await c.query('SELECT id, name FROM classes WHERE id=$1', [want])).rows[0] ?? null : null;
+        if (want && !target) return { badClass: true };
+        if ((mine?.class_id ?? null) !== (target?.id ?? null)) {
+          if (mine) {
+            await c.query('DELETE FROM class_members WHERE user_id=$1', [id]);
+            log.push(['Odstranil dijaka iz razreda', `${mine.name}: ${u.name}`]);
+          }
+          if (target) {
+            await c.query('INSERT INTO class_members(class_id, user_id, added_by) VALUES($1,$2,$3)', [target.id, id, req.user.id]);
+            log.push(['Dodal dijaka v razred', `${target.name}: ${u.name}`]);
+          }
+        }
+      }
+      return { log };
     });
-    if (u) await audit(req.user, role === 'teacher' ? 'Določil učitelja' : 'Odvzel vlogo učitelja', u.name);
-    res.redirect('/admin');
+    if (out.missing) return flash(res, to, 'Uporabnik ne obstaja več.');
+    if (out.admin) return flash(res, to, 'Skrbnika se ureja v nastavitvah strežnika.');
+    if (out.badClass) return flash(res, to, 'Izbrani razred ne obstaja. Nič ni bilo spremenjeno.');
+    for (const [action, detail] of out.log) await audit(req.user, action, detail);
+    flash(res, to, out.log.length ? 'Spremembe so shranjene.' : 'Ni sprememb.');
   } catch (e) { next(e); }
 });
 adminRouter.post('/uporabniki/:id/izbrisi', checkCsrf, async (req, res, next) => {
   try {
+    const to = backTo(req.body.back);
     const u = await one('SELECT * FROM users WHERE id=$1', [Number(req.params.id) || 0]);
-    if (!u) return res.redirect('/admin');
-    if (isAdmin(u)) return flash(res, '/admin', 'Skrbnika ni mogoče izbrisati. Najprej ga odstrani iz nastavitve ADMIN_EMAILS.');
+    if (!u) return res.redirect(to);
+    if (isAdmin(u)) return flash(res, to, 'Skrbnika ni mogoče izbrisati. Najprej ga odstrani iz nastavitve ADMIN_EMAILS.');
     await eraseUser(u);
     await audit(req.user, 'Izbrisal uporabnika in njegove podatke');
-    flash(res, '/admin', 'Uporabnik in vsi njegovi podatki so izbrisani.');
+    flash(res, to, 'Uporabnik in vsi njegovi podatki so izbrisani.');
   } catch (e) { next(e); }
 });
 adminRouter.post('/uporabniki/razredi', checkCsrf, async (req, res, next) => {

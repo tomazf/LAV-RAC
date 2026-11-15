@@ -106,10 +106,7 @@ test('admin comes from configuration, regardless of letter case, and chooses tea
   assert.match(await t.textContent('h1'), /Čakaš/);
   const a = await login('Sara Skrbnik');
   assert.equal(new URL(a.url()).pathname, '/ucitelj');
-  await a.goto(`${APP}/admin`);
-  const row = a.locator('tr', { hasText: 'ucitelj@sola.test' });
-  await row.locator('button:text("Določi za učitelja")').click();
-  await a.waitForURL(`${APP}/admin`);
+  await makeTeacher(a, 'ucitelj@sola.test');
   await t.reload();
   assert.equal(new URL(t.url()).pathname, '/ucitelj');
   assert.equal((await t.goto(`${APP}/admin`)).status(), 403);
@@ -126,6 +123,23 @@ async function adminMakesClass(a, name) {
   return Number((await sql('SELECT id FROM classes WHERE name=$1', [name]))[0].id);
 }
 // Opens the edit window of a class on the admin page, lets the caller change it, and saves.
+// The edit window of a person in Administration > Uporabniki (opened with the pencil, found by the search).
+async function editUser(a, email, change, { save = true } = {}) {
+  await a.goto(`${APP}/admin?q=${encodeURIComponent(email)}`);
+  await a.locator('tr', { hasText: email }).locator('.icon-btn').click();
+  const dlg = a.locator('dialog[open]');
+  await change(dlg);
+  if (save) { await dlg.locator('button:text-is("Shrani")').click(); await a.waitForLoadState(); }
+  return dlg;
+}
+const eraseUserVia = async (a, email) => {
+  await editUser(a, email, async (dlg) => {
+    await dlg.locator('summary:text("Izbriši za vedno")').click();
+    await dlg.locator('button:text("Da, izbriši za vedno")').click();
+    await a.waitForURL(/sporocilo/);
+  }, { save: false });
+};
+const makeTeacher = (a, email) => editUser(a, email, (dlg) => dlg.locator('input[name=role][value=teacher]').check());
 async function editClass(a, name, change) {
   await a.goto(`${APP}/admin/razredi`);
   await a.locator('tr', { hasText: name }).locator('.icon-btn').click();
@@ -412,9 +426,7 @@ test('time counts only while active on a visible page, per chapter', async () =>
 });
 test('teachers only see their own classes; CSV export is safe', async () => {
   const a = await login('Sara Skrbnik');
-  await a.goto(`${APP}/admin`);
-  await a.locator('tr', { hasText: 'cene.zupan@sola.test' }).locator('button:text("Določi za učitelja")').click();
-  await a.waitForURL(`${APP}/admin`);
+  await makeTeacher(a, 'cene.zupan@sola.test');
   const other = await login('Cene Zupan');
   assert.equal((await other.goto(`${APP}/ucitelj/razredi/${classId}`)).status(), 404);
   assert.equal((await other.goto(`${APP}/ucitelj/razredi/${classId}/izvoz.csv`)).status(), 404);
@@ -627,9 +639,7 @@ test('several teachers per class and classes per teacher; removing the role ends
   // the admin can open any class without joining
   assert.equal((await a.goto(`${APP}/ucitelj/razredi/${second}`)).status(), 200);
   // removing the teacher role removes the person from all classes and sends them back to waiting
-  await a.goto(`${APP}/admin`);
-  await a.locator('tr', { hasText: 'cene.zupan@sola.test' }).locator('button:text("Odvzemi vlogo učitelja")').click();
-  await a.waitForLoadState();
+  await editUser(a, 'cene.zupan@sola.test', (dlg) => dlg.locator('input[name=role][value=user]').check());
   assert.equal((await sql(`SELECT count(*)::int n FROM class_teachers t JOIN users u ON u.id=t.user_id WHERE u.oid='u-cene'`))[0].n, 0);
   await c.goto(APP);
   assert.match(await c.textContent('h1'), /Čakaš/);
@@ -649,7 +659,7 @@ test('classes: one pencil opens one window that saves name and teachers together
   assert.equal(await row.locator('button').getAttribute('aria-label'), 'Uredi razred R9X');
   // a class without a teacher says so in its row and in a notice above the table
   assert.match(await row.locator('.tag.warn').textContent(), /Brez učitelja/);
-  assert.match(await a.locator('p.notice-warn[role=status]').textContent(), /Brez učitelja:.*R9X/);
+  assert.match(await a.locator('p.notice-warn[role=status]', { hasText: 'Brez učitelja' }).textContent(), /Brez učitelja:.*R9X/);
   // Cancel and Escape close the window without saving
   await row.locator('.icon-btn').click();
   await a.locator('dialog[open] input[name=name]').fill('Nekaj drugega');
@@ -678,7 +688,7 @@ test('classes: one pencil opens one window that saves name and teachers together
     await a.fill('#novi', same);
     await a.click('text=Ustvari razred');
     await a.waitForLoadState();
-    assert.match(await a.textContent('[role=alert]'), /Razred z imenom R9Y že obstaja/);
+    assert.match(await a.textContent('[role=alert]'), new RegExp(`Razred z imenom ${same.trim()} že obstaja`));
   }
   await editClass(a, 'R9Y', async (dlg) => { await dlg.locator('input[name=name]').fill('r3b'); });
   assert.match(await a.textContent('[role=alert]'), /Razred z imenom r3b že obstaja/);
@@ -717,6 +727,125 @@ test('a student can be in one class only and cannot be taken from another', asyn
   assert.equal(r.status(), 200);
   const rows = await sql('SELECT class_id FROM class_members WHERE user_id=$1', [ana]);
   assert.deepEqual(rows.map((x) => Number(x.class_id)), [classId]);
+  await a.context().close();
+});
+test('users: one pencil opens one window for the role, the class of a student and the classes of a teacher', async () => {
+  const a = await login('Sara Skrbnik');
+  const ana = Number((await sql(`SELECT id FROM users WHERE oid='u-ana'`))[0].id);
+  const home = Number((await sql('SELECT class_id FROM class_members WHERE user_id=$1', [ana]))[0].class_id);
+  const u1 = Number((await sql(`INSERT INTO classes(name) VALUES ('U1') RETURNING id`))[0].id);
+  const u2 = Number((await sql(`INSERT INTO classes(name) VALUES ('U2') RETURNING id`))[0].id);
+  const mine = async () => (await sql('SELECT class_id FROM class_members WHERE user_id=$1', [ana])).map((r) => Number(r.class_id));
+  const teaches = async () => (await sql('SELECT class_id FROM class_teachers WHERE user_id=$1 ORDER BY class_id', [ana])).map((r) => Number(r.class_id));
+  const role = async () => (await sql('SELECT role FROM users WHERE id=$1', [ana]))[0].role;
+  const all = async () => (await sql(`SELECT action, detail FROM audit_log WHERE detail LIKE '%Ana Kovač%' ORDER BY id`)).map((l) => [l.action, l.detail]);
+  const logged = (await all()).length;
+  const log = async () => (await all()).slice(logged); // only what this test changed
+  const progress = async () => (await sql('SELECT count(*)::int n FROM progress WHERE user_id=$1', [ana]))[0].n;
+  const had = await progress();
+  assert.ok(had > 0);
+
+  // the rows hold only the pencil, named after the person; the admin from the settings has none
+  await a.goto(`${APP}/admin`);
+  assert.equal(await a.locator('table.data select, table.data input, table.data form').count(), 0);
+  const row = a.locator('tr', { hasText: 'ana.kovac@sola.test' });
+  assert.equal(await row.locator('button').count(), 1);
+  assert.equal(await row.locator('button').getAttribute('aria-label'), 'Uredi uporabnika Ana Kovač');
+  assert.equal(await a.locator('tr', { hasText: 'admin@sola.test' }).locator('button').count(), 0);
+  assert.match(await a.locator('tr', { hasText: 'admin@sola.test' }).textContent(), /Določen v nastavitvah strežnika/);
+
+  // a student has the class to choose, a teacher the classes; the role decides which is shown
+  await editUser(a, 'ana.kovac@sola.test', async (dlg) => {
+    assert.equal(await dlg.locator('[data-panel=user]').isVisible(), true);
+    assert.equal(await dlg.locator('[data-panel=teacher]').isVisible(), false);
+    await dlg.locator('input[name=role][value=teacher]').check();
+    assert.equal(await dlg.locator('[data-panel=user]').isVisible(), false);
+    assert.equal(await dlg.locator('[data-panel=teacher]').isVisible(), true);
+    await dlg.locator('input[name=role][value=user]').check();
+    assert.equal(await dlg.locator('select[name=class_id]').inputValue(), String(home));
+    await dlg.locator('button:text-is("Prekliči")').click();
+  }, { save: false });
+  assert.equal(await a.locator('dialog[open]').count(), 0);
+
+  // saving without a change changes nothing and says so; the list keeps its search
+  await editUser(a, 'ana.kovac@sola.test', async () => {});
+  assert.match(await a.textContent('.notice'), /Ni sprememb/);
+  assert.match(a.url(), /q=ana\.kovac/);
+  assert.deepEqual(await log(), []);
+
+  // the admin moves a student to another class: one class, the progress stays with the student
+  await editUser(a, 'ana.kovac@sola.test', (dlg) => dlg.locator('select[name=class_id]').selectOption({ label: 'U1' }));
+  assert.match(await a.textContent('.notice'), /Spremembe so shranjene/);
+  assert.deepEqual(await mine(), [u1]);
+  assert.equal(await progress(), had);
+  assert.match(await a.locator('tr', { hasText: 'ana.kovac@sola.test' }).textContent(), /U1/);
+  assert.deepEqual(await log(), [['Odstranil dijaka iz razreda', `${(await sql('SELECT name FROM classes WHERE id=$1', [home]))[0].name}: Ana Kovač`], ['Dodal dijaka v razred', 'U1: Ana Kovač']]);
+
+  // without a class she waits again
+  await editUser(a, 'ana.kovac@sola.test', (dlg) => dlg.locator('select[name=class_id]').selectOption(''));
+  assert.deepEqual(await mine(), []);
+  assert.match(await a.locator('tr', { hasText: 'ana.kovac@sola.test' }).textContent(), /Brez razreda/);
+
+  // a teacher: the role and the classes in one save; she is no longer a student
+  await editUser(a, 'ana.kovac@sola.test', async (dlg) => {
+    await dlg.locator('select[name=class_id]').selectOption({ label: 'U2' });
+    await dlg.locator('input[name=role][value=teacher]').check();
+    await dlg.locator('label', { hasText: /^\s*U1\s*$/ }).locator('input').check();
+    await dlg.locator('label', { hasText: /^\s*U2\s*$/ }).locator('input').check();
+  });
+  assert.equal(await role(), 'teacher');
+  assert.deepEqual(await teaches(), [u1, u2]);
+  assert.deepEqual(await mine(), []); // the class chosen for a student is not used for a teacher
+  assert.match(await a.locator('tr', { hasText: 'ana.kovac@sola.test' }).textContent(), /U1, U2/);
+  // reopened, the window shows the classes she teaches
+  await editUser(a, 'ana.kovac@sola.test', async (dlg) => {
+    assert.equal(await dlg.locator('input[name=role][value=teacher]').isChecked(), true);
+    assert.equal(await dlg.locator('input[name=teach]:checked').count(), 2);
+    assert.equal(await dlg.locator('[data-panel=teacher]').isVisible(), true);
+    await dlg.locator('label', { hasText: /^\s*U2\s*$/ }).locator('input').uncheck();
+  });
+  assert.deepEqual(await teaches(), [u1]);
+  // she opens her class as a teacher
+  assert.equal((await (await login('Ana Kovač')).goto(`${APP}/ucitelj/razredi/${u1}`)).status(), 200);
+
+  // a teacher becomes a student again: the classes she taught are gone, the chosen class is hers
+  await editUser(a, 'ana.kovac@sola.test', async (dlg) => {
+    await dlg.locator('input[name=role][value=user]').check();
+    await dlg.locator('select[name=class_id]').selectOption({ label: 'U2' });
+  });
+  assert.equal(await role(), 'user');
+  assert.deepEqual(await teaches(), []);
+  assert.deepEqual(await mine(), [u2]);
+  assert.deepEqual((await log()).map((l) => l[0]), [
+    'Odstranil dijaka iz razreda', 'Dodal dijaka v razred', 'Odstranil dijaka iz razreda',
+    'Določil učitelja', 'Dodal učitelja razredu', 'Dodal učitelja razredu', 'Odstranil učitelja iz razreda',
+    'Odvzel vlogo učitelja', 'Odstranil učitelja iz razreda', 'Dodal dijaka v razred',
+  ]);
+  assert.equal(await progress(), had);
+
+  // forms sent by hand: the admin of the settings, a class that does not exist and a foreign return address change nothing
+  const csrf = await a.inputValue('input[name=_csrf]');
+  const adminId = (await sql(`SELECT id FROM users WHERE oid='u-admin'`))[0].id;
+  const post = (id, form) => a.request.post(`${APP}/admin/uporabniki/${id}/uredi`, { form: { _csrf: csrf, ...form } });
+  assert.match(decodeURIComponent((await post(adminId, { role: 'teacher' })).url()), /Skrbnika se ureja v nastavitvah/);
+  assert.equal((await sql(`SELECT role FROM users WHERE oid='u-admin'`))[0].role, 'user');
+  assert.match(decodeURIComponent((await post(ana, { role: 'user', class_id: '999999' })).url()), /Izbrani razred ne obstaja/);
+  assert.deepEqual(await mine(), [u2]);
+  assert.match(decodeURIComponent((await post(999999, { role: 'user' })).url()), /Uporabnik ne obstaja več/);
+  const away = await post(ana, { role: 'user', class_id: String(u2), back: 'https://evil.example/x' });
+  assert.equal(new URL(away.url()).origin, APP);
+  assert.equal(new URL((await post(ana, { role: 'user', class_id: String(u2), back: '//evil.example/x' })).url()).origin, APP);
+  // somebody who is not the admin cannot use the window
+  const t = await login('Tomaž Učitelj');
+  const own = await t.request.post(`${APP}/admin/uporabniki/${ana}/uredi`, { form: { role: 'teacher' } });
+  assert.notEqual(own.status(), 200);
+  assert.equal(await role(), 'user');
+  await t.context().close();
+
+  // everything back where it was
+  await editUser(a, 'ana.kovac@sola.test', (dlg) => dlg.locator('select[name=class_id]').selectOption(String(home)));
+  assert.deepEqual(await mine(), [home]);
+  await sql('DELETE FROM classes WHERE id = ANY($1)', [[u1, u2]]);
   await a.context().close();
 });
 test('each class has its own open exercises and order; closed exercises stay in the results', async () => {
@@ -950,11 +1079,7 @@ test('removing from a class keeps the user; deleting from the system erases them
   assert.ok((await counts(bor)).progress === c.progress, 'progress follows the student');
   // deleted from the system: nothing of the student remains, including the name in the log
   assert.ok((await sql(`SELECT count(*)::int n FROM audit_log WHERE detail LIKE '%Bor Novak%'`))[0].n > 0, 'name was in the log');
-  await a.goto(`${APP}/admin`);
-  const u = a.locator('tr', { hasText: 'bor.novak@sola.test' });
-  await u.locator('summary:text("Izbriši za vedno")').click();
-  await u.locator('button:text("Da, izbriši za vedno")').click();
-  await a.waitForURL(/sporocilo/);
+  await eraseUserVia(a, 'bor.novak@sola.test');
   assert.ok(!decodeURIComponent(a.url()).includes('Bor'), 'name is not in the address');
   assert.deepEqual(Object.values(await counts(bor)), [0, 0, 0, 0, 0, 0]);
   assert.equal(await uid('u-bor'), undefined);
@@ -972,11 +1097,7 @@ test('removing from a class keeps the user; deleting from the system erases them
   assert.deepEqual(Object.values(await counts(fresh)), [0, 0, 0, 0, 0, 0]);
   await s.context().close();
   // a teacher can be deleted too; the class stays and the log no longer names them
-  await a.goto(`${APP}/admin`);
-  const tr = a.locator('tr', { hasText: 'ucitelj@sola.test' });
-  await tr.locator('summary:text("Izbriši za vedno")').click();
-  await tr.locator('button:text("Da, izbriši za vedno")').click();
-  await a.waitForURL(/sporocilo/);
+  await eraseUserVia(a, 'ucitelj@sola.test');
   assert.equal(await uid('u-teacher'), undefined);
   assert.equal((await sql(`SELECT count(*)::int n FROM audit_log WHERE actor_name LIKE '%Tomaž%' OR detail LIKE '%Tomaž%'`))[0].n, 0);
   assert.ok((await sql(`SELECT count(*)::int n FROM audit_log WHERE actor_name='izbrisan uporabnik'`))[0].n > 0);
@@ -1023,15 +1144,9 @@ test('backup from the admin page: download, warning, restore keeps deleted users
   const nums = await a.locator('.data tbody td.n').allTextContents();
   assert.ok(nums.length > 1);
   assert.deepEqual(nums, nums.map((_, i) => String(i + 1)));
-  await a.goto(`${APP}/admin?q=cene`);
-  const row = a.locator('tr', { hasText: 'cene.zupan@sola.test' });
-  await row.locator('summary:text("Izbriši za vedno")').click();
-  await row.locator('button:text("Da, izbriši za vedno")').click();
-  await a.waitForURL(/sporocilo/);
+  await eraseUserVia(a, 'cene.zupan@sola.test');
   assert.equal(await uid('u-cene'), undefined);
-  await a.goto(`${APP}/admin?q=dasa`);
-  await a.locator('tr', { hasText: 'dasa.horvat@sola.test' }).locator('button:text("Določi za učitelja")').click();
-  await a.waitForURL(`${APP}/admin`);
+  await makeTeacher(a, 'dasa.horvat@sola.test');
   assert.equal((await sql(`SELECT role FROM users WHERE oid='u-dasa'`))[0].role, 'teacher');
   const usersBefore = (await sql('SELECT count(*)::int n FROM users'))[0].n;
 

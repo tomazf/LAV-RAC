@@ -7,23 +7,40 @@
   <label class="sr" for="q">Išči</label><input id="q" type="search" name="q" value="<%= search %>" placeholder="Ime ali račun"><button class="btn ghost">Išči</button>
 </form>
 <% const assign = kind === 'waiting' && classes.length && users.length; %>
+<noscript><p class="notice-warn">Za urejanje uporabnikov je potreben JavaScript.</p></noscript>
 <div class="scroll"><table class="data">
-  <thead><tr><th class="n">Št.</th><th class="l">Uporabnik</th><th class="l">Vloga</th><th class="l">Razredi</th><th class="l">Zadnja prijava</th><% if (assign) { %><th class="l">Dodaj v razred</th><% } %><th class="l">Dejanja</th></tr></thead>
+  <thead><tr><th class="n">Št.</th><th class="l">Uporabnik</th><th class="l">Vloga</th><th class="l">Razredi</th><th class="l">Zadnja prijava</th><% if (assign) { %><th class="l">Dodaj v razred</th><% } %><th class="l"><span class="sr">Urejanje</span></th></tr></thead>
   <tbody><% users.forEach((u, i) => { %><tr>
     <td class="n"><%= pg.from + i %></td>
     <td class="l"><strong><%= u.name %></strong><br><span class="dim"><%= u.username %></span></td>
     <td class="l nw"><span class="tag t-<%= u.kind %>"><%= ROLES[u.kind] %></span></td>
     <td class="l"><%= u.teaching || u.class_names || '' %></td>
     <td class="l nw"><%= f.ago(u.last_login_at) %></td>
-    <% if (assign) { %><td class="l"><label class="sr" for="cl<%= u.id %>">Razred za <%= u.name %></label><select id="cl<%= u.id %>" name="class_<%= u.id %>" form="assign"><option value="">–</option><% classes.forEach((c) => { %><option value="<%= c.id %>"><%= c.name %><%= c.year ? ` (${c.year}. letnik)` : '' %></option><% }) %></select></td><% } %>
-    <td class="l"><div class="row">
-      <% if (u.kind !== 'admin') { %>
-      <form method="post" action="/admin/uporabniki/<%= u.id %>/vloga"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="role" value="<%= u.role === 'teacher' ? 'user' : 'teacher' %>"><button class="btn ghost small"><%= u.role === 'teacher' ? 'Odvzemi vlogo učitelja' : 'Določi za učitelja' %></button></form>
-      <details class="danger-zone"><summary>Izbriši za vedno</summary><p>Račun, napredek in zgodovina bodo trajno izbrisani. Tega ni mogoče razveljaviti. Če želiš dijaka samo premakniti, ga odstrani iz razreda.</p><form method="post" action="/admin/uporabniki/<%= u.id %>/izbrisi"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn danger small">Da, izbriši za vedno: <%= u.name %></button></form></details>
-      <% } else { %><span class="dim">Določen v nastavitvah strežnika</span><% } %>
-    </div></td>
+    <% if (assign) { %><td class="l"><label class="sr" for="cl<%= u.id %>">Razred za <%= u.name %></label><select id="cl<%= u.id %>" name="class_<%= u.id %>" form="assign"><option value="">–</option><% groups.forEach((g) => { %><% if (g.title) { %><optgroup label="<%= g.title %>"><% } %><% g.classes.forEach((c) => { %><option value="<%= c.id %>"><%= c.name %></option><% }) %><% if (g.title) { %></optgroup><% } %><% }) %></select></td><% } %>
+    <td class="r"><% if (u.kind !== 'admin') { %><button type="button" class="icon-btn" data-edit="u<%= u.id %>" aria-label="Uredi uporabnika <%= u.name %>" title="Uredi"><%- include('../partials/icon', { name: 'edit' }) %></button><% } else { %><span class="dim">Določen v nastavitvah strežnika</span><% } %></td>
   </tr><% }) %></tbody>
 </table></div>
+<% users.filter((u) => u.kind !== 'admin').forEach((u) => { %>
+<dialog class="edit-dlg" id="u<%= u.id %>" aria-labelledby="ut<%= u.id %>">
+  <form class="edit-form" method="post" action="/admin/uporabniki/<%= u.id %>/uredi" data-roles><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="back" value="<%= back %>">
+    <div><h2 id="ut<%= u.id %>">Uredi uporabnika <%= u.name %></h2><span class="dim"><%= u.username %></span></div>
+    <fieldset class="field"><legend>Vloga</legend>
+      <div class="row"><label class="switch"><input type="radio" name="role" value="user" <%= u.role === 'teacher' ? '' : 'checked' %>> Dijak</label><label class="switch"><input type="radio" name="role" value="teacher" <%= u.role === 'teacher' ? 'checked' : '' %>> Učitelj</label></div></fieldset>
+    <div class="field" data-panel="user"><label for="uc<%= u.id %>">Razred</label>
+      <select id="uc<%= u.id %>" name="class_id"><option value="">brez razreda</option><% groups.forEach((g) => { %><% if (g.title) { %><optgroup label="<%= g.title %>"><% } %><% g.classes.forEach((c) => { %><option value="<%= c.id %>" <%= u.class_id === c.id ? 'selected' : '' %>><%= c.name %></option><% }) %><% if (g.title) { %></optgroup><% } %><% }) %></select>
+      <span class="dim">Dijak je lahko v enem razredu. Napredek ostane pri dijaku, tudi če ga premakneš.<%= u.role === 'teacher' ? ' Ko učitelju odvzameš vlogo, izgubi vse razrede, ki jih je poučeval.' : '' %></span></div>
+    <fieldset class="field" data-panel="teacher"><legend>Razredi, ki jih poučuje</legend>
+      <% if (!classes.length) { %><span class="dim">Še ni razredov.</span><% } %>
+      <% groups.forEach((g) => { %><% if (g.title) { %><strong class="grp-name"><%= g.title %></strong><% } %><ul class="checks"><% g.classes.forEach((c) => { %><li><label class="switch"><input type="checkbox" name="teach" value="<%= c.id %>" <%= u.teach_ids.includes(c.id) ? 'checked' : '' %>> <%= c.name %></label></li><% }) %></ul><% }) %>
+      <span class="dim">Učitelj ni dijak: dijak, ki ga določiš za učitelja, izgubi članstvo v razredu.</span></fieldset>
+    <div class="dlg-actions"><button class="btn">Shrani</button><button type="button" class="btn ghost" data-close>Prekliči</button></div>
+    <details class="danger-zone"><summary>Izbriši za vedno</summary>
+      <p>Račun, napredek in zgodovina bodo trajno izbrisani. Tega ni mogoče razveljaviti. Če dijaka želiš samo premakniti, mu zgoraj izberi drug razred.</p>
+      <button class="btn danger small" formaction="/admin/uporabniki/<%= u.id %>/izbrisi" formnovalidate>Da, izbriši za vedno: <%= u.name %></button></details>
+  </form>
+</dialog>
+<% }) %>
 <% if (assign) { %><form id="assign" class="assign-bar" method="post" action="/admin/uporabniki/razredi"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn">Shrani razrede</button><span class="dim">Dijaki brez izbranega razreda ostanejo, kjer so.</span></form><% } %>
 <%- include('../partials/listpager', { path: '/admin', params }) %>
+<script src="<%= asset('js/admin-edit.js') %>"></script>
 <%- include('../partials/foot') %>

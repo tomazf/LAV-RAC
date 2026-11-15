@@ -1081,7 +1081,10 @@ test('admin lists: filter row, class for students without one, the log in pages,
   await a.click('.sorter a:text-is("brez razreda")');
   assert.deepEqual(await a.locator('tbody td strong').allTextContents(), ['Bor Novak']);
   const bor = (await db.query(`SELECT id FROM users WHERE oid='u-bor'`)).rows[0].id;
-  await a.selectOption(`#cl${bor}`, { label: 'R3A (3. letnik)' });
+  // the classes are listed under their years (the ones that exist), in the list and in the edit window
+  assert.deepEqual(await a.locator(`#cl${bor} optgroup`).evaluateAll((els) => els.map((e) => e.label)), ['3. letnik', '4. letnik']);
+  assert.deepEqual(await a.locator(`#uc${bor} optgroup`).evaluateAll((els) => els.map((e) => e.label)), ['3. letnik', '4. letnik']);
+  await a.selectOption(`#cl${bor}`, { label: 'R3A' });
   await a.click('text=Shrani razrede');
   await a.waitForLoadState();
   assert.match(await a.textContent('.notice'), /Dijakov, dodanih v razred: 1\./);
