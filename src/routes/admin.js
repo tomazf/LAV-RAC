@@ -2,7 +2,7 @@ import express from 'express';
 import { checkCsrf, isAdmin, requireAdmin } from '../auth.js';
 import { lowerYears, pastText, plannedIn, plannedModules, standardGroups, YEARS, yearsOn } from '../catalog.js';
 import { audit, eraseUser, many, one, q, tx } from '../db.js';
-import { ACTION_BACKUP, backupWarning } from '../backup.js';
+import { ACTION_BACKUP, backupWarning, recentBackup } from '../backup.js';
 import { byName, cleanName } from '../format.js';
 import { paging } from '../paging.js';
 import { backupRouter } from './backup.js';
@@ -156,16 +156,45 @@ adminRouter.post('/uporabniki/razredi', checkCsrf, async (req, res, next) => {
     flash(res, '/admin?vloga=waiting', total ? `Dijakov, dodanih v razred: ${total}.` : 'Nobenemu dijaku ni bil izbran razred.');
   } catch (e) { next(e); }
 });
-adminRouter.get('/ciscenje', (req, res) => res.render('admin/cleanup', { tab: 'cleanup', message: req.query.sporocilo || null }));
+// Inactive students: first a list of who matches, then the admin picks and confirms. Names are only shown to the admin.
+const MIN_DAYS = 30;
+const CLEAN_LIST_MAX = 1000;
+adminRouter.get('/ciscenje', async (req, res, next) => {
+  try {
+    const days = Number(req.query.dni);
+    const asked = req.query.dni !== undefined && req.query.dni !== '';
+    const valid = Number.isInteger(days) && days >= MIN_DAYS;
+    let found = null;
+    if (valid) {
+      const rows = await many(
+        `SELECT u.*, (SELECT c.name FROM class_members m JOIN classes c ON c.id=m.class_id WHERE m.user_id=u.id) AS class_name
+         FROM users u WHERE u.role='user' AND u.last_login_at < now() - make_interval(days => $1) ORDER BY u.last_login_at`, [days],
+      );
+      const all = rows.filter((u) => !isAdmin(u));
+      found = { all: all.length, list: all.slice(0, CLEAN_LIST_MAX).sort(byName) };
+    }
+    res.render('admin/cleanup', {
+      tab: 'cleanup', message: req.query.sporocilo || null, days: valid ? days : 365, asked, valid, MIN_DAYS, found,
+      fresh: await recentBackup(), more: found ? Math.max(0, found.all - found.list.length) : 0,
+    });
+  } catch (e) { next(e); }
+});
 adminRouter.post('/ciscenje', checkCsrf, async (req, res, next) => {
   try {
     const days = Number(req.body.days);
-    if (!Number.isInteger(days) || days < 30 || req.body.confirm !== 'da') return flash(res, '/admin/ciscenje', 'Vpiši vsaj 30 dni in potrdi brisanje.');
-    const old = await many(`SELECT * FROM users WHERE role='user' AND last_login_at < now() - make_interval(days => $1)`, [days]);
-    const gone = old.filter((u) => !isAdmin(u));
+    const back = `/admin/ciscenje?dni=${Number.isInteger(days) ? days : ''}`;
+    if (!Number.isInteger(days) || days < MIN_DAYS || req.body.confirm !== 'da') return flash(res, back, `Vpiši vsaj ${MIN_DAYS} dni in potrdi brisanje.`);
+    // The deletion is for good, so a fresh copy of the database must exist, the same as for the end of the school year.
+    if (!(await recentBackup())) return flash(res, back, 'Najprej prenesi svežo varnostno kopijo (Administracija > Kopije), nato ponovi.');
+    const picked = [...new Set(asList(req.body.id).map(Number).filter(Boolean))];
+    if (!picked.length) return flash(res, back, 'Nisi izbral nobenega dijaka.');
+    // What was shown may be out of date: only those still without a login for that long, still students, are deleted.
+    const rows = await many(`SELECT * FROM users WHERE id = ANY($1) AND role='user' AND last_login_at < now() - make_interval(days => $2)`, [picked, days]);
+    const gone = rows.filter((u) => !isAdmin(u));
     for (const u of gone) await eraseUser(u);
     await audit(req.user, 'Izbrisal neaktivne uporabnike', `${gone.length} (brez prijave ${days} dni)`);
-    flash(res, '/admin/ciscenje', `Izbrisanih uporabnikov: ${gone.length}.`);
+    const skipped = picked.length - gone.length;
+    flash(res, back, `Izbrisanih uporabnikov: ${gone.length}.${skipped ? ` Preskočenih: ${skipped} (od predogleda so se prijavili ali niso več dijaki).` : ''}`);
   } catch (e) { next(e); }
 });
 adminRouter.get('/vaje', (req, res) => {

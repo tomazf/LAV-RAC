@@ -1187,6 +1187,95 @@ test('admin lists: filter row, class for students without one, the log in pages,
   assert.deepEqual(errors, []);
 });
 
+test('cleanup: the matching students are listed first, the admin picks who goes, a fresh backup is needed, late logins are skipped', async () => {
+  const db = new pg.Client({ connectionString: DB });
+  await db.connect();
+  const a = await login('Sara Skrbnik');
+  const make = async (oid, name, days, role = 'user') => Number((await db.query(
+    `INSERT INTO users(oid, username, email, name, role, last_login_at) VALUES($1,$2,$2,$3,$4, now() - make_interval(days => $5)) RETURNING id`,
+    [oid, `${oid}@sola.test`, name, role, days],
+  )).rows[0].id);
+  const zan = await make('z-1', 'Žan Zaspani', 400);
+  const ula = await make('z-2', 'Ula Utrujena', 500);
+  const mia = await make('z-3', 'Mia Mlada', 100);
+  const rok = await make('z-4', 'Rok Redek', 800);
+  const tina = await make('z-t', 'Tina Učiteljica', 700, 'teacher');
+  const cls = Number((await db.query(`INSERT INTO classes(name, year) VALUES('Zz', 2) RETURNING id`)).rows[0].id);
+  await db.query('INSERT INTO class_members(class_id, user_id) VALUES($1,$2)', [cls, zan]);
+  const alive = async () => (await db.query(`SELECT oid FROM users WHERE oid LIKE 'z-%' ORDER BY oid`)).rows.map((r) => r.oid);
+
+  // nothing is listed before it is asked for; too few days are refused
+  await a.goto(`${APP}/admin/ciscenje`);
+  assert.equal(await a.locator('.clean-form').count(), 0);
+  assert.match(await a.textContent('main'), /Najprej se pokažejo dijaki, ki ustrezajo/);
+  await a.goto(`${APP}/admin/ciscenje?dni=10`);
+  assert.match(await a.textContent('[role=alert]'), /Vpiši vsaj 30 dni/);
+  assert.equal(await a.locator('.clean-form').count(), 0);
+
+  // the students who match, in the order of the Slovene alphabet, with class and last login; teachers and the recent are not there
+  await a.goto(`${APP}/admin/ciscenje`);
+  await a.fill('#days', '365');
+  await a.click('button:text-is("Pokaži dijake")');
+  assert.deepEqual(await a.locator('.clean-form tbody td:nth-child(2) strong').allTextContents(), ['Rok Redek', 'Ula Utrujena', 'Žan Zaspani']);
+  assert.match(await a.textContent('.clean-form h2'), /Dijaki brez prijave 365 dni \(3\)/);
+  assert.deepEqual(await a.locator('.clean-form tbody td:nth-child(3)').allTextContents(), ['brez razreda', 'brez razreda', 'Zz']);
+  assert.equal(await a.locator('.clean-form input[name=id]:checked').count(), 3);
+  await a.click('.clean-form button[data-check=none]');
+  assert.equal(await a.locator('[data-count]').textContent(), '0 od 3 označenih');
+  assert.equal(await a.locator('[data-delete]').isDisabled(), true);
+  await a.click('.clean-form button[data-check=all]');
+  assert.equal(await a.locator('[data-delete]').isDisabled(), false);
+  await a.goto(`${APP}/admin/ciscenje?dni=30`);
+  assert.deepEqual(await a.locator('.clean-form tbody td:nth-child(2) strong').allTextContents(), ['Mia Mlada', 'Rok Redek', 'Ula Utrujena', 'Žan Zaspani']); // 100 days is enough at 30
+
+  // without a fresh backup the deletion is refused and nobody is gone
+  await db.query(`UPDATE audit_log SET created_at = created_at - interval '3 hours' WHERE action='Prenesel varnostno kopijo'`);
+  await a.goto(`${APP}/admin/ciscenje?dni=365`);
+  assert.match(await a.locator('.clean-form .notice-warn').textContent(), /prenesi svežo varnostno kopijo/);
+  await a.check('.clean-form input[name=confirm]');
+  await a.click('[data-delete]');
+  await a.waitForLoadState();
+  assert.match(await a.textContent('.notice'), /Najprej prenesi svežo varnostno kopijo/);
+  assert.deepEqual(await alive(), ['z-1', 'z-2', 'z-3', 'z-4', 'z-t']);
+
+  // a fresh backup; one student is kept (unticked), another logs in after the list was made
+  const csrf = await a.locator('.clean-form input[name=_csrf]').inputValue();
+  assert.equal((await a.request.post(`${APP}/admin/kopije/prenesi`, { form: { _csrf: csrf } })).status(), 200);
+  await a.goto(`${APP}/admin/ciscenje?dni=365`);
+  assert.match(await a.textContent('.clean-form'), /pred kratkim preneseno/);
+  await a.locator('tr', { hasText: 'Ula Utrujena' }).locator('input[name=id]').uncheck();
+  assert.equal(await a.locator('[data-count]').textContent(), '2 od 3 označenih');
+  await db.query('UPDATE users SET last_login_at=now() WHERE id=$1', [zan]);
+  await a.check('.clean-form input[name=confirm]');
+  await a.click('[data-delete]');
+  await a.waitForLoadState();
+  assert.match(await a.textContent('.notice'), /Izbrisanih uporabnikov: 1\. Preskočenih: 1 \(od predogleda so se prijavili/);
+  assert.deepEqual(await alive(), ['z-1', 'z-2', 'z-3', 'z-t']);
+  assert.equal((await db.query(`SELECT detail FROM audit_log WHERE action='Izbrisal neaktivne uporabnike' ORDER BY id DESC LIMIT 1`)).rows[0].detail, '1 (brez prijave 365 dni)');
+  assert.equal((await db.query(`SELECT count(*)::int n FROM audit_log WHERE detail LIKE '%Rok Redek%'`)).rows[0].n, 0);
+  assert.equal((await db.query('SELECT count(*)::int n FROM erased_users')).rows[0].n >= 1, true);
+
+  // forms sent by hand: a teacher, an admin and a recent student are never deleted, whatever the list said
+  const adminId = (await db.query(`SELECT id FROM users WHERE oid='u-admin'`)).rows[0].id;
+  const post = (days, ...ids) => a.request.post(`${APP}/admin/ciscenje`, {
+    data: new URLSearchParams([['_csrf', csrf], ['confirm', 'da'], ['days', days], ...ids.map((i) => ['id', String(i)])]).toString(),
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+  });
+  assert.match(decodeURIComponent((await post('365', tina, adminId, mia)).url()), /Izbrisanih uporabnikov: 0\. Preskočenih: 3/);
+  assert.match(decodeURIComponent((await post('365')).url()), /Nisi izbral nobenega dijaka/);
+  assert.match(decodeURIComponent((await post('5', ula)).url()), /Vpiši vsaj 30 dni/);
+  assert.equal((await db.query(`SELECT count(*)::int n FROM users WHERE oid IN ('u-admin') OR oid LIKE 'z-%'`)).rows[0].n, 5);
+  assert.equal((await db.query(`SELECT count(*)::int n FROM users WHERE id=$1`, [ula])).rows[0].n, 1);
+
+  // the rest of the old list is still there and can go in the next round
+  await a.goto(`${APP}/admin/ciscenje?dni=365`);
+  assert.deepEqual(await a.locator('.clean-form tbody td:nth-child(2) strong').allTextContents(), ['Ula Utrujena']);
+  await db.query(`DELETE FROM users WHERE oid LIKE 'z-%'`);
+  await db.query('DELETE FROM classes WHERE id=$1', [cls]);
+  await a.context().close();
+  await db.end();
+});
+
 test('Za doma: two more tasks per chapter, added in the portal, unscored', async () => {
   const want = { '2.1': [9, 'Barve na spletu', 'Prekoračitev v 8 bitih'], '2.2': [8, 'Glasovalna naprava', 'Samo vrata NEALI'], '2.3': [9, 'Naslovni prostor', 'Množenje z 10 s pomiki'] };
   const a = await login('Sara Skrbnik');

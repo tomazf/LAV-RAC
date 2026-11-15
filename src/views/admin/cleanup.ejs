@@ -1,11 +1,42 @@
 <%- include('../partials/head', { pageTitle: 'Čiščenje', mainClass: 'wide' }) %>
+<% const f = fmt; %>
 <%- include('../partials/adminnav') %>
 <section class="block">
   <h2>Izbriši neaktivne dijake za vedno</h2>
-  <p>Trajno izbriše račune in vse podatke dijakov, ki se dolgo niso prijavili, npr. tistih, ki so šolo zapustili med letom. Učitelji in skrbniki ostanejo.</p>
-  <form class="inline" method="post" action="/admin/ciscenje"><input type="hidden" name="_csrf" value="<%= csrf %>">
-    <label for="days">Brez prijave dni</label><input id="days" type="number" name="days" min="30" value="365" required>
-    <label><input type="checkbox" name="confirm" value="da" required> Razumem, da brisanja ni mogoče razveljaviti</label>
-    <button class="btn danger">Izbriši neaktivne</button></form>
+  <p>Trajno izbriše račune in vse podatke dijakov, ki se dolgo niso prijavili, npr. tistih, ki so šolo zapustili med letom. Najprej se pokažejo dijaki, ki ustrezajo, nato izbereš, koga izbrišeš. Učitelji in skrbniki ostanejo.</p>
+  <form class="inline" method="get" action="/admin/ciscenje">
+    <label for="days">Brez prijave dni</label><input id="days" type="number" name="dni" min="<%= MIN_DAYS %>" value="<%= days %>" required>
+    <button class="btn">Pokaži dijake</button></form>
+  <% if (asked && !valid) { %><p class="notice-warn" role="alert">Vpiši vsaj <%= MIN_DAYS %> dni.</p><% } %>
 </section>
+<% if (found) { %>
+<section class="block">
+  <% if (!found.all) { %><p class="empty">Ni dijakov, ki bi bili brez prijave <%= days %> dni ali več.</p>
+  <% } else { %>
+  <form method="post" action="/admin/ciscenje" class="clean-form">
+    <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="days" value="<%= days %>">
+    <h2>Dijaki brez prijave <%= days %> dni (<%= found.all %>)</h2>
+    <p class="dim">Označeni se izbrišejo. Dijaka, ki ga želiš obdržati, odznači.</p>
+    <div class="year-tools"><span class="dim" data-count><%= found.list.length %> od <%= found.list.length %> označenih</span><button type="button" class="year-pick" data-check="all">vsi</button><button type="button" class="year-pick" data-check="none">nobeden</button></div>
+    <div class="scroll"><table class="data">
+      <thead><tr><th class="l"><span class="sr">Izbris</span></th><th class="l">Dijak</th><th class="l">Razred</th><th class="l">Zadnja prijava</th></tr></thead>
+      <tbody><% found.list.forEach((u) => { %><tr>
+        <td class="l"><input type="checkbox" name="id" value="<%= u.id %>" id="c<%= u.id %>" checked><label class="sr" for="c<%= u.id %>">Izbriši <%= u.name %></label></td>
+        <td class="l"><strong><%= u.name %></strong><br><span class="dim"><%= u.username %></span></td>
+        <td class="l"><%= u.class_name || 'brez razreda' %></td>
+        <td class="l nw"><%= f.dateTime(u.last_login_at) %></td>
+      </tr><% }) %></tbody>
+    </table></div>
+    <% if (more) { %><p class="notice-warn">Prikazanih je prvih <%= found.list.length %> od <%= found.all %>. Ko jih izbrišeš, se pokažejo naslednji.</p><% } %>
+    <% if (fresh) { %><p class="dim">Trenutno stanje je bilo pred kratkim preneseno. Izbrisanih dijakov ne vrne niti obnovitev kopije.</p>
+    <% } else { %><p class="notice-warn">Najprej <a href="/admin/kopije">prenesi svežo varnostno kopijo</a>. Brez nje brisanja ni mogoče potrditi.</p><% } %>
+    <div class="stack">
+      <label><input type="checkbox" name="confirm" value="da" required> Razumem, da se izbrani dijaki trajno izbrišejo in da brisanja ni mogoče razveljaviti</label>
+      <button class="btn danger" data-delete>Izbriši izbrane dijake</button>
+    </div>
+  </form>
+  <% } %>
+</section>
+<script src="<%= asset('js/cleanup.js') %>"></script>
+<% } %>
 <%- include('../partials/foot') %>
