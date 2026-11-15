@@ -33,7 +33,7 @@ Artifact je vir vsebine, portal doda obliko in delovanje. Za vsako vajo:
 
 Skupna oblika vseh vaj je v `content/shell/` (`vaja.js`, `vaja.css`). `npm run import` iz tega zgradi `content/exercises/<id>.html` in `content/catalog.json`. Stran se med uvozom odpre v brskalniku z enako CSP kot v portalu.
 
-Pogledi učitelja in skrbnika (dogovor 11. 11. 2026): pred imenom dijaka je zaporedna številka (pregled razreda in Administracija > Uporabniki; pri Uporabnikih šteje vse vrstice čez strani, ne samo strani), zato je vidno, koliko dijakov je; pojasnilo pod tabelo razreda se prelomi čez celotno širino strani in nima svojega drsnika (12. 11. 2026 zamenjuje prvotni dogovor »ena vrstica, na ozkem zaslonu se premika vodoravno«); povezave »Razredi« nad naslovom razreda ni (pot nazaj je v glavi portala).
+Pogledi učitelja in skrbnika (dogovor 11. 11. 2026): pred imenom dijaka je zaporedna številka (pregled razreda in Administracija > Uporabniki; pri Uporabnikih šteje vse vrstice čez strani, ne samo strani), zato je vidno, koliko dijakov je; pojasnilo pod tabelo razreda se prelomi čez celotno širino strani in nima svojega drsnika (12. 11. 2026 zamenjuje prvotni dogovor »ena vrstica, na ozkem zaslonu se premika vodoravno«); povezave »Razredi« nad naslovom razreda ni (pot nazaj je v glavi portala). Stran dijaka (15. 11. 2026): časovnica odgovorov z izbiro obdobja in pojavnim oknom ter poravnani traki nalog (pravila v razdelku 9 načrta).
 
 Oblika vaje (dogovor 6. 11. 2026):
 - vstopna stran Pregled s karticami skupin (ikona, razlage) in kartico Vaje,
