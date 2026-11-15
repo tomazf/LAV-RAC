@@ -72,9 +72,20 @@ yearRouter.post('/', checkCsrf, async (req, res, next) => {
       }
       // Deleting the classes also removes their teachers, members and open exercises.
       await c.query('DELETE FROM classes WHERE id = ANY($1)', [leaving.map((x) => x.id)]);
+      // Names are unique, and a class moving up often takes the name of one that moves up too (R2A -> R3A while R3A -> R4A).
+      // So every moving class first gets a placeholder name, then the final names are set and checked against each other
+      // and against the classes that stay.
+      const stay = classes.filter((x) => !leaving.includes(x) && !moving.includes(x));
+      const names = new Map(moving.map((x) => [x.id, String(req.body[`name_${x.id}`] ?? '').trim().slice(0, 80) || nextName(x)]));
+      const key = (n) => n.trim().toLowerCase();
+      const used = new Set(stay.map((x) => key(x.name)));
+      for (const name of names.values()) {
+        if (used.has(key(name))) throw Object.assign(new Error('name taken'), { taken: name });
+        used.add(key(name));
+      }
+      for (const x of moving) await c.query('UPDATE classes SET name=$2 WHERE id=$1', [x.id, `~prehod ${x.id}`]);
       for (const x of moving) {
-        const name = String(req.body[`name_${x.id}`] ?? '').trim().slice(0, 80) || nextName(x);
-        await c.query('UPDATE classes SET year=$2, name=$3, past_years=$4 WHERE id=$1', [x.id, x.year + 1, name, lowerYears(x.year + 1)]);
+        await c.query('UPDATE classes SET year=$2, name=$3, past_years=$4 WHERE id=$1', [x.id, x.year + 1, names.get(x.id), lowerYears(x.year + 1)]);
         // The new year starts closed and without teachers; the admin assigns them, the teachers open the chapters.
         await c.query('DELETE FROM class_teachers WHERE class_id=$1', [x.id]);
         await c.query('DELETE FROM class_exercises WHERE class_id=$1', [x.id]);
@@ -85,5 +96,9 @@ yearRouter.post('/', checkCsrf, async (req, res, next) => {
     });
     await audit(req.user, ACTION_YEAR, `izbrisanih dijakov ${done.erased}, izbrisanih razredov ${done.deleted}, razredov v višjem letniku ${done.moved}, dijakov brez razreda ${done.unassigned}`);
     res.redirect(`/admin/razredi?sporocilo=${encodeURIComponent(`Šolsko leto je zaključeno. Izbrisanih dijakov: ${done.erased}. Razredov v višjem letniku: ${done.moved}. Dijakov brez razreda: ${done.unassigned}. Razredom zdaj dodeli učitelje.`)}`);
-  } catch (e) { next(e); }
+  } catch (e) {
+    // Nothing was changed: the transaction rolled back.
+    if (e.taken) return back(res, 'napaka', `Razred z imenom ${e.taken} že obstaja ali je ime podvojeno. Izberi drugo ime; nič ni bilo spremenjeno.`);
+    next(e);
+  }
 });
