@@ -1636,7 +1636,7 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 
 /* top: always visible progress */
 .lr-top{position:sticky;top:0;z-index:20;background:var(--lr-card);border-bottom:1px solid var(--lr-line);box-shadow:0 2px 10px #24143312}
-/* the header spans the whole page: »Vse vaje« on the left, the note and »Odjava« on the right, title, progress and search in the middle (agreed 10. and 13. 11. 2026) */
+/* the header spans the whole page: »Vse vaje« on the left, »Odjava« on the right, title, progress and search in the middle (agreed 10. and 13. 11. 2026) */
 .lr-top-in{display:flex;flex-wrap:nowrap;align-items:center;gap:8px 24px;padding:10px max(clamp(16px,2vw,32px),env(safe-area-inset-right,0px)) 10px max(clamp(16px,2vw,32px),env(safe-area-inset-left,0px))}
 .lr-top-mid{flex:1 1 auto;min-width:0;max-width:920px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px}
 .lr-top-in .lvs-right{flex:none;display:flex;align-items:center;gap:4px 16px;color:var(--lr-ink)}
@@ -1650,11 +1650,6 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
   .lr-top-in .lvs-right{grid-column:3;justify-self:end;margin-left:24px;position:relative;flex-wrap:nowrap;gap:2px 8px}
   /* the save message hangs under the header: it never pushes the search sideways */
   .lr-top-in .lvs-status{position:absolute;right:0;top:calc(100% + 16px);z-index:1;max-width:min(420px,60vw);padding:4px 10px;border-radius:8px;background:var(--lr-card);border:1px solid var(--lr-line);box-shadow:0 2px 8px #24143318;font-size:.84rem;text-align:right}
-  /* the note is only an icon here; its label stays in the tooltip */
-  .lr-top-in .lvn-btn{min-width:36px;min-height:36px;justify-content:center;border-radius:8px;color:var(--lr-mut)}
-  .lr-top-in .lvn-btn:hover{background:var(--lr-tile);color:var(--lr-acc)}
-  .lr-top-in .lvn-btn.lvn-has{color:var(--lr-acc)}
-  .lr-top-in .lvn-btn span{display:none}
   .lr-top-mid{grid-column:2;max-width:none;margin:0;flex-wrap:nowrap;gap:0 28px;padding:10px 0 11px}
   .lr-top-mid .lr-name{flex:0 1 auto}
   .lr-top-mid .lr-name b{font-size:1.2rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1666,8 +1661,6 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 .lr-top-in .lvs-back,.lr-top-in .lvs-out button{display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border-radius:8px;background:var(--lr-acc-soft);border:1.5px solid var(--lr-acc-soft);color:var(--lr-acc);font:700 .9rem var(--lr-fb);text-decoration:none;cursor:pointer;white-space:nowrap}
 .lr-top-in .lvs-back:hover,.lr-top-in .lvs-out button:hover{border-color:var(--lr-acc)}
 .lr-top .lvs-warn,.lr-top .lvs-warn a{color:var(--lr-half)}
-.lr-top .lvs-exnote{max-width:1400px}
-.lr-top .lvs-exnote:not([hidden]){margin:0 auto;padding-bottom:10px}
 .lr-name{display:flex;flex-direction:column;min-width:0;flex:1 1 220px;line-height:1.25}
 .lr-name b{font-size:1.05rem}
 .lr-name span{font-size:.85rem;color:var(--lr-mut)}
@@ -1886,8 +1879,6 @@ mark.lr-hit{scroll-margin-top:170px}
   .lr-top-in .lvs-back{order:-2}
   .lr-top-in .lvs-right{order:-1;margin-left:auto;gap:4px 10px}
   .lr-top-in .lvs-back,.lr-top-in .lvs-out button{padding:0 10px}
-  /* on the narrowest phones the note keeps only its icon (the button still says what it does) */
-  .lr-top-in .lvn-btn span{display:var(--lr-notelab,inline)}
   .lr-name{flex:1 1 100%}
   .lr-body{grid-template-columns:minmax(0,1fr);gap:16px;padding-top:14px}
   .lr-rail{display:none}
@@ -1900,7 +1891,6 @@ mark.lr-hit{scroll-margin-top:170px}
   .lr-shead>.lr-gi{display:none}
   .lr-right{margin-left:0}
 }
-@media (max-width:340px){.lr-top-in{--lr-notelab:none}}
 @media (prefers-reduced-motion:reduce){.lr *{transition:none!important}}
 
 /* long task statements with light markup (formatQ in vaja.js): paragraphs, bold key words, short lists */
