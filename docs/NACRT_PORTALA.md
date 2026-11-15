@@ -99,6 +99,7 @@ Strani: Uporabniki (filter, iskanje, vloge, izbris; dijakom brez razreda skrbnik
 - Seznami oseb (brez razreda, dijaki v razredu, skrbniški seznam uporabnikov) so v slovenski abecedi (č, š, ž za c, s, z), ker je zbirka podatkov ne uredi tako. Ime je »Ime Priimek«, priimek je zadnja beseda. Seznam brez razreda in rezultate razreda je mogoče razvrstiti tudi po priimku.
 - Seznam brez razreda kaže samo ime in priimek; UPN je v oblačku ob miški; iskanje je samo po imenu.
 - Rezultati razreda: tabela po vajah, izvoz CSV, podrobnosti dijaka (naloge, točke pred zadnjo ponastavitvijo, čas po straneh).
+- Podrobnosti dijaka (dogovor 15. 11. 2026): časovnica odgovorov ima obdobje 7 dni, 30 dni (privzeto), 90 dni, šolsko leto in vse (`?obdobje=`). Šolsko leto se šteje od 1. septembra. Do 92 dni je en stolpec en dan, daljše obdobje je po tednih (od ponedeljka do nedelje). Namigi se ne štejejo med odgovore, v pojavnem oknu pa so. Pojavno okno kaže dan, število odgovorov in namigov, uro prvega in zadnjega dogodka (samo pri dnevu), po vajah številke nalog in izide; podatki so iz `task_events`, časa reševanja po dnevih portal ne hrani. Okno deluje z miško, dotikom in tipkami (puščice, Home, End, Escape). Traki nalog pri vajah se začnejo povsod na istem mestu.
 - Dijak z odprto vajo po posodobitvi portala osveži stran.
 
 ## 10. Postavitev

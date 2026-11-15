@@ -1,11 +1,16 @@
 const TZ = 'Europe/Ljubljana';
 const dateFmt = new Intl.DateTimeFormat('sl-SI', { timeZone: TZ, day: 'numeric', month: 'numeric', year: 'numeric' });
 const dateTimeFmt = new Intl.DateTimeFormat('sl-SI', { timeZone: TZ, day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+const timeFmt = new Intl.DateTimeFormat('sl-SI', { timeZone: TZ, hour: '2-digit', minute: '2-digit' });
+// A day key ("2026-11-15") carries no time zone, so it is read at noon UTC and formatted in UTC.
+const dayLabelFmt = new Intl.DateTimeFormat('sl-SI', { timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'numeric', year: 'numeric' });
 export const plural = (n, [one, two, few, many]) => {
   const h = Math.abs(n) % 100;
   return h === 1 ? one : h === 2 ? two : h === 3 || h === 4 ? few : many;
 };
 export const count = (n, forms) => `${n} ${plural(n, forms)}`;
+export const ODGOVOROV = ['odgovor', 'odgovora', 'odgovori', 'odgovorov'];
+export const NAMIGOV = ['namig', 'namiga', 'namigi', 'namigov'];
 export const NALOG = ['naloga', 'nalogi', 'naloge', 'nalog'];
 export const TOCK = ['točka', 'točki', 'točke', 'točk'];
 export const DIJAKOV = ['dijak', 'dijaka', 'dijaki', 'dijakov'];
@@ -26,6 +31,8 @@ export function duration(sec) {
   return `${Math.floor(m / 60)} h ${m % 60} min`;
 }
 export const date = (d) => (d ? dateFmt.format(new Date(d)) : '');
+export const time = (d) => (d ? timeFmt.format(new Date(d)) : '');
+export const dayLabel = (key) => dayLabelFmt.format(new Date(`${key}T12:00:00Z`));
 export const dateTime = (d) => (d ? dateTimeFmt.format(new Date(d)) : '');
 export function ago(d) {
   if (!d) return 'še nikoli';

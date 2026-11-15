@@ -157,14 +157,33 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 .hn{color:var(--mut)}
 .hb{position:absolute;left:0;bottom:0;height:4px;background:var(--sig);border-radius:0 2px 2px 4px}
 .rs{position:absolute;top:0;right:3px;font-size:.68rem;color:var(--ink)}
-.bars{display:flex;align-items:flex-end;gap:2px;height:80px;border-bottom:1px solid var(--wire)}
-.bar{flex:1;background:var(--acc);border-radius:2px 2px 0 0;min-width:0}
+/* Timeline on the student page: every column is as tall as the chart, so it can be hovered above a short bar */
+.tl-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 18px;margin-bottom:8px}
+.tl-head h2{margin:0}
+.tl-range{display:flex;flex-wrap:wrap;gap:4px}
+.tl-range a{display:inline-flex;align-items:center;min-height:32px;padding:2px 12px;border:1px solid var(--line);border-radius:99px;color:var(--ink);text-decoration:none;font-size:.93rem}
+.tl-range a:hover{border-color:var(--acc)}
+.tl-range a[aria-current]{background:var(--acc);border-color:var(--acc);color:var(--onacc);font-weight:700}
+.bars{display:flex;align-items:stretch;height:96px;margin:0;padding:0;list-style:none;border-bottom:1px solid var(--wire);touch-action:pan-y;user-select:none}
+.bar-col{flex:1 1 0;min-width:0;display:flex;align-items:flex-end;padding:0 1px;border-radius:3px 3px 0 0}
+.bar-col.on{background:var(--tile)}
+.bar-col:focus{outline:none}
+.bar-col:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.bar{display:block;width:100%;background:var(--acc);border-radius:2px 2px 0 0;min-width:0}
+.bar-col.on .bar{background:var(--sig)}
 .bar.zero{background:var(--line)}
+.tl-tip-box{position:fixed;z-index:40;box-sizing:border-box;width:max-content;max-width:min(360px,calc(100vw - 16px));padding:10px 12px;background:var(--card);color:var(--ink);border:1px solid var(--wire);border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.2);font-size:.92rem;line-height:1.35;pointer-events:none}
+.tl-tip-box strong{display:block;text-transform:capitalize}
+.tl-tip-box p{margin:4px 0 0}
+.tl-tip-box ul{list-style:none;margin:6px 0 0;padding:0}
+.tl-tip-box li{padding:1px 0}
+.tl-tip-box .dim{color:var(--mut)}
+.tl-out{color:var(--mut)}
 .bars-axis{display:flex;justify-content:space-between;color:var(--mut);font-size:.88rem;margin-top:4px;gap:10px}
 .exd{border-top:1px solid var(--line)}
-.exd>summary{display:grid;grid-template-columns:minmax(220px,1fr) minmax(0,1.3fr) auto;gap:6px 16px;align-items:center;padding:10px 4px;cursor:pointer}
+.exd>summary{display:grid;grid-template-columns:minmax(220px,1fr) minmax(0,1.3fr) 13rem;gap:6px 16px;align-items:center;padding:10px 4px;cursor:pointer}
 .exd>summary .strip{margin:0}
-.exd-m{font-size:.93rem;color:var(--mut);white-space:nowrap}
+.exd-m{font-size:.93rem;color:var(--mut);white-space:nowrap;text-align:right}
 .exd-body{padding:6px 4px 20px}
 .exd-body h3{margin:14px 0 6px}
 .plain{margin:0;padding-left:18px}
@@ -184,6 +203,7 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
   .node{grid-template-columns:minmax(0,1fr)}
   .times{grid-column:1/-1;grid-row:2}
   .exd>summary{grid-template-columns:minmax(0,1fr)}
+  .exd-m{text-align:left}
   h1{font-size:1.6rem}
   .who-name{display:none}
 }

@@ -4,6 +4,7 @@ import { byId, classGroups, CHAPTERS, ensureClassRows, inYear, plannedIn, planne
 import { audit, many, one, q, tx } from '../db.js';
 import { portal } from '../portal.js';
 import { byName, bySurname, csvCell, dayKey, date, duration, num, pct } from '../format.js';
+import { buildTimeline, RANGES } from '../timeline.js';
 import { readTask, recordReset, summarize } from '../progress.js';
 import { cell, progressFor, rollup, strip } from '../stats.js';
 
@@ -275,12 +276,6 @@ teacherRouter.get('/razredi/:id/dijaki/:uid', loadClass, async (req, res, next) 
     const ids = new Set(list.map((e) => e.id));
     const events = (await many('SELECT * FROM task_events WHERE user_id=$1 ORDER BY created_at', [uid])).filter((ev) => ids.has(ev.exercise_id));
     const pages = await many('SELECT * FROM page_time WHERE user_id=$1', [uid]);
-    const days = new Map();
-    for (let i = 29; i >= 0; i--) days.set(dayKey(Date.now() - i * 864e5), 0);
-    for (const ev of events) {
-      const k = dayKey(ev.created_at);
-      if (days.has(k) && ev.kind !== 'hint') days.set(k, days.get(k) + 1);
-    }
     const exs = list.map((e) => {
       const c = cell(map, e.id);
       const finished = new Map();
@@ -290,6 +285,7 @@ teacherRouter.get('/razredi/:id/dijaki/:uid', loadClass, async (req, res, next) 
         visits: e.pages.map((p) => ({ ...p, row: pages.find((r) => r.exercise_id === e.id && r.page_id === p.id) })),
       };
     });
-    res.render('teacher/student', { cls: req.cls, m, exs, total: rollup(map, open.ids), maxPoints: open.maxPoints, maxTasks: open.maxTasks, days: [...days], CHAPTERS, duration });
+    const timeline = buildTimeline(events, exs, String(req.query.obdobje ?? ''), dayKey(Date.now()));
+    res.render('teacher/student', { cls: req.cls, m, exs, total: rollup(map, open.ids), maxPoints: open.maxPoints, maxTasks: open.maxTasks, timeline, RANGES, CHAPTERS, duration });
   } catch (e) { next(e); }
 });

@@ -10,6 +10,8 @@ import path from 'node:path';
 import pg from 'pg';
 import { chromium } from 'playwright';
 import { startMockOidc, TENANT } from './mock-oidc.js';
+import { dayKey, dayLabel } from '../src/format.js';
+import { addDays } from '../src/timeline.js';
 
 pg.types.setTypeParser(1700, Number);
 const DB = process.env.TEST_DATABASE_URL;
@@ -690,6 +692,104 @@ test('notes are gone: no icon, no slot, no route, no script, no table, and the p
   await a.waitForSelector('.lvs-bar');
   assert.equal(await a.locator('.lvn-btn, .lvn-text').count(), 0);
   await a.context().close();
+});
+test('the timeline on the student page: ranges, bars per day or week, a pop-up with what was solved, and aligned task strips', async () => {
+  const ana = (await sql(`SELECT id FROM users WHERE oid='u-ana'`))[0].id;
+  const titleOf = (id) => catalog.exercises.find((e) => e.id === id).title;
+  // Events on fixed days of the portal's calendar: three days ago (a busy day), 40 and 100 days ago (one answer each).
+  const at = (daysAgo, time) => `((date_trunc('day', now() AT TIME ZONE 'Europe/Ljubljana') - interval '${daysAgo} days' + time '${time}') AT TIME ZONE 'Europe/Ljubljana')`;
+  const rows = [
+    [3, '10:00', 1, 'hint', '1.1'], [3, '10:05', 1, 'wrong', '1.1'], [3, '10:20', 1, 'correct', '1.1'], [3, '12:30', 0, 'partial', '1.1'], [3, '12:31', 2, 'solution', '3.3'],
+    [40, '09:00', 0, 'correct', '1.1'], [100, '09:00', 0, 'correct', '1.1'],
+  ];
+  const ids = [];
+  for (const [d, time, task, kind, ex] of rows) {
+    ids.push((await sql(`INSERT INTO task_events(user_id, exercise_id, attempt, task_index, kind, points, created_at) VALUES ($1,$2,1,$3,$4,0,${at(d, time)}) RETURNING id`, [ana, ex, task, kind]))[0].id);
+  }
+  const today = dayKey(Date.now());
+  const threeAgo = addDays(today, -3);
+  const t = await login('Tomaž Učitelj');
+  const url = `${APP}/ucitelj/razredi/${classId}/dijaki/${ana}`;
+  const info = async () => t.evaluate(() => ({
+    h2: document.querySelector('.tl h2').textContent, cols: document.querySelectorAll('.bar-col').length, axis: document.querySelector('.bars-axis').textContent,
+    current: [...document.querySelectorAll('.tl-range [aria-current]')].map((a) => a.textContent), links: [...document.querySelectorAll('.tl-range a')].map((a) => a.textContent),
+    labels: [...document.querySelectorAll('.bar-col')].map((c) => c.getAttribute('aria-label')),
+  }));
+  // 30 days is the default, and a nonsense range falls back to it
+  for (const q of ['', '?obdobje=junk', '?obdobje=30']) {
+    await t.goto(url + q);
+    const i = await info();
+    assert.deepEqual([i.h2, i.cols, i.current, i.links], ['Odgovori v zadnjih 30 dneh', 30, ['30 dni'], ['7 dni', '30 dni', '90 dni', 'Šolsko leto', 'Vse']]);
+  }
+  await t.goto(url);
+  let i = await info();
+  assert.ok(i.labels.some((l) => l.startsWith(`${dayLabel(threeAgo)}: 4 odgovori, 1 namig. vaja 1.1, naloge 1, 2. vaja 3.3, naloga 3. pravilno 1, pravilno z namigom 1, napačno 1, ogledana rešitev 1`)), i.labels.join('\n'));
+  assert.equal(i.labels.filter((l) => l.includes(dayLabel(addDays(today, -40)))).length, 0, '40 days ago is outside 30 days');
+  // the other ranges
+  await t.goto(`${url}?obdobje=7`);
+  i = await info();
+  assert.deepEqual([i.h2, i.cols, i.current], ['Odgovori v zadnjih 7 dneh', 7, ['7 dni']]);
+  await t.goto(`${url}?obdobje=90`);
+  i = await info();
+  assert.deepEqual([i.h2, i.cols], ['Odgovori v zadnjih 90 dneh', 90]);
+  assert.ok(i.labels.some((l) => l.startsWith(`${dayLabel(addDays(today, -40))}: 1 odgovor. vaja 1.1, naloga 1. pravilno 1`)));
+  assert.match(i.axis, /največ \d+ na dan/);
+  await t.goto(`${url}?obdobje=leto`);
+  i = await info();
+  assert.match(i.h2, /^Odgovori v šolskem letu \d{4}\/\d{2}$/);
+  assert.deepEqual(i.current, ['Šolsko leto']);
+  await t.goto(`${url}?obdobje=vse`);
+  i = await info();
+  // 100 days back is longer than 92, so each bar is a week
+  assert.equal(i.h2, 'Odgovori od začetka');
+  assert.ok(i.cols >= 15 && i.cols <= 16, `${i.cols} weeks`);
+  assert.match(i.axis, /na teden/);
+  assert.ok(i.labels.some((l) => /^\d+\. \d+\. \d{4} – \d+\. \d+\. \d{4}: 1 odgovor\. vaja 1\.1, naloga 1\. pravilno 1$/.test(l)), 'the week of the oldest answer');
+  assert.ok(i.labels.every((l) => !/(ponedeljek|torek|sreda|četrtek|petek|sobota|nedelja),/.test(l)), 'weeks are named by their dates');
+
+  // the pop-up: hover anywhere above a bar
+  await t.goto(url);
+  assert.equal(await t.locator('.bar-col[title]').count(), 0, 'no plain tooltip once the script runs');
+  const box = await t.locator('.bars').boundingBox();
+  const colX = (n, back) => box.x + box.width * ((n - 1 - back + 0.5) / n);
+  await t.mouse.move(colX(30, 3), box.y + 6);
+  await t.waitForSelector('.tl-tip-box:not([hidden])');
+  const tip = await t.locator('.tl-tip-box').innerText();
+  for (const part of [dayLabel(threeAgo), '4 odgovori, 1 namig', '10:00–12:31', titleOf('1.1'), 'naloge 1, 2', titleOf('3.3'), 'naloga 3', 'pravilno 1', 'napačno 1', 'ogledana rešitev 1']) {
+    assert.ok(tip.toLowerCase().includes(part.toLowerCase()), `pop-up has "${part}": ${tip}`);
+  }
+  assert.equal(await t.locator('.bar-col.on').count(), 1);
+  const place = await t.evaluate(() => { const r = document.querySelector('.tl-tip-box').getBoundingClientRect(); return [r.left >= 0, r.right <= innerWidth, r.top >= 0]; });
+  assert.deepEqual(place, [true, true, true]);
+  // a day without answers says so, and the pop-up follows the pointer
+  await t.mouse.move(colX(30, 5), box.y + 6);
+  assert.match(await t.locator('.tl-tip-box').innerText(), /Brez odgovorov/i);
+  await t.mouse.move(box.x + 5, box.y - 80);
+  assert.equal(await t.locator('.tl-tip-box').isHidden(), true);
+  // the keyboard: one tab stop, arrows walk back day by day, Escape closes
+  await t.locator('.bar-col').last().focus();
+  assert.equal(await t.locator('.bar-col[tabindex="0"]').count(), 1);
+  for (let k = 0; k < 3; k++) await t.keyboard.press('ArrowLeft');
+  assert.ok((await t.locator('.tl-tip-box').innerText()).includes(titleOf('3.3')));
+  assert.equal(await t.locator('.bar-col[tabindex="0"]').count(), 1);
+  await t.keyboard.press('Escape');
+  assert.equal(await t.locator('.tl-tip-box').isHidden(), true);
+  await t.keyboard.press('Home');
+  assert.ok((await t.locator('.tl-tip-box').innerText()).length > 0);
+  // the range buttons are plain links that keep the place on the page
+  await t.locator('.tl-range a', { hasText: '90 dni' }).click();
+  await t.waitForURL(/obdobje=90#casovnica$/);
+  assert.equal((await info()).cols, 90);
+
+  // the strips of task cells start at the same place in every exercise, whatever the text on the right says
+  await t.goto(url);
+  const rowsInfo = await t.evaluate(() => [...document.querySelectorAll('.exd > summary')].map((s) => ({ left: Math.round(s.querySelector('.strip').getBoundingClientRect().left * 10) / 10, text: s.querySelector('.exd-m').textContent })));
+  assert.ok(rowsInfo.length >= 9);
+  assert.ok(new Set(rowsInfo.map((r) => r.text.length)).size > 1, 'the texts on the right differ in length');
+  assert.deepEqual([...new Set(rowsInfo.map((r) => r.left))].length, 1, JSON.stringify(rowsInfo));
+
+  await sql('DELETE FROM task_events WHERE id = ANY($1)', [ids]);
+  await t.context().close();
 });
 test('browsers load new static files right after an update', async () => {
   const ctx = await browser.newContext();

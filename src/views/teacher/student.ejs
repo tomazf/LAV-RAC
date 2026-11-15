@@ -1,5 +1,5 @@
 <%- include('../partials/head', { pageTitle: m.name, mainClass: 'wide' }) %>
-<% const f = fmt; const peak = Math.max(1, ...days.map((d) => d[1])); %>
+<% const f = fmt; const tl = timeline; const base = '/ucitelj/razredi/' + cls.id + '/dijaki/' + m.id; %>
 <p class="crumbs"><a href="/ucitelj">Razredi</a> / <a href="/ucitelj/razredi/<%= cls.id %>"><%= cls.name %></a></p>
 <div class="title-row"><div><h1><%= m.name %></h1><p class="dim"><%= m.email || m.username %></p></div>
   <details class="danger-zone right"><summary>Odstrani iz razreda</summary>
@@ -14,12 +14,22 @@
   <div><dt>Naloge</dt><dd><%= f.duration(total.time.Naloge) %></dd></div>
   <div><dt>Zadnja aktivnost</dt><dd><%= f.ago(total.last) %></dd></div>
 </dl>
-<section class="block">
-  <h2>Odgovori v zadnjih 30 dneh</h2>
-  <div class="bars" role="img" aria-label="Število odgovorov po dnevih v zadnjih 30 dneh">
-    <% days.forEach(([d, n]) => { %><span class="bar <%= n ? '' : 'zero' %>" style="height:<%= n ? Math.max(8, Math.round(n / peak * 100)) : 3 %>%" title="<%= f.date(d) %>: <%= n %>"></span><% }) %>
+<section class="block tl" id="casovnica">
+  <div class="tl-head">
+    <h2><%= tl.title %></h2>
+    <nav class="tl-range" aria-label="Obdobje časovnice"><% RANGES.forEach((r) => { %><a href="<%= base %>?obdobje=<%= r.id %>#casovnica"<% if (r.id === tl.range.id) { %> aria-current="true"<% } %>><%= r.label %></a><% }) %></nav>
   </div>
-  <div class="bars-axis"><span><%= f.date(days[0][0]) %></span><span>največ <%= peak %> na dan</span><span><%= f.date(days[days.length - 1][0]) %></span></div>
+  <ol class="bars" aria-label="<%= tl.title %>, po <%= tl.weekly ? 'tednih' : 'dnevih' %>">
+    <% tl.buckets.forEach((b, i) => { %><li class="bar-col" tabindex="<%= i === tl.buckets.length - 1 ? 0 : -1 %>" aria-label="<%= b.aria %>" title="<%= b.short %>">
+      <span class="bar <%= b.answers ? '' : 'zero' %>" style="height:<%= b.height %>%"></span>
+      <template class="tl-tip"><strong><%= b.label %></strong>
+        <p class="tl-sum"><%= b.head || 'Brez odgovorov' %><% if (b.hours) { %> <span class="dim">· <%= b.hours %></span><% } %></p>
+        <% if (b.exs.length) { %><ul><% b.exs.forEach((e) => { %><li><b><%= e.no %></b> <%= e.title %> <span class="dim">· <%= e.text %></span></li><% }) %></ul><% } %>
+        <% if (b.outcomes.length) { %><p class="tl-out"><%= b.outcomes.map((o) => o.text + ' ' + o.n).join(' · ') %></p><% } %>
+      </template>
+    </li><% }) %>
+  </ol>
+  <div class="bars-axis"><span><%= f.date(tl.buckets[0].start) %></span><span>največ <%= tl.peak %> na <%= tl.unit %><% if (tl.weekly) { %> (stolpec je en teden)<% } %></span><span><%= f.date(tl.to) %></span></div>
 </section>
 <section class="block">
   <h2>Vaje</h2>
@@ -49,4 +59,5 @@
   <% }) %>
   <%- include('../partials/legend') %>
 </section>
+<script src="<%= asset('js/timeline.js') %>"></script>
 <%- include('../partials/foot') %>
