@@ -2,7 +2,7 @@
 // moves up a year. Preview first, a fresh backup, a typed confirmation, then everything in one transaction.
 import express from 'express';
 import { checkCsrf, isAdmin } from '../auth.js';
-import { finalYear, lowerYears, yearsOn } from '../catalog.js';
+import { finalYear, lowerYears, YEARS, yearsOn } from '../catalog.js';
 import { audit, eraseUser, many, one, tx } from '../db.js';
 import { recentBackup } from '../backup.js';
 import { byName } from '../format.js';
@@ -27,11 +27,16 @@ async function plan() {
     c.teachers = teachers.filter((t) => t.class_id === c.id).sort(byName).map((t) => t.name);
     c.next = c.year ? nextName(c) : c.name;
   }
+  const stay = classes.filter((c) => !c.year || c.year > finalYear);
+  const moving = classes.filter((c) => c.year && c.year < finalYear).sort((a, b) => b.year - a.year || byName(a, b));
+  // The proposed name may already be a class that stays; the server refuses it, the preview says so beforehand.
+  for (const c of moving) c.clash = stay.some((x) => x.name.trim().toLowerCase() === c.next.trim().toLowerCase());
   return {
     leaving: classes.filter((c) => c.year === finalYear),
-    // Higher years first, so the list reads in the order the classes move.
-    moving: classes.filter((c) => c.year && c.year < finalYear).sort((a, b) => b.year - a.year),
-    other: classes.filter((c) => !c.year || c.year > finalYear),
+    moving,
+    other: stay,
+    // One section per year, in the order the classes move: the final year leaves first, then each year moves up.
+    sections: YEARS.map((y) => y.year).sort((a, b) => b - a).map((year) => ({ year, last: year === finalYear, classes: classes.filter((c) => c.year === year) })),
   };
 }
 
@@ -59,6 +64,8 @@ yearRouter.post('/', checkCsrf, async (req, res, next) => {
     const erase = ids(req.body.erase);
     const shownMoving = ids(req.body.moving);
     const keep = ids(req.body.keep);
+    // Erasing is for good, so it has its own tick; the preview names the people it concerns.
+    if ([...erase].some((id) => shownLeaving.has(id)) && req.body.ack !== '1') return back(res, 'napaka', 'Potrdi, da se označeni dijaki trajno izbrišejo.');
     const done = await tx(async (c) => {
       const classes = (await c.query('SELECT * FROM classes ORDER BY id FOR UPDATE')).rows;
       const leaving = classes.filter((x) => x.year === finalYear);

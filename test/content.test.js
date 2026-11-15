@@ -1025,16 +1025,65 @@ test('a class works on its year; lower years open for revision; the admin closes
   assert.equal(await r2card.locator('input[type=checkbox]:checked').count(), 2);
   assert.equal(await a.inputValue(`#name_${r3}`), 'R4A');
   assert.equal(await a.inputValue(`#name_${r2}`), 'R3A');
+  // one section per year, in the order the classes move, each with its own classes
+  assert.deepEqual(await a.locator('h2.year-h').allTextContents(), ['4. letnik: izbris', '3. → 4. letnik', '2. → 3. letnik']);
+  assert.deepEqual(await a.locator('.year-sec').evaluateAll((l) => l.map((s) => [...s.querySelectorAll('.year-card h3')].map((h) => h.textContent.replace('→', '').trim()))), [['R4A'], ['R3A'], ['R2A']]);
+  // before confirming, the preview names who is still in the final year and who is left without a class
+  const erase = a.locator('[data-sum=erase]'), free = a.locator('[data-sum=free]'), ack = a.locator('[data-ack] input');
+  assert.match((await erase.textContent()).replace(/\s+/g, ' '), /V razredih 4\. letnika so še dijaki \(1\): Daša Horvat\. Ob potrditvi se trajno izbrišejo/);
+  assert.equal(await free.isVisible(), false);
+  assert.equal(await ack.getAttribute('required'), '');
+  await r2card.locator('button:text-is("nobeden")').click();
+  assert.match((await free.textContent()).replace(/\s+/g, ' '), /ostanejo brez razreda \(2\): Ana Kovač, Bor Novak\./);
+  await r2card.locator('button:text-is("vsi")').click();
+  assert.equal(await free.isVisible(), false);
+  await a.locator('.year-card', { hasText: 'R4A' }).locator('button:text-is("nobeden")').click();
+  assert.equal(await erase.isVisible(), false); // nobody is erased, so there is nothing to confirm
+  assert.equal(await ack.isVisible(), false);
+  assert.match((await free.textContent()).replace(/\s+/g, ' '), /ostanejo brez razreda \(1\): Daša Horvat\./);
+  await a.locator('.year-card', { hasText: 'R4A' }).locator('button:text-is("vsi")').click();
+  assert.equal(await ack.isVisible(), true);
   await a.fill('#potrdi', 'PREHOD');
+  await ack.check();
   await a.click('text=Zaključi šolsko leto');
   await a.waitForLoadState();
   assert.match(await a.textContent('[role=alert]'), /Najprej prenesi svežo varnostno kopijo/);
   assert.ok(await uid('u-dasa'));
   const csrf = await a.inputValue('input[name=_csrf]');
   assert.equal((await a.request.post(`${APP}/admin/kopije/prenesi`, { form: { _csrf: csrf } })).status(), 200);
+  // erasing needs its own tick, also when the form is sent by hand
+  const dasa = await uid('u-dasa');
+  const noAck = await a.request.post(`${APP}/admin/solsko-leto`, { form: { _csrf: csrf, potrdi: 'PREHOD', leaving: String(dasa), erase: String(dasa) } });
+  assert.match(decodeURIComponent(noAck.url()), /Potrdi, da se označeni dijaki trajno izbrišejo/);
+  assert.ok(await uid('u-dasa'));
+  // a new name that a class staying behind already has is warned about in the preview and refused, nothing changes
+  await db.query(`INSERT INTO classes(name) VALUES ('R3Q')`);
+  await db.query(`UPDATE classes SET name='R2Q' WHERE id=$1`, [r2]);
+  await a.goto(`${APP}/admin/solsko-leto`);
+  assert.match(await a.locator('.year-card', { hasText: 'R2Q' }).locator('.year-clash').textContent(), /Razred z imenom R3Q že obstaja in ostane/);
+  await a.fill('#potrdi', 'PREHOD');
+  await a.check('[data-ack] input');
+  await a.click('text=Zaključi šolsko leto');
+  await a.waitForLoadState();
+  assert.match(await a.textContent('[role=alert]'), /Razred z imenom R3Q že obstaja ali je ime podvojeno/);
+  // two classes cannot get the same new name either
+  await a.goto(`${APP}/admin/solsko-leto`);
+  await a.fill(`#name_${r2}`, 'Isto');
+  await a.fill(`#name_${r3}`, ' isto ');
+  await a.fill('#potrdi', 'PREHOD');
+  await a.check('[data-ack] input');
+  await a.click('text=Zaključi šolsko leto');
+  await a.waitForLoadState();
+  assert.match(await a.textContent('[role=alert]'), /Razred z imenom isto že obstaja ali je ime podvojeno/);
+  assert.deepEqual((await db.query('SELECT name, year FROM classes ORDER BY name')).rows, [{ name: 'R2Q', year: 2 }, { name: 'R3A', year: 3 }, { name: 'R3Q', year: null }, { name: 'R4A', year: 4 }]);
+  assert.ok(await uid('u-dasa'));
+  await db.query(`DELETE FROM classes WHERE name='R3Q'`);
+  await db.query(`UPDATE classes SET name='R2A' WHERE id=$1`, [r2]);
   await a.goto(`${APP}/admin/solsko-leto`);
   await a.locator('.year-card', { hasText: 'R2A' }).locator('label', { hasText: 'Bor Novak' }).locator('input[type=checkbox]').uncheck();
+  assert.match((await free.textContent()).replace(/\s+/g, ' '), /ostanejo brez razreda \(1\): Bor Novak\./);
   await a.fill('#potrdi', 'prehod');
+  await a.check('[data-ack] input');
   await a.click('text=Zaključi šolsko leto');
   await a.waitForURL(/admin\/razredi/);
   assert.match(await a.textContent('.notice'), /Izbrisanih dijakov: 1\. Razredov v višjem letniku: 2\. Dijakov brez razreda: 1\./);
@@ -1060,6 +1109,7 @@ test('a class works on its year; lower years open for revision; the admin closes
   // a second run so soon needs an extra confirmation
   await a.goto(`${APP}/admin/solsko-leto`);
   await a.fill('#potrdi', 'PREHOD');
+  await a.check('[data-ack] input');
   await a.click('text=Zaključi šolsko leto');
   await a.waitForLoadState();
   assert.match(await a.textContent('[role=alert]'), /pred kratkim že zaključeno/);
