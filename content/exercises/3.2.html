@@ -101,11 +101,12 @@
     //   self: no points, ticked by the student   nobtn: no »Kopiraj kodo« / »Odpri Programiz«
     //   inline: the blanks (___) are typed in the code (same: all as wide as the widest)   cols: the blanks in two columns
     //   list: lines »- …« of the question become bullets   example: the solution is open from the start   remove: leave the list
+    //   exact: the printed output is compared with the letter case and the spaces kept (otherwise both are ignored)
     prepare(list, levels, o) {
       const ref = new Map();
       levels.forEach((L) => list.filter((t) => t.lv === L.tag).forEach((t, k) => ref.set(L.tag + (k + 1), t)));
       const get = (r) => { const t = ref.get(r); if (!t) throw new Error('LavRac.prepare: no task ' + r); return t; };
-      ['self', 'nobtn', 'inline', 'same', 'cols', 'list', 'example'].forEach((flag) => (o[flag] || []).forEach((r) => { get(r)[flag] = true; }));
+      ['self', 'nobtn', 'inline', 'same', 'cols', 'list', 'example', 'exact'].forEach((flag) => (o[flag] || []).forEach((r) => { get(r)[flag] = true; }));
       (o.remove || []).map(get).forEach((t) => { list.splice(list.indexOf(t), 1); });
     },
     // The artifact's own memory of what was typed and how many hints are open.
@@ -2413,7 +2414,7 @@ function norm(s, o){
   return x;
 }
 function matchBlank(val, b){ const v = norm(val,b); return b.acc.some(a => norm(a,b) === v); }
-const normOut = s => String(s).replace(/\r/g,"").split("\n").map(l=>l.replace(/\s+$/,"")).join("\n").replace(/\n+$/,"");
+const normOut = (s, t) => { const x = String(s).replace(/\r/g,"").split("\n").map(l => t && t.exact ? l.replace(/\s+$/,"") : l.replace(/\s+/g," ").trim().toLowerCase()); return x.join("\n").replace(t && t.exact ? /\n+$/ : /^\n+|\n+$/g,""); };
 const srcLabel = s => { const m = /^M(\d\d)(\d)\/(\d+)$/.exec(s); return m ? `Matura 20${m[1]} · ${m[2]==="1"?"spomladi":"jeseni"} · ${m[3]}. nal.` : s; };
 const ptsLabel = p => p===1 ? "1 točka" : p===2 ? "2 točki" : (p<5 ? p+" točke" : p+" točk");
 
@@ -2545,9 +2546,9 @@ function wire(el,t){
     }
     if(t.type==="output" || t.type==="code"){
       if(!out.value.trim()){ show(false, t.type==="code" ? "Zaženi program in prilepi njegov izpis." : "Napiši izpis."); return; }
-      ok = normOut(out.value)===normOut(t.expected);
+      ok = normOut(out.value,t)===normOut(t.expected,t);
       out.classList.remove("right","wrong"); out.classList.add(ok?"right":"wrong");
-      if(!ok){ const a=normOut(out.value).split("\n"), b=normOut(t.expected).split("\n"); const k=b.findIndex((l,j)=>a[j]!==l); msg = k<0 ? "Izpis ima preveč vrstic." : `Razlika v ${k+1}. vrstici.`; }
+      if(!ok){ const a=normOut(out.value,t).split("\n"), b=normOut(t.expected,t).split("\n"); const k=b.findIndex((l,j)=>a[j]!==l); msg = k<0 ? "Izpis ima preveč vrstic." : `Razlika v ${k+1}. vrstici.`; }
     }
     if(!ok && t.type==="blanks" && t.b.every((_,k)=>!$(`#b-${t.id}-${k}`,el).value.trim())){ show(false,"Najprej vpiši odgovor."); return; }
     if(!ok && /^Razvrsti/.test(msg)){ show(false,msg); return; }

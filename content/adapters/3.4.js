@@ -2,7 +2,7 @@
 // answers typed as program output), one answer per task, three theory groups, the operator set split in two (E and F)
 // with the matura revision set moved after it as "Ponavljanje" (agreed 8. 11. 2026), and no mention of laboratory exercises.
 
-import { statements, QTEXT } from './qformat.js';
+import { statements, QTEXT, outputCompare } from './qformat.js';
 const ICONS = {
   tipi: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="8" width="12" height="8" rx="1.5"/><rect x="6" y="20" width="24" height="8" rx="1.5"/><rect x="6" y="32" width="36" height="8" rx="1.5" class="fill" opacity=".35"/></svg>',
   znaki: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M5 36L15 10l10 26M9.5 27h11"/><circle cx="35" cy="30" r="5"/><path d="M40 25v11"/></svg>',
@@ -81,6 +81,8 @@ export default {
   --seen:var(--lr-seen);--seen-soft:var(--lr-seen-bg);--f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}
   body{padding-left:0;padding-right:0}`,
   patches: [
+    // The typed output is compared without regard to letter case and repeated spaces (agreed 16. 11. 2026).
+    ...outputCompare(true),
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
     // Set E is split: its first 23 tasks stay in E, the rest (programs and logical expressions) form F, and the matura
     // revision set becomes G, graded among the others "Ponavljanje" (agreed 8. 11. 2026).

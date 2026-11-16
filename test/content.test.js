@@ -497,9 +497,14 @@ test('the rail: counters at the right edge, a pie of states per set, text hangs 
   let wrapped = false;
   for (const [id, letter] of [['2.1', 'E'], ['2.2', 'G'], ['2.3', 'J'], ['3.1', 'F'], ['3.2', 'H'], ['3.3', 'G'], ['3.4', 'H']]) {
     const ex = catalog.exercises.find((e) => e.id === id);
+    // The theory is seen before the page starts: the shell saves its own state when a page is left, which can overwrite a
+    // value written afterwards (a reload right after writing it made this test fail now and then).
+    await p.addInitScript(([name, seen]) => {
+      if (!location.pathname.endsWith('/' + name)) return;
+      const key = 'lavrac_local_' + location.pathname;
+      try { localStorage.setItem(key, JSON.stringify({ ...(JSON.parse(localStorage.getItem(key) || 'null') || { t: {} }), seen })); } catch (e) { /* storage blocked */ }
+    }, [`${id}.html`, ex.gate]);
     await p.goto(pathToFileURL(path.join(root, 'content/exercises', `${id}.html`)).href);
-    await p.evaluate((seen) => localStorage.setItem('lavrac_local_' + location.pathname, JSON.stringify({ t: {}, seen })), ex.gate);
-    await p.reload();
     await p.waitForSelector('.lr-rail');
     // the sets are lettered A, B, C … and Za doma takes the next letter
     const tags = await p.locator('.lr-rail a.lr-gated .lr-tg').allTextContents();
@@ -1349,6 +1354,41 @@ test('3.1: program output is the answer and stays after a reload; an empty blank
   await go(a, 'doma');
   assert.deepEqual((await a.locator('.page.on .tnum').allTextContents()).map((t) => t.replace(/\s+/g, ' ')),
     ['D1. Namesti JDK in preveri različico', 'D2. Isti program, različni sistemi', 'D3. Prevajalnik in tolmač s svojimi besedami', 'D4. Shema na papir']);
+  await a.context().close();
+  assert.deepEqual(errors, []);
+});
+
+// Typed program output (agreed 16. 11. 2026): letter case and repeated or surrounding spaces do not matter, a different
+// word or a space inside a word still does. The card is found by its text; each card takes one answer.
+test('3.1 to 3.5: typed program output ignores letter case and repeated spaces, nothing else', async () => {
+  const a = await login('Sara Skrbnik');
+  const find = (snippet) => a.evaluate((snip) => {
+    for (const pg of document.querySelectorAll('.page')) {
+      const k = [...pg.querySelectorAll('.lr-task')].findIndex((c) => c.querySelector('textarea.out') && c.textContent.includes(snip));
+      if (k >= 0) return `${pg.id}/${k + 1}`;
+    }
+    return null;
+  }, snippet);
+  const cases = [
+    // [exercise, a piece of the card's text, what the student types, the result]
+    ['3.1', 'java Argumenti Ana 17', 'ŠTEVILO ARGUMENTOV:  3\n0: ana\n1:   17\n  2: novo   MESTO \n\n', 'ok'],
+    ['3.3', 'Namesto vnosa s Scannerjem so vrednosti zapisane v kodi.', 'ANA  2008   1.68 b  False\n2009\n2009ana\n', 'ok'],
+    ['3.3', 'Vrstice napiši natanko tako, kot se izpišejo.', 'ABC D E', 'bad'], // a line break is not a space
+    ['3.4', "(char)((int)('A') + j)", '  C1   =  d', 'ok'],
+    ['3.4', 'int x = 2000000000 * 3;', '1705 032704', 'bad'],
+    ['3.5', 'if (x > 5);', '\n\nVELIK  ', 'ok'],
+    ['3.5', "char ch = 'b';", 'bb', 'bad'],
+  ];
+  for (const [id, snippet, typed, want] of cases) {
+    await a.goto(`${APP}/vaje/${id}`);
+    await a.waitForSelector('.lr-task', { state: 'attached' });
+    const hash = await find(snippet);
+    assert.ok(hash, `${id}: ${snippet}`);
+    await go(a, hash);
+    await card(a).locator('textarea.out').fill(typed);
+    await card(a).locator('.lr-check').click();
+    assert.equal(await card(a).getAttribute('data-lr'), want, `${id} ${hash}: ${JSON.stringify(typed)}`);
+  }
   await a.context().close();
   assert.deepEqual(errors, []);
 });

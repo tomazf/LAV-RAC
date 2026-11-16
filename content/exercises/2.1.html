@@ -101,11 +101,12 @@
     //   self: no points, ticked by the student   nobtn: no »Kopiraj kodo« / »Odpri Programiz«
     //   inline: the blanks (___) are typed in the code (same: all as wide as the widest)   cols: the blanks in two columns
     //   list: lines »- …« of the question become bullets   example: the solution is open from the start   remove: leave the list
+    //   exact: the printed output is compared with the letter case and the spaces kept (otherwise both are ignored)
     prepare(list, levels, o) {
       const ref = new Map();
       levels.forEach((L) => list.filter((t) => t.lv === L.tag).forEach((t, k) => ref.set(L.tag + (k + 1), t)));
       const get = (r) => { const t = ref.get(r); if (!t) throw new Error('LavRac.prepare: no task ' + r); return t; };
-      ['self', 'nobtn', 'inline', 'same', 'cols', 'list', 'example'].forEach((flag) => (o[flag] || []).forEach((r) => { get(r)[flag] = true; }));
+      ['self', 'nobtn', 'inline', 'same', 'cols', 'list', 'example', 'exact'].forEach((flag) => (o[flag] || []).forEach((r) => { get(r)[flag] = true; }));
       (o.remove || []).map(get).forEach((t) => { list.splice(list.indexOf(t), 1); });
     },
     // The artifact's own memory of what was typed and how many hints are open.
