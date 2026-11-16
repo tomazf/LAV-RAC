@@ -163,8 +163,8 @@ test('parts without exercises wait for staff; a closed class shows a clear messa
   await a.goto(`${APP}/admin/vaje`);
   // every part has its first chapter now (LAV-RAČ4 since 4.1, 11. 11. 2026), so no whole part waits
   assert.deepEqual(await a.locator('.group.planned h2').allTextContents(), []);
-  // the empty 4th chapter of LAV-RAČ2 has its place
-  assert.deepEqual(await a.locator('.planned-ex td:first-child').allTextContents(), ['4 V pripravi']);
+  // the chapters that wait for their artifact have their places (content/sources.json "planned", 17. 11. 2026)
+  assert.deepEqual(await a.locator('.planned-ex td:first-child').allTextContents(), ['4 V pripravi', '6 V pripravi', '8 V pripravi', '9 V pripravi', '10 V pripravi', '4 V pripravi', '5 V pripravi', '6 V pripravi', '7 V pripravi']);
   await a.goto(`${APP}/admin/razredi`);
   // a class needs its year, also when the form is sent by hand
   const csrf = await a.inputValue('form[action="/admin/razredi"] input[name=_csrf]');
@@ -196,7 +196,7 @@ test('parts without exercises wait for staff; a closed class shows a clear messa
   assert.match(await s.textContent('main'), /Številski sistemi, kodiranje in pariteta/);
   assert.doesNotMatch(await s.textContent('main'), /V pripravi/);
   await a.goto(`${classUrl}/vaje`);
-  assert.equal(await a.locator('.planned-ex').count(), 1);
+  assert.equal(await a.locator('.planned-ex').count(), 2); // the class of the 2nd year: places 4 and 6 of LAV-RAČ2
   // chapters count from 1 within each year; the technical id stays in the address
   assert.equal(await s.locator('h3:has-text("Številski sistemi") .ex-no').textContent(), '1');
   assert.match(await s.textContent('main a.btn.big'), /^Začni vajo 1: Številski sistemi/);

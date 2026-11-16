@@ -154,6 +154,8 @@ Ime, naslov prijavne strani, opis in šola so v `content/portal.json`, vsebina v
 
 ## Razvoj in preizkusi
 
+Nova in spremenjena poglavja (LAV-RAČ): [`docs/DODAJANJE_POGLAVIJ.md`](docs/DODAJANJE_POGLAVIJ.md).
+
 ```bash
 npm ci
 npx playwright install chromium

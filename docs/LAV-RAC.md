@@ -4,16 +4,45 @@ Splošni dogovor je v `NACRT_PORTALA.md`. Tukaj je samo, kar velja za ta portal.
 
 ## Stanje
 
-Postavljena je osnova: prijava, vloge, oblika, vstopna stran in struktura z deli LAV-RAČ2, LAV-RAČ3 in LAV-RAČ4. Uvožene so vaje 2.1 Številski sistemi, kodiranje in pariteta, 2.2 Logične funkcije, 2.3 Arhitektura računalniških sistemov, 3.1 Java in delovanje JVM (LAV-RAČ3, 1. poglavje), 3.2 Algoritmi in diagrami poteka (LAV-RAČ3, 2. poglavje), 3.3 Temeljni gradniki programa (LAV-RAČ3, 3. poglavje), 3.4 Podatkovni tipi v Javi (LAV-RAČ3, 4. poglavje) in 3.5 Pogojni stavki v Javi (LAV-RAČ3, 5. poglavje) 4.1 Relacijska algebra (LAV-RAČ4, 1. poglavje) in 4.2 Podatkovne baze in SUPB (LAV-RAČ4, 2. poglavje).
+Postavljena je osnova: prijava, vloge, oblika, vstopna stran in struktura z deli LAV-RAČ2, LAV-RAČ3 in LAV-RAČ4. Poglavja se v vsakem letniku štejejo od 1 in tako jih vidijo dijaki in učitelji (`no`); tehnična oznaka vaje (`id`, v povezavah in bazi) je letnik.poglavje, da je enolična. Razpored je od učitelja (popravljen 6. 11. 2026, dopolnjen 17. 11. 2026). Števila nalog in točk so v `content/catalog.json`, tukaj jih ni, ker bi se hitro zastarela.
 
-Razpored (od učitelja, popravljen 6. 11. 2026). Poglavja se v vsakem letniku štejejo od 1 in tako jih vidijo dijaki in učitelji (`no`); tehnična oznaka vaje (`id`, v povezavah in bazi) je letnik.poglavje, da je enolična:
-- LAV-RAČ2 (prazno mesto 4 je za učitelje »V pripravi«, `planned` v `content/sources.json`): 2.1 Številski sistemi, kodiranje in pariteta, 2.2 Logične funkcije, 2.3 Arhitektura računalniških sistemov, 2.4 (prosto, dodamo kasneje), 2.5 Operacijski sistemi in Linux lupina
-- LAV-RAČ3: 3.1 Java in delovanje JVM, 3.2 Algoritmi in diagrami poteka, 3.3 Temeljni gradniki programa, 3.4 Podatkovni tipi v Javi, 3.5 Pogojni stavki v Javi, 3.6 Zanke v Javi
-- LAV-RAČ4: 4.1 Relacijska algebra (uvožena 11. 11. 2026, pregledana in skupine razlag potrjene), 4.2 Podatkovne baze in SUPB (uvožena 11. 11. 2026, skupine razlag potrjene 12. 11. 2026, sklopa B in C združena). Načrt poglavij (učitelj, 11. 11. 2026): 1 Relacijska algebra, 2 Podatkovne baze in SUPB, 3 Konceptualni in logični model, 4 SQL DDL in integritetne omejitve, 5 SQL poizvedbe, 6 SQL DML in tuji ključi, 7 UML. Poglavje se doda, ko je vsebina (uvoz artifacta); prostih mest »V pripravi« zanje zaenkrat ni
+Stanje poglavij (17. 11. 2026):
 
+| Vaja | Poglavje | Stanje |
+|---|---|---|
+| 2.1 | Številski sistemi, kodiranje in pariteta | uvožena |
+| 2.2 | Logične funkcije | uvožena |
+| 2.3 | Arhitektura računalniških sistemov | uvožena |
+| 2.4 | (prosto, dodamo kasneje) | V pripravi |
+| 2.5 | Operacijski sistemi in Linux lupina | artifact pripravljen, čaka uvoz |
+| 2.6 | | V pripravi |
+| 3.1 | Java in delovanje JVM | uvožena |
+| 3.2 | Algoritmi in diagrami poteka | uvožena |
+| 3.3 | Temeljni gradniki programa | uvožena |
+| 3.4 | Podatkovni tipi v Javi | uvožena |
+| 3.5 | Pogojni stavki v Javi | uvožena |
+| 3.6 | Zanke v Javi | artifact pripravljen, čaka uvoz |
+| 3.7 | Tabele v Javi | artifact pripravljen, čaka uvoz |
+| 3.8, 3.9, 3.10 | | V pripravi |
+| 4.1 | Relacijska algebra | uvožena 11. 11. 2026, pregledana, skupine razlag potrjene |
+| 4.2 | Podatkovne baze in SUPB | uvožena 11. 11. 2026, skupine razlag potrjene 12. 11. 2026, sklopa B in C združena |
+| 4.3 | Konceptualni in logični model | artifact pripravljen, čaka uvoz |
+| 4.4 | SQL DDL in integritetne omejitve | V pripravi |
+| 4.5 | SQL poizvedbe | V pripravi |
+| 4.6 | SQL DML in tuji ključi | V pripravi |
+| 4.7 | UML | V pripravi |
+
+Kaj še rabimo:
+- uvoz pripravljenih poglavij 2.5, 3.6, 3.7 in 4.3 (artifacti: `claude.ai/artifact/2ZG1PRMFhWNrPQHmyvAuCE`, `NEku4wgzLZtrMEH5MpREN1`, `Ud7sBts42HGSGMeLZwnjXp`, `97oYmvWT8xBWqoKL3pH8EC`),
+- artifacte za poglavja »V pripravi«: 2.4, 2.6, 3.8, 3.9, 3.10, 4.4, 4.5, 4.6 in 4.7,
+- igre (Robot zankar, Kodni sprint, Kodni CTF, Vdor v šolsko bazo, Dežurni DBA) niso poglavja in se ne štejejo; o njih se odloča posebej.
+
+Mesta »V pripravi« so v `content/sources.json` (`planned`), učitelji in skrbniki jih vidijo kot prazno vrstico. Uvoz poglavja mesto sam izpusti iz kataloga. Poglavje se doda, ko je vsebina (uvoz artifacta); postopek je v `docs/DODAJANJE_POGLAVIJ.md`.
 
 ## Odločitve
 
+- Preizkusi pri delu (17. 11. 2026): celotnega `npm test` ne zaganjamo brez izrecnega dovoljenja učitelja, ker traja dolgo. Pred objavo se poženejo samo preizkusi, ki jih sprememba zadeva; pri skupni kodi in pri dodajanju ali odstranjevanju poglavja asistent najprej vpraša in priporoči. CI požene vse ob objavi, rezultat se pogleda po objavi. Zapisano v `CLAUDE.md`.
+- Mesta »V pripravi« (17. 11. 2026): vsako poglavje, ki čaka na artifact, ima mesto v `planned`, da ne pozabimo, kaj še rabimo; igre niso poglavja.
 - LAV-RAČ3 (8. 11. 2026): pravila za uvoz poglavij 3. letnika so v `TODO.md` (skupine teorije, »Ponavljanje«, naloge s programom v poljubnem okolju, brez omemb laboratorijskih vaj). Pri nalogah z izpisom ali programom portal hrani tudi vpisani izpis in kodo.
 - Točkovanje (6. 11. 2026): naloge »Za doma« se ne točkujejo. Maturitetne naloge se točkujejo smiselno glede na nalogo, kot v maturitetnih polah.
 - Letniki in stran Šolsko leto so samo za ta portal; LAV-ELS jih ne dobi (6. 11. 2026).
