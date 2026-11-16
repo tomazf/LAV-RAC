@@ -1,13 +1,13 @@
 /* LAV-RAČ: plum front panel, warm lamps. Logic 1 is a lit lamp, wires are grey. */
 :root{
   --bg:#f5f3f8;--card:#fff;--ink:#241433;--mut:#5f5470;--acc:#6b2a7a;--onacc:#fff;--sig:#b4500a;--sigbg:#fdf0dd;--onsig:#1b1206;
-  --ok:#2b8a3e;--self:#1f6f8b;--amb:#b7791f;--bad:#c92a2a;--line:#ddd6e6;--tile:#ece6f2;--wire:#b3a8c2;--hdr:#2e1a40;--onhdr:#fff;--heat:107,42,122;--okbg:#e3f5e8;--badbg:#fde8e8;
+  --ok:#2b8a3e;--self:#1f6f8b;--amb:#b7791f;--part:#5a6b0a;--bad:#c92a2a;--line:#ddd6e6;--tile:#ece6f2;--wire:#b3a8c2;--hdr:#2e1a40;--onhdr:#fff;--heat:107,42,122;--okbg:#e3f5e8;--badbg:#fde8e8;
   --fb:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;--fm:"IBM Plex Mono",ui-monospace,Consolas,monospace;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root{
   --bg:#171021;--card:#231833;--ink:#efe9f5;--mut:#a99cba;--acc:#d5a6e6;--onacc:#1f1130;--sig:#ffb454;--sigbg:#3a2a18;--onsig:#1b1206;
-  --ok:#6fd48a;--self:#6cc1dd;--amb:#f1b95a;--bad:#ff8080;--line:#3a2c4d;--tile:#2f2242;--wire:#5c4d70;--hdr:#1f1130;--heat:213,166,230;--okbg:#17352a;--badbg:#3d2230;color-scheme:dark}}
+  --ok:#6fd48a;--self:#6cc1dd;--amb:#f1b95a;--part:#d4e36a;--bad:#ff8080;--line:#3a2c4d;--tile:#2f2242;--wire:#5c4d70;--hdr:#1f1130;--heat:213,166,230;--okbg:#17352a;--badbg:#3d2230;color-scheme:dark}}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 var(--fb);min-height:100vh;display:flex;flex-direction:column}
@@ -114,6 +114,7 @@ main.stage{display:flex;align-items:center;justify-content:center;max-width:none
 .strip i{display:block;width:11px;height:11px;border-radius:2px}
 .s-correct{background:var(--ok)}
 .s-partial{background:var(--amb)}
+.s-part{background:var(--part)}
 .s-wrong{background:var(--bad)}
 .s-solution{background:var(--mut)}
 .s-self{background:var(--self)}

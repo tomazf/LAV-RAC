@@ -3,6 +3,8 @@
 // exercises as "Ponavljanje" (as in the other chapters), the practice items without points left as "Za doma".
 // The expression evaluator (RA) and the sample databases stay in the page: the server only learns the points.
 
+import { partialCredit } from './qformat.js';
+
 const ICONS = {
   baza: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="8" width="36" height="32" rx="3"/><path d="M6 18h36M6 28h36M18 8v32"/><rect x="6" y="8" width="36" height="10" rx="3" class="fill" opacity=".35"/></svg>',
   mnoz: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 8v17a12 12 0 0 0 24 0V8"/><path d="M12 8v17a12 12 0 0 0 24 0V8z" class="fill" opacity=".35"/></svg>',
@@ -54,6 +56,8 @@ export default {
   --f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}
   body{padding-left:0;padding-right:0}`,
   patches: [
+    // Partial credit for tasks with several parts (agreed 16. 11. 2026).
+    ...partialCredit,
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
     // The revision set (artifact id "doma", which is also the id of the Za doma section) is "Ponavljanje" and gets its
     // own id; the shell lettering puts it after the sets A–F, and Za doma takes the next letter.
@@ -90,7 +94,7 @@ S = LavRac.loadUi();`],
     `    if(t.lv==="P"){ if(ok){ if(s.state!=="seen") s.state="ok"; save(); } show(ok, ok ? "Pravilno." : ("Ni še pravilno. "+msg).trim()); paint(); return; }
     if(!ok && t.type==="blanks" && t.b.every((_,k)=>!$(\`#b-\${t.id}-\${k}\`,el).value.trim())){ show(false,"Najprej vpiši odgovor."); return; }
     if(!ok && /^Razvrsti/.test(msg)){ show(false,msg); return; }
-    save(); LavRac.answered(t.idx, ok, msg);`],
+    save(); LavRac.answered(t.idx, ok, msg, part);`],
     ['if(hintB) hintB.addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h=hi; save(); drawHints(); }});',
       'if(hintB) hintB.addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h=hi; save(); if(t.lv!=="P") LavRac.hinted(t.idx); drawHints(); }});'],
     ['if(solEl.hidden){ drawSol(); solEl.hidden=false; if(s.state!=="ok"){ s.state="seen"; save(); paint(); progress(); }',

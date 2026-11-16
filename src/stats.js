@@ -3,12 +3,13 @@ import { many } from './db.js';
 import { readTask } from './progress.js';
 import { num } from './format.js';
 
-const STATUS = { correct: 'pravilno', partial: 'pravilno z namigom', wrong: 'napačno', solution: 'ogledana rešitev', self: 'sam preveril', hint: 'uporabljen namig, še ni odgovora', open: 'še ni rešeno' };
+const STATUS = { correct: 'pravilno', partial: 'pravilno z namigom', part: 'delno pravilno', wrong: 'napačno', solution: 'ogledana rešitev', self: 'sam preveril', hint: 'uporabljen namig, še ni odgovora', open: 'še ni rešeno' };
 export function taskStatus(t, task) {
   if (t.done) {
     if (task?.self) return 'self';
     if (t.solution) return 'solution';
     if (t.points <= 0) return 'wrong';
+    if (t.partial) return 'part';
     return t.hinted ? 'partial' : 'correct';
   }
   return t.hinted ? 'hint' : 'open';

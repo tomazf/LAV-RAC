@@ -2,6 +2,7 @@
 // one answer per task, hints and solution reported to the shell, and three theory groups for the overview.
 
 import { readFileSync } from 'node:fs';
+import { partialCredit2 } from './qformat.js';
 
 // Longer code that is built into the artifact lives in content/adapters/2.2/ so that it can be read and checked as code.
 const part = (name) => readFileSync(new URL('./2.2/' + name, import.meta.url), 'utf8');
@@ -138,6 +139,8 @@ export default {
   .symcmp th small{font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0}
   .symcmp td{vertical-align:middle}`,
   patches: [
+    // Partial credit for tasks with several parts (agreed 16. 11. 2026).
+    ...partialCredit2(true),
     ['HOME.forEach((h,k)=>{', `HOME.push(...${JSON.stringify(HOME_PLUS)});\nHOME.forEach((h,k)=>{`],
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
     ...STATEMENTS.map(([from, to]) => [`q:${JSON.stringify(from)}`, `q:${JSON.stringify(to)}`]),
@@ -195,7 +198,7 @@ function save(){ LavRac.saveUi(S); }`],
     show(ok, ok ? (s.state==="seen" ? "Pravilno. Točke se ne štejejo, ker si si ogledal rešitev." : \`Pravilno. +\${ptsLabel(t.pts)}\`) : ("Ni še pravilno. "+msg).trim());
     paint(); progress();`,
     `    if(!ok && /Najprej|^Izpolni|^Razvrsti|Uporabi samo spremenljivke|V tej nalogi so samo|Izraza ne razumem/.test(msg)){ show(false,msg); return; }
-    save(); LavRac.answered(t.idx, ok, msg);`],
+    save(); LavRac.answered(t.idx, ok, msg, part);`],
     ['$(".js-hint",el).addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h = hi; save(); drawHints(); }});',
       '$(".js-hint",el).addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h = hi; save(); LavRac.hinted(t.idx); drawHints(); }});'],
     ['if(solEl.hidden){ drawSol(); solEl.hidden = false; if(s.state!=="ok"){ s.state = "seen"; save(); paint(); progress(); }',

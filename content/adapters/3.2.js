@@ -2,7 +2,7 @@
 // answers typed as program output), one answer per task, three theory groups, the matura revision set moved among
 // the graded sets as "Ponavljanje" (agreed 8. 11. 2026), and the matura's diagram labels only (the switch was dropped 10. 11. 2026).
 
-import { statements, QTEXT, outputCompare } from './qformat.js';
+import { statements, QTEXT, outputCompare, partialCredit } from './qformat.js';
 const ICONS = {
   zapis: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="10" y="5" width="28" height="38" rx="3"/><path d="M16 15h16M16 22h16M16 29h16M16 36h9"/></svg>',
   gradniki: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="14" y="4" width="20" height="9" rx="2"/><path d="M24 13v5"/><path d="M24 18l10 8-10 8-10-8z"/><path d="M24 34v4"/><rect x="14" y="38" width="20" height="7" rx="2" class="fill" opacity=".35"/></svg>',
@@ -78,6 +78,8 @@ export default {
   --seen:var(--lr-seen);--seen-soft:var(--lr-seen-bg);--f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}
   body{padding-left:0;padding-right:0}`,
   patches: [
+    // Partial credit for tasks with several parts (agreed 16. 11. 2026).
+    ...partialCredit,
     // The typed output is compared without regard to letter case and repeated spaces (agreed 16. 11. 2026).
     ...outputCompare(false),
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
@@ -130,7 +132,7 @@ S = LavRac.loadUi();`],
     paint(); progress();`,
     `    if(!ok && t.type==="blanks" && t.b.every((_,k)=>!$(\`#b-\${t.id}-\${k}\`,el).value.trim())){ show(false,"Najprej vpiši odgovor."); return; }
     if(!ok && /^Razvrsti/.test(msg)){ show(false,msg); return; }
-    save(); LavRac.answered(t.idx, ok, msg);`],
+    save(); LavRac.answered(t.idx, ok, msg, part);`],
     ['$(".js-hint",el).addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h=hi; save(); drawHints(); }});',
       '$(".js-hint",el).addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h=hi; save(); LavRac.hinted(t.idx); drawHints(); }});'],
     ['if(solEl.hidden){ drawSol(); solEl.hidden=false; if(s.state!=="ok"){ s.state="seen"; save(); paint(); progress(); }',

@@ -111,7 +111,7 @@ Portal hrani podatke dijakov, zato se pred uporabo pogovori s pooblaščeno oseb
 
 ## Napredek in ponastavitev
 
-Vsak dijak ima pri vaji en trenutni poskus. Rešena naloga je zaklenjena, namig odbije polovico točk, prikaz rešitve pomeni 0 točk. Ta pravila preveri tudi strežnik.
+Vsak dijak ima pri vaji en trenutni poskus. Rešena naloga je zaklenjena, namig odbije polovico točk, prikaz rešitve pomeni 0 točk. Pri nalogi z več deli (več vrzeli, trditev, izbir ali vrstic izpisa) dobi dijak točke po deležu pravilnih delov, zaokroženo navzdol na pol točke. Ta pravila preveri tudi strežnik.
 
 Ponastavitev začne nov poskus. Lahko jo sproži dijak sam, učitelj posameznemu dijaku ali celemu razredu, ali nova različica vaje. Shrani se samo rezultat tik pred zadnjo ponastavitvijo: šteje, dokler dijak v novem poskusu ne odgovori na nobeno nalogo (varovalka za ponastavitev po nesreči). Učitelj ga vidi pri dijaku. Porabljen čas ostane.
 

@@ -2,7 +2,7 @@
 // answers typed as program output), one answer per task, two theory groups, and the matura revision set moved
 // among the graded sets as "Ponavljanje" (agreed 8. 11. 2026).
 
-import { statements, QTEXT, outputCompare } from './qformat.js';
+import { statements, QTEXT, outputCompare, partialCredit } from './qformat.js';
 const ICONS = {
   jezik: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17 14L7 24l10 10M31 14l10 10-10 10"/><path d="M27 10l-6 28"/></svg>',
   orodja: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="6" width="40" height="36" rx="3"/><rect x="10" y="14" width="28" height="22" rx="2"/><rect x="16" y="21" width="16" height="10" rx="2" class="fill" opacity=".35"/></svg>',
@@ -49,6 +49,8 @@ export default {
   --seen:var(--lr-seen);--seen-soft:var(--lr-seen-bg);--f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}
   body{padding-left:0;padding-right:0}`,
   patches: [
+    // Partial credit for tasks with several parts (agreed 16. 11. 2026).
+    ...partialCredit,
     // The typed output is compared without regard to letter case and repeated spaces (agreed 16. 11. 2026).
     ...outputCompare(false),
     // C10 is checked by the student: its solution no longer says the output is compared exactly.
@@ -91,7 +93,7 @@ function save(){ LavRac.saveUi(S); }`],
     paint(); progress();`,
     `    if(!ok && t.type==="blanks" && t.b.every((_,k)=>!$(\`#b-\${t.id}-\${k}\`,el).value.trim())){ show(false,"Najprej vpiši odgovor."); return; }
     if(!ok && /^Razvrsti/.test(msg)){ show(false,msg); return; }
-    save(); LavRac.answered(t.idx, ok, msg);`],
+    save(); LavRac.answered(t.idx, ok, msg, part);`],
     ['$(".js-hint",el).addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h=hi; save(); drawHints(); }});',
       '$(".js-hint",el).addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h=hi; save(); LavRac.hinted(t.idx); drawHints(); }});'],
     ['if(solEl.hidden){ drawSol(); solEl.hidden=false; if(s.state!=="ok"){ s.state="seen"; save(); paint(); progress(); }',

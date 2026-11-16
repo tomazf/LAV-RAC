@@ -55,7 +55,7 @@
     if (!r.d) return r.h ? 'hinted' : 'open';
     if (TASKS[i] && TASKS[i].self) return 'self';
     if (r.sol) return 'seen';
-    if (r.p > 0) return r.h ? 'half' : 'ok';
+    if (r.p > 0) return r.f === false ? 'part' : r.h ? 'half' : 'ok';
     return 'bad';
   }
   const pts = (n) => {
@@ -69,14 +69,15 @@
   const MESSAGE = {
     ok: (r) => 'Pravilno: ' + pts(r.p) + '.',
     half: (r) => 'Pravilno z namigom: ' + pts(r.p) + '.',
+    part: (r) => 'Delno pravilno: ' + pts(r.p) + (r.po ? ' (pravilno ' + r.pr + ' od ' + r.po + ')' : '') + (r.h ? ', z namigom' : '') + '.',
     bad: (r, note) => 'Napačno: 0 točk.' + (note ? ' ' + note : '') + ' Naloga je zaklenjena, rešitev si lahko ogledaš.',
     seen: () => 'Rešitev prikazana: 0 točk. Naloga je zaklenjena.',
     self: () => 'Označeno: sam si preveril delovanje. Naloga nima točk.',
   };
-  const LABEL = { ok: 'Pravilno', half: 'Pravilno z namigom', bad: 'Napačno', seen: 'Rešitev ogledana', self: 'Sam preveril' };
+  const LABEL = { ok: 'Pravilno', half: 'Pravilno z namigom', part: 'Delno pravilno', bad: 'Napačno', seen: 'Rešitev ogledana', self: 'Sam preveril' };
 
   function totals() {
-    const r = { ok: 0, half: 0, bad: 0, seen: 0, self: 0, done: 0, points: 0, max: 0, n: TASKS.length };
+    const r = { ok: 0, half: 0, part: 0, bad: 0, seen: 0, self: 0, done: 0, points: 0, max: 0, n: TASKS.length };
     TASKS.forEach((t, i) => {
       const s = status(i);
       r.max += t.max;
@@ -137,13 +138,22 @@
       if (changed) persist();
     },
     // note: the artifact's explanation of a wrong answer, shown with the result.
-    answered(i, ok, note) {
+    // part: { right, of } for a task with several parts, when some are right and some wrong (agreed 16. 11. 2026): the points
+    // are the share of the right parts, in halves of a point, rounded down; with a hint half of that. All right is ok.
+    answered(i, ok, note, part) {
       const r = rec(i);
       if (r.d) return;
       notes.set(i, ok ? '' : String(note || '').trim());
       const max = TASKS[i].max;
       r.d = true;
-      r.p = ok ? (r.h ? half(max) : max) : 0;
+      if (ok) r.p = r.h ? half(max) : max;
+      else {
+        const of = part && Number(part.of) > 1 ? Number(part.of) : 0;
+        const right = of ? Math.min(Math.max(Math.floor(Number(part.right)) || 0, 0), of - 1) : 0;
+        const earned = of ? (max * right / of) / (r.h ? 2 : 1) : 0;
+        r.p = Math.floor(earned * 2 + 1e-9) / 2;
+        if (r.p > 0) { r.f = false; r.pr = right; r.po = of; }
+      }
       persist();
       paintTask(i, true);
       paintProgress();
@@ -248,7 +258,7 @@
   }
 
   function buildTop(c) {
-    const bar = h('div', { class: 'lr-stack', 'aria-hidden': 'true' }, ...['ok', 'half', 'bad', 'seen', 'self'].map((k) => h('i', { class: 'lr-' + k })));
+    const bar = h('div', { class: 'lr-stack', 'aria-hidden': 'true' }, ...['ok', 'half', 'part', 'bad', 'seen', 'self'].map((k) => h('i', { class: 'lr-' + k })));
     const reset = h('div', { class: 'lr-reset', id: 'lrReset' });
     const idle = () => {
       reset.replaceChildren(h('button', { type: 'button', class: 'lr-btn lr-ghost', id: 'resetBtn', text: 'Ponastavi vajo' }));
@@ -360,7 +370,7 @@
       h('h2', { text: 'Kako poteka' }),
       h('ol', {},
         h('li', { text: 'Najprej preglej vse razlage. Vaje se odklenejo, ko odpreš vsako stran razlage.' }),
-        h('li', { text: 'Pri vsaki nalogi oddaš en odgovor. Pravilen odgovor prinese vse točke, napačen 0 točk.' }),
+        h('li', { text: 'Pri vsaki nalogi oddaš en odgovor. Pravilen odgovor prinese vse točke, napačen 0 točk. Pri nalogi z več deli (več vrzeli, trditev ali izbir) dobiš točke po deležu pravilnih delov, zaokroženo navzdol na pol točke.' }),
         h('li', { text: 'Namig odbije polovico točk naloge. Ogled rešitve prinese 0 točk in nalogo zaklene.' }),
         TASKS.some((t) => t.self) ? h('li', { text: 'Naloge z oznako »Sam preveri« nimajo točk: rešitev narediš sam, jo preizkusiš in nalogo označiš s »Preveril sem«. Rešitev si lahko ogledaš brez posledic.' }) : null,
         h('li', { text: 'Napredek se shranjuje v tvoj račun, zato lahko nadaljuješ na katerem koli računalniku.' })));
@@ -400,7 +410,7 @@
     // A set of self tasks has only that state in its legend; a mixed set has both.
     const allSelf = s.tasks.every((t) => TASKS[t.idx].self), anySelf = s.tasks.some((t) => TASKS[t.idx].self);
     const legend = h('div', { class: 'lr-legend' },
-      ...[...(allSelf ? [] : [['ok', 'pravilno'], ['half', 'pravilno z namigom (50 %)'], ['bad', 'napačno'], ['seen', 'ogledana rešitev (0 točk)']]), ...(anySelf ? [['self', 'sam preveril (brez točk)']] : [])]
+      ...[...(allSelf ? [] : [['ok', 'pravilno'], ['half', 'pravilno z namigom (50 %)'], ['part', 'delno pravilno'], ['bad', 'napačno'], ['seen', 'ogledana rešitev (0 točk)']]), ...(anySelf ? [['self', 'sam preveril (brez točk)']] : [])]
         .map(([k, t]) => h('span', {}, h('i', { class: 'lr-sw lr-' + k }), t)));
     const board = h('div', { class: 'lr-board' },
       h('div', { class: 'lr-bh' }, h('b', { text: s.title }), h('span', { class: 'lr-done', 'data-done': s.id })),
@@ -628,7 +638,7 @@
     const fb = card.lrFb;
     if (done) {
       card.querySelectorAll('.lr-q input, .lr-q select, .lr-q textarea, .lr-q button, .lr-check, .lr-extra').forEach((x) => { x.disabled = true; });
-      if (fb) { fb.textContent = MESSAGE[s](state.t[i], notes.get(i)); fb.className = 'feedback lr-fb ' + (s === 'ok' || s === 'half' || s === 'self' ? 'ok' : 'bad'); }
+      if (fb) { fb.textContent = MESSAGE[s](state.t[i], notes.get(i)); fb.className = 'feedback lr-fb ' + (s === 'ok' || s === 'half' || s === 'part' || s === 'self' ? 'ok' : 'bad'); }
     }
     if (announce) {
       const sb = card.querySelector('.lr-solask');
@@ -644,7 +654,7 @@
         h('span', { class: 'lr-pd', text: ' · ' }),
         h('span', { class: 'lr-pp' }, h('b', { text: String(r.points).replace('.', ',') }), ' / ' + r.max + ' točk'));
     }
-    ['ok', 'half', 'bad', 'seen', 'self'].forEach((k) => {
+    ['ok', 'half', 'part', 'bad', 'seen', 'self'].forEach((k) => {
       const el = document.querySelector('.lr-stack .lr-' + k);
       if (el) el.style.width = (r.n ? 100 * r[k] / r.n : 0) + '%';
     });
@@ -658,11 +668,11 @@
     if (vt && gateOpen()) vt.textContent = 'Rešenih ' + r.done + ' / ' + r.n + ', ' + String(r.points).replace('.', ',') + ' / ' + r.max + ' točk';
   }
   // The set's pie in the rail: one slice per state, clockwise from the top, in the order of the legend.
-  const PIE = [['ok', '--lr-ok', 'pravilno'], ['half', '--lr-half', 'pravilno z namigom'], ['bad', '--lr-bad', 'napačno'], ['seen', '--lr-seen', 'ogledana rešitev'], ['self', '--lr-self', 'sam preveril'], ['none', '--lr-none', 'brez odgovora']];
+  const PIE = [['ok', '--lr-ok', 'pravilno'], ['half', '--lr-half', 'pravilno z namigom'], ['part', '--lr-part', 'delno pravilno'], ['bad', '--lr-bad', 'napačno'], ['seen', '--lr-seen', 'ogledana rešitev'], ['self', '--lr-self', 'sam preveril'], ['none', '--lr-none', 'brez odgovora']];
   function paintPie(s) {
     const n = s.tasks.length;
     if (!n) return;
-    const c = { ok: 0, half: 0, bad: 0, seen: 0, self: 0, none: 0 };
+    const c = { ok: 0, half: 0, part: 0, bad: 0, seen: 0, self: 0, none: 0 };
     s.tasks.forEach((x) => { const st = status(x.idx); c[c[st] === undefined ? 'none' : st]++; });
     let cum = 0;
     const parts = [];
@@ -1179,7 +1189,7 @@ p.prose{display:block}
 :root{
   --lr-bg:#fffaf4;--lr-card:#fff;--lr-ink:#241433;--lr-mut:#5f5470;--lr-acc:#6b2a7a;--lr-acc-soft:#fdeedd;--lr-line:#f0e3d3;--lr-tile:#faf0e3;
   --lr-hdr:#2e1a40;--lr-lamp:#ffc45c;
-  --lr-ok:#2b8a3e;--lr-ok-bg:#e3f5e8;--lr-half:#9a6416;--lr-half-bg:#f8eed9;--lr-bad:#c92a2a;--lr-bad-bg:#fde8e8;--lr-seen:#5f5470;--lr-seen-bg:#ece6f2;
+  --lr-ok:#2b8a3e;--lr-ok-bg:#e3f5e8;--lr-half:#9a6416;--lr-half-bg:#f8eed9;--lr-part:#5a6b0a;--lr-part-bg:#eef2d2;--lr-bad:#c92a2a;--lr-bad-bg:#fde8e8;--lr-seen:#5f5470;--lr-seen-bg:#ece6f2;
   --lr-self:#1f6f8b;--lr-self-bg:#e1f0f5;
   --lr-none:#e6dccf;--lr-ring:#c3b5a3;--lr-mark:#ffe08a;--lr-onmark:#241433;
   --lr-fb:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;--lr-fm:"IBM Plex Mono",ui-monospace,Consolas,monospace;
@@ -1187,7 +1197,7 @@ p.prose{display:block}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --lr-bg:#171021;--lr-card:#231833;--lr-ink:#efe9f5;--lr-mut:#a99cba;--lr-acc:#d5a6e6;--lr-acc-soft:#3a2a4a;--lr-line:#3a2c4d;--lr-tile:#2f2242;
   --lr-hdr:#1f1130;
-  --lr-ok:#6fd48a;--lr-ok-bg:#17352a;--lr-half:#f1b95a;--lr-half-bg:#3a2e17;--lr-bad:#ff8080;--lr-bad-bg:#3d2230;--lr-seen:#a99cba;--lr-seen-bg:#2f2242;
+  --lr-ok:#6fd48a;--lr-ok-bg:#17352a;--lr-half:#f1b95a;--lr-half-bg:#3a2e17;--lr-part:#d4e36a;--lr-part-bg:#2c3312;--lr-bad:#ff8080;--lr-bad-bg:#3d2230;--lr-seen:#a99cba;--lr-seen-bg:#2f2242;
   --lr-self:#6cc1dd;--lr-self-bg:#16313b;
   --lr-none:#4a3a60;--lr-ring:#76648f;--lr-mark:#5c470c;--lr-onmark:#fff3cf;
 }}
@@ -1269,7 +1279,7 @@ html:not(#lr) .btn.ghost:not(#resetBtn):hover{border-color:var(--lr-mut)}
 mark.lr-hit{scroll-margin-top:170px}
 .lr-sno{padding:10px;color:var(--lr-mut);font-size:.9rem}
 .lr-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.lr-ok{background:var(--lr-ok)}.lr-half{background:var(--lr-half)}.lr-bad{background:var(--lr-bad)}.lr-seen{background:var(--lr-seen)}.lr-self{background:var(--lr-self)}
+.lr-ok{background:var(--lr-ok)}.lr-half{background:var(--lr-half)}.lr-part{background:var(--lr-part)}.lr-bad{background:var(--lr-bad)}.lr-seen{background:var(--lr-seen)}.lr-self{background:var(--lr-self)}
 
 /* body: rail + page */
 .lr-body{max-width:1400px;margin:auto;display:grid;grid-template-columns:304px minmax(0,1fr);gap:40px;padding:24px max(16px,env(safe-area-inset-left,0px)) 80px}
@@ -1367,6 +1377,7 @@ mark.lr-hit{scroll-margin-top:170px}
 .lr-num:hover{border-color:var(--lr-acc)}
 .lr-num[data-s=ok]{background:var(--lr-ok-bg);border-color:var(--lr-ok);color:var(--lr-ok)}
 .lr-num[data-s=half]{background:var(--lr-half-bg);border-color:var(--lr-half);color:var(--lr-half)}
+.lr-num[data-s=part]{background:var(--lr-part-bg);border-color:var(--lr-part);color:var(--lr-part)}
 .lr-num[data-s=bad]{background:var(--lr-bad-bg);border-color:var(--lr-bad);color:var(--lr-bad)}
 .lr-num[data-s=seen]{background:var(--lr-seen-bg);border-color:var(--lr-seen);color:var(--lr-seen)}
 .lr-num[data-s=self]{background:var(--lr-self-bg);border-color:var(--lr-self);color:var(--lr-self)}
@@ -1403,12 +1414,14 @@ mark.lr-hit{scroll-margin-top:170px}
 .lr-solask{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:flex-end;padding:10px 12px;border-radius:10px;background:var(--lr-bad-bg);font-size:.95rem}
 .lr-task[data-lr=ok]{border-color:var(--lr-ok)!important}
 .lr-task[data-lr=half]{border-color:var(--lr-half)!important}
+.lr-task[data-lr=part]{border-color:var(--lr-part)!important}
 .lr-task[data-lr=bad]{border-color:var(--lr-bad)!important}
 .lr-task[data-lr=seen]{border-color:var(--lr-seen)!important}
 .lr-task[data-lr=self]{border-color:var(--lr-self)!important}
 .tag.lr-st{font-weight:700}
 .tag.lr-st.lr-ok{background:var(--lr-ok-bg);color:var(--lr-ok)}
 .tag.lr-st.lr-half{background:var(--lr-half-bg);color:var(--lr-half)}
+.tag.lr-st.lr-part{background:var(--lr-part-bg);color:var(--lr-part)}
 .tag.lr-st.lr-bad{background:var(--lr-bad-bg);color:var(--lr-bad)}
 .tag.lr-st.lr-seen{background:var(--lr-seen-bg);color:var(--lr-seen)}
 .tag.lr-st.lr-self{background:var(--lr-self-bg);color:var(--lr-self)}
@@ -2489,6 +2502,7 @@ function matchBlank(val, b){
   if(b.pool){ const set = new Set(String(val).split(/[\s,;]+/).map(x=>x.trim().toLowerCase()).filter(Boolean)); const n = [...set].filter(x=>b.pool.includes(x)).length; return n>=b.min && n===set.size; }
   const v = norm(val,b); return b.acc.some(a => norm(a,b) === v); }
 const normOut = (s, t) => { const x = String(s).replace(/\r/g,"").split("\n").map(l => t && t.exact ? l.replace(/\s+$/,"") : l.replace(/\s+/g," ").trim().toLowerCase()); return x.join("\n").replace(t && t.exact ? /\n+$/ : /^\n+|\n+$/g,""); };
+const lcsN = (a, b) => { const d = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0)); for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = a[i-1] === b[j-1] ? d[i-1][j-1] + 1 : Math.max(d[i-1][j], d[i][j-1]); return d[a.length][b.length]; };
 const srcLabel = s => { const r = /^MRAC\/(\d+)$/.exec(s); if(r) return `Katalog 2023 · primer · ${r[1]}. nal.`; const m = /^M(\d\d)(\d)\/(\d+)$/.exec(s); return m ? `Matura 20${m[1]} · ${m[2]==="1"?"spomladi":"jeseni"} · ${m[3]}. nal.` : s; };
 const ptsLabel = p => p===1 ? "1 točka" : p===2 ? "2 točki" : (p<5 ? p+" točke" : p+" točk");
 
@@ -2598,34 +2612,36 @@ function wire(el,t){
 
   $(".js-check",el).addEventListener("click",()=>{
     collect();
-    let ok=false, msg="";
+    let ok=false, msg="", part=null;
     if(t.type==="mc"){
       const v = new Set(s.v||[]);
       if(!v.size){ show(false,"Najprej izberi odgovor."); return; }
       ok = v.size===t.a.length && t.a.every(k=>v.has(k));
       el.querySelectorAll(".opt").forEach((o,k)=>{ o.classList.remove("right","wrong"); if(v.has(k)) o.classList.add(t.a.includes(k)?"right":"wrong"); });
+      if(!ok && t.a.length>1){ const hit = [...v].filter(k=>t.a.includes(k)).length; part = { right: Math.max(0, hit - (v.size - hit)), of: t.a.length }; }
       if(!ok && t.a.length>1 && v.size!==t.a.length) msg = `Pravilnih odgovorov je ${t.a.length}.`;
     }
     if(t.type==="blanks"){
       let all=true;
       t.b.forEach((b,k)=>{ const i=$(`#b-${t.id}-${k}`,el); const good = matchBlank(i.value,b); i.classList.remove("right","wrong"); if(i.value.trim()) i.classList.add(good?"right":"wrong"); if(!good) all=false; });
-      ok = all;
+      ok = all; part = { right: t.b.filter((b,k)=>matchBlank($(`#b-${t.id}-${k}`,el).value,b)).length, of: t.b.length };
     }
     if(t.type==="cls"){
       let all=true, any=false;
       el.querySelectorAll(".crow").forEach(r=>{ const k=+r.dataset.k; r.classList.remove("right","wrong"); if(s.v[k]==null){ all=false; return; } any=true; const good = s.v[k]===t.items[k][1]; r.classList.add(good?"right":"wrong"); if(!good) all=false; });
       if(!any){ show(false,"Najprej razvrsti vsaj eno trditev."); return; }
       ok = all; if(!ok && s.v.includes(null)) msg="Razvrsti vse trditve.";
+      part = { right: t.items.filter((it,k)=>s.v[k]===it[1]).length, of: t.items.length };
     }
     if(t.type==="output" || t.type==="code"){
       if(!out.value.trim()){ show(false, t.type==="code" ? "Zaženi program in prilepi njegov izpis." : "Napiši izpis."); return; }
       const exps = [].concat(t.expected); ok = exps.some(e=>normOut(out.value,t)===normOut(e,t));
       out.classList.remove("right","wrong"); out.classList.add(ok?"right":"wrong");
-      if(!ok){ const a=normOut(out.value,t).split("\n"), b=normOut(exps[0],t).split("\n"); const k=b.findIndex((l,j)=>a[j]!==l); msg = k<0 ? "Izpis ima preveč vrstic." : `Razlika v ${k+1}. vrstici.`; }
+      if(!ok){ const a=normOut(out.value,t).split("\n"), b=normOut(exps[0],t).split("\n"); part = exps.map(e => { const bb = normOut(e,t).split("\n"); return { right: lcsN(a,bb), of: Math.max(a.length,bb.length) }; }).sort((u,v) => v.right/v.of - u.right/u.of)[0]; const k=b.findIndex((l,j)=>a[j]!==l); msg = k<0 ? "Izpis ima preveč vrstic." : `Razlika v ${k+1}. vrstici.`; }
     }
     if(!ok && t.type==="blanks" && t.b.every((_,k)=>!$(`#b-${t.id}-${k}`,el).value.trim())){ show(false,"Najprej vpiši odgovor."); return; }
     if(!ok && /^Razvrsti/.test(msg)){ show(false,msg); return; }
-    save(); LavRac.answered(t.idx, ok, msg);
+    save(); LavRac.answered(t.idx, ok, msg, part);
   });
 
   let hi = s.h || 0;

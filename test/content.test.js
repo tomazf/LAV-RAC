@@ -1393,6 +1393,115 @@ test('3.1 to 3.5: typed program output ignores letter case and repeated spaces, 
   assert.deepEqual(errors, []);
 });
 
+// Runs fn with the user's progress in the given exercises set aside, so the test does not depend on what earlier tests answered,
+// and puts the earlier state back afterwards for the tests that follow.
+async function withCleanProgress(name, ids, fn) {
+  const db = new pg.Client({ connectionString: DB });
+  await db.connect();
+  // the user does not exist yet when the test runs alone: nothing to set aside
+  const who = (await db.query('SELECT id FROM users WHERE name=$1', [name])).rows[0]?.id;
+  if (who === undefined) {
+    await db.end();
+    return fn();
+  }
+  const pick = 'WHERE user_id=$1 AND exercise_id = ANY($2)';
+  await db.query(`CREATE TABLE zz_progress AS SELECT * FROM progress ${pick}`, [who, ids]);
+  await db.query(`CREATE TABLE zz_events AS SELECT * FROM task_events ${pick}`, [who, ids]);
+  await db.query(`DELETE FROM progress ${pick}`, [who, ids]);
+  await db.query(`DELETE FROM task_events ${pick}`, [who, ids]);
+  try {
+    await fn();
+  } finally {
+    await db.query(`DELETE FROM progress ${pick}`, [who, ids]);
+    await db.query(`DELETE FROM task_events ${pick}`, [who, ids]);
+    await db.query('INSERT INTO progress SELECT * FROM zz_progress');
+    await db.query('INSERT INTO task_events SELECT * FROM zz_events');
+    await db.query('DROP TABLE zz_progress, zz_events');
+    await db.end();
+  }
+}
+
+// Partial credit (agreed 16. 11. 2026): a task with several parts is worth the share of the parts that are right, in halves of a
+// point rounded down, and half of that with a hint. The server keeps the points and the kind of the answer.
+test('a task with several parts gives points for the parts that are right', () => withCleanProgress('Sara Skrbnik', ['3.1', '2.3'], async () => {
+  const a = await login('Sara Skrbnik');
+  const find = (snippet) => a.evaluate((snip) => {
+    for (const pg of document.querySelectorAll('.page')) {
+      const k = [...pg.querySelectorAll('.lr-task')].findIndex((c) => c.textContent.includes(snip));
+      if (k >= 0) return `${pg.id}/${k + 1}`;
+    }
+    return null;
+  }, snippet);
+  const open = async (id, snippet) => {
+    await a.goto(`${APP}/vaje/${id}`);
+    await a.waitForSelector('.lr-task', { state: 'attached' });
+    const hash = await find(snippet);
+    assert.ok(hash, `${id}: ${snippet}`);
+    await go(a, hash);
+  };
+  const result = async () => ({ lr: await card(a).getAttribute('data-lr'), text: (await card(a).locator('.lr-left .feedback').textContent()).trim() });
+  const submit = async () => { await card(a).locator('.lr-check').click(); await settled(a); };
+  const pointsNow = async () => Number((await a.locator('#lrPtxt .lr-pp b').textContent()).replace(',', '.'));
+
+  // sorting, 3 points, 6 statements: 5 right is 2,5 points
+  await open('3.1', 'Razvrsti napake.');
+  const before = await pointsNow();
+  const want = [0, 0, 1, 2, 1, 0]; // the last one should be 2
+  for (let k = 0; k < 6; k++) await card(a).locator(`.crow[data-k="${k}"] button[data-ci="${want[k]}"]`).click();
+  await submit();
+  assert.deepEqual(await result(), { lr: 'part', text: 'Delno pravilno: 2,5 točke (pravilno 5 od 6).' });
+  assert.match(await card(a).locator('.tags .lr-st').textContent(), /^Delno pravilno$/);
+  assert.equal(await pointsNow(), before + 2.5);
+  assert.match(await a.locator('.lr-rail a[data-page=naloge-d]').getAttribute('title'), /delno pravilno 1/);
+  // the answer and its message come back after a reload, from the server
+  await a.reload();
+  await at(a, await find('Razvrsti napake.'));
+  assert.deepEqual(await result(), { lr: 'part', text: 'Delno pravilno: 2,5 točke (pravilno 5 od 6).' });
+
+  // two blanks, 2 points, with a hint: one right is half of one point
+  await open('3.1', 'Napisali smo program v programskem jeziku Java. Datoteka z n');
+  await card(a).locator('.lr-hint').click();
+  const blanks = card(a).locator('.lr-q input[type=text]');
+  await blanks.nth(0).fill('izvorna koda');
+  await blanks.nth(1).fill('nekaj drugega');
+  await submit();
+  assert.deepEqual(await result(), { lr: 'part', text: 'Delno pravilno: 0,5 točke (pravilno 1 od 2), z namigom.' });
+
+  // two right answers of six: one chosen right and none wrong is half of 2 points; one right and one wrong is nothing
+  await open('3.1', 'Katera izmed spodnjih trditev je resnična za sintakso in kat');
+  await card(a).locator('.opt').nth(0).click();
+  await submit();
+  assert.deepEqual(await result(), { lr: 'part', text: 'Delno pravilno: 1 točka (pravilno 1 od 2).' });
+  await open('3.1', 'Kateri trditvi o prevajalniku in tolmaču sta resnični?');
+  await card(a).locator('.opt').nth(0).click();
+  await card(a).locator('.opt').nth(1).click();
+  await submit();
+  assert.equal((await result()).lr, 'bad');
+
+  // several lines of output: lines that are right in their place count (3 of 4 lines, 2 points)
+  await open('3.1', 'Zapiši natančen izpis, vrstico za vrstico');
+  await card(a).locator('textarea.out').fill('Java je\nprenosljiva21\n3x\nkonc');
+  await submit();
+  assert.deepEqual(await result(), { lr: 'part', text: 'Delno pravilno: 1,5 točke (pravilno 3 od 4).' });
+
+  // the second year: two blanks of 2.3
+  await open('2.3', 'Desetiško število 205 zapiši z osmimi biti');
+  const b23 = card(a).locator('.lr-q input[type=text]');
+  await b23.nth(0).fill('11001101');
+  await b23.nth(1).fill('FF');
+  await submit();
+  assert.deepEqual(await result(), { lr: 'part', text: 'Delno pravilno: 1 točka (pravilno 1 od 2).' });
+
+  // what the server keeps: the points in halves and one event of the new kind for each
+  const db = new pg.Client({ connectionString: DB });
+  await db.connect();
+  const rows = (await db.query(`SELECT e.exercise_id, e.task_index, e.kind, e.points::float FROM task_events e JOIN users u ON u.id=e.user_id WHERE u.name='Sara Skrbnik' AND e.kind IN ('part','wrong') AND ((e.exercise_id='3.1' AND e.task_index IN (8,10,31,36,41)) OR (e.exercise_id='2.3' AND e.task_index=3)) ORDER BY 1, 2`)).rows;
+  await db.end();
+  assert.deepEqual(rows.map((r) => [r.exercise_id, r.task_index, r.kind, r.points]), [['2.3', 3, 'part', 1], ['3.1', 8, 'part', 0.5], ['3.1', 10, 'wrong', 0], ['3.1', 31, 'part', 1.5], ['3.1', 36, 'part', 1], ['3.1', 41, 'part', 2.5]]);
+  await a.context().close();
+  assert.deepEqual(errors, []);
+}));
+
 test('3.2: matura labels only and no switch; set E is checked by the student, without points; a code answer keeps program and output; the revision set is last', async () => {
   const ex = catalog.exercises.find((e) => e.id === '3.2');
   const a = await login('Sara Skrbnik');

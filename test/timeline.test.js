@@ -115,3 +115,10 @@ test('day arithmetic is not thrown off by a change of the clock', () => {
   const t = buildTimeline([], EX, '30', '2026-03-31');
   assert.equal(new Set(t.buckets.map((b) => b.start)).size, 30);
 });
+
+test('a partly right answer has its own outcome between hinted and wrong', () => {
+  const t = buildTimeline([ev('2026-11-12', '10:00:00', 'part', 'a', 0), ev('2026-11-12', '10:01:00', 'wrong', 'a', 1), ev('2026-11-12', '10:02:00', 'partial', 'a', 2)], EX, '30', TODAY);
+  const d = t.buckets.find((b) => b.start === '2026-11-12');
+  assert.deepEqual(d.outcomes, [{ text: 'pravilno z namigom', n: 1 }, { text: 'delno pravilno', n: 1 }, { text: 'napačno', n: 1 }]);
+  assert.match(d.aria, /pravilno z namigom 1, delno pravilno 1, napačno 1$/);
+});

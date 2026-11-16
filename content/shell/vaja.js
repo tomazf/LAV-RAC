@@ -48,7 +48,7 @@
     if (!r.d) return r.h ? 'hinted' : 'open';
     if (TASKS[i] && TASKS[i].self) return 'self';
     if (r.sol) return 'seen';
-    if (r.p > 0) return r.h ? 'half' : 'ok';
+    if (r.p > 0) return r.f === false ? 'part' : r.h ? 'half' : 'ok';
     return 'bad';
   }
   const pts = (n) => {
@@ -62,14 +62,15 @@
   const MESSAGE = {
     ok: (r) => 'Pravilno: ' + pts(r.p) + '.',
     half: (r) => 'Pravilno z namigom: ' + pts(r.p) + '.',
+    part: (r) => 'Delno pravilno: ' + pts(r.p) + (r.po ? ' (pravilno ' + r.pr + ' od ' + r.po + ')' : '') + (r.h ? ', z namigom' : '') + '.',
     bad: (r, note) => 'Napačno: 0 točk.' + (note ? ' ' + note : '') + ' Naloga je zaklenjena, rešitev si lahko ogledaš.',
     seen: () => 'Rešitev prikazana: 0 točk. Naloga je zaklenjena.',
     self: () => 'Označeno: sam si preveril delovanje. Naloga nima točk.',
   };
-  const LABEL = { ok: 'Pravilno', half: 'Pravilno z namigom', bad: 'Napačno', seen: 'Rešitev ogledana', self: 'Sam preveril' };
+  const LABEL = { ok: 'Pravilno', half: 'Pravilno z namigom', part: 'Delno pravilno', bad: 'Napačno', seen: 'Rešitev ogledana', self: 'Sam preveril' };
 
   function totals() {
-    const r = { ok: 0, half: 0, bad: 0, seen: 0, self: 0, done: 0, points: 0, max: 0, n: TASKS.length };
+    const r = { ok: 0, half: 0, part: 0, bad: 0, seen: 0, self: 0, done: 0, points: 0, max: 0, n: TASKS.length };
     TASKS.forEach((t, i) => {
       const s = status(i);
       r.max += t.max;
@@ -130,13 +131,22 @@
       if (changed) persist();
     },
     // note: the artifact's explanation of a wrong answer, shown with the result.
-    answered(i, ok, note) {
+    // part: { right, of } for a task with several parts, when some are right and some wrong (agreed 16. 11. 2026): the points
+    // are the share of the right parts, in halves of a point, rounded down; with a hint half of that. All right is ok.
+    answered(i, ok, note, part) {
       const r = rec(i);
       if (r.d) return;
       notes.set(i, ok ? '' : String(note || '').trim());
       const max = TASKS[i].max;
       r.d = true;
-      r.p = ok ? (r.h ? half(max) : max) : 0;
+      if (ok) r.p = r.h ? half(max) : max;
+      else {
+        const of = part && Number(part.of) > 1 ? Number(part.of) : 0;
+        const right = of ? Math.min(Math.max(Math.floor(Number(part.right)) || 0, 0), of - 1) : 0;
+        const earned = of ? (max * right / of) / (r.h ? 2 : 1) : 0;
+        r.p = Math.floor(earned * 2 + 1e-9) / 2;
+        if (r.p > 0) { r.f = false; r.pr = right; r.po = of; }
+      }
       persist();
       paintTask(i, true);
       paintProgress();
@@ -241,7 +251,7 @@
   }
 
   function buildTop(c) {
-    const bar = h('div', { class: 'lr-stack', 'aria-hidden': 'true' }, ...['ok', 'half', 'bad', 'seen', 'self'].map((k) => h('i', { class: 'lr-' + k })));
+    const bar = h('div', { class: 'lr-stack', 'aria-hidden': 'true' }, ...['ok', 'half', 'part', 'bad', 'seen', 'self'].map((k) => h('i', { class: 'lr-' + k })));
     const reset = h('div', { class: 'lr-reset', id: 'lrReset' });
     const idle = () => {
       reset.replaceChildren(h('button', { type: 'button', class: 'lr-btn lr-ghost', id: 'resetBtn', text: 'Ponastavi vajo' }));
@@ -353,7 +363,7 @@
       h('h2', { text: 'Kako poteka' }),
       h('ol', {},
         h('li', { text: 'Najprej preglej vse razlage. Vaje se odklenejo, ko odpreš vsako stran razlage.' }),
-        h('li', { text: 'Pri vsaki nalogi oddaš en odgovor. Pravilen odgovor prinese vse točke, napačen 0 točk.' }),
+        h('li', { text: 'Pri vsaki nalogi oddaš en odgovor. Pravilen odgovor prinese vse točke, napačen 0 točk. Pri nalogi z več deli (več vrzeli, trditev ali izbir) dobiš točke po deležu pravilnih delov, zaokroženo navzdol na pol točke.' }),
         h('li', { text: 'Namig odbije polovico točk naloge. Ogled rešitve prinese 0 točk in nalogo zaklene.' }),
         TASKS.some((t) => t.self) ? h('li', { text: 'Naloge z oznako »Sam preveri« nimajo točk: rešitev narediš sam, jo preizkusiš in nalogo označiš s »Preveril sem«. Rešitev si lahko ogledaš brez posledic.' }) : null,
         h('li', { text: 'Napredek se shranjuje v tvoj račun, zato lahko nadaljuješ na katerem koli računalniku.' })));
@@ -393,7 +403,7 @@
     // A set of self tasks has only that state in its legend; a mixed set has both.
     const allSelf = s.tasks.every((t) => TASKS[t.idx].self), anySelf = s.tasks.some((t) => TASKS[t.idx].self);
     const legend = h('div', { class: 'lr-legend' },
-      ...[...(allSelf ? [] : [['ok', 'pravilno'], ['half', 'pravilno z namigom (50 %)'], ['bad', 'napačno'], ['seen', 'ogledana rešitev (0 točk)']]), ...(anySelf ? [['self', 'sam preveril (brez točk)']] : [])]
+      ...[...(allSelf ? [] : [['ok', 'pravilno'], ['half', 'pravilno z namigom (50 %)'], ['part', 'delno pravilno'], ['bad', 'napačno'], ['seen', 'ogledana rešitev (0 točk)']]), ...(anySelf ? [['self', 'sam preveril (brez točk)']] : [])]
         .map(([k, t]) => h('span', {}, h('i', { class: 'lr-sw lr-' + k }), t)));
     const board = h('div', { class: 'lr-board' },
       h('div', { class: 'lr-bh' }, h('b', { text: s.title }), h('span', { class: 'lr-done', 'data-done': s.id })),
@@ -621,7 +631,7 @@
     const fb = card.lrFb;
     if (done) {
       card.querySelectorAll('.lr-q input, .lr-q select, .lr-q textarea, .lr-q button, .lr-check, .lr-extra').forEach((x) => { x.disabled = true; });
-      if (fb) { fb.textContent = MESSAGE[s](state.t[i], notes.get(i)); fb.className = 'feedback lr-fb ' + (s === 'ok' || s === 'half' || s === 'self' ? 'ok' : 'bad'); }
+      if (fb) { fb.textContent = MESSAGE[s](state.t[i], notes.get(i)); fb.className = 'feedback lr-fb ' + (s === 'ok' || s === 'half' || s === 'part' || s === 'self' ? 'ok' : 'bad'); }
     }
     if (announce) {
       const sb = card.querySelector('.lr-solask');
@@ -637,7 +647,7 @@
         h('span', { class: 'lr-pd', text: ' · ' }),
         h('span', { class: 'lr-pp' }, h('b', { text: String(r.points).replace('.', ',') }), ' / ' + r.max + ' točk'));
     }
-    ['ok', 'half', 'bad', 'seen', 'self'].forEach((k) => {
+    ['ok', 'half', 'part', 'bad', 'seen', 'self'].forEach((k) => {
       const el = document.querySelector('.lr-stack .lr-' + k);
       if (el) el.style.width = (r.n ? 100 * r[k] / r.n : 0) + '%';
     });
@@ -651,11 +661,11 @@
     if (vt && gateOpen()) vt.textContent = 'Rešenih ' + r.done + ' / ' + r.n + ', ' + String(r.points).replace('.', ',') + ' / ' + r.max + ' točk';
   }
   // The set's pie in the rail: one slice per state, clockwise from the top, in the order of the legend.
-  const PIE = [['ok', '--lr-ok', 'pravilno'], ['half', '--lr-half', 'pravilno z namigom'], ['bad', '--lr-bad', 'napačno'], ['seen', '--lr-seen', 'ogledana rešitev'], ['self', '--lr-self', 'sam preveril'], ['none', '--lr-none', 'brez odgovora']];
+  const PIE = [['ok', '--lr-ok', 'pravilno'], ['half', '--lr-half', 'pravilno z namigom'], ['part', '--lr-part', 'delno pravilno'], ['bad', '--lr-bad', 'napačno'], ['seen', '--lr-seen', 'ogledana rešitev'], ['self', '--lr-self', 'sam preveril'], ['none', '--lr-none', 'brez odgovora']];
   function paintPie(s) {
     const n = s.tasks.length;
     if (!n) return;
-    const c = { ok: 0, half: 0, bad: 0, seen: 0, self: 0, none: 0 };
+    const c = { ok: 0, half: 0, part: 0, bad: 0, seen: 0, self: 0, none: 0 };
     s.tasks.forEach((x) => { const st = status(x.idx); c[c[st] === undefined ? 'none' : st]++; });
     let cum = 0;
     const parts = [];

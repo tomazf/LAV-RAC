@@ -2,7 +2,7 @@
 // one answer per task, four theory groups, and for the assembler tasks a test run that does not count before
 // the answer is handed in ("Oddaj" counts and locks, also when tests fail).
 
-import { statements } from './qformat.js';
+import { statements, partialCredit2 } from './qformat.js';
 const ICONS = {
   procesor: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="12" y="12" width="24" height="24" rx="3"/><rect x="19" y="19" width="10" height="10" class="fill" opacity=".35"/><path d="M18 5v7M24 5v7M30 5v7M18 36v7M24 36v7M30 36v7M5 18h7M5 24h7M5 30h7M36 18h7M36 24h7M36 30h7"/></svg>',
   zbirnik: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="8" width="38" height="32" rx="3"/><text x="10" y="22" font-size="10">LDAA</text><text x="10" y="34" font-size="10">STAA</text></svg>',
@@ -48,6 +48,8 @@ export default {
   body{padding-left:0;padding-right:0}
   .rc.on small{color:inherit}`,
   patches: [
+    // Partial credit for tasks with several parts (agreed 16. 11. 2026).
+    ...partialCredit2(false),
     ['HOME.forEach((h,k)=>{', `HOME.push(...${JSON.stringify(HOME_PLUS)});\nHOME.forEach((h,k)=>{`],
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
     // Set I is mixed revision; not all of its tasks come from the matura (agreed 8. 11. 2026).
@@ -63,7 +65,7 @@ export default {
     ["  // preverjanje\n  $(\".js-check\",el).addEventListener(\"click\",()=>{",
       "  // preverjanje\n  if(t.type===\"asm\") $(\".js-run\",el).addEventListener(\"click\",()=>{ el._trial = true; $(\".js-check\",el).click(); });\n  $(\".js-check\",el).addEventListener(\"click\",()=>{"],
     // One answer per task. Something missing is not an answer yet; anything else locks the task.
-    ["    if(ok){ if(s.state!==\"seen\") s.state=\"ok\"; save(); }\n    show(ok, ok ? (s.state===\"seen\" ? \"Pravilno. Točke se ne štejejo, ker si si ogledal rešitev.\" : `Pravilno. +${ptsLabel(t.pts)}`) : (\"Ni še pravilno. \"+msg).trim());\n    paint(); progress();", "    if(el._trial){ el._trial = false; show(ok, ok ? \"Vsi testi uspejo. Testi se ne točkujejo: ko si pripravljen, program oddaj.\" : (msg + \" Testi se ne točkujejo: popravi program in jih zaženi znova.\").trim()); return; }\n    if(!ok && /^Izpolni|^Razvrsti/.test(msg)){ show(false,msg); return; }\n    save(); LavRac.answered(t.idx, ok, msg);"],
+    ["    if(ok){ if(s.state!==\"seen\") s.state=\"ok\"; save(); }\n    show(ok, ok ? (s.state===\"seen\" ? \"Pravilno. Točke se ne štejejo, ker si si ogledal rešitev.\" : `Pravilno. +${ptsLabel(t.pts)}`) : (\"Ni še pravilno. \"+msg).trim());\n    paint(); progress();", "    if(el._trial){ el._trial = false; show(ok, ok ? \"Vsi testi uspejo. Testi se ne točkujejo: ko si pripravljen, program oddaj.\" : (msg + \" Testi se ne točkujejo: popravi program in jih zaženi znova.\").trim()); return; }\n    if(!ok && /^Izpolni|^Razvrsti/.test(msg)){ show(false,msg); return; }\n    save(); LavRac.answered(t.idx, ok, msg, part);"],
     ['$(".js-hint",el).addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h=hi; save(); drawHints(); }});',
       '$(".js-hint",el).addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h=hi; save(); LavRac.hinted(t.idx); drawHints(); }});'],
     ['if(solEl.hidden){ drawSol(); solEl.hidden=false; if(s.state!=="ok"){ s.state="seen"; save(); paint(); progress(); }',

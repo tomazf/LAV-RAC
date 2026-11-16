@@ -1,18 +1,25 @@
 // Pure rules for exercise state: tasks stay locked, hints stay used, points follow the series rules.
 const FIELDS = {
-  short: { done: 'd', points: 'p', hinted: 'h' },
-  long: { done: 'done', points: 'pts', hinted: 'hinted' },
+  short: { done: 'd', points: 'p', hinted: 'h', full: 'f' },
+  long: { done: 'done', points: 'pts', hinted: 'hinted', full: 'full' },
 };
 export const fieldsOf = (ex) => FIELDS[ex.format] || FIELDS.short;
 export function readTask(ex, raw) {
   const f = fieldsOf(ex);
   const r = raw && typeof raw === 'object' ? raw : {};
-  return { done: r[f.done] === true, points: Number(r[f.points]) || 0, hinted: r[f.hinted] === true, solution: r.sol === true };
+  // `full` is written only as false: a task with several parts that was answered with some of them wrong (partial credit).
+  return { done: r[f.done] === true, points: Number(r[f.points]) || 0, hinted: r[f.hinted] === true, solution: r.sol === true, partial: r[f.full] === false };
 }
 // A self task (»Sam preveri«) has no points and nothing in it can be wrong; the student only ticks it.
+// A task with several parts may be answered partly right (agreed 16. 11. 2026): the points are then a share of the cap in
+// halves of a point, below the cap. With a hint the cap is half of the points of the task.
 function legalPoints(task, t) {
   if (task.self || !t.done || t.solution) return 0;
   const cap = t.hinted ? task.max / 2 : task.max;
+  if (t.partial) {
+    const p = Math.floor(Math.min(Math.max(t.points, 0), cap) * 2) / 2;
+    return p >= cap ? Math.max(0, cap - 0.5) : p;
+  }
   if (t.points >= cap) return cap;
   if (t.points >= task.max / 2) return task.max / 2;
   return 0;
@@ -21,6 +28,7 @@ function kindOf(task, t) {
   if (task.self) return 'self';
   if (t.solution) return 'solution';
   if (t.points <= 0) return 'wrong';
+  if (t.partial) return 'part';
   return t.points >= task.max ? 'correct' : 'partial';
 }
 export function summarize(ex, state) {

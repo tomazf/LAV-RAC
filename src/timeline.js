@@ -25,7 +25,7 @@ export const weekStart = (k) => addDays(k, -((new Date(ms(k)).getUTCDay() + 6) %
 export const schoolYearStart = (k) => `${Number(k.slice(5, 7)) >= 9 ? Number(k.slice(0, 4)) : Number(k.slice(0, 4)) - 1}-09-01`;
 const schoolYearName = (k) => { const y = Number(k.slice(0, 4)); return `${y}/${String(y + 1).slice(2)}`; };
 
-const OUTCOMES = [['correct', 'pravilno'], ['partial', 'pravilno z namigom'], ['wrong', 'napačno'], ['solution', 'ogledana rešitev'], ['self', 'sam preveril']];
+const OUTCOMES = [['correct', 'pravilno'], ['partial', 'pravilno z namigom'], ['part', 'delno pravilno'], ['wrong', 'napačno'], ['solution', 'ogledana rešitev'], ['self', 'sam preveril']];
 const tasksText = (nums) => (nums.length === 1 ? `naloga ${nums[0]}` : nums.length <= 8 ? `naloge ${nums.join(', ')}` : count(nums.length, ['naloga', 'nalogi', 'naloge', 'nalog']));
 
 /**
