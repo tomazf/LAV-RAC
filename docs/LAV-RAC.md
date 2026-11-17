@@ -16,12 +16,12 @@ Stanje poglavij (17. 11. 2026):
 | 2.4 | (prosto, dodamo kasneje) | V pripravi |
 | 2.5 | Operacijski sistemi in Linux lupina | artifact pripravljen, čaka uvoz |
 | 2.6 | | V pripravi |
-| 3.1 | Java in delovanje JVM | uvožena |
-| 3.2 | Algoritmi in diagrami poteka | uvožena |
-| 3.3 | Temeljni gradniki programa | uvožena |
-| 3.4 | Podatkovni tipi v Javi | uvožena |
-| 3.5 | Pogojni stavki v Javi | uvožena |
-| 3.6 | Zanke v Javi | uvožena 17. 11. 2026, čaka pregled učitelja |
+| 3.1 | Java in delovanje JVM | uvožena; nov artifact z malimi nalogami 18. 11. 2026 |
+| 3.2 | Algoritmi in diagrami poteka | uvožena; nov artifact čaka na posodobitev |
+| 3.3 | Temeljni gradniki programa | uvožena; nov artifact čaka na posodobitev |
+| 3.4 | Podatkovni tipi v Javi | uvožena; nov artifact čaka na posodobitev |
+| 3.5 | Pogojni stavki v Javi | uvožena; nov artifact čaka na posodobitev |
+| 3.6 | Zanke v Javi | uvožena 17. 11. 2026, čaka pregled učitelja; nov artifact čaka na posodobitev |
 | 3.7 | Tabele v Javi | artifact pripravljen, čaka uvoz |
 | 3.8, 3.9, 3.10 | | V pripravi |
 | 4.1 | Relacijska algebra | uvožena 11. 11. 2026, pregledana, skupine razlag potrjene |
@@ -43,6 +43,7 @@ Mesta »V pripravi« so v `content/sources.json` (`planned`), učitelji in skrbn
 ## Odločitve
 
 - Preizkusi pri delu (17. 11. 2026): celotnega `npm test` ne zaganjamo brez izrecnega dovoljenja učitelja, ker traja dolgo. Pred objavo se poženejo samo preizkusi, ki jih sprememba zadeva; pri skupni kodi in pri dodajanju ali odstranjevanju poglavja asistent najprej vpraša in priporoči. CI požene vse ob objavi, rezultat se pogleda po objavi. Zapisano v `CLAUDE.md`.
+- Posodobitev 3.1–3.6 na nove artifacte (18. 11. 2026): artifacti imajo na koncu strani razlage male naloge »Preizkusi se« (povleci in spusti, drži ali ne, katera slika, korak za korakom, sled izvajanja) in svojo samooceno nalog s kodo. Dogovorjeno: (1) naloge s kodo ostanejo, kot jih obravnava portal (točke ali »Sam preveri«, odgovor, namigi in rešitev na strežnik); artifactova samoocena (»Primerjaj z rešitvijo«, merila) se ne prevzame (`codeAsBefore` v `content/adapters/qformat.js`); (3) male naloge »Preizkusi se« so brez točk in portal ne hrani ničesar, tudi oznake »Opravljeno« ne (`miniTasks`); iskanje po razlagah jih preskoči; (4) v 3.2 in 3.3 imajo diagrami še naprej samo maturitetne napise, besedilo artifacta se temu prilagodi. Število, vrstni red in točke nalog so enaki, zato `version` ostane. Artifactov razred `.chip` je v filtru nalog zadel tudi kocke povleci in spusti; adapter filter omeji na `.chip[data-f]` (napako je treba popraviti tudi v artifactih). Stanje: 3.1 narejena (commit `4873a75`); 3.2–3.6 čakajo (sled izvajanja je v artifactih `new Function`, ki ga stroga CSP vaj prepoveduje, zato jo je treba ob uvozu prevesti v navadno kodo).
 - Mesta »V pripravi« (17. 11. 2026): vsako poglavje, ki čaka na artifact, ima mesto v `planned`, da ne pozabimo, kaj še rabimo; igre niso poglavja.
 - LAV-RAČ3 (8. 11. 2026): pravila za uvoz poglavij 3. letnika so v `TODO.md` (skupine teorije, »Ponavljanje«, naloge s programom v poljubnem okolju, brez omemb laboratorijskih vaj). Pri nalogah z izpisom ali programom portal hrani tudi vpisani izpis in kodo.
 - Točkovanje (6. 11. 2026): naloge »Za doma« se ne točkujejo. Maturitetne naloge se točkujejo smiselno glede na nalogo, kot v maturitetnih polah.
