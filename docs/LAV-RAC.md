@@ -26,14 +26,15 @@ Stanje poglavij (17. 11. 2026):
 | 3.8, 3.9, 3.10 | | V pripravi |
 | 4.1 | Relacijska algebra | uvožena 11. 11. 2026, pregledana, skupine razlag potrjene |
 | 4.2 | Podatkovne baze in SUPB | uvožena 11. 11. 2026, skupine razlag potrjene 12. 11. 2026, sklopa B in C združena |
-| 4.3 | Konceptualni in logični model | artifact pripravljen, čaka uvoz |
+| 4.3 | Konceptualni in logični model | uvožena 17. 11. 2026, risarske naloge s samooceno so »Sam preveri« (brez točk); skupine razlag čakajo potrditev |
 | 4.4 | SQL DDL in integritetne omejitve | V pripravi |
 | 4.5 | SQL poizvedbe | V pripravi |
 | 4.6 | SQL DML in tuji ključi | V pripravi |
 | 4.7 | UML | V pripravi |
 
 Kaj še rabimo:
-- uvoz pripravljenih poglavij 2.5, 3.6, 3.7 in 4.3 (artifacti: `claude.ai/artifact/2ZG1PRMFhWNrPQHmyvAuCE`, `NEku4wgzLZtrMEH5MpREN1`, `Ud7sBts42HGSGMeLZwnjXp`, `97oYmvWT8xBWqoKL3pH8EC`),
+- uvoz pripravljenih poglavij 2.5, 3.6 in 3.7 (artifacti: `claude.ai/artifact/2ZG1PRMFhWNrPQHmyvAuCE`, `NEku4wgzLZtrMEH5MpREN1`, `Ud7sBts42HGSGMeLZwnjXp`),
+- pregled 4.3 na zaslonu in potrditev skupin razlag,
 - artifacte za poglavja »V pripravi«: 2.4, 2.6, 3.8, 3.9, 3.10, 4.4, 4.5, 4.6 in 4.7,
 - igre (Robot zankar, Kodni sprint, Kodni CTF, Vdor v šolsko bazo, Dežurni DBA) niso poglavja in se ne štejejo; o njih se odloča posebej.
 

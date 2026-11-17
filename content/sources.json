@@ -83,6 +83,13 @@
       "artifactTitle": "Podatkovne baze in SUPB",
       "version": 1,
       "no": "2"
+    },
+    {
+      "id": "4.3",
+      "artifact": "https://claude.ai/artifact/97oYmvWT8xBWqoKL3pH8EC",
+      "artifactTitle": "Konceptualni in logični model",
+      "version": 1,
+      "no": "3"
     }
   ],
   "planned": [

@@ -6503,6 +6503,537 @@
     "is",
     "utrjevanje"
    ]
+  },
+  {
+   "id": "4.3",
+   "no": "3",
+   "module": "LAV-RAČ4",
+   "title": "Konceptualni in logični model",
+   "fullTitle": "Konceptualni in logični model",
+   "key": "scnm_lavrac_4_3_v1",
+   "version": 1,
+   "format": "short",
+   "maxPoints": 63,
+   "tasks": [
+    {
+     "i": 0,
+     "level": "srednja",
+     "max": 2,
+     "section": "Faze, modeli in diagram ER",
+     "q": "V kateri fazi življenjskega cikla programske opreme izdelamo entitetno-relacijske diagrame?"
+    },
+    {
+     "i": 1,
+     "level": "lažja",
+     "max": 1,
+     "section": "Faze, modeli in diagram ER",
+     "q": "V kateri fazi izdelave podatkovne baze se določi enolični identifikator entitetnega tipa?"
+    },
+    {
+     "i": 2,
+     "level": "srednja",
+     "max": 2,
+     "section": "Faze, modeli in diagram ER",
+     "q": "V kateri fazi razvoja informacijskega sistema (IS) je smiselno začeti uporabljati orodja CASE?"
+    },
+    {
+     "i": 3,
+     "level": "lažja",
+     "max": 1,
+     "section": "Faze, modeli in diagram ER",
+     "q": "Za načrtovanje informacijskega sistema se uporablja"
+    },
+    {
+     "i": 4,
+     "level": "težja",
+     "max": 3,
+     "section": "Faze, modeli in diagram ER",
+     "q": "Faze izdelave informacijskega sistema so: analiza zahtev, testiranje, implementacija, načrtovanje in prenos v ciljno okolje."
+    },
+    {
+     "i": 5,
+     "level": "srednja",
+     "max": 2,
+     "section": "Faze, modeli in diagram ER",
+     "q": "Denimo, da fazo načrtovanja IS označimo z oznako A in fazo implementacije IS z oznako B. Za vsakim opravilom izberi oznako faze, ki ji pripada."
+    },
+    {
+     "i": 6,
+     "level": "srednja",
+     "max": 2,
+     "section": "Faze, modeli in diagram ER",
+     "q": "S katerima vrstama diagramov lahko predstavimo model podatkov?"
+    },
+    {
+     "i": 7,
+     "level": "lažja",
+     "max": 1,
+     "section": "Faze, modeli in diagram ER",
+     "q": "Katera izmed naštetih značilnosti velja za diagrame entiteta-razmerje (ER)?"
+    },
+    {
+     "i": 8,
+     "level": "srednja",
+     "max": 2,
+     "section": "Faze, modeli in diagram ER",
+     "q": "Kateri značilnosti veljata za diagrame entiteta-razmerje?"
+    },
+    {
+     "i": 9,
+     "level": "srednja",
+     "max": 2,
+     "section": "Faze, modeli in diagram ER",
+     "q": "Kateri trditvi veljata za diagrame ER?"
+    },
+    {
+     "i": 10,
+     "level": "srednja",
+     "max": 2,
+     "section": "Faze, modeli in diagram ER",
+     "q": "Na kateri nivo modela spada?"
+    },
+    {
+     "i": 11,
+     "level": "težja",
+     "max": 3,
+     "section": "Entitete, atributi in ključi",
+     "q": "Dopolnite poved z besedami iz nabora tako, da bo strokovno resnična za ER-diagrame. NABOR: entiteta, entitetni tip, entitetni ključ, atribut, razmerje, števnost"
+    },
+    {
+     "i": 12,
+     "level": "srednja",
+     "max": 2,
+     "section": "Entitete, atributi in ključi",
+     "q": "Za entitetni tip Oseba imamo na voljo atribute: EMŠO, ime, priimek, datum rojstva in davčno številko. Zapišite vse atribute, ki so kandidati za entitetni identi"
+    },
+    {
+     "i": 13,
+     "level": "srednja",
+     "max": 2,
+     "section": "Entitete, atributi in ključi",
+     "q": "V podatkovni bazi je shranjena relacija Placilo (spodaj). Dopolnite stavka. Izberi med: PlaciloID, DatumPlacila, Znesek, Opombe, relacija nima primarnega ključa"
+    },
+    {
+     "i": 14,
+     "level": "srednja",
+     "max": 2,
+     "section": "Entitete, atributi in ključi",
+     "q": "Osnovni namen primarnega ključa tabele je"
+    },
+    {
+     "i": 15,
+     "level": "srednja",
+     "max": 2,
+     "section": "Entitete, atributi in ključi",
+     "q": "Obkrožite črki pred resničnima trditvama. Primarni ključ tabele"
+    },
+    {
+     "i": 16,
+     "level": "srednja",
+     "max": 2,
+     "section": "Entitete, atributi in ključi",
+     "q": "Obvezna značilnost primarnega ključa tabele je, da"
+    },
+    {
+     "i": 17,
+     "level": "srednja",
+     "max": 2,
+     "section": "Entitete, atributi in ključi",
+     "q": "V relacijskih podatkovnih bazah so podatki shranjeni v tabelah (relacijah). Vrstice v tabeli imenujemo zapisi, stolpce pa atributi. Kateri dve od danih trditev "
+    },
+    {
+     "i": 18,
+     "level": "srednja",
+     "max": 2,
+     "section": "Entitete, atributi in ključi",
+     "q": "Za vsako trditev izberi R, če je za dobro načrtovane relacijske podatkovne baze resnična, ali N, če ni resnična."
+    },
+    {
+     "i": 19,
+     "level": "srednja",
+     "max": 2,
+     "section": "Entitete, atributi in ključi",
+     "q": "Besedilo: »Knjižnica hrani podatke o knjigah (naslov, leto izida) in o članih (ime, priimek). Član si izposodi knjigo.« Kateri samostalniki so entitetni tipi?"
+    },
+    {
+     "i": 20,
+     "level": "srednja",
+     "max": 2,
+     "section": "Entitete, atributi in ključi",
+     "q": "Kako modeliraš podatek iz besedila?"
+    },
+    {
+     "i": 21,
+     "level": "srednja",
+     "max": 2,
+     "section": "Števnosti in branje diagrama",
+     "q": "Pri povezavi entitet v ER-diagramu uporabljamo različne povezave. Poveži simbole in imena povezav."
+    },
+    {
+     "i": 22,
+     "level": "srednja",
+     "max": 2,
+     "section": "Števnosti in branje diagrama",
+     "q": "Katere trditve so pravilne za dani diagram ER podatkovne baze? (Več pravilnih trditev.)"
+    },
+    {
+     "i": 23,
+     "level": "težja",
+     "max": 3,
+     "section": "Števnosti in branje diagrama",
+     "q": "Z diagramom ER je predstavljen model podatkovne baze. Dopolnite stavke tako, da bodo resnični za podani diagram ER."
+    },
+    {
+     "i": 24,
+     "level": "srednja",
+     "max": 2,
+     "section": "Števnosti in branje diagrama",
+     "q": "Spodnja relacijska shema opisuje podatke in povezave med strankami in njihovimi osebnimi svetovalci v banki. Kateri dve izmed naštetih trditev sta resnični za p"
+    },
+    {
+     "i": 25,
+     "level": "srednja",
+     "max": 2,
+     "section": "Števnosti in branje diagrama",
+     "q": "Spodnja relacijska shema opisuje podatke in povezave med strankami ter njihovimi agenti v turistični agenciji. Obkrožite črki pred resničnima trditvama."
+    },
+    {
+     "i": 26,
+     "level": "težja",
+     "max": 3,
+     "section": "Števnosti in branje diagrama",
+     "q": "Za diagram šolske baze izberi R (resnično) ali N (neresnično)."
+    },
+    {
+     "i": 27,
+     "level": "srednja",
+     "max": 2,
+     "section": "Števnosti in branje diagrama",
+     "q": "Kaj velja za ta diagram? Izberi vse pravilne odgovore."
+    },
+    {
+     "i": 28,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Logični model: zapiši relacijske sheme",
+     "q": "Dan je ta diagram ER. Zapišite relacijski shemi za entitetna tipa, ki sta na sliki, in opišite števnost razmerja Dela."
+    },
+    {
+     "i": 29,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Logični model: zapiši relacijske sheme",
+     "q": "Dan imamo ta model ER. Napišite pripadajoče relacijske sheme."
+    },
+    {
+     "i": 30,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Logični model: zapiši relacijske sheme",
+     "q": "Dan je diagram ER. Napišite vse relacijske sheme."
+    },
+    {
+     "i": 31,
+     "level": "srednja",
+     "max": 2,
+     "section": "Logični model: zapiši relacijske sheme",
+     "q": "Diagram prikazuje razmerje 1 : 1 med profesorjem in razredom, katerega razrednik je."
+    },
+    {
+     "i": 32,
+     "level": "srednja",
+     "max": 2,
+     "section": "Logični model: zapiši relacijske sheme",
+     "q": "Kako se pretvori v relacijske sheme?"
+    },
+    {
+     "i": 33,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Logični model: zapiši relacijske sheme",
+     "q": "V podjetju želijo poenostaviti proces inventure, zato bodo vse inventurne kose opremili z evidenčno inventurno številko. Poleg tega bodo določili kategorije, ko"
+    },
+    {
+     "i": 34,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Od shem do diagrama ER",
+     "q": "Podatkovna baza je opisana z relacijskima shemama tabel. Za podatkovno bazo narišite diagram ER. Na diagramu prikažite entitetne tipe, atribute, ključe in razme"
+    },
+    {
+     "i": 35,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Od shem do diagrama ER",
+     "q": "Strukture tabel v podatkovni bazi opisujejo te relacijske sheme. Narišite model ER podatkovne baze. Na diagramu prikažite entitetne tipe, razmerja, vse ključe i"
+    },
+    {
+     "i": 36,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Od shem do diagrama ER",
+     "q": "Dane imamo naslednje relacijske sheme. Narišite pripadajoči diagram ER. Iz diagrama morajo biti razvidni entitetni tipi, atributi, ključi in povezave s števnost"
+    },
+    {
+     "i": 37,
+     "level": "srednja",
+     "max": 2,
+     "section": "Od shem do diagrama ER",
+     "q": "Dani sta relacijski shemi. Kaj velja za pripadajoči diagram ER? Izberi vse pravilne odgovore."
+    },
+    {
+     "i": 38,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Diagram ER iz besedila",
+     "q": "Denimo, da imamo dva entitetna tipa: Pisatelj in Knjiga, ki sta povezana z razmerjem napiše (»pisatelj« napiše »knjiga«). Predpostavimo, da lahko knjigo napiše "
+    },
+    {
+     "i": 39,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Diagram ER iz besedila",
+     "q": "Na fakulteti so organizirani različni tečaji. Za tečaj beležimo podatka IDTečaja in ImeTečaja. Nanj se lahko prijavi več študentov. Za študenta beležimo podatka"
+    },
+    {
+     "i": 40,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Diagram ER iz besedila",
+     "q": "V podatkovni bazi zapisujemo prijave k maturi. Osnovni podatki o kandidatu so EMŠO, priimek, ime in datum rojstva, šola, ki jo je končal, in kraj prebivališča. "
+    },
+    {
+     "i": 41,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Diagram ER iz besedila",
+     "q": "Šola organizira tekmovanja iz različnih predmetov. Vsako tekmovanje ima eno odgovorno osebo (učitelja). Učitelj ima svoj ID, ime in priimek. En učitelj je lahko"
+    },
+    {
+     "i": 42,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Diagram ER iz besedila",
+     "q": "Spletna trgovina želi imeti podatkovno bazo, v kateri bo hranila podatke o izdelkih in o uporabnikih. Spletna trgovina ponuja več izdelkov in vsak izdelek sodi "
+    },
+    {
+     "i": 43,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Diagram ER iz besedila",
+     "q": "Za organizatorja različnih dogodkov je treba izdelati načrt podatkovne baze. Vsak dogodek ima svojo šifro, ime, datum začetka in datum konca dogodka. Na dogodku"
+    },
+    {
+     "i": 44,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Ponavljanje",
+     "q": "V podatkovni bazi hranimo naslednje podatke o vozilih: znamko, model, letnik in ceno. O kupcih hranimo naslednje podatke: davčno številko, priimek, ime, naslov "
+    },
+    {
+     "i": 45,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Ponavljanje",
+     "q": "V podatkovni bazi želimo hraniti športne dejavnosti. Vsaka od njih ima svojo enolično kodo in ime. Ker imamo na voljo le tri dvorane, želimo hraniti tudi urnik,"
+    },
+    {
+     "i": 46,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Ponavljanje",
+     "q": "Za podjetje, ki izvaja spletno oglaševanje apartmajev, je treba narediti načrt podatkovne baze. V neki državi je več regij in v vsaki regiji več krajev. Podatki"
+    },
+    {
+     "i": 47,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Ponavljanje",
+     "q": "Na spletnem portalu beležimo aktivnosti uporabnikov. Vsaka aktivnost ima svojo enolično številko, ime in opcijski opis. Uporabnik ima svoj ID, ime, priimek in e"
+    },
+    {
+     "i": 48,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Ponavljanje",
+     "q": "Igro igra več igralcev. Podatki o igralcu so uporabniško ime, elektronski naslov, geslo in datum registracije. Razločevalni podatek je elektronski naslov. Podat"
+    },
+    {
+     "i": 49,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Ponavljanje",
+     "q": "V spletni igralnici so registrirani igralci, ki igrajo različne igrice. Za vsakega igralca se zabeleži njegov ID, ime, priimek, država, iz katere prihaja, in en"
+    },
+    {
+     "i": 50,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Ponavljanje",
+     "q": "Zgraditi želimo podatkovno bazo o filmih in igralcih v njih. Vsak film želimo tudi kategorizirati v enega ali več žanrov. O filmu shranimo naslov, leto izida, ž"
+    },
+    {
+     "i": 51,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Ponavljanje",
+     "q": "Dan imamo ta model ER. Napišite relacijske sheme za relacije Disciplina, Tekma in Tekmovalec."
+    }
+   ],
+   "pages": [
+    {
+     "id": "pregled",
+     "chapter": "Teorija",
+     "label": "Pregled"
+    },
+    {
+     "id": "uvod",
+     "chapter": "Teorija",
+     "label": "Od zahtev do podatkovne baze"
+    },
+    {
+     "id": "entitete",
+     "chapter": "Teorija",
+     "label": "Entiteta in entitetni tip"
+    },
+    {
+     "id": "atributi",
+     "chapter": "Teorija",
+     "label": "Atributi"
+    },
+    {
+     "id": "kljuci",
+     "chapter": "Teorija",
+     "label": "Ključi"
+    },
+    {
+     "id": "razmerja",
+     "chapter": "Teorija",
+     "label": "Razmerja"
+    },
+    {
+     "id": "stevnost",
+     "chapter": "Teorija",
+     "label": "Števnost (vrana noga)"
+    },
+    {
+     "id": "mn",
+     "chapter": "Teorija",
+     "label": "Razmerje M : N"
+    },
+    {
+     "id": "sibki",
+     "chapter": "Teorija",
+     "label": "Močni in šibki entitetni tip"
+    },
+    {
+     "id": "branje",
+     "chapter": "Teorija",
+     "label": "Branje diagrama ER"
+    },
+    {
+     "id": "sheme",
+     "chapter": "Teorija",
+     "label": "Od diagrama ER do shem"
+    },
+    {
+     "id": "obratno",
+     "chapter": "Teorija",
+     "label": "Od shem do diagrama ER"
+    },
+    {
+     "id": "postopek",
+     "chapter": "Teorija",
+     "label": "Postopek: besedilo → diagram"
+    },
+    {
+     "id": "workbench",
+     "chapter": "Teorija",
+     "label": "MySQL Workbench"
+    },
+    {
+     "id": "utrjevanje",
+     "chapter": "Teorija",
+     "label": "Povzetek in primeri"
+    },
+    {
+     "id": "naloge-a",
+     "chapter": "Naloge",
+     "label": "Vaje A · Faze, modeli in diagram ER"
+    },
+    {
+     "id": "naloge-b",
+     "chapter": "Naloge",
+     "label": "Vaje B · Entitete, atributi in ključi"
+    },
+    {
+     "id": "naloge-c",
+     "chapter": "Naloge",
+     "label": "Vaje C · Števnosti in branje diagrama"
+    },
+    {
+     "id": "naloge-d",
+     "chapter": "Naloge",
+     "label": "Vaje D · Logični model: zapiši relacijske sheme"
+    },
+    {
+     "id": "naloge-e",
+     "chapter": "Naloge",
+     "label": "Vaje E · Od shem do diagrama ER"
+    },
+    {
+     "id": "naloge-f",
+     "chapter": "Naloge",
+     "label": "Vaje F · Diagram ER iz besedila"
+    },
+    {
+     "id": "doma-mat",
+     "chapter": "Naloge",
+     "label": "Vaje G · Ponavljanje"
+    },
+    {
+     "id": "doma",
+     "chapter": "Naloge",
+     "label": "Vaje H · Za doma"
+    }
+   ],
+   "gate": [
+    "uvod",
+    "entitete",
+    "atributi",
+    "kljuci",
+    "razmerja",
+    "stevnost",
+    "mn",
+    "sibki",
+    "branje",
+    "sheme",
+    "obratno",
+    "postopek",
+    "workbench",
+    "utrjevanje"
+   ]
   }
  ],
  "planned": [
