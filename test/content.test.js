@@ -1358,6 +1358,117 @@ test('3.1: program output is the answer and stays after a reload; an empty blank
   assert.deepEqual(errors, []);
 });
 
+// The small tasks at the end of an explanation (»Preizkusi se«, 18. 11. 2026): they work inside the portal's page rules, give no
+// points, send nothing to the server and keep nothing after a reload; the search in the explanations skips them. The artifact's
+// own self-assessment of code tasks is not in the page (the portal keeps its own handling, tested above).
+test('3.1: the small tasks of the explanations work, send nothing and keep nothing', async () => {
+  // a student of a 3rd-year class that has 3.1 open, whatever the earlier tests left: set aside and put back afterwards
+  await (await login('Ana Kovač')).context().close();
+  const db = new pg.Client({ connectionString: DB });
+  await db.connect();
+  const ana = (await db.query(`SELECT id FROM users WHERE name='Ana Kovač'`)).rows[0].id;
+  const prev = (await db.query('SELECT class_id FROM class_members WHERE user_id=$1', [ana])).rows;
+  const cls = (await db.query(`INSERT INTO classes(name, year) VALUES('Zz3', 3) RETURNING id`)).rows[0].id;
+  await db.query('DELETE FROM class_members WHERE user_id=$1', [ana]);
+  await db.query('INSERT INTO class_members(class_id, user_id) VALUES($1,$2)', [cls, ana]);
+  await db.query(`INSERT INTO class_exercises(class_id, exercise_id, visible, sort_order) VALUES($1,'3.1',true,0)`, [cls]);
+  try {
+    await smallTasks31();
+  } finally {
+    await db.query('DELETE FROM class_members WHERE user_id=$1', [ana]);
+    await db.query('DELETE FROM progress WHERE user_id=$1 AND exercise_id=$2', [ana, '3.1']);
+    await db.query('DELETE FROM classes WHERE id=$1', [cls]);
+    for (const r of prev) await db.query('INSERT INTO class_members(class_id, user_id) VALUES($1,$2)', [r.class_id, ana]);
+    await db.end();
+  }
+  // the artifact's own self-assessment of code tasks is not in the page: the portal's wording stays
+  const s = await login('Sara Skrbnik');
+  await s.goto(`${APP}/vaje/3.1#pregled`);
+  await at(s, 'pregled');
+  assert.match(await s.locator('.page.on .lr-rules').innerText(), /Odgovor preveri sam, če se zatakne, odpri namig\. Če si ogledaš rešitev/);
+  for (const hash of ['pregled', 'naloge-c', 'naloge-c/10', 'doma']) {
+    await go(s, hash);
+    assert.doesNotMatch(await s.locator('.page.on').innerText(), /Samoocena|Primerjaj z rešitvijo|Preveri izpis|Moram še vaditi|neobvezno/, hash);
+  }
+  await s.context().close();
+  assert.deepEqual(errors, []);
+});
+async function smallTasks31() {
+  const a = await login('Ana Kovač');
+  const outside = [];
+  let posts = 0;
+  a.on('request', (r) => { if (!r.url().startsWith(APP)) outside.push(r.url()); if (r.method() === 'POST' && r.url().includes('/api/progress/')) posts++; });
+  await a.goto(`${APP}/vaje/3.1`);
+  await go(a, 'jezik');
+  await settled(a);
+  assert.equal(await a.locator('.w').count(), 16);
+  assert.equal(await a.locator('.w:not([data-quiz])').count(), 0, 'the search skips them like the quizzes of 4.1');
+  assert.equal(await a.locator('.w.done').count(), 0);
+  const sent = posts;
+  // drag and drop, by tapping: an unfinished one asks to place everything, a wrong place is marked, the right ones finish it
+  const dd = a.locator('.page.on .wdd').first();
+  await dd.locator('.js-chk').click();
+  assert.match(await dd.locator('.wscore').textContent(), /^Najprej razvrsti vse \(še 5\)\.$/);
+  await dd.locator('.chip').first().click();
+  await dd.locator('.ws[data-s="4"]').click();
+  await dd.locator('.chip').first().click();
+  await dd.locator('.ws[data-s="4"]').click();
+  assert.equal(await dd.locator('.ws[data-s="4"] .chip').count(), 1, 'a place holds one piece');
+  await dd.locator('.js-rst').click();
+  for (let n = await dd.locator('.wpool .chip').count(); n > 0; n--) {
+    const chip = dd.locator('.wpool .chip').first();
+    const slot = await chip.getAttribute('data-s');
+    await chip.click();
+    await dd.locator(`.ws[data-s="${slot}"]`).click();
+  }
+  await dd.locator('.js-chk').click();
+  assert.equal(await dd.locator('.wscore').textContent(), 'Pravilno!');
+  assert.equal(await dd.locator('.chip.right').count(), 5);
+  // the artifact's task filter also takes the class chip: a piece that was clicked must not turn into a pressed filter button
+  assert.equal(await a.locator('.chip[aria-pressed="true"]:not([data-f])').count(), 0);
+  assert.equal(new Set(await dd.locator('.chip').evaluateAll((els) => els.map((e) => getComputedStyle(e).color))).size, 1, 'every piece is read in one colour');
+  assert.ok(await dd.evaluate((e) => e.classList.contains('done')));
+  assert.ok(await dd.locator('.wdone').isVisible());
+  // true or false: every statement answers once and shows why
+  const tf = a.locator('.page.on .wtf').first();
+  const items = tf.locator('.wi');
+  const n = await items.count();
+  assert.equal(n, 4);
+  for (let i = 0; i < n; i++) {
+    const it = items.nth(i);
+    await it.locator('.seg button').nth(Number(await it.getAttribute('data-a'))).click();
+    assert.ok(await it.evaluate((e) => e.classList.contains('right')));
+    assert.ok(await it.locator('.ww').isVisible());
+    assert.ok(await it.locator('.seg button').first().isDisabled());
+  }
+  assert.match(await tf.locator('.wscore').textContent(), /^4 \/ 4 pravilno/);
+  assert.ok(await tf.evaluate((e) => e.classList.contains('done')));
+  await a.waitForTimeout(500);
+  assert.equal(posts, sent, 'the small tasks send nothing');
+  // which picture: a wrong choice can be repeated, the right one shows the explanation (a page seen for the first time is saved,
+  // so the count starts again once it is)
+  await go(a, 'class');
+  await settled(a);
+  const sentAgain = posts;
+  const pk = a.locator('.page.on .wpick');
+  const right = Number(await pk.getAttribute('data-a'));
+  await pk.locator('.wo').nth((right + 1) % 4).click();
+  assert.match(await pk.locator('.wfb').textContent(), /Ni pravilno/);
+  assert.ok(await pk.locator('.wwhy').isHidden());
+  await pk.locator('.wo').nth(right).click();
+  assert.equal(await pk.locator('.wfb').textContent(), 'Pravilno.');
+  assert.ok(await pk.locator('.wwhy').isVisible());
+  assert.ok(await pk.evaluate((e) => e.classList.contains('done')));
+  // nothing went to the server, and nothing is kept: after a reload every one is to be done again
+  await a.waitForTimeout(500);
+  assert.equal(posts, sentAgain, 'the small tasks send nothing');
+  await a.reload();
+  await at(a, 'class');
+  assert.equal(await a.locator('.w.done').count(), 0);
+  assert.deepEqual(outside, []);
+  await a.context().close();
+}
+
 // Typed program output (agreed 16. 11. 2026): letter case and repeated or surrounding spaces do not matter, a different
 // word or a space inside a word still does. The card is found by its text; each card takes one answer.
 test('3.1 to 3.5: typed program output ignores letter case and repeated spaces, nothing else', async () => {

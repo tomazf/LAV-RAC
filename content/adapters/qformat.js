@@ -50,3 +50,31 @@ export const partialCredit2 = (spaced) => [
   ['ok = all; if(!ok && s.v.includes(null)) msg = t.type==="cls" ? "Razvrsti vse trditve." : "Izpolni vse vrstice.";',
     'ok = all; if(!ok && s.v.includes(null)) msg = t.type==="cls" ? "Razvrsti vse trditve." : "Izpolni vse vrstice.";\n      { const rows = t.type==="cls" ? t.items : t.rows; part = { right: rows.filter((r,k)=>s.v[k]===r[1]).length, of: rows.length }; }'],
 ];
+
+// The tasks where the student writes code stay as the portal handles them (points or "Sam preveri" as set in the adapter; the
+// answer, the hints and the solution go to the shell). The newer artifacts add a self-assessment of their own for these tasks
+// (»Preveri izpis«, »Primerjaj z rešitvijo«, criteria to tick, no points). It is not used: these replacements bring back the
+// artifact's earlier handling of such a task. Must come before the replacement of »Pokaži rešitev«.
+export const codeAsBefore = [
+  ["`${t.type===\"code\"?`<span class=\"tag self\">Samoocena · na maturi ${ptsLabel(t.pts)}</span>`:`<span class=\"tag\">${ptsLabel(t.pts)}</span>`}<span class=\"tag js-st\" hidden></span>`",
+    "`<span class=\"tag\">${ptsLabel(t.pts)}</span><span class=\"tag js-st\" hidden></span>`"],
+  ["Izpis tvojega programa (neobvezno)</label><textarea id=\"o-${t.id}\" class=\"mono out\" spellcheck=\"false\"></textarea></div><p class=\"selfnote\">Pri nalogah, kjer pišeš kodo, stran pravilnosti ne more preveriti, zato točk ni. Izpis je le preizkus. Ko končaš, klikni »Primerjaj z rešitvijo«: svojo kodo vidiš ob primeru rešitve in sam oceniš, ali je pravilna. Koda se shrani.</p>",
+    "Izpis tvojega programa</label><textarea id=\"o-${t.id}\" class=\"mono out\" spellcheck=\"false\"></textarea></div>"],
+  ["${t.type===\"code\"?\"Preveri izpis\":\"Preveri\"}", 'Preveri'],
+  ["${t.type===\"code\"?\"Primerjaj z rešitvijo\":\"Pokaži rešitev\"}", 'Pokaži rešitev'],
+  ["    if(t.type===\"code\"){ show(ok, ok ? \"Izpis se ujema s pričakovanim. Zdaj primerjaj še svojo kodo z rešitvijo.\" : (\"Izpis se še ne ujema. \"+msg).trim()); save(); return; }\n", ''],
+  ["    if(t.type===\"code\"){\n      if(!solEl.hidden){ solEl.hidden = true; btn.textContent = \"Primerjaj z rešitvijo\"; return; }\n      collect();\n      const mine = (ed.value||\"\").trim(), empty = !mine || mine===(t.starter||\"\").trim();\n      if(empty && !s.askEmpty){ s.askEmpty = true; show(false,\"Najprej poskusi napisati svojo kodo. Če želiš samo rešitev, klikni še enkrat (naloga se potem ne šteje).\"); return; }\n      drawCmp(empty); solEl.hidden = false; btn.textContent = \"Skrij primerjavo\";\n      if(empty && s.state!==\"cmp\"){ s.state=\"seen\"; save(); paint(); progress(); }\n      return;\n    }\n", ''],
+];
+
+// The small tasks at the end of an explanation (»Preizkusi se«: drag and drop, true or false, which picture, trace). They have no
+// points and the portal keeps nothing of them (agreed 18. 11. 2026): the mark »Opravljeno« lives in the page only. The search in
+// the explanations skips what is marked data-quiz, as it skips the quizzes of 4.1.
+export const miniTasks = [
+  ["document.querySelectorAll(\".w\").forEach(r=>{ if(wdone(r)) r.classList.add(\"done\"); });",
+    'document.querySelectorAll(".w").forEach(r=>{ r.setAttribute("data-quiz",""); if(wdone(r)) r.classList.add("done"); });'],
+  // The artifact's task filter takes every element with the class chip, so a piece of a drag and drop task that was clicked got
+  // aria-pressed and the colour of a pressed filter (light text on a light ground), and the filter lost its own mark. Only the filter
+  // buttons (they have data-f) are meant.
+  ["document.querySelectorAll(\".chip\").forEach(c=>c.addEventListener(\"click\",()=>{\n  document.querySelectorAll(\".chip\").forEach(x=>x.setAttribute(\"aria-pressed\",\"false\"));",
+    "document.querySelectorAll(\".chip[data-f]\").forEach(c=>c.addEventListener(\"click\",()=>{\n  document.querySelectorAll(\".chip[data-f]\").forEach(x=>x.setAttribute(\"aria-pressed\",\"false\"));"],
+];

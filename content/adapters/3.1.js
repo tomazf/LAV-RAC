@@ -1,8 +1,10 @@
 // Java in delovanje JVM. Connects the published artifact to the exercise shell: the portal's storage (also for
 // answers typed as program output), one answer per task, two theory groups, and the matura revision set moved
 // among the graded sets as "Ponavljanje" (agreed 8. 11. 2026).
+// Since 18. 11. 2026 the explanations also end with small tasks »Preizkusi se« (no points, nothing is kept) and the artifact's own
+// self-assessment of code tasks is not used (see codeAsBefore in qformat.js).
 
-import { statements, QTEXT, outputCompare, partialCredit } from './qformat.js';
+import { statements, QTEXT, outputCompare, partialCredit, codeAsBefore, miniTasks } from './qformat.js';
 const ICONS = {
   jezik: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17 14L7 24l10 10M31 14l10 10-10 10"/><path d="M27 10l-6 28"/></svg>',
   orodja: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="6" width="40" height="36" rx="3"/><rect x="10" y="14" width="28" height="22" rx="2"/><rect x="16" y="21" width="16" height="10" rx="2" class="fill" opacity=".35"/></svg>',
@@ -53,6 +55,12 @@ export default {
     ...partialCredit,
     // The typed output is compared without regard to letter case and repeated spaces (agreed 16. 11. 2026).
     ...outputCompare(false),
+    // The tasks with code keep the portal's handling, the small tasks of the explanations keep nothing (agreed 18. 11. 2026).
+    ...codeAsBefore,
+    ...miniTasks,
+    // The introduction of the tasks says nothing about the artifact's self-assessment of code tasks (not used here).
+    [" Naloge so dveh vrst. Pri nalogah z <strong>enoličnim odgovorom</strong> (izbira, dopolnjevanje, razvrščanje, napoved izpisa) stran odgovor preveri in podeli točke; če si pred pravilnim odgovorom ogledal rešitev, se točke ne štejejo. Pri nalogah z oznako <span class=\"tag self\">Samoocena</span> <strong>sam napišeš kodo</strong> (preizkusiš jo v Programizu, Eclipse ali VS Code). Stran je ne more preveriti, zato točk ni: kodo in neobvezen izpis shranimo, nato klikneš »Primerjaj z rešitvijo«, kjer vidiš svojo kodo ob primeru rešitve, prečrtaš merila in sam oceniš, ali nalogo znaš. Vrednosti so zapisane v kodi, vnosa s Scannerjem ni treba preizkušati.",
+      " Odgovor preveri sam, če se zatakne, odpri namig. Če si ogledaš rešitev, preden nalogo pravilno rešiš, se ti točke ne štejejo."],
     // C10 is checked by the student: its solution no longer says the output is compared exactly.
     ['Pazi na pike in velike črke, izpis primerjamo natančno.', 'Pazi na ločila: vejica in klicaj v prvi vrstici ter pika v drugi.'],
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
