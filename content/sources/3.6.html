@@ -1,0 +1,1102 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Zanke v Javi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: sticky chapter rail (desktop) + single reading column; theory first, then graded task cards, then homework. */
+:root{
+  --bg:#f4f6f8; --surface:#ffffff; --sunk:#e9edf1; --line:#d3dae1;
+  --fg:#18202b; --muted:#5a6675;
+  --accent:#8b4a1f; --accent-soft:#f3e4d8;
+  --ok:#11775f; --ok-soft:#dcf1ea; --bad:#b4372b; --bad-soft:#f8e1de; --seen:#8a6a00; --seen-soft:#f6edcc;
+  --code-bg:#1d2430; --code-fg:#e5e9f0; --k:#f0a868; --s:#9fd39a; --c:#8a96a8; --n:#d6a5f0;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11151b; --surface:#181e26; --sunk:#0d1116; --line:#2b3440;
+  --fg:#e4e8ee; --muted:#9aa5b3;
+  --accent:#e8a26f; --accent-soft:#3a2a1f;
+  --ok:#53c9a6; --ok-soft:#14322a; --bad:#f08578; --bad-soft:#3a1e1b; --seen:#e2c25a; --seen-soft:#352d12;
+  --code-bg:#0b0f14; --code-fg:#e5e9f0;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11151b; --surface:#181e26; --sunk:#0d1116; --line:#2b3440;
+  --fg:#e4e8ee; --muted:#9aa5b3;
+  --accent:#e8a26f; --accent-soft:#3a2a1f;
+  --ok:#53c9a6; --ok-soft:#14322a; --bad:#f08578; --bad-soft:#3a1e1b; --seen:#e2c25a; --seen-soft:#352d12;
+  --code-bg:#0b0f14; --code-fg:#e5e9f0;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:17px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:48px;padding-block:32px 80px}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr);gap:24px;padding-block:20px 60px}.wrap > .rail{display:none}}
+[hidden]{display:none!important}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(2rem,4.5vw,3rem);font-weight:700;letter-spacing:-.02em}
+h2{font-size:1.65rem;font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.2rem;font-weight:700}
+p{margin:0}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.eyebrow{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+main{min-width:0;display:flex;flex-direction:column;gap:56px}
+section{display:flex;flex-direction:column;gap:18px;scroll-margin-top:24px}
+.prose{max-width:68ch;display:flex;flex-direction:column;gap:14px}
+p.prose{display:block}
+.prose ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--sunk);padding:.08em .35em;border-radius:4px}
+pre{margin:0}
+.code{background:var(--code-bg);color:var(--code-fg);font-family:var(--f-mono);font-size:.84rem;line-height:1.55;padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.code .k{color:var(--k)} .code .s{color:var(--s)} .code .c{color:var(--c);font-style:italic} .code .n{color:var(--n)}
+.term .p{color:var(--k);user-select:none} .term .o{color:#a9b4c4}
+
+/* rail */
+.rail{position:sticky;top:max(24px,env(safe-area-inset-top,0px));align-self:start;display:flex;flex-direction:column;gap:20px;font-size:.93rem}
+.rail nav{display:flex;flex-direction:column;gap:2px}
+.rail nav a{color:var(--muted);text-decoration:none;padding:4px 10px;border-left:2px solid var(--line)}
+.rail nav a:hover{color:var(--fg);border-left-color:var(--accent)}
+.rail .grp{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 0 4px 12px}
+
+/* hero */
+.hero{display:flex;flex-direction:column;gap:16px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.hero .lead{font-size:1.15rem;color:var(--muted);max-width:62ch}
+.magic{font-family:var(--f-mono);font-size:clamp(.8rem,2.4vw,1rem);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.magic span{padding:3px 7px;border-radius:4px;background:var(--sunk);color:var(--muted)}
+.magic span.hi{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.magic small{color:var(--muted);font-family:var(--f-body);font-size:.85rem;margin-left:6px}
+
+/* progress */
+.progress{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.progress .row{display:flex;justify-content:space-between;gap:8px;font-variant-numeric:tabular-nums;font-size:.92rem}
+.bar{height:8px;background:var(--sunk);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.progress .tools{display:flex;gap:8px;flex-wrap:wrap}
+
+/* diagram + tables */
+.fig{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;overflow-x:auto}
+.fig svg{display:block;min-width:640px;width:100%;height:auto}
+.fig figcaption{font-size:.88rem;color:var(--muted);margin-top:8px}
+figure{margin:0}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.95rem;min-width:520px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
+.note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 14px;border-radius:0 8px 8px 0;max-width:68ch;font-size:.97rem}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.two > *{min-width:0}
+
+/* task list */
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:inherit;font-size:.88rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:5px 12px;border-radius:99px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.level{display:flex;flex-direction:column;gap:14px}
+.level > header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding-top:8px}
+.level > header p{color:var(--muted);font-size:.95rem}
+.task{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px;scroll-margin-top:24px}
+.task[data-state="ok"]{border-color:var(--ok)}
+.task[data-state="seen"]{border-color:var(--seen)}
+.thead{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.tnum{font-family:var(--f-display);font-weight:700;font-size:1.05rem}
+.tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.tag{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.04em;padding:2px 8px;border-radius:4px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.tag.mat{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.tag.st-ok{background:var(--ok-soft);color:var(--ok)}
+.tag.st-seen{background:var(--seen-soft);color:var(--seen)}
+.q{display:flex;flex-direction:column;gap:10px;max-width:72ch}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 12px;border:1px solid var(--line);border-radius:8px;cursor:pointer;background:var(--bg)}
+.opt:hover{border-color:var(--muted)}
+.opt input{margin-top:5px;accent-color:var(--accent)}
+.opt b{font-family:var(--f-mono);font-weight:600;min-width:1.2em}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.blank{display:flex;flex-direction:column;gap:4px}
+.blank label{font-size:.93rem;color:var(--muted)}
+input[type="text"],textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 10px;width:100%}
+input.mono,textarea.mono{font-family:var(--f-mono);font-size:.86rem}
+textarea.editor{font-family:var(--f-mono);font-size:.84rem;line-height:1.5;min-height:180px;tab-size:4;white-space:pre;overflow:auto;resize:vertical}
+textarea.out{min-height:90px}
+input.right,textarea.right{border-color:var(--ok);background:var(--ok-soft)}
+input.wrong,textarea.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.cls{display:flex;flex-direction:column;gap:6px}
+.crow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.crow.right{border-color:var(--ok);background:var(--ok-soft)} .crow.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.crow .txt{min-width:0;font-size:.96rem}
+.seg{display:inline-flex;justify-self:start;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex-wrap:wrap}
+.seg button{font:inherit;font-size:.84rem;border:0;background:var(--surface);color:var(--fg);padding:4px 10px;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+@media (max-width:560px){.crow{grid-template-columns:minmax(0,1fr)}}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;font-size:.92rem;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:6px 14px;border-radius:6px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.feedback{font-weight:600;font-size:.95rem}
+.feedback.ok{color:var(--ok)} .feedback.bad{color:var(--bad)}
+.hints{display:flex;flex-direction:column;gap:6px}
+.hint{background:var(--sunk);border-radius:8px;padding:8px 12px;font-size:.95rem;max-width:72ch}
+.hint b{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);margin-right:6px}
+.sol{border-top:1px dashed var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px}
+.sol .ans{font-weight:700}
+.sol .why{max-width:72ch;color:var(--fg)}
+.editorbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.editorbar span{font-size:.85rem;color:var(--muted)}
+.confirm{display:inline-flex;gap:8px;align-items:center;font-size:.9rem}
+/* paging */
+.rail nav a[aria-current="page"]{color:var(--fg);border-left-color:var(--accent);font-weight:600;background:var(--surface)}
+.rail nav a{display:flex;justify-content:space-between;gap:8px}
+.rail nav a .cnt{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:400}
+.rail nav a .cnt.full{color:var(--ok)}
+.rprog{display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:.86rem;font-variant-numeric:tabular-nums}
+.sync{display:flex;gap:6px;align-items:flex-start;color:var(--muted);font-size:.8rem;line-height:1.35}
+.sync::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;margin-top:4px;background:var(--seen)}
+.sync[data-s="cloud"]::before{background:var(--ok)}
+.mtop{display:none;flex-direction:column;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.mtop select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 10px;width:100%}
+.mtop .row{display:flex;justify-content:space-between;gap:8px;font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+@media (max-width:900px){.mtop{display:flex}}
+.crumb{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-top:1px solid var(--line);padding-top:20px}
+.pager a{display:flex;flex-direction:column;gap:2px;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);text-decoration:none;min-width:0}
+.pager a:hover{border-color:var(--accent)}
+.pager a.next{text-align:right;grid-column:2}
+.pager a .t{font-family:var(--f-display);font-weight:700;font-size:1.05rem}
+.pager a.next .t::after{content:" \2192"} .pager a.prev .t::before{content:"\2190  "}
+.pager .eyebrow{font-size:.7rem}
+@media (max-width:560px){.pager{grid-template-columns:1fr}.pager a.next{grid-column:1}}
+.lvl-empty{color:var(--muted);font-style:italic}
+main{gap:40px}
+footer{color:var(--muted);font-size:.88rem;border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.fc{display:block;max-width:100%;height:auto;margin:0 auto}
+.fc .fn{fill:var(--surface);stroke:var(--fg);stroke-width:1.5}
+.fc .fl{fill:none;stroke:var(--fg);stroke-width:1.5}
+.fc .fa{fill:var(--fg);stroke:none}
+.fc .ft{font-family:var(--f-mono);font-size:13px;fill:var(--fg);text-anchor:middle;dominant-baseline:central}
+.fc .fl2{font-family:var(--f-body);font-size:12px;font-weight:600;fill:var(--muted)}
+.fc.sym{margin:0}
+.fc .fb{fill:var(--accent);stroke:var(--surface);stroke-width:1.5}
+.fc .fbt{font-family:var(--f-body);font-size:11px;font-weight:700;fill:var(--surface);text-anchor:middle;dominant-baseline:central}
+p.prose{display:block}
+.langsw{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.mtop .langsw{flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap}
+
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+
+<div class="wrap">
+  <aside class="rail" aria-label="Vsebina poglavja">
+    <div class="eyebrow">Poglavje 6 od 12</div>
+    <nav>
+      <div class="grp">Razlaga</div>
+      <a href="#while">Zanka while</a>
+      <a href="#for">Zanka for</a>
+      <a href="#do-while">Zanka do-while</a>
+      <a href="#izbira">Izbira in pretvorba</a>
+      <a href="#gnezdene">Gnezdene zanke</a>
+      <a href="#break">break in continue</a>
+      <a href="#vzorci">Vzorci in algoritmi</a>
+      <a href="#napake">Pogoste napake</a>
+      <div class="grp">Vaje</div>
+      <a href="#naloge-a">A · Vrste zank <span class="cnt" data-lv="A"></span></a>
+      <a href="#naloge-b">B · Sledenje izvajanju <span class="cnt" data-lv="B"></span></a>
+      <a href="#naloge-c">C · Pisanje zank <span class="cnt" data-lv="C"></span></a>
+      <a href="#naloge-d">D · Gnezdene zanke <span class="cnt" data-lv="D"></span></a>
+      <a href="#naloge-e">E · break in continue <span class="cnt" data-lv="E"></span></a>
+      <a href="#naloge-f">F · Laboratorijske vaje <span class="cnt" data-lv="F"></span></a>
+      <a href="#naloge-g">G · Dodatne vaje <span class="cnt" data-lv="G"></span></a>
+      <a href="#doma">Za doma <span class="cnt" data-lv="H"></span></a>
+    </nav>
+    <div class="rprog" aria-live="polite">
+      <strong>Tvoj napredek</strong>
+      <div class="bar"><i class="js-bar"></i></div>
+      <span class="js-progtxt"></span>
+      <span class="sync js-sync" data-s="local">Napredek se shranjuje v tem brskalniku.</span>
+    </div>
+  </aside>
+
+  <main>
+    <div class="mtop">
+      <label class="eyebrow" for="pageSel">Poglavje 6 · stran</label>
+      <select id="pageSel"></select>
+      <div class="bar"><i class="js-bar"></i></div>
+      <div class="row"><span class="js-progtxt"></span></div>
+      <span class="sync js-sync" data-s="local">Napredek se shranjuje v tem brskalniku.</span>
+    </div>
+    <div class="crumb" id="crumb"><span class="eyebrow">Poglavje 6 · Zanke</span><span class="eyebrow" id="crumbN"></span></div>
+    <header class="hero" id="hero">
+      <div class="eyebrow">Splošna matura · Računalništvo · Izpitna pola 1</div>
+      <h1>Zanke v Javi</h1>
+      <p class="lead">Računalnik je najbolj uporaben, kadar mora isto stvar ponoviti stokrat ali milijonkrat: izpisati števila od 1 do 100, sešteti števke, poiskati praštevila. Spoznaš zanke <code>while</code>, <code>for</code> in <code>do-while</code>, gnezdene zanke, stavka <code>break</code> in <code>continue</code> ter vzorce, ki jih srečaš v večini nalog.</p>
+      <div class="magic" aria-label="Teme poglavja">
+        <span class="hi">while</span><span>·</span><span class="hi">for</span><span>·</span><span class="hi">do-while</span>
+        <small>tri vrste zank</small>
+      </div>
+    </header>
+
+    <!-- ===================== RAZLAGA ===================== -->
+<section id="while">
+<div class="eyebrow">Razlaga 1</div>
+<h2>Zanka while</h2>
+<div class="prose">
+  <p><strong>Zanka</strong> je stavek, ki isto skupino stavkov izvede večkrat. Zanka <code>while</code> ponavlja stavke, <strong>dokler je izpolnjen pogoj</strong>. Pogoj je izraz tipa <code>boolean</code>, tak kot pri stavku <code>if</code>.</p>
+  <p>Pogoj se preveri <strong>pred vsako ponovitvijo</strong>, tudi pred prvo. Zato se telo zanke izvede nič-krat (če je pogoj že na začetku neresničen), enkrat ali večkrat.</p>
+</div>
+<div class="two">
+<pre class="code js-hl">int i = 1;                  // začetek
+while (i &lt;= 10) {           // pogoj
+    System.out.println(i);  // telo zanke
+    i++;                    // sprememba
+}
+// izpis: 1, 2, ..., 10</pre>
+<figure class="fig"><div data-fc="w1"></div><figcaption>Diagram poteka zanke while. Pogoj je v rombu, veja True vodi v telo in nazaj k pogoju, veja False iz zanke.</figcaption></figure>
+</div>
+<div class="tbl"><table>
+<thead><tr><th>Del zanke</th><th>Naloga</th><th>V primeru</th></tr></thead>
+<tbody><tr><td>začetna vrednost</td><td>pripravi spremenljivko, ki nastopa v pogoju (pred zanko)</td><td><code>int i = 1;</code></td></tr><tr><td>pogoj</td><td>odloči, ali bo sledila nova ponovitev</td><td><code>i &lt;= 10</code></td></tr><tr><td>telo zanke</td><td>stavki, ki se ponavljajo (v zavitih oklepajih)</td><td><code>System.out.println(i);</code></td></tr><tr><td>sprememba</td><td>spremeni vrednost iz pogoja, da se zanka enkrat konča</td><td><code>i++;</code></td></tr></tbody>
+</table></div>
+<p class="note"><strong>Neskončna zanka:</strong> če se spremenljivka iz pogoja v telesu nikoli ne spremeni (npr. pozabljen <code>i++</code>), pogoj ostane resničen in se program nikoli ne konča. Zavita oklepaja <code>{ }</code> pišemo vedno: brez njiju spada v zanko samo prvi stavek.</p>
+<h3 style="font-size:1.15rem;margin-top:8px">Sledenje izvajanju zanke</h3>
+<div class="prose">
+  <p>Pri maturitetnih nalogah tipa »kaj izpiše« ali »kolikokrat se izvede« si pripravi <strong>tabelo</strong>: vrstica za vsako ponovitev, stolpec za vsako spremenljivko. Ne pozabi zadnjega preverjanja pogoja, ki zanko konča.</p>
+</div>
+<div class="two">
+<pre class="code js-hl">int a = 1, b = 20;
+while (a &lt; b) {
+    a = a * 2;
+    b = b - 3;
+}
+System.out.println(a + " " + b);   // 16 8</pre>
+<div class="tbl"><table>
+<thead><tr><th>Pred ponovitvijo</th><th>a</th><th>b</th><th>a &lt; b</th></tr></thead>
+<tbody><tr><td>1.</td><td>1</td><td>20</td><td>true</td></tr><tr><td>2.</td><td>2</td><td>17</td><td>true</td></tr><tr><td>3.</td><td>4</td><td>14</td><td>true</td></tr><tr><td>4.</td><td>8</td><td>11</td><td>true</td></tr><tr><td>po 4. ponovitvi</td><td>16</td><td>8</td><td>false, konec</td></tr></tbody>
+</table></div>
+</div>
+<p class="note">Zanka se je izvedla <strong>štirikrat</strong>. Vrednosti a in b po zadnji ponovitvi sta 16 in 8. Pri zanki, ki izpisuje, sledi tudi izpisu: izpis se zgodi samo, če se izvede telo.</p>
+</section>
+
+<section id="for">
+<div class="eyebrow">Razlaga 2</div>
+<h2>Zanka for</h2>
+<div class="prose">
+  <p>Kadar vnaprej vemo, kolikokrat se mora zanka izvesti, uporabimo zanko <code>for</code>. V <strong>glavi</strong> zanke so na enem mestu zbrani začetna vrednost, pogoj in sprememba števca, ločeni s podpičji:</p>
+</div>
+<pre class="code js-hl">for (začetek; pogoj; korak) {
+    telo
+}</pre>
+<div class="prose">
+  <p>Zanka <code>for</code> je <strong>krajši zapis zanke while</strong>. Izvede se po vrsti: 1. začetek (samo enkrat), 2. pogoj, 3. telo, 4. korak, nato spet 2. pogoj in tako naprej. Ko pogoj postane neresničen, se zanka konča.</p>
+</div>
+<div class="two">
+<div style="display:flex;flex-direction:column;gap:8px"><span class="eyebrow">Zanka for</span><pre class="code js-hl">for (int i = 1; i &lt;= 3; i++) {
+    System.out.println(i);
+}</pre></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="eyebrow">Enakovredna zanka while</span><pre class="code js-hl">int i = 1;
+while (i &lt;= 3) {
+    System.out.println(i);
+    i++;
+}</pre></div>
+</div>
+<div class="tbl"><table>
+<thead><tr><th>Kaj želimo</th><th>Zanka for</th></tr></thead>
+<tbody><tr><td>števila od 1 do n</td><td><code>for (int i = 1; i &lt;= n; i++)</code></td></tr><tr><td>n ponovitev (števec od 0)</td><td><code>for (int i = 0; i &lt; n; i++)</code></td></tr><tr><td>števila od n do 1 (navzdol)</td><td><code>for (int i = n; i &gt;= 1; i--)</code></td></tr><tr><td>vsako drugo število (korak 2)</td><td><code>for (int i = 0; i &lt;= 20; i += 2)</code></td></tr><tr><td>vsi znaki od a do z</td><td><code>for (char ch = 'a'; ch &lt;= 'z'; ch++)</code></td></tr></tbody>
+</table></div>
+<h3 style="font-size:1.15rem;margin-top:8px">Doseg števca in prazno telo</h3>
+<div class="prose">
+  <p>Spremenljivka, deklarirana v glavi zanke <code>for</code>, <strong>obstaja samo znotraj zanke</strong>. Če vrednost števca potrebujemo tudi za zanko, ga deklariramo pred njo. Glavo zanke <code>for</code> lahko zapišemo tudi s praznim telesom (podpičje namesto <code>{ }</code>). Tedaj se zanka vrti, števec pa se spreminja, dokler pogoj ne postane neresničen.</p>
+</div>
+<pre class="code js-hl">int i;                               // števec deklariran pred zanko
+for (i = 10; i &gt; 0; i -= 3);         // telo je prazen stavek
+System.out.println(i);               // -2: vrednosti 10, 7, 4, 1, nato -2 ne ustreza pogoju</pre>
+<p class="note">Za maturo: pri zanki <code>for (int i = 0; i &lt; n; i++)</code> se telo izvede n-krat, števec pa ima vrednosti od 0 do n − 1. Pri <code>i &lt;= n</code> bi se izvedlo (n + 1)-krat. To je najpogostejša napaka pri štetju ponovitev.</p>
+</section>
+
+<section id="do-while">
+<div class="eyebrow">Razlaga 3</div>
+<h2>Zanka do-while</h2>
+<div class="prose">
+  <p>Pri zanki <code>do-while</code> je <strong>pogoj na koncu</strong>: telo se izvede najprej, pogoj pa se preveri šele po prvi ponovitvi. Zato se telo izvede <strong>vsaj enkrat</strong>. Za zaprtim oklepajem pogoja je podpičje.</p>
+</div>
+<div class="two">
+<pre class="code js-hl">do {
+    telo
+} while (pogoj);   // podpičje na koncu
+
+int x = 10;
+do {
+    System.out.println(x);   // izpiše 10
+    x++;
+} while (x &lt; 5);             // 11 &lt; 5 ni res: konec</pre>
+<figure class="fig"><div data-fc="d1"></div><figcaption>Zanka do-while v diagramu poteka: telo je pred pogojem. Pri True se vrnemo na začetek telesa.</figcaption></figure>
+</div>
+<div class="prose">
+  <p>Tipični uporabi sta <strong>preverjanje vnosa</strong> (uporabnik mora vpisati število vsaj enkrat, preden ga lahko preverimo) in <strong>meni</strong>, ki se ponavlja, dokler uporabnik ne izbere izhoda. Primer: ponavljamo vnos, dokler število ni štirimestno.</p>
+</div>
+<pre class="code js-hl">Scanner sc = new Scanner(System.in);
+int stevilo;                                     // deklariran PRED zanko, da je viden v pogoju
+do {
+    System.out.println("Vnesi stirimestno stevilo");
+    stevilo = sc.nextInt();
+} while (stevilo &lt; 1000 || stevilo &gt; 9999);      // ponavljaj, dokler število ni ustrezno</pre>
+<div class="tbl"><table>
+<thead><tr><th></th><th>while</th><th>do-while</th></tr></thead>
+<tbody><tr><td>kje je pogoj</td><td>na začetku</td><td>na koncu</td></tr><tr><td>najmanj ponovitev</td><td>0</td><td>1</td></tr><tr><td>podpičje za pogojem</td><td>ne</td><td>da</td></tr><tr><td>tipična uporaba</td><td>ponavljanje, ki se morda ne izvede</td><td>vnos, meni, nekaj moramo narediti vsaj enkrat</td></tr></tbody>
+</table></div>
+<p class="note"><strong>Doseg:</strong> spremenljivka, deklarirana v telesu zanke do-while, v pogoju ni vidna. Če jo uporabljaš v pogoju, jo deklariraj pred zanko (kot <code>stevilo</code> zgoraj). Pogoj pri do-while pove, kdaj zanka <strong>nadaljuje</strong>, ne kdaj se konča.</p>
+</section>
+
+<section id="izbira">
+<div class="eyebrow">Razlaga 4</div>
+<h2>Katero zanko izbrati in pretvorba med zankami</h2>
+<div class="tbl"><table>
+<thead><tr><th>Situacija</th><th>Primerna zanka</th></tr></thead>
+<tbody><tr><td>število ponovitev je znano vnaprej (n-krat, od 1 do n)</td><td><code>for</code></td></tr><tr><td>število ponovitev ni znano, ponavljamo, dokler velja pogoj (lahko tudi nikoli)</td><td><code>while</code></td></tr><tr><td>telo se mora izvesti vsaj enkrat (vnos, meni)</td><td><code>do-while</code></td></tr></tbody>
+</table></div>
+<div class="prose">
+  <p>Vsako zanko lahko zapišemo z vsako drugo. Maturitetne naloge pogosto zahtevajo: »Zapišite isto kodo <strong>brez zanke for</strong>« ali »pretvorite zanko do-while v for«. Pravilo za pretvorbo <code>for</code> v <code>while</code>:</p>
+</div>
+<pre class="code js-hl">for (A; B; C) {          // zanka for
+    S
+}
+
+A;                       // enakovredna zanka while
+while (B) {
+    S
+    C;
+}</pre>
+<div class="prose">
+  <p>Isto štetje od 0 do 4 z vsemi tremi zankami:</p>
+</div>
+<div class="two"><div style="display:flex;flex-direction:column;gap:8px"><span class="eyebrow">for</span><pre class="code js-hl">for (int i = 0; i &lt; 5; i++) {
+    System.out.print(i);
+}</pre></div><div style="display:flex;flex-direction:column;gap:8px"><span class="eyebrow">while</span><pre class="code js-hl">int i = 0;
+while (i &lt; 5) {
+    System.out.print(i);
+    i++;
+}</pre></div><div style="display:flex;flex-direction:column;gap:8px"><span class="eyebrow">do-while</span><pre class="code js-hl">int i = 0;
+do {
+    System.out.print(i);
+    i++;
+} while (i &lt; 5);</pre></div></div>
+<div class="prose">
+  <p>Vse tri zanke izpišejo 01234.</p>
+</div>
+<p class="note"><strong>Pozor pri do-while:</strong> zapisa z while in do-while sta enakovredna samo, če je pogoj pred prvo ponovitvijo izpolnjen. Če pogoj ni izpolnjen, zanka while telesa ne izvede, do-while pa ga izvede enkrat. Pri pretvorbi <code>for</code> v <code>do-while</code> zato pogoj pogosto preverimo še pred zanko (<code>if</code>).</p>
+</section>
+
+<section id="gnezdene">
+<div class="eyebrow">Razlaga 5</div>
+<h2>Gnezdene zanke</h2>
+<div class="prose">
+  <p>Zanka je navaden stavek, zato jo lahko zapišemo znotraj druge zanke. Temu rečemo <strong>gnezdenje</strong>. Za vsako ponovitev <strong>zunanje</strong> zanke se <strong>notranja</strong> zanka izvede v celoti. Tako obdelamo vrstice in stolpce: zunanja zanka šteje vrstice, notranja stolpce.</p>
+</div>
+<div class="two">
+<pre class="code js-hl">for (int i = 1; i &lt;= 3; i++) {       // vrstice
+    for (int j = 1; j &lt;= 4; j++) {   // stolpci
+        System.out.print("*");
+    }
+    System.out.println();            // nova vrstica
+}
+// ****
+// ****
+// ****</pre>
+<pre class="code js-hl">for (int i = 1; i &lt;= 3; i++) {
+    for (int j = 1; j &lt;= i; j++) {   // meja je odvisna od i
+        System.out.print("*");
+    }
+    System.out.println();
+}
+// *
+// **
+// ***</pre>
+</div>
+<figure class="fig"><div data-fc="trik"></div><figcaption>Diagram poteka za trikotnik iz zvezdic. Notranja zanka while je v celoti v telesu zunanje.</figcaption></figure>
+<div class="prose">
+  <p>Skupno število ponovitev notranjega telesa je pri pravokotniku 3 · 4 = 12, pri trikotniku pa 1 + 2 + 3 = 6. Če meja notranje zanke ni odvisna od zunanjega števca, ponovitve množimo, sicer jih seštejemo po vrsticah.</p>
+  <p><strong>Mesto stavka <code>println</code>:</strong> <code>System.out.print</code> stoji v notranji zanki, <code>System.out.println()</code> pa <strong>za</strong> notranjo zanko in znotraj zunanje, da se vsaka vrstica zaključi.</p>
+</div>
+<div class="tbl"><table>
+<thead><tr><th>Vzorec (n vrstic in stolpcev)</th><th>Pogoj, ki izbere znak</th><th>Izris za n = 3</th></tr></thead>
+<tbody><tr><td>pravokotnik</td><td>vedno</td><td><code>*<strong></code> <code></strong>*</code> <code>***</code></td></tr><tr><td>trikotnik</td><td><code>j &lt;= i</code></td><td><code>*</code> <code><strong></code> <code></strong>*</code></td></tr><tr><td>obrnjen trikotnik</td><td><code>j &lt;= n - i + 1</code></td><td><code>*<strong></code> <code></strong></code> <code>*</code></td></tr><tr><td>glavna diagonala</td><td><code>j == i</code></td><td><code>X..</code> <code>.X.</code> <code>..X</code></td></tr><tr><td>stranska diagonala</td><td><code>j == n - i + 1</code></td><td><code>..X</code> <code>.X.</code> <code>X..</code></td></tr><tr><td>šahovnica</td><td><code>(i + j) % 2 == 0</code></td><td><code>XOX</code> <code>OXO</code> <code>XOX</code></td></tr><tr><td>okvir</td><td><code>i == 1 || i == n || j == 1 || j == n</code></td><td><code>***</code> <code>*.*</code> <code>***</code></td></tr></tbody>
+</table></div>
+<p class="note">Pri nalogah »kaj izpiše« gnezdena zanka: izpiši vrednosti i in j po vrsticah (i = 1: j = 1, 2, 3 …). Tako vidiš, kdaj se notranja zanka ne izvede (npr. ko je pogoj <code>j &lt; i</code> pri i = 1 že neresničen).</p>
+</section>
+
+<section id="break">
+<div class="eyebrow">Razlaga 6</div>
+<h2>Stavka break in continue</h2>
+<div class="prose">
+  <p>Včasih zanke ne želimo izvesti do konca. Stavek <code>break</code> <strong>zapusti zanko</strong> (najbližjo, v kateri stoji), program pa se nadaljuje za zanko. Stavek <code>continue</code> <strong>preskoči preostanek trenutne ponovitve</strong> in nadaljuje z naslednjo. Pri <code>for</code> se pred preverjanjem pogoja izvede še korak (<code>i++</code>), pri <code>while</code> in <code>do-while</code> skoči izvajanje takoj na pogoj.</p>
+</div>
+<div class="two">
+<div style="display:flex;flex-direction:column;gap:8px"><span class="eyebrow">break: iskanje najmanjšega delitelja</span><pre class="code js-hl">int n = 91;
+for (int d = 2; d &lt; n; d++) {
+    if (n % d == 0) {
+        System.out.println(d);   // 7
+        break;                   // delitelj najden, zanko lahko končamo
+    }
+}</pre></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="eyebrow">continue: izpis lihih števil</span><pre class="code js-hl">for (int i = 1; i &lt;= 10; i++) {
+    if (i % 2 == 0) {
+        continue;                // sodo število preskočimo
+    }
+    System.out.print(i + " ");   // 1 3 5 7 9
+}</pre></div>
+</div>
+<div class="prose">
+  <p><strong>Neskončna zanka z izhodom.</strong> Zanko <code>while (true)</code> poznamo kot zanko, ki jo prekine šele <code>break</code>. Uporabna je, kadar vnaprej ne vemo, kdaj bo konec (npr. meni, ki se ponavlja, dokler uporabnik ne izbere izhoda).</p>
+  <p>Stavek <code>break</code> prekine samo <strong>najbolj notranjo</strong> zanko ali stavek <code>switch</code>. Metodo pa zapusti stavek <code>return</code>.</p>
+</div>
+<pre class="code js-hl">for (int i = 1; i &lt;= 3; i++) {
+    for (int j = 1; j &lt;= 3; j++) {
+        if (j == 2) {
+            break;               // prekine samo notranjo zanko
+        }
+        System.out.println(i + " " + j);
+    }
+}
+// izpis: 1 1, 2 1, 3 1</pre>
+<p class="note"><strong>Past pri while:</strong> <code>continue</code> skoči na pogoj in preskoči tudi spremembo števca, če je ta na koncu telesa. Pri <code>int i = 0; while (i &lt; 5) { if (i == 2) continue; i++; }</code> se i nikoli ne poveča preko 2 in zanka je neskončna. Pri zanki <code>for</code> te težave ni, ker se korak vedno izvede.</p>
+</section>
+
+<section id="vzorci">
+<div class="eyebrow">Razlaga 7</div>
+<h2>Vzorci in algoritmi z zankami</h2>
+<div class="prose">
+  <p>Večina nalog, tudi maturitetnih, uporablja nekaj ponavljajočih se vzorcev. Ko jih prepoznaš, sestaviš program iz znanih delov.</p>
+</div>
+<div class="tbl"><table>
+<thead><tr><th>Vzorec</th><th>Priprava pred zanko</th><th>V zanki</th></tr></thead>
+<tbody><tr><td>števec (koliko je …)</td><td><code>int stevec = 0;</code></td><td><code>if (pogoj) stevec++;</code></td></tr><tr><td>vsota</td><td><code>int vsota = 0;</code></td><td><code>vsota += x;</code></td></tr><tr><td>produkt (fakulteta, potenca)</td><td><code>long produkt = 1;</code> (ne 0!)</td><td><code>produkt *= x;</code></td></tr><tr><td>največje število</td><td><code>int max = Integer.MIN_VALUE;</code> ali prvo število</td><td><code>if (x &gt; max) max = x;</code></td></tr><tr><td>najmanjše število</td><td><code>int min = Integer.MAX_VALUE;</code> ali prvo število</td><td><code>if (x &lt; min) min = x;</code></td></tr><tr><td>delitelji števila n</td><td><code>for (int d = 1; d &lt;= n; d++)</code></td><td><code>if (n % d == 0)</code> d je delitelj</td></tr><tr><td>večkratnik števila k</td><td>števec 1 do n</td><td><code>if (i % k == 0)</code></td></tr></tbody>
+</table></div>
+<h3 style="font-size:1.15rem;margin-top:8px">Delo s števkami števila</h3>
+<div class="prose">
+  <p>Zadnja števka števila je <code>n % 10</code>, število brez zadnje števke pa <code>n / 10</code>. Zanka teče, dokler od števila kaj ostane.</p>
+</div>
+<pre class="code js-hl">int n = 472;
+int vsota = 0;
+while (n &gt; 0) {
+    vsota += n % 10;     // 2, nato 7, nato 4
+    n /= 10;             // 47, nato 4, nato 0
+}
+System.out.println(vsota);   // 13</pre>
+<h3 style="font-size:1.15rem;margin-top:8px">Praštevilo in Evklidov algoritem</h3>
+<div class="two">
+<div style="display:flex;flex-direction:column;gap:8px"><span class="eyebrow">Praštevilo: deljitelji do √n</span><pre class="code js-hl">static boolean jePrastevilo(int n) {
+    if (n &lt; 2) return false;
+    for (int d = 2; d * d &lt;= n; d++) {
+        if (n % d == 0) {
+            return false;   // našli smo delitelj
+        }
+    }
+    return true;
+}</pre></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="eyebrow">Največji skupni delitelj (48, 18)</span><pre class="code js-hl">int a = 48, b = 18;
+while (b != 0) {
+    int ostanek = a % b;    // 12, nato 6, nato 0
+    a = b;
+    b = ostanek;
+}
+System.out.println(a);      // 6</pre></div>
+</div>
+<div class="prose">
+  <p>Število n ni praštevilo, če ima delitelj med 2 in √n. Preverjamo <code>d * d &lt;= n</code>, ker bi imel vsak večji delitelj že par, manjši od √n, in bi ga našli prej. Pri Evklidovem algoritmu zamenjamo (a, b) z (b, a % b), dokler b ni 0; takrat je največji skupni delitelj enak a. Najmanjši skupni večkratnik je <code>a / nsd * b</code>.</p>
+</div>
+<h3 style="font-size:1.15rem;margin-top:8px">Zaporedja</h3>
+<div class="prose">
+  <p>Pri zaporedjih si moramo zapomniti prejšnji člen (ali dva). Člen zaporedja računamo v zanki, nato spremenljivke »premaknemo«. Kadar vnaprej ne vemo, koliko členov bo (npr. zaporedje, ki se konča, ko pride do 1), uporabimo zanko <code>while</code>. Pri računanju z decimalnimi števili ne pozabi na tip <code>double</code>: <code>1 / 3</code> je pri celih številih 0, <code>1.0 / 3</code> pa 0,333…</p>
+</div>
+<p class="note">Pri izračunu <strong>fakultete</strong> ali <strong>potence</strong> uporabi tip <code>long</code>: že 13! ne gre več v tip <code>int</code>. Začetna vrednost produkta je vedno <strong>1</strong>, ne 0.</p>
+</section>
+
+<section id="napake">
+<div class="eyebrow">Razlaga 8</div>
+<h2>Pogoste napake</h2>
+<div class="tbl"><table>
+<thead><tr><th>Napaka</th><th>Kaj se zgodi</th><th>Popravek</th></tr></thead>
+<tbody><tr><td>pozabljena sprememba števca (<code>i++</code>)</td><td>neskončna zanka</td><td>v telesu spremeni spremenljivko iz pogoja</td></tr><tr><td><code>while (x &gt; 0);</code> ali <code>for (...);</code></td><td>podpičje je prazno telo zanke; stavki v zavitih oklepajih se izvedejo samo enkrat, za zanko (zanka while z nespremenjenim pogojem je neskončna)</td><td>za glavo zanke ne pišemo podpičja</td></tr><tr><td><code>&lt;</code> namesto <code>&lt;=</code> ali obratno</td><td>ena ponovitev preveč ali premalo (napaka za ena)</td><td>zapiši prvo in zadnjo vrednost števca na papir</td></tr><tr><td>pozabljeno podpičje za <code>while (pogoj)</code> pri do-while</td><td>program se ne prevede</td><td><code>do { … } while (pogoj);</code></td></tr><tr><td>spremenljivka, deklarirana v zanki, uporabljena za njo</td><td>program se ne prevede (cannot find symbol)</td><td>deklariraj jo pred zanko</td></tr><tr><td><code>vsota</code> ali <code>stevec</code> postavljen na 0 znotraj zanke</td><td>v vsaki ponovitvi se začne znova</td><td>začetno vrednost postavi pred zanko</td></tr><tr><td>produkt, ki se začne pri 0</td><td>rezultat je vedno 0</td><td>produkt se začne pri 1</td></tr><tr><td><code>i % 2 == 1</code> za negativna števila</td><td>v Javi je −3 % 2 enako −1, zato pogoj ne najde negativnih lihih števil</td><td><code>i % 2 != 0</code></td></tr><tr><td><code>1 / 3</code> pri celih številih</td><td>celoštevilsko deljenje, rezultat 0</td><td>uporabi <code>1.0 / 3</code> ali tip <code>double</code></td></tr><tr><td><code>continue</code> pred spremembo števca v zanki while</td><td>neskončna zanka</td><td>števec spremeni pred <code>continue</code> ali uporabi <code>for</code></td></tr><tr><td>preveliko število v tipu <code>int</code></td><td>rezultat je napačen (prelitje)</td><td>uporabi tip <code>long</code></td></tr></tbody>
+</table></div>
+<p class="note">Program z zanko vedno preizkusi z <strong>mejnimi primeri</strong>: n = 0, n = 1, najmanjšim in največjim možnim številom. Pri težavah izpiši vrednosti spremenljivk v vsaki ponovitvi.</p>
+</section>
+
+    <!-- ===================== NALOGE ===================== -->
+    <section id="naloge" style="gap:24px">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="eyebrow">Vaje</div>
+        <h2>Naloge od lažjih do težjih</h2>
+        <p class="prose" style="color:var(--muted)">Naloge z oznako <span class="tag mat">Matura</span> so iz izpitnih pol 1 iz let 2012–2026, z enakim številom točk kot na izpitu. Naloge z oznako RAČ-LAV 3 so iz laboratorijske vaje 5, naloge z oznako Utrjevanje zank in Vaje z zankami pa iz zbirk vaj. Pri nalogah z izpisom ali programom lahko kodo kopiraš v Programiz in preveriš, ali je tvoj odgovor pravilen. Vrednosti so v kodi zapisane kar v spremenljivke, vnosa s Scannerjem tam ni treba preizkušati. Če si ogledaš rešitev, preden nalogo pravilno rešiš, se ti točke ne štejejo.</p>
+        <div class="filters" role="group" aria-label="Prikaži naloge">
+          <button class="chip" data-f="all" aria-pressed="true" type="button">Vse</button>
+          <button class="chip" data-f="mat" aria-pressed="false" type="button">Samo maturitetne</button>
+          <button class="chip" data-f="own" aria-pressed="false" type="button">Samo dodatne</button>
+          <button class="chip" data-f="open" aria-pressed="false" type="button">Še nerešene</button>
+        </div>
+      </div>
+      <div id="levels" style="display:flex;flex-direction:column;gap:40px"></div>
+    </section>
+
+    <section id="doma">
+      <div class="eyebrow">Za doma</div>
+      <h2>Vaje za doma</h2>
+      <p class="prose" style="color:var(--muted)">Najprej maturitetne naloge za ponavljanje, nato praktične vaje, ki jih narediš na računalniku v Eclipse ali VS Code.</p>
+      <div id="homeMat"></div>
+      <div class="level"><header><span class="eyebrow">Praktične vaje</span><h3 style="font-size:1.35rem">Na svojem računalniku</h3></header><div id="home" class="level"></div></div>
+    </section>
+
+    <nav class="pager" id="pager" aria-label="Listanje po straneh"></nav>
+
+    <footer>
+      <span>Viri nalog: Državni izpitni center (RIC), izpitne pole 1 iz računalništva 2012–2026. Predmetni izpitni katalog za splošno maturo – računalništvo 2023 (velja do 2028). Laboratorijske vaje: RAČ-LAV 3. letnik, vaja 5 – zanke. Zbirki nalog: Utrjevanje zank in Vaje z zankami.</span>
+      <span>Naloge z oznako »Prirejeno« so po izvirniku prilagojene za to stran (manjše meje, vrednosti v kodi namesto vnosa, dodan izpis). Naloge z zaporedji (Fibonacci, aritmetično, geometrijsko, Taylor, bisekcija) so v vaji 5 navedene le po imenih, besedilo je sestavljeno za to stran. Vsi programi in izpisi so preverjeni z OpenJDK 21.</span>
+      <span id="resetWrap"></span>
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+const PROGRAMIZ = "https://www.programiz.com/java-programming/online-compiler/";
+const STORE = "java-matura-p1-poglavje6-v1";
+
+/* ---------- diagrami poteka ---------- */
+/* ---------- diagram poteka: preprost samodejni razpored ---------- */
+const FLOW = (function(){
+  const CW = 7.8, GAP = 24, ST = 14, MIN = 110;
+  const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const tw = s => String(s).length * CW;
+  const lw = s => String(s).length * 7 + 6;   // širina oznak da/ne (True/False)
+  const LBL = {
+    en:{start:"Main", end:"End", yes:"True", no:"False"},
+    sl:{start:"začetek", end:"konec", yes:"da", no:"ne"}
+  };
+  let LANG = "en";
+  const B = {
+    start:t=>({t:"start",x:t||null}), end:t=>({t:"end",x:t||null}),
+    p:x=>({t:"p",x}),
+    inp:(...v)=>({t:"io",k:"in",v}), out:(...v)=>({t:"io",k:"out",v}),
+    if:(c,y,n)=>({t:"if",c,y:y||[],n:n||[]}),
+    wh:(c,b)=>({t:"wh",c,b:b||[]}), dw:(c,b)=>({t:"dw",c,b:b||[]})
+  };
+  function poly(pts, cls){ return `<polygon class="${cls||"fn"}" points="${pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")}"/>`; }
+  function line(pts){ return `<polyline class="fl" points="${pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")}"/>`; }
+  function head(x,y,dir){ // arrowhead whose tip is at (x,y)
+    const a=5.5, b=4;
+    const P = dir==="d" ? [[x,y],[x-b,y-a],[x+b,y-a]] : dir==="r" ? [[x,y],[x-a,y-b],[x-a,y+b]] : dir==="l" ? [[x,y],[x+a,y-b],[x+a,y+b]] : [[x,y],[x-b,y+a],[x+b,y+a]];
+    return `<polygon class="fa" points="${P.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")}"/>`;
+  }
+  function text(x,y,s,cls,anchor){ return `<text class="${cls||"ft"}" x="${x.toFixed(1)}" y="${y.toFixed(1)}"${anchor?` text-anchor="${anchor}"`:""}>${esc(s)}</text>`; }
+  const DH = 54;
+  function dwOf(c){ return Math.max(MIN, tw(c)*1.45 + 44); }
+
+  let NUM = null;
+  function shape(kind, s, x, y, out){
+    const m = shape0(kind, s, x, y, out);
+    if(NUM && kind!=="start" && kind!=="end"){
+      const bx = kind==="p" ? x-m.w/2 : kind==="io" ? x-m.w/2+12 : x-m.w/4-6, by = kind==="if" ? y+m.h/4-6 : y;
+      NUM.n++;
+      out.push(`<circle class="fb" cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="9"/><text class="fbt" x="${bx.toFixed(1)}" y="${by.toFixed(1)}">${NUM.n}</text>`);
+    }
+    return m;
+  }
+  function shape0(kind, s, x, y, out){ // top-centre at (x,y); returns {w,h}
+    const t = s==null ? "" : s;
+    if(kind==="start"||kind==="end"){ const w=Math.max(90,tw(t)+34), h=30;
+      out.push(`<rect class="fn" x="${(x-w/2).toFixed(1)}" y="${y}" width="${w}" height="${h}" rx="15"/>`+text(x,y+h/2,t)); return {w,h}; }
+    if(kind==="p"){ const w=Math.max(100,tw(t)+28), h=34;
+      out.push(`<rect class="fn" x="${(x-w/2).toFixed(1)}" y="${y}" width="${w}" height="${h}"/>`+text(x,y+h/2,t)); return {w,h}; }
+    if(kind==="io"){ const w=Math.max(110,tw(t)+48), h=34, k=12;
+      out.push(poly([[x-w/2+k,y],[x+w/2,y],[x+w/2-k,y+h],[x-w/2,y+h]])+text(x,y+h/2,t)); return {w,h}; }
+    if(kind==="if"){ const w=dwOf(t), h=DH;
+      out.push(poly([[x,y],[x+w/2,y+h/2],[x,y+h],[x-w/2,y+h/2]])+text(x,y+h/2,t)); return {w,h}; }
+  }
+  function ioText(n){
+    if(n.k==="in") return LANG==="en" ? "Input "+n.v[0] : "preberi "+n.v.join(", ");
+    const lit = n.v.some(a=>String(a).trim().charAt(0)==='"');
+    return LANG==="en" ? "Output "+n.v.join(lit ? " & " : ' & " " & ') : "izpiši "+n.v.join(", ");
+  }
+  function prep(list){
+    const out=[];
+    list.forEach(n=>{
+      if(n.t==="io" && n.k==="in" && LANG==="en" && n.v.length>1){ n.v.forEach(v=>out.push({t:"io",k:"in",v:[v]})); }
+      else if(n.t==="if") out.push({t:"if",c:n.c,y:prep(n.y),n:prep(n.n)});
+      else if(n.t==="wh"||n.t==="dw") out.push({t:n.t,c:n.c,b:prep(n.b)});
+      else out.push(n);
+    });
+    return out;
+  }
+  function simple(kind, s){
+    const o=[]; const m = shape0(kind,s,0,0,[]);
+    return {l:m.w/2, r:m.w/2, h:m.h, draw(x,y,out){ shape(kind,s,x,y,out); }};
+  }
+  function seq(list){
+    const items = list.map(layout);
+    let l=0,r=0,h=0;
+    items.forEach((it,i)=>{ l=Math.max(l,it.l); r=Math.max(r,it.r); h+=it.h+(i?GAP:0); });
+    return {l,r,h,n:items.length, draw(x,y,out){
+      let cy=y;
+      items.forEach((it,i)=>{
+        if(i){ out.push(line([[x,cy-GAP],[x,cy]])+head(x,cy,"d")); }
+        it.draw(x,cy,out); cy+=it.h+GAP;
+      });
+    }};
+  }
+  function layout(n){
+    if(n.t==="if") return ifL(n);
+    if(n.t==="wh") return whL(n);
+    if(n.t==="dw") return dwL(n);
+    if(n.t==="io") return simple("io", ioText(n));
+    if(n.t==="start"||n.t==="end") return simple(n.t, n.x || LBL[LANG][n.t]);
+    return simple(n.t, n.x);
+  }
+  function ifL(n){
+    const dw = dwOf(n.c), cy = DH/2;
+    const L = seq(n.y), R = seq(n.n);
+    const xL = -Math.max(dw/2+4, L.r+22), xR = Math.max(dw/2+4, R.l+22);
+    const yb = DH + 8;
+    const yj = yb + Math.max(L.h, R.h) + 22;
+    return {l:Math.max(dw/2+4+lw(LBL[LANG].yes), L.l-xL), r:Math.max(dw/2+4+lw(LBL[LANG].no), xR+R.r), h:yj, draw(x,y,out){
+      shape("if",n.c,x,y,out);
+      out.push(text(x-dw/2-4,y+cy-7,LBL[LANG].yes,"fl2","end")+text(x+dw/2+4,y+cy-7,LBL[LANG].no,"fl2","start"));
+      [[xL,L],[xR,R]].forEach(([dx,B])=>{
+        const bx=x+dx, sx = dx<0 ? x-dw/2 : x+dw/2;
+        if(B.n){
+          out.push(line([[sx,y+cy],[bx,y+cy],[bx,y+yb]])+head(bx,y+yb,"d"));
+          B.draw(bx,y+yb,out);
+          out.push(line([[bx,y+yb+B.h],[bx,y+yj],[x,y+yj]]));
+        } else out.push(line([[sx,y+cy],[bx,y+cy],[bx,y+yj],[x,y+yj]]));
+      });
+    }};
+  }
+  function whL(n){
+    const dw = dwOf(n.c), cy = DH/2, Bd = seq(n.b);
+    const y0 = DH + 26;
+    const xb = -(Math.max(Bd.l, dw/2) + 26), xe = Math.max(Bd.r, dw/2) + 26;
+    const ybot = y0 + Bd.h, yEnd = ybot + 44;
+    return {l:-xb, r:Math.max(xe, dw/2+4+lw(LBL[LANG].no)), h:yEnd, draw(x,y,out){
+      shape("if",n.c,x,y,out);
+      out.push(text(x+8,y+DH+17,LBL[LANG].yes,"fl2","start")+text(x+dw/2+4,y+cy-7,LBL[LANG].no,"fl2","start"));
+      out.push(line([[x,y+DH],[x,y+y0]])+head(x,y+y0,"d"));
+      Bd.draw(x,y+y0,out);
+      out.push(line([[x,y+ybot],[x,y+ybot+20],[x+xb,y+ybot+20],[x+xb,y+cy],[x-dw/2,y+cy]])+head(x-dw/2,y+cy,"r"));
+      out.push(line([[x+dw/2,y+cy],[x+xe,y+cy],[x+xe,y+yEnd],[x,y+yEnd]]));
+    }};
+  }
+  function dwL(n){
+    const dw = dwOf(n.c), cy = DH/2, Bd = seq(n.b);
+    const gap = Math.max(26, lw(LBL[LANG].yes)+8);
+    const yd = Bd.h + 26, xb = -(Math.max(Bd.l, dw/2) + gap), yEnd = yd + DH + 26;
+    return {l:-xb, r:Math.max(Bd.r, dw/2), h:yEnd, draw(x,y,out){
+      Bd.draw(x,y,out);
+      out.push(line([[x,y+Bd.h],[x,y+yd]])+head(x,y+yd,"d"));
+      shape("if",n.c,x,y+yd,out);
+      out.push(text(x-dw/2-4,y+yd+cy-7,LBL[LANG].yes,"fl2","end")+text(x+8,y+yd+DH+17,LBL[LANG].no,"fl2","start"));
+      out.push(line([[x-dw/2,y+yd+cy],[x+xb,y+yd+cy],[x+xb,y-12],[x,y-12]])+head(x,y-12,"r"));
+      out.push(line([[x,y+yd+DH],[x,y+yEnd]]));
+    }};
+  }
+  function svg(blocks, o){
+    o = o||{};
+    const list = (o.bare ? [] : [B.start(o.start)]).concat(prep(blocks), o.bare ? [] : [B.end(o.end)]);
+    const S = seq(list); const out=[]; NUM = o.num ? {n:0} : null;
+    const P = 14, pad = 12, w = S.l+S.r+2*P, h = S.h+2*P+ST;
+    S.draw(S.l+P, P+ST, out); NUM = null;
+    return `<svg class="fc" viewBox="0 0 ${w.toFixed(0)} ${h.toFixed(0)}" style="width:${Math.ceil(w)}px;max-width:100%;min-width:0;height:auto" role="img" aria-label="${esc(o.label||"Diagram poteka")}">${out.join("")}</svg>`;
+  }
+  function sym(kind){ // prazen simbol za izbiro
+    const out=[]; const m=shape(kind==="if"?"if":kind,"",50,6,out);
+    const w=Math.max(100,m.w+12), h=m.h+12;
+    const o2=[]; shape(kind==="if"?"if":kind,"",w/2,6,o2);
+    return `<svg class="fc sym" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true">${o2.join("")}</svg>`;
+  }
+  return {B, svg, sym, setLang:l=>{ LANG = l==="sl" ? "sl" : "en"; }, getLang:()=>LANG};
+})();
+
+const J = {};
+const FLOWS = {"w1":[{"t":"p","x":"i = 1"},{"t":"wh","c":"i \u003c= 10","b":[{"t":"io","k":"out","v":["i"]},{"t":"p","x":"i = i + 1"}]}],"d1":[{"t":"dw","c":"stevilo \u003c 1000 || stevilo > 9999","b":[{"t":"io","k":"out","v":["\"Vnesi stirimestno stevilo\""]},{"t":"io","k":"in","v":["stevilo"]}]}],"vsota":[{"t":"io","k":"in","v":["n"]},{"t":"p","x":"vsota = 0"},{"t":"p","x":"i = 1"},{"t":"wh","c":"i \u003c= n","b":[{"t":"p","x":"vsota = vsota + i"},{"t":"p","x":"i = i + 1"}]},{"t":"io","k":"out","v":["vsota"]}],"m151_10":[{"t":"p","x":"x = 5"},{"t":"p","x":"y = 2"},{"t":"p","x":"a = y"},{"t":"wh","c":"x > 0","b":[{"t":"if","c":"x % 2 == 0","y":[{"t":"p","x":"y = y * y"},{"t":"p","x":"x = x / 2"}],"n":[{"t":"p","x":"y = y * a"},{"t":"p","x":"x = x - 1"}]}]},{"t":"io","k":"out","v":["y"]}],"m231_3":[{"t":"p","x":"j = 2020"},{"t":"p","x":"i = 30"},{"t":"wh","c":"j > i","b":[{"t":"io","k":"out","v":["\"j=\"","j","\" i=\"","i"]},{"t":"p","x":"j = j / i"},{"t":"if","c":"i % 2 == 0","y":[{"t":"p","x":"i = i - 5"}],"n":[{"t":"p","x":"i = i - 10"}]}]},{"t":"io","k":"out","v":["\"j=\"","j","\" i=\"","i"]}],"trik":[{"t":"p","x":"n = 3"},{"t":"p","x":"i = 1"},{"t":"wh","c":"i \u003c= n","b":[{"t":"p","x":"j = 1"},{"t":"wh","c":"j \u003c= i","b":[{"t":"io","k":"out","v":["\"*\""]},{"t":"p","x":"j = j + 1"}]},{"t":"io","k":"out","v":["\"skok v novo vrsto\""]},{"t":"p","x":"i = i + 1"}]}],"m221_4":[{"t":"p","x":"i = 0"},{"t":"p","x":"j = 0"},{"t":"wh","c":"i \u003c 5","b":[{"t":"wh","c":"j \u003c= i","b":[{"t":"io","k":"out","v":["\"*\""]},{"t":"p","x":"j = j + 1"}]},{"t":"io","k":"out","v":["\"skok v novo vrsto\""]},{"t":"p","x":"i = i + 1"}]}]};
+const LEVELS = [{"id":"naloge-a","tag":"A","title":"Vrste zank in pogoj","note":"Katere zanke poznamo, kdaj se telo zanke izvede in kolikokrat (razlage 1 do 4)."},{"id":"naloge-b","tag":"B","title":"Sledenje izvajanju zanke","note":"Izpis, število ponovitev in vrednosti spremenljivk. Diagram poteka z zanko (razlage 1 do 3)."},{"id":"naloge-c","tag":"C","title":"Pisanje zank","note":"Zapiši zanko for, while ali do-while in pretvarjaj med njimi (razlage 2 do 4)."},{"id":"naloge-d","tag":"D","title":"Gnezdene zanke in izpisi likov","note":"Zanka v zanki: vrstice in stolpci, trikotniki in vzorci (razlaga 5)."},{"id":"naloge-e","tag":"E","title":"Stavka break in continue","note":"Predčasen izhod iz zanke in preskok ponovitve (razlaga 6)."},{"id":"naloge-f","tag":"F","title":"Laboratorijske vaje RAČ-LAV 3 · vaja 5","note":"Vse naloge iz laboratorijske vaje 5 (zanke in ponavljanja). Vrednosti so zapisane v kodi, Scannerja ne potrebuješ (razlaga 7)."},{"id":"naloge-g","tag":"G","title":"Dodatne vaje: Utrjevanje zank in Vaje z zankami","note":"Naloge iz zbirk Utrjevanje zank in Vaje z zankami, ki jih laboratorijska vaja še ne pokriva."},{"id":"doma-mat","tag":"H","title":"Maturitetne naloge za ponavljanje","note":"Naloge iz izpitnih pol 1, ki zahtevajo pisanje zank.","home":true}];
+const T = [{"src":"M141/1","pts":1,"lv":"A","type":"mc","q":"Katera od naštetih rezerviranih besed programskega jezika Java predstavlja zanko?","o":["for","int","if","switch"],"a":[0],"h":["Zanka ponavlja stavke, vejitev pa izbira med njimi.","Besedi if in switch spadata k vejitvam (poglavje 5)."],"why":"for je zanka. int je podatkovni tip, if in switch pa sta vejitvi.","id":"M141-1"},{"src":"M151/6","pts":1,"lv":"A","type":"mc","q":"Katera izmed navedenih rezerviranih besed predstavlja zanko?","o":["static","switch","while","try"],"a":[2],"h":["Zanka stavke ponavlja, dokler je pogoj izpolnjen.","try je del obravnave izjem, static pa pomeni statični člen razreda."],"why":"while je zanka. static je modifikator, switch vejitev, try pa obravnava izjem.","id":"M151-6"},{"src":"M152/15","pts":2,"lv":"A","type":"blanks","q":"S katerimi rezerviranimi besedami v programskem jeziku Java definiramo zanke? Vpiši tri besede, ločene z vejico.","b":[{"l":"rezervirane besede","pool":["for","while","do","do-while","dowhile"],"min":3,"acc":["for, while, do"]}],"h":["Java pozna tri vrste zank.","Ena od njih ima pogoj na koncu in se začne z besedo do."],"why":"Zanke so for, while in do (do-while). Zanka do-while se začne z besedo do, pogoj z besedo while pa stoji na koncu.","id":"M152-15"},{"src":"M192/9","pts":1,"lv":"A","type":"blanks","q":"Za katero zanko programskega jezika Java je naslednja trditev vedno resnična? »Stavki v zanki se vedno izvedejo vsaj enkrat.« Trditev je resnična za ______ zanko.","b":[{"l":"zanka","acc":["do-while","do while","dowhile","do"]}],"h":["Pogoj se preverja šele po izvedbi telesa.","Zapis te zanke se začne z do."],"why":"Pri zanki do-while se telo najprej izvede, pogoj pa se preveri šele na koncu. Zato se telo izvede vsaj enkrat. Pri while in for se pogoj preveri pred prvo ponovitvijo.","id":"M192-9"},{"src":"M121/3","pts":2,"lv":"A","type":"mc","q":"Katere trditve veljajo za zanko do while?","o":["Pogoj se preverja na začetku zanke.","Stavki zanke se izvajajo, dokler je pogoj resničen.","Pogoj se preverja na koncu zanke.","Stavki v telesu zanke se nikoli ne izvedejo.","Če je pogoj že prvič neresničen, se stavki v telesu zanke vsaj enkrat izvedejo."],"a":[1,2,4],"h":["Kje v zapisu do { … } while (pogoj); stoji pogoj?","Telo se izvede pred prvim preverjanjem pogoja."],"why":"Pri do-while se najprej izvede telo, nato se preveri pogoj. Telo se ponavlja, dokler je pogoj resničen, in se izvede vsaj enkrat, tudi če je pogoj že prvič neresničen. Trditvi A in D ne veljata.","id":"M121-3"},{"src":"M212/3","pts":1,"lv":"A","type":"mc","q":"Katere stavke programskega jezika imenujemo »zanka«?","o":["Zanka je vsak stavek, ki neki spremenljivki določi vrednost.","Zanka je vsak stavek, ki omogoča ponovno izvajanje nekih stavkov.","Zanka je vsak stavek, ki izpisuje podatke.","Zanka je vsak stavek, v katerem smemo uporabiti stavek break."],"a":[1],"h":["Beseda »zanka« pove, da se nekaj ponavlja.","Stavek break lahko uporabimo tudi v stavku switch, ki ni zanka."],"why":"Zanka je stavek, ki omogoča večkratno izvajanje stavkov. Prireditveni stavek določi vrednost, izpisuje pa stavek println. break je dovoljen tudi v switch.","id":"M212-3"},{"src":"M202/10","pts":1,"lv":"A","type":"mc","q":"Katera od naslednjih zank se izvede natanko trikrat?","o":["for (int i=1; i\u003c3; i++) { }","for (int i=1; i\u003c=3; i++) { }","int i=1; while (i\u003c3) { i++;}","int i=7; while (i>5) {i--;}"],"a":[1],"h":["Zapiši vrednosti števca pri vsaki ponovitvi.","Pri A in C ima števec vrednosti 1 in 2, pri D pa 7 in 6."],"why":"Pri B ima števec i vrednosti 1, 2 in 3, zato se zanka izvede trikrat. Pri A in C se izvede dvakrat (i = 1, 2), pri D tudi dvakrat (i = 7, 6).","id":"M202-10"},{"lv":"A","own":true,"pts":1,"type":"output","q":"Kaj izpiše program? Zanki imata enak pogoj, a različno obliko.","code":"\nint i = 10;\nwhile (i \u003c 5) {\n    System.out.println(\"while\");\n    i++;\n}\ndo {\n    System.out.println(\"do\");\n    i++;\n} while (i \u003c 5);\nSystem.out.println(i);","expected":"do\n11","h":["Pogoj i \u003c 5 je že na začetku neresničen.","Telo zanke do-while se izvede enkrat, še preden se pogoj sploh preveri."],"why":"Zanka while telesa ne izvede nikoli, ker je 10 \u003c 5 neresnično. Zanka do-while telo izvede enkrat (izpiše do in poveča i na 11), nato pogoj ni izpolnjen. Na koncu se izpiše 11.","id":"own-7"},{"lv":"A","own":true,"pts":2,"type":"cls","cats":["Pogoj na začetku","Pogoj na koncu"],"q":"Razvrsti zapise in naloge: pri katerih se pogoj preveri pred prvo ponovitvijo in pri katerih šele po njej?","items":[["while (i \u003c= n) { … }",0],["for (int i = 0; i \u003c n; i++) { … }",0],["do { … } while (i \u003c= n);",1],["Izpis števil od 1 do n, pri čemer je lahko n tudi 0.",0],["Ponavljaj vnos, dokler uporabnik ne vpiše smiselnega števila.",1],["Izpiši meni vsaj enkrat in ga ponavljaj, dokler uporabnik ne izbere izhoda.",1]],"h":["Če se telo včasih ne izvede nikoli, je pogoj na začetku.","Pri vnosu in meniju moramo vnos ali izpis narediti vsaj enkrat, še preden lahko preverimo pogoj."],"why":"Zanki while in for preverita pogoj pred vsako ponovitvijo, zato se telo lahko ne izvede nikoli. Zanka do-while preveri pogoj po ponovitvi. Zato je primerna za preverjanje vnosa in za menije, kjer moramo nekaj narediti vsaj enkrat.","id":"own-8"},{"lv":"A","own":true,"pts":2,"type":"mc","q":"Katere izmed teh zank so neskončne (se nikoli ne končajo)?","o":["while (true) { }","for (;;) { }","while (1 \u003c 2) { }","int i = 0; while (i \u003c 5) { System.out.println(i); }","for (int i = 0; i \u003c 5; i++) { }"],"a":[0,1,2,3],"h":["Zanka se konča, ko pogoj postane neresničen.","Pri D se i v telesu ne spreminja, zato je pogoj vedno resničen."],"why":"Pri A, C in D je pogoj ves čas resničen (D: števec se ne povečuje). Pri B izpustimo pogoj, kar pomeni, da je vedno resničen. Zanka E se po petih ponovitvah konča.","id":"own-9"},{"src":"M122/9","pts":2,"lv":"B","type":"mc","q":"Kolikokrat se izvede navedena zanka?","snip":"int a=1,b=10,c=5;\nwhile ((a\u003cb) && (c\u003c14)) {\n    a++;\n    c+=2;\n}","o":["Zanka se nikoli ne izvede.","6-krat.","5-krat.","10-krat.","Neskončna zanka."],"a":[2],"h":["Pogoj je sestavljen z &&, zato mora veljati oboje.","c se poveča za 2 in ima vrednosti 5, 7, 9, 11, 13, 15."],"why":"Pogoj a \u003c b velja še dolgo, pogoj c \u003c 14 pa velja za c = 5, 7, 9, 11 in 13. To je 5 ponovitev. Pri c = 15 se zanka konča.","id":"M122-9"},{"src":"M181/8","pts":1,"lv":"B","type":"mc","q":"Kolikokrat se izpiše beseda Pozdrav?","snip":"int a = 4;\nint b = 12;\nwhile(a\u003cb){\n    System.out.println(\"Pozdrav\");\n    a+=4;\n    b-=4;\n}","o":["1","2","3","4"],"a":[0],"h":["Po prvi ponovitvi sta a in b enaka.","Pogoj a \u003c b je zato neresničen."],"why":"Prvič je 4 \u003c 12 in se izpiše Pozdrav. Nato je a = 8, b = 8, kar ni a \u003c b, zato se zanka konča. Beseda se izpiše enkrat.","id":"M181-8"},{"src":"M151/8","pts":1,"lv":"B","type":"mc","q":"Kaj se izpiše na zaslonu po izvedbi spodnje kode?","snip":"int x=25;\nwhile (x>0) {\n    x = x / 2;\n    System.out.print(\"X\");\n}","o":["XXXXXX","XXXXX","XXXX","XXX"],"a":[1],"h":["Pri celoštevilskem deljenju z 2 ostanek odpade.","Vrednosti x so 25, 12, 6, 3, 1, 0."],"why":"x se zmanjšuje: 25, 12, 6, 3, 1, 0. Zanka se izvede pri x = 25, 12, 6, 3 in 1, torej petkrat, in izpiše XXXXX.","id":"M151-8"},{"src":"M151/16","pts":3,"lv":"B","type":"blanks","q":"Dan je izsek programa. Kolikokrat se izvede zanka? Katere vrednosti se izpišejo med izvajanjem zanke (ločene z vejico)?","snip":"int x=40;\nint y=6;\nwhile (x>0){\n    x-=y;\n    y+=6;\n    System.out.println(x+y);\n}","b":[{"l":"število ponovitev","acc":["4"]},{"l":"izpisane vrednosti","acc":["46, 40, 28, 10"],"list":true}],"h":["Sledi dvema spremenljivkama in zapiši tabelo x, y po vsaki ponovitvi.","Prva ponovitev: x = 34, y = 12, izpiše se 46."],"why":"Po ponovitvah je (x, y) = (34, 12), (22, 18), (4, 24), (−20, 30). Izpišejo se vsote 46, 40, 28 in 10. Pri x = −20 pogoj x > 0 ne velja več, zato je ponovitev štiri.","id":"M151-16"},{"src":"M131/4","pts":2,"lv":"B","type":"output","q":"Kaj izpiše naslednji program? (Zapiši vsako vrstico izpisa v svojo vrstico.)","code":"\nint a=5,b=50;\nwhile (b>a) {\n    b=b/2;\n    a=a*2;\n    System.out.println(\"a=\"+a+\" b=\"+b);\n}","expected":"a=10 b=25\na=20 b=12","h":["Ponovitev je toliko, dokler je b večji od a.","Prva ponovitev: b = 25, a = 10."],"why":"Prva ponovitev da a = 10, b = 25. Ker je 25 > 10, sledi druga: a = 20, b = 12. Nato 12 > 20 ni res in se zanka konča.","id":"M131-4"},{"src":"M142/11","pts":2,"lv":"B","type":"output","q":"Kaj in kako izpiše naslednji del programa? (Izpis je v eni vrstici, členi so ločeni s presledkom.)","code":"\nint a=800, b=50;\ndo {\n    a=a/2;\n    b=b*2;\n    System.out.print(a+ \" \"+ b + \" \");\n} while (a>b);","expected":"400 100 200 200","h":["Zanka do-while se izvede vsaj enkrat.","Po prvi ponovitvi je a = 400 in b = 100, pogoj a > b velja."],"why":"Prva ponovitev izpiše 400 100. Ker je 400 > 100, sledi druga: 200 200. Pogoj 200 > 200 ni izpolnjen, zato se zanka konča.","id":"M142-11"},{"src":"M172/10","pts":3,"lv":"B","type":"output","q":"Kaj izpiše naslednji izsek programa? (Vsako vrstico izpisa zapiši v svojo vrstico.)","code":"\nint a = 18;\nint b = 4;\nint c = 0, o = a;\nwhile (o >= b) {\n    o -= b;\n    c++;\n    System.out.println(c+\" \"+o);\n}\nSystem.out.println(c==a/b);\nSystem.out.println(o==a%b);","expected":"1 14\n2 10\n3 6\n4 2\ntrue\ntrue","h":["Zanka z odštevanjem računa celi količnik in ostanek pri deljenju 18 s 4.","Na koncu je c količnik, o pa ostanek."],"why":"Od 18 odštevamo 4, dokler je ostanek vsaj 4: (c, o) = (1, 14), (2, 10), (3, 6), (4, 2). Na koncu je c = 4 = 18 / 4 in o = 2 = 18 % 4, zato se dvakrat izpiše true.","id":"M172-10"},{"src":"M182/11","pts":2,"lv":"B","type":"output","q":"Kaj izpiše program Izpis1? (Vsako vrstico izpisa zapiši v svojo vrstico.)","code":"\nint i=5; int j=12;\nwhile ((i+j\u003c100) && (j%i!=4)){\n    i*=2;\n    j+=i+1;\n    System.out.println(i+\" \"+j);\n}","expected":"10 23\n20 44","h":["Pred vsako ponovitvijo preveri oba dela pogoja.","Pri i = 20, j = 44 je j % i enako 4."],"why":"Prva ponovitev: i = 10, j = 23. Druga: i = 20, j = 44. Tedaj je 44 % 20 = 4, drugi del pogoja ni izpolnjen in zanka se konča.","id":"M182-11"},{"src":"M221/7","pts":2,"lv":"B","type":"output","q":"Kaj izpiše izsek programa? (Vsako vrstico izpisa zapiši v svojo vrstico.)","code":"\nint x=100, y=8;\ndo {\n    x=x/y;\n    y=y+1;\n    System.out.println(x + \" \" + y);\n} while (x>10);","expected":"12 9\n1 10","h":["Celoštevilsko deljenje zavrže decimalke.","100 / 8 je 12."],"why":"Prva ponovitev: x = 100 / 8 = 12, y = 9. Ker je 12 > 10, sledi druga: x = 12 / 9 = 1, y = 10. Pogoj 1 > 10 ni izpolnjen.","id":"M221-7"},{"src":"M232/7","pts":1,"lv":"B","type":"output","q":"Kaj izpiše izsek programa?","code":"\nint a = 5;\nwhile (a-- \u003c 5){\n    if (a >= 3)\n        a--;\n    else\n        a -= 4;\n    a--;\n}\nSystem.out.println(a);","expected":"4","h":["a-- v pogoju primerja staro vrednost, nato pa a zmanjša.","Pogoj 5 \u003c 5 je neresničen, a se vseeno zmanjša na 4."],"why":"Pri prvem preverjanju je 5 \u003c 5 neresnično, zato se telo ne izvede. Zaradi postfiksnega a-- je a po preverjanju že 4. Izpiše se 4.","id":"M232-7"},{"src":"M162/10","pts":3,"lv":"B","type":"output","q":"Kaj se izpiše po naslednjem delu programa?","code":"\nint a=1, b=10, c=100;\nwhile(a\u003cc) {\n    if (b\u003cc) {\n        a*=b;\n        c/=a;\n    }\n    System.out.println(a+\" \"+b+\" \"+c);\n}","expected":"10 10 10","h":["Prva ponovitev: a = 1 · 10, c = 100 / 10.","Po prvi ponovitvi a ni več manjši od c."],"why":"Pogoja a \u003c c in b \u003c c sta izpolnjena. Najprej a = 10, nato c = 100 / 10 = 10 in izpis 10 10 10. Ker 10 \u003c 10 ni res, je to edina ponovitev.","id":"M162-10"},{"src":"M141/12","pts":3,"lv":"B","type":"output","q":"Kaj izpiše ta izsek programa? (Vsako vrstico izpisa zapiši v svojo vrstico.)","code":"\nint x=0; int y=30;\nwhile (x\u003cy){\n    for (int k=x*10; k \u003c y; k+=10){\n        System.out.println(x+\" \"+k+\" \"+y);\n        y--;\n    }\n    x++;\n}","expected":"0 0 30\n0 10 29\n0 20 28\n1 10 27\n1 20 26\n2 20 25","h":["Pri vsaki ponovitvi notranje zanke se y zmanjša, zato se pogoj k \u003c y spremeni.","Pri x = 0 notranja zanka teče pri k = 0, 10, 20."],"why":"Pri x = 0 se notranja zanka izvede trikrat (k = 0, 10, 20; y pade na 27). Pri x = 1 dvakrat (k = 10, 20; y = 25), pri x = 2 enkrat (k = 20; y = 24). Pri x = 3 in več je k = 10x vsaj 30, kar ni manj od y, zato se izpiše le šest vrstic.","id":"M141-12"},{"src":"M211/17","pts":2,"lv":"B","type":"output","q":"Dan imamo spodnji program. Kaj ta program izpiše? (Izpis je v eni vrstici, členi so ločeni s presledkom.)","code":"\npublic class Test {\n    public static void main(String [] args) {\n        int x = 0;\n        int y = 0;\n        while ( x \u003c 5 ) {\n            if ( y \u003c 5 )\n            {   x = x + 1;\n                if ( y \u003c 3 )\n                {   x = x - 1; }\n            }\n            y = y + 2;\n            System.out.print(x + \"\" + y +\" \");\n            x = x + 1;\n        }\n    }\n}","expected":"02 14 36 48","h":["x + \"\" + y zlepi števili v niz, npr. 0 in 2 dasta 02.","Zapiši x in y po vsaki ponovitvi."],"why":"Pri y = 0 in y = 2 se x najprej poveča in nato zmanjša (y \u003c 3), zato izpis pove 02 in 14. Pri y = 4 se x poveča na 3 in izpiše se 36. Nato je x = 4, y = 6: pogoj y \u003c 5 ni izpolnjen, x se ne spremeni in izpiše se 48. Potem je x = 5 in zanka se konča.","id":"M211-17"},{"src":"M201/16","pts":3,"lv":"B","type":"output","q":"Kaj izpiše naslednji program? (Vsako vrstico izpisa zapiši v svojo vrstico.)","code":"\npublic class KajIzpise {\n    public static void main(String[] args) {\n        int stevec=1;\n        int rezultat=1;\n        while (stevec\u003c=5) {\n            rezultat=rezultat+podvoji(rezultat);\n            stevec=stevec+1;\n            System.out.println(rezultat);\n        }\n    }\n    private static int podvoji(int n) {\n        return 2*n;\n    }\n}","expected":"3\n9\n27\n81\n243","h":["Metoda podvoji vrne dvakratnik argumenta.","Rezultat + 2 · rezultat je trikratnik rezultata."],"why":"Vsaka ponovitev trikratno poveča rezultat (r + 2r = 3r). Ker števec preteče vrednosti 1 do 5, se izpiše 3, 9, 27, 81, 243.","id":"M201-16"},{"src":"M151/10","pts":3,"lv":"B","type":"blanks","draw":true,"fc":[{"t":"p","x":"x = 5"},{"t":"p","x":"y = 2"},{"t":"p","x":"a = y"},{"t":"wh","c":"x > 0","b":[{"t":"if","c":"x % 2 == 0","y":[{"t":"p","x":"y = y * y"},{"t":"p","x":"x = x / 2"}],"n":[{"t":"p","x":"y = y * a"},{"t":"p","x":"x = x - 1"}]}]},{"t":"io","k":"out","v":["y"]}],"q":"Dano kodo programskega jezika Java pretvorite v diagram poteka (na papirju ali v Flowgorithmu). Nato vpiši, kaj izpiše program.","snip":"int x = 5, y = 2;\nint a = y;\nwhile (x > 0) {\n    if (x%2 == 0) {\n        y = y*y;\n        x = x/2;\n    } else {\n        y = y*a;\n        x--;\n    }\n}\nSystem.out.println(y);","b":[{"l":"izpis programa","acc":["512"]}],"h":["Vejitev if – else je znotraj zanke while.","Sledi (x, y): (5, 2) → (4, 4) → (2, 16) → (1, 256) → (0, 512)."],"why":"Pri lihem x se y pomnoži z a = 2 in x zmanjša za 1, pri sodem se y kvadrira in x razpolovi. Po štirih ponovitvah je x = 0 in y = 512. Diagram: zanka while s pogojem x > 0, v njej if – else.","id":"M151-10"},{"src":"M231/3","pts":3,"lv":"B","type":"output","draw":true,"fc":[{"t":"p","x":"j = 2020"},{"t":"p","x":"i = 30"},{"t":"wh","c":"j > i","b":[{"t":"io","k":"out","v":["\"j=\"","j","\" i=\"","i"]},{"t":"p","x":"j = j / i"},{"t":"if","c":"i % 2 == 0","y":[{"t":"p","x":"i = i - 5"}],"n":[{"t":"p","x":"i = i - 10"}]}]},{"t":"io","k":"out","v":["\"j=\"","j","\" i=\"","i"]}],"adapt":true,"q":"Dani javanski program pretvorite v diagram poteka (na papirju ali v Flowgorithmu). Nato zapiši, kaj izpiše program. (Prirejeno: dodan je izpis.) Vsako vrstico izpisa zapiši v svojo vrstico.","code":"\npublic class Programcek {\n    public static void main(String[] args) {\n        int j=2020, i=30;\n        while (j > i) {\n            System.out.println(\"j=\"+j+\" i=\"+i);\n            j = j / i;\n            if (i % 2 == 0)\n                i = i - 5;\n            else\n                i = i - 10;\n        }\n        System.out.println(\"j=\"+j+\" i=\"+i);\n    }\n}","expected":"j=2020 i=30\nj=67 i=25\nj=2 i=15","h":["Zapiši j in i po vsaki ponovitvi.","V pogoju zanke primerjamo j z i, zato nekdaj velik j hitro postane manjši."],"why":"Prvi izpis je j=2020 i=30. Nato je j = 67 (2020 / 30), i = 25. Ker je 67 > 25, sledi izpis j=67 i=25, nato j = 2 in i = 15 (25 je liho). Ker 2 > 15 ni res, se izpiše še j=2 i=15.","id":"M231-3"},{"src":"M221/4","pts":2,"lv":"B","type":"output","redr":true,"fcq":[{"t":"p","x":"i = 0"},{"t":"p","x":"j = 0"},{"t":"wh","c":"i \u003c 5","b":[{"t":"wh","c":"j \u003c= i","b":[{"t":"io","k":"out","v":["\"*\""]},{"t":"p","x":"j = j + 1"}]},{"t":"io","k":"out","v":["\"skok v novo vrsto\""]},{"t":"p","x":"i = i + 1"}]}],"q":"Kaj izpiše program, ki ga prikazuje diagram poteka? Diagram je prerisan iz izpitne pole, element »skok v novo vrsto« pomeni prehod v novo vrstico izpisa. Pozor: j se v zunanji zanki ne postavi nazaj na 0. Izpis zapiši po vrsticah.","expected":"*\n*\n*\n*\n*","h":["Pri i = 0: j = 0 je ≤ 0, izpiše se * in j postane 1.","Pri i = 1 je j že 1, torej se spet izpiše samo ena zvezdica."],"why":"Spremenljivka j se nikoli ne postavi nazaj na 0. Pri i = 0 notranja zanka izpiše eno zvezdico in j postane 1. Pri vsakem naslednjem i je j že enak i, zato notranja zanka izpiše natanko še eno zvezdico in j postane i + 1. Po vsaki ponovitvi zunanje zanke se izpiše nova vrstica, zato je izpis pet vrstic z eno zvezdico.","id":"M221-4"},{"lv":"B","own":true,"pts":1,"type":"blanks","q":"Kolikokrat se izpiše beseda Pozdrav?","snip":"for (int i = 1; i \u003c 10; i += 3) {\n    System.out.println(\"Pozdrav\");\n}","b":[{"l":"število izpisov","acc":["3"]}],"h":["Zapiši vrednosti števca: začne pri 1, vsakič se poveča za 3.","Števec ima vrednosti 1, 4, 7, nato 10."],"why":"Števec ima vrednosti 1, 4 in 7. Pri 10 pogoj i \u003c 10 ne velja več. Zanka se izvede trikrat.","id":"own-27"},{"lv":"B","own":true,"pts":1,"type":"output","q":"Kaj izpiše program?","code":"\nint n = 5;\nint vsota = 0;\nwhile (n > 0) {\n    vsota += n;\n    n--;\n}\nSystem.out.println(vsota);\nSystem.out.println(n);","expected":"15\n0","h":["Zanka seštevanja števil od n navzdol.","Po zanki je n enak 0."],"why":"Seštejemo 5 + 4 + 3 + 2 + 1 = 15. Zanka se konča, ko je n = 0, zato se izpiše tudi 0.","id":"own-28"},{"src":"M161/6","pts":2,"lv":"C","type":"code","q":"Na ekranu želimo dobiti izpis 1-2-3-4-5-6-7-8-9-10- (vse v eni vrstici, na koncu je pomišljaj). Zapiši del kode, ki z uporabo zanke for doseže ta izpis.","hideExp":true,"expected":"1-2-3-4-5-6-7-8-9-10-","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","sol":"public class Main {\n    public static void main(String[] args) {\n        for (int i = 1; i \u003c= 10; i++) {\n            System.out.print(i + \"-\");\n        }\n        System.out.println();\n    }\n}","h":["Števec teče od 1 do 10, za vsakim številom izpišemo pomišljaj.","Uporabi print, ne println, da ostanejo števila v eni vrstici."],"why":"Zanka for z i od 1 do vključno 10 izpiše vsako število in za njim pomišljaj. Izpis se konča s pomišljajem, ker ga izpišemo za vsakim številom, tudi za zadnjim.","id":"M161-6"},{"src":"M251/7","pts":2,"lv":"C","type":"code","adapt":true,"q":"Zapišite poljubno zanko, s katero izpišemo vsa naravna soda števila manjša od 100. (Prirejeno: izpiši števila v eni vrstici, ločena s presledkom.)","hideExp":true,"expected":"2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 42 44 46 48 50 52 54 56 58 60 62 64 66 68 70 72 74 76 78 80 82 84 86 88 90 92 94 96 98","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","sol":"public class Main {\n    public static void main(String[] args) {\n        for (int i = 2; i \u003c 100; i += 2) {\n            System.out.print(i + \" \");\n        }\n        System.out.println();\n    }\n}","h":["Najmanjše naravno sodo število je 2, vsako naslednje je za 2 večje.","Korak zanke lahko zapišeš kot i += 2."],"why":"Zanka teče po sodih številih od 2 do 98 s korakom 2. Možna je tudi zanka z vsemi števili in pogojem i % 2 == 0, a je počasnejša (potrebuje dvakrat več ponovitev).","id":"M251-7"},{"src":"M232/8","pts":1,"lv":"C","type":"code","adapt":true,"q":"Zapišite poljubno zanko, s katero se stavek System.out.print(\"*\"); izvede natanko 42-krat. (Prirejeno: po zanki izpiši še prazno vrstico, da se izpis zaključi.)","hideExp":true,"expected":"******************************************","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","sol":"public class Main {\n    public static void main(String[] args) {\n        for (int i = 0; i \u003c 42; i++) {\n            System.out.print(\"*\");\n        }\n        System.out.println();\n    }\n}","h":["Števec naj teče od 0 do 41 ali od 1 do 42.","Pri začetku z 0 je pogoj i \u003c 42, pri začetku z 1 pa i \u003c= 42."],"why":"Zanka s števcem od 0 do vključno 41 (pogoj i \u003c 42) se izvede 42-krat. Enako dobimo z i od 1 do 42 (i \u003c= 42).","id":"M232-8"},{"src":"M231/13","pts":2,"lv":"C","type":"code","adapt":true,"q":"Zapišite zanko for, v kateri števec preteče vsa zaporedna liha cela števila med 999 in 111, vključno z mejama, vsako natanko enkrat, pričnemo pa s številom 999. Telo zanke naj bo prazen stavek. (Prirejeno: števec deklariraj pred zanko in po zanki izpiši njegovo vrednost.)","hideExp":true,"expected":"109","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","sol":"public class Main {\n    public static void main(String[] args) {\n        int i;\n        for (i = 999; i >= 111; i -= 2);\n        System.out.println(i);\n    }\n}","h":["Števec se zmanjšuje: korak je −2.","Prazen stavek zapišemo s samim podpičjem za oklepajem."],"why":"Zanka začne pri 999 in se vsakič zmanjša za 2, dokler je i >= 111. Zadnja vrednost v zanki je 111. Po zanki je i = 109, ker je bil pogoj tedaj prvič neresničen. Podpičje za oklepajem je tu namerno: telo zanke je prazen stavek.","id":"M231-13"},{"src":"M222/8","pts":2,"lv":"C","type":"code","adapt":true,"q":"Zapišite zanko for, v kateri števec preteče vsa soda cela števila med 100 in 0, vključno z mejama, vsako natanko enkrat, pričnemo pa s številom 100. Telo zanke naj bo prazen stavek. (Prirejeno: števec deklariraj pred zanko in po zanki izpiši njegovo vrednost.)","hideExp":true,"expected":"-2","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","sol":"public class Main {\n    public static void main(String[] args) {\n        int i;\n        for (i = 100; i >= 0; i -= 2);\n        System.out.println(i);\n    }\n}","h":["Začni pri 100 in števec zmanjšuj za 2.","Mejna vrednost 0 mora biti vključena, zato uporabi >=."],"why":"Števec ima vrednosti 100, 98, …, 2, 0. Ko se zmanjša na −2, pogoj i >= 0 ne velja več. Po zanki je i = −2.","id":"M222-8"},{"src":"M141/17","pts":2,"lv":"C","type":"code","adapt":true,"q":"Napišite zaporedje stavkov, ki tvori enak izpis kakor spodnja koda, pri čemer ne smete uporabiti zanke for. (Prirejeno: namesto 2000 je zgornja meja 20.)","snip":"for(int i=0; i\u003c20; i+=2) {\n    System.out.print(i+\" \");\n}\nSystem.out.println();","hideExp":true,"expected":"0 2 4 6 8 10 12 14 16 18","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","sol":"public class Main {\n    public static void main(String[] args) {\n        int i = 0;\n        while (i \u003c 20) {\n            System.out.print(i + \" \");\n            i += 2;\n        }\n        System.out.println();\n    }\n}","h":["Zanko for zapišemo z while: začetek pred zanko, pogoj v oklepaju, korak na koncu telesa.","Ne pozabi na korak i += 2, sicer je zanka neskončna."],"why":"for (start; pogoj; korak) telo; je enakovredno: start; while (pogoj) { telo; korak; }. Zato i = 0 postavimo pred zanko, pogoj je i \u003c 20, korak i += 2 pa je zadnji stavek v telesu.","id":"M141-17"},{"src":"M191/10","pts":2,"lv":"C","type":"code","adapt":true,"q":"Zapišite zaporedje stavkov brez uporabe zanke for, ki nadomestijo zanko for(int i=0; i\u003c1000000; i++) System.out.println(i); (Prirejeno: namesto milijona je zgornja meja 5.)","hideExp":true,"expected":"0\n1\n2\n3\n4","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","sol":"public class Main {\n    public static void main(String[] args) {\n        int i = 0;\n        do {\n            System.out.println(i);\n            i++;\n        } while (i \u003c 5);\n    }\n}","h":["Uporabiš lahko while ali do-while.","Pri do-while se telo izvede vsaj enkrat, kar tu ustreza, ker je že prva vrednost 0 \u003c 5."],"why":"Obe zanki dasta enak izpis 0, 1, 2, 3, 4. Pri while preverimo pogoj pred telesom, pri do-while po njem. Ker je pogoj pri i = 0 izpolnjen, sta zapisa tu enakovredna.","id":"M191-10"},{"src":"M211/10","pts":2,"lv":"C","type":"code","adapt":true,"q":"Del programa, ki izračuna vsoto naravnih števil iz intervala [1..100], zapišite z uporabo zanke do while. Dana je zanka for: for(int num = 100, sum=0; num>0; num--) { sum += num; } (Prirejeno: po zanki izpiši vsoto.)","hideExp":true,"expected":"5050","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","sol":"public class Main {\n    public static void main(String[] args) {\n        int num = 100, sum = 0;\n        do {\n            sum += num;\n            num--;\n        } while (num > 0);\n        System.out.println(sum);\n    }\n}","h":["Deklaraciji num in sum premakni pred zanko.","Pogoj iz glave zanke for (num > 0) postane pogoj za while na koncu."],"why":"Spremenljivki num in sum deklariramo pred zanko, ker bi bili v zanki do-while vidni le znotraj telesa. V telesu seštejemo in zmanjšamo num. Na koncu preverimo num > 0. Rezultat je 5050.","id":"M211-10"},{"src":"M202/15","pts":2,"lv":"C","type":"code","adapt":true,"q":"Naslednjo zanko do while pretvorite v zanko for. (Prirejeno: po zanki izpiši x in y, ločena s presledkom; y deklariraj pred zanko.)","snip":"int x = 1;\nint y = 0;\ndo {\n    x = x + y % x;\n    y = y + 1;\n} while (y \u003c= 3);","hideExp":true,"expected":"1 4","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","sol":"public class Main {\n    public static void main(String[] args) {\n        int x = 1;\n        int y;\n        for (y = 0; y \u003c= 3; y++) {\n            x = x + y % x;\n        }\n        System.out.println(x + \" \" + y);\n    }\n}","h":["Začetna vrednost y = 0 gre v prvi del glave, y = y + 1 v tretji del.","Pogoj je isti. Ker je y na začetku 0 in je 0 \u003c= 3, se do-while in for obnašata enako."],"why":"Telo ostane x = x + y % x, števec y = 0 postavimo v začetek zanke for, y++ je korak in pogoj ostane y \u003c= 3. Po zanki je x = 1 in y = 4.","id":"M202-15"},{"src":"M221/17","pts":2,"lv":"C","type":"code","adapt":true,"q":"Dopolnite spodnjo kodo z zanko do while, ki tvori naključna realna števila iz intervala [0, 1) in tvorjenje preneha, ko je zadnje naključno število večje od 0,75. (Prirejeno: da je izpis vedno enak, uporabi Random rand = new Random(2026); in izpiši vsako tvorjeno število v svojo vrstico.)","hideExp":true,"expected":"0.6186327814734252\n0.849209341093155","starter":"import java.util.Random;\n\npublic class Main {\n    public static void main(String[] args) {\n        Random rand = new Random(2026);\n        // tvoja koda\n    }\n}","sol":"import java.util.Random;\n\npublic class Main {\n    public static void main(String[] args) {\n        Random rand = new Random(2026);\n        double x;\n        do {\n            x = rand.nextDouble();\n            System.out.println(x);\n        } while (x \u003c= 0.75);\n    }\n}","h":["Telo zanke tvori novo število: nextDouble().","Ponavljaj, dokler število ni večje od 0,75, torej dokler velja x \u003c= 0.75."],"why":"Zanko do-while uporabimo, ker moramo število tvoriti vsaj enkrat, preden ga lahko preverimo. Spremenljivko x deklariramo pred zanko, da je vidna v pogoju. Pogoj za nadaljevanje je x \u003c= 0.75.","id":"M221-17"},{"src":"M201/7","pts":1,"lv":"C","type":"mc","q":"Dan je ta stavek for: for (int i=1; i\u003c5; i++) System.out.print(i); Katero zaporedje stavkov povzroči enak izpis kakor zanka for?","o":["i=0;\nwhile (i\u003c5)\n    System.out.print(++i);","i=0;\ndo\n    System.out.print(++i);\nwhile (i\u003c5);","i=0;\ndo\n    System.out.print(++i);\nwhile (++i\u003c5);","i=0;\nwhile (++i\u003c5) {\n    System.out.print(i);\n}"],"a":[3],"h":["Zanka for izpiše 1234.","Pri ++i se števec poveča že pred primerjavo oz. izpisom."],"why":"Pri D se i najprej poveča in primerja (1 \u003c 5, …, 4 \u003c 5), nato izpiše: 1234. Pri A in B se izpiše tudi 5 (12345), pri C vsak drugi člen (135), ker se i poveča dvakrat na ponovitev.","id":"M201-7"},{"src":"M232/17","pts":2,"lv":"C","type":"code","q":"Napišite kodo metode deli tako, da bo vrnila celi del pri deljenju števila a s številom b. Dovoljene so le dodatne spremenljivke, zanke ter operaciji seštevanja in odštevanja. Operacij množenja, deljenja in ostanka pri deljenju ne smete uporabiti. (Metoda se kliče iz glavnega programa z a = 17 in b = 5.)","hideExp":true,"expected":"3","starter":"public class Main {\n    public static int deli(int a, int b) {\n        // koda\n    }\n\n    public static void main(String[] args) {\n        System.out.println(deli(17, 5));\n    }\n}","sol":"public class Main {\n    public static int deli(int a, int b) {\n        int kolicnik = 0;\n        while (a >= b) {\n            a = a - b;\n            kolicnik++;\n        }\n        return kolicnik;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(deli(17, 5));\n    }\n}","h":["Štej, kolikokrat lahko odšteješ b od a, preden a postane manjši od b.","To je enak postopek, kot ga pri deljenju izvedemo na roke."],"why":"Od a odštevamo b, dokler je a >= b, in štejemo odštevanja. Za 17 in 5 je to 3 (ostane 2). Za pozitivna a in b metoda vrne celi del količnika.","id":"M232-17"},{"lv":"C","own":true,"pts":1,"type":"code","q":"Napiši zanko for, ki izpiše števila od 10 do 1 v eni vrstici, ločena s presledkom: 10 9 8 7 6 5 4 3 2 1.","hideExp":true,"expected":"10 9 8 7 6 5 4 3 2 1","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","sol":"public class Main {\n    public static void main(String[] args) {\n        for (int i = 10; i >= 1; i--) {\n            System.out.print(i + \" \");\n        }\n        System.out.println();\n    }\n}","h":["Števec začne pri 10 in se zmanjšuje.","Pogoj je i >= 1 (ne i > 1), da bo vključen tudi 1."],"why":"Števec i teče od 10 do 1 s korakom −1. Za vsakim številom izpišemo presledek (presledek na koncu vrstice ne vpliva na rezultat).","id":"own-41"},{"lv":"C","own":true,"pts":2,"type":"code","q":"Seštej vsa naravna števila od 1 do n, kjer je n = 10, s tremi zankami: while, for in do-while. Izpiši tri rezultate v treh vrsticah.","hideExp":true,"expected":"55\n55\n55","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","sol":"public class Main {\n    public static void main(String[] args) {\n        int n = 10;\n\n        int a = 0, i = 1;\n        while (i \u003c= n) {\n            a += i;\n            i++;\n        }\n        System.out.println(a);\n\n        int b = 0;\n        for (int j = 1; j \u003c= n; j++) {\n            b += j;\n        }\n        System.out.println(b);\n\n        int cc = 0, k = 1;\n        do {\n            cc += k;\n            k++;\n        } while (k \u003c= n);\n        System.out.println(cc);\n    }\n}","h":["Pri while in do-while deklariraj števec pred zanko, pri for v glavi.","Vsota naj bo pred zanko enaka 0."],"why":"Vse tri zanke seštejejo 1 + 2 + … + 10 = 55. Pri do-while bi bilo za n = 0 treba paziti, ker se telo izvede vsaj enkrat.","id":"own-42"},{"src":"M121/12","pts":2,"lv":"D","type":"output","adapt":true,"q":"Kaj in kako se izpiše med izvajanjem naslednjega zaporedja stavkov? (Prirejeno: v izvirniku manjka znak +, popravljeno je a+\" \"+b. Vsako vrstico izpisa zapiši v svojo vrstico, števila ločuj s presledkom.)","code":"\nfor (int a=0; a\u003c5; ++a) {\n    for (int b=5; b>a; --b)\n        System.out.print(a+\" \"+b+\" \");\n    System.out.println();\n}","expected":"0 5 0 4 0 3 0 2 0 1\n1 5 1 4 1 3 1 2\n2 5 2 4 2 3\n3 5 3 4\n4 5","h":["Zunanja zanka šteje vrstice, notranja izpisuje pare a b.","Notranja zanka nima zavitih oklepajev: obsega samo stavek print."],"why":"V vrstici a notranja zanka izpiše pare (a, b) za b od 5 do a + 1. Vrstica 0 ima torej 5 parov, vrstica 1 jih ima 4, in tako naprej do vrstice 4 z enim parom. println je v zunanji zanki, zato se vrstica zaključi po notranji zanki.","id":"M121-12"},{"src":"M131/2","pts":2,"lv":"D","type":"code","q":"Z gnezdenimi zankami napišite del programa, s katerim dobimo izpis v tej obliki: 1, 22, 333, 4444, 55555 (vsako v svoji vrstici).","hideExp":true,"expected":"1\n22\n333\n4444\n55555","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","sol":"public class Main {\n    public static void main(String[] args) {\n        for (int i = 1; i \u003c= 5; i++) {\n            for (int j = 1; j \u003c= i; j++) {\n                System.out.print(i);\n            }\n            System.out.println();\n        }\n    }\n}","h":["Zunanja zanka šteje vrstice, števec i je hkrati tudi število, ki ga izpišemo.","Notranja zanka izpiše števko i natanko i-krat."],"why":"V vrstici i notranja zanka izpiše števko i natanko i-krat. Ko se notranja zanka konča, println pomakne izpis v novo vrstico.","id":"M131-2"},{"src":"M151/12","pts":3,"lv":"D","type":"code","q":"Z gnezdenimi zankami realizirajte programsko kodo v Javi, s katero zagotovite izpis v tej obliki (štiri vrstice): *ooo, **oo, ***o, ****","hideExp":true,"expected":"*ooo\n**oo\n***o\n****","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","sol":"public class Main {\n    public static void main(String[] args) {\n        for (int i = 1; i \u003c= 4; i++) {\n            for (int j = 1; j \u003c= 4; j++) {\n                if (j \u003c= i) System.out.print(\"*\");\n                else System.out.print(\"o\");\n            }\n            System.out.println();\n        }\n    }\n}","h":["V vrstici i je prvih i znakov zvezdica, ostali so o.","V notranji zanki z if preveri, ali je j \u003c= i."],"why":"Zunanja zanka šteje vrstice 1 do 4, notranja stolpce 1 do 4. Če je stolpec j največ enak številu vrstice i, izpišemo *, sicer o.","id":"M151-12"},{"src":"M162/14","pts":2,"lv":"D","type":"blanks","q":"Napišite, kateri pogoj moramo zapisati na črto v spodnji kodi, da bo koda izpisala ****, *oo*, *oo*, **** (štiri vrstice).","snip":"for(int v=0; v\u003c4; v++) {\n    for (int s=0; s\u003c4; s++) {\n        if (___________________)\n            System.out.print(\"*\");\n        else\n            System.out.print(\"o\");\n    }\n    System.out.println();\n}","b":[{"l":"pogoj","code":true,"acc":["v==0||v==3||s==0||s==3","v==0||s==0||v==3||s==3","s==0||s==3||v==0||v==3","s==0||v==0||s==3||v==3","v==0||v==3||s==3||s==0","s==0||s==3||v==3||v==0","v%3==0||s%3==0","s%3==0||v%3==0"]}],"h":["Zvezdica je na robu: v prvi in zadnji vrstici ter v prvem in zadnjem stolpcu.","Indeksa v in s imata vrednosti 0, 1, 2, 3."],"why":"Rob dobimo, ko je vrstica v ali stolpec s enak 0 ali 3: v == 0 || v == 3 || s == 0 || s == 3. Ker sta 0 in 3 edina večkratnika števila 3 med 0 in 3, deluje tudi v % 3 == 0 || s % 3 == 0.","id":"M162-14"},{"src":"M201/12","pts":2,"lv":"D","type":"output","q":"Kaj in kako se izpiše med izvajanjem naslednjega zaporedja stavkov? (Vsako vrstico izpisa zapiši v svojo vrstico.)","code":"\nint i=0;\ndo {\n    int j=0;\n    while (j\u003c=i){\n        System.out.print(i);\n        j++;\n    }\n    System.out.println();\n    i++;\n} while (i\u003c4);","expected":"0\n11\n222\n3333","h":["Pri i izpiše while števko i natanko (i + 1)-krat.","Zunanja zanka do-while se izvede za i = 0, 1, 2, 3."],"why":"Pri vsakem i se notranja zanka izvede za j = 0 do vključno i, torej (i + 1)-krat in izpiše števko i. Dobimo 0, 11, 222, 3333.","id":"M201-12"},{"src":"M201/15","pts":3,"lv":"D","type":"output","q":"Kaj in kako izpiše naslednji del programa? (Vsako vrstico izpisa zapiši v svojo vrstico.)","code":"\nfor(int i = 0; i \u003c=3; i++){\n    for (int j=5; j>=i; j--){\n        System.out.print(j);\n    }\n    System.out.println();\n}","expected":"543210\n54321\n5432\n543","h":["Notranja zanka šteje navzdol od 5 do vključno i.","Pri i = 0 izpiše števila 5 4 3 2 1 0, pri i = 3 pa le 5 4 3."],"why":"V vrstici i izpiše notranja zanka števila od 5 navzdol do i: 543210, 54321, 5432, 543.","id":"M201-15"},{"src":"M202/8","pts":2,"lv":"D","type":"output","q":"Kaj izpiše naslednji del kode? (Vsako vrstico izpisa zapiši v svojo vrstico.)","code":"\nint a=7, b=2, c;\nc = a/b;\nfor(int i=0; i\u003cc; i++) {\n    a = a*2;\n    for(int j=0; j\u003ci; j++) {\n        b = b + 2;\n    }\n    System.out.println(a+\" \"+b);\n}","expected":"14 2\n28 4\n56 8","h":["c = 7 / 2 = 3, zato se zunanja zanka izvede trikrat.","Notranja zanka se pri i izvede i-krat in vsakič poveča b za 2."],"why":"c = 3. Pri i = 0 se a podvoji (14), notranja zanka se ne izvede, b = 2. Pri i = 1 je a = 28 in b = 4. Pri i = 2 je a = 56 in b se dvakrat poveča za 2 (b = 8).","id":"M202-8"},{"src":"M172/16","pts":2,"lv":"D","type":"output","q":"Kaj izpiše izsek programa? (Vsako vrstico izpisa zapiši v svojo vrstico.)","code":"\nchar c='A'; int k=6; int a=1;\nwhile (a\u003c=k) {\n    c=(char)(c+a);\n    int i=1;\n    do {System.out.print(c);i++;}\n    while (i\u003ck);\n    System.out.println();\n    a++;\n    k-=a;\n}","expected":"BBBBB\nDDD","h":["V pogoju notranje zanke je k, ki se spreminja v zunanji.","(char)(c + a) je črka, ki je za a mest za c v abecedi."],"why":"Prva ponovitev: c = B, notranja zanka do-while izpiše B za i = 1 do 5 (petkrat), nato je a = 2, k = 4. Druga ponovitev: c = D, notranja zanka izpiše D trikrat. Nato je a = 3, k = 1 in pogoj 3 \u003c= 1 ni izpolnjen.","id":"M172-16"},{"src":"M191/17","pts":2,"lv":"D","type":"output","q":"Dan je izsek kode v programskem jeziku Java. Kaj se med izvajanjem izpiše na zaslon? (Vsako vrstico izpisa zapiši v svojo vrstico.)","code":"\nint a = 14, b = 4;\nint c = a%b;\nfor(int i=0; i\u003cc; i++) {\n    a = a + c;\n    double j = 0;\n    while (j\u003ci) {\n        b = b + i;\n        j = j + 0.8;\n    }\n    System.out.println(a+\", \"+b);\n}","expected":"16, 4\n18, 6","h":["c = 14 % 4 = 2, zunanja zanka se izvede dvakrat.","Notranja zanka while ima korak 0,8, torej j = 0, 0,8, 1,6 …"],"why":"c = 2. Pri i = 0: a = 16, notranja zanka se ne izvede (0 \u003c 0 ni res), b = 4. Pri i = 1: a = 18, j = 0 in 0,8 sta manjša od 1, zato se b poveča dvakrat za 1 (b = 6).","id":"M191-17"},{"src":"M222/14","pts":2,"lv":"D","type":"output","q":"Kaj izpiše spodnji izsek kode? (Vsako vrstico izpisa zapiši v svojo vrstico.)","code":"\nfor(int i=0; i\u003c5; i++) {\n    for(int j=0; j\u003c5; j++)\n        if (i==0 || j==0 || i==j)\n            System.out.print(\"X\");\n        else\n            System.out.print(\"O\");\n    System.out.println();\n}","expected":"XXXXX\nXXOOO\nXOXOO\nXOOXO\nXOOOX","h":["V prvi vrstici (i = 0), v prvem stolpcu (j = 0) in na diagonali (i == j) je X.","Povsod drugod je O."],"why":"Pogoj je izpolnjen v prvi vrstici, prvem stolpcu in na glavni diagonali. Zato je izpis oblike črke N: XXXXX, XXOOO, XOXOO, XOOXO, XOOOX.","id":"M222-14"},{"src":"M251/8","pts":2,"lv":"D","type":"output","q":"Kaj izpiše izsek kode? (Vsako vrstico izpisa zapiši v svojo vrstico.)","code":"\nfor(int i=0; i\u003c5; i++) {\n    for(int j=0; j\u003c5; j++)\n        if (i==j || j == 4 - i )\n            System.out.print(\"X\");\n        else\n            System.out.print(\"O\");\n    System.out.println();\n}","expected":"XOOOX\nOXOXO\nOOXOO\nOXOXO\nXOOOX","h":["i == j je glavna diagonala, j == 4 − i je stranska diagonala.","V sredini obe diagonali sovpadata."],"why":"X je na glavni (i == j) in stranski (j == 4 − i) diagonali, ki se sekata v središču. Izpis je oblike črke X: XOOOX, OXOXO, OOXOO, OXOXO, XOOOX.","id":"M251-8"},{"src":"M231/18","pts":3,"lv":"D","type":"code","q":"Napišite metodo static void trikotnik (int n), ki nariše enakokraki trikotnik višine n, ki je podana kot parameter. Za n = 4 se na zaslon izpiše: 3 presledki in *, nato 2 presledka in ***, 1 presledek in *****, nato *******. (Glavni program kliče trikotnik(4).)","hideExp":true,"expected":"   *\n  ***\n *****\n*******","starter":"public class Main {\n    static void trikotnik(int n) {\n        // koda\n    }\n\n    public static void main(String[] args) {\n        trikotnik(4);\n    }\n}","sol":"public class Main {\n    static void trikotnik(int n) {\n        for (int i = 1; i \u003c= n; i++) {\n            for (int j = 1; j \u003c= n - i; j++) {\n                System.out.print(\" \");\n            }\n            for (int j = 1; j \u003c= 2 * i - 1; j++) {\n                System.out.print(\"*\");\n            }\n            System.out.println();\n        }\n    }\n\n    public static void main(String[] args) {\n        trikotnik(4);\n    }\n}","h":["V vrstici i je n − i presledkov in 2i − 1 zvezdic.","Za vsako vrstico potrebuješ dve notranji zanki: eno za presledke in eno za zvezdice."],"why":"V vrstici i najprej izpišemo n − i presledkov, nato 2i − 1 zvezdic. Za n = 4 so vrstice dolge 1, 3, 5 in 7 zvezdic, odmik pa je 3, 2, 1 in 0 presledkov.","id":"M231-18"},{"src":"M151/4","pts":1,"lv":"E","type":"mc","q":"Kateri izmed opisov velja za stavek break?","o":["Stavek break nemudoma prekine izvajanje metode, v kateri je zapisan.","Stavek break nemudoma skoči na ponovno preverjanje pogoja zanke, v kateri je zapisan.","Stavka break ne moremo uporabiti znotraj stavka switch.","Stavek break nemudoma prekine izvajanje zanke, v kateri je zapisan."],"a":[3],"h":["Metodo prekinemo s stavkom return.","Skok na preverjanje pogoja je naloga stavka continue."],"why":"break nemudoma zapusti zanko (ali switch), v kateri stoji, in program se nadaljuje za njo. Metodo zapusti return, skok na novo ponovitev pa izvede continue.","id":"M151-4"},{"src":"M181/7","pts":1,"lv":"E","type":"mc","q":"S katero izmed navedenih rezerviranih besed v programskem jeziku Java prekinemo izvajanje zanke for?","o":["while","stop","break","void"],"a":[2],"h":["stop in void sta v Javi ne zanko ne prekinitev.","Ista beseda prekine tudi stavek switch."],"why":"Zanko prekine stavek break. Besede stop v Javi ni, void je tip vrnjene vrednosti metode, while pa je druga zanka.","id":"M181-7"},{"src":"M162/13","pts":1,"lv":"E","type":"mc","q":"Kaj je učinek stavka continue znotraj zanke for?","o":["Program se nadaljuje z izvedbo stavka, ki sledi zanki for.","Program se nadaljuje z izvedbo stavka, ki je pred zanko for.","Program se nadaljuje s spremembo vrednosti indeksa zanke for.","Program se nadaljuje s preverjanjem pogoja zanke for."],"a":[2],"h":["Pri zanki for se po telesu izvede korak (npr. i++), nato se preveri pogoj.","Izvedba stavka za zanko je učinek stavka break."],"why":"continue preskoči preostanek telesa. Pri zanki for sledi izvedba koraka (sprememba indeksa), nato preverjanje pogoja. Pri zanki while ni koraka, zato skoči neposredno na preverjanje pogoja.","id":"M162-13"},{"src":"M242/7","pts":2,"lv":"E","type":"blanks","q":"Dopolnite trditvi tako, da bosta na črti zapisani besedi strokovno smiselno tvorili resnični trditvi (Java). Stavek ____ znotraj zanke nemudoma skoči na naslednjo iteracijo oz. ponovitev zanke, v kateri se nahaja. Stavek ____ pa izvajanje zanke, v kateri se nahaja, nemudoma prekine. V tem primeru se izvajanje nadaljuje za to zanko.","b":[{"l":"prva beseda","acc":["continue"]},{"l":"druga beseda","acc":["break"]}],"h":["Ena beseda pomeni »nadaljuj z naslednjo ponovitvijo«.","Druga zapusti zanko."],"why":"continue preskoči preostanek trenutne ponovitve in nadaljuje z naslednjo, break zanko prekine.","id":"M242-7"},{"src":"M211/7","pts":1,"lv":"E","type":"mc","q":"V programu imamo zaporedje stavkov: int i=0; while (true) { System.out.println(++i); if (i==10) break; } Obkrožite črko pred trditvijo, ki je za navedene programske stavke resnična.","o":["Izvajanje se nikoli ne zaključi.","Pri prevajanju programa pride do napake, ker stavka break ne smemo uporabiti v zanki.","Prvo število, ki ga stavki izpišejo, je število 0.","Prvo število, ki ga stavki izpišejo, je število 1."],"a":[3],"h":["++i poveča i, preden se vrednost uporabi.","Pri i == 10 se izvede break."],"why":"Pogoj true je vedno resničen, zanko pa zapusti stavek break pri i == 10, zato se izvajanje zaključi. Zaradi ++i je prva izpisana vrednost 1, zadnja pa 10.","id":"M211-7"},{"src":"M192/15","pts":2,"lv":"E","type":"output","q":"Kaj izpiše izsek programa?","code":"\nint x;\nfor(x=1; x\u003c=10; x++)\n{\n    if(x \u003c 5){\n        System.out.print(\"A\");\n        continue;\n    }\n    else {\n        System.out.print(\"B\");\n        break;\n    }\n}\nSystem.out.println(x);","expected":"AAAAB5","h":["Za x = 1 do 4 se izpiše A in izvede continue.","Pri x = 5 se izpiše B in zanka se prekine, x pa ostane 5."],"why":"Za x = 1, 2, 3 in 4 se izpiše A. Pri x = 5 se izpiše B in break prekine zanko, preden se x poveča. Ker je x deklariran pred zanko, se na koncu izpiše 5. Skupaj AAAAB5.","id":"M192-15"},{"src":"M241/7","pts":2,"lv":"E","type":"output","q":"Kaj se izpiše na zaslonu pri izvedbi spodnje kode? (Vsako vrstico izpisa zapiši v svojo vrstico.)","code":"\nfor (int i = -5; i \u003c 5; i++){\n    if (-2*i > 3)\n        continue;\n    else\n        if (i > 1)\n            break;\n    System.out.println(\"i= \" + i);\n}","expected":"i= -1\ni= 0\ni= 1","h":["Pri i = −5, −4, −3, −2 je −2i > 3, zato continue preskoči izpis.","Zanka se konča, ko je i > 1, torej pri i = 2."],"why":"Pogoj −2i > 3 velja za i \u003c= −2, zato se te vrednosti preskočijo. Izpišejo se i = −1, 0 in 1. Pri i = 2 pogoj −2i > 3 ni resničen, i > 1 pa je, zato break prekine zanko.","id":"M241-7"},{"lv":"E","own":true,"pts":1,"type":"output","q":"Kaj izpiše program? Zanka je namenoma neskončna.","code":"\nint vsota = 0;\nint i = 1;\nwhile (true) {\n    vsota += i;\n    if (vsota > 20) break;\n    i++;\n}\nSystem.out.println(i + \" \" + vsota);","expected":"6 21","h":["Seštevaj 1 + 2 + 3 + … in preveri po vsakem seštevanju.","Vsote so 1, 3, 6, 10, 15, 21."],"why":"Vsota preseže 20 šele pri i = 6 (1 + 2 + 3 + 4 + 5 + 6 = 21). Tedaj se izvede break in izpiše se 6 21.","id":"own-62"},{"lv":"E","own":true,"pts":1,"type":"output","q":"Kaj izpiše program?","code":"\nfor (int i = 1; i \u003c= 10; i++) {\n    if (i % 3 == 0) continue;\n    System.out.print(i + \" \");\n}\nSystem.out.println();","expected":"1 2 4 5 7 8 10","h":["continue preskoči izpis pri večkratnikih števila 3.","Števila 3, 6 in 9 se ne izpišejo."],"why":"Pri i = 3, 6 in 9 je i % 3 == 0 in continue preskoči izpis. Izpišejo se ostala števila: 1 2 4 5 7 8 10.","id":"own-63"},{"lv":"E","own":true,"pts":2,"type":"cls","cats":["break","continue"],"q":"Razvrsti opise: kateri stavek ima opisani učinek v zanki?","items":[["Zanka se konča, program nadaljuje s stavkom za zanko.",0],["Preostanek telesa se preskoči, zanka se nadaljuje z naslednjo ponovitvijo.",1],["Primeren, ko smo v zanki našli iskano vrednost in nadaljnje iskanje ni več potrebno.",0],["Primeren, ko želimo posamezno vrednost izpustiti in obdelati ostale.",1],["V zanki for se po njem izvede korak (npr. i++).",1],["Lahko ga uporabimo tudi v stavku switch.",0]],"h":["break zanko zapusti, continue samo preskoči trenutno ponovitev.","Stavek, ki ga poznamo iz switch, je break."],"why":"break zanko zaključi in je primeren pri iskanju. continue preskoči preostanek telesa in nadaljuje z naslednjo ponovitvijo (pri for po izvedbi koraka). Samo break je dovoljen tudi v stavku switch.","id":"own-64"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 1","type":"mc","pts":1,"q":"Kolikokrat se lahko izvede zanka while? Od česa je odvisno?","o":["Natanko enkrat.","Vsaj enkrat.","Nič-krat, enkrat ali večkrat. Odvisno je od pogoja in od vrednosti spremenljivk v njem.","Natanko tolikokrat, kolikor je v oklepaju napisano število."],"a":[2],"h":["Pogoj se preveri pred prvo ponovitvijo.","Če je pogoj že na začetku neresničen, se telo ne izvede nikoli."],"why":"Pogoj preverimo pred vsako ponovitvijo. Če je že prvič neresničen, se telo ne izvede nikoli. Sicer se izvaja, dokler pogoj ostane resničen, in število ponovitev je odvisno od spremenljivk v pogoju.","id":"own-65"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 2","type":"mc","pts":1,"q":"Kolikokrat se lahko izvede zanka do-while? Od česa je odvisno?","o":["Nikoli, če je pogoj že na začetku neresničen.","Vsaj enkrat. Nato je število ponovitev odvisno od pogoja.","Natanko enkrat.","Samo če je pogoj resničen že pred zanko."],"a":[1],"h":["Pogoj stoji na koncu zanke.","Telo se izvede, še preden se pogoj sploh preveri."],"why":"Pri do-while se telo izvede najprej, pogoj pa se preveri po njem. Zato se telo izvede vsaj enkrat, nato se ponavlja, dokler je pogoj resničen.","id":"own-66"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 3","type":"mc","pts":2,"q":"Kdaj bi uporabili neskončno zanko? Kako se lahko konča oziroma prekine? Izberi pravilni trditvi.","o":["Neskončna zanka je vedno napaka in je v pravilnem programu ni.","Uporabimo jo, kadar vnaprej ne vemo, kdaj bo konec, npr. pri meniju, ki se ponavlja, dokler uporabnik ne izbere izhoda.","Prekinemo jo lahko s stavkom break (v metodi tudi z return).","Prekiniti jo je mogoče samo z izklopom računalnika."],"a":[1,2],"h":["Pri meniju ne vemo, kolikokrat bo uporabnik izbral kakšno možnost.","Stavek break zapusti zanko, v kateri stoji."],"why":"Neskončna zanka while (true) je pogosta: ponavlja se, dokler ne nastopi neki dogodek (npr. izbira izhoda v meniju), in se takrat konča s stavkom break ali z return.","id":"own-67"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 4","type":"code","hideExp":true,"expected":"1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":1,"adapt":true,"q":"Izpiši vsa naravna števila med 1 in 100. (Prirejeno: v eni vrstici, ločena s presledkom.)","sol":"public class Main {\n    public static void main(String[] args) {\n        for (int i = 1; i \u003c= 100; i++) {\n            System.out.print(i + \" \");\n        }\n        System.out.println();\n    }\n}","h":["Števec teče od 1 do 100.","Za vsakim številom izpiši presledek."],"why":"Zanka for z i od 1 do vključno 100. Število ponovitev je vnaprej znano, zato je for najbolj pregledna zanka.","id":"own-68"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 5","type":"code","hideExp":true,"expected":"3 6 9 12 15 18 21 24 27 30 33 36 39 42 45 48 51 54 57 60 63 66 69 72 75 78 81 84 87 90 93 96 99","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":1,"adapt":true,"q":"Izpiši vsa naravna števila med 1 in 100, ki so deljiva s 3. (Prirejeno: v eni vrstici, ločena s presledkom.)","sol":"public class Main {\n    public static void main(String[] args) {\n        for (int i = 1; i \u003c= 100; i++) {\n            if (i % 3 == 0) {\n                System.out.print(i + \" \");\n            }\n        }\n        System.out.println();\n    }\n}","h":["Število je deljivo s 3, če je ostanek pri deljenju s 3 enak 0.","Znotraj zanke uporabi stavek if."],"why":"Pogoj i % 3 == 0 je izpolnjen za večkratnike števila 3. Možna je tudi zanka s korakom 3: for (int i = 3; i \u003c= 100; i += 3).","id":"own-69"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 6","type":"code","hideExp":true,"expected":"3 6 9 12 18 21 24 27 33 36 39 42 48 51 54 57 63 66 69 72 78 81 84 87 93 96 99","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":1,"adapt":true,"q":"Izpiši vsa naravna števila med 1 in 100, ki so deljiva s 3 in niso večkratniki števila 5. (Prirejeno: v eni vrstici, ločena s presledkom.)","sol":"public class Main {\n    public static void main(String[] args) {\n        for (int i = 1; i \u003c= 100; i++) {\n            if (i % 3 == 0 && i % 5 != 0) {\n                System.out.print(i + \" \");\n            }\n        }\n        System.out.println();\n    }\n}","h":["Dva pogoja poveži z operatorjem &&.","Večkratnik števila 5 prepoznaš po i % 5 == 0, zato ga izločiš z != 0."],"why":"Pogoj i % 3 == 0 && i % 5 != 0 izloči števila 15, 30, 45, 60, 75 in 90.","id":"own-70"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 7","type":"code","hideExp":true,"expected":"1 2 3 4 6 9 12 18 36","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":2,"q":"Sestavi program, ki za dano naravno število n = 36 izpiše vse njegove delitelje. (V eni vrstici, ločeni s presledkom.)","sol":"public class Main {\n    public static void main(String[] args) {\n        int n = 36;\n        for (int d = 1; d \u003c= n; d++) {\n            if (n % d == 0) {\n                System.out.print(d + \" \");\n            }\n        }\n        System.out.println();\n    }\n}","h":["Delitelj je število d, pri katerem je n % d enak 0.","Delitelji so lahko od 1 do n."],"why":"Preverimo vsa števila od 1 do n. Delitelji števila 36 so 1, 2, 3, 4, 6, 9, 12, 18 in 36. Učinkoviteje je iskati le do √n in izpisati oba delitelja hkrati, a tu to ni potrebno.","id":"own-71"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 8","type":"code","hideExp":true,"expected":"9 7 5 3 1 -1 -3 -5 -7 -9","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":1,"q":"Sestavi program, ki izpiše vsa liha števila med −10 in 10 v padajočem vrstnem redu. (V eni vrstici, ločena s presledkom.)","sol":"public class Main {\n    public static void main(String[] args) {\n        for (int i = 10; i >= -10; i--) {\n            if (i % 2 != 0) {\n                System.out.print(i + \" \");\n            }\n        }\n        System.out.println();\n    }\n}","h":["Zanka naj teče navzdol: korak i--.","Pri negativnih številih je ostanek pri deljenju z 2 enak −1, zato uporabi i % 2 != 0, ne i % 2 == 1."],"why":"V Javi je −9 % 2 enako −1, zato pogoj i % 2 == 1 negativnih lihih števil ne bi našel. Pogoj i % 2 != 0 deluje za pozitivna in negativna števila.","id":"own-72"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 9","type":"code","hideExp":true,"expected":"5050","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":1,"q":"Sestavi program, ki s pomočjo zanke while sešteje števila od 1 do 100.","sol":"public class Main {\n    public static void main(String[] args) {\n        int i = 1;\n        int vsota = 0;\n        while (i \u003c= 100) {\n            vsota += i;\n            i++;\n        }\n        System.out.println(vsota);\n    }\n}","h":["Pred zanko postavi števec i = 1 in vsota = 0.","V telesu zanke povečaj števec, sicer je zanka neskončna."],"why":"Seštevek 1 + 2 + … + 100 je 5050 (Gaussova formula n(n + 1) / 2).","id":"own-73"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 10","type":"code","hideExp":true,"expected":"2500","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":1,"q":"Sestavi program, ki s pomočjo zanke while sešteje liha števila od 1 do 100.","sol":"public class Main {\n    public static void main(String[] args) {\n        int i = 1;\n        int vsota = 0;\n        while (i \u003c= 100) {\n            vsota += i;\n            i += 2;\n        }\n        System.out.println(vsota);\n    }\n}","h":["Začni pri 1 in števec povečuj za 2.","Ni treba preverjati sodosti, če je korak 2."],"why":"Seštejemo 1 + 3 + 5 + … + 99 (50 števil). Vsota prvih n lihih števil je n², torej 50² = 2500.","id":"own-74"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 11","type":"code","hideExp":true,"expected":"1 2 3 4 5 6 7 8 9 10\n2 4 6 8 10 12 14 16 18 20\n3 6 9 12 15 18 21 24 27 30\n4 8 12 16 20 24 28 32 36 40\n5 10 15 20 25 30 35 40 45 50\n6 12 18 24 30 36 42 48 54 60\n7 14 21 28 35 42 49 56 63 70\n8 16 24 32 40 48 56 64 72 80\n9 18 27 36 45 54 63 72 81 90\n10 20 30 40 50 60 70 80 90 100","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":2,"q":"Sestavi program, ki izpiše poštevanko od 1 do 10: v vsaki od desetih vrstic produkte i · j za j od 1 do 10, ločene s presledkom.","sol":"public class Main {\n    public static void main(String[] args) {\n        for (int i = 1; i \u003c= 10; i++) {\n            for (int j = 1; j \u003c= 10; j++) {\n                System.out.print(i * j + \" \");\n            }\n            System.out.println();\n        }\n    }\n}","h":["Potrebuješ dve zanki, eno v drugi.","Po koncu notranje zanke izpiši znak za novo vrstico."],"why":"Zunanja zanka šteje vrstice (prvi faktor), notranja stolpce (drugi faktor). Ker je v notranji zanki println, bi se vsak produkt izpisal v svojo vrstico. Zato println stoji po notranji zanki.","id":"own-75"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 12","type":"code","hideExp":true,"expected":"*\n**\n***\n****\n*****","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":2,"q":"Z uporabo poljubne zanke izpiši trikotnik iz zvezdic z višino n = 5: v prvi vrstici je ena zvezdica, v drugi dve in tako naprej do pete vrstice. (Poskusi še obrnjen trikotnik in druge like.)","sol":"public class Main {\n    public static void main(String[] args) {\n        int n = 5;\n        for (int i = 1; i \u003c= n; i++) {\n            for (int j = 1; j \u003c= i; j++) {\n                System.out.print(\"*\");\n            }\n            System.out.println();\n        }\n    }\n}","h":["Števec i v zunanji zanki šteje vrstice.","V i-ti vrstici izpiše notranja zanka i zvezdic."],"why":"Notranja zanka teče od 1 do i, zato izpiše i zvezdic. Za obrnjen trikotnik zunanjo zanko zapiši navzdol (i od n do 1).","id":"own-76"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 13","type":"code","hideExp":true,"expected":"3628800","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":1,"q":"Sestavi program, ki izračuna fakulteto celega števila n = 10 (n! = 1 · 2 · … · n).","sol":"public class Main {\n    public static void main(String[] args) {\n        int n = 10;\n        long fakulteta = 1;\n        for (int i = 2; i \u003c= n; i++) {\n            fakulteta *= i;\n        }\n        System.out.println(fakulteta);\n    }\n}","h":["Začetna vrednost produkta je 1, ne 0.","Uporabi tip long: 13! je že večji od največjega števila tipa int."],"why":"10! = 3 628 800. Tip int zadošča do 12!, long do 20!. Po 0! = 1 je za n = 0 rezultat prav tako 1, ker se zanka ne izvede.","id":"own-77"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 14","type":"code","hideExp":true,"expected":"abcdefghijklmnopqrstuvwxyz","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":1,"q":"Sestavi program, ki izpiše angleško abecedo (male črke, v eni vrstici brez presledkov).","sol":"public class Main {\n    public static void main(String[] args) {\n        for (char ch = 'a'; ch \u003c= 'z'; ch++) {\n            System.out.print(ch);\n        }\n        System.out.println();\n    }\n}","h":["Števec zanke je lahko tudi tipa char.","Povečanje z ch++ pomakne črko za eno naprej v abecedi."],"why":"Znaki imajo zaporedne kode (a = 97 … z = 122), zato lahko zanko for z znakovnim števcem izvedemo od 'a' do 'z'. Angleška abeceda nima črk č, š, ž.","id":"own-78"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 15","type":"code","hideExp":true,"expected":"97 je prastevilo","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":2,"q":"Sestavi program, ki za dano pozitivno celo število n = 97 ugotovi, ali je praštevilo. Izpiši »97 je prastevilo« ali »97 ni prastevilo«. Preizkusi še z 91 in 2.","sol":"public class Main {\n    public static void main(String[] args) {\n        int n = 97;\n        boolean prastevilo = n > 1;\n        for (int d = 2; d * d \u003c= n; d++) {\n            if (n % d == 0) {\n                prastevilo = false;\n                break;\n            }\n        }\n        System.out.println(n + (prastevilo ? \" je prastevilo\" : \" ni prastevilo\"));\n    }\n}","h":["Število je praštevilo, če ni deljivo z nobenim številom od 2 do √n.","Ko najdeš delitelj, zanko prekini z break. Številu 1 pripada vrednost false."],"why":"97 nima delitelja do √97 ≈ 9,8, zato je praštevilo. 91 = 7 · 13 ni praštevilo. Poseben primer je število 1, ki ni praštevilo.","id":"own-79"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 16","type":"code","hideExp":true,"expected":"2 * 2 * 2 * 3 * 3 * 5","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":3,"q":"Sestavi program, ki število n = 360 razstavi na prafaktorje. Izpiši jih v eni vrstici, ločene z » * «.","sol":"public class Main {\n    public static void main(String[] args) {\n        int n = 360;\n        int d = 2;\n        boolean prvi = true;\n        while (n > 1) {\n            if (n % d == 0) {\n                if (!prvi) System.out.print(\" * \");\n                System.out.print(d);\n                prvi = false;\n                n /= d;\n            } else {\n                d++;\n            }\n        }\n        System.out.println();\n    }\n}","h":["Deli z najmanjšim možnim deliteljem d = 2. Če deli, ga izpiši in n deli z d.","Če d ne deli, ga povečaj. Ko je n enak 1, je razstavljanje končano."],"why":"360 = 2 · 2 · 2 · 3 · 3 · 5. Delitelj d se poveča samo, ko ne deli več; tako so izpisani vsi delitelji praštevila (sestavljeni delitelji se ne pojavijo, ker so njihovi faktorji že odstranjeni).","id":"own-80"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 17","type":"code","hideExp":true,"expected":"2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61 67 71 73 79 83 89 97 101 103 107 109 113 127 131 137 139 149 151 157 163 167 173 179 181 191 193 197 199 211 223 227 229 233 239 241 251 257 263 269 271 277 281 283 293 307 311 313 317 331 337 347 349 353 359 367 373 379 383 389 397 401 409 419 421 431 433 439 443 449 457 461 463 467 479 487 491 499 503 509 521 523 541","starter":"public class Main {\n    static boolean jePrastevilo(int n) {\n        // koda\n    }\n\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":3,"q":"Sestavi program, ki izpiše prvih 100 praštevil (v eni vrstici, ločena s presledkom).","sol":"public class Main {\n    static boolean jePrastevilo(int n) {\n        if (n \u003c 2) return false;\n        for (int d = 2; d * d \u003c= n; d++) {\n            if (n % d == 0) return false;\n        }\n        return true;\n    }\n\n    public static void main(String[] args) {\n        int stevec = 0;\n        int n = 2;\n        while (stevec \u003c 100) {\n            if (jePrastevilo(n)) {\n                System.out.print(n + \" \");\n                stevec++;\n            }\n            n++;\n        }\n        System.out.println();\n    }\n}","h":["Zapiši pomožno metodo jePrastevilo(int n) in jo kliči iz zanke.","Štej izpisana praštevila, ne preizkušenih števil."],"why":"Štejemo najdena praštevila, zato zanka while teče, dokler jih ni 100. Zadnje praštevilo je 541.","id":"own-81"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 18","type":"code","hideExp":true,"expected":"97","starter":"public class Main {\n    static boolean jePrastevilo(int n) {\n        // koda\n    }\n\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":3,"q":"Napiši program, ki izpiše n-to praštevilo. V kodi nastavi n = 25 (rezultat je 25. praštevilo).","sol":"public class Main {\n    static boolean jePrastevilo(int n) {\n        if (n \u003c 2) return false;\n        for (int d = 2; d * d \u003c= n; d++) {\n            if (n % d == 0) return false;\n        }\n        return true;\n    }\n\n    public static void main(String[] args) {\n        int n = 25;\n        int stevec = 0;\n        int x = 1;\n        while (stevec \u003c n) {\n            x++;\n            if (jePrastevilo(x)) {\n                stevec++;\n            }\n        }\n        System.out.println(x);\n    }\n}","h":["Ko je števec praštevil enak n, je trenutno število iskano praštevilo.","Povečuj x in števec le, ko je x praštevilo."],"why":"Prvih 25 praštevil se konča s 97. Zanka se ustavi, ko števec doseže n, in takrat je x ravno n-to praštevilo.","id":"own-82"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 19","type":"code","hideExp":true,"expected":"2 3 5 7 11 13 17 19 23 29 31 37 41 43 47","starter":"public class Main {\n    static boolean jePrastevilo(int n) {\n        // koda\n    }\n\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":2,"q":"Sestavi program Prastevila, ki izpiše vsa praštevila, manjša ali enaka n = 50 (v eni vrstici, ločena s presledkom).","sol":"public class Main {\n    static boolean jePrastevilo(int n) {\n        if (n \u003c 2) return false;\n        for (int d = 2; d * d \u003c= n; d++) {\n            if (n % d == 0) return false;\n        }\n        return true;\n    }\n\n    public static void main(String[] args) {\n        int n = 50;\n        for (int x = 2; x \u003c= n; x++) {\n            if (jePrastevilo(x)) {\n                System.out.print(x + \" \");\n            }\n        }\n        System.out.println();\n    }\n}","h":["Preveri vsako število od 2 do n.","Uporabi metodo jePrastevilo iz prejšnje naloge."],"why":"Praštevila do 50 so 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43 in 47.","id":"own-83"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 20","type":"code","hideExp":true,"expected":"97","starter":"public class Main {\n    static boolean jePrastevilo(int n) {\n        // koda\n    }\n\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":2,"q":"Sestavi program Prastevilo, ki poišče in izpiše najmanjše praštevilo, ki je večje ali enako n = 90.","sol":"public class Main {\n    static boolean jePrastevilo(int n) {\n        if (n \u003c 2) return false;\n        for (int d = 2; d * d \u003c= n; d++) {\n            if (n % d == 0) return false;\n        }\n        return true;\n    }\n\n    public static void main(String[] args) {\n        int n = 90;\n        while (!jePrastevilo(n)) {\n            n++;\n        }\n        System.out.println(n);\n    }\n}","h":["Ne veš, koliko korakov bo potrebnih, zato uporabi while.","Povečuj n, dokler ni praštevilo."],"why":"90, 91 (7 · 13), 92, 93, 94, 95 in 96 niso praštevila, 97 pa je. Za zanko, katere število ponovitev ni vnaprej znano, je primerna zanka while.","id":"own-84"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 21","type":"code","hideExp":true,"expected":"NSD = 12\nNSV = 252","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":3,"q":"Sestavi program, ki izračuna največji skupni delitelj (Evklidov algoritem) in najmanjši skupni večkratnik dveh celih števil. V kodi nastavi a = 84 in b = 36. Izpiši »NSD = …« in »NSV = …« v dveh vrsticah.","sol":"public class Main {\n    public static void main(String[] args) {\n        int a = 84, b = 36;\n        int x = a, y = b;\n        while (y != 0) {\n            int ostanek = x % y;\n            x = y;\n            y = ostanek;\n        }\n        System.out.println(\"NSD = \" + x);\n        System.out.println(\"NSV = \" + (a / x * b));\n    }\n}","h":["Evklid: dokler b ni 0, zamenjaj (a, b) z (b, a % b).","NSV = a · b / NSD. Najprej deli, da se izogneš prevelikemu produktu."],"why":"(84, 36) → (36, 12) → (12, 0), zato je NSD = 12. NSV = 84 / 12 · 36 = 252.","id":"own-85"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 22","type":"code","hideExp":true,"expected":"1024","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":2,"q":"Napiši program, ki s pomočjo zanke while izračuna potenco osnova na eksponent. V kodi nastavi osnovo 2 in eksponent 10.","sol":"public class Main {\n    public static void main(String[] args) {\n        int osnova = 2;\n        int eksponent = 10;\n        long potenca = 1;\n        int i = 0;\n        while (i \u003c eksponent) {\n            potenca *= osnova;\n            i++;\n        }\n        System.out.println(potenca);\n    }\n}","h":["Osnovo pomnoži s samo seboj eksponent-krat.","Začetna vrednost produkta je 1."],"why":"2^10 = 1024. Če je eksponent 0, se zanka ne izvede in rezultat je 1.","id":"own-86"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 23","type":"code","hideExp":true,"expected":"55","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":3,"draw":true,"fc":[{"t":"io","k":"in","v":["n"]},{"t":"p","x":"vsota = 0"},{"t":"p","x":"i = 1"},{"t":"wh","c":"i \u003c= n","b":[{"t":"p","x":"vsota = vsota + i"},{"t":"p","x":"i = i + 1"}]},{"t":"io","k":"out","v":["vsota"]}],"q":"Sestavi diagram poteka (na papirju ali v Flowgorithmu) in program, ki za dano nenegativno celo število n = 10 izračuna vrednost vsote 1 + 2 + 3 + … + n. Izpiši vsoto.","sol":"public class Main {\n    public static void main(String[] args) {\n        int n = 10;\n        int vsota = 0;\n        int i = 1;\n        while (i \u003c= n) {\n            vsota = vsota + i;\n            i = i + 1;\n        }\n        System.out.println(vsota);\n    }\n}","h":["V diagramu je zanka while: pogoj i \u003c= n, v telesu vsota in števec.","Za n = 0 se zanka ne izvede in je vsota 0."],"why":"Diagram ima pripravo (vsota = 0, i = 1), pogoj i \u003c= n in v telesu dve prireditvi. Za n = 10 je vsota 55.","id":"own-87"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 24","type":"code","hideExp":true,"expected":"8","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":2,"adapt":true,"q":"Sestavi program, ki poišče celo število a, ki da pri deljenju s 5 ostanek 3 in pri deljenju s 7 ostanek 1. (Prirejeno: poišči najmanjše naravno tako število.)","sol":"public class Main {\n    public static void main(String[] args) {\n        int a = 1;\n        while (!(a % 5 == 3 && a % 7 == 1)) {\n            a++;\n        }\n        System.out.println(a);\n    }\n}","h":["Preizkušaj števila 1, 2, 3, … dokler ne najdeš števila, ki izpolni oba pogoja.","Ne veš vnaprej, koliko števil bo treba preizkusiti, zato uporabi while."],"why":"8 : 5 = 1, ostanek 3 in 8 : 7 = 1, ostanek 1. Druge rešitve so 8 + 35k, saj je 35 najmanjši skupni večkratnik števil 5 in 7.","id":"own-88"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 25","type":"code","hideExp":true,"expected":"24","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":2,"q":"Sestavi program Produkt, ki prebere naravno število n = 10234 in izračuna produkt njegovih neničelnih števk.","sol":"public class Main {\n    public static void main(String[] args) {\n        int n = 10234;\n        int produkt = 1;\n        while (n > 0) {\n            int stevka = n % 10;\n            if (stevka != 0) {\n                produkt *= stevka;\n            }\n            n /= 10;\n        }\n        System.out.println(produkt);\n    }\n}","h":["Zadnjo števko dobiš z n % 10, preostanek števila pa z n / 10.","Števko 0 preskoči, sicer bo produkt 0."],"why":"Števke so 4, 3, 2, 0, 1. Ničelne ne upoštevamo: 4 · 3 · 2 · 1 = 24.","id":"own-89"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 26","type":"code","hideExp":true,"expected":"6 28 496","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":3,"q":"Sestavi program PerfektnaStevila, ki izpiše vsa perfektna števila na danem intervalu. V kodi nastavi interval [1, 1000]. Naravno število je perfektno, če je enako vsoti vseh svojih deliteljev (razen števila samega), npr. 28 = 1 + 2 + 4 + 7 + 14. (V eni vrstici, ločena s presledkom.)","sol":"public class Main {\n    public static void main(String[] args) {\n        for (int n = 1; n \u003c= 1000; n++) {\n            int vsota = 0;\n            for (int d = 1; d \u003c n; d++) {\n                if (n % d == 0) {\n                    vsota += d;\n                }\n            }\n            if (vsota == n) {\n                System.out.print(n + \" \");\n            }\n        }\n        System.out.println();\n    }\n}","h":["Za vsako število n v zunanji zanki v notranji seštej delitelje, manjše od n.","Če je vsota enaka n, izpiši n."],"why":"Zunanja zanka preteče interval, notranja računa vsoto deliteljev. Na intervalu do 1000 so perfektna števila 6, 28 in 496.","id":"own-90"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 27","type":"code","hideExp":true,"expected":"8","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":1,"q":"Sestavi program VsotaStevk, ki prebere naravno število n = 2024 in izračuna vsoto njegovih števk.","sol":"public class Main {\n    public static void main(String[] args) {\n        int n = 2024;\n        int vsota = 0;\n        while (n > 0) {\n            vsota += n % 10;\n            n /= 10;\n        }\n        System.out.println(vsota);\n    }\n}","h":["Zadnja števka je n % 10.","Zadnjo števko odstrani z n /= 10."],"why":"2 + 0 + 2 + 4 = 8. Zanka se konča, ko od števila ne ostane nič (n = 0).","id":"own-91"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 28","type":"code","hideExp":true,"expected":"35\n8","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":2,"q":"Sestavi program VsotaStevk, ki prebere naravno število n = 98765 in izračuna vsoto njegovih števk, vsoto števk dobljene vsote, …, dokler ne dobi enomestnega števila. Vse vsote naj sproti izpisuje (vsako v svojo vrstico).","sol":"public class Main {\n    public static void main(String[] args) {\n        int n = 98765;\n        while (n > 9) {\n            int vsota = 0;\n            while (n > 0) {\n                vsota += n % 10;\n                n /= 10;\n            }\n            System.out.println(vsota);\n            n = vsota;\n        }\n    }\n}","h":["Zunanja zanka se ponavlja, dokler število ni enomestno (n > 9).","Notranja zanka izračuna vsoto števk kot v prejšnji nalogi."],"why":"9 + 8 + 7 + 6 + 5 = 35, nato 3 + 5 = 8. Pri 8 se zunanja zanka konča, ker je število enomestno.","id":"own-92"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 29","type":"code","hideExp":true,"expected":"3.14285","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":3,"q":"Sestavi program, ki izračuna količnik dveh števil na n decimalk natančno. V kodi nastavi a = 22, b = 7 in n = 5. Decimalke izračunaj z deljenjem na roke (ostanek pomnoži z 10 in deli), brez zaokroževanja. Izpiši 3.14285.","sol":"public class Main {\n    public static void main(String[] args) {\n        int a = 22, b = 7, n = 5;\n        System.out.print(a / b);\n        int ostanek = a % b;\n        if (n > 0) {\n            System.out.print(\".\");\n        }\n        for (int i = 0; i \u003c n; i++) {\n            ostanek *= 10;\n            System.out.print(ostanek / b);\n            ostanek %= b;\n        }\n        System.out.println();\n    }\n}","h":["Najprej izpiši celi del a / b in ostanek a % b.","Vsako decimalko dobiš tako, da ostanek pomnožiš z 10, deliš z b, nov ostanek pa je ostanek pri tem deljenju."],"why":"22 : 7 = 3, ostanek 1. Nato 10 : 7 = 1 (ostanek 3), 30 : 7 = 4 (ostanek 2), 20 : 7 = 2 (ostanek 6), 60 : 7 = 8 (ostanek 4), 40 : 7 = 5 (ostanek 5). Dobimo 3.14285. Zadnja števka ni zaokrožena, zato je rezultat natančen na 5 decimalk navzdol.","id":"own-93"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 30","type":"code","hideExp":true,"expected":"0.33\n0.003333","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":3,"q":"Sestavi program, ki izračuna količnik dveh števil na n decimalk natančno in izpiše tudi absolutno napako med pravim in zahtevanim rezultatom. V kodi nastavi a = 1, b = 3, n = 2. Prvo vrstico izpiši priblizek (0.33), v drugo napako, zaokroženo na 6 decimalk z Math.round(napaka * 1e6) / 1e6.","sol":"public class Main {\n    public static void main(String[] args) {\n        int a = 1, b = 3, n = 2;\n        int celi = a / b;\n        int ostanek = a % b;\n        long cifre = 0;\n        long mnozitelj = 1;\n        for (int i = 0; i \u003c n; i++) {\n            ostanek *= 10;\n            cifre = cifre * 10 + ostanek / b;\n            ostanek %= b;\n            mnozitelj *= 10;\n        }\n        double priblizek = celi + (double) cifre / mnozitelj;\n        System.out.println(priblizek);\n        double napaka = Math.abs((double) a / b - priblizek);\n        System.out.println(Math.round(napaka * 1e6) / 1e6);\n    }\n}","h":["Decimalke zbiraj v celo število (cifre) in ga na koncu deli s 10^n.","Napaka je Math.abs(pravi - približek)."],"why":"Približek je 0.33, pravi količnik pa 0.3333…, zato je absolutna napaka približno 0.003333. Zaokrožimo jo, da se izognemo dolgemu zapisu decimalk, ki se lahko razlikuje po zadnji števki.","id":"own-94"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 31","type":"code","hideExp":true,"expected":"3 x 100\n1 x 50\n1 x 20","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":3,"q":"Na bankomatu dvigamo denar. Napiši program, ki za znesek 370 EUR (zaokrožen na 10 EUR) izpiše, koliko in katerih bankovcev (100, 50, 20, 10) je potrebnih. Izpiši samo bankovce, ki jih je vsaj eden, v obliki »3 x 100« (vsakega v svojo vrstico).","sol":"public class Main {\n    public static void main(String[] args) {\n        int znesek = 370;\n        int bankovec = 100;\n        while (bankovec >= 10 && znesek > 0) {\n            int st = znesek / bankovec;\n            if (st > 0) {\n                System.out.println(st + \" x \" + bankovec);\n            }\n            znesek %= bankovec;\n            if (bankovec == 100) bankovec = 50;\n            else if (bankovec == 50) bankovec = 20;\n            else if (bankovec == 20) bankovec = 10;\n            else bankovec = 0;\n        }\n    }\n}","h":["Začni z največjim bankovcem: število bankovcev je znesek / bankovec, preostanek znesek % bankovec.","Nato preidi na naslednji manjši bankovec (100 → 50 → 20 → 10)."],"why":"370 = 3 · 100 + 1 · 50 + 1 · 20. Pri vsakem bankovcu najprej uporabimo celi količnik, nato nadaljujemo s preostankom.","id":"own-95"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · 32","type":"code","hideExp":true,"expected":"6 3 10 5 16 8 4 2 1","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":3,"q":"Sestavi program Zaporedje, ki prebere prvi člen zaporedja (v kodi nastavi a = 6) in izpiše vse člene, dokler ne izpiše člena 1. Člen a(n+1) = a(n) / 2, če je a(n) sodo, in a(n+1) = 3 · a(n) + 1, če je liho. (V eni vrstici, ločeni s presledkom.)","sol":"public class Main {\n    public static void main(String[] args) {\n        int a = 6;\n        System.out.print(a);\n        while (a != 1) {\n            if (a % 2 == 0) {\n                a = a / 2;\n            } else {\n                a = 3 * a + 1;\n            }\n            System.out.print(\" \" + a);\n        }\n        System.out.println();\n    }\n}","h":["Zanka se konča, ko člen doseže 1.","To je zaporedje, ki ga imenujemo tudi 3N + 1."],"why":"6 → 3 → 10 → 5 → 16 → 8 → 4 → 2 → 1. Ni dokazano, da se zaporedje za vsak začetni člen konča pri 1, za vsa preizkušena števila pa se.","id":"own-96"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · zaporedja · Fibonacci","type":"code","hideExp":true,"expected":"1 1 2 3 5 8 13 21 34 55 89 144","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":2,"adapt":true,"q":"Fibonaccijevo zaporedje: a1 = 1, a2 = 1, vsak naslednji člen je vsota prejšnjih dveh. Izpiši prvih 12 členov v eni vrstici, ločenih s presledkom. (Prirejeno: v vaji 5 je naveden samo naslov naloge, besedilo je sestavljeno.)","sol":"public class Main {\n    public static void main(String[] args) {\n        int a = 1, b = 1;\n        for (int i = 1; i \u003c= 12; i++) {\n            System.out.print(a + \" \");\n            int c = a + b;\n            a = b;\n            b = c;\n        }\n        System.out.println();\n    }\n}","h":["Potrebuješ dve spremenljivki: prejšnji in trenutni člen.","V zanki izračunaj novi člen in pomakni spremenljivki."],"why":"Člena 1 1 2 3 5 8 13 21 34 55 89 144. Po zanki a in b že kažeta naslednja člena, ki ju ne izpišemo.","id":"own-97"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · zaporedja · aritmetično","type":"code","hideExp":true,"expected":"3 7 11 15 19 23 27 31\nVsota = 136","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":2,"adapt":true,"q":"Aritmetično zaporedje z a1 = 3 in razliko d = 4: izpiši prvih 8 členov v eni vrstici, v drugi vrstici pa »Vsota = …«. (Prirejeno: v vaji 5 je naveden samo naslov naloge, besedilo je sestavljeno.)","sol":"public class Main {\n    public static void main(String[] args) {\n        int a = 3, d = 4;\n        int vsota = 0;\n        for (int i = 1; i \u003c= 8; i++) {\n            System.out.print(a + \" \");\n            vsota += a;\n            a += d;\n        }\n        System.out.println();\n        System.out.println(\"Vsota = \" + vsota);\n    }\n}","h":["Vsak člen je za d večji od prejšnjega.","Vsoto zbiraj med izpisovanjem."],"why":"Členi so 3, 7, 11, 15, 19, 23, 27, 31. Vsota je 8 / 2 · (3 + 31) = 136.","id":"own-98"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · zaporedja · geometrijsko","type":"code","hideExp":true,"expected":"2 6 18 54 162 486\nVsota = 728","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":2,"adapt":true,"q":"Geometrijsko zaporedje z a1 = 2 in količnikom q = 3: izpiši prvih 6 členov v eni vrstici, v drugi vrstici pa »Vsota = …«. (Prirejeno: v vaji 5 je naveden samo naslov naloge, besedilo je sestavljeno.)","sol":"public class Main {\n    public static void main(String[] args) {\n        int a = 2, q = 3;\n        int vsota = 0;\n        for (int i = 1; i \u003c= 6; i++) {\n            System.out.print(a + \" \");\n            vsota += a;\n            a *= q;\n        }\n        System.out.println();\n        System.out.println(\"Vsota = \" + vsota);\n    }\n}","h":["Vsak člen je q-krat večji od prejšnjega.","Za prvih 6 členov ne boš presegel območja tipa int."],"why":"Členi so 2, 6, 18, 54, 162, 486 in vsota 728. Pri večjem številu členov bi moral uporabiti long ali double.","id":"own-99"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · zaporedja · Taylor","type":"code","hideExp":true,"expected":"2.7183","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":3,"adapt":true,"q":"Taylorjeva vrsta za število e: e = 1 + 1/1! + 1/2! + 1/3! + … Izračunaj vsoto prvih 10 členov (od 1/0! do 1/9!) in jo izpiši, zaokroženo na 4 decimalke z Math.round(vsota * 10000) / 10000.0. (Prirejeno: v vaji 5 je naveden samo naslov naloge, besedilo je sestavljeno.)","sol":"public class Main {\n    public static void main(String[] args) {\n        double clen = 1;\n        double vsota = 1;\n        for (int k = 1; k \u003c 10; k++) {\n            clen = clen / k;\n            vsota += clen;\n        }\n        System.out.println(Math.round(vsota * 10000) / 10000.0);\n    }\n}","h":["Vsak člen dobiš iz prejšnjega: 1/k! = (1/(k − 1)!) / k.","Pri deljenju uporabi double, ne int."],"why":"Vsota 10 členov je približno 2.7182815, zaokroženo 2.7183. Število e je 2.71828…, vrsta torej zelo hitro konvergira.","id":"own-100"},{"lv":"F","own":true,"lab":"RAČ-LAV 3 · vaja 5 · zaporedja · bisekcija","type":"code","hideExp":true,"expected":"1.4142","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":3,"adapt":true,"q":"Bisekcija: poišči ničlo funkcije f(x) = x² − 2 na intervalu [1, 2]. Interval vedno razpolovi in obdrži polovico, kjer funkcija zamenja predznak. Ponavljaj, dokler ni interval ožji od 1e-6. Izpiši sredino intervala, zaokroženo na 4 decimalke z Math.round(sredina * 10000) / 10000.0. (Prirejeno: v vaji 5 je naveden samo naslov naloge, besedilo je sestavljeno.)","sol":"public class Main {\n    public static void main(String[] args) {\n        double a = 1, b = 2;\n        while (b - a > 1e-6) {\n            double s = (a + b) / 2;\n            if (s * s - 2 \u003c 0) {\n                a = s;\n            } else {\n                b = s;\n            }\n        }\n        System.out.println(Math.round((a + b) / 2 * 10000) / 10000.0);\n    }\n}","h":["Če je f(sredina) negativna, je ničla desno od sredine, zato je nova spodnja meja sredina.","Število korakov ni vnaprej znano, zato uporabi while."],"why":"Ničla funkcije x² − 2 je √2 ≈ 1.41421356. Pri vsaki ponovitvi se interval razpolovi, zato je po približno 20 korakih ožji od 1e-6.","id":"own-101"},{"lv":"G","own":true,"lab":"Vaje z zankami · 1","type":"code","hideExp":true,"expected":"100","starter":"public class Main {\n    static boolean jePrestopno(int leto) {\n        // koda\n    }\n\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":3,"q":"Koliko je prestopnih let med leti 1654 in 2066 (obe meji vključno)? Nalogo izdelaj s pomočjo metode jePrestopno(int leto), ki vrne true, če je leto prestopno, sicer false. Izpiši število prestopnih let.","sol":"public class Main {\n    static boolean jePrestopno(int leto) {\n        return (leto % 4 == 0 && leto % 100 != 0) || leto % 400 == 0;\n    }\n\n    public static void main(String[] args) {\n        int stevec = 0;\n        for (int leto = 1654; leto \u003c= 2066; leto++) {\n            if (jePrestopno(leto)) {\n                stevec++;\n            }\n        }\n        System.out.println(stevec);\n    }\n}","h":["Leto je prestopno, če je deljivo s 4 in ni deljivo s 100, ali pa je deljivo s 400.","Zanka for pregleda vsa leta od 1654 do 2066, metoda pa odloči za posamezno leto."],"why":"Pravilo: (leto % 4 == 0 && leto % 100 != 0) || leto % 400 == 0. Med 1656 in 2064 je 103 večkratnikov števila 4. Stoletna leta 1700, 1800 in 1900 niso prestopna, leto 2000 pa je (deljivo s 400), zato je rezultat 100. Delitev dela na metodo in zanko naredi program preglednejši.","id":"own-102"},{"lv":"G","own":true,"lab":"Vaje z zankami · 2 in Utrjevanje zank · 4","type":"code","hideExp":true,"expected":"239\n4649","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":3,"q":"V Mali vasi imajo težave z mišmi, zato na pomoč pokličejo mačka Toma in njegove prijatelje (mačk je torej več kot ena). Po enem letu so vse mačke pokončale enako število miši, kar skupno znaša 1.111.111, vsaka posebej pa je ubila več miši, kot je vseh mačk skupaj. Izračunaj, koliko mačk je prišlo v Malo vas in koliko miši je pokončal vsak maček. Izpiši število mačk in v drugi vrstici število miši na mačka.","sol":"public class Main {\n    public static void main(String[] args) {\n        int skupaj = 1111111;\n        for (int macke = 2; macke * macke \u003c skupaj; macke++) {\n            if (skupaj % macke == 0) {\n                System.out.println(macke);\n                System.out.println(skupaj / macke);\n            }\n        }\n    }\n}","h":["Število mačk je delitelj števila 1.111.111. Produkt (mačke · miši na mačka) je 1.111.111.","Ker je vsak maček ubil več miši kot je vseh mačk, mora veljati macke \u003c miši, torej macke · macke \u003c 1.111.111."],"why":"1.111.111 = 239 · 4649. Zanka preverja možne števila mačk od 2, dokler velja macke² \u003c skupaj (tako je miši na mačka vedno več kot mačk). Prvi in edini delitelj v tem območju je 239. Število 4649 je praštevilo, zato drugih rešitev ni (mačk bi bilo lahko tudi 1, a naloga omenja več mačk).","id":"own-103"},{"lv":"G","own":true,"lab":"Vaje z zankami · 3","type":"code","hideExp":true,"expected":"153 370 371 407","starter":"public class Main {\n    static boolean jeNarcisticno(int n) {\n        // koda\n    }\n\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":3,"adapt":true,"q":"Napiši metodo jeNarcisticno(int n), ki preveri, ali je število narcistično. Narcistično število je enako vsoti svojih števk, vsaka na potenco dolžine števila (npr. 153 = 1³ + 5³ + 3³). (Prirejeno: izpiši vsa narcistična trimestna števila, v eni vrstici, ločena s presledkom.)","sol":"public class Main {\n    static boolean jeNarcisticno(int n) {\n        int dolzina = String.valueOf(n).length();\n        int vsota = 0;\n        int ostalo = n;\n        while (ostalo > 0) {\n            int stevka = ostalo % 10;\n            int potenca = 1;\n            for (int i = 0; i \u003c dolzina; i++) {\n                potenca *= stevka;\n            }\n            vsota += potenca;\n            ostalo /= 10;\n        }\n        return vsota == n;\n    }\n\n    public static void main(String[] args) {\n        for (int n = 100; n \u003c= 999; n++) {\n            if (jeNarcisticno(n)) {\n                System.out.print(n + \" \");\n            }\n        }\n        System.out.println();\n    }\n}","h":["Dolžina števila n je String.valueOf(n).length(). Števke dobiš z n % 10 in n / 10.","Potenco števke izračunaj z notranjo zanko, ki množi števko samo s seboj dolžina-krat."],"why":"Samo štiri trimestna števila so narcistična: 153, 370, 371 in 407. Metoda razbije število na števke in sešteje potence, nato primerja vsoto z izvirnim številom.","id":"own-104"},{"lv":"G","own":true,"lab":"Utrjevanje zank · 1","type":"code","hideExp":true,"expected":"Za prevoz 228 potnikov potrebujemo 5 avtobusov.","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":2,"q":"Upokojenci se odpravljajo na izlet. Peljali se bodo z avtobusi, v vsakega gre največ 50 ljudi. V kodi nastavi število potnikov na 228 in izračunaj, koliko avtobusov je potrebnih. Izpiši »Za prevoz 228 potnikov potrebujemo 5 avtobusov.« (Preizkusi še 35 in 75.)","sol":"public class Main {\n    public static void main(String[] args) {\n        int potniki = 228;\n        int ostalo = potniki;\n        int avtobusi = 0;\n        while (ostalo > 0) {\n            ostalo -= 50;\n            avtobusi++;\n        }\n        System.out.println(\"Za prevoz \" + potniki + \" potnikov potrebujemo \" + avtobusi + \" avtobusov.\");\n    }\n}","h":["Vsak avtobus odpelje do 50 potnikov. Odštevaj 50, dokler je še kakšen potnik.","Preverjanje: 35 potnikov → 1 avtobus, 75 potnikov → 2 avtobusa, 50 potnikov → 1 avtobus."],"why":"Odštevamo 50: 228 → 178 → 128 → 78 → 28 → −22. Zanka se izvede petkrat. Isto da izraz (potniki + 49) / 50 s celoštevilskim deljenjem.","id":"own-105"},{"lv":"G","own":true,"lab":"Utrjevanje zank · 2","type":"code","hideExp":true,"expected":"Stevilo 6 je perfektno.\nStevilo 28 je perfektno.\nStevilo 43 ni perfektno.","starter":"public class Main {\n    static boolean jePerfektno(int n) {\n        // koda\n    }\n\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":2,"q":"Perfektno število je enako vsoti vseh svojih deliteljev (razen števila samega). Napiši metodo jePerfektno(int n) in jo preizkusi na številih 6, 28 in 43. Za vsako število izpiši »Stevilo 6 je perfektno.« oziroma »Stevilo 43 ni perfektno.«","sol":"public class Main {\n    static boolean jePerfektno(int n) {\n        int vsota = 0;\n        for (int d = 1; d \u003c n; d++) {\n            if (n % d == 0) {\n                vsota += d;\n            }\n        }\n        return vsota == n && n > 1;\n    }\n    static void izpisi(int n) {\n        if (jePerfektno(n)) {\n            System.out.println(\"Stevilo \" + n + \" je perfektno.\");\n        } else {\n            System.out.println(\"Stevilo \" + n + \" ni perfektno.\");\n        }\n    }\n\n    public static void main(String[] args) {\n        izpisi(6);\n        izpisi(28);\n        izpisi(43);\n    }\n}","h":["Seštej delitelje števila n, ki so manjši od n.","Če je vsota enaka n, je število perfektno."],"why":"6 = 1 + 2 + 3 in 28 = 1 + 2 + 4 + 7 + 14 sta perfektni. Delitelji števila 43 so samo 1 in 43, zato je vsota 1 in število ni perfektno.","id":"own-106"},{"lv":"G","own":true,"lab":"Utrjevanje zank · 5","type":"code","hideExp":true,"expected":"3.1316","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":3,"q":"Vrednost števila π lahko izračunamo kot vsoto členov 4 · (1/1 − 1/3 + 1/5 − 1/7 + 1/9 − …). Izračunaj vrednost, ki jo dobimo s prvimi sto členi, in jo izpiši, zaokroženo na 4 decimalke z Math.round(pi * 10000) / 10000.0.","sol":"public class Main {\n    public static void main(String[] args) {\n        double vsota = 0;\n        double predznak = 1;\n        for (int k = 0; k \u003c 100; k++) {\n            vsota += predznak / (2 * k + 1);\n            predznak = -predznak;\n        }\n        double pi = 4 * vsota;\n        System.out.println(Math.round(pi * 10000) / 10000.0);\n    }\n}","h":["Imenovalci so 1, 3, 5, 7, … (2k + 1), predznak pa se menjava.","Pozor pri deljenju: 1 / 3 je pri celih številih 0. Uporabi double."],"why":"Prvih sto členov Leibnizove vrste da približno 3.1316. Vrsta konvergira počasi: še po sto členih se vrednost razlikuje od π že v drugi decimalki.","id":"own-107"},{"lv":"G","own":true,"lab":"Utrjevanje zank · 6","type":"code","hideExp":true,"expected":"Stevilo smo korenili 18 krat.","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":3,"q":"Kolikokrat moramo število 55 zaporedoma koreniti (Math.sqrt), da bo rezultat še vedno večji od 1,00001? Šteje število korenjenj, pri katerih je rezultat večji od 1,00001.","sol":"public class Main {\n    public static void main(String[] args) {\n        double x = 55;\n        int stevec = 0;\n        while (Math.sqrt(x) > 1.00001) {\n            x = Math.sqrt(x);\n            stevec++;\n        }\n        System.out.println(\"Stevilo smo korenili \" + stevec + \" krat.\");\n    }\n}","h":["Pri vsaki ponovitvi izračunaj koren in ga shrani nazaj v x.","Ne veš vnaprej, koliko korakov bo potrebnih: uporabi zanko while."],"why":"Zaporedje korenov (7,416…, 2,723…, 1,650…, …, 1,0000305…, 1,0000152…) se približuje številu 1. Zadnji koren, ki je še večji od 1,00001, je 1,0000152…, ob 18. korenjenju. Naslednji koren bi bil manjši, zato se zanka ustavi.","id":"own-108"},{"lv":"G","own":true,"lab":"Utrjevanje zank · 10","type":"code","hideExp":true,"expected":"Rezultat je 15","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":2,"q":"Izvedi množenje samo s seštevanjem (brez operatorja *). Množitelj 5 seštej tolikokrat, kolikor je množenec 3. Izpiši »Rezultat je 15«.","sol":"public class Main {\n    public static void main(String[] args) {\n        int mnozitelj = 5;\n        int mnozenec = 3;\n        int rezultat = 0;\n        for (int i = 0; i \u003c mnozenec; i++) {\n            rezultat += mnozitelj;\n        }\n        System.out.println(\"Rezultat je \" + rezultat);\n    }\n}","h":["5 · 3 = 5 + 5 + 5. Število seštevanj je enako množencu.","Začetna vrednost vsote je 0."],"why":"Množenje je ponavljajoče seštevanje: 5 + 5 + 5 = 15. Za vajo lahko podobno izvedeš deljenje z odštevanjem (ostanek je tisto, kar ostane) ali potenciranje z množenjem.","id":"own-109"},{"lv":"G","own":true,"lab":"Utrjevanje zank · 13","type":"code","hideExp":true,"expected":"15380937\n8145060\n13983816","starter":"public class Main {\n    static long kombinacije(int n, int k) {\n        // koda\n    }\n\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":3,"q":"Število kombinacij pri igri loto je binomski koeficient (n nad k) = n · (n−1) · … · (n−k+1) / (k · (k−1) · … · 1). Napiši metodo kombinacije(int n, int k) in izpiši število kombinacij za 7 od 39, za 6 od 45 (Hrvaška) in za 6 od 49 (ZDA). Vsako število v svojo vrstico.","sol":"public class Main {\n    static long kombinacije(int n, int k) {\n        long rezultat = 1;\n        for (int i = 1; i \u003c= k; i++) {\n            rezultat = rezultat * (n - k + i) / i;\n        }\n        return rezultat;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(kombinacije(39, 7));\n        System.out.println(kombinacije(45, 6));\n        System.out.println(kombinacije(49, 6));\n    }\n}","h":["Rezultat naj bo tipa long: števec je zelo velik.","Množi in deli izmenično: rezultat = rezultat * (n − k + i) / i. Po vsakem koraku je rezultat celo število."],"why":"Rezultati so 15.380.937 (39 od 7), 8.145.060 (45 od 6) in 13.983.816 (49 od 6). Če bi najprej izračunal ves števec, bi se produkt prelil čez tip long. Z izmeničnim množenjem in deljenjem ostane število majhno, deljenje pa je v vsakem koraku natančno.","id":"own-110"},{"lv":"G","own":true,"lab":"Utrjevanje zank · 14","type":"code","hideExp":true,"expected":"Obrnjeno stevilo je 4321","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","pts":2,"q":"Obrni število: število 1234 razbij na števke in sestavi število 4321. Izpiši »Obrnjeno število je 4321«.","sol":"public class Main {\n    public static void main(String[] args) {\n        int n = 1234;\n        int obrnjeno = 0;\n        while (n > 0) {\n            obrnjeno = obrnjeno * 10 + n % 10;\n            n /= 10;\n        }\n        System.out.println(\"Obrnjeno stevilo je \" + obrnjeno);\n    }\n}","h":["Zadnjo števko dobiš z n % 10, število brez zadnje števke pa z n / 10.","Obrnjeno število gradiš tako, da prejšnjega pomnožiš z 10 in prišteješ novo števko."],"why":"Koraki: 0 · 10 + 4 = 4, 4 · 10 + 3 = 43, 43 · 10 + 2 = 432, 432 · 10 + 1 = 4321. Zanka se konča, ko od števila ne ostane nič.","id":"own-111"},{"src":"M151/13","pts":2,"lv":"H","type":"code","adapt":true,"hideExp":true,"expected":"0\n1\n2\n3\n4\n5\n6\n7\n8\n9","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","q":"Brez uporabe zanke for zapiši kodo, ki naredi isto kakor spodnja zanka. (Prirejeno: izvirnik izpiše števila do 10000, tu do 10.)","snip":"for (int i = 0; i \u003c 10; i++)\n    System.out.println(i);","sol":"public class Main {\n    public static void main(String[] args) {\n        int i = 0;\n        while (i \u003c 10) {\n            System.out.println(i);\n            i++;\n        }\n    }\n}","h":["Zanko for lahko vedno zapišemo z zanko while.","Začetna vrednost števca stoji pred zanko, pogoj v zanki, povečanje na koncu telesa."],"why":"Zanka for (začetek; pogoj; korak) telo je enakovredna zapisu: začetek; while (pogoj) { telo; korak; }. Možna je tudi zanka do-while.","id":"M151-13"},{"src":"M181/16","pts":3,"lv":"H","type":"code","adapt":true,"hideExp":true,"expected":"******************************","starter":"public class Main {\n    public static void main(String[] args) {\n        // tvoja koda\n    }\n}","q":"V programu imamo zanko for, s katero na zaslon zaporedoma izpišemo znake »*«. Zapiši kodo, ki stori enako, pri čemer ne smeš uporabiti zanke for. (Prirejeno: izvirnik izpiše 1000 zvezdic, tu jih izpiši 30, vse v eni vrstici.)","snip":"for (int i = 0; i \u003c 30; i++)\n    System.out.print('*');","sol":"public class Main {\n    public static void main(String[] args) {\n        int i = 0;\n        while (i \u003c 30) {\n            System.out.print('*');\n            i++;\n        }\n        System.out.println();\n    }\n}","h":["Namesto zanke for uporabi while ali do-while.","Ne pozabi povečati števca, sicer je zanka neskončna."],"why":"Števec i teče od 0 do 29, zato se izvede 30 ponovitev. Z do-while bi bila koda enaka, pogoj pa bi bil na koncu. Najprej se prepričaj, da števec res narašča.","id":"M181-16"}];
+const HOME = [{"id":"h1","title":"Reka in poglavarji","q":"Šest poglavarjev si pravično razdeli reko, dolgo 128 km. Prvi izbere levo (0) ali desno (1) polovico reke, drugi levo ali desno polovico preostalega dela in tako naprej do petega. Šestemu ostane preostali del. Program naj vsakemu od petih poglavarjev omogoči vnos izbire (0 ali 1) in izpiše, od katerega do katerega kilometra pripada reka zadnjemu poglavarju. Pri vnosu 0, 1, 1, 0, 0 izpiši »Zadnjemu poglavarju ostane del reke med 76km in 80km.«","jsolCode":"import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int zacetek = 0, konec = 128;\n        for (int i = 1; i \u003c= 5; i++) {\n            System.out.print(\"Poglavar \" + i + \" (0 = levo, 1 = desno): \");\n            int izbira = sc.nextInt();\n            int sredina = (zacetek + konec) / 2;\n            if (izbira == 0) {\n                zacetek = sredina;   // vzame levo polovico, preostane desna\n            } else {\n                konec = sredina;     // vzame desno polovico, preostane leva\n            }\n        }\n        System.out.println(\"Zadnjemu poglavarju ostane del reke med \" + zacetek + \"km in \" + konec + \"km.\");\n    }\n}","sol":"Poglavar vzame levo ali desno polovico, drugim pa ostane druga polovica. Zato hranimo meji preostalega dela (zacetek, konec) in ju pri vsakem poglavarju spremenimo: pri izbiri 0 se začetek premakne na sredino, pri izbiri 1 pa se konec premakne na sredino. Po petih ponovitvah je interval dolg 4 km. Pri vnosu 0, 1, 1, 0, 0 dobimo (64, 128), (64, 96), (64, 80), (72, 80) in (76, 80)."},{"id":"h2","title":"Človek ne jezi se","q":"Pri igri Človek ne jezi se mora figura prehoditi 44 polj in je na začetku na polju 1. Z metanjem kocke jo premikamo, dokler ne doseže zadnjega, 44. polja. Če bi figura s tem metom preskočila zadnje polje, se ne premakne. Napiši program, ki simulira metanje kocke (Random) in izpiše, koliko metov je bilo potrebnih.","jsolCode":"import java.util.Random;\n\npublic class Main {\n    public static void main(String[] args) {\n        Random r = new Random();\n        int polje = 1;\n        int meti = 0;\n        while (polje != 44) {\n            int kocka = r.nextInt(6) + 1;\n            meti++;\n            if (polje + kocka \u003c= 44) {\n                polje += kocka;\n            }\n        }\n        System.out.println(\"Da smo prisli do konca, smo potrebovali \" + meti + \" metov.\");\n    }\n}","sol":"Število metov vnaprej ni znano, zato je primerna zanka while (polje != 44). Z r.nextInt(6) + 1 dobimo število od 1 do 6. Pozor: figura se premakne samo, če ne preseže polja 44. Na polju 43 torej čakamo na met enke. Povprečno je potrebnih približno 14 do 15 metov."},{"id":"h3","title":"Deset šestic","q":"Radi bi s kocko vrgli šestico desetkrat. Napiši program, ki simulira metanje kocke in izpiše, koliko metov je bilo potrebnih, da je šestica padla desetkrat.","jsolCode":"import java.util.Random;\n\npublic class Main {\n    public static void main(String[] args) {\n        Random r = new Random();\n        int sestice = 0;\n        int meti = 0;\n        while (sestice \u003c 10) {\n            meti++;\n            if (r.nextInt(6) + 1 == 6) {\n                sestice++;\n            }\n        }\n        System.out.println(\"Za 10 sestic smo potrebovali \" + meti + \" metov.\");\n    }\n}","sol":"Štejemo vse mete in šestice posebej. Zanka se ponavlja, dokler šestic ni deset. Povprečno je potrebnih okoli 60 metov (deset šestic, vsaka v povprečju na vsak šesti met)."},{"id":"h4","title":"Trikrat zapored cifra","q":"Mečemo pošten kovanec. Kolikokrat ga moramo vreči, da bo trikrat zapored padla cifra? Napiši program, ki simulira metanje (Random) in izpisuje »grb« ali »cifra«, na koncu pa število metov.","jsolCode":"import java.util.Random;\n\npublic class Main {\n    public static void main(String[] args) {\n        Random r = new Random();\n        int zapored = 0;\n        int meti = 0;\n        while (zapored \u003c 3) {\n            meti++;\n            if (r.nextInt(2) == 0) {\n                System.out.println(\"grb\");\n                zapored = 0;\n            } else {\n                System.out.println(\"cifra\");\n                zapored++;\n            }\n        }\n        System.out.println(\"Kovanec smo vrgli \" + meti + \" krat.\");\n    }\n}","sol":"Spremenljivka zapored šteje cifre zaporedoma. Ob cifri se poveča, ob grbu se postavi nazaj na 0. Zanka se konča, ko je zapored enak 3. Povprečno je potrebnih 14 metov."},{"id":"h5","title":"Obtežena kocka","q":"Obtežena kocka se ustavi na obteženi strani v približno 90 % metih. Simuliraj tako kocko: v 90 % metih naj pade 6, v ostalih pa kakšna od števil 1 do 5. Preizkusi z 1000 meti in izpiši, kolikokrat je padla šestica.","jsolCode":"import java.util.Random;\n\npublic class Main {\n    public static void main(String[] args) {\n        Random r = new Random();\n        int sestice = 0;\n        for (int i = 0; i \u003c 1000; i++) {\n            int kocka;\n            if (r.nextDouble() \u003c 0.9) {\n                kocka = 6;\n            } else {\n                kocka = r.nextInt(5) + 1;\n            }\n            if (kocka == 6) {\n                sestice++;\n            }\n        }\n        System.out.println(\"Sestica je padla \" + sestice + \" krat od 1000.\");\n    }\n}","sol":"r.nextDouble() vrne število med 0 in 1. V 90 % primerih je manjše od 0,9, takrat pade šestica. V ostalih primerih izberemo eno od števil 1 do 5. Rezultat bo blizu 900, vsakič pa nekoliko drugačen."},{"id":"h6","title":"Deset števil","q":"V program vnesi 10 števil in izpiši največje, najmanjše, koliko jih je večjih od 5 in koliko vnesenih števil je bilo enakih 10.","jsolCode":"import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int max = Integer.MIN_VALUE;\n        int min = Integer.MAX_VALUE;\n        int vecjihOd5 = 0;\n        int desetke = 0;\n        for (int i = 1; i \u003c= 10; i++) {\n            System.out.print(\"Vnesi \" + i + \". stevilo: \");\n            int x = sc.nextInt();\n            if (x > max) max = x;\n            if (x \u003c min) min = x;\n            if (x > 5) vecjihOd5++;\n            if (x == 10) desetke++;\n        }\n        System.out.println(\"Najvecje: \" + max);\n        System.out.println(\"Najmanjse: \" + min);\n        System.out.println(\"Vecjih od 5: \" + vecjihOd5);\n        System.out.println(\"Desetk: \" + desetke);\n    }\n}","sol":"Pred zanko postavimo max na najmanjše in min na največje možno število tipa int, da ju prvo vneseno število vedno prepiše. Dva števca (števila večjih od 5 in desetk) povečamo v pogojnih stavkih. Vse štiri vrednosti izpišemo po koncu zanke."},{"id":"h7","title":"Zaokrožitev zneska","q":"Na bankomatu moramo znesek zaokrožiti na 10 EUR. Napiši program, ki prebere znesek in če ni zaokrožen, izpiše: »Tega zneska ne morem izplacati. Lahko pa izplacam 90 EUR.« Za 92 izpiši 90, za 35 izpiši 40, za 70 izpiši »OK«. (Zanke ne potrebuješ, naloga je iz zbirke Utrjevanje zank.)","jsolCode":"import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        System.out.print(\"Vnesi znesek: \");\n        int znesek = sc.nextInt();\n        if (znesek % 10 == 0) {\n            System.out.println(\"OK\");\n        } else {\n            int zaokrozen = (znesek + 5) / 10 * 10;\n            System.out.println(\"Tega zneska ne morem izplacati. Lahko pa izplacam \" + zaokrozen + \" EUR.\");\n        }\n    }\n}","sol":"Znesek je zaokrožen, če je deljiv z 10. Sicer ga zaokrožimo na najbližjo desetico: prištejemo 5, delimo z 10 (celoštevilsko) in pomnožimo z 10. Tako 92 → 90, 35 → 40, 27 → 30 in 42 → 40."},{"id":"h8","title":"Ugani število","q":"Računalnik si izmisli skrito število od 1 do 100. Uporabnik ugiba; po vsakem ugibanju program izpiše »Premalo.« ali »Preveč.«. Ko uporabnik ugane, program izpiše število poskusov. Uporabi zanko do-while.","jsolCode":"import java.util.Random;\nimport java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Random r = new Random();\n        Scanner sc = new Scanner(System.in);\n        int skrito = r.nextInt(100) + 1;\n        int poskusi = 0;\n        int ugib;\n        do {\n            System.out.print(\"Ugibaj (1 do 100): \");\n            ugib = sc.nextInt();\n            poskusi++;\n            if (ugib \u003c skrito) {\n                System.out.println(\"Premalo.\");\n            } else if (ugib > skrito) {\n                System.out.println(\"Preveč.\");\n            }\n        } while (ugib != skrito);\n        System.out.println(\"Uganil si v \" + poskusi + \" poskusih.\");\n    }\n}","sol":"Uporabnik mora ugibati vsaj enkrat, zato je primerna zanka do-while: pogoj ugib != skrito lahko preverimo šele po prvem vnosu. Z razpolavljanjem intervala (vedno poskusi sredino) uganeš število v največ sedmih poskusih."}];
+
+T.forEach(t=>{ if(t.solKey) t.sol = J[t.solKey]; });
+HOME.forEach(h=>{ if(h.jsol) h.jsolCode = J[h.jsol]; });
+
+/* ---------- storage: browser always, user account when available ---------- */
+let S = {}, localT = 0;
+try { S = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; localT = +localStorage.getItem(STORE+"-t") || 0; } catch(e) { S = {}; }
+let remote = null, pushTimer = null, pushing = false, dirty = false;
+function saveLocal(){ try { localStorage.setItem(STORE, JSON.stringify(S)); localStorage.setItem(STORE+"-t", String(localT)); } catch(e){} }
+function save(){ localT = Date.now(); saveLocal(); if(remote){ dirty = true; clearTimeout(pushTimer); pushTimer = setTimeout(push, 1500); } }
+function st(id){ return S[id] || (S[id] = {}); }
+const RANK = {ok:2, seen:1};
+function summary(){
+  const r = {resenih:0, tock:0, vseh:T.length, vsehTock:T.reduce((a,t)=>a+t.pts,0), sklopi:{}};
+  T.forEach(t=>{ const k=t.lv; r.sklopi[k] = r.sklopi[k] || {resenih:0, vseh:0}; r.sklopi[k].vseh++;
+    if(S[t.id] && S[t.id].state==="ok"){ r.resenih++; r.tock+=t.pts; r.sklopi[k].resenih++; } });
+  return r;
+}
+async function push(){
+  if(!remote || pushing || !dirty) return;
+  pushing = true; dirty = false;
+  try { await remote.ref.set({poglavje:6, naloge:S, povzetek:summary(), posodobljeno:localT}); setSync("cloud"); }
+  catch(e){ if(e && e.code==="invalid_argument"){ remote = null; setSync("local"); } else { setSync("err"); dirty = true; } }
+  pushing = false;
+  if(dirty && remote){ clearTimeout(pushTimer); pushTimer = setTimeout(push, 4000); }
+}
+function merge(R, rT){
+  let changed = false;
+  const newer = rT > localT;
+  Object.keys(R).forEach(id=>{
+    const r = R[id] || {}, l = S[id];
+    if(!l){ S[id] = r; changed = true; return; }
+    const base = newer ? Object.assign({}, l, r) : Object.assign({}, r, l);
+    const rs = Math.max(RANK[l.state]||0, RANK[r.state]||0);
+    base.state = rs===2 ? "ok" : rs===1 ? "seen" : undefined;
+    base.h = Math.max(l.h||0, r.h||0);
+    if(JSON.stringify(base)!==JSON.stringify(l)){ S[id] = base; changed = true; }
+  });
+  if(newer) localT = rT;
+  return changed;
+}
+const SYNC_TXT = {
+  local:"Napredek se shranjuje v tem brskalniku. Na drugem računalniku ga ne boš videl.",
+  cloud:"Napredek se shranjuje v tvojem računu in je na voljo na vseh napravah.",
+  err:"Shranjevanje v račun trenutno ne deluje. Napredek je varen v tem brskalniku."
+};
+function setSync(k){ document.querySelectorAll(".js-sync").forEach(e=>{ e.dataset.s=k; e.textContent=SYNC_TXT[k]; }); }
+
+/* ---------- helpers ---------- */
+const $ = (s,el=document)=>el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const KW = new Set("abstract boolean break byte case catch char class continue default do double else extends final finally float for if implements import instanceof int interface long new null package private protected public return short static super switch this throw throws try void while true false var String System".split(" "));
+function hl(code){
+  const re = /(\/\/[^\n]*)|("(?:\\.|[^"\\])*")|('(?:\\.|[^'\\])')|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_]\w*)\b/g;
+  let out="", last=0, m;
+  while((m=re.exec(code))){
+    out += esc(code.slice(last, m.index));
+    if(m[1]) out += '<span class="c">'+esc(m[1])+'</span>';
+    else if(m[2]||m[3]) out += '<span class="s">'+esc(m[2]||m[3])+'</span>';
+    else if(m[4]) out += '<span class="n">'+m[4]+'</span>';
+    else if(KW.has(m[5])) out += '<span class="k">'+m[5]+'</span>';
+    else out += esc(m[5]);
+    last = re.lastIndex;
+  }
+  return out + esc(code.slice(last));
+}
+const fold = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+function norm(s, o){
+  let x = String(s).trim();
+  if(o.code) return x.replace(/\s+/g,"");
+  x = x.replace(/\s+/g," ");
+  if(!o.cs) x = fold(x.toLowerCase()).replace(/[.]$/,"");
+  if(o.list) x = x.split(/\s*,\s*/).sort().join(",");
+  return x;
+}
+function matchBlank(val, b){
+  if(b.pool){ const set = new Set(String(val).split(/[\s,;]+/).map(x=>x.trim().toLowerCase()).filter(Boolean)); const n = [...set].filter(x=>b.pool.includes(x)).length; return n>=b.min && n===set.size; }
+  const v = norm(val,b); return b.acc.some(a => norm(a,b) === v); }
+const normOut = s => String(s).replace(/\r/g,"").split("\n").map(l=>l.replace(/\s+$/,"")).join("\n").replace(/\n+$/,"");
+const srcLabel = s => { const r = /^MRAC\/(\d+)$/.exec(s); if(r) return `Katalog 2023 · primer · ${r[1]}. nal.`; const m = /^M(\d\d)(\d)\/(\d+)$/.exec(s); return m ? `Matura 20${m[1]} · ${m[2]==="1"?"spomladi":"jeseni"} · ${m[3]}. nal.` : s; };
+const ptsLabel = p => p===1 ? "1 točka" : p===2 ? "2 točki" : (p<5 ? p+" točke" : p+" točk");
+
+/* ---------- render tasks ---------- */
+T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });
+const levelsEl = $("#levels");
+let counter = 0;
+function renderAll(){
+levelsEl.innerHTML = ""; $("#homeMat").innerHTML = ""; counter = 0;
+LEVELS.forEach(L=>{
+  const wrap = document.createElement("div");
+  wrap.className = "level"; wrap.id = L.id;
+  wrap.innerHTML = `<header><span class="eyebrow">Sklop ${L.tag}</span><h3 style="font-size:1.35rem">${esc(L.title)}</h3><p>${esc(L.note)}</p></header>`;
+  T.filter(t=>t.lv===L.tag).forEach(t=>{ counter++; t.n = counter; wrap.appendChild(card(t)); });
+  const em = document.createElement("p"); em.className = "lvl-empty"; em.hidden = true; em.textContent = "V tem sklopu ni nalog za izbrani filter.";
+  wrap.appendChild(em);
+  (L.home ? $("#homeMat") : levelsEl).appendChild(wrap);
+});
+applyFilter(); showPage(cur, true);
+}
+
+function card(t){
+  const el = document.createElement("article");
+  el.className = "task"; el.id = "t-"+t.id; el.dataset.kind = t.own ? "own" : "mat";
+  const tags = (t.lab ? `<span class="tag mat">${esc(t.lab)}</span>` : t.own ? `<span class="tag">Dodatna</span>` : `<span class="tag mat">${esc(srcLabel(t.src))}</span>`) + (t.adapt?`<span class="tag">Prirejeno</span>`:"") + (t.redr?`<span class="tag">Diagram prerisan</span>`:"") + (t.draw?`<span class="tag">Nariši diagram</span>`:"") + `<span class="tag">${ptsLabel(t.pts)}</span><span class="tag js-st" hidden></span>`;
+  let body = "";
+  if(t.code) body += `<pre class="code">${hl(t.code)}</pre>`;
+  if(t.code && t.type!=="output") body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="code">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`;
+  body += `<p>${esc(t.q)}</p>`;
+  if(t.snip) body += `<pre class="code">${hl(t.snip)}</pre>`;
+  if(t.fcq) body += `<div class="fig">${FLOW.svg(t.fcq)}</div>`;
+  if(t.type==="mc"){
+    const multi = t.a.length>1;
+    body += `<div class="opts">` + t.o.map((o,k)=>`<label class="opt"><input type="${multi?"checkbox":"radio"}" name="r-${t.id}" id="r-${t.id}-${k}" value="${k}"><b>${"ABCDEF"[k]}</b><span>${t.osym ? FLOW.sym(t.osym[k]) : esc(o)}</span></label>`).join("") + `</div>`;
+  } else if(t.type==="blanks"){
+    body += t.b.map((b,k)=>`<div class="blank"><label for="b-${t.id}-${k}">${esc(b.l)}</label><input type="text" id="b-${t.id}-${k}" class="${b.code||b.cs?"mono":""}" autocomplete="off" spellcheck="false"></div>`).join("");
+  } else if(t.type==="cls"){
+    body += `<div class="cls">` + t.items.map((it,k)=>`<div class="crow" data-k="${k}"><span class="txt">${esc(it[0])}</span><div class="seg" role="group" aria-label="Izberi">${t.cats.map((c,ci)=>`<button type="button" data-ci="${ci}" aria-pressed="false">${esc(c)}</button>`).join("")}</div></div>`).join("") + `</div>`;
+  } else if(t.type==="output"){
+    body += `<div class="blank"><label for="o-${t.id}">Tvoj odgovor (izpis)</label><textarea id="o-${t.id}" class="mono out" spellcheck="false"></textarea></div>`;
+    if(t.code) body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="code">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`;
+  } else if(t.type==="code"){
+    if(!t.hideExp) body += `<pre class="code">${esc(t.expected)}</pre>`;
+    body += `<div class="blank"><div class="editorbar"><label for="e-${t.id}">Tvoja koda</label><span>Zaženi v Eclipse, VS Code ali Programizu (tam razred preimenuj v Main), izpis prilepi spodaj.</span></div><textarea id="e-${t.id}" class="editor" spellcheck="false"></textarea></div>`;
+    body += `<div class="actions"><button class="btn js-copy" type="button" data-copy="editor">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a><button class="btn ghost js-restore" type="button">Ponastavi kodo</button></div>`;
+    body += `<div class="blank"><label for="o-${t.id}">Izpis tvojega programa</label><textarea id="o-${t.id}" class="mono out" spellcheck="false"></textarea></div>`;
+  }
+  el.innerHTML = `
+    <div class="thead"><span class="tnum">${t.n}. naloga</span><div class="tags">${tags}</div></div>
+    <div class="q">${body}</div>
+    <div class="actions">
+      <button class="btn primary js-check" type="button">Preveri</button>
+      <button class="btn js-hint" type="button">Namig</button>
+      <button class="btn ghost js-sol" type="button">Pokaži rešitev</button>
+      <span class="feedback" aria-live="polite"></span>
+    </div>
+    <div class="hints"></div>
+    <div class="sol" hidden></div>`;
+  wire(el,t);
+  return el;
+}
+
+function wire(el,t){
+  const s = st(t.id);
+  const fb = $(".feedback",el), hintsEl = $(".hints",el), solEl = $(".sol",el);
+  // restore inputs
+  if(t.type==="mc" && s.v) s.v.forEach(k=>{ const i=$(`#r-${t.id}-${k}`,el); if(i) i.checked=true; });
+  if(t.type==="blanks" && s.v) s.v.forEach((v,k)=>{ const i=$(`#b-${t.id}-${k}`,el); if(i) i.value=v; });
+  if(t.type==="cls"){
+    el.querySelectorAll(".crow").forEach(row=>{
+      const k = +row.dataset.k;
+      row.querySelectorAll("button").forEach(b=>{
+        if(s.v && s.v[k]===+b.dataset.ci) b.setAttribute("aria-pressed","true");
+        b.addEventListener("click",()=>{ row.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed","false")); b.setAttribute("aria-pressed","true"); row.classList.remove("right","wrong"); collect(); });
+      });
+    });
+  }
+  const ed = $(`#e-${t.id}`,el), out = $(`#o-${t.id}`,el);
+  if(ed){ ed.value = s.code != null ? s.code : t.starter;
+    ed.addEventListener("keydown",e=>{ if(e.key==="Tab" && !e.shiftKey){ e.preventDefault(); const a=ed.selectionStart,b=ed.selectionEnd; ed.value=ed.value.slice(0,a)+"    "+ed.value.slice(b); ed.selectionStart=ed.selectionEnd=a+4; collect(); }});
+    ed.addEventListener("input",collect);
+    $(".js-restore",el).addEventListener("click",()=>{ ed.value=t.starter; collect(); });
+  }
+  if(out){ if(s.out) out.value=s.out; out.addEventListener("input",collect); }
+  el.querySelectorAll("input").forEach(i=>i.addEventListener("input",()=>{ i.classList.remove("right","wrong"); collect(); }));
+  el.querySelectorAll("input[type=radio],input[type=checkbox]").forEach(i=>i.addEventListener("change",()=>{ el.querySelectorAll(".opt").forEach(o=>o.classList.remove("right","wrong")); collect(); }));
+
+  function collect(){
+    if(t.type==="mc") s.v = [...el.querySelectorAll(`input[name="r-${t.id}"]:checked`)].map(i=>+i.value);
+    if(t.type==="blanks") s.v = t.b.map((_,k)=>$(`#b-${t.id}-${k}`,el).value);
+    if(t.type==="cls") s.v = [...el.querySelectorAll(".crow")].map(r=>{ const p=r.querySelector('button[aria-pressed="true"]'); return p ? +p.dataset.ci : null; });
+    if(ed) s.code = ed.value;
+    if(out) s.out = out.value;
+    save();
+  }
+
+  el.querySelectorAll(".js-copy").forEach(btn=>btn.addEventListener("click",()=>{
+    const text = btn.dataset.copy==="editor" ? ed.value : runnable(t.code);
+    const done = ()=>{ const o=btn.textContent; btn.textContent="Kopirano"; setTimeout(()=>btn.textContent=o,1400); };
+    try { navigator.clipboard.writeText(text).then(done, ()=>fallback(text,done)); } catch(e){ fallback(text,done); }
+  }));
+
+  $(".js-check",el).addEventListener("click",()=>{
+    collect();
+    let ok=false, msg="";
+    if(t.type==="mc"){
+      const v = new Set(s.v||[]);
+      if(!v.size){ show(false,"Najprej izberi odgovor."); return; }
+      ok = v.size===t.a.length && t.a.every(k=>v.has(k));
+      el.querySelectorAll(".opt").forEach((o,k)=>{ o.classList.remove("right","wrong"); if(v.has(k)) o.classList.add(t.a.includes(k)?"right":"wrong"); });
+      if(!ok && t.a.length>1 && v.size!==t.a.length) msg = `Pravilnih odgovorov je ${t.a.length}.`;
+    }
+    if(t.type==="blanks"){
+      let all=true;
+      t.b.forEach((b,k)=>{ const i=$(`#b-${t.id}-${k}`,el); const good = matchBlank(i.value,b); i.classList.remove("right","wrong"); if(i.value.trim()) i.classList.add(good?"right":"wrong"); if(!good) all=false; });
+      ok = all;
+    }
+    if(t.type==="cls"){
+      let all=true, any=false;
+      el.querySelectorAll(".crow").forEach(r=>{ const k=+r.dataset.k; r.classList.remove("right","wrong"); if(s.v[k]==null){ all=false; return; } any=true; const good = s.v[k]===t.items[k][1]; r.classList.add(good?"right":"wrong"); if(!good) all=false; });
+      if(!any){ show(false,"Najprej razvrsti vsaj eno trditev."); return; }
+      ok = all; if(!ok && s.v.includes(null)) msg="Razvrsti vse trditve.";
+    }
+    if(t.type==="output" || t.type==="code"){
+      if(!out.value.trim()){ show(false, t.type==="code" ? "Zaženi program in prilepi njegov izpis." : "Napiši izpis."); return; }
+      const exps = [].concat(t.expected); ok = exps.some(e=>normOut(out.value)===normOut(e));
+      out.classList.remove("right","wrong"); out.classList.add(ok?"right":"wrong");
+      if(!ok){ const a=normOut(out.value).split("\n"), b=normOut(exps[0]).split("\n"); const k=b.findIndex((l,j)=>a[j]!==l); msg = k<0 ? "Izpis ima preveč vrstic." : `Razlika v ${k+1}. vrstici.`; }
+    }
+    if(ok){ if(s.state!=="seen") s.state="ok"; save(); }
+    show(ok, ok ? (s.state==="seen" ? "Pravilno. Točke se ne štejejo, ker si si ogledal rešitev." : `Pravilno. +${ptsLabel(t.pts)}`) : ("Ni še pravilno. "+msg).trim());
+    paint(); progress();
+  });
+
+  let hi = s.h || 0;
+  const drawHints = ()=>{ hintsEl.innerHTML = t.h.slice(0,hi).map((h,k)=>`<div class="hint"><b>NAMIG ${k+1}/${t.h.length}</b>${esc(h)}</div>`).join(""); const b=$(".js-hint",el); b.disabled = hi>=t.h.length; b.textContent = hi>=t.h.length ? "Ni več namigov" : (hi? "Naslednji namig":"Namig"); };
+  drawHints();
+  $(".js-hint",el).addEventListener("click",()=>{ if(hi<t.h.length){ hi++; s.h=hi; save(); drawHints(); }});
+
+  function drawSol(){
+    let ans="";
+    if(t.type==="mc") ans = "Pravilno: " + t.a.map(k=>"ABCDEF"[k]).join(", ");
+    if(t.type==="blanks") ans = t.b.map(b=>`${b.l} ${b.acc[0]}`).join(" · ");
+    if(t.type==="cls") ans = t.items.map(it=>`${it[0]} → ${t.cats[it[1]]}`).join("\n");
+    let html = "";
+    if(t.type==="cls") html += `<div class="ans" style="white-space:pre-line;font-weight:400">${esc(ans)}</div>`;
+    else if(ans) html += `<div class="ans">${esc(ans)}</div>`;
+    if(t.fc) html += `<div class="fig"><div class="eyebrow" style="margin-bottom:8px">Diagram poteka</div>${FLOW.svg(t.fc)}</div>`;
+    if(t.jsolCode) html += `<div><div class="eyebrow">Primer v Javi</div><pre class="code">${hl(t.jsolCode)}</pre></div>`;
+    if(t.type==="output") html += `<div><div class="eyebrow">Pravilen izpis</div><pre class="code">${esc(t.expected)}</pre></div>`;
+    if(t.type==="code") html += `<div><div class="eyebrow">Ena od možnih rešitev</div><pre class="code">${hl(t.sol)}</pre></div>`;
+    html += `<p class="why">${esc(t.why)}</p>`;
+    solEl.innerHTML = html;
+  }
+  $(".js-sol",el).addEventListener("click",()=>{
+    if(solEl.hidden){ drawSol(); solEl.hidden=false; if(s.state!=="ok"){ s.state="seen"; save(); paint(); progress(); } $(".js-sol",el).textContent="Skrij rešitev"; }
+    else { solEl.hidden=true; $(".js-sol",el).textContent="Pokaži rešitev"; }
+  });
+
+  function show(ok,m){ fb.textContent=m; fb.className="feedback "+(ok?"ok":"bad"); }
+  function paint(){
+    el.dataset.state = s.state||"";
+    const tg = $(".js-st",el);
+    if(s.state==="ok"){ tg.hidden=false; tg.className="tag js-st st-ok"; tg.textContent="Rešeno"; }
+    else if(s.state==="seen"){ tg.hidden=false; tg.className="tag js-st st-seen"; tg.textContent="Rešitev ogledana"; }
+    else tg.hidden=true;
+  }
+  paint();
+}
+
+function runnable(c){ return /\bclass\s+\w+/.test(c) ? c.replace(/public\s+class\s+\w+/, "public class Main") : "public class Main {\n    public static void main(String[] args) {\n" + c.split("\n").map(l=>l?"        "+l:l).join("\n") + "\n    }\n}"; }
+function fallback(text,done){
+  const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); done(); }catch(e){} ta.remove();
+}
+
+/* ---------- home ---------- */
+const homeEl = $("#home");
+HOME.forEach((h,k)=>{
+  const el = document.createElement("article"); el.className="task";
+  el.innerHTML = `<div class="thead"><span class="tnum">D${k+1}. ${esc(h.title)}</span><div class="tags"><span class="tag">Za doma</span></div></div>
+   <div class="q">${h.code?`<pre class="code">${hl(h.code)}</pre>`:""}<p>${esc(h.q)}</p>
+   ${h.code?`<div class="actions"><button class="btn js-c" type="button">Kopiraj kodo</button><a class="btn" href="${PROGRAMIZ}" target="_blank" rel="noopener">Odpri Programiz ↗</a></div>`:""}</div>
+   <div class="actions"><button class="btn ghost js-s" type="button">Pokaži rešitev</button></div>
+   <div class="sol" hidden>${h.fc?`<div class="fig">${FLOW.svg(h.fc)}</div>`:""}${h.jsolCode?`<pre class="code">${hl(h.jsolCode)}</pre>`:""}<p class="why">${esc(h.sol)}</p></div>`;
+  const sol=$(".sol",el), b=$(".js-s",el);
+  b.addEventListener("click",()=>{ sol.hidden=!sol.hidden; b.textContent= sol.hidden?"Pokaži rešitev":"Skrij rešitev"; });
+  const c=$(".js-c",el); if(c) c.addEventListener("click",()=>{ const done=()=>{c.textContent="Kopirano";setTimeout(()=>c.textContent="Kopiraj kodo",1400)}; try{navigator.clipboard.writeText(h.code).then(done,()=>fallback(h.code,done));}catch(e){fallback(h.code,done);} });
+  homeEl.appendChild(el);
+});
+
+/* ---------- static highlighting ---------- */
+document.querySelectorAll(".js-hl").forEach(p=>{ p.innerHTML = hl(p.textContent); });
+
+/* ---------- progress ---------- */
+function progress(){
+  const r = summary();
+  const txt = `${r.resenih} / ${r.vseh} nalog · ${r.tock} / ${r.vsehTock} točk`;
+  document.querySelectorAll(".js-progtxt").forEach(e=>e.textContent=txt);
+  document.querySelectorAll(".js-bar").forEach(e=>e.style.width=(100*r.tock/r.vsehTock)+"%");
+  document.querySelectorAll(".cnt[data-lv]").forEach(e=>{ const k=r.sklopi[e.dataset.lv]; if(!k) return; e.textContent=`${k.resenih}/${k.vseh}`; e.classList.toggle("full", k.resenih===k.vseh); });
+  const nm = T.filter(t=>!t.own).length, ps = $("#progSrc"); if(ps) ps.textContent = `${nm} maturitetnih · ${T.length-nm} dodatnih nalog`;
+}
+
+/* ---------- filters ---------- */
+let curFilter = "all";
+function applyFilter(){
+  document.querySelectorAll("#levels .task, #homeMat .task").forEach(el=>{
+    const s = S[el.id.slice(2)] || {};
+    el.hidden = (curFilter==="mat" && el.dataset.kind!=="mat") || (curFilter==="own" && el.dataset.kind!=="own") || (curFilter==="open" && s.state==="ok");
+  });
+  document.querySelectorAll("#levels .level, #homeMat .level").forEach(l=>{ const e=l.querySelector(".lvl-empty"); if(e) e.hidden = !!l.querySelector(".task:not([hidden])"); });
+}
+document.querySelectorAll(".chip").forEach(c=>c.addEventListener("click",()=>{
+  document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed","false"));
+  c.setAttribute("aria-pressed","true");
+  curFilter = c.dataset.f; applyFilter();
+}));
+
+/* ---------- pages ---------- */
+const PAGES = [["while","Zanka while"],["for","Zanka for"],["do-while","Zanka do-while"],["izbira","Izbira in pretvorba"],["gnezdene","Gnezdene zanke"],["break","break in continue"],["vzorci","Vzorci in algoritmi"],["napake","Pogoste napake"],
+  ["naloge-a","Naloge A · Vrste zank"],["naloge-b","Naloge B · Sledenje izvajanju"],["naloge-c","Naloge C · Pisanje zank"],["naloge-d","Naloge D · Gnezdene zanke"],["naloge-e","Naloge E · break in continue"],["naloge-f","Naloge F · Laboratorijske vaje"],["naloge-g","Naloge G · Dodatne vaje"],["doma","Vaje za doma"]];
+const sel = $("#pageSel");
+sel.innerHTML = PAGES.map((p,k)=>`<option value="${p[0]}">${k+1}. ${esc(p[1])}</option>`).join("");
+sel.addEventListener("change",()=>{ location.hash = sel.value; });
+let cur = PAGES[0][0];
+function showPage(id, quiet){
+  const k0 = PAGES.findIndex(p=>p[0]===id); const k = k0<0 ? 0 : k0; cur = PAGES[k][0];
+  document.querySelectorAll("main > section").forEach(sec=>{ sec.hidden = sec.id==="naloge" ? !cur.startsWith("naloge-") : sec.id!==cur; });
+  document.querySelectorAll("#levels > .level").forEach(l=>{ l.hidden = l.id!==cur; });
+  $("#hero").hidden = k!==0; $("#crumb").hidden = k===0;
+  $("#crumbN").textContent = `Stran ${k+1} od ${PAGES.length}`;
+  document.querySelectorAll(".rail nav a").forEach(a=>{ if(a.getAttribute("href")==="#"+cur) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
+  sel.value = cur;
+  const pv = PAGES[k-1], nx = PAGES[k+1];
+  $("#pager").innerHTML = (pv?`<a class="prev" href="#${pv[0]}"><span class="eyebrow">Nazaj</span><span class="t">${esc(pv[1])}</span></a>`:"") + (nx?`<a class="next" href="#${nx[0]}"><span class="eyebrow">Naprej</span><span class="t">${esc(nx[1])}</span></a>`:"");
+  if(!quiet) window.scrollTo(0,0);
+}
+window.addEventListener("hashchange",()=>showPage(location.hash.slice(1)));
+
+/* ---------- reset with inline confirm ---------- */
+const rw = $("#resetWrap");
+function resetIdle(){ rw.innerHTML = `<button class="btn ghost" id="resetBtn" type="button" style="padding-left:0">Počisti ves napredek v tem poglavju</button>`; $("#resetBtn").addEventListener("click",resetAsk); }
+function resetAsk(){ rw.innerHTML = `<span class="confirm">Res izbrišem vse odgovore? <button class="btn" id="rY" type="button">Da, počisti</button><button class="btn ghost" id="rN" type="button">Prekliči</button></span>`;
+  $("#rY").addEventListener("click", async ()=>{ S = {}; localT = Date.now(); saveLocal();
+    if(remote){ try { await remote.ref.set({poglavje:6, naloge:{}, povzetek:summary(), posodobljeno:localT}); } catch(e){} }
+    location.hash = "while"; location.reload(); });
+  $("#rN").addEventListener("click",resetIdle); }
+resetIdle();
+
+/* ---------- start ---------- */
+cur = location.hash.slice(1) || "while";
+try{ FLOW.setLang(localStorage.getItem("java-matura-diagram-lang")||"en"); }catch(e){ FLOW.setLang("en"); }
+function paintLang(){ document.querySelectorAll(".js-lang").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.lang===FLOW.getLang()))); }
+function fillFigs(){
+  document.querySelectorAll("[data-fc]").forEach(e=>{ e.innerHTML = FLOW.svg(FLOWS[e.dataset.fc],{num:!!e.dataset.num}); });
+  document.querySelectorAll("[data-sym]").forEach(e=>{ e.innerHTML = FLOW.sym(e.dataset.sym); });
+}
+document.querySelectorAll(".js-lang").forEach(b=>b.addEventListener("click",()=>{
+  FLOW.setLang(b.dataset.lang);
+  try{ localStorage.setItem("java-matura-diagram-lang", b.dataset.lang); }catch(e){}
+  paintLang(); fillFigs(); renderAll();
+}));
+paintLang(); fillFigs();
+renderAll();
+progress();
+if(location.hash) setTimeout(()=>window.scrollTo(0,0), 0);
+
+/* ---------- account sync (db) ---------- */
+(async ()=>{
+  try {
+    if(!window.claude || !window.claude.use) return;
+    const user = await window.claude.use("user");
+    const db = await window.claude.use("db");
+    if(!user || !db) return;
+    const id = await user.id(); if(!id) return;
+    if(await user.can("data.write") === false) return;
+    const ref = db.doc("napredek/" + id);
+    const snap = await ref.get();
+    remote = { ref };
+    if(snap.exists){
+      const d = snap.data() || {};
+      if(merge(d.naloge || {}, +d.posodobljeno || 0)){ saveLocal(); renderAll(); progress(); }
+    }
+    setSync("cloud");
+    dirty = true; push();
+    document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden" && dirty){ clearTimeout(pushTimer); push(); } });
+  } catch(e){ remote = null; setSync("local"); }
+})();
+})();
+</script>
+
+
+
+</body></html>

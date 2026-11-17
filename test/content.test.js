@@ -606,8 +606,8 @@ test('corrected chapter and topic titles (10. 11. 2026) are the same in the cata
   assert.deepEqual(errors, []);
 });
 
-test('2.2, 2.3, 3.1 to 3.5 and 4.1 to 4.3: every page opens without errors, with their theory groups', async () => {
-  const want = { '2.2': [85, ['Logična vrata', 'Funkcije in poenostavljanje', 'Aritmetična vezja', 'Vaje']], '2.3': [129, ['Podatki in procesor', 'Zbirnik', 'Prekinitve in pomnilniki', 'Vhod, izhod in cevovod', 'Vaje']], '3.1': [52, ['Jezik in prevajanje', 'Orodja, zagon in napake', 'Vaje']], '3.2': [53, ['Algoritem in zapis', 'Gradniki in sled', 'Od diagrama do programa', 'Vaje']], '3.3': [55, ['Program in podatki', 'Izpis in vnos', 'Računanje in potek programa', 'Vaje']], '3.4': [76, ['Tipi in pretvorbe', 'Znaki in nizi', 'Operatorji', 'Vaje']], '3.5': [50, ['Stavek IF', 'Več možnosti', 'Vaje']], '4.1': [89, ['Pojmi in baza', 'Osnovne operacije', 'Množične operacije', 'Stiki in količnik', 'Izrazi v praksi', 'Vaje']], '4.2': [63, ['Podatki in podatkovna baza', 'Naloge SUPB', 'Zgradba baze in jeziki', 'Uporabniki in pravice', 'Informacijski sistemi in povzetek', 'Vaje']], '4.3': [52, ['Od zahtev do modela', 'Entitete, atributi in ključi', 'Razmerja in števnosti', 'Diagram ER in relacijske sheme', 'Postopek, orodje in povzetek', 'Vaje']] };
+test('2.2, 2.3, 3.1 to 3.6 and 4.1 to 4.3: every page opens without errors, with their theory groups', async () => {
+  const want = { '2.2': [85, ['Logična vrata', 'Funkcije in poenostavljanje', 'Aritmetična vezja', 'Vaje']], '2.3': [129, ['Podatki in procesor', 'Zbirnik', 'Prekinitve in pomnilniki', 'Vhod, izhod in cevovod', 'Vaje']], '3.1': [52, ['Jezik in prevajanje', 'Orodja, zagon in napake', 'Vaje']], '3.2': [53, ['Algoritem in zapis', 'Gradniki in sled', 'Od diagrama do programa', 'Vaje']], '3.3': [55, ['Program in podatki', 'Izpis in vnos', 'Računanje in potek programa', 'Vaje']], '3.4': [76, ['Tipi in pretvorbe', 'Znaki in nizi', 'Operatorji', 'Vaje']], '3.5': [50, ['Stavek IF', 'Več možnosti', 'Vaje']], '3.6': [114, ['Vrste zank', 'Gnezdenje, break in continue', 'Vzorci', 'Vaje']], '4.1': [89, ['Pojmi in baza', 'Osnovne operacije', 'Množične operacije', 'Stiki in količnik', 'Izrazi v praksi', 'Vaje']], '4.2': [63, ['Podatki in podatkovna baza', 'Naloge SUPB', 'Zgradba baze in jeziki', 'Uporabniki in pravice', 'Informacijski sistemi in povzetek', 'Vaje']], '4.3': [52, ['Od zahtev do modela', 'Entitete, atributi in ključi', 'Razmerja in števnosti', 'Diagram ER in relacijske sheme', 'Postopek, orodje in povzetek', 'Vaje']] };
   for (const [id, [n, groups]] of Object.entries(want)) {
     const ex = catalog.exercises.find((e) => e.id === id);
     assert.equal(ex.module, { 2: 'LAV-RAČ2', 3: 'LAV-RAČ3', 4: 'LAV-RAČ4' }[id[0]]);
@@ -1294,7 +1294,7 @@ test('Za doma: two more tasks per chapter, added in the portal, unscored', async
     assert.ok(await a.locator('.page.on article', { hasText: titles[1] }).locator('.sol').isVisible());
   }
   // unscored: the catalog has the same tasks and points as before (3.1 to 3.3 changed on 10. 11. 2026: tasks the student checks have no points)
-  assert.deepEqual(catalog.exercises.map((e) => [e.id, e.tasks.length, e.maxPoints]), [['2.1', 99, 218], ['2.2', 85, 164], ['2.3', 129, 237], ['3.1', 52, 75], ['3.2', 53, 61], ['3.3', 55, 83], ['3.4', 76, 83], ['3.5', 50, 58], ['4.1', 89, 158], ['4.2', 63, 113], ['4.3', 52, 63]]);
+  assert.deepEqual(catalog.exercises.map((e) => [e.id, e.tasks.length, e.maxPoints]), [['2.1', 99, 218], ['2.2', 85, 164], ['2.3', 129, 237], ['3.1', 52, 75], ['3.2', 53, 61], ['3.3', 55, 83], ['3.4', 76, 83], ['3.5', 50, 58], ['3.6', 114, 125], ['4.1', 89, 158], ['4.2', 63, 113], ['4.3', 52, 63]]);
   await a.context().close();
   assert.deepEqual(errors, []);
 });
@@ -1822,6 +1822,85 @@ test('3.5: two theory groups, laboratory exercises are not mentioned, set E is "
   assert.deepEqual(errors, []);
 });
 
+test('3.6: three theory groups, laboratory exercises are not mentioned, sets F and G are checked by the student, graded programs check the kind of loop, D12 keeps its spaces', async () => {
+  const ex = catalog.exercises.find((e) => e.id === '3.6');
+  const a = await login('Sara Skrbnik');
+  await a.goto(`${APP}/vaje/3.6#pregled`);
+  await at(a, 'pregled');
+  assert.deepEqual(await a.locator('.lr-rail .lr-grp b').allTextContents(), ['Vrste zank', 'Gnezdenje, break in continue', 'Vzorci', 'Vaje']);
+  const sections = [...new Set(ex.tasks.map((t) => t.section))];
+  assert.deepEqual(sections, ['Vrste zank in pogoj', 'Sledenje izvajanju zanke', 'Pisanje zank', 'Gnezdene zanke in izpisi likov', 'Stavka break in continue', 'Naloge za utrjevanje', 'Dodatne vaje', 'Ponavljanje']);
+  assert.deepEqual(sections.map((n) => ex.tasks.filter((t) => t.section === n).length), [10, 19, 14, 12, 10, 37, 10, 2]);
+  // 226 points of the artifact minus the 47 self-checked programs of sets F and G, which carry no points
+  assert.equal(ex.maxPoints, 125);
+  const nameOf = (t) => String.fromCharCode(65 + sections.indexOf(t.section)) + (ex.tasks.filter((u) => u.section === t.section).indexOf(t) + 1);
+  assert.deepEqual(ex.tasks.filter((t) => t.self).map(nameOf), [...Array.from({ length: 37 }, (_, i) => 'F' + (i + 1)), ...Array.from({ length: 10 }, (_, i) => 'G' + (i + 1))]);
+  assert.deepEqual(await a.locator('.lr-rail a.lr-gated .lr-tg').allTextContents(), ['A ·', 'B ·', 'C ·', 'D ·', 'E ·', 'F ·', 'G ·', 'H ·', 'I ·']);
+  assert.equal((await a.locator('.lr-rail a.lr-gated .lr-tx').last().textContent()).trim(), 'Za doma');
+  // nothing of the laboratory exercise, no chapter number of the artifact, no label switch; the collections keep their names
+  assert.doesNotMatch(JSON.stringify(ex), /aboratorij|RAČ-LAV|vaji 5/);
+  for (const hash of ['pregled', 'while', 'napake', 'naloge-c', 'naloge-f', 'naloge-g', 'doma-mat', 'doma']) {
+    await go(a, hash);
+    assert.doesNotMatch(await a.locator('body').innerText(), /Poglavje \d+ od 12|RAČ-LAV|aboratorij|vaji 5/, hash);
+  }
+  assert.equal(await a.locator('.js-lang, .langsw').count(), 0);
+  await go(a, 'naloge-f/1');
+  assert.match(await card(a).locator('.tags').textContent(), /Dodatna/);
+  await go(a, 'naloge-g/1');
+  assert.match(await card(a).locator('.tags').textContent(), /Utrjevanje zank · 1|Vaje z zankami · 1/);
+  // the tasks that only ask for an output have no copy / Programiz buttons
+  for (const hash of ['naloge-a/8', 'naloge-b/5', 'naloge-b/19', 'naloge-d/1', 'naloge-d/11', 'naloge-e/6', 'naloge-e/9']) {
+    await go(a, hash);
+    assert.equal(await card(a).locator('.js-copy, a[href*=programiz]').count(), 0, hash);
+  }
+  // D4: the condition is typed in the code
+  await go(a, 'naloge-d/4');
+  assert.equal(await card(a).locator('pre.code input.lr-gap').count(), 1);
+  assert.match(await card(a).locator('pre.code').first().textContent(), /\*oo\*/);
+  // star figures are shown as code, not read as bold markup (D3, D12)
+  await go(a, 'naloge-d/3');
+  assert.match(await card(a).locator('pre.code').first().textContent(), /\*ooo\s+\*\*oo\s+\*\*\*o\s+\*\*\*\*/);
+  assert.equal(await card(a).locator('.lr-qf').count(), 0);
+  await go(a, 'naloge-d/12');
+  assert.equal(await card(a).locator('pre.code').first().textContent(), '   *\n  ***\n *****\n*******');
+  // a self-checked program: editor without an output field, the right output shown for comparison
+  await go(a, 'naloge-f/17');
+  assert.ok(await card(a).locator('textarea.editor').isVisible());
+  assert.equal(await card(a).locator('textarea.out').count(), 0);
+  assert.doesNotMatch(await card(a).textContent(), /[Pp]rilepi/);
+  assert.match((await card(a).locator('.lr-tests').textContent()).replace(/\s+/g, ' '), /Pravilen izpis za preverjanje\s*2 3 5 7 11/);
+  // graded programs: a missing kind of loop is only a message, the task stays open
+  const feedback = async () => (await card(a).locator('.feedback').first().textContent()).trim();
+  const submit = async (code, out) => {
+    await card(a).locator('textarea.editor').fill(code);
+    await card(a).locator('textarea.out').fill(out);
+    await card(a).locator('.lr-check').click();
+    return [await feedback(), await card(a).getAttribute('data-lr')];
+  };
+  await go(a, 'naloge-c/1');
+  assert.deepEqual(await submit('int i = 1; while (i <= 10) { System.out.print(i + "-"); i++; } // for (', '1-2-3-4-5-6-7-8-9-10-'), ['V kodi manjka zanka for.', 'open']);
+  assert.deepEqual(await submit('for (int i = 1; i <= 10; i++) System.out.print(i + "-");', '1-2-3-4-5-6-7-8-9-10-'), ['Pravilno: 2 točki.', 'ok']);
+  await go(a, 'naloge-c/7');
+  assert.deepEqual(await submit('for (int i = 0; i < 5; i++) System.out.println(i);', '0\n1\n2\n3\n4'), ['Zanke for ne smeš uporabiti.', 'open']);
+  assert.deepEqual(await submit('System.out.println(0); System.out.println(1); System.out.println(2); System.out.println(3); System.out.println(4);', '0\n1\n2\n3\n4'), ['Uporabi zanko while ali do-while.', 'open']);
+  assert.deepEqual(await submit('int i = 0; while (i < 5) { System.out.println(i); i++; }', '0\n1\n2\n3\n4'), ['Pravilno: 2 točki.', 'ok']);
+  await go(a, 'naloge-c/12');
+  assert.deepEqual(await submit('int k = 0; while (a >= b) { a -= b; k++; } return a / b;', '3'), ['Množenja, deljenja in ostanka (*, /, %) ne smeš uporabiti.', 'open']);
+  // D12 asks for the spaces in front of the stars: without them the triangle is not right
+  await go(a, 'naloge-d/12');
+  const [, st] = await submit('for (int i = 0; i < n; i++) { /* ... */ }', '*\n***\n*****\n*******');
+  assert.notEqual(st, 'ok');
+  // Za doma: eight tasks, every solution a program in Java colours
+  await go(a, 'doma');
+  const homeSols = a.locator('.page.on .js-s');
+  assert.equal(await homeSols.count(), 8);
+  for (let i = 0; i < 8; i++) await homeSols.nth(i).click();
+  assert.equal(await a.locator('.page.on .sol pre.code').count(), 8);
+  assert.ok(await a.locator('.page.on .sol pre.code .k').count() > 0);
+  await a.context().close();
+  assert.deepEqual(errors, []);
+});
+
 test('4.1: relational algebra: five theory groups, the revision set is last, an expression is checked by its result, one that cannot be read is no answer', async () => {
   const ex = catalog.exercises.find((e) => e.id === '4.1');
   assert.equal(ex.module, 'LAV-RAČ4');
@@ -2161,7 +2240,7 @@ test('4.3: conceptual and logical model: five theory groups, the drawing tasks a
 
 test('long task statements are laid out as paragraphs, lists and bold words in every chapter that has them, and the markup never reaches the catalog', async () => {
   // number of statements that carry the light markup (content/adapters/qformat.js, content/shell/vaja.js formatQ)
-  const laid = { '2.1': 1, '2.2': 20, '2.3': 14, '3.1': 5, '3.2': 5, '3.3': 6, '3.4': 3, '3.5': 8, '4.1': 0, '4.2': 0, '4.3': 0 };
+  const laid = { '2.1': 1, '2.2': 20, '2.3': 14, '3.1': 5, '3.2': 5, '3.3': 6, '3.4': 3, '3.5': 8, '3.6': 2, '4.1': 0, '4.2': 0, '4.3': 0 };
   assert.deepEqual(Object.keys(laid).sort(), catalog.exercises.map((e) => e.id).sort());
   for (const ex of catalog.exercises) assert.ok(ex.tasks.every((t) => !/\*\*/.test(t.q) && !/\n/.test(t.q)), `${ex.id}: the catalog keeps plain one-line statements`);
   const a = await login('Sara Skrbnik');

@@ -5136,6 +5136,966 @@
    ]
   },
   {
+   "id": "3.6",
+   "no": "6",
+   "module": "LAV-RAČ3",
+   "title": "Zanke v Javi",
+   "fullTitle": "Zanke v Javi",
+   "key": "scnm_lavrac_3_6_v1",
+   "version": 1,
+   "format": "short",
+   "maxPoints": 125,
+   "tasks": [
+    {
+     "i": 0,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrste zank in pogoj",
+     "q": "Katera od naštetih rezerviranih besed programskega jezika Java predstavlja zanko?"
+    },
+    {
+     "i": 1,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrste zank in pogoj",
+     "q": "Katera izmed navedenih rezerviranih besed predstavlja zanko?"
+    },
+    {
+     "i": 2,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vrste zank in pogoj",
+     "q": "S katerimi rezerviranimi besedami v programskem jeziku Java definiramo zanke? Vpiši tri besede, ločene z vejico."
+    },
+    {
+     "i": 3,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrste zank in pogoj",
+     "q": "Za katero zanko programskega jezika Java je naslednja trditev vedno resnična? »Stavki v zanki se vedno izvedejo vsaj enkrat.« Trditev je resnična za ______ zank"
+    },
+    {
+     "i": 4,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vrste zank in pogoj",
+     "q": "Katere trditve veljajo za zanko do while?"
+    },
+    {
+     "i": 5,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrste zank in pogoj",
+     "q": "Katere stavke programskega jezika imenujemo »zanka«?"
+    },
+    {
+     "i": 6,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrste zank in pogoj",
+     "q": "Katera od naslednjih zank se izvede natanko trikrat?"
+    },
+    {
+     "i": 7,
+     "level": "lažja",
+     "max": 1,
+     "section": "Vrste zank in pogoj",
+     "q": "Kaj izpiše program? Zanki imata enak pogoj, a različno obliko."
+    },
+    {
+     "i": 8,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vrste zank in pogoj",
+     "q": "Razvrsti zapise in naloge: pri katerih se pogoj preveri pred prvo ponovitvijo in pri katerih šele po njej?"
+    },
+    {
+     "i": 9,
+     "level": "srednja",
+     "max": 2,
+     "section": "Vrste zank in pogoj",
+     "q": "Katere izmed teh zank so neskončne (se nikoli ne končajo)?"
+    },
+    {
+     "i": 10,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sledenje izvajanju zanke",
+     "q": "Kolikokrat se izvede navedena zanka?"
+    },
+    {
+     "i": 11,
+     "level": "lažja",
+     "max": 1,
+     "section": "Sledenje izvajanju zanke",
+     "q": "Kolikokrat se izpiše beseda Pozdrav?"
+    },
+    {
+     "i": 12,
+     "level": "lažja",
+     "max": 1,
+     "section": "Sledenje izvajanju zanke",
+     "q": "Kaj se izpiše na zaslonu po izvedbi spodnje kode?"
+    },
+    {
+     "i": 13,
+     "level": "težja",
+     "max": 3,
+     "section": "Sledenje izvajanju zanke",
+     "q": "Dan je izsek programa. Kolikokrat se izvede zanka? Katere vrednosti se izpišejo med izvajanjem zanke (ločene z vejico)?"
+    },
+    {
+     "i": 14,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sledenje izvajanju zanke",
+     "q": "Kaj izpiše naslednji program? (Zapiši vsako vrstico izpisa v svojo vrstico.)"
+    },
+    {
+     "i": 15,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sledenje izvajanju zanke",
+     "q": "Kaj in kako izpiše naslednji del programa? (Izpis je v eni vrstici, členi so ločeni s presledkom.)"
+    },
+    {
+     "i": 16,
+     "level": "težja",
+     "max": 3,
+     "section": "Sledenje izvajanju zanke",
+     "q": "Kaj izpiše naslednji izsek programa? (Vsako vrstico izpisa zapiši v svojo vrstico.)"
+    },
+    {
+     "i": 17,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sledenje izvajanju zanke",
+     "q": "Kaj izpiše program Izpis1? (Vsako vrstico izpisa zapiši v svojo vrstico.)"
+    },
+    {
+     "i": 18,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sledenje izvajanju zanke",
+     "q": "Kaj izpiše izsek programa? (Vsako vrstico izpisa zapiši v svojo vrstico.)"
+    },
+    {
+     "i": 19,
+     "level": "lažja",
+     "max": 1,
+     "section": "Sledenje izvajanju zanke",
+     "q": "Kaj izpiše izsek programa?"
+    },
+    {
+     "i": 20,
+     "level": "težja",
+     "max": 3,
+     "section": "Sledenje izvajanju zanke",
+     "q": "Kaj se izpiše po naslednjem delu programa?"
+    },
+    {
+     "i": 21,
+     "level": "težja",
+     "max": 3,
+     "section": "Sledenje izvajanju zanke",
+     "q": "Kaj izpiše ta izsek programa? (Vsako vrstico izpisa zapiši v svojo vrstico.)"
+    },
+    {
+     "i": 22,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sledenje izvajanju zanke",
+     "q": "Dan imamo spodnji program. Kaj ta program izpiše? (Izpis je v eni vrstici, členi so ločeni s presledkom.)"
+    },
+    {
+     "i": 23,
+     "level": "težja",
+     "max": 3,
+     "section": "Sledenje izvajanju zanke",
+     "q": "Kaj izpiše naslednji program? (Vsako vrstico izpisa zapiši v svojo vrstico.)"
+    },
+    {
+     "i": 24,
+     "level": "težja",
+     "max": 3,
+     "section": "Sledenje izvajanju zanke",
+     "q": "Dano kodo programskega jezika Java pretvorite v diagram poteka (na papirju ali v Flowgorithmu). Nato vpiši, kaj izpiše program."
+    },
+    {
+     "i": 25,
+     "level": "težja",
+     "max": 3,
+     "section": "Sledenje izvajanju zanke",
+     "q": "Dani javanski program pretvorite v diagram poteka (na papirju ali v Flowgorithmu). Nato zapiši, kaj izpiše program. (Prirejeno: dodan je izpis.) Vsako vrstico i"
+    },
+    {
+     "i": 26,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sledenje izvajanju zanke",
+     "q": "Kaj izpiše program, ki ga prikazuje diagram poteka? Diagram je prerisan iz izpitne pole, element »skok v novo vrsto« pomeni prehod v novo vrstico izpisa. Pozor:"
+    },
+    {
+     "i": 27,
+     "level": "lažja",
+     "max": 1,
+     "section": "Sledenje izvajanju zanke",
+     "q": "Kolikokrat se izpiše beseda Pozdrav?"
+    },
+    {
+     "i": 28,
+     "level": "lažja",
+     "max": 1,
+     "section": "Sledenje izvajanju zanke",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 29,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje zank",
+     "q": "Na ekranu želimo dobiti izpis 1-2-3-4-5-6-7-8-9-10- (vse v eni vrstici, na koncu je pomišljaj). Zapiši del kode, ki z uporabo zanke for doseže ta izpis."
+    },
+    {
+     "i": 30,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje zank",
+     "q": "Zapišite poljubno zanko, s katero izpišemo vsa naravna soda števila manjša od 100. (Prirejeno: izpiši števila v eni vrstici, ločena s presledkom.)"
+    },
+    {
+     "i": 31,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pisanje zank",
+     "q": "Zapišite poljubno zanko, s katero se stavek System.out.print(\"*\"); izvede natanko 42-krat. (Prirejeno: po zanki izpiši še prazno vrstico, da se izpis zaključi.)"
+    },
+    {
+     "i": 32,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje zank",
+     "q": "Zapišite zanko for, v kateri števec preteče vsa zaporedna liha cela števila med 999 in 111, vključno z mejama, vsako natanko enkrat, pričnemo pa s številom 999."
+    },
+    {
+     "i": 33,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje zank",
+     "q": "Zapišite zanko for, v kateri števec preteče vsa soda cela števila med 100 in 0, vključno z mejama, vsako natanko enkrat, pričnemo pa s številom 100. Telo zanke "
+    },
+    {
+     "i": 34,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje zank",
+     "q": "Napišite zaporedje stavkov, ki tvori enak izpis kakor spodnja koda, pri čemer ne smete uporabiti zanke for. (Prirejeno: namesto 2000 je zgornja meja 20.)"
+    },
+    {
+     "i": 35,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje zank",
+     "q": "Zapišite zaporedje stavkov brez uporabe zanke for, ki nadomestijo zanko for(int i=0; i<1000000; i++) System.out.println(i); (Prirejeno: namesto milijona je zgor"
+    },
+    {
+     "i": 36,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje zank",
+     "q": "Del programa, ki izračuna vsoto naravnih števil iz intervala [1..100], zapišite z uporabo zanke do while. Dana je zanka for: for(int num = 100, sum=0; num>0; nu"
+    },
+    {
+     "i": 37,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje zank",
+     "q": "Naslednjo zanko do while pretvorite v zanko for. (Prirejeno: po zanki izpiši x in y, ločena s presledkom; y deklariraj pred zanko.)"
+    },
+    {
+     "i": 38,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje zank",
+     "q": "Dopolnite spodnjo kodo z zanko do while, ki tvori naključna realna števila iz intervala [0, 1) in tvorjenje preneha, ko je zadnje naključno število večje od 0,7"
+    },
+    {
+     "i": 39,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pisanje zank",
+     "q": "Dan je ta stavek for: for (int i=1; i<5; i++) System.out.print(i); Katero zaporedje stavkov povzroči enak izpis kakor zanka for?"
+    },
+    {
+     "i": 40,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje zank",
+     "q": "Napišite kodo metode deli tako, da bo vrnila celi del pri deljenju števila a s številom b. Dovoljene so le dodatne spremenljivke, zanke ter operaciji seštevanja"
+    },
+    {
+     "i": 41,
+     "level": "lažja",
+     "max": 1,
+     "section": "Pisanje zank",
+     "q": "Napiši zanko for, ki izpiše števila od 10 do 1 v eni vrstici, ločena s presledkom: 10 9 8 7 6 5 4 3 2 1."
+    },
+    {
+     "i": 42,
+     "level": "srednja",
+     "max": 2,
+     "section": "Pisanje zank",
+     "q": "Seštej vsa naravna števila od 1 do n, kjer je n = 10, s tremi zankami: while, for in do-while. Izpiši tri rezultate v treh vrsticah."
+    },
+    {
+     "i": 43,
+     "level": "srednja",
+     "max": 2,
+     "section": "Gnezdene zanke in izpisi likov",
+     "q": "Kaj in kako se izpiše med izvajanjem naslednjega zaporedja stavkov? (Prirejeno: v izvirniku manjka znak +, popravljeno je a+\" \"+b. Vsako vrstico izpisa zapiši v"
+    },
+    {
+     "i": 44,
+     "level": "srednja",
+     "max": 2,
+     "section": "Gnezdene zanke in izpisi likov",
+     "q": "Z gnezdenimi zankami napišite del programa, s katerim dobimo izpis v tej obliki: 1, 22, 333, 4444, 55555 (vsako v svoji vrstici)."
+    },
+    {
+     "i": 45,
+     "level": "težja",
+     "max": 3,
+     "section": "Gnezdene zanke in izpisi likov",
+     "q": "Z gnezdenimi zankami realizirajte programsko kodo v Javi, s katero zagotovite izpis v tej obliki (štiri vrstice):"
+    },
+    {
+     "i": 46,
+     "level": "srednja",
+     "max": 2,
+     "section": "Gnezdene zanke in izpisi likov",
+     "q": "Napišite, kateri pogoj moramo zapisati na črto v spodnji kodi, da bo koda izpisala lik iz komentarja na začetku (štiri vrstice)."
+    },
+    {
+     "i": 47,
+     "level": "srednja",
+     "max": 2,
+     "section": "Gnezdene zanke in izpisi likov",
+     "q": "Kaj in kako se izpiše med izvajanjem naslednjega zaporedja stavkov? (Vsako vrstico izpisa zapiši v svojo vrstico.)"
+    },
+    {
+     "i": 48,
+     "level": "težja",
+     "max": 3,
+     "section": "Gnezdene zanke in izpisi likov",
+     "q": "Kaj in kako izpiše naslednji del programa? (Vsako vrstico izpisa zapiši v svojo vrstico.)"
+    },
+    {
+     "i": 49,
+     "level": "srednja",
+     "max": 2,
+     "section": "Gnezdene zanke in izpisi likov",
+     "q": "Kaj izpiše naslednji del kode? (Vsako vrstico izpisa zapiši v svojo vrstico.)"
+    },
+    {
+     "i": 50,
+     "level": "srednja",
+     "max": 2,
+     "section": "Gnezdene zanke in izpisi likov",
+     "q": "Kaj izpiše izsek programa? (Vsako vrstico izpisa zapiši v svojo vrstico.)"
+    },
+    {
+     "i": 51,
+     "level": "srednja",
+     "max": 2,
+     "section": "Gnezdene zanke in izpisi likov",
+     "q": "Dan je izsek kode v programskem jeziku Java. Kaj se med izvajanjem izpiše na zaslon? (Vsako vrstico izpisa zapiši v svojo vrstico.)"
+    },
+    {
+     "i": 52,
+     "level": "srednja",
+     "max": 2,
+     "section": "Gnezdene zanke in izpisi likov",
+     "q": "Kaj izpiše spodnji izsek kode? (Vsako vrstico izpisa zapiši v svojo vrstico.)"
+    },
+    {
+     "i": 53,
+     "level": "srednja",
+     "max": 2,
+     "section": "Gnezdene zanke in izpisi likov",
+     "q": "Kaj izpiše izsek kode? (Vsako vrstico izpisa zapiši v svojo vrstico.)"
+    },
+    {
+     "i": 54,
+     "level": "težja",
+     "max": 3,
+     "section": "Gnezdene zanke in izpisi likov",
+     "q": "Napišite metodo static void trikotnik (int n), ki nariše enakokraki trikotnik višine n, ki je podana kot parameter. Za n = 4 se na zaslon izpiše spodnji lik; pr"
+    },
+    {
+     "i": 55,
+     "level": "lažja",
+     "max": 1,
+     "section": "Stavka break in continue",
+     "q": "Kateri izmed opisov velja za stavek break?"
+    },
+    {
+     "i": 56,
+     "level": "lažja",
+     "max": 1,
+     "section": "Stavka break in continue",
+     "q": "S katero izmed navedenih rezerviranih besed v programskem jeziku Java prekinemo izvajanje zanke for?"
+    },
+    {
+     "i": 57,
+     "level": "lažja",
+     "max": 1,
+     "section": "Stavka break in continue",
+     "q": "Kaj je učinek stavka continue znotraj zanke for?"
+    },
+    {
+     "i": 58,
+     "level": "srednja",
+     "max": 2,
+     "section": "Stavka break in continue",
+     "q": "Dopolnite trditvi tako, da bosta na črti zapisani besedi strokovno smiselno tvorili resnični trditvi (Java). Stavek ____ znotraj zanke nemudoma skoči na nasledn"
+    },
+    {
+     "i": 59,
+     "level": "lažja",
+     "max": 1,
+     "section": "Stavka break in continue",
+     "q": "V programu imamo zaporedje stavkov: int i=0; while (true) { System.out.println(++i); if (i==10) break; } Obkrožite črko pred trditvijo, ki je za navedene progra"
+    },
+    {
+     "i": 60,
+     "level": "srednja",
+     "max": 2,
+     "section": "Stavka break in continue",
+     "q": "Kaj izpiše izsek programa?"
+    },
+    {
+     "i": 61,
+     "level": "srednja",
+     "max": 2,
+     "section": "Stavka break in continue",
+     "q": "Kaj se izpiše na zaslonu pri izvedbi spodnje kode? (Vsako vrstico izpisa zapiši v svojo vrstico.)"
+    },
+    {
+     "i": 62,
+     "level": "lažja",
+     "max": 1,
+     "section": "Stavka break in continue",
+     "q": "Kaj izpiše program? Zanka je namenoma neskončna."
+    },
+    {
+     "i": 63,
+     "level": "lažja",
+     "max": 1,
+     "section": "Stavka break in continue",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 64,
+     "level": "srednja",
+     "max": 2,
+     "section": "Stavka break in continue",
+     "q": "Razvrsti opise: kateri stavek ima opisani učinek v zanki?"
+    },
+    {
+     "i": 65,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Kolikokrat se lahko izvede zanka while? Od česa je odvisno?"
+    },
+    {
+     "i": 66,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Kolikokrat se lahko izvede zanka do-while? Od česa je odvisno?"
+    },
+    {
+     "i": 67,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Kdaj bi uporabili neskončno zanko? Kako se lahko konča oziroma prekine? Izberi pravilni trditvi."
+    },
+    {
+     "i": 68,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Izpiši vsa naravna števila med 1 in 100. (Prirejeno: v eni vrstici, ločena s presledkom.)"
+    },
+    {
+     "i": 69,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Izpiši vsa naravna števila med 1 in 100, ki so deljiva s 3. (Prirejeno: v eni vrstici, ločena s presledkom.)"
+    },
+    {
+     "i": 70,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Izpiši vsa naravna števila med 1 in 100, ki so deljiva s 3 in niso večkratniki števila 5. (Prirejeno: v eni vrstici, ločena s presledkom.)"
+    },
+    {
+     "i": 71,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program, ki za dano naravno število n = 36 izpiše vse njegove delitelje. (V eni vrstici, ločeni s presledkom.)"
+    },
+    {
+     "i": 72,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program, ki izpiše vsa liha števila med −10 in 10 v padajočem vrstnem redu. (V eni vrstici, ločena s presledkom.)"
+    },
+    {
+     "i": 73,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program, ki s pomočjo zanke while sešteje števila od 1 do 100."
+    },
+    {
+     "i": 74,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program, ki s pomočjo zanke while sešteje liha števila od 1 do 100."
+    },
+    {
+     "i": 75,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program, ki izpiše poštevanko od 1 do 10: v vsaki od desetih vrstic produkte i · j za j od 1 do 10, ločene s presledkom."
+    },
+    {
+     "i": 76,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Z uporabo poljubne zanke izpiši trikotnik iz zvezdic z višino n = 5: v prvi vrstici je ena zvezdica, v drugi dve in tako naprej do pete vrstice. (Poskusi še obr"
+    },
+    {
+     "i": 77,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program, ki izračuna fakulteto celega števila n = 10 (n! = 1 · 2 · … · n)."
+    },
+    {
+     "i": 78,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program, ki izpiše angleško abecedo (male črke, v eni vrstici brez presledkov)."
+    },
+    {
+     "i": 79,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program, ki za dano pozitivno celo število n = 97 ugotovi, ali je praštevilo. Izpiši »97 je prastevilo« ali »97 ni prastevilo«. Preizkusi še z 91 in 2."
+    },
+    {
+     "i": 80,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program, ki število n = 360 razstavi na prafaktorje. Izpiši jih v eni vrstici, ločene z » * «."
+    },
+    {
+     "i": 81,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program, ki izpiše prvih 100 praštevil (v eni vrstici, ločena s presledkom)."
+    },
+    {
+     "i": 82,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Napiši program, ki izpiše n-to praštevilo. V kodi nastavi n = 25 (rezultat je 25. praštevilo)."
+    },
+    {
+     "i": 83,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program Prastevila, ki izpiše vsa praštevila, manjša ali enaka n = 50 (v eni vrstici, ločena s presledkom)."
+    },
+    {
+     "i": 84,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program Prastevilo, ki poišče in izpiše najmanjše praštevilo, ki je večje ali enako n = 90."
+    },
+    {
+     "i": 85,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program, ki izračuna največji skupni delitelj (Evklidov algoritem) in najmanjši skupni večkratnik dveh celih števil. V kodi nastavi a = 84 in b = 36. Iz"
+    },
+    {
+     "i": 86,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Napiši program, ki s pomočjo zanke while izračuna potenco osnova na eksponent. V kodi nastavi osnovo 2 in eksponent 10."
+    },
+    {
+     "i": 87,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi diagram poteka (na papirju ali v Flowgorithmu) in program, ki za dano nenegativno celo število n = 10 izračuna vrednost vsote 1 + 2 + 3 + … + n. Izpiši "
+    },
+    {
+     "i": 88,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program, ki poišče celo število a, ki da pri deljenju s 5 ostanek 3 in pri deljenju s 7 ostanek 1. (Prirejeno: poišči najmanjše naravno tako število.)"
+    },
+    {
+     "i": 89,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program Produkt, ki prebere naravno število n = 10234 in izračuna produkt njegovih neničelnih števk."
+    },
+    {
+     "i": 90,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program PerfektnaStevila, ki izpiše vsa perfektna števila na danem intervalu. V kodi nastavi interval [1, 1000]. Naravno število je perfektno, če je ena"
+    },
+    {
+     "i": 91,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program VsotaStevk, ki prebere naravno število n = 2024 in izračuna vsoto njegovih števk."
+    },
+    {
+     "i": 92,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program VsotaStevk, ki prebere naravno število n = 98765 in izračuna vsoto njegovih števk, vsoto števk dobljene vsote, …, dokler ne dobi enomestnega šte"
+    },
+    {
+     "i": 93,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program, ki izračuna količnik dveh števil na n decimalk natančno. V kodi nastavi a = 22, b = 7 in n = 5. Decimalke izračunaj z deljenjem na roke (ostane"
+    },
+    {
+     "i": 94,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program, ki izračuna količnik dveh števil na n decimalk natančno in izpiše tudi absolutno napako med pravim in zahtevanim rezultatom. V kodi nastavi a ="
+    },
+    {
+     "i": 95,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Na bankomatu dvigamo denar. Napiši program, ki za znesek 370 EUR (zaokrožen na 10 EUR) izpiše, koliko in katerih bankovcev (100, 50, 20, 10) je potrebnih. Izpiš"
+    },
+    {
+     "i": 96,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program Zaporedje, ki prebere prvi člen zaporedja (v kodi nastavi a = 6) in izpiše vse člene, dokler ne izpiše člena 1. Člen a(n+1) = a(n) / 2, če je a("
+    },
+    {
+     "i": 97,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Fibonaccijevo zaporedje: a1 = 1, a2 = 1, vsak naslednji člen je vsota prejšnjih dveh. Izpiši prvih 12 členov v eni vrstici, ločenih s presledkom."
+    },
+    {
+     "i": 98,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Aritmetično zaporedje z a1 = 3 in razliko d = 4: izpiši prvih 8 členov v eni vrstici, v drugi vrstici pa »Vsota = …«."
+    },
+    {
+     "i": 99,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Geometrijsko zaporedje z a1 = 2 in količnikom q = 3: izpiši prvih 6 členov v eni vrstici, v drugi vrstici pa »Vsota = …«."
+    },
+    {
+     "i": 100,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Taylorjeva vrsta za število e: e = 1 + 1/1! + 1/2! + 1/3! + … Izračunaj vsoto prvih 10 členov (od 1/0! do 1/9!) in jo izpiši, zaokroženo na 4 decimalke z Math.r"
+    },
+    {
+     "i": 101,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Bisekcija: poišči ničlo funkcije f(x) = x² − 2 na intervalu [1, 2]. Interval vedno razpolovi in obdrži polovico, kjer funkcija zamenja predznak. Ponavljaj, dokl"
+    },
+    {
+     "i": 102,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "Koliko je prestopnih let med leti 1654 in 2066 (obe meji vključno)? Nalogo izdelaj s pomočjo metode jePrestopno(int leto), ki vrne true, če je leto prestopno, s"
+    },
+    {
+     "i": 103,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "V Mali vasi imajo težave z mišmi, zato na pomoč pokličejo mačka Toma in njegove prijatelje (mačk je torej več kot ena). Po enem letu so vse mačke pokončale enak"
+    },
+    {
+     "i": 104,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "Napiši metodo jeNarcisticno(int n), ki preveri, ali je število narcistično. Narcistično število je enako vsoti svojih števk, vsaka na potenco dolžine števila (n"
+    },
+    {
+     "i": 105,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "Upokojenci se odpravljajo na izlet. Peljali se bodo z avtobusi, v vsakega gre največ 50 ljudi. V kodi nastavi število potnikov na 228 in izračunaj, koliko avtob"
+    },
+    {
+     "i": 106,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "Perfektno število je enako vsoti vseh svojih deliteljev (razen števila samega). Napiši metodo jePerfektno(int n) in jo preizkusi na številih 6, 28 in 43. Za vsa"
+    },
+    {
+     "i": 107,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "Vrednost števila π lahko izračunamo kot vsoto členov 4 · (1/1 − 1/3 + 1/5 − 1/7 + 1/9 − …). Izračunaj vrednost, ki jo dobimo s prvimi sto členi, in jo izpiši, z"
+    },
+    {
+     "i": 108,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "Kolikokrat moramo število 55 zaporedoma koreniti (Math.sqrt), da bo rezultat še vedno večji od 1,00001? Šteje število korenjenj, pri katerih je rezultat večji o"
+    },
+    {
+     "i": 109,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "Izvedi množenje samo s seštevanjem (brez operatorja *). Množitelj 5 seštej tolikokrat, kolikor je množenec 3. Izpiši »Rezultat je 15«."
+    },
+    {
+     "i": 110,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "Število kombinacij pri igri loto je binomski koeficient (n nad k) = n · (n−1) · … · (n−k+1) / (k · (k−1) · … · 1). Napiši metodo kombinacije(int n, int k) in iz"
+    },
+    {
+     "i": 111,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "Obrni število: število 1234 razbij na števke in sestavi število 4321. Izpiši »Obrnjeno število je 4321«."
+    },
+    {
+     "i": 112,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Brez uporabe zanke for zapiši kodo, ki naredi isto kakor spodnja zanka. (Prirejeno: izvirnik izpiše števila do 10000, tu do 10.)"
+    },
+    {
+     "i": 113,
+     "level": "težja",
+     "max": 3,
+     "section": "Ponavljanje",
+     "q": "V programu imamo zanko for, s katero na zaslon zaporedoma izpišemo znake »*«. Zapiši kodo, ki stori enako, pri čemer ne smeš uporabiti zanke for. (Prirejeno: iz"
+    }
+   ],
+   "pages": [
+    {
+     "id": "pregled",
+     "chapter": "Teorija",
+     "label": "Pregled"
+    },
+    {
+     "id": "while",
+     "chapter": "Teorija",
+     "label": "Zanka while"
+    },
+    {
+     "id": "for",
+     "chapter": "Teorija",
+     "label": "Zanka for"
+    },
+    {
+     "id": "do-while",
+     "chapter": "Teorija",
+     "label": "Zanka do-while"
+    },
+    {
+     "id": "izbira",
+     "chapter": "Teorija",
+     "label": "Izbira in pretvorba"
+    },
+    {
+     "id": "gnezdene",
+     "chapter": "Teorija",
+     "label": "Gnezdene zanke"
+    },
+    {
+     "id": "break",
+     "chapter": "Teorija",
+     "label": "break in continue"
+    },
+    {
+     "id": "vzorci",
+     "chapter": "Teorija",
+     "label": "Vzorci in algoritmi"
+    },
+    {
+     "id": "napake",
+     "chapter": "Teorija",
+     "label": "Pogoste napake"
+    },
+    {
+     "id": "naloge-a",
+     "chapter": "Naloge",
+     "label": "Vaje A · Vrste zank in pogoj"
+    },
+    {
+     "id": "naloge-b",
+     "chapter": "Naloge",
+     "label": "Vaje B · Sledenje izvajanju zanke"
+    },
+    {
+     "id": "naloge-c",
+     "chapter": "Naloge",
+     "label": "Vaje C · Pisanje zank"
+    },
+    {
+     "id": "naloge-d",
+     "chapter": "Naloge",
+     "label": "Vaje D · Gnezdene zanke in izpisi likov"
+    },
+    {
+     "id": "naloge-e",
+     "chapter": "Naloge",
+     "label": "Vaje E · Stavka break in continue"
+    },
+    {
+     "id": "naloge-f",
+     "chapter": "Naloge",
+     "label": "Vaje F · Naloge za utrjevanje"
+    },
+    {
+     "id": "naloge-g",
+     "chapter": "Naloge",
+     "label": "Vaje G · Dodatne vaje"
+    },
+    {
+     "id": "doma-mat",
+     "chapter": "Naloge",
+     "label": "Vaje H · Ponavljanje"
+    },
+    {
+     "id": "doma",
+     "chapter": "Naloge",
+     "label": "Vaje I · Za doma"
+    }
+   ],
+   "gate": [
+    "while",
+    "for",
+    "do-while",
+    "izbira",
+    "gnezdene",
+    "break",
+    "vzorci",
+    "napake"
+   ]
+  },
+  {
    "id": "4.1",
    "no": "1",
    "module": "LAV-RAČ4",
