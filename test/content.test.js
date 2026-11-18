@@ -1469,6 +1469,41 @@ async function smallTasks31() {
   await a.context().close();
 }
 
+// The small tasks of 3.2 to 3.6 (18. 11. 2026): the same rules as in 3.1, and the step-by-step programs (»izvajalnik«) run to the end
+// under the portal's strict content security policy, where the artifact's own new Function is not allowed; the functions are
+// built at import. In 3.2 the diagrams keep the matura's labels.
+test('3.2 to 3.6: small tasks are not kept or searched, the trace programs run under the policy, diagrams have the matura labels', async () => {
+  const traces = { '3.2': 3, '3.3': 5, '3.4': 7, '3.5': 6, '3.6': 8 };
+  const s = await login('Sara Skrbnik');
+  for (const [id, nTrace] of Object.entries(traces)) {
+    await s.goto(`${APP}/vaje/${id}`);
+    await s.waitForSelector('.lr-task', { state: 'attached' });
+    const src = readFileSync(new URL(`../content/sources/${id}.html`, import.meta.url), 'utf8');
+    const small = (src.match(/<div class="w /g) || []).length;
+    assert.equal(await s.locator('.w').count(), small, `${id}: every small task is in the page`);
+    assert.equal(await s.locator('.w:not([data-quiz])').count(), 0, `${id}: the search skips them`);
+    assert.equal(await s.locator('.wtrace').count(), nTrace, id);
+    const caps = await s.locator('.wtrace').evaluateAll((els) => els.map((el) => {
+      el.querySelector('.js-last').click();
+      return el.querySelector('.wcap').textContent;
+    }));
+    for (const c of caps) assert.doesNotMatch(c, /Napaka v simulaciji/, `${id}: ${c}`);
+    assert.ok(caps.filter((c) => /^Konec programa\./.test(c)).length >= 1, `${id}: at least one program ends`);
+    assert.equal(await s.locator('.w.done').count() >= 0, true);
+    assert.equal(await s.locator('.w .wcode .ln').count() > 0, true, `${id}: the code lines are drawn`);
+    assert.doesNotMatch(await s.evaluate(() => [...document.querySelectorAll('.page')].map((e) => e.textContent).join(' ')), /Samoocena|Primerjaj z rešitvijo|Preveri izpis|Moram še vaditi/, id);
+    if (id === '3.2') {
+      const svgText = await s.evaluate(() => [...document.querySelectorAll('svg')].map((e) => e.textContent).join(' '));
+      assert.match(svgText, /začetek/);
+      assert.match(svgText, /preberi/);
+      assert.doesNotMatch(svgText, /\bInput\b|\bOutput\b|\bStart\b/);
+      assert.equal(await s.locator('.js-lang').count(), 0, 'no language switch');
+    }
+  }
+  await s.context().close();
+  assert.deepEqual(errors, []);
+});
+
 // Typed program output (agreed 16. 11. 2026): letter case and repeated or surrounding spaces do not matter, a different
 // word or a space inside a word still does. The card is found by its text; each card takes one answer.
 test('3.1 to 3.5: typed program output ignores letter case and repeated spaces, nothing else', async () => {

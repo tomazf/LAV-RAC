@@ -2,7 +2,7 @@
 // answers typed as program output), one answer per task, three theory groups, the matura revision set moved among
 // the graded sets as "Ponavljanje" (agreed 8. 11. 2026), and the matura's diagram labels only (the switch was dropped 10. 11. 2026).
 
-import { statements, QTEXT, outputCompare, partialCredit } from './qformat.js';
+import { statements, QTEXT, outputCompare, partialCredit, codeAsBefore, miniTasks, traceCompile } from './qformat.js';
 const ICONS = {
   podatki: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17 7c-4 0-5 2-5 5v5c0 3-2 5-5 7 3 2 5 4 5 7v5c0 3 1 5 5 5"/><path d="M31 7c4 0 5 2 5 5v5c0 3 2 5 5 7-3 2-5 4-5 7v5c0 3-1 5-5 5"/><rect x="19.5" y="19.5" width="9" height="9" rx="1.5" class="fill" opacity=".35"/></svg>',
   izpis: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="7" width="40" height="28" rx="3"/><path d="M12 16l7 5-7 5M23 27h9"/><path d="M16 42h16M24 35v7"/></svg>',
@@ -71,6 +71,14 @@ export default {
     ...partialCredit,
     // The typed output is compared without regard to letter case and repeated spaces (agreed 16. 11. 2026).
     ...outputCompare(true),
+    // Code tasks are self-checked and the small tasks keep nothing (agreed 18. 11. 2026); the trace widgets are compiled at import (CSP).
+    // codeAsBefore must come before the replacement of »Pokaži rešitev«.
+    ...codeAsBefore,
+    ...miniTasks,
+    ...traceCompile('3.3'),
+    // The introduction of the exercises says what the portal does, not what the artifact's own self-assessment does (agreed 18. 11. 2026).
+    [" Naloge so dveh vrst. Pri nalogah z <strong>enoličnim odgovorom</strong> (izbira, dopolnjevanje, razvrščanje, napoved izpisa) stran odgovor preveri in podeli točke; če si pred pravilnim odgovorom ogledal rešitev, se točke ne štejejo. Pri nalogah z oznako <span class=\"tag self\">Samoocena</span> <strong>sam napišeš kodo</strong> (preizkusiš jo v Programizu, Eclipse ali VS Code). Stran je ne more preveriti, zato točk ni: kodo in neobvezen izpis shranimo, nato klikneš »Primerjaj z rešitvijo«, kjer vidiš svojo kodo ob primeru rešitve, prečrtaš merila in sam oceniš, ali nalogo znaš. Vrednosti so zapisane v kodi, vnosa s Scannerjem ni treba preizkušati.",
+      " Pri nalogah z izpisom ali programom lahko kodo kopiraš v Programiz in preveriš, ali je tvoj odgovor pravilen. Vrednosti so v kodi zapisane kar v spremenljivke, vnosa s Scannerjem tam ni treba preizkušati. Če si ogledaš rešitev, preden nalogo pravilno rešiš, se ti točke ne štejejo."],
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
     // The matura revision set is graded among the others (agreed 8. 11. 2026).
     ['title:"Še več maturitetnih nalog", note:"Naloge iz drugih rokov za ponavljanje.", home:true',
@@ -129,7 +137,7 @@ S = LavRac.loadUi();`],
     ['cur = location.hash.slice(1) || "jezik";\n', ''],
     // The matura's labels from the start: the Za doma figures are drawn before the start code runs.
     ['let LANG = "en";', 'let LANG = "sl";'],
-    ['try{ FLOW.setLang(localStorage.getItem("java-matura-diagram-lang")||"en"); }catch(e){ FLOW.setLang("en"); }', 'FLOW.setLang("sl");'],
+    ['try{ FLOW.setLang("en"); }catch(e){ FLOW.setLang("en"); }', 'FLOW.setLang("sl");'],
     [`document.querySelectorAll(".js-lang").forEach(b=>b.addEventListener("click",()=>{
   FLOW.setLang(b.dataset.lang);
   try{ localStorage.setItem("java-matura-diagram-lang", b.dataset.lang); }catch(e){}

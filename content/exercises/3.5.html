@@ -1192,6 +1192,159 @@ p.prose{display:block}
 .mtop .langsw{flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap}
 
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+/* interaktivni gradniki v razlagi (pogl. 7) */
+.w{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:6px 0;display:flex;flex-direction:column;gap:10px;max-width:880px}
+.w .wh{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-weight:700;font-size:.98rem}
+.w .wh .wbadge{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;background:var(--accent-soft);color:var(--accent);padding:2px 8px;border-radius:4px;font-weight:600}
+.w .wh .wdone{margin-left:auto;font-size:.8rem;font-weight:600;color:var(--ok);display:none}
+.w.done .wh .wdone{display:inline}
+.w .wp{margin:0;font-size:.95rem;color:var(--muted);max-width:70ch}
+.w .wfoot{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.w .wfoot .wscore{font-weight:600;font-size:.92rem}
+.w code{font-family:var(--f-mono);font-size:.88em}
+.w pre.code{margin:0}
+
+/* pravilno / napačno (statično) */
+.pn{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:6px 0}
+.pn .pc{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);display:flex;flex-direction:column}
+.pn .pc>.pt{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;padding:5px 12px;display:flex;gap:6px;align-items:center}
+.pn .pc.ok>.pt{background:var(--ok-soft);color:var(--ok)}
+.pn .pc.no>.pt{background:var(--bad-soft);color:var(--bad)}
+.pn .pc.ok{border-color:var(--ok)} .pn .pc.no{border-color:var(--bad)}
+.pn .pc pre{margin:0;border-radius:0;flex:1}
+.pn .pc .pw{padding:8px 12px;font-size:.92rem;border-top:1px solid var(--line);background:var(--bg)}
+
+/* pravilno / napačno (interaktivno) */
+.wtf .wi{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.wtf .wi .wt{min-width:0;font-size:.95rem}
+.wtf .wi .wt pre{margin:0;font-size:.82rem}
+.wtf .wi.right{border-color:var(--ok);background:var(--ok-soft)}
+.wtf .wi.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.wtf .wi .ww{grid-column:1/-1;font-size:.9rem;display:none}
+.wtf .wi.right .ww,.wtf .wi.wrong .ww{display:block}
+.wtf .wi .seg button:disabled{cursor:default;opacity:.75}
+@media (max-width:560px){.wtf .wi{grid-template-columns:minmax(0,1fr)}}
+
+/* povleci in spusti */
+.wdd .wslots{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.wdd.ord .wslots{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}
+.wdd .ws{border:1px dashed var(--muted);border-radius:8px;padding:6px 8px;min-height:64px;background:var(--bg);display:flex;flex-direction:column;gap:6px}
+.wdd .ws .wl{font-size:.8rem;font-weight:700;color:var(--muted)}
+.wdd .ws .wz{display:flex;flex-direction:column;gap:5px;flex:1;min-height:30px}
+.wdd .ws.over{border-color:var(--accent);background:var(--accent-soft)}
+.wdd .wpool{display:flex;flex-wrap:wrap;gap:8px;padding:8px;border:1px solid var(--line);border-radius:8px;min-height:44px;background:var(--sunk)}
+.wdd .chip{font-family:var(--f-mono);font-size:.84rem;padding:4px 10px;border:1px solid var(--muted);border-radius:6px;background:var(--surface);cursor:grab;user-select:none;touch-action:manipulation;line-height:1.4}
+.wdd .chip.sel{outline:2px solid var(--accent);background:var(--accent-soft)}
+.wdd .chip.right{border-color:var(--ok);background:var(--ok-soft)}
+.wdd .chip.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.wdd .chip.drag{opacity:.4}
+.wdd .whelp{font-size:.82rem;color:var(--muted)}
+
+/* izbira prave slike */
+.wpick .wq{font-size:.96rem}
+.wpick .wopts{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.wpick .wo{font:inherit;text-align:left;border:2px solid var(--line);border-radius:10px;background:var(--bg);padding:8px;cursor:pointer;display:flex;flex-direction:column;gap:6px;color:var(--fg)}
+.wpick .wo:hover{border-color:var(--muted)}
+.wpick .wo b{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.wpick .wo svg{max-width:100%;height:auto}
+.wpick .wo.right{border-color:var(--ok);background:var(--ok-soft)}
+.wpick .wo.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.wpick .wfb{font-size:.92rem;font-weight:600;min-height:1.2em}
+.wpick .wfb.ok{color:var(--ok)} .wpick .wfb.bad{color:var(--bad)}
+.wpick .wwhy{font-size:.92rem;display:none}
+
+/* korak za korakom */
+.wstep .wcode{margin:0;padding:10px 0;font-family:var(--f-mono);font-size:.84rem;line-height:1.6;background:var(--code-bg);color:var(--code-fg);border-radius:8px;overflow-x:auto}
+.wstep .wcode .ln{display:block;padding:0 14px;white-space:pre;border-left:3px solid transparent}
+.wstep .wcode .ln.cur{background:rgba(240,168,104,.18);border-left-color:var(--k)}
+.wstep .wcode .ln.past{opacity:.6}
+.wstep .wfr{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;overflow-x:auto}
+.wstep .wfr svg{max-width:100%;height:auto}
+.wstep .wcap{font-size:.95rem;min-height:2.6em}
+.wstep .wnav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.wstep .wnav .wpos{font-family:var(--f-mono);font-size:.82rem;color:var(--muted)}
+
+/* simulator in raziskovalci */
+.wsim .wbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.wsim .wbar input[type=text]{flex:1;min-width:200px;font-family:var(--f-mono);font-size:.88rem;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
+.wsim .wq{font-family:var(--f-mono);font-size:.84rem;background:var(--code-bg);color:var(--code-fg);border-radius:8px;padding:8px 0;display:flex;flex-direction:column}
+.wsim .wq .ln{padding:0 14px;white-space:pre;border-left:3px solid transparent;opacity:.55}
+.wsim .wq .ln.done{opacity:1}
+.wsim .wq .ln.next{opacity:1;background:rgba(240,168,104,.18);border-left-color:var(--k)}
+.wsim .wq .ln.err{opacity:1;background:rgba(240,133,120,.2);border-left-color:var(--bad)}
+.wsim .wmsg{font-family:var(--f-mono);font-size:.84rem;min-height:1.4em;padding:6px 10px;border-radius:6px;background:var(--sunk)}
+.wsim .wmsg.bad{background:var(--bad-soft);color:var(--bad)}
+.wsim .wout{white-space:pre-wrap}
+.wsim .wsvg,.widx .wsvg,.wgrid .wsvg,.wcount .wsvg{overflow-x:auto;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px}
+.wsim .wsvg svg,.widx .wsvg svg,.wgrid .wsvg svg,.wcount .wsvg svg{max-width:100%;height:auto}
+.mem .cell.gc{opacity:.35;stroke-dasharray:3 3}
+.mem text.gc{opacity:.45}
+.mem .cell.sel{fill:var(--accent);stroke:var(--accent)}
+.mem .cell.bad{fill:var(--bad-soft);stroke:var(--bad)}
+.mem .cell.row{fill:var(--accent-soft);stroke:var(--accent)}
+.mem .cell.col{fill:var(--seen-soft);stroke:var(--seen)}
+.mem .cell.dg{fill:var(--ok-soft);stroke:var(--ok)}
+.mem .tc1{fill:var(--accent-soft);stroke:var(--accent)}
+.mem .tc2{fill:var(--ok-soft);stroke:var(--ok)}
+.mem .tc3{fill:var(--seen-soft);stroke:var(--seen)}
+.mem .tcb{fill:var(--bad-soft);stroke:var(--bad)}
+.mem .bar{fill:var(--accent)}
+.mem .barbg{fill:var(--sunk)}
+.mem .ln2{stroke:var(--muted);stroke-width:1.4;fill:none}
+.mem .ar2{fill:none;stroke:var(--muted);stroke-width:1.4}
+.mem .ah2{fill:var(--muted)}
+.mem .x{stroke:var(--bad);stroke-width:2.5}
+.mem text.big{font-size:15px;font-weight:700}
+.mem text.sm{font-size:11px;fill:var(--muted)}
+.widx .wctl,.wgrid .wctl,.wcount .wctl{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.widx .wctl label,.wgrid .wctl label{font-size:.88rem;display:flex;gap:6px;align-items:center}
+.widx select,.wgrid select{font:inherit;font-size:.88rem;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
+.widx .wres,.wgrid .wres{font-family:var(--f-mono);font-size:.86rem;padding:6px 10px;border-radius:6px;background:var(--sunk)}
+.widx .wres.bad{background:var(--bad-soft);color:var(--bad)}
+
+/* oddaja kode: primerjava s primerom rešitve */
+.cmp{display:flex;flex-direction:column;gap:10px;border-top:1px dashed var(--line);padding-top:12px}
+.cmp .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.cmp .cols>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.cmp .cols pre{margin:0;max-height:420px;overflow:auto}
+.cmp .mer{display:flex;flex-direction:column;gap:6px;padding:10px 12px;background:var(--sunk);border-radius:8px}
+.cmp .mer label{display:flex;gap:8px;align-items:flex-start;font-size:.94rem;cursor:pointer}
+.cmp .mer label input{margin-top:4px}
+.cmp .verdict{display:flex;gap:10px;flex-wrap:wrap}
+.tag.st-cmp{background:var(--ok-soft);color:var(--ok)}
+.tag.st-redo{background:var(--seen-soft);color:var(--seen)}
+.tag.self{background:var(--sunk);color:var(--muted)}
+.selfnote{font-size:.88rem;color:var(--muted);margin:0}
+
+/* izvajalnik programa (wtrace) */
+.wtrace .wtin{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.wtrace .wtin label{font-size:.9rem;font-weight:600;display:flex;gap:6px;align-items:center}
+.wtrace .wtin input,.wtrace .wtin select{font-family:var(--f-mono);font-size:.9rem;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
+.wtrace .wcode{margin:0;padding:10px 0;font-family:var(--f-mono);font-size:.84rem;line-height:1.6;background:var(--code-bg);color:var(--code-fg);border-radius:8px;overflow-x:auto}
+.wtrace .wcode .ln{display:block;padding:0 14px;white-space:pre;border-left:3px solid transparent}
+.wtrace .wcode .ln.cur{background:rgba(240,168,104,.18);border-left-color:var(--k)}
+.wtrace .wtvars{display:flex;gap:8px;flex-wrap:wrap;min-height:34px;align-items:center}
+.wtrace .tv{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);padding:3px 9px;font-family:var(--f-mono);font-size:.86rem}
+.wtrace .tv .tn{color:var(--muted)} .wtrace .tv .te{color:var(--muted)} .wtrace .tv .tval{font-weight:700}
+.wtrace .tv.chg{border-color:var(--accent);background:var(--accent-soft)}
+.wtrace .tnone{font-size:.88rem;color:var(--muted)}
+.wtrace .wtout{margin:0;font-family:var(--f-mono);font-size:.86rem;padding:8px 12px;border-radius:8px;background:var(--sunk);white-space:pre-wrap;min-height:2.2em}
+.wtrace .wtout.empty{color:var(--muted)}
+.wtrace .wcap{font-size:.92rem;min-height:1.4em}
+.wtrace .wcap.bad{color:var(--bad);font-weight:600}
+.wtrace .wnav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.wtrace .wnav .wpos{font-family:var(--f-mono);font-size:.82rem;color:var(--muted)}
+.wtrace .wlab{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.wtrace .wttab{overflow-x:auto;max-height:340px;overflow-y:auto;border:1px solid var(--line);border-radius:8px}
+.wtrace .wttab table{border-collapse:collapse;font-family:var(--f-mono);font-size:.82rem;width:100%}
+.wtrace .wttab th,.wtrace .wttab td{border-bottom:1px solid var(--line);padding:3px 10px;text-align:left;white-space:nowrap}
+.wtrace .wttab tr.cur td{background:var(--accent-soft)}
+.wtrace .wpred{display:flex;flex-direction:column;gap:6px;padding:8px 10px;border:1px dashed var(--muted);border-radius:8px}
+.wtrace .wpred textarea{font-family:var(--f-mono);font-size:.86rem;min-height:3.2em;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);resize:vertical}
+.wtrace .wfb{font-size:.92rem;font-weight:600;min-height:1.2em}
+.wtrace .wfb.ok{color:var(--ok)} .wtrace .wfb.bad{color:var(--bad)}
+.wo svg.fc{width:100% !important;max-width:230px;min-width:0;height:auto;display:block;margin:6px auto 0}
+
 </style>
 <style>
 /* LAV-RAČ exercise shell: light orange background with the portal's plum for text and buttons, and the same task colours as the teacher's results. The artifact's own content keeps its styles;
@@ -1608,7 +1761,10 @@ System.out.println(x);   // 7</pre>
         </tbody>
       </table></div>
       <p class="note"><strong>Pozor:</strong> zapisa <code>20 &lt;= a &lt;= 40</code> Java ne pozna. Prvi del da <code>true</code> ali <code>false</code>, logične vrednosti pa ne moremo primerjati s številom 40. Pravilno: <code>a &gt;= 20 &amp;&amp; a &lt;= 40</code>.</p>
-    </section>
+    
+<div class="eyebrow" style="margin-top:14px">Preizkusi se</div>
+<div class="w wtrace" data-w="p-if-tr" data-cfg="{&quot;lines&quot;: [&quot;int x = {x};&quot;, &quot;if (x &lt; 0) {&quot;, &quot;    x = -x;&quot;, &quot;}&quot;, &quot;System.out.println(x);&quot;], &quot;js&quot;: &quot;__l(0); x = IN.x;\nif ((__l(1), x &lt; 0)) {\n    __l(2); x = -x;\n}\n__l(4); println(x);&quot;, &quot;vars&quot;: [[&quot;x&quot;, &quot;int&quot;]], &quot;inputs&quot;: [{&quot;n&quot;: &quot;x&quot;, &quot;l&quot;: &quot;x =&quot;, &quot;t&quot;: &quot;int&quot;, &quot;v&quot;: -7, &quot;min&quot;: -9, &quot;max&quot;: 9}], &quot;predict&quot;: 1}"><div class="wh"><span class="wbadge">Sledi programu</span><span>Stavek if: absolutna vrednost</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Če je pogoj resničen, se izvede telo, sicer ga program preskoči in nadaljuje pod njim. Napovej izpis za x = -7, nato poskusi 0 in 5.</p><div class="wtin"></div><div class="wpred"><span class="wlab">Napoved</span><span class="wp">Kaj izpiše program z izbranimi vrednostmi? Vpiši izpis in preveri.</span><textarea spellcheck="false" aria-label="Tvoja napoved izpisa"></textarea><div style="display:flex;gap:8px;align-items:center"><button class="btn primary js-pchk" type="button">Preveri napoved</button><span class="wfb" aria-live="polite"></span></div></div><div class="wcode" role="region" aria-label="Program"></div><span class="wlab">Spremenljivke</span><div class="wtvars"></div><span class="wlab">Izpis</span><pre class="wtout"></pre><div class="wcap" aria-live="polite"></div><div class="wnav"><button class="btn js-first" type="button" aria-label="Na začetek">⏮</button><button class="btn js-prev" type="button">◀ Nazaj</button><button class="btn primary js-next" type="button">Naprej ▶</button><button class="btn js-last" type="button" aria-label="Do konca">⏭</button><span class="wpos"></span><button class="btn ghost js-tab" type="button">Pokaži sled v tabeli</button></div><div class="wttab" hidden></div></div><div class="w wdd" data-w="p-if-dd" data-cap="1"><div class="wh"><span class="wbadge">Povleci in spusti</span><span>Kateri pogoj?</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Vsak opis poveži s pravilnim pogojem v Javi. <span class="whelp">(Povleci ali tapni element, nato tapni mesto.)</span></p><div class="wslots"><div class="ws" data-s="0"><span class="wl">n je sodo število</span><div class="wz"></div></div><div class="ws" data-s="1"><span class="wl">a leži na intervalu [20, 40]</span><div class="wz"></div></div><div class="ws" data-s="2"><span class="wl">a leži zunaj intervala [20, 40]</span><div class="wz"></div></div><div class="ws" data-s="3"><span class="wl">x je večkratnik števila y</span><div class="wz"></div></div><div class="ws" data-s="4"><span class="wl">niza s in t imata enako vsebino</span><div class="wz"></div></div></div><div class="wpool"><span class="chip" data-s="0"><code>n % 2 == 0</code></span><span class="chip" data-s="1"><code>a &gt;= 20 &amp;&amp; a &lt;= 40</code></span><span class="chip" data-s="3"><code>x % y == 0</code></span><span class="chip" data-s="2"><code>a &lt; 20 || a &gt; 40</code></span><span class="chip" data-s="4"><code>s.equals(t)</code></span></div></div><div class="w wtf" data-w="p-if-tf" data-a1="Pravilno" data-a2="Napačno"><div class="wh"><span class="wbadge">Preizkusi se</span><span>Se prevede?</span><span class="wdone">✓ Opravljeno</span></div><div class="wi" data-a="0" data-why="Vsak del primerjave je boolean, povezan z &amp;amp;&amp;amp;. Zapis &lt;code&gt;20 &amp;lt;= a &amp;lt;= 40&lt;/code&gt; Java ne pozna."><code>if (20 &lt;= a &amp;&amp; a &lt;= 40)</code> zapiše interval [20, 40] pravilno.</div><div class="wi" data-a="1" data-why="Znak &lt;code&gt;=&lt;/code&gt; je prirejanje, ne primerjava, rezultat je &lt;code&gt;int&lt;/code&gt; in ne &lt;code&gt;boolean&lt;/code&gt;: &lt;em&gt;incompatible types&lt;/em&gt;. Primerjamo z &lt;code&gt;==&lt;/code&gt;."><code>int x = 5; if (x = 5) { … }</code> se prevede in preveri, ali je x enak 5.</div><div class="wi" data-a="1" data-why="Prvi del &lt;code&gt;20 &amp;lt;= a&lt;/code&gt; da true ali false, tega pa ne moremo primerjati s številom 40: napaka pri prevajanju."><code>if (20 &lt;= a &lt;= 40)</code> se prevede in deluje kot interval.</div></div>
+</section>
 
     <section id="if-else">
       <div class="eyebrow">Razlaga 2</div>
@@ -1645,7 +1801,17 @@ if (x &gt; 0) {
 int z;                            // spremenljivko deklariramo PRED vejitvijo,
 if (x &lt; 10) z = 1; else z = 2;    // v obeh vejah ji določimo vrednost
 System.out.println(z);            // 1</pre>
-    </section>
+    
+<div class="eyebrow" style="margin-top:14px">Preizkusi se</div>
+<div class="w wtrace" data-w="p-ie-tr" data-cfg="{&quot;lines&quot;: [&quot;int n = {n};&quot;, &quot;if (n % 2 == 0) {&quot;, &quot;    System.out.println(\&quot;sodo\&quot;);&quot;, &quot;    n = n / 2;&quot;, &quot;} else {&quot;, &quot;    System.out.println(\&quot;liho\&quot;);&quot;, &quot;    n = 3 * n + 1;&quot;, &quot;}&quot;, &quot;System.out.println(n);&quot;], &quot;js&quot;: &quot;__l(0); n = IN.n;\nif ((__l(1), rem(n, 2) === 0)) {\n    __l(2); println(\&quot;sodo\&quot;);\n    __l(3); n = div(n, 2);\n} else {\n    __l(5); println(\&quot;liho\&quot;);\n    __l(6); n = 3 * n + 1;\n}\n__l(8); println(n);&quot;, &quot;vars&quot;: [[&quot;n&quot;, &quot;int&quot;]], &quot;inputs&quot;: [{&quot;n&quot;: &quot;n&quot;, &quot;l&quot;: &quot;n =&quot;, &quot;t&quot;: &quot;int&quot;, &quot;v&quot;: 7, &quot;min&quot;: -9, &quot;max&quot;: 30}], &quot;predict&quot;: 1}"><div class="wh"><span class="wbadge">Sledi programu</span><span>if – else: natanko ena veja</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Izvede se natanko ena od obeh vej, nato program nadaljuje pod stavkom. Napovej izpis za n = 7. Poskusi tudi negativno liho število (npr. −3): ostanek pri deljenju je tedaj −1, a pogoj <code>n % 2 == 0</code> je še vedno neresničen.</p><div class="wtin"></div><div class="wpred"><span class="wlab">Napoved</span><span class="wp">Kaj izpiše program z izbranimi vrednostmi? Vpiši izpis in preveri.</span><textarea spellcheck="false" aria-label="Tvoja napoved izpisa"></textarea><div style="display:flex;gap:8px;align-items:center"><button class="btn primary js-pchk" type="button">Preveri napoved</button><span class="wfb" aria-live="polite"></span></div></div><div class="wcode" role="region" aria-label="Program"></div><span class="wlab">Spremenljivke</span><div class="wtvars"></div><span class="wlab">Izpis</span><pre class="wtout"></pre><div class="wcap" aria-live="polite"></div><div class="wnav"><button class="btn js-first" type="button" aria-label="Na začetek">⏮</button><button class="btn js-prev" type="button">◀ Nazaj</button><button class="btn primary js-next" type="button">Naprej ▶</button><button class="btn js-last" type="button" aria-label="Do konca">⏭</button><span class="wpos"></span><button class="btn ghost js-tab" type="button">Pokaži sled v tabeli</button></div><div class="wttab" hidden></div></div><div class="w wdd ord" data-w="p-ie-dd" data-cap="1"><div class="wh"><span class="wbadge">Povleci in spusti</span><span>Sestavi stavek if – else</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Vrstice postavi v pravilen vrstni red, da program izpiše »veliko« za a &gt; 5 in sicer »malo«. <span class="whelp">(Povleci ali tapni element, nato tapni mesto.)</span></p><div class="wslots"><div class="ws" data-s="0"><span class="wl">1.</span><div class="wz"></div></div><div class="ws" data-s="1"><span class="wl">2.</span><div class="wz"></div></div><div class="ws" data-s="2"><span class="wl">3.</span><div class="wz"></div></div><div class="ws" data-s="3"><span class="wl">4.</span><div class="wz"></div></div><div class="ws" data-s="4"><span class="wl">5.</span><div class="wz"></div></div><div class="ws" data-s="5"><span class="wl">6.</span><div class="wz"></div></div></div><div class="wpool"><span class="chip" data-s="0"><code>int a = 8;</code></span><span class="chip" data-s="2"><code>System.out.println("veliko");</code></span><span class="chip" data-s="3"><code>} else {</code></span><span class="chip" data-s="5"><code>}</code></span><span class="chip" data-s="4"><code>System.out.println("malo");</code></span><span class="chip" data-s="1"><code>if (a &gt; 5) {</code></span></div></div><p class="wp">Doseg spremenljivke je blok, v katerem je deklarirana:</p><div class="pn"><div class="pc ok"><div class="pt">✓ Pravilno: deklaracija pred vejitvijo</div><pre class="code js-hl">int x = 7;
+int z;
+if (x &lt; 10) z = 1; else z = 2;
+System.out.println(z);   // 1</pre><div class="pw">Spremenljivka z je deklarirana pred vejitvijo, zato je vidna povsod, vrednost pa dobi v obeh vejah.</div></div><div class="pc no"><div class="pt">✗ Napačno: uporaba zunaj bloka</div><pre class="code js-hl">int x = 7;
+if (x &gt; 0) {
+    int dvojno = 2 * x;
+}
+System.out.println(dvojno);</pre><div class="pw">Spremenljivka <code>dvojno</code> obstaja samo do konca bloka. Za njim jo prevajalnik ne najde (<em>cannot find symbol</em>).</div></div></div><div class="w wtf" data-w="p-ie-tf" data-a1="Pravilno" data-a2="Napačno"><div class="wh"><span class="wbadge">Preizkusi se</span><span>Drži ali ne?</span><span class="wdone">✓ Opravljeno</span></div><div class="wi" data-a="1" data-why="Brez zavitih oklepajev pripada pogoju samo prvi stavek. Drugi stavek se izvede &lt;b&gt;vedno&lt;/b&gt;. Zamik vrstic na to ne vpliva.">Pri <code>if (a &gt; 5) a = a * 2; a = a + 1;</code> se drugi stavek izvede samo, če je a &gt; 5.</div><div class="wi" data-a="1" data-why="Izvede se &lt;b&gt;natanko ena&lt;/b&gt; veja: če je pogoj resničen veja if, sicer veja else.">Pri if – else se lahko izvedeta obe veji.</div></div>
+</section>
 
     <section id="gnezdenje">
       <div class="eyebrow">Razlaga 3</div>
@@ -1679,7 +1845,14 @@ if (x &gt; 2) {
 }
 System.out.println(x + " " + y);   // 4 -2</pre>
       <p class="note">Pri maturitetnih nalogah »izračunaj vrednost spremenljivk« si zapiši vrednosti po vsakem stavku. Najprej preveri zunanji pogoj: če ni izpolnjen, se celoten notranji del preskoči.</p>
-    </section>
+    
+<div class="eyebrow" style="margin-top:14px">Preizkusi se</div>
+<div class="w wtrace" data-w="p-dang-tr" data-cfg="{&quot;lines&quot;: [&quot;int x = {x};&quot;, &quot;int y = {y};&quot;, &quot;if (x &gt; 0)&quot;, &quot;    if (y &gt; 0)&quot;, &quot;        System.out.println(\&quot;A\&quot;);&quot;, &quot;else&quot;, &quot;    System.out.println(\&quot;B\&quot;);&quot;, &quot;System.out.println(\&quot;konec\&quot;);&quot;], &quot;js&quot;: &quot;__l(0); x = IN.x;\n__l(1); y = IN.y;\nif ((__l(2), x &gt; 0))\n    if ((__l(3), y &gt; 0))\n        { __l(4); println(\&quot;A\&quot;); }\nelse\n    { __l(6); println(\&quot;B\&quot;); }\n__l(7); println(\&quot;konec\&quot;);&quot;, &quot;vars&quot;: [[&quot;x&quot;, &quot;int&quot;], [&quot;y&quot;, &quot;int&quot;]], &quot;inputs&quot;: [{&quot;n&quot;: &quot;x&quot;, &quot;l&quot;: &quot;x =&quot;, &quot;t&quot;: &quot;select&quot;, &quot;opts&quot;: [-1, 5], &quot;v&quot;: -1}, {&quot;n&quot;: &quot;y&quot;, &quot;l&quot;: &quot;y =&quot;, &quot;t&quot;: &quot;select&quot;, &quot;opts&quot;: [-3, 4], &quot;v&quot;: 4}], &quot;predict&quot;: 1}"><div class="wh"><span class="wbadge">Sledi programu</span><span>Viseči else: čemu pripada?</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Zamik kaže, da else spada k prvemu if, prevajalnik pa ga veže k <b>najbližjemu</b> if brez else. Napovej izpis za x = −1 in y = 4, nato preizkusi vse štiri kombinacije.</p><div class="wtin"></div><div class="wpred"><span class="wlab">Napoved</span><span class="wp">Kaj izpiše program z izbranimi vrednostmi? Vpiši izpis in preveri.</span><textarea spellcheck="false" aria-label="Tvoja napoved izpisa"></textarea><div style="display:flex;gap:8px;align-items:center"><button class="btn primary js-pchk" type="button">Preveri napoved</button><span class="wfb" aria-live="polite"></span></div></div><div class="wcode" role="region" aria-label="Program"></div><span class="wlab">Spremenljivke</span><div class="wtvars"></div><span class="wlab">Izpis</span><pre class="wtout"></pre><div class="wcap" aria-live="polite"></div><div class="wnav"><button class="btn js-first" type="button" aria-label="Na začetek">⏮</button><button class="btn js-prev" type="button">◀ Nazaj</button><button class="btn primary js-next" type="button">Naprej ▶</button><button class="btn js-last" type="button" aria-label="Do konca">⏭</button><span class="wpos"></span><button class="btn ghost js-tab" type="button">Pokaži sled v tabeli</button></div><div class="wttab" hidden></div></div><div class="w wpick" data-w="p-dang-pk" data-a="1"><div class="wh"><span class="wbadge">Katera slika?</span><span>Čemu pripada else?</span><span class="wdone">✓ Opravljeno</span></div><div class="wq"><pre class="code js-hl">if (a &gt; 0)
+    if (b &gt; 0)
+        System.out.println("X");
+else
+    System.out.println("Y");</pre></div><div class="wopts"><button type="button" class="wo"><b>A</b>Prvemu stavku <code>if (a &gt; 0)</code>, ker je zamaknjen pod njim.</button><button type="button" class="wo"><b>B</b>Drugemu stavku <code>if (b &gt; 0)</code>, ker je najbližji, ki še nima else.</button><button type="button" class="wo"><b>C</b>Obema hkrati.</button></div><div class="wfb" aria-live="polite"></div><div class="wwhy">Pravilo: <b>else pripada najbližjemu if, ki še nima svojega else</b>. Če želimo drugače, notranji if obdamo z zavitimi oklepaji.</div></div>
+</section>
 
     <section id="veriga">
       <div class="eyebrow">Razlaga 4</div>
@@ -1721,7 +1894,10 @@ int z = (x &lt; y) ? x : y;
 System.out.println(z);   // 7</pre>
       </div>
       <p class="note">Pogojni operator vrne vrednost, ne izvaja stavkov. Za izbiro med dvema izpisoma ali dvema skupinama stavkov uporabi if – else.</p>
-    </section>
+    
+<div class="eyebrow" style="margin-top:14px">Preizkusi se</div>
+<div class="w wtrace" data-w="p-ch-tr" data-cfg="{&quot;lines&quot;: [&quot;int tocke = {t};&quot;, &quot;if (tocke &gt;= 90) {&quot;, &quot;    System.out.println(\&quot;odlicno\&quot;);&quot;, &quot;} else if (tocke &gt;= 50) {&quot;, &quot;    System.out.println(\&quot;pozitivno\&quot;);&quot;, &quot;} else {&quot;, &quot;    System.out.println(\&quot;negativno\&quot;);&quot;, &quot;}&quot;], &quot;js&quot;: &quot;__l(0); tocke = IN.t;\nif ((__l(1), tocke &gt;= 90)) {\n    __l(2); println(\&quot;odlicno\&quot;);\n} else if ((__l(3), tocke &gt;= 50)) {\n    __l(4); println(\&quot;pozitivno\&quot;);\n} else {\n    __l(6); println(\&quot;negativno\&quot;);\n}&quot;, &quot;vars&quot;: [[&quot;tocke&quot;, &quot;int&quot;]], &quot;inputs&quot;: [{&quot;n&quot;: &quot;t&quot;, &quot;l&quot;: &quot;točke =&quot;, &quot;t&quot;: &quot;int&quot;, &quot;v&quot;: 72, &quot;min&quot;: 0, &quot;max&quot;: 100}], &quot;predict&quot;: 1}"><div class="wh"><span class="wbadge">Sledi programu</span><span>Veriga else if: od zgoraj navzdol</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Pogoji se preverjajo <b>od zgoraj navzdol</b>, izvede se veja prvega izpolnjenega pogoja, ostali se ne preverjajo več. Napovej izpis za 72 točk, nato poskusi 90, 50 in 49.</p><div class="wtin"></div><div class="wpred"><span class="wlab">Napoved</span><span class="wp">Kaj izpiše program z izbranimi vrednostmi? Vpiši izpis in preveri.</span><textarea spellcheck="false" aria-label="Tvoja napoved izpisa"></textarea><div style="display:flex;gap:8px;align-items:center"><button class="btn primary js-pchk" type="button">Preveri napoved</button><span class="wfb" aria-live="polite"></span></div></div><div class="wcode" role="region" aria-label="Program"></div><span class="wlab">Spremenljivke</span><div class="wtvars"></div><span class="wlab">Izpis</span><pre class="wtout"></pre><div class="wcap" aria-live="polite"></div><div class="wnav"><button class="btn js-first" type="button" aria-label="Na začetek">⏮</button><button class="btn js-prev" type="button">◀ Nazaj</button><button class="btn primary js-next" type="button">Naprej ▶</button><button class="btn js-last" type="button" aria-label="Do konca">⏭</button><span class="wpos"></span><button class="btn ghost js-tab" type="button">Pokaži sled v tabeli</button></div><div class="wttab" hidden></div></div><div class="w wdd ord" data-w="p-ch-dd" data-cap="1"><div class="wh"><span class="wbadge">Povleci in spusti</span><span>Pravi vrstni red pogojev</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Ocena: od 90 točk odlično, od 75 prav dobro, od 50 dobro, sicer nezadostno. Pogoje v verigi postavi v vrstni red, v katerem so pravilni. <span class="whelp">(Povleci ali tapni element, nato tapni mesto.)</span></p><div class="wslots"><div class="ws" data-s="0"><span class="wl">1. pogoj</span><div class="wz"></div></div><div class="ws" data-s="1"><span class="wl">2. pogoj</span><div class="wz"></div></div><div class="ws" data-s="2"><span class="wl">3. pogoj</span><div class="wz"></div></div></div><div class="wpool"><span class="chip" data-s="2"><code>tocke &gt;= 50</code></span><span class="chip" data-s="1"><code>tocke &gt;= 75</code></span><span class="chip" data-s="0"><code>tocke &gt;= 90</code></span></div></div><div class="w wtf" data-w="p-ch-tf" data-a1="Pravilno" data-a2="Napačno"><div class="wh"><span class="wbadge">Preizkusi se</span><span>Drži ali ne?</span><span class="wdone">✓ Opravljeno</span></div><div class="wi" data-a="0" data-why="Pogoj &lt;code&gt;tocke &amp;gt;= 50&lt;/code&gt; je izpolnjen prvi, zato se veja za 90 točk nikoli ne izvede. Pri mejah »vsaj« začnemo pri največji.">Če v verigi najprej preverimo <code>tocke &gt;= 50</code> in šele nato <code>tocke &gt;= 90</code>, 95 točk dobi izpis »pozitivno«.</div><div class="wi" data-a="0" data-why="Pogojni operator vrne &lt;code&gt;x&lt;/code&gt;, če je pogoj resničen, sicer &lt;code&gt;y&lt;/code&gt;."><code>int z = (x &gt; y) ? x : y;</code> izbere večjo od vrednosti x in y.</div><div class="wi" data-a="1" data-why="Pogojni operator &lt;b&gt;vrne vrednost&lt;/b&gt; in ne izvaja stavkov. Za več stavkov v veji uporabimo if – else.">Pogojni operator <code>?:</code> lahko izvede dva stavka, tako kot blok v if – else.</div></div>
+</section>
 
     <section id="switch">
       <div class="eyebrow">Razlaga 5</div>
@@ -1787,7 +1963,10 @@ else ime = "dan ne obstaja";</pre>
     default: ime = "dan ne obstaja";
 }</pre>
       </div>
-    </section>
+    
+<div class="eyebrow" style="margin-top:14px">Preizkusi se</div>
+<div class="w wtrace" data-w="p-sw-tr" data-cfg="{&quot;lines&quot;: [&quot;int mesec = {m};&quot;, &quot;int dni;&quot;, &quot;switch (mesec) {&quot;, &quot;    case 2:&quot;, &quot;        dni = 28;&quot;, &quot;        break;&quot;, &quot;    case 4: case 6: case 9: case 11:&quot;, &quot;        dni = 30;&quot;, &quot;        break;&quot;, &quot;    default:&quot;, &quot;        dni = 31;&quot;, &quot;}&quot;, &quot;System.out.println(dni);&quot;], &quot;js&quot;: &quot;__l(0); mesec = IN.m;\nswitch ((__l(2), mesec)) {\n    case 2:\n        __l(4); dni = 28;\n        __l(5); break;\n    case 4: case 6: case 9: case 11:\n        __l(7); dni = 30;\n        __l(8); break;\n    default:\n        __l(10); dni = 31;\n}\n__l(12); println(dni);&quot;, &quot;vars&quot;: [[&quot;mesec&quot;, &quot;int&quot;], [&quot;dni&quot;, &quot;int&quot;]], &quot;inputs&quot;: [{&quot;n&quot;: &quot;m&quot;, &quot;l&quot;: &quot;mesec =&quot;, &quot;t&quot;: &quot;select&quot;, &quot;opts&quot;: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], &quot;v&quot;: 4}], &quot;predict&quot;: 1}"><div class="wh"><span class="wbadge">Sledi programu</span><span>Stavek switch: dnevi v mesecu</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Switch skoči na oznako case z enako vrednostjo (ali na default), nato izvaja stavke do break. Več oznak lahko deli isti rezultat. Napovej izpis za mesec 4, nato poskusi 2 in 12.</p><div class="wtin"></div><div class="wpred"><span class="wlab">Napoved</span><span class="wp">Kaj izpiše program z izbranimi vrednostmi? Vpiši izpis in preveri.</span><textarea spellcheck="false" aria-label="Tvoja napoved izpisa"></textarea><div style="display:flex;gap:8px;align-items:center"><button class="btn primary js-pchk" type="button">Preveri napoved</button><span class="wfb" aria-live="polite"></span></div></div><div class="wcode" role="region" aria-label="Program"></div><span class="wlab">Spremenljivke</span><div class="wtvars"></div><span class="wlab">Izpis</span><pre class="wtout"></pre><div class="wcap" aria-live="polite"></div><div class="wnav"><button class="btn js-first" type="button" aria-label="Na začetek">⏮</button><button class="btn js-prev" type="button">◀ Nazaj</button><button class="btn primary js-next" type="button">Naprej ▶</button><button class="btn js-last" type="button" aria-label="Do konca">⏭</button><span class="wpos"></span><button class="btn ghost js-tab" type="button">Pokaži sled v tabeli</button></div><div class="wttab" hidden></div></div><div class="w wtrace" data-w="p-ft-tr" data-cfg="{&quot;lines&quot;: [&quot;int k = {k};&quot;, &quot;switch (k) {&quot;, &quot;    case 1: System.out.print(\&quot;A\&quot;);&quot;, &quot;    case 2: System.out.print(\&quot;B\&quot;);&quot;, &quot;    case 3: System.out.print(\&quot;C\&quot;); break;&quot;, &quot;    case 4: System.out.print(\&quot;D\&quot;);&quot;, &quot;}&quot;, &quot;System.out.println();&quot;], &quot;js&quot;: &quot;__l(0); k = IN.k;\nswitch ((__l(1), k)) {\n    case 1: __l(2); print(\&quot;A\&quot;);\n    case 2: __l(3); print(\&quot;B\&quot;);\n    case 3: __l(4); print(\&quot;C\&quot;); break;\n    case 4: __l(5); print(\&quot;D\&quot;);\n}\n__l(7); println();&quot;, &quot;vars&quot;: [[&quot;k&quot;, &quot;int&quot;]], &quot;inputs&quot;: [{&quot;n&quot;: &quot;k&quot;, &quot;l&quot;: &quot;k =&quot;, &quot;t&quot;: &quot;select&quot;, &quot;opts&quot;: [1, 2, 3, 4, 5], &quot;v&quot;: 2}], &quot;predict&quot;: 1}"><div class="wh"><span class="wbadge">Sledi programu</span><span>Brez break se izvajanje nadaljuje</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Ko switch skoči na oznako, izvede vse stavke do prvega break ali do konca stavka, tudi tiste za naslednjimi oznakami case. To je pogosta maturitetna past. Napovej izpis za k = 2.</p><div class="wtin"></div><div class="wpred"><span class="wlab">Napoved</span><span class="wp">Kaj izpiše program z izbranimi vrednostmi? Vpiši izpis in preveri.</span><textarea spellcheck="false" aria-label="Tvoja napoved izpisa"></textarea><div style="display:flex;gap:8px;align-items:center"><button class="btn primary js-pchk" type="button">Preveri napoved</button><span class="wfb" aria-live="polite"></span></div></div><div class="wcode" role="region" aria-label="Program"></div><span class="wlab">Spremenljivke</span><div class="wtvars"></div><span class="wlab">Izpis</span><pre class="wtout"></pre><div class="wcap" aria-live="polite"></div><div class="wnav"><button class="btn js-first" type="button" aria-label="Na začetek">⏮</button><button class="btn js-prev" type="button">◀ Nazaj</button><button class="btn primary js-next" type="button">Naprej ▶</button><button class="btn js-last" type="button" aria-label="Do konca">⏭</button><span class="wpos"></span><button class="btn ghost js-tab" type="button">Pokaži sled v tabeli</button></div><div class="wttab" hidden></div></div><div class="w wdd" data-w="p-sw-dd" data-cap="0"><div class="wh"><span class="wbadge">Povleci in spusti</span><span>Ali ga lahko zapišemo s switch?</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Pogoje razvrsti: ali jih lahko neposredno pretvorimo v oznake case ali ne. <span class="whelp">(Povleci ali tapni element, nato tapni mesto.)</span></p><div class="wslots"><div class="ws" data-s="0"><span class="wl">lahko (case)</span><div class="wz"></div></div><div class="ws" data-s="1"><span class="wl">ne moremo</span><div class="wz"></div></div></div><div class="wpool"><span class="chip" data-s="0"><code>mesec == 12</code></span><span class="chip" data-s="1"><code>d == 1.5 (d je double)</code></span><span class="chip" data-s="0"><code>dan == 3</code></span><span class="chip" data-s="1"><code>x == y</code></span><span class="chip" data-s="0"><code>znak == 'a'</code></span><span class="chip" data-s="1"><code>ocena &lt; 3</code></span><span class="chip" data-s="1"><code>x &gt; 5</code></span></div></div><div class="w wtf" data-w="p-sw-tf" data-a1="Pravilno" data-a2="Napačno"><div class="wh"><span class="wbadge">Preizkusi se</span><span>Se prevede?</span><span class="wdone">✓ Opravljeno</span></div><div class="wi" data-a="1" data-why="Izraz v stavku switch je lahko &lt;code&gt;byte&lt;/code&gt;, &lt;code&gt;short&lt;/code&gt;, &lt;code&gt;char&lt;/code&gt;, &lt;code&gt;int&lt;/code&gt; ali &lt;code&gt;String&lt;/code&gt;. &lt;code&gt;double&lt;/code&gt;, &lt;code&gt;long&lt;/code&gt;, &lt;code&gt;float&lt;/code&gt; in &lt;code&gt;boolean&lt;/code&gt; niso dovoljeni."><code>switch (d)</code> z <code>double d = 1.5;</code> je dovoljen.</div><div class="wi" data-a="1" data-why="Oznaka case mora biti &lt;b&gt;konstanta&lt;/b&gt;, ne pogoj. Za intervale uporabimo verigo else if."><code>case x &gt; 5:</code> je veljavna oznaka.</div></div>
+</section>
 
     <section id="napake">
       <div class="eyebrow">Razlaga 6</div>
@@ -1808,7 +1987,10 @@ else ime = "dan ne obstaja";</pre>
         </tbody>
       </table></div>
       <p class="note">Program z vejitvijo vedno preizkusi z več vrednostmi: z vrednostjo za vsako vejo in z mejnimi vrednostmi (npr. točno 50 točk pri meji 50).</p>
-    </section>
+    
+<div class="eyebrow" style="margin-top:14px">Preizkusi se</div>
+<div class="w wtf" data-w="p-err-tf" data-a1="Pravilno" data-a2="Napačno"><div class="wh"><span class="wbadge">Preizkusi se</span><span>Najdi napako</span><span class="wdone">✓ Opravljeno</span></div><div class="wi" data-a="1" data-why="Podpičje takoj za pogojem je &lt;b&gt;prazen stavek&lt;/b&gt; in je edini stavek, ki ga pogoj obvladuje. Izpis se izvede vedno."><code>if (x &gt; 5); System.out.println("A");</code> izpiše A samo, če je x večji od 5.</div><div class="wi" data-a="0" data-why="Vsako število je vsaj 20 ali največ 40 (ali oboje). Za interval je pravilen veznik &amp;amp;&amp;amp;: &lt;code&gt;a &amp;gt;= 20 &amp;amp;&amp;amp; a &amp;lt;= 40&lt;/code&gt;.">Pogoj <code>a &gt;= 20 || a &lt;= 40</code> je resničen za vsako število a.</div><div class="wi" data-a="0" data-why="Prvi izpolnjeni pogoj »prekrije« ostale. Začni pri največji meji.">Pri mejah »vsaj« je pomemben vrstni red pogojev v verigi else if.</div></div>
+</section>
 
     <!-- ===================== NALOGE ===================== -->
     <section id="naloge" style="gap:24px">
@@ -2342,11 +2524,14 @@ let remote = null, pushTimer = null, pushing = false, dirty = false;
 function saveLocal(){ LavRac.saveUi(S); }
 function save(){ LavRac.saveUi(S); }
 function st(id){ return S[id] || (S[id] = {}); }
-const RANK = {ok:2, seen:1};
+const RANK = {ok:2, cmp:2, seen:1, redo:1};
 function summary(){
-  const r = {resenih:0, tock:0, vseh:T.length, vsehTock:T.reduce((a,t)=>a+t.pts,0), sklopi:{}};
+  const pt = T.filter(t=>t.type!=="code");
+  const r = {resenih:0, tock:0, vseh:T.length, vsehTock:pt.reduce((a,t)=>a+t.pts,0), kodaVseh:T.length-pt.length, kodaPrimerjanih:0, sklopi:{}};
   T.forEach(t=>{ const k=t.lv; r.sklopi[k] = r.sklopi[k] || {resenih:0, vseh:0}; r.sklopi[k].vseh++;
-    if(S[t.id] && S[t.id].state==="ok"){ r.resenih++; r.tock+=t.pts; r.sklopi[k].resenih++; } });
+    const sv = S[t.id] && S[t.id].state;
+    if(t.type==="code"){ if(sv==="cmp" || sv==="ok"){ r.resenih++; r.kodaPrimerjanih++; r.sklopi[k].resenih++; } }
+    else if(sv==="ok"){ r.resenih++; r.tock+=t.pts; r.sklopi[k].resenih++; } });
   return r;
 }
 async function push(){
@@ -2365,7 +2550,7 @@ function merge(R, rT){
     if(!l){ S[id] = r; changed = true; return; }
     const base = newer ? Object.assign({}, l, r) : Object.assign({}, r, l);
     const rs = Math.max(RANK[l.state]||0, RANK[r.state]||0);
-    base.state = rs===2 ? "ok" : rs===1 ? "seen" : undefined;
+    { const lr = RANK[l.state]||0, rr = RANK[r.state]||0; base.state = (lr||rr) ? (lr>=rr ? l.state : r.state) : undefined; }
     base.h = Math.max(l.h||0, r.h||0);
     if(JSON.stringify(base)!==JSON.stringify(l)){ S[id] = base; changed = true; }
   });
@@ -2415,6 +2600,8 @@ const srcLabel = s => { const r = /^MRAC\/(\d+)$/.exec(s); if(r) return `Katalog
 const ptsLabel = p => p===1 ? "1 točka" : p===2 ? "2 točki" : (p<5 ? p+" točke" : p+" točk");
 
 /* ---------- render tasks ---------- */
+const MER_ = {"18": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Pogoji pokrijejo vse primere, tudi mejne vrednosti (<, <=, ==), in so v pravem vrstnem redu.", "Ostanek (%) in celoštevilsko deljenje (/) sta uporabljena na pravem mestu.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "19": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Pogoji pokrijejo vse primere, tudi mejne vrednosti (<, <=, ==), in so v pravem vrstnem redu.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "24": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Pogoji pokrijejo vse primere, tudi mejne vrednosti (<, <=, ==), in so v pravem vrstnem redu.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "35": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Stavek switch ima pri vsaki veji break (ali namerni izpad) in default za preostale primere.", "Stavek break/continue stoji na pravem mestu in prekine pravo zanko.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "36": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Pogoji pokrijejo vse primere, tudi mejne vrednosti (<, <=, ==), in so v pravem vrstnem redu.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "37": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Pogoji pokrijejo vse primere, tudi mejne vrednosti (<, <=, ==), in so v pravem vrstnem redu.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "38": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Pogoji pokrijejo vse primere, tudi mejne vrednosti (<, <=, ==), in so v pravem vrstnem redu.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "39": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Pogoji pokrijejo vse primere, tudi mejne vrednosti (<, <=, ==), in so v pravem vrstnem redu.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "40": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Pogoji pokrijejo vse primere, tudi mejne vrednosti (<, <=, ==), in so v pravem vrstnem redu.", "Ostanek (%) in celoštevilsko deljenje (/) sta uporabljena na pravem mestu.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "41": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Pogoji pokrijejo vse primere, tudi mejne vrednosti (<, <=, ==), in so v pravem vrstnem redu.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "43": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Stavek switch ima pri vsaki veji break (ali namerni izpad) in default za preostale primere.", "Stavek break/continue stoji na pravem mestu in prekine pravo zanko.", "Ostanek (%) in celoštevilsko deljenje (/) sta uporabljena na pravem mestu.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "44": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Stavek switch ima pri vsaki veji break (ali namerni izpad) in default za preostale primere.", "Stavek break/continue stoji na pravem mestu in prekine pravo zanko.", "Znak (char) in njegova številska koda (ASCII) sta pravilno uporabljena.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "45": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Pogoji pokrijejo vse primere, tudi mejne vrednosti (<, <=, ==), in so v pravem vrstnem redu.", "Ostanek (%) in celoštevilsko deljenje (/) sta uporabljena na pravem mestu.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."]};
+T.forEach((t,i)=>{ if(MER_[i]) t.m = MER_[i]; });
 LavRac.prepare(T, LEVELS, {"self":["B8","B9","C5","D9","E1","E2","E3","E4","E5","E6","E8","E9","E10"],"nobtn":["A3","A11","B5","C1","C2","C3","C7","D1","D2","D3","D4","D7"]});
 [{"code":"public class Main {\n    public static void main(String[] args) {\n        int a = 3, b = 4, c = 5;\n        if (a + b > c && a + c > b && b + c > a) {\n            if (a == b && b == c) {\n                System.out.println(\"enakostranicni\");\n            } else if (a == b || b == c || a == c) {\n                System.out.println(\"enakokraki\");\n            } else {\n                System.out.println(\"raznostranicni\");\n            }\n        } else {\n            System.out.println(\"trikotnik ne obstaja\");\n        }\n    }\n}","sol":"Zunanji if preveri, ali trikotnik obstaja, notranja veriga pa določi vrsto. Za 3, 3, 3 je trikotnik enakostranični, za 3, 3, 5 enakokraki, za 3, 4, 5 raznostranični, za 1, 2, 5 ne obstaja (1 + 2 ni večje od 5)."},{"code":"public class Main {\n    public static void main(String[] args) {\n        double a = 1, b = -3, c = 2;\n        double d = b * b - 4 * a * c;\n        if (d > 0) {\n            double x1 = (-b + Math.sqrt(d)) / (2 * a);\n            double x2 = (-b - Math.sqrt(d)) / (2 * a);\n            System.out.println(\"Dve resitvi: \" + x1 + \" in \" + x2);\n        } else if (d == 0) {\n            System.out.println(\"Ena resitev: \" + (-b / (2 * a)));\n        } else {\n            System.out.println(\"Ni realnih resitev\");\n        }\n    }\n}","sol":"Za (1, -3, 2) sta rešitvi 2.0 in 1.0, za (1, 2, 1) je rešitev -1.0, (1, 0, 1) nima realnih rešitev."},{"code":"import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        System.out.println(\"1 - pozdrav\");\n        System.out.println(\"2 - trenutno leto\");\n        System.out.println(\"3 - izhod\");\n        int izbira = sc.nextInt();\n        switch (izbira) {\n            case 1: System.out.println(\"Pozdravljen!\"); break;\n            case 2: System.out.println(2026); break;\n            case 3: System.out.println(\"Nasvidenje\"); break;\n            default: System.out.println(\"Napacna izbira\");\n        }\n    }\n}","sol":"Vsaka možnost se konča z break, sicer bi se izvedle tudi naslednje. Ne pozabi na import java.util.Scanner; na začetku datoteke."},{"code":"import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int t = sc.nextInt();\n        if (t < 0 || t > 100) {\n            System.out.println(\"Napacen vnos\");\n        } else if (t >= 90) {\n            System.out.println(5);\n        } else if (t >= 75) {\n            System.out.println(4);\n        } else if (t >= 60) {\n            System.out.println(3);\n        } else if (t >= 50) {\n            System.out.println(2);\n        } else {\n            System.out.println(1);\n        }\n    }\n}","sol":"Najprej preverimo območje, nato gremo od največje meje navzdol. Za 49 je ocena 1, za 50 ocena 2, za 89 ocena 4, za 90 ocena 5, za 101 izpis Napacen vnos."}].forEach((f, k) => { HOME[k].jsolCode = f.code; if (f.sol) HOME[k].sol = f.sol; });
 T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });
@@ -2578,9 +2765,28 @@ function wire(el,t){
     html += `<p class="why">${esc(t.why)}</p>`;
     solEl.innerHTML = html;
   }
+  function drawCmp(empty){
+    const mine = (ed ? ed.value : "").trim();
+    const m = t.m || [];
+    let h = `<div class="cmp"><div class="cols">`;
+    if(!empty) h += `<div><span class="eyebrow">Tvoja koda</span><pre class="code">${hl(mine)}</pre></div>`;
+    h += `<div><span class="eyebrow">Ena od možnih rešitev</span><pre class="code">${hl(t.sol)}</pre></div></div>`;
+    h += `<p class="why">${esc(t.why)}</p>`;
+    if(!empty){
+      h += `<div class="mer"><span class="eyebrow">Primerjaj sam</span>` + m.map((x,k)=>`<label><input type="checkbox" data-k="${k}"${s.mer && s.mer[k] ? " checked":""}><span>${esc(x)}</span></label>`).join("") + `</div>`;
+      h += `<div class="verdict"><button class="btn primary js-cok" type="button">Razumem in znam sam</button><button class="btn js-cre" type="button">Moram še vaditi</button></div>`;
+    }
+    h += `</div>`;
+    solEl.innerHTML = h;
+    solEl.querySelectorAll(".mer input").forEach(i=>i.addEventListener("change",()=>{ s.mer = [...solEl.querySelectorAll(".mer input")].map(x=>x.checked); save(); }));
+    const ok2 = solEl.querySelector(".js-cok"), re2 = solEl.querySelector(".js-cre");
+    if(ok2) ok2.addEventListener("click",()=>{ s.state="cmp"; s.cmpAt=Date.now(); save(); paint(); progress(); show(true,"Shranjeno: naloga je označena kot primerjana."); });
+    if(re2) re2.addEventListener("click",()=>{ s.state="redo"; s.cmpAt=Date.now(); save(); paint(); progress(); show(false,"Shranjeno: naloga je označena za ponovitev."); });
+  }
   $(".js-sol",el).addEventListener("click",()=>{
-    if(solEl.hidden){ drawSol(); solEl.hidden=false; LavRac.solution(t.idx); $(".js-sol",el).textContent="Skrij rešitev"; }
-    else { solEl.hidden=true; $(".js-sol",el).textContent="Prikaži rešitev"; }
+    const btn = $(".js-sol",el);
+    if(solEl.hidden){ drawSol(); solEl.hidden=false; LavRac.solution(t.idx); btn.textContent="Skrij rešitev"; }
+    else { solEl.hidden=true; btn.textContent="Prikaži rešitev"; }
   });
 
   function show(ok,m){ fb.textContent=m; fb.className="feedback "+(ok?"ok":"bad"); }
@@ -2589,6 +2795,8 @@ function wire(el,t){
     const tg = $(".js-st",el);
     if(s.state==="ok"){ tg.hidden=false; tg.className="tag js-st st-ok"; tg.textContent="Rešeno"; }
     else if(s.state==="seen"){ tg.hidden=false; tg.className="tag js-st st-seen"; tg.textContent="Rešitev ogledana"; }
+    else if(s.state==="cmp"){ tg.hidden=false; tg.className="tag js-st st-cmp"; tg.textContent="Primerjano"; }
+    else if(s.state==="redo"){ tg.hidden=false; tg.className="tag js-st st-redo"; tg.textContent="Za ponovitev"; }
     else tg.hidden=true;
   }
   paint();
@@ -2614,6 +2822,596 @@ HOME.forEach((h,k)=>{
   homeEl.appendChild(el);
 });
 
+/* ---------- interaktivni gradniki v razlagi ---------- */
+(function(){
+const SVGNS = "http://www.w3.org/2000/svg";
+const wdone = root => !!(S["w-"+root.dataset.w] && S["w-"+root.dataset.w].ok);
+function finish(root){ const k = "w-"+root.dataset.w; const s = st(k); if(!s.ok){ s.ok = 1; save(); } root.classList.add("done"); }
+document.querySelectorAll(".w").forEach(r=>{ r.setAttribute("data-quiz",""); if(wdone(r)) r.classList.add("done"); });
+const el = (tag, cls, html) => { const e = document.createElement(tag); if(cls) e.className = cls; if(html!=null) e.innerHTML = html; return e; };
+const T_ = (x,y,t,cls,anchor) => `<text x="${x}" y="${y}"${cls?` class="${cls}"`:""}${anchor?` text-anchor="${anchor}"`:""}>${esc(t)}</text>`;
+
+/* ===== pravilno / napačno ===== */
+document.querySelectorAll(".wtf").forEach(root=>{
+  const items = [...root.querySelectorAll(".wi")];
+  const lab = [root.dataset.a1 || "Pravilno", root.dataset.a2 || "Napačno"];
+  const foot = el("div","wfoot",'<span class="wscore"></span><button class="btn ghost js-again" type="button">Še enkrat</button>');
+  root.appendChild(foot);
+  let answered = 0, good = 0;
+  const upd = ()=>{
+    foot.querySelector(".wscore").textContent = answered ? `${good} / ${items.length} pravilno` + (answered<items.length ? ` (odgovorjeno: ${answered})` : "") : `${items.length} trditev`;
+    if(answered===items.length) finish(root);
+  };
+  items.forEach(it=>{
+    const txt = el("div","wt"); while(it.firstChild) txt.appendChild(it.firstChild);
+    const seg = el("div","seg"); seg.setAttribute("role","group");
+    lab.forEach((l,k)=>{
+      const b = el("button"); b.type = "button"; b.textContent = l; b.setAttribute("aria-pressed","false");
+      b.addEventListener("click",()=>{
+        if(it.dataset.done) return; it.dataset.done = "1"; answered++;
+        const ok = +it.dataset.a === k; if(ok) good++;
+        it.classList.add(ok?"right":"wrong"); b.setAttribute("aria-pressed","true");
+        seg.querySelectorAll("button").forEach(x=>x.disabled = true); upd();
+      });
+      seg.appendChild(b);
+    });
+    const why = el("div","ww", it.dataset.why || "");
+    it.append(txt, seg, why);
+  });
+  foot.querySelector(".js-again").addEventListener("click",()=>{
+    items.forEach(it=>{ delete it.dataset.done; it.classList.remove("right","wrong"); it.querySelectorAll(".seg button").forEach(b=>{ b.disabled = false; b.setAttribute("aria-pressed","false"); }); });
+    answered = good = 0; upd();
+  });
+  upd();
+});
+
+/* ===== povleci in spusti (ali tapni in tapni) ===== */
+document.querySelectorAll(".wdd").forEach(root=>{
+  const cap = +root.dataset.cap || 0;
+  const pool = root.querySelector(".wpool");
+  const zones = [...root.querySelectorAll(".ws")];
+  const chips = [...root.querySelectorAll(".chip")];
+  const foot = el("div","wfoot",'<button class="btn primary js-chk" type="button">Preveri</button><button class="btn ghost js-rst" type="button">Ponastavi</button><span class="wscore"></span>');
+  root.appendChild(foot);
+  const score = foot.querySelector(".wscore");
+  let sel = null, dragged = null;
+  const clearV = ()=>{ chips.forEach(c=>c.classList.remove("right","wrong")); score.textContent = ""; };
+  const unsel = ()=>{ if(sel){ sel.classList.remove("sel"); sel = null; } };
+  function place(chip, target){
+    if(target !== pool && cap){
+      const occ = [...target.children].filter(x=>x!==chip);
+      while(occ.length >= cap) pool.appendChild(occ.shift());
+    }
+    target.appendChild(chip); clearV(); unsel();
+  }
+  chips.forEach(c=>{
+    c.draggable = true; c.tabIndex = 0;
+    c.addEventListener("dragstart",e=>{ dragged = c; c.classList.add("drag"); try{ e.dataTransfer.setData("text/plain","x"); e.dataTransfer.effectAllowed = "move"; }catch(_){} });
+    c.addEventListener("dragend",()=>{ c.classList.remove("drag"); dragged = null; zones.forEach(z=>z.classList.remove("over")); });
+    const pick = e=>{ e.stopPropagation(); if(sel===c){ unsel(); return; } if(sel){ place(sel, c.parentNode); return; } sel = c; c.classList.add("sel"); };
+    c.addEventListener("click",pick);
+    c.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); pick(e); } });
+  });
+  const targets = zones.map(z=>[z, z.querySelector(".wz")]).concat([[pool,pool]]);
+  targets.forEach(([box,t])=>{
+    box.addEventListener("dragover",e=>{ e.preventDefault(); box.classList.add("over"); });
+    box.addEventListener("dragleave",()=>box.classList.remove("over"));
+    box.addEventListener("drop",e=>{ e.preventDefault(); box.classList.remove("over"); if(dragged) place(dragged, t); });
+    box.addEventListener("click",()=>{ if(sel) place(sel, t); });
+  });
+  foot.querySelector(".js-rst").addEventListener("click",()=>{ chips.forEach(c=>pool.appendChild(c)); clearV(); unsel(); });
+  foot.querySelector(".js-chk").addEventListener("click",()=>{
+    let ok = 0, free = 0;
+    chips.forEach(c=>{
+      c.classList.remove("right","wrong");
+      const z = c.closest(".ws");
+      if(!z){ free++; return; }
+      const good = z.dataset.s === c.dataset.s;
+      c.classList.add(good?"right":"wrong"); if(good) ok++;
+    });
+    score.textContent = free ? `Najprej razvrsti vse (še ${free}).` : (ok===chips.length ? "Pravilno!" : `${ok} / ${chips.length} na pravem mestu.`);
+    if(!free && ok===chips.length) finish(root);
+  });
+});
+
+/* ===== izberi pravo sliko ===== */
+document.querySelectorAll(".wpick").forEach(root=>{
+  const fb = root.querySelector(".wfb"), why = root.querySelector(".wwhy");
+  root.querySelectorAll(".wo").forEach((b,k)=>{
+    b.addEventListener("click",()=>{
+      if(root.classList.contains("solved")) return;
+      const ok = k === +root.dataset.a;
+      b.classList.add(ok?"right":"wrong");
+      if(ok){ root.classList.add("solved"); fb.textContent = "Pravilno."; fb.className = "wfb ok"; if(why) why.style.display = "block"; finish(root); }
+      else { fb.textContent = "Ni pravilno. Poskusi še enkrat."; fb.className = "wfb bad"; }
+    });
+  });
+});
+
+/* ===== korak za korakom ===== */
+document.querySelectorAll(".wstep").forEach(root=>{
+  const lines = [...root.querySelectorAll(".wcode .ln")];
+  const frames = [...root.querySelectorAll(".wfr")];
+  const cap = root.querySelector(".wcap"), pos = root.querySelector(".wpos");
+  const prev = root.querySelector(".js-prev"), next = root.querySelector(".js-next");
+  let k = 0;
+  const show = ()=>{
+    frames.forEach((f,i)=>f.hidden = i!==k);
+    const cur = +frames[k].dataset.line;
+    lines.forEach((l,i)=>{ l.classList.toggle("cur", i===cur); l.classList.toggle("past", i<cur); });
+    cap.innerHTML = frames[k].dataset.note || "";
+    pos.textContent = `korak ${k+1} / ${frames.length}`;
+    prev.disabled = k===0; next.disabled = k===frames.length-1;
+    if(k===frames.length-1) finish(root);
+  };
+  prev.addEventListener("click",()=>{ if(k>0){ k--; show(); } });
+  next.addEventListener("click",()=>{ if(k<frames.length-1){ k++; show(); } });
+  show();
+});
+
+/* ===== pomnilniški simulator ===== */
+document.querySelectorAll(".wsim").forEach(root=>{
+  const scen = JSON.parse(root.dataset.sc);
+  const bar = root.querySelector(".wbar"), qEl = root.querySelector(".wq"), msgEl = root.querySelector(".wmsg"), outEl = root.querySelector(".wout"), svgEl = root.querySelector(".wsvg");
+  const inp = root.querySelector("input[type=text]");
+  let vars, heap, nid, hist, queue, out, last, nrun;
+  const CW = 46, CH = 30;
+  function reset(sc){ vars = []; heap = []; nid = 1; hist = []; out = []; last = null; nrun = 0; queue = sc ? sc.lines.slice() : []; msg("",false); draw(); }
+  const getVar = n => vars.find(v=>v.name===n);
+  const arr = v => v && v.ref ? heap.find(h=>h.id===v.ref) : null;
+  const CE = m => { const e = new Error(m); e.kind = "c"; return e; };
+  const RE = (n,m) => { const e = new Error(n + ": " + m); e.kind = "r"; return e; };
+  function intExpr(s){
+    s = s.trim();
+    let m;
+    const term = t=>{
+      t = t.trim(); let mm;
+      if(/^-?\d+$/.test(t)) return +t;
+      if((mm = t.match(/^(\w+)\.length$/))){ const v = getVar(mm[1]); if(!v) throw CE(`cannot find symbol: ${mm[1]}`); if(v.t!=="int[]") throw CE(`cannot find symbol: length`); const a = arr(v); if(!a) throw RE("NullPointerException", `Cannot read the array length because "${v.name}" is null`); return a.vals.length; }
+      if((mm = t.match(/^(\w+)\[(.+)\]$/))){ const v = getVar(mm[1]); if(!v) throw CE(`cannot find symbol: ${mm[1]}`); if(v.t!=="int[]") throw CE(`array required, but int found`); const a = arr(v); const i = intExpr(mm[2]); if(!a) throw RE("NullPointerException", `Cannot load from int array because "${v.name}" is null`); if(i<0||i>=a.vals.length) throw RE("ArrayIndexOutOfBoundsException", `Index ${i} out of bounds for length ${a.vals.length}`); return a.vals[i]; }
+      if(/^\w+$/.test(t)){ const v = getVar(t); if(!v) throw CE(`cannot find symbol: ${t}`); if(v.t!=="int") throw CE(`incompatible types: ${v.t} cannot be converted to int`); return v.val; }
+      throw CE(`neveljaven izraz: ${t}`);
+    };
+    if((m = s.match(/^(.+?)\s([+\-])\s(.+)$/))) return m[2]==="+" ? term(m[1]) + term(m[3]) : term(m[1]) - term(m[3]);
+    return term(s);
+  }
+  function arrExpr(s, allowInit){ // vrne {ref} za desno stran prireditve tabele
+    s = s.trim(); let m;
+    if((m = s.match(/^new int\[(.+)\]$/))){ const n = intExpr(m[1]); if(n<0) throw RE("NegativeArraySizeException", String(n)); if(n>10) throw CE("simulator podpira do 10 elementov"); return mk(new Array(n).fill(0)); }
+    if((m = s.match(/^(?:new int\[\]\s*)?\{(.*)\}$/))){
+      if(!allowInit && !/^new/.test(s)) throw CE("array constants can only be used in initializers (uporabi new int[] {...})");
+      const vals = m[1].trim()==="" ? [] : m[1].split(",").map(x=>{ if(!/^\s*-?\d+\s*$/.test(x)) throw CE("neveljavna vrednost: "+x.trim()); return +x; });
+      if(vals.length>10) throw CE("simulator podpira do 10 elementov"); return mk(vals);
+    }
+    if(s==="null") return {ref:null};
+    if((m = s.match(/^(\w+)\.clone\(\)$/))){ const v = getVar(m[1]); if(!v) throw CE(`cannot find symbol: ${m[1]}`); if(v.t!=="int[]") throw CE("cannot find symbol: clone()"); const a = arr(v); if(!a) throw RE("NullPointerException", `Cannot invoke "Object.clone()" because "${v.name}" is null`); return mk(a.vals.slice()); }
+    if(/^\w+$/.test(s)){ const v = getVar(s); if(!v) throw CE(`cannot find symbol: ${s}`); if(v.t!=="int[]") throw CE(`incompatible types: int cannot be converted to int[]`); return {ref:v.ref}; }
+    throw CE("neveljaven izraz: " + s);
+  }
+  function mk(vals){ const h = {id:nid++, vals}; heap.push(h); return {ref:h.id, fresh:true}; }
+  function exec(line){
+    let s = line.trim().replace(/;$/,"").trim(); let m;
+    if(!s) return;
+    last = null;
+    if((m = s.match(/^int\[\]\s*(\w+)\s*=\s*(.+)$/))){
+      if(getVar(m[1])) throw CE(`variable ${m[1]} is already defined`);
+      const r = arrExpr(m[2], true); vars.push({name:m[1], t:"int[]", ref:r.ref}); return;
+    }
+    if((m = s.match(/^int\s+(\w+)\s*=\s*(.+)$/))){
+      if(getVar(m[1])) throw CE(`variable ${m[1]} is already defined`);
+      vars.push({name:m[1], t:"int", val:intExpr(m[2])}); return;
+    }
+    if((m = s.match(/^(\w+)\[(.+)\]\s*=\s*(.+)$/))){
+      const v = getVar(m[1]); if(!v) throw CE(`cannot find symbol: ${m[1]}`); if(v.t!=="int[]") throw CE("array required, but int found");
+      const a = arr(v); const i = intExpr(m[2]); const x = intExpr(m[3]);
+      if(!a) throw RE("NullPointerException", `Cannot store to int array because "${v.name}" is null`);
+      if(i<0||i>=a.vals.length) throw RE("ArrayIndexOutOfBoundsException", `Index ${i} out of bounds for length ${a.vals.length}`);
+      a.vals[i] = x; last = {id:a.id, i}; return;
+    }
+    if((m = s.match(/^System\.out\.println\((.*)\)$/))){
+      const e = m[1].trim(); let mm, txt;
+      if((mm = e.match(/^(\w+)\s*(==|!=)\s*(\w+)$/)) && getVar(mm[1]) && getVar(mm[1]).t==="int[]" ){
+        const A = getVar(mm[1]), B = mm[3]==="null" ? {ref:null} : getVar(mm[3]); if(!B) throw CE(`cannot find symbol: ${mm[3]}`);
+        const eq = A.ref===B.ref; txt = String(mm[2]==="==" ? eq : !eq);
+      } else if((mm = e.match(/^(?:java\.util\.)?Arrays\.toString\((\w+)\)$/))){
+        const v = getVar(mm[1]); if(!v) throw CE(`cannot find symbol: ${mm[1]}`); const a = arr(v); txt = a ? "[" + a.vals.join(", ") + "]" : "null";
+      } else if((mm = e.match(/^(?:java\.util\.)?Arrays\.equals\((\w+),\s*(\w+)\)$/))){
+        const A = getVar(mm[1]), B = getVar(mm[2]); if(!A||!B) throw CE("cannot find symbol"); const a = arr(A), b = arr(B);
+        txt = String(a===b || (a && b && a.vals.length===b.vals.length && a.vals.every((x,i)=>x===b.vals[i])));
+      } else if(/^\w+$/.test(e) && getVar(e) && getVar(e).t==="int[]"){
+        const v = getVar(e); txt = v.ref ? "[I@" + (0x1b6d3586 + v.ref*4099).toString(16) : "null";
+      } else txt = String(intExpr(e));
+      out.push(txt); return;
+    }
+    if((m = s.match(/^(\w+)\s*=\s*(.+)$/))){
+      const v = getVar(m[1]); if(!v) throw CE(`cannot find symbol: ${m[1]}`);
+      if(v.t==="int"){ if(/new |clone|\{|null/.test(m[2])) throw CE("incompatible types: int[] cannot be converted to int"); v.val = intExpr(m[2]); return; }
+      const r = arrExpr(m[2], false); v.ref = r.ref; return;
+    }
+    throw CE("tega stavka simulator ne razume");
+  }
+  function run(line, fromQueue){
+    let status = "ok";
+    try { exec(line); msg(out.length ? "" : "", false); }
+    catch(e){
+      status = "err";
+      if(e.kind==="c") msg("Napaka pri prevajanju: " + e.message + ". Stanje pomnilnika se ni spremenilo.", true);
+      else if(e.kind==="r") msg(`Exception in thread "main" java.lang.${e.message}. V pravem programu se izvajanje tu konča.`, true);
+      else { status = "err"; msg("Napaka: " + e.message, true); }
+    }
+    hist.push({t:line.trim(), st:status}); nrun++;
+    draw();
+    if((fromQueue && !queue.length && nrun>=3) || nrun>=6) finish(root);
+  }
+  function msg(t,bad){ msgEl.textContent = t; msgEl.className = "wmsg" + (bad?" bad":""); msgEl.style.display = t ? "" : "none"; }
+  function drawQ(){
+    qEl.innerHTML = "";
+    hist.forEach(h=>qEl.appendChild(el("div","ln " + (h.st==="err"?"err":"done"), esc(h.t))));
+    queue.forEach((l,i)=>qEl.appendChild(el("div","ln" + (i===0?" next":""), esc(l))));
+    qEl.style.display = (hist.length||queue.length) ? "" : "none";
+    const bn = root.querySelector(".js-next"), ba = root.querySelector(".js-all");
+    if(bn){ bn.disabled = !queue.length; ba.disabled = !queue.length; }
+    outEl.textContent = out.length ? "Izpis:\n" + out.join("\n") : "";
+    outEl.style.display = out.length ? "" : "none";
+  }
+  function draw(){
+    drawQ();
+    const X0 = 12, SW = 190, HX = 270;
+    const nv = vars.length;
+    // kopica: vsaka tabela dobi svojo vrstico
+    let hy = 44; const pos = {};
+    heap.forEach(h=>{ pos[h.id] = hy; hy += 74; });
+    const H = Math.max(40 + nv*44 + 20, hy + 10, 120);
+    const refd = new Set(vars.filter(v=>v.t==="int[]" && v.ref).map(v=>v.ref));
+    let o = T_(12,16,"SKLAD","lbl") + T_(HX,16,"KOPICA","lbl") + `<line class="sep" x1="${HX-30}" y1="6" x2="${HX-30}" y2="${H-6}"/>`;
+    o += `<rect class="fr" x="${X0}" y="26" width="${SW}" height="${26+nv*44}" rx="6"/>` + T_(X0+8,43,"main","lbl");
+    const refs = [];
+    vars.forEach((v,i)=>{
+      const cy = 52 + i*44, cx = X0 + SW - 66;
+      o += T_(cx-8, cy+22, v.name, "", "end") + `<rect class="cell" x="${cx}" y="${cy+4}" width="58" height="${CH}"/>`;
+      if(v.t==="int") o += T_(cx+29, cy+24, v.val, "", "middle");
+      else if(v.ref){ o += `<circle class="dot" cx="${cx+29}" cy="${cy+4+CH/2}" r="4"/>`; refs.push([cx+29, cy+4+CH/2, v.ref, i]); }
+      else o += T_(cx+29, cy+24, "null", "nul", "middle");
+    });
+    heap.forEach(h=>{
+      const y = pos[h.id], gc = !refd.has(h.id);
+      o += T_(HX, y-8, `int[${h.vals.length}]` + (gc ? "  (nanjo ne kaže nobena referenca)" : ""), "lbl");
+      if(!h.vals.length) o += `<rect class="cell empty" x="${HX}" y="${y}" width="14" height="${CH}"/>`;
+      h.vals.forEach((x,k)=>{
+        const hi = last && last.id===h.id && last.i===k;
+        o += `<rect class="cell${hi?" hi":""}${gc?" gc":""}" x="${HX+k*CW}" y="${y}" width="${CW}" height="${CH}"/>` + T_(HX+k*CW+CW/2, y+CH/2+5, x, gc?"gc":"", "middle") + T_(HX+k*CW+CW/2, y+CH+13, k, "ix", "middle");
+      });
+    });
+    refs.forEach(([px,py,id,i])=>{
+      const ty = pos[id] + CH/2, mx = 218 + (i%4)*7;
+      const pts = Math.abs(ty-py)<1 ? [[px,py],[HX-1,py]] : [[px,py],[mx,py],[mx,ty],[HX-1,ty]];
+      o += `<polyline class="ar" points="${pts.map(p=>p.join(",")).join(" ")}"/><polygon class="ah" points="${HX-1},${ty} ${HX-8},${ty-4} ${HX-8},${ty+4}"/>`;
+    });
+    svgEl.innerHTML = `<svg class="mem" viewBox="0 0 ${HX+10*CW+20} ${H}" style="width:${HX+10*CW+20}px" role="img" aria-label="Pomnilnik: sklad in kopica">${o}</svg>`;
+  }
+  // kontrole
+  const sc = root.querySelector(".js-sc");
+  scen.forEach((s,i)=>{ const b = el("button","btn","" ); b.type = "button"; b.textContent = s.n; b.addEventListener("click",()=>{ reset(s); }); sc.appendChild(b); });
+  root.querySelector(".js-next").addEventListener("click",()=>{ if(queue.length) run(queue.shift(), true); });
+  root.querySelector(".js-all").addEventListener("click",()=>{ while(queue.length) run(queue.shift(), true); });
+  root.querySelector(".js-rs").addEventListener("click",()=>reset(null));
+  const go = ()=>{ const v = inp.value.trim(); if(!v) return; run(v, false); inp.value = ""; };
+  root.querySelector(".js-go").addEventListener("click",go);
+  inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); go(); } });
+  reset(scen[0]);
+});
+
+/* ===== naslov elementa in indeks ===== */
+document.querySelectorAll(".widx").forEach(root=>{
+  const svgEl = root.querySelector(".wsvg"), res = root.querySelector(".wres");
+  const selT = root.querySelector(".js-t"), selN = root.querySelector(".js-n");
+  const bPrev = root.querySelector(".js-prev"), bNext = root.querySelector(".js-next");
+  const TY = {byte:["byte",1], char:["char",2], int:["int",4], double:["double",8]};
+  let idx = 2, used = false;
+  function draw(){
+    const [tn, sz] = TY[selT.value]; const n = +selN.value; const base = 1000;
+    if(idx < -1) idx = -1; if(idx > n) idx = n;
+    const cw = 22 + 9*sz, X0 = 40, Y0 = 56;
+    const W = X0 + (n+2)*cw + 10;
+    let o = "";
+    for(let k=-1;k<=n;k++){
+      const x = X0 + (k+1)*cw, inside = k>=0 && k<n;
+      if(inside){
+        o += `<rect class="cell${k===idx?" sel":""}" x="${x}" y="${Y0}" width="${cw}" height="32"/>` + T_(x+cw/2, Y0+21, selT.value==="char" ? "'"+String.fromCharCode(97+k)+"'" : selT.value==="double" ? (k+0.5).toFixed(1) : (k*3+1), k===idx?"big":"", "middle") + T_(x+cw/2, Y0+48, k, "ix", "middle") + T_(x+cw/2, Y0+62, base+sz*k, "ix", "middle");
+      } else {
+        o += `<rect class="cell empty${k===idx?" bad":""}" x="${x}" y="${Y0}" width="${cw}" height="32"/>` + T_(x+cw/2, Y0+21, "?", "nul", "middle") + T_(x+cw/2, Y0+48, k, "ix", "middle");
+      }
+    }
+    const mx = X0 + (idx+1)*cw + cw/2;
+    o += `<polygon class="ah" points="${mx},${Y0-4} ${mx-7},${Y0-16} ${mx+7},${Y0-16}"/>` + T_(mx, Y0-22, "t["+idx+"]", "big", "middle");
+    o += T_(4, Y0+48, "indeks", "lbl") + T_(4, Y0+62, "naslov", "lbl");
+    svgEl.innerHTML = `<svg class="mem" viewBox="0 0 ${W} ${Y0+76}" style="width:${W}px" role="img" aria-label="Elementi tabele z indeksi in naslovi">${o}</svg>`;
+    if(idx>=0 && idx<n){ res.className = "wres"; res.textContent = `t[${idx}]  →  naslov = 1000 + ${idx} · ${sz} = ${base+sz*idx}   (tabela ${tn}[${n}] zasede ${n*sz} bajtov)`; }
+    else { res.className = "wres bad"; res.textContent = `t[${idx}]  →  ArrayIndexOutOfBoundsException: Index ${idx} out of bounds for length ${n}`; }
+    bPrev.disabled = idx<=-1; bNext.disabled = idx>=n;
+    if(used && idx>=n) finish(root);
+  }
+  bPrev.addEventListener("click",()=>{ idx--; used = true; draw(); });
+  bNext.addEventListener("click",()=>{ idx++; used = true; draw(); });
+  selT.addEventListener("change",draw); selN.addEventListener("change",draw);
+  draw();
+});
+
+/* ===== dvodimenzionalna tabela ===== */
+document.querySelectorAll(".wgrid").forEach(root=>{
+  const gEl = root.querySelector(".js-g"), mEl = root.querySelector(".js-m"), res = root.querySelector(".wres");
+  const selR = root.querySelector(".js-r"), selC = root.querySelector(".js-c");
+  const modes = [["cell","celica"],["row","vrstica"],["col","stolpec"],["diag","glavna diagonala"],["anti","stranska diagonala"],["edge","rob"],["inner","notranjost"]];
+  const seg = root.querySelector(".seg");
+  let mode = "cell", si = 1, sj = 2, seen = new Set();
+  modes.forEach(([k,l])=>{ const b = el("button"); b.type = "button"; b.textContent = l; b.dataset.k = k; b.setAttribute("aria-pressed", k===mode?"true":"false"); b.addEventListener("click",()=>{ mode = k; seen.add(k); seg.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b?"true":"false")); draw(); if(seen.size>=5) finish(root); }); seg.appendChild(b); });
+  function draw(){
+    const R = +selR.value, C = +selC.value; if(si>=R) si = R-1; if(sj>=C) sj = C-1;
+    const cw = 52, ch = 34, X0 = 34, Y0 = 30;
+    const hit = (i,j)=>{
+      switch(mode){
+        case "cell": return i===si && j===sj ? "sel" : "";
+        case "row": return i===si ? (j===sj?"sel":"row") : "";
+        case "col": return j===sj ? (i===si?"sel":"col") : "";
+        case "diag": return i===j ? "dg" : "";
+        case "anti": return i+j===R-1 ? "dg" : "";
+        case "edge": return (i===0||j===0||i===R-1||j===C-1) ? "dg" : "";
+        case "inner": return (i>0&&j>0&&i<R-1&&j<C-1) ? "dg" : "";
+      }
+    };
+    let o = "";
+    for(let j=0;j<C;j++) o += T_(X0+j*cw+cw/2, Y0-10, j, "ix", "middle");
+    for(let i=0;i<R;i++){
+      o += T_(X0-10, Y0+i*ch+ch/2+4, i, "ix", "end");
+      for(let j=0;j<C;j++){
+        const c = hit(i,j);
+        o += `<g data-i="${i}" data-j="${j}" style="cursor:pointer"><rect class="cell ${c}" x="${X0+j*cw}" y="${Y0+i*ch}" width="${cw}" height="${ch}"/>` + T_(X0+j*cw+cw/2, Y0+i*ch+ch/2+4, i*C+j+1, c==="sel"?"big":"", "middle") + `</g>`;
+      }
+    }
+    gEl.innerHTML = `<svg class="mem" viewBox="0 0 ${X0+C*cw+10} ${Y0+R*ch+8}" style="width:${X0+C*cw+10}px" role="img" aria-label="Dvodimenzionalna tabela">${o}</svg>`;
+    gEl.querySelectorAll("g[data-i]").forEach(g=>g.addEventListener("click",()=>{ si = +g.dataset.i; sj = +g.dataset.j; draw(); }));
+    // pomnilnik: tabela referenc na vrstice
+    let q = T_(12,16,"m","lbl") + T_(110,16,"vrstice (vsaka je svoja tabela)","lbl");
+    for(let i=0;i<R;i++){
+      const y = 28 + i*44, rowHi = (mode==="row"||mode==="cell"||mode==="col") && i===si;
+      q += `<rect class="cell${rowHi?" hi":""}" x="12" y="${y}" width="46" height="30"/><circle class="dot" cx="35" cy="${y+15}" r="4"/>` + T_(8,y+20,i,"ix","end");
+      q += `<polyline class="ar" points="35,${y+15} 104,${y+15}"/><polygon class="ah" points="105,${y+15} 98,${y+11} 98,${y+19}"/>`;
+      for(let j=0;j<C;j++){
+        const colHi = (mode==="col"||mode==="cell") && j===sj && i===si;
+        q += `<rect class="cell${rowHi && (mode==="row"||(mode!=="col"&&true))?" hi":""}${colHi?" sel":""}" x="${106+j*40}" y="${y}" width="40" height="30"/>` + T_(106+j*40+20, y+20, i*C+j+1, colHi?"big":"", "middle");
+      }
+    }
+    mEl.innerHTML = `<svg class="mem" viewBox="0 0 ${106+C*40+10} ${28+R*44}" style="width:${106+C*40+10}px" role="img" aria-label="Pomnilniška predstavitev: tabela referenc na vrstice">${q}</svg>`;
+    const cond = {cell:`m[${si}][${sj}]  je element v vrstici ${si} in stolpcu ${sj}`, row:`m[${si}]  je cela vrstica ${si} (tabela z m[${si}].length = ${C} elementi)`, col:`stolpec ${sj}: elementi m[0][${sj}], m[1][${sj}] … m[${R-1}][${sj}] (i teče po vrsticah)`, diag:"glavna diagonala: i == j" + (R!==C?"  (pri nekvadratni tabeli ni prava diagonala)":""), anti:"stranska diagonala: i + j == m.length − 1" + (R!==C?"  (velja za kvadratno tabelo)":""), edge:"rob: i == 0 || i == m.length − 1 || j == 0 || j == m[i].length − 1", inner:"notranjost: ostale celice, 0 < i < m.length − 1 in 0 < j < m[i].length − 1"}[mode];
+    res.textContent = `m.length = ${R} (vrstic)   m[0].length = ${C} (stolpcev)\n${cond}`;
+  }
+  selR.addEventListener("change",draw); selC.addEventListener("change",draw);
+  draw();
+});
+
+/* ===== kocka in tabela pogostosti ===== */
+document.querySelectorAll(".wcount").forEach(root=>{
+  const svgEl = root.querySelector(".wsvg"), res = root.querySelector(".wres");
+  let cnt, total;
+  const reset = ()=>{ cnt = new Array(7).fill(0); total = 0; res.textContent = "stevec je še sama ničla."; draw(); };
+  function draw(hi){
+    const CW = 54, X0 = 62, mx = Math.max(1, ...cnt);
+    let o = T_(4,30,"stevec","lbl");
+    for(let k=0;k<7;k++){
+      const x = X0 + k*CW;
+      o += `<rect class="cell${k===hi?" hi":""}${k===0?" empty":""}" x="${x}" y="14" width="${CW}" height="30"/>` + T_(x+CW/2,34,cnt[k],k===0?"nul":"","middle") + T_(x+CW/2,58,k,"ix","middle");
+      if(k>0){ const h = Math.round(80*cnt[k]/mx); o += `<rect class="barbg" x="${x+10}" y="70" width="${CW-20}" height="80"/><rect class="bar" x="${x+10}" y="${150-h}" width="${CW-20}" height="${h}"/>`; o += T_(x+CW/2,166,k,"sm","middle"); }
+    }
+    svgEl.innerHTML = `<svg class="mem" viewBox="0 0 ${X0+7*CW+10} 176" style="width:${X0+7*CW+10}px" role="img" aria-label="Tabela pogostosti metov kocke">${o}</svg>`;
+  }
+  const throwN = n=>{ let met = 0; for(let i=0;i<n;i++){ met = Math.floor(Math.random()*6)+1; cnt[met]++; total++; } res.textContent = `met = ${met}  →  stevec[${met}]++      skupaj metov: ${total}`; draw(met); if(total>=50) finish(root); };
+  root.querySelector(".js-1").addEventListener("click",()=>throwN(1));
+  root.querySelector(".js-10").addEventListener("click",()=>throwN(10));
+  root.querySelector(".js-100").addEventListener("click",()=>throwN(100));
+  root.querySelector(".js-rs").addEventListener("click",reset);
+  reset();
+});
+
+/* ===== izvajalnik programa: vrstica za vrstico, spremenljivke, izpis ===== */
+class JErr extends Error {}
+const TRACE_FN = {
+"p-if-tr":function(IN,println,print,D,Ch,I,Bt,Sh,div,rem,cl,frames,out,JErr){"use strict";var x;
+function __l(k){ if(frames.length>500) throw new JErr("__limit"); frames.push({k:k,v:{x:cl(x)},o:out.length}); }
+__l(0); x = IN.x;
+if ((__l(1), x < 0)) {
+    __l(2); x = -x;
+}
+__l(4); println(x);
+__l(-1);
+},
+"p-ie-tr":function(IN,println,print,D,Ch,I,Bt,Sh,div,rem,cl,frames,out,JErr){"use strict";var n;
+function __l(k){ if(frames.length>500) throw new JErr("__limit"); frames.push({k:k,v:{n:cl(n)},o:out.length}); }
+__l(0); n = IN.n;
+if ((__l(1), rem(n, 2) === 0)) {
+    __l(2); println("sodo");
+    __l(3); n = div(n, 2);
+} else {
+    __l(5); println("liho");
+    __l(6); n = 3 * n + 1;
+}
+__l(8); println(n);
+__l(-1);
+},
+"p-dang-tr":function(IN,println,print,D,Ch,I,Bt,Sh,div,rem,cl,frames,out,JErr){"use strict";var x,y;
+function __l(k){ if(frames.length>500) throw new JErr("__limit"); frames.push({k:k,v:{x:cl(x),y:cl(y)},o:out.length}); }
+__l(0); x = IN.x;
+__l(1); y = IN.y;
+if ((__l(2), x > 0))
+    if ((__l(3), y > 0))
+        { __l(4); println("A"); }
+else
+    { __l(6); println("B"); }
+__l(7); println("konec");
+__l(-1);
+},
+"p-ch-tr":function(IN,println,print,D,Ch,I,Bt,Sh,div,rem,cl,frames,out,JErr){"use strict";var tocke;
+function __l(k){ if(frames.length>500) throw new JErr("__limit"); frames.push({k:k,v:{tocke:cl(tocke)},o:out.length}); }
+__l(0); tocke = IN.t;
+if ((__l(1), tocke >= 90)) {
+    __l(2); println("odlicno");
+} else if ((__l(3), tocke >= 50)) {
+    __l(4); println("pozitivno");
+} else {
+    __l(6); println("negativno");
+}
+__l(-1);
+},
+"p-sw-tr":function(IN,println,print,D,Ch,I,Bt,Sh,div,rem,cl,frames,out,JErr){"use strict";var mesec,dni;
+function __l(k){ if(frames.length>500) throw new JErr("__limit"); frames.push({k:k,v:{mesec:cl(mesec),dni:cl(dni)},o:out.length}); }
+__l(0); mesec = IN.m;
+switch ((__l(2), mesec)) {
+    case 2:
+        __l(4); dni = 28;
+        __l(5); break;
+    case 4: case 6: case 9: case 11:
+        __l(7); dni = 30;
+        __l(8); break;
+    default:
+        __l(10); dni = 31;
+}
+__l(12); println(dni);
+__l(-1);
+},
+"p-ft-tr":function(IN,println,print,D,Ch,I,Bt,Sh,div,rem,cl,frames,out,JErr){"use strict";var k;
+function __l(k){ if(frames.length>500) throw new JErr("__limit"); frames.push({k:k,v:{k:cl(k)},o:out.length}); }
+__l(0); k = IN.k;
+switch ((__l(1), k)) {
+    case 1: __l(2); print("A");
+    case 2: __l(3); print("B");
+    case 3: __l(4); print("C"); break;
+    case 4: __l(5); print("D");
+}
+__l(7); println();
+__l(-1);
+}
+};
+document.querySelectorAll(".wtrace").forEach(root=>{
+  const cfg = JSON.parse(root.dataset.cfg);
+  const jd = x => (typeof x==="number" && Number.isInteger(x)) ? x.toFixed(1) : String(x);
+  const fmt = (v,t) => {
+    if(v===undefined) return null;
+    if(t==="double") return jd(v);
+    if(t==="char") return "'" + String.fromCharCode(v) + "'";
+    if(t==="String") return v===null ? "null" : '"' + v + '"';
+    if(t==="boolean") return v ? "true" : "false";
+    if(/\[\]$/.test(t)) return v===null ? "null" : "{" + v.map(x=>fmt(x,t.slice(0,-2))).join(", ") + "}";
+    return String(v);
+  };
+  const names = cfg.vars.map(v=>v[0]);
+  const inEl = {};
+  const inBox = root.querySelector(".wtin"), codeEl = root.querySelector(".wcode"), varsEl = root.querySelector(".wtvars");
+  const outEl = root.querySelector(".wtout"), capEl = root.querySelector(".wcap"), posEl = root.querySelector(".wpos");
+  const tabEl = root.querySelector(".wttab");
+  const bPrev = root.querySelector(".js-prev"), bNext = root.querySelector(".js-next"), bFirst = root.querySelector(".js-first"), bLast = root.querySelector(".js-last"), bTab = root.querySelector(".js-tab");
+  let frames = [], out = [], err = null, k = 0, IN = {};
+
+  (cfg.inputs||[]).forEach(d=>{
+    const lab = el("label", "", esc(d.l||d.n)+" ");
+    let c;
+    if(d.t==="select"){ c = el("select"); d.opts.forEach(o=>{ const op = el("option"); op.value = String(o); op.textContent = String(o); c.appendChild(op); }); c.value = String(d.v); }
+    else { c = el("input"); c.type = d.t==="text" ? "text" : "number"; if(d.min!=null) c.min = d.min; if(d.max!=null) c.max = d.max; c.value = d.v; c.size = d.t==="text" ? 10 : 5; }
+    c.addEventListener("input", ()=>{ rerun(); });
+    c.setAttribute("aria-label", d.l||d.n);
+    inEl[d.n] = c; lab.appendChild(c); inBox.appendChild(lab);
+  });
+  if(!(cfg.inputs||[]).length) inBox.remove();
+
+  function readIn(){
+    const o = {};
+    (cfg.inputs||[]).forEach(d=>{
+      const v = inEl[d.n].value;
+      o[d.n] = d.t==="text" ? v : d.t==="select" ? (isNaN(+v) || v==="" ? v : +v) : (isNaN(parseInt(v,10)) ? 0 : (d.f ? parseFloat(v) : parseInt(v,10)));
+      if(d.t!=="text" && d.t!=="select" && d.min!=null) o[d.n] = Math.max(d.min, Math.min(d.max, o[d.n]));
+    });
+    return o;
+  }
+  function exec(){
+    frames = []; out = []; err = null;
+    const cl = v => Array.isArray(v) ? v.slice() : v;
+    const pr = (x,nl)=>{ out.push(String(x) + (nl ? "\n" : "")); };
+    const H = {
+      println: x=>pr(x===undefined ? "" : x, 1), print: x=>pr(x,0), D: jd, Ch: c=>String.fromCharCode(c),
+      I: x=>x|0, Bt: x=>(x<<24)>>24, Sh: x=>(x<<16)>>16,
+      div: (a,b)=>{ if(b===0) throw new JErr("java.lang.ArithmeticException: / by zero"); return Math.trunc(a/b); },
+      rem: (a,b)=>{ if(b===0) throw new JErr("java.lang.ArithmeticException: / by zero"); return a%b; }
+    };
+    const body = '"use strict";var ' + names.join(",") + ';\nfunction __l(k){ if(frames.length>500) throw new JErr("__limit"); frames.push({k:k,v:{' + names.map(n=>n+":cl("+n+")").join(",") + '},o:out.length}); }\n' + cfg.js + "\n__l(-1);";
+    try { TRACE_FN[root.dataset.w](IN,H.println,H.print,H.D,H.Ch,H.I,H.Bt,H.Sh,H.div,H.rem,cl,frames,out,JErr); }
+    catch(e){
+      const last = frames.length ? frames[frames.length-1] : {v:{}, o:0};
+      if(e instanceof JErr){ err = e.message==="__limit" ? "Izvajanje je prekinjeno: več kot 500 korakov (neskončna zanka?)." : "Izjema: " + e.message; frames.push({k:-2, v:last.v, o:out.length}); }
+      else { err = "Napaka v simulaciji: " + e.message; frames.push({k:-2, v:last.v, o:out.length}); }
+    }
+  }
+  function lineText(s){ return s.replace(/\{(\w+)\}/g, (m,n)=> n in IN ? String(IN[n]) : m); }
+  function drawCode(){
+    codeEl.innerHTML = "";
+    cfg.lines.forEach((l,i)=>{ const s = el("span","ln"); s.textContent = lineText(l) || " "; s.dataset.i = i; codeEl.appendChild(s); });
+    if(cfg.hl!==0) codeEl.querySelectorAll(".ln").forEach(s=>{ const h = hl(s.textContent); if(h!==undefined) s.innerHTML = h || " "; });
+  }
+  function show(){
+    const f = frames[k], pf = k>0 ? frames[k-1] : null;
+    codeEl.querySelectorAll(".ln").forEach((l,i)=>{ l.classList.toggle("cur", i===f.k); });
+    const cur = codeEl.querySelector(".ln.cur"); 
+    let h = "";
+    cfg.vars.forEach(([n,t])=>{
+      const v = fmt(f.v[n], t); if(v===null) return;
+      const pv = pf ? fmt(pf.v[n], t) : null;
+      h += `<span class="tv${pf && pv!==v ? " chg" : ""}"><span class="tn">${esc(t==="char"||t==="String"||t==="boolean"||t==="double"||t==="int"||/\[\]$/.test(t) ? n : n)}</span><span class="te">=</span><span class="tval">${esc(v)}</span></span>`;
+    });
+    varsEl.innerHTML = h || '<span class="tnone">Spremenljivke še ne obstajajo.</span>';
+    const o = out.slice(0, f.o).join("");
+    outEl.textContent = o || "(še nič izpisano)";
+    outEl.classList.toggle("empty", !o);
+    const last = k===frames.length-1;
+    capEl.className = "wcap" + (last && err ? " bad" : "");
+    capEl.textContent = f.k>=0 ? `Ta vrstica se bo zdaj izvedla (vrstica ${f.k+1}).` : (f.k===-1 ? "Konec programa." : err);
+    posEl.textContent = `korak ${k+1} / ${frames.length}`;
+    bPrev.disabled = bFirst.disabled = k===0; bNext.disabled = bLast.disabled = last;
+    if(last && !cfg.predict) finish(root);
+  }
+  function drawTab(){
+    const shown = names.filter(n=>frames.some(f=>f.v[n]!==undefined));
+    const ty = Object.fromEntries(cfg.vars);
+    let h = '<table><thead><tr><th>korak</th><th>vrstica</th>' + shown.map(n=>`<th>${esc(n)}</th>`).join("") + '<th>izpis</th></tr></thead><tbody>';
+    const MAX = 60;
+    frames.forEach((f,i)=>{
+      if(i>=MAX){ if(i===MAX) h += `<tr><td colspan="${shown.length+3}">… še ${frames.length-MAX} korakov</td></tr>`; return; }
+      const prevO = i>0 ? frames[i-1].o : 0;
+      const newOut = out.slice(prevO, f.o).join("").replace(/\n$/,"").replace(/\n/g,"⏎");
+      h += `<tr${i===k?' class="cur"':""}><td>${i+1}</td><td>${f.k>=0 ? f.k+1 : "konec"}</td>` + shown.map(n=>{ const v = fmt(f.v[n], ty[n]); return `<td>${v===null ? "" : esc(v)}</td>`; }).join("") + `<td>${esc(newOut)}</td></tr>`;
+    });
+    tabEl.innerHTML = h + "</tbody></table>";
+  }
+  function rerun(){
+    IN = readIn(); exec(); k = 0; drawCode(); show(); if(!tabEl.hidden) drawTab();
+    const pf = root.querySelector(".wpred"); if(pf){ pf.querySelector(".wfb").textContent = ""; pf.querySelector(".wfb").className = "wfb"; }
+  }
+  bPrev.addEventListener("click",()=>{ if(k>0){ k--; show(); if(!tabEl.hidden) drawTab(); } });
+  bNext.addEventListener("click",()=>{ if(k<frames.length-1){ k++; show(); if(!tabEl.hidden) drawTab(); } });
+  bFirst.addEventListener("click",()=>{ k = 0; show(); if(!tabEl.hidden) drawTab(); });
+  bLast.addEventListener("click",()=>{ k = frames.length-1; show(); if(!tabEl.hidden) drawTab(); });
+  bTab.addEventListener("click",()=>{ tabEl.hidden = !tabEl.hidden; bTab.textContent = tabEl.hidden ? "Pokaži sled v tabeli" : "Skrij sled"; if(!tabEl.hidden) drawTab(); });
+  const pf = root.querySelector(".wpred");
+  if(pf){
+    const ta = pf.querySelector("textarea"), fb = pf.querySelector(".wfb");
+    const norm = s => s.split("\n").map(x=>x.replace(/\s+$/,"")).join("\n").replace(/\n+$/,"").trim();
+    pf.querySelector(".js-pchk").addEventListener("click",()=>{
+      const real = norm(out.join(""));
+      if(!ta.value.trim()){ fb.className = "wfb bad"; fb.textContent = "Najprej vpiši svojo napoved."; return; }
+      if(norm(ta.value)===real){ fb.className = "wfb ok"; fb.textContent = "Pravilno! Zdaj si oglej še korake."; finish(root); }
+      else { fb.className = "wfb bad"; fb.textContent = "Ni enako. Poskusi sledenje po korakih in primerjaj."; }
+    });
+  }
+  rerun();
+});
+})();
+
 /* ---------- static highlighting ---------- */
 document.querySelectorAll(".js-hl").forEach(p=>{ p.innerHTML = hl(p.textContent); });
 
@@ -2624,7 +3422,7 @@ function progress(){
   document.querySelectorAll(".js-progtxt").forEach(e=>e.textContent=txt);
   document.querySelectorAll(".js-bar").forEach(e=>e.style.width=(100*r.tock/r.vsehTock)+"%");
   document.querySelectorAll(".cnt[data-lv]").forEach(e=>{ const k=r.sklopi[e.dataset.lv]; if(!k) return; e.textContent=`${k.resenih}/${k.vseh}`; e.classList.toggle("full", k.resenih===k.vseh); });
-  const nm = T.filter(t=>!t.own).length, ps = $("#progSrc"); if(ps) ps.textContent = `${nm} maturitetnih · ${T.length-nm} dodatnih nalog`;
+  const nm = T.filter(t=>!t.own).length, ps = $("#progSrc"); if(ps) ps.textContent = `${nm} maturitetnih · ${T.length-nm} dodatnih nalog · ${r.kodaVseh} nalog s kodo (primerjano: ${r.kodaPrimerjanih}, brez točk)`;
 }
 
 /* ---------- filters ---------- */
@@ -2632,12 +3430,12 @@ let curFilter = "all";
 function applyFilter(){
   document.querySelectorAll("#levels .task, #homeMat .task").forEach(el=>{
     const s = S[el.id.slice(2)] || {};
-    el.hidden = (curFilter==="mat" && el.dataset.kind!=="mat") || (curFilter==="own" && el.dataset.kind!=="own") || (curFilter==="open" && s.state==="ok");
+    el.hidden = (curFilter==="mat" && el.dataset.kind!=="mat") || (curFilter==="own" && el.dataset.kind!=="own") || (curFilter==="open" && (s.state==="ok" || s.state==="cmp"));
   });
   document.querySelectorAll("#levels .level, #homeMat .level").forEach(l=>{ const e=l.querySelector(".lvl-empty"); if(e) e.hidden = !!l.querySelector(".task:not([hidden])"); });
 }
-document.querySelectorAll(".chip").forEach(c=>c.addEventListener("click",()=>{
-  document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed","false"));
+document.querySelectorAll(".chip[data-f]").forEach(c=>c.addEventListener("click",()=>{
+  document.querySelectorAll(".chip[data-f]").forEach(x=>x.setAttribute("aria-pressed","false"));
   c.setAttribute("aria-pressed","true");
   curFilter = c.dataset.f; applyFilter();
 }));

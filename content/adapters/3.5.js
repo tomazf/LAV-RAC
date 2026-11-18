@@ -3,7 +3,7 @@
 // utrjevanje" and the matura revision set kept last as "Ponavljanje" (agreed 8. 11. 2026), no mention of laboratory
 // exercises, and the matura's diagram labels only (agreed 10. 11. 2026).
 
-import { statements, QTEXT, outputCompare, partialCredit } from './qformat.js';
+import { statements, QTEXT, outputCompare, partialCredit, codeAsBefore, miniTasks, traceCompile } from './qformat.js';
 const ICONS = {
   if: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5l12 10-12 10-12-10z"/><path d="M12 15H6v21M36 15h6v21"/><rect x="1.5" y="36" width="9" height="8" rx="1.5" class="fill" opacity=".35"/><rect x="37.5" y="36" width="9" height="8" rx="1.5"/></svg>',
   vec: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4v12"/><path d="M24 16L8 30M24 16v14M24 16l16 14"/><rect x="2" y="30" width="12" height="9" rx="1.5"/><rect x="18" y="30" width="12" height="9" rx="1.5" class="fill" opacity=".35"/><rect x="34" y="30" width="12" height="9" rx="1.5"/></svg>',
@@ -79,6 +79,14 @@ export default {
     ...partialCredit,
     // The typed output is compared without regard to letter case and repeated spaces (agreed 16. 11. 2026).
     ...outputCompare(true),
+    // Code tasks are self-checked and the small tasks keep nothing (agreed 18. 11. 2026); the trace widgets are compiled at import (CSP).
+    // codeAsBefore must come before the replacement of »Pokaži rešitev«.
+    ...codeAsBefore,
+    ...miniTasks,
+    ...traceCompile('3.5'),
+    // The introduction of the exercises says what the portal does, not what the artifact's own self-assessment does (agreed 18. 11. 2026).
+    [" Naloge so dveh vrst. Pri nalogah z <strong>enoličnim odgovorom</strong> (izbira, dopolnjevanje, razvrščanje, napoved izpisa) stran odgovor preveri in podeli točke; če si pred pravilnim odgovorom ogledal rešitev, se točke ne štejejo. Pri nalogah z oznako <span class=\"tag self\">Samoocena</span> <strong>sam napišeš kodo</strong> (preizkusiš jo v Programizu, Eclipse ali VS Code). Stran je ne more preveriti, zato točk ni: kodo in neobvezen izpis shranimo, nato klikneš »Primerjaj z rešitvijo«, kjer vidiš svojo kodo ob primeru rešitve, prečrtaš merila in sam oceniš, ali nalogo znaš. Vrednosti so zapisane v kodi, vnosa s Scannerjem ni treba preizkušati.",
+      " Pri nalogah z izpisom ali programom lahko kodo kopiraš v Programiz in preveriš, ali je tvoj odgovor pravilen. Vrednosti so v kodi zapisane kar v spremenljivke, vnosa s Scannerjem tam ni treba preizkušati. Če si ogledaš rešitev, preden nalogo pravilno rešiš, se ti točke ne štejejo."],
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
     // IF and ELSE are written in capitals in titles (corrected 10. 11. 2026); the code keeps them lowercase.
     ['["stavek-if","Pogojni stavek if"]', '["stavek-if","Pogojni stavek IF"]'],

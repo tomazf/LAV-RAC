@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 // Light markup in long task statements (the shell turns it into paragraphs, bold words and lists: formatQ in
 // content/shell/vaja.js): **bold**, one paragraph per line, lines starting with "- " form a list.
 // A pair is [statement as it is in the page at that point, new statement]; the importer fails if the old one is not there once.
@@ -78,3 +79,29 @@ export const miniTasks = [
   ["document.querySelectorAll(\".chip\").forEach(c=>c.addEventListener(\"click\",()=>{\n  document.querySelectorAll(\".chip\").forEach(x=>x.setAttribute(\"aria-pressed\",\"false\"));",
     "document.querySelectorAll(\".chip[data-f]\").forEach(c=>c.addEventListener(\"click\",()=>{\n  document.querySelectorAll(\".chip[data-f]\").forEach(x=>x.setAttribute(\"aria-pressed\",\"false\"));"],
 ];
+
+// The trace widgets of the explanations (»Preizkusi se«, step through a short program) build a function from text with
+// new Function, which the portal's content security policy forbids. At import the functions are built here instead and
+// the page looks them up by the name of the widget (agreed 18. 11. 2026; the policy stays strict).
+const unesc = (s) => s.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'").replace(/&#x27;/g, "'").replace(/&amp;/g, '&');
+export function traceCompile(id) {
+  const html = readFileSync(new URL(`../sources/${id}.html`, import.meta.url), 'utf8');
+  const fns = [];
+  const seen = new Set();
+  for (const m of html.matchAll(/<div class="w wtrace" data-w="([^"]+)" data-cfg="([^"]*)"/g)) {
+    if (seen.has(m[1])) throw new Error(`trace widget ${m[1]} appears twice in ${id}`);
+    seen.add(m[1]);
+    const cfg = JSON.parse(unesc(m[2]));
+    const names = cfg.vars.map((v) => v[0]);
+    // The same text the artifact passes to new Function.
+    const body = '"use strict";var ' + names.join(',') + ';\nfunction __l(k){ if(frames.length>500) throw new JErr("__limit"); frames.push({k:k,v:{'
+      + names.map((n) => n + ':cl(' + n + ')').join(',') + '},o:out.length}); }\n' + cfg.js + '\n__l(-1);';
+    fns.push(`${JSON.stringify(m[1])}:function(IN,println,print,D,Ch,I,Bt,Sh,div,rem,cl,frames,out,JErr){${body}\n}`);
+  }
+  if (!fns.length) return [];
+  return [
+    ['class JErr extends Error {}', `class JErr extends Error {}\nconst TRACE_FN = {\n${fns.join(',\n')}\n};`],
+    ['try { new Function("IN","println","print","D","Ch","I","Bt","Sh","div","rem","cl","frames","out","JErr", body)(IN,',
+      'try { TRACE_FN[root.dataset.w](IN,'],
+  ];
+}

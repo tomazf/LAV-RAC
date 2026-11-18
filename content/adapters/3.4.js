@@ -2,7 +2,7 @@
 // answers typed as program output), one answer per task, three theory groups, the operator set split in two (E and F)
 // with the matura revision set moved after it as "Ponavljanje" (agreed 8. 11. 2026), and no mention of laboratory exercises.
 
-import { statements, QTEXT, outputCompare, partialCredit } from './qformat.js';
+import { statements, QTEXT, outputCompare, partialCredit, codeAsBefore, miniTasks, traceCompile } from './qformat.js';
 const ICONS = {
   tipi: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="8" width="12" height="8" rx="1.5"/><rect x="6" y="20" width="24" height="8" rx="1.5"/><rect x="6" y="32" width="36" height="8" rx="1.5" class="fill" opacity=".35"/></svg>',
   znaki: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M5 36L15 10l10 26M9.5 27h11"/><circle cx="35" cy="30" r="5"/><path d="M40 25v11"/></svg>',
@@ -87,6 +87,14 @@ export default {
     ...partialCredit,
     // The typed output is compared without regard to letter case and repeated spaces (agreed 16. 11. 2026).
     ...outputCompare(true),
+    // Code tasks are self-checked and the small tasks keep nothing (agreed 18. 11. 2026); the trace widgets are compiled at import (CSP).
+    // codeAsBefore must come before the replacement of »Pokaži rešitev«.
+    ...codeAsBefore,
+    ...miniTasks,
+    ...traceCompile('3.4'),
+    // The introduction of the exercises says what the portal does, not what the artifact's own self-assessment does (agreed 18. 11. 2026).
+    [" Naloge so dveh vrst. Pri nalogah z <strong>enoličnim odgovorom</strong> (izbira, dopolnjevanje, razvrščanje, napoved izpisa) stran odgovor preveri in podeli točke; če si pred pravilnim odgovorom ogledal rešitev, se točke ne štejejo. Pri nalogah z oznako <span class=\"tag self\">Samoocena</span> <strong>sam napišeš kodo</strong> (preizkusiš jo v Programizu, Eclipse ali VS Code). Stran je ne more preveriti, zato točk ni: kodo in neobvezen izpis shranimo, nato klikneš »Primerjaj z rešitvijo«, kjer vidiš svojo kodo ob primeru rešitve, prečrtaš merila in sam oceniš, ali nalogo znaš. Vrednosti so zapisane v kodi, vnosa s Scannerjem ni treba preizkušati.",
+      " Pri nalogah z izpisom ali programom lahko kodo kopiraš v Programiz in preveriš, ali je tvoj odgovor pravilen. Vrednosti so v kodi zapisane kar v spremenljivke, vnosa s Scannerjem tam ni treba preizkušati. Če si ogledaš rešitev, preden nalogo pravilno rešiš, se ti točke ne štejejo."],
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
     // Set E is split: its first 23 tasks stay in E, the rest (programs and logical expressions) form F, and the matura
     // revision set becomes G, graded among the others "Ponavljanje" (agreed 8. 11. 2026).

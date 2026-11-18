@@ -1192,6 +1192,159 @@ p.prose{display:block}
 .mtop .langsw{flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap}
 
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+/* interaktivni gradniki v razlagi (pogl. 7) */
+.w{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:6px 0;display:flex;flex-direction:column;gap:10px;max-width:880px}
+.w .wh{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-weight:700;font-size:.98rem}
+.w .wh .wbadge{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;background:var(--accent-soft);color:var(--accent);padding:2px 8px;border-radius:4px;font-weight:600}
+.w .wh .wdone{margin-left:auto;font-size:.8rem;font-weight:600;color:var(--ok);display:none}
+.w.done .wh .wdone{display:inline}
+.w .wp{margin:0;font-size:.95rem;color:var(--muted);max-width:70ch}
+.w .wfoot{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.w .wfoot .wscore{font-weight:600;font-size:.92rem}
+.w code{font-family:var(--f-mono);font-size:.88em}
+.w pre.code{margin:0}
+
+/* pravilno / napačno (statično) */
+.pn{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:6px 0}
+.pn .pc{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);display:flex;flex-direction:column}
+.pn .pc>.pt{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;padding:5px 12px;display:flex;gap:6px;align-items:center}
+.pn .pc.ok>.pt{background:var(--ok-soft);color:var(--ok)}
+.pn .pc.no>.pt{background:var(--bad-soft);color:var(--bad)}
+.pn .pc.ok{border-color:var(--ok)} .pn .pc.no{border-color:var(--bad)}
+.pn .pc pre{margin:0;border-radius:0;flex:1}
+.pn .pc .pw{padding:8px 12px;font-size:.92rem;border-top:1px solid var(--line);background:var(--bg)}
+
+/* pravilno / napačno (interaktivno) */
+.wtf .wi{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.wtf .wi .wt{min-width:0;font-size:.95rem}
+.wtf .wi .wt pre{margin:0;font-size:.82rem}
+.wtf .wi.right{border-color:var(--ok);background:var(--ok-soft)}
+.wtf .wi.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.wtf .wi .ww{grid-column:1/-1;font-size:.9rem;display:none}
+.wtf .wi.right .ww,.wtf .wi.wrong .ww{display:block}
+.wtf .wi .seg button:disabled{cursor:default;opacity:.75}
+@media (max-width:560px){.wtf .wi{grid-template-columns:minmax(0,1fr)}}
+
+/* povleci in spusti */
+.wdd .wslots{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.wdd.ord .wslots{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}
+.wdd .ws{border:1px dashed var(--muted);border-radius:8px;padding:6px 8px;min-height:64px;background:var(--bg);display:flex;flex-direction:column;gap:6px}
+.wdd .ws .wl{font-size:.8rem;font-weight:700;color:var(--muted)}
+.wdd .ws .wz{display:flex;flex-direction:column;gap:5px;flex:1;min-height:30px}
+.wdd .ws.over{border-color:var(--accent);background:var(--accent-soft)}
+.wdd .wpool{display:flex;flex-wrap:wrap;gap:8px;padding:8px;border:1px solid var(--line);border-radius:8px;min-height:44px;background:var(--sunk)}
+.wdd .chip{font-family:var(--f-mono);font-size:.84rem;padding:4px 10px;border:1px solid var(--muted);border-radius:6px;background:var(--surface);cursor:grab;user-select:none;touch-action:manipulation;line-height:1.4}
+.wdd .chip.sel{outline:2px solid var(--accent);background:var(--accent-soft)}
+.wdd .chip.right{border-color:var(--ok);background:var(--ok-soft)}
+.wdd .chip.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.wdd .chip.drag{opacity:.4}
+.wdd .whelp{font-size:.82rem;color:var(--muted)}
+
+/* izbira prave slike */
+.wpick .wq{font-size:.96rem}
+.wpick .wopts{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.wpick .wo{font:inherit;text-align:left;border:2px solid var(--line);border-radius:10px;background:var(--bg);padding:8px;cursor:pointer;display:flex;flex-direction:column;gap:6px;color:var(--fg)}
+.wpick .wo:hover{border-color:var(--muted)}
+.wpick .wo b{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.wpick .wo svg{max-width:100%;height:auto}
+.wpick .wo.right{border-color:var(--ok);background:var(--ok-soft)}
+.wpick .wo.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.wpick .wfb{font-size:.92rem;font-weight:600;min-height:1.2em}
+.wpick .wfb.ok{color:var(--ok)} .wpick .wfb.bad{color:var(--bad)}
+.wpick .wwhy{font-size:.92rem;display:none}
+
+/* korak za korakom */
+.wstep .wcode{margin:0;padding:10px 0;font-family:var(--f-mono);font-size:.84rem;line-height:1.6;background:var(--code-bg);color:var(--code-fg);border-radius:8px;overflow-x:auto}
+.wstep .wcode .ln{display:block;padding:0 14px;white-space:pre;border-left:3px solid transparent}
+.wstep .wcode .ln.cur{background:rgba(240,168,104,.18);border-left-color:var(--k)}
+.wstep .wcode .ln.past{opacity:.6}
+.wstep .wfr{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;overflow-x:auto}
+.wstep .wfr svg{max-width:100%;height:auto}
+.wstep .wcap{font-size:.95rem;min-height:2.6em}
+.wstep .wnav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.wstep .wnav .wpos{font-family:var(--f-mono);font-size:.82rem;color:var(--muted)}
+
+/* simulator in raziskovalci */
+.wsim .wbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.wsim .wbar input[type=text]{flex:1;min-width:200px;font-family:var(--f-mono);font-size:.88rem;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
+.wsim .wq{font-family:var(--f-mono);font-size:.84rem;background:var(--code-bg);color:var(--code-fg);border-radius:8px;padding:8px 0;display:flex;flex-direction:column}
+.wsim .wq .ln{padding:0 14px;white-space:pre;border-left:3px solid transparent;opacity:.55}
+.wsim .wq .ln.done{opacity:1}
+.wsim .wq .ln.next{opacity:1;background:rgba(240,168,104,.18);border-left-color:var(--k)}
+.wsim .wq .ln.err{opacity:1;background:rgba(240,133,120,.2);border-left-color:var(--bad)}
+.wsim .wmsg{font-family:var(--f-mono);font-size:.84rem;min-height:1.4em;padding:6px 10px;border-radius:6px;background:var(--sunk)}
+.wsim .wmsg.bad{background:var(--bad-soft);color:var(--bad)}
+.wsim .wout{white-space:pre-wrap}
+.wsim .wsvg,.widx .wsvg,.wgrid .wsvg,.wcount .wsvg{overflow-x:auto;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px}
+.wsim .wsvg svg,.widx .wsvg svg,.wgrid .wsvg svg,.wcount .wsvg svg{max-width:100%;height:auto}
+.mem .cell.gc{opacity:.35;stroke-dasharray:3 3}
+.mem text.gc{opacity:.45}
+.mem .cell.sel{fill:var(--accent);stroke:var(--accent)}
+.mem .cell.bad{fill:var(--bad-soft);stroke:var(--bad)}
+.mem .cell.row{fill:var(--accent-soft);stroke:var(--accent)}
+.mem .cell.col{fill:var(--seen-soft);stroke:var(--seen)}
+.mem .cell.dg{fill:var(--ok-soft);stroke:var(--ok)}
+.mem .tc1{fill:var(--accent-soft);stroke:var(--accent)}
+.mem .tc2{fill:var(--ok-soft);stroke:var(--ok)}
+.mem .tc3{fill:var(--seen-soft);stroke:var(--seen)}
+.mem .tcb{fill:var(--bad-soft);stroke:var(--bad)}
+.mem .bar{fill:var(--accent)}
+.mem .barbg{fill:var(--sunk)}
+.mem .ln2{stroke:var(--muted);stroke-width:1.4;fill:none}
+.mem .ar2{fill:none;stroke:var(--muted);stroke-width:1.4}
+.mem .ah2{fill:var(--muted)}
+.mem .x{stroke:var(--bad);stroke-width:2.5}
+.mem text.big{font-size:15px;font-weight:700}
+.mem text.sm{font-size:11px;fill:var(--muted)}
+.widx .wctl,.wgrid .wctl,.wcount .wctl{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.widx .wctl label,.wgrid .wctl label{font-size:.88rem;display:flex;gap:6px;align-items:center}
+.widx select,.wgrid select{font:inherit;font-size:.88rem;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
+.widx .wres,.wgrid .wres{font-family:var(--f-mono);font-size:.86rem;padding:6px 10px;border-radius:6px;background:var(--sunk)}
+.widx .wres.bad{background:var(--bad-soft);color:var(--bad)}
+
+/* oddaja kode: primerjava s primerom rešitve */
+.cmp{display:flex;flex-direction:column;gap:10px;border-top:1px dashed var(--line);padding-top:12px}
+.cmp .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.cmp .cols>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.cmp .cols pre{margin:0;max-height:420px;overflow:auto}
+.cmp .mer{display:flex;flex-direction:column;gap:6px;padding:10px 12px;background:var(--sunk);border-radius:8px}
+.cmp .mer label{display:flex;gap:8px;align-items:flex-start;font-size:.94rem;cursor:pointer}
+.cmp .mer label input{margin-top:4px}
+.cmp .verdict{display:flex;gap:10px;flex-wrap:wrap}
+.tag.st-cmp{background:var(--ok-soft);color:var(--ok)}
+.tag.st-redo{background:var(--seen-soft);color:var(--seen)}
+.tag.self{background:var(--sunk);color:var(--muted)}
+.selfnote{font-size:.88rem;color:var(--muted);margin:0}
+
+/* izvajalnik programa (wtrace) */
+.wtrace .wtin{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.wtrace .wtin label{font-size:.9rem;font-weight:600;display:flex;gap:6px;align-items:center}
+.wtrace .wtin input,.wtrace .wtin select{font-family:var(--f-mono);font-size:.9rem;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
+.wtrace .wcode{margin:0;padding:10px 0;font-family:var(--f-mono);font-size:.84rem;line-height:1.6;background:var(--code-bg);color:var(--code-fg);border-radius:8px;overflow-x:auto}
+.wtrace .wcode .ln{display:block;padding:0 14px;white-space:pre;border-left:3px solid transparent}
+.wtrace .wcode .ln.cur{background:rgba(240,168,104,.18);border-left-color:var(--k)}
+.wtrace .wtvars{display:flex;gap:8px;flex-wrap:wrap;min-height:34px;align-items:center}
+.wtrace .tv{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);padding:3px 9px;font-family:var(--f-mono);font-size:.86rem}
+.wtrace .tv .tn{color:var(--muted)} .wtrace .tv .te{color:var(--muted)} .wtrace .tv .tval{font-weight:700}
+.wtrace .tv.chg{border-color:var(--accent);background:var(--accent-soft)}
+.wtrace .tnone{font-size:.88rem;color:var(--muted)}
+.wtrace .wtout{margin:0;font-family:var(--f-mono);font-size:.86rem;padding:8px 12px;border-radius:8px;background:var(--sunk);white-space:pre-wrap;min-height:2.2em}
+.wtrace .wtout.empty{color:var(--muted)}
+.wtrace .wcap{font-size:.92rem;min-height:1.4em}
+.wtrace .wcap.bad{color:var(--bad);font-weight:600}
+.wtrace .wnav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.wtrace .wnav .wpos{font-family:var(--f-mono);font-size:.82rem;color:var(--muted)}
+.wtrace .wlab{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.wtrace .wttab{overflow-x:auto;max-height:340px;overflow-y:auto;border:1px solid var(--line);border-radius:8px}
+.wtrace .wttab table{border-collapse:collapse;font-family:var(--f-mono);font-size:.82rem;width:100%}
+.wtrace .wttab th,.wtrace .wttab td{border-bottom:1px solid var(--line);padding:3px 10px;text-align:left;white-space:nowrap}
+.wtrace .wttab tr.cur td{background:var(--accent-soft)}
+.wtrace .wpred{display:flex;flex-direction:column;gap:6px;padding:8px 10px;border:1px dashed var(--muted);border-radius:8px}
+.wtrace .wpred textarea{font-family:var(--f-mono);font-size:.86rem;min-height:3.2em;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);resize:vertical}
+.wtrace .wfb{font-size:.92rem;font-weight:600;min-height:1.2em}
+.wtrace .wfb.ok{color:var(--ok)} .wtrace .wfb.bad{color:var(--bad)}
+.wo svg.fc{width:100% !important;max-width:230px;min-width:0;height:auto;display:block;margin:6px auto 0}
+
 </style>
 <style>
 /* LAV-RAČ exercise shell: light orange background with the portal's plum for text and buttons, and the same task colours as the teacher's results. The artifact's own content keeps its styles;
@@ -1604,7 +1757,10 @@ System.out.println(b);     // -128
 int x = 2000000000 * 3;    // množenje int * int, rezultat je prevelik za int
 System.out.println(x);     // 1705032704, ne 6000000000</pre>
       <p class="note">Prekoračitev ne povzroči izjeme in ne napake pri prevajanju. Program se izvede, rezultat pa je napačen. Takšna napaka je semantična (poglavje 1). Če pričakuješ velika števila, uporabi <code>long</code> in zapiši literal s črko <code>L</code>.</p>
-    </section>
+    
+<div class="eyebrow" style="margin-top:14px">Preizkusi se</div>
+<div class="w wtrace" data-w="t-byte-tr" data-cfg="{&quot;lines&quot;: [&quot;byte b = 125;&quot;, &quot;for (int i = 1; i &lt;= {n}; i++) {&quot;, &quot;    b++;&quot;, &quot;    System.out.print(b + \&quot; \&quot;);&quot;, &quot;}&quot;, &quot;System.out.println();&quot;], &quot;js&quot;: &quot;__l(0); b = 125;\nfor (i = 1; (__l(1), i &lt;= IN.n); i++) {\n    __l(2); b = Bt(b + 1);\n    __l(3); print(b + \&quot; \&quot;);\n} i = undefined;\n__l(5); println();&quot;, &quot;vars&quot;: [[&quot;b&quot;, &quot;int&quot;], [&quot;i&quot;, &quot;int&quot;]], &quot;inputs&quot;: [{&quot;n&quot;: &quot;n&quot;, &quot;l&quot;: &quot;število ponovitev =&quot;, &quot;t&quot;: &quot;int&quot;, &quot;v&quot;: 5, &quot;min&quot;: 1, &quot;max&quot;: 8}], &quot;predict&quot;: 1}"><div class="wh"><span class="wbadge">Sledi programu</span><span>Prekoračitev: byte se »zavije«</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Tip <code>byte</code> sprejme vrednosti od −128 do 127. Ko števec preseže 127, ne pride do napake: vrednost se zavije na drugi konec območja. Napovej izpis za 5 ponovitev.</p><div class="wtin"></div><div class="wpred"><span class="wlab">Napoved</span><span class="wp">Kaj izpiše program z izbranimi vrednostmi? Vpiši izpis in preveri.</span><textarea spellcheck="false" aria-label="Tvoja napoved izpisa"></textarea><div style="display:flex;gap:8px;align-items:center"><button class="btn primary js-pchk" type="button">Preveri napoved</button><span class="wfb" aria-live="polite"></span></div></div><div class="wcode" role="region" aria-label="Program"></div><span class="wlab">Spremenljivke</span><div class="wtvars"></div><span class="wlab">Izpis</span><pre class="wtout"></pre><div class="wcap" aria-live="polite"></div><div class="wnav"><button class="btn js-first" type="button" aria-label="Na začetek">⏮</button><button class="btn js-prev" type="button">◀ Nazaj</button><button class="btn primary js-next" type="button">Naprej ▶</button><button class="btn js-last" type="button" aria-label="Do konca">⏭</button><span class="wpos"></span><button class="btn ghost js-tab" type="button">Pokaži sled v tabeli</button></div><div class="wttab" hidden></div></div><div class="w wtrace" data-w="t-int-tr" data-cfg="{&quot;lines&quot;: [&quot;int a = 2000000000;&quot;, &quot;int m = {m};&quot;, &quot;int c = a * m;&quot;, &quot;long d = (long) a * m;&quot;, &quot;System.out.println(c);&quot;, &quot;System.out.println(d);&quot;], &quot;js&quot;: &quot;__l(0); a = 2000000000;\n__l(1); m = IN.m;\n__l(2); c = I(a * m);\n__l(3); d = a * m;\n__l(4); println(c);\n__l(5); println(d);&quot;, &quot;vars&quot;: [[&quot;a&quot;, &quot;int&quot;], [&quot;m&quot;, &quot;int&quot;], [&quot;c&quot;, &quot;int&quot;], [&quot;d&quot;, &quot;long&quot;]], &quot;inputs&quot;: [{&quot;n&quot;: &quot;m&quot;, &quot;l&quot;: &quot;m =&quot;, &quot;t&quot;: &quot;select&quot;, &quot;opts&quot;: [1, 2, 3, 4], &quot;v&quot;: 3}], &quot;predict&quot;: 1}"><div class="wh"><span class="wbadge">Sledi programu</span><span>Prekoračitev pri množenju</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Produkt dveh <code>int</code> je spet <code>int</code>, zato prevelik rezultat potihem »zavije«. Če pred množenjem eno število pretvorimo v <code>long</code>, je rezultat pravilen. Napovej izpis za m = 3.</p><div class="wtin"></div><div class="wpred"><span class="wlab">Napoved</span><span class="wp">Kaj izpiše program z izbranimi vrednostmi? Vpiši izpis in preveri.</span><textarea spellcheck="false" aria-label="Tvoja napoved izpisa"></textarea><div style="display:flex;gap:8px;align-items:center"><button class="btn primary js-pchk" type="button">Preveri napoved</button><span class="wfb" aria-live="polite"></span></div></div><div class="wcode" role="region" aria-label="Program"></div><span class="wlab">Spremenljivke</span><div class="wtvars"></div><span class="wlab">Izpis</span><pre class="wtout"></pre><div class="wcap" aria-live="polite"></div><div class="wnav"><button class="btn js-first" type="button" aria-label="Na začetek">⏮</button><button class="btn js-prev" type="button">◀ Nazaj</button><button class="btn primary js-next" type="button">Naprej ▶</button><button class="btn js-last" type="button" aria-label="Do konca">⏭</button><span class="wpos"></span><button class="btn ghost js-tab" type="button">Pokaži sled v tabeli</button></div><div class="wttab" hidden></div></div><div class="w wdd" data-w="t-rng-dd" data-cap="1"><div class="wh"><span class="wbadge">Povleci in spusti</span><span>Območje vrednosti</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Vsak tip postavi k njegovemu območju vrednosti. <span class="whelp">(Povleci ali tapni element, nato tapni mesto.)</span></p><div class="wslots"><div class="ws" data-s="0"><span class="wl">byte</span><div class="wz"></div></div><div class="ws" data-s="1"><span class="wl">short</span><div class="wz"></div></div><div class="ws" data-s="2"><span class="wl">int</span><div class="wz"></div></div><div class="ws" data-s="3"><span class="wl">long</span><div class="wz"></div></div></div><div class="wpool"><span class="chip" data-s="2">−2 147 483 648 … 2 147 483 647</span><span class="chip" data-s="0">−128 … 127</span><span class="chip" data-s="3">−9 223 372 036 854 775 808 … 9 223 372 036 854 775 807</span><span class="chip" data-s="1">−32 768 … 32 767</span></div></div><div class="w wtf" data-w="t-ob-tf" data-a1="Pravilno" data-a2="Napačno"><div class="wh"><span class="wbadge">Preizkusi se</span><span>Drži ali ne?</span><span class="wdone">✓ Opravljeno</span></div><div class="wi" data-a="1" data-why="Napake ni. Vrednost se zavije in b postane −128. Prekoračitev je semantična napaka: program se izvede, rezultat pa je napačen.">Pri <code>byte b = 127; b++;</code> Java med izvajanjem javi napako.</div><div class="wi" data-a="1" data-why="Produkt je &lt;code&gt;int * int&lt;/code&gt;, zato je rezultat &lt;code&gt;int&lt;/code&gt; in se zavije: x je 1705032704. Pravilno je &lt;code&gt;2000000000L * 3&lt;/code&gt; v spremenljivki tipa long."><code>int x = 2000000000 * 3;</code> v x shrani 6000000000.</div><div class="wi" data-a="0" data-why="Literal &lt;code&gt;5000000000L&lt;/code&gt; je tipa long. Brez črke L je literal tipa int in prevelik za int.">Če pričakujemo velika števila, uporabimo <code>long</code> in literal zapišemo s črko <code>L</code>.</div></div>
+</section>
 
     <section id="pretvarjanje">
       <div class="eyebrow">Razlaga 2</div>
@@ -1629,7 +1785,10 @@ System.out.println(d + " " + i + " " + n + " " + b);   // 7.0 9 -2 -56</pre>
         </tbody>
       </table></div>
       <p class="note">Pretvorba velja samo za izraz, v katerem je zapisana. Spremenljivka <code>a</code> ostane 7. Pretvorba <code>(int)</code> ne zaokroži: <code>(int) 3.99</code> je 3. Za zaokroževanje uporabimo <code>Math.round(3.99)</code>, ki vrne 4. Pretvorba <code>long → float</code> je samodejna, vendar lahko pri zelo velikih številih izgubi nekaj natančnosti.</p>
-    </section>
+    
+<div class="eyebrow" style="margin-top:14px">Preizkusi se</div>
+<div class="w wtrace" data-w="t-cast-tr" data-cfg="{&quot;lines&quot;: [&quot;int a = {a};&quot;, &quot;int b = {b};&quot;, &quot;double r1 = a / b;&quot;, &quot;double r2 = (double) a / b;&quot;, &quot;double r3 = (double) (a / b);&quot;, &quot;System.out.println(r1 + \&quot; \&quot; + r2 + \&quot; \&quot; + r3);&quot;], &quot;js&quot;: &quot;__l(0); a = IN.a;\n__l(1); b = IN.b;\n__l(2); r1 = div(a, b);\n__l(3); r2 = a / b;\n__l(4); r3 = div(a, b);\n__l(5); println(D(r1) + \&quot; \&quot; + D(r2) + \&quot; \&quot; + D(r3));&quot;, &quot;vars&quot;: [[&quot;a&quot;, &quot;int&quot;], [&quot;b&quot;, &quot;int&quot;], [&quot;r1&quot;, &quot;double&quot;], [&quot;r2&quot;, &quot;double&quot;], [&quot;r3&quot;, &quot;double&quot;]], &quot;inputs&quot;: [{&quot;n&quot;: &quot;a&quot;, &quot;l&quot;: &quot;a =&quot;, &quot;t&quot;: &quot;select&quot;, &quot;opts&quot;: [7, 10, 17, 20], &quot;v&quot;: 7}, {&quot;n&quot;: &quot;b&quot;, &quot;l&quot;: &quot;b =&quot;, &quot;t&quot;: &quot;select&quot;, &quot;opts&quot;: [2, 3, 4, 5], &quot;v&quot;: 2}], &quot;predict&quot;: 1}"><div class="wh"><span class="wbadge">Sledi programu</span><span>Celoštevilsko deljenje in pretvorba</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Če sta oba operanda <code>int</code>, je deljenje celoštevilsko, tudi če rezultat shranimo v <code>double</code>. Pretvorba <code>(double) a</code> se zgodi <b>pred</b> deljenjem. Napovej izpis za a = 7 in b = 2.</p><div class="wtin"></div><div class="wpred"><span class="wlab">Napoved</span><span class="wp">Kaj izpiše program z izbranimi vrednostmi? Vpiši izpis in preveri.</span><textarea spellcheck="false" aria-label="Tvoja napoved izpisa"></textarea><div style="display:flex;gap:8px;align-items:center"><button class="btn primary js-pchk" type="button">Preveri napoved</button><span class="wfb" aria-live="polite"></span></div></div><div class="wcode" role="region" aria-label="Program"></div><span class="wlab">Spremenljivke</span><div class="wtvars"></div><span class="wlab">Izpis</span><pre class="wtout"></pre><div class="wcap" aria-live="polite"></div><div class="wnav"><button class="btn js-first" type="button" aria-label="Na začetek">⏮</button><button class="btn js-prev" type="button">◀ Nazaj</button><button class="btn primary js-next" type="button">Naprej ▶</button><button class="btn js-last" type="button" aria-label="Do konca">⏭</button><span class="wpos"></span><button class="btn ghost js-tab" type="button">Pokaži sled v tabeli</button></div><div class="wttab" hidden></div></div><div class="w wdd" data-w="t-conv-dd" data-cap="0"><div class="wh"><span class="wbadge">Povleci in spusti</span><span>Samodejno ali s pretvorbo?</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Vsako prirejanje razvrsti: ali ga Java opravi sama (širši tip) ali moraš zapisati pretvorbo (tip). <span class="whelp">(Povleci ali tapni element, nato tapni mesto.)</span></p><div class="wslots"><div class="ws" data-s="0"><span class="wl">samodejno</span><div class="wz"></div></div><div class="ws" data-s="1"><span class="wl">potrebna pretvorba (tip)</span><div class="wz"></div></div></div><div class="wpool"><span class="chip" data-s="1"><code>double → int</code></span><span class="chip" data-s="1"><code>double → float</code></span><span class="chip" data-s="0"><code>int → long</code></span><span class="chip" data-s="0"><code>float → double</code></span><span class="chip" data-s="1"><code>long → int</code></span><span class="chip" data-s="1"><code>int → byte</code></span><span class="chip" data-s="0"><code>char → int</code></span><span class="chip" data-s="1"><code>int → char</code></span><span class="chip" data-s="0"><code>byte → int</code></span><span class="chip" data-s="0"><code>int → double</code></span></div></div><div class="w wtf" data-w="t-cast-tf" data-a1="Pravilno" data-a2="Napačno"><div class="wh"><span class="wbadge">Preizkusi se</span><span>Drži ali ne?</span><span class="wdone">✓ Opravljeno</span></div><div class="wi" data-a="1" data-why="Pretvorba &lt;b&gt;ne zaokroži&lt;/b&gt;, decimalni del odreže proti nič: 3. Za zaokroževanje uporabimo &lt;code&gt;Math.round(3.99)&lt;/code&gt;."><code>(int) 3.99</code> je 4.</div><div class="wi" data-a="0" data-why="Decimalni del odpade, vrednost se približa ničli."><code>(int) -2.5</code> je −2.</div><div class="wi" data-a="0" data-why="Vrednost 200 je zunaj območja byte (−128 … 127), zato se zavije: 200 − 256 = −56."><code>(byte) 200</code> je −56.</div><div class="wi" data-a="1" data-why="Najprej se izračuna celoštevilsko &lt;code&gt;7 / 2 = 3&lt;/code&gt;, nato pretvorba v 3.0. Za 3.5 zapišemo &lt;code&gt;(double) 7 / 2&lt;/code&gt;."><code>(double) (7 / 2)</code> je 3.5.</div></div>
+</section>
 
     <section id="znaki">
       <div class="eyebrow">Razlaga 3</div>
@@ -1655,7 +1814,10 @@ System.out.println(d - 'a');            // 3   (100 - 97)
 char z = '7';
 int cifra = z - '0';                    // 7   (številska vrednost cifre)</pre>
       <p class="note">Za znak uporabljamo enojne narekovaje <code>'A'</code>, za niz dvojne <code>"A"</code>. Rezultat <code>c + 1</code> je <code>int</code>, zato ga za znak ponovno pretvorimo z oklepajem.</p>
-    </section>
+    
+<div class="eyebrow" style="margin-top:14px">Preizkusi se</div>
+<div class="w wtrace" data-w="t-chr-tr" data-cfg="{&quot;lines&quot;: [&quot;char c = &#x27;{c}&#x27;;&quot;, &quot;int koda = c;&quot;, &quot;char naslednji = (char) (c + 1);&quot;, &quot;int razlika = c - &#x27;a&#x27;;&quot;, &quot;System.out.println(koda + \&quot; \&quot; + naslednji + \&quot; \&quot; + razlika);&quot;], &quot;js&quot;: &quot;__l(0); c = String(IN.c).charCodeAt(0);\n__l(1); koda = c;\n__l(2); naslednji = c + 1;\n__l(3); razlika = c - 97;\n__l(4); println(koda + \&quot; \&quot; + Ch(naslednji) + \&quot; \&quot; + razlika);&quot;, &quot;vars&quot;: [[&quot;c&quot;, &quot;char&quot;], [&quot;koda&quot;, &quot;int&quot;], [&quot;naslednji&quot;, &quot;char&quot;], [&quot;razlika&quot;, &quot;int&quot;]], &quot;inputs&quot;: [{&quot;n&quot;: &quot;c&quot;, &quot;l&quot;: &quot;znak c =&quot;, &quot;t&quot;: &quot;select&quot;, &quot;opts&quot;: [&quot;A&quot;, &quot;a&quot;, &quot;d&quot;, &quot;z&quot;, &quot;7&quot;], &quot;v&quot;: &quot;d&quot;}], &quot;predict&quot;: 1}"><div class="wh"><span class="wbadge">Sledi programu</span><span>Znak je število: računanje s koda ASCII</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Znak <code>char</code> hrani številsko kodo. Zato lahko z njim računamo, rezultat računanja pa je <code>int</code> in ga moramo za znak ponovno pretvoriti. Napovej izpis za znak d.</p><div class="wtin"></div><div class="wpred"><span class="wlab">Napoved</span><span class="wp">Kaj izpiše program z izbranimi vrednostmi? Vpiši izpis in preveri.</span><textarea spellcheck="false" aria-label="Tvoja napoved izpisa"></textarea><div style="display:flex;gap:8px;align-items:center"><button class="btn primary js-pchk" type="button">Preveri napoved</button><span class="wfb" aria-live="polite"></span></div></div><div class="wcode" role="region" aria-label="Program"></div><span class="wlab">Spremenljivke</span><div class="wtvars"></div><span class="wlab">Izpis</span><pre class="wtout"></pre><div class="wcap" aria-live="polite"></div><div class="wnav"><button class="btn js-first" type="button" aria-label="Na začetek">⏮</button><button class="btn js-prev" type="button">◀ Nazaj</button><button class="btn primary js-next" type="button">Naprej ▶</button><button class="btn js-last" type="button" aria-label="Do konca">⏭</button><span class="wpos"></span><button class="btn ghost js-tab" type="button">Pokaži sled v tabeli</button></div><div class="wttab" hidden></div></div><div class="w wdd" data-w="t-asc-dd" data-cap="1"><div class="wh"><span class="wbadge">Povleci in spusti</span><span>Tabela ASCII</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Vsak znak postavi k njegovi kodi. <span class="whelp">(Povleci ali tapni element, nato tapni mesto.)</span></p><div class="wslots"><div class="ws" data-s="0"><span class="wl">'0'</span><div class="wz"></div></div><div class="ws" data-s="1"><span class="wl">'A'</span><div class="wz"></div></div><div class="ws" data-s="2"><span class="wl">'a'</span><div class="wz"></div></div><div class="ws" data-s="3"><span class="wl">' ' (presledek)</span><div class="wz"></div></div></div><div class="wpool"><span class="chip" data-s="0">48</span><span class="chip" data-s="1">65</span><span class="chip" data-s="3">32</span><span class="chip" data-s="2">97</span></div></div><div class="w wpick" data-w="t-chr-pk" data-a="1"><div class="wh"><span class="wbadge">Katera slika?</span><span>Kaj izpiše stavek?</span><span class="wdone">✓ Opravljeno</span></div><div class="wq"><pre class="code">System.out.println('a' + 1);</pre></div><div class="wopts"><button type="button" class="wo"><b>A</b>b</button><button type="button" class="wo"><b>B</b>98</button><button type="button" class="wo"><b>C</b>a1</button><button type="button" class="wo"><b>D</b>napaka pri prevajanju</button></div><div class="wfb" aria-live="polite"></div><div class="wwhy">Pri seštevanju se <code>'a'</code> pretvori v število 97, vsota pa je <code>int</code> 98. Če želimo znak b, zapišemo <code>(char) ('a' + 1)</code>. Besedilo »a1« bi dobili z nizom: <code>"a" + 1</code>.</div></div>
+</section>
 
     <section id="razredi">
       <div class="eyebrow">Razlaga 4</div>
@@ -1683,7 +1845,10 @@ System.out.println(n + 1);         // 426
 String t = String.valueOf(n * 2);  // t je "850" (niz)
 System.out.println(t + "!");       // 850!</pre>
       <p class="note"><strong>Pozor: izjema.</strong> Če niz ni veljavno število, se sproži <code>NumberFormatException</code> (poglavje 9). Tako je pri <code>Integer.parseInt("12a")</code> in <code>Integer.parseInt("3.5")</code>. <code>Double.parseDouble</code> vedno zahteva piko, zato <code>Double.parseDouble("3,5")</code> ne deluje, ne glede na jezikovne nastavitve računalnika.</p>
-    </section>
+    
+<div class="eyebrow" style="margin-top:14px">Preizkusi se</div>
+<div class="w wtrace" data-w="t-pars-tr" data-cfg="{&quot;lines&quot;: [&quot;String s = \&quot;{s}\&quot;;&quot;, &quot;int n = Integer.parseInt(s);&quot;, &quot;System.out.println(n + 1);&quot;, &quot;String t = String.valueOf(n * 2);&quot;, &quot;System.out.println(t + \&quot;!\&quot;);&quot;], &quot;js&quot;: &quot;__l(0); s = String(IN.s);\n__l(1); if (!/^[+-]?\\d+$/.test(s)) throw new JErr(&#x27;java.lang.NumberFormatException: For input string: \&quot;&#x27; + s + &#x27;\&quot;&#x27;); n = parseInt(s, 10);\n__l(2); println(n + 1);\n__l(3); t = String(n * 2);\n__l(4); println(t + \&quot;!\&quot;);&quot;, &quot;vars&quot;: [[&quot;s&quot;, &quot;String&quot;], [&quot;n&quot;, &quot;int&quot;], [&quot;t&quot;, &quot;String&quot;]], &quot;inputs&quot;: [{&quot;n&quot;: &quot;s&quot;, &quot;l&quot;: &quot;niz s =&quot;, &quot;t&quot;: &quot;select&quot;, &quot;opts&quot;: [&quot;425&quot;, &quot;-7&quot;, &quot;12a&quot;, &quot;3.5&quot;], &quot;v&quot;: &quot;425&quot;}], &quot;predict&quot;: 1}"><div class="wh"><span class="wbadge">Sledi programu</span><span>Iz niza v število</span><span class="wdone">✓ Opravljeno</span></div><p class="wp"><code>Integer.parseInt</code> pretvori niz v <code>int</code>. Če niz ni veljavno celo število, se sproži izjema <code>NumberFormatException</code>. Napovej izpis za 425, nato preizkusi še 12a in 3.5.</p><div class="wtin"></div><div class="wpred"><span class="wlab">Napoved</span><span class="wp">Kaj izpiše program z izbranimi vrednostmi? Vpiši izpis in preveri.</span><textarea spellcheck="false" aria-label="Tvoja napoved izpisa"></textarea><div style="display:flex;gap:8px;align-items:center"><button class="btn primary js-pchk" type="button">Preveri napoved</button><span class="wfb" aria-live="polite"></span></div></div><div class="wcode" role="region" aria-label="Program"></div><span class="wlab">Spremenljivke</span><div class="wtvars"></div><span class="wlab">Izpis</span><pre class="wtout"></pre><div class="wcap" aria-live="polite"></div><div class="wnav"><button class="btn js-first" type="button" aria-label="Na začetek">⏮</button><button class="btn js-prev" type="button">◀ Nazaj</button><button class="btn primary js-next" type="button">Naprej ▶</button><button class="btn js-last" type="button" aria-label="Do konca">⏭</button><span class="wpos"></span><button class="btn ghost js-tab" type="button">Pokaži sled v tabeli</button></div><div class="wttab" hidden></div></div><div class="w wdd" data-w="t-cls-dd" data-cap="1"><div class="wh"><span class="wbadge">Povleci in spusti</span><span>Kateri zapis?</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Vsak namen poveži z ustreznim zapisom. <span class="whelp">(Povleci ali tapni element, nato tapni mesto.)</span></p><div class="wslots"><div class="ws" data-s="0"><span class="wl">niz → int</span><div class="wz"></div></div><div class="ws" data-s="1"><span class="wl">niz → double</span><div class="wz"></div></div><div class="ws" data-s="2"><span class="wl">število → niz</span><div class="wz"></div></div><div class="ws" data-s="3"><span class="wl">največji int</span><div class="wz"></div></div><div class="ws" data-s="4"><span class="wl">dvojiški zapis števila 5</span><div class="wz"></div></div></div><div class="wpool"><span class="chip" data-s="4"><code>Integer.toBinaryString(5)</code></span><span class="chip" data-s="0"><code>Integer.parseInt("42")</code></span><span class="chip" data-s="3"><code>Integer.MAX_VALUE</code></span><span class="chip" data-s="1"><code>Double.parseDouble("3.5")</code></span><span class="chip" data-s="2"><code>String.valueOf(42)</code></span></div></div><div class="w wtf" data-w="t-rz-tf" data-a1="Pravilno" data-a2="Napačno"><div class="wh"><span class="wbadge">Preizkusi se</span><span>Izjema ali ne?</span><span class="wdone">✓ Opravljeno</span></div><div class="wi" data-a="1" data-why="Niz »3.5« ni celo število: sproži se &lt;code&gt;NumberFormatException&lt;/code&gt;. Za realna števila uporabimo &lt;code&gt;Double.parseDouble&lt;/code&gt;."><code>Integer.parseInt("3.5")</code> vrne 3.</div><div class="wi" data-a="1" data-why="&lt;code&gt;parseDouble&lt;/code&gt; vedno zahteva piko, ne glede na jezikovne nastavitve: &lt;code&gt;NumberFormatException&lt;/code&gt;."><code>Double.parseDouble("3,5")</code> vrne 3.5, ker je vejica slovenski decimalni znak.</div><div class="wi" data-a="0" data-why="Pika je decimalni znak, zato pretvorba uspe."><code>Double.parseDouble("3.5")</code> vrne 3.5.</div></div>
+</section>
 
     <section id="operatorji">
       <div class="eyebrow">Razlaga 5</div>
@@ -1747,7 +1912,10 @@ System.out.println(n << 1);   // 36   (premik v levo = množenje z 2)
 int m = (n > 10) ? n * 2 : n / 2;   // m = 36 (pogojni operator)</pre>
       <p class="note"><strong>Kratko sklenjeno vrednotenje.</strong> Pri <code>&amp;&amp;</code> se druga stran ne izračuna, če je prva napačna. Pri <code>||</code> se druga stran ne izračuna, če je prva pravilna. Zato v <code>d != 0 &amp;&amp; 10 / d &gt; 1</code> ne pride do deljenja z nič.</p>
       <p class="note"><strong>Pozor:</strong> <code>=</code> prireja, <code>==</code> primerja. Pri nizih primerjamo z <code>equals</code>, ne z <code>==</code>. Pri <code>+</code> je ena od strani niz, zato se izvede združevanje besedila, ne seštevanje.</p>
-    </section>
+    
+<div class="eyebrow" style="margin-top:14px">Preizkusi se</div>
+<div class="w wtrace" data-w="t-inc-tr" data-cfg="{&quot;lines&quot;: [&quot;int x = {x};&quot;, &quot;int a = x++;&quot;, &quot;int b = ++x;&quot;, &quot;int c = x-- + --x;&quot;, &quot;System.out.println(a + \&quot; \&quot; + b + \&quot; \&quot; + c + \&quot; \&quot; + x);&quot;], &quot;js&quot;: &quot;__l(0); x = IN.x;\n__l(1); a = x++;\n__l(2); b = ++x;\n__l(3); c = x-- + --x;\n__l(4); println(a + \&quot; \&quot; + b + \&quot; \&quot; + c + \&quot; \&quot; + x);&quot;, &quot;vars&quot;: [[&quot;x&quot;, &quot;int&quot;], [&quot;a&quot;, &quot;int&quot;], [&quot;b&quot;, &quot;int&quot;], [&quot;c&quot;, &quot;int&quot;]], &quot;inputs&quot;: [{&quot;n&quot;: &quot;x&quot;, &quot;l&quot;: &quot;x =&quot;, &quot;t&quot;: &quot;int&quot;, &quot;v&quot;: 5, &quot;min&quot;: 1, &quot;max&quot;: 9}], &quot;predict&quot;: 1}"><div class="wh"><span class="wbadge">Sledi programu</span><span>Prefiksni in postfiksni ++ in --</span><span class="wdone">✓ Opravljeno</span></div><p class="wp"><code>x++</code> vrne staro vrednost in šele nato poveča x, <code>++x</code> najprej poveča x in vrne novo vrednost. Opazuj, kako se x spreminja v vsaki vrstici. Napovej izpis za x = 5.</p><div class="wtin"></div><div class="wpred"><span class="wlab">Napoved</span><span class="wp">Kaj izpiše program z izbranimi vrednostmi? Vpiši izpis in preveri.</span><textarea spellcheck="false" aria-label="Tvoja napoved izpisa"></textarea><div style="display:flex;gap:8px;align-items:center"><button class="btn primary js-pchk" type="button">Preveri napoved</button><span class="wfb" aria-live="polite"></span></div></div><div class="wcode" role="region" aria-label="Program"></div><span class="wlab">Spremenljivke</span><div class="wtvars"></div><span class="wlab">Izpis</span><pre class="wtout"></pre><div class="wcap" aria-live="polite"></div><div class="wnav"><button class="btn js-first" type="button" aria-label="Na začetek">⏮</button><button class="btn js-prev" type="button">◀ Nazaj</button><button class="btn primary js-next" type="button">Naprej ▶</button><button class="btn js-last" type="button" aria-label="Do konca">⏭</button><span class="wpos"></span><button class="btn ghost js-tab" type="button">Pokaži sled v tabeli</button></div><div class="wttab" hidden></div></div><div class="w wstep" data-w="t-prio-st"><div class="wh"><span class="wbadge">Korak za korakom</span><span>Prioriteta: izraz po korakih</span><span class="wdone">✓ Opravljeno</span></div><div class="wcode"><span class="ln">int r = 2 + 3 * 4 % 5 - 1;</span><span class="ln">int r = 2 + 12 % 5 - 1;</span><span class="ln">int r = 2 + 2 - 1;</span><span class="ln">int r = 4 - 1;</span><span class="ln">int r = 3;</span></div><div class="wfr" data-line="0" data-note="Izraz ima operatorje +, *, %, −. Najprej se izračunata * in % (prioriteta 3), od leve proti desni." hidden></div><div class="wfr" data-line="1" data-note="3 * 4 = 12. Naslednji v skupini 3 je %, ki je z leve strani prvi neizračunan." hidden></div><div class="wfr" data-line="2" data-note="12 % 5 = 2. Zdaj ostaneta samo + in − (prioriteta 4), spet od leve proti desni." hidden></div><div class="wfr" data-line="3" data-note="2 + 2 = 4. Ostane še odštevanje." hidden></div><div class="wfr" data-line="4" data-note="4 − 1 = 3. Vrednost r je 3." hidden></div><div class="wcap" aria-live="polite"></div><div class="wnav"><button class="btn js-prev" type="button">◀ Nazaj</button><button class="btn primary js-next" type="button">Naprej ▶</button><span class="wpos"></span></div></div><div class="w wtrace" data-w="t-sc-tr" data-cfg="{&quot;lines&quot;: [&quot;int d = {d};&quot;, &quot;if (d != 0 {op} 10 / d &gt; 1) {&quot;, &quot;    System.out.println(\&quot;velik\&quot;);&quot;, &quot;} else {&quot;, &quot;    System.out.println(\&quot;ne\&quot;);&quot;, &quot;}&quot;], &quot;js&quot;: &quot;__l(0); d = IN.d;\nif ((__l(1), (IN.op === \&quot;&amp;&amp;\&quot;) ? (d !== 0 &amp;&amp; div(10, d) &gt; 1) : (((d !== 0) &amp; (div(10, d) &gt; 1)) === 1))) {\n    __l(2); println(\&quot;velik\&quot;);\n} else {\n    __l(4); println(\&quot;ne\&quot;);\n}&quot;, &quot;vars&quot;: [[&quot;d&quot;, &quot;int&quot;]], &quot;inputs&quot;: [{&quot;n&quot;: &quot;d&quot;, &quot;l&quot;: &quot;d =&quot;, &quot;t&quot;: &quot;select&quot;, &quot;opts&quot;: [0, 1, 2, 5, 10], &quot;v&quot;: 0}, {&quot;n&quot;: &quot;op&quot;, &quot;l&quot;: &quot;operator:&quot;, &quot;t&quot;: &quot;select&quot;, &quot;opts&quot;: [&quot;&amp;&amp;&quot;, &quot;&amp;&quot;], &quot;v&quot;: &quot;&amp;&amp;&quot;}], &quot;predict&quot;: 1}"><div class="wh"><span class="wbadge">Sledi programu</span><span>Kratko sklenjeno vrednotenje: && proti &</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Pri <code>&amp;&amp;</code> se desna stran ne izračuna, če je leva neresnična, zato ne pride do deljenja z nič. Bitni (in logični) <code>&amp;</code> izračuna <b>obe</b> strani. Napovej izpis za d = 0 z operatorjem &amp;&amp;, nato zamenjaj operator.</p><div class="wtin"></div><div class="wpred"><span class="wlab">Napoved</span><span class="wp">Kaj izpiše program z izbranimi vrednostmi? Vpiši izpis in preveri.</span><textarea spellcheck="false" aria-label="Tvoja napoved izpisa"></textarea><div style="display:flex;gap:8px;align-items:center"><button class="btn primary js-pchk" type="button">Preveri napoved</button><span class="wfb" aria-live="polite"></span></div></div><div class="wcode" role="region" aria-label="Program"></div><span class="wlab">Spremenljivke</span><div class="wtvars"></div><span class="wlab">Izpis</span><pre class="wtout"></pre><div class="wcap" aria-live="polite"></div><div class="wnav"><button class="btn js-first" type="button" aria-label="Na začetek">⏮</button><button class="btn js-prev" type="button">◀ Nazaj</button><button class="btn primary js-next" type="button">Naprej ▶</button><button class="btn js-last" type="button" aria-label="Do konca">⏭</button><span class="wpos"></span><button class="btn ghost js-tab" type="button">Pokaži sled v tabeli</button></div><div class="wttab" hidden></div></div><div class="w wdd" data-w="t-op-dd" data-cap="0"><div class="wh"><span class="wbadge">Povleci in spusti</span><span>Skupine operatorjev</span><span class="wdone">✓ Opravljeno</span></div><p class="wp">Operatorje razvrsti po skupinah. <span class="whelp">(Povleci ali tapni element, nato tapni mesto.)</span></p><div class="wslots"><div class="ws" data-s="0"><span class="wl">aritmetični</span><div class="wz"></div></div><div class="ws" data-s="1"><span class="wl">relacijski</span><div class="wz"></div></div><div class="ws" data-s="2"><span class="wl">logični</span><div class="wz"></div></div><div class="ws" data-s="3"><span class="wl">bitni</span><div class="wz"></div></div><div class="ws" data-s="4"><span class="wl">prireditveni</span><div class="wz"></div></div></div><div class="wpool"><span class="chip" data-s="3"><code>~</code></span><span class="chip" data-s="4"><code>+=</code></span><span class="chip" data-s="0"><code>/</code></span><span class="chip" data-s="2"><code>!</code></span><span class="chip" data-s="4"><code>*=</code></span><span class="chip" data-s="0"><code>%</code></span><span class="chip" data-s="1"><code>&lt;=</code></span><span class="chip" data-s="1"><code>!=</code></span><span class="chip" data-s="2"><code>||</code></span><span class="chip" data-s="3"><code>&gt;&gt;</code></span><span class="chip" data-s="2"><code>&amp;&amp;</code></span><span class="chip" data-s="3"><code>^</code></span></div></div><div class="w wtf" data-w="t-op-tf" data-a1="Pravilno" data-a2="Napačno"><div class="wh"><span class="wbadge">Preizkusi se</span><span>Kaj izpiše?</span><span class="wdone">✓ Opravljeno</span></div><div class="wi" data-a="0" data-why="Že prvi &lt;code&gt;+&lt;/code&gt; ima na eni strani niz, zato je to združevanje: »53«, nato »532«."><code>System.out.println("5" + 3 + 2);</code> izpiše 532.</div><div class="wi" data-a="1" data-why="Od leve proti desni: najprej &lt;code&gt;5 + 3 = 8&lt;/code&gt; (števili), nato združevanje z nizom: »82«."><code>System.out.println(5 + 3 + "2");</code> izpiše 52.</div><div class="wi" data-a="1" data-why="Celoštevilsko deljenje odreže decimalni del proti nič: −3."><code>-7 / 2</code> je −4.</div><div class="wi" data-a="0" data-why="Predznak ostanka je enak predznaku deljenca."><code>-7 % 2</code> je −1.</div><div class="wi" data-a="0" data-why="&lt;code&gt;~n&lt;/code&gt; je &lt;code&gt;−n − 1&lt;/code&gt;, premik v desno za 1 pa deli z 2.">Pri <code>int n = 18;</code> je <code>~n</code> enak −19 in <code>n &gt;&gt; 1</code> enak 9.</div></div>
+</section>
 
     <section id="napake">
       <div class="eyebrow">Razlaga 6</div>
@@ -1766,7 +1934,10 @@ int m = (n > 10) ? n * 2 : n / 2;   // m = 36 (pogojni operator)</pre>
         </tbody>
       </table></div>
       <p class="note">Prekoračitev in pretvorba pogosto ne javita napake. Program se izvede, rezultat pa je napačen, zato rezultate vedno preveri z izračunom na papirju.</p>
-    </section>
+    
+<div class="eyebrow" style="margin-top:14px">Preizkusi se</div>
+<div class="w wtf" data-w="t-er-tf" data-a1="Se prevede" data-a2="Se ne prevede"><div class="wh"><span class="wbadge">Preizkusi se</span><span>Se prevede?</span><span class="wdone">✓ Opravljeno</span></div><div class="wi" data-a="1" data-why="Vrednost 200 ni v območju byte (−128 … 127): napaka &lt;em&gt;possible lossy conversion&lt;/em&gt;. Če res želimo: &lt;code&gt;(byte) 200&lt;/code&gt; da −56."><code>byte b = 200;</code></div><div class="wi" data-a="1" data-why="Realno število ne gre v int brez pretvorbe. Zapišemo &lt;code&gt;double x = 3.5;&lt;/code&gt; ali &lt;code&gt;(int) 3.5&lt;/code&gt;."><code>int x = 3.5;</code></div><div class="wi" data-a="1" data-why="Literal brez črke L je tipa int in je prevelik: &lt;em&gt;integer number too large&lt;/em&gt;. Pravilno: &lt;code&gt;5000000000L&lt;/code&gt;."><code>long l = 5000000000;</code></div><div class="wi" data-a="1" data-why="Dvojni narekovaji pomenijo niz, ne znak. Za znak: &lt;code&gt;&#x27;A&#x27;&lt;/code&gt;."><code>char c = "A";</code></div><div class="wi" data-a="0" data-why="Znak se samodejno pretvori v širši tip &lt;code&gt;int&lt;/code&gt;: i je 65."><code>char c = 'A'; int i = c;</code></div></div>
+</section>
 
     <!-- ===================== NALOGE ===================== -->
     <section id="naloge" style="gap:24px">
@@ -2444,11 +2615,14 @@ let remote = null, pushTimer = null, pushing = false, dirty = false;
 function saveLocal(){ LavRac.saveUi(S); }
 function save(){ LavRac.saveUi(S); }
 function st(id){ return S[id] || (S[id] = {}); }
-const RANK = {ok:2, seen:1};
+const RANK = {ok:2, cmp:2, seen:1, redo:1};
 function summary(){
-  const r = {resenih:0, tock:0, vseh:T.length, vsehTock:T.reduce((a,t)=>a+t.pts,0), sklopi:{}};
+  const pt = T.filter(t=>t.type!=="code");
+  const r = {resenih:0, tock:0, vseh:T.length, vsehTock:pt.reduce((a,t)=>a+t.pts,0), kodaVseh:T.length-pt.length, kodaPrimerjanih:0, sklopi:{}};
   T.forEach(t=>{ const k=t.lv; r.sklopi[k] = r.sklopi[k] || {resenih:0, vseh:0}; r.sklopi[k].vseh++;
-    if(S[t.id] && S[t.id].state==="ok"){ r.resenih++; r.tock+=t.pts; r.sklopi[k].resenih++; } });
+    const sv = S[t.id] && S[t.id].state;
+    if(t.type==="code"){ if(sv==="cmp" || sv==="ok"){ r.resenih++; r.kodaPrimerjanih++; r.sklopi[k].resenih++; } }
+    else if(sv==="ok"){ r.resenih++; r.tock+=t.pts; r.sklopi[k].resenih++; } });
   return r;
 }
 async function push(){
@@ -2467,7 +2641,7 @@ function merge(R, rT){
     if(!l){ S[id] = r; changed = true; return; }
     const base = newer ? Object.assign({}, l, r) : Object.assign({}, r, l);
     const rs = Math.max(RANK[l.state]||0, RANK[r.state]||0);
-    base.state = rs===2 ? "ok" : rs===1 ? "seen" : undefined;
+    { const lr = RANK[l.state]||0, rr = RANK[r.state]||0; base.state = (lr||rr) ? (lr>=rr ? l.state : r.state) : undefined; }
     base.h = Math.max(l.h||0, r.h||0);
     if(JSON.stringify(base)!==JSON.stringify(l)){ S[id] = base; changed = true; }
   });
@@ -2517,6 +2691,8 @@ const srcLabel = s => { const r = /^MRAC\/(\d+)$/.exec(s); if(r) return `Katalog
 const ptsLabel = p => p===1 ? "1 točka" : p===2 ? "2 točki" : (p<5 ? p+" točke" : p+" točk");
 
 /* ---------- render tasks ---------- */
+const MER_ = {"17": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Pretvorba tipa (cast) je zapisana tam, kjer je potrebna, in daje pravilen tip.", "Znak (char) in njegova številska koda (ASCII) sta pravilno uporabljena.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "26": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "50": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Ostanek (%) in celoštevilsko deljenje (/) sta uporabljena na pravem mestu.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "51": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Ostanek (%) in celoštevilsko deljenje (/) sta uporabljena na pravem mestu.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "52": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Ostanek (%) in celoštevilsko deljenje (/) sta uporabljena na pravem mestu.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "53": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Ostanek (%) in celoštevilsko deljenje (/) sta uporabljena na pravem mestu.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "54": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Ostanek (%) in celoštevilsko deljenje (/) sta uporabljena na pravem mestu.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "56": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "57": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Ostanek (%) in celoštevilsko deljenje (/) sta uporabljena na pravem mestu.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "58": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Ostanek (%) in celoštevilsko deljenje (/) sta uporabljena na pravem mestu.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."], "59": ["Koda se prevede in izpis se ujema s pričakovanim (če izpis preverjaš).", "Ostanek (%) in celoštevilsko deljenje (/) sta uporabljena na pravem mestu.", "Moj postopek je lahko drugačen od primera, a daje enake rezultate."]};
+T.forEach((t,i)=>{ if(MER_[i]) t.m = MER_[i]; });
 LavRac.prepare(T, LEVELS, {"self":["C7","D8","F1","F2","F3","F4","F5","F7","F8","F9","F10"],"nobtn":["A2","A3","B2","B3","B7","C3","C8","D1","D2","D6","D7","E2","E3","E4","E6","E7","E8","E10","E11","E15","E22","E23","F6","F16","G4"]});
 [{"code":"public class Main {\n    public static void main(String[] args) {\n        short s = 32765;\n        for (int i = 0; i < 5; i++) {\n            s++;\n            System.out.println(s);\n        }\n    }\n}"},{"code":"public class Main {\n    public static void main(String[] args) {\n        String niz = \"19.95\";\n        double d = Double.parseDouble(niz);\n        System.out.println(d * 2);        // 39.9\n        int n = Integer.parseInt(niz);    // NumberFormatException\n        System.out.println(n);\n    }\n}"},{"code":"public class Main {\n    public static void main(String[] args) {\n        System.out.println(0.1 + 0.2);       // 0.30000000000000004\n        int centi = 10 + 20;                 // 30 centov\n        System.out.println(centi / 100.0);   // 0.3\n    }\n}"},{"code":"public class Main {\n    public static void main(String[] args) {\n        for (char c = 'A'; c <= 'E'; c++) {\n            System.out.println(c + \" = \" + (int) c);\n        }\n    }\n}","sol":"Izpis je A = 65, B = 66, C = 67, D = 68, E = 69. Z (int) c se znak pretvori v svojo kodo ASCII."},{"code":"public class Main {\n    public static String intToBinaryString(int n) {\n        if (n == 0) {\n            return \"0\";\n        }\n        String r = \"\";\n        while (n > 0) {\n            r = (n % 2) + r;\n            n = n / 2;\n        }\n        return r;\n    }\n\n    public static boolean primerjaj(int n) {\n        return intToBinaryString(n).equals(Integer.toBinaryString(n));\n    }\n\n    public static void main(String[] args) {\n        System.out.println(intToBinaryString(10));   // 1010\n        System.out.println(primerjaj(10));           // true\n    }\n}","sol":"Za 10 dobimo 1010 in primerjaj(10) vrne true. Niza primerjamo z equals, ne z ==."},{"code":"public class Main {\n    public static void main(String[] args) {\n        for (int i = 32; i <= 127; i++) {\n            System.out.print((char) i);\n        }\n    }\n}","sol":"Spremenljivka i je tipa int, zato jo za izpis znaka pretvorimo z (char). Znak s kodo 127 je kontrolni znak in se ne vidi. Če uporabiš spremenljivko tipa char, z zanko for (char c = ' '; c <= '~'; c++) izpišeš samo vidne znake do kode 126."}].forEach((f, k) => { HOME[k].jsolCode = f.code; if (f.sol) HOME[k].sol = f.sol; });
 T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });
@@ -2674,9 +2850,28 @@ function wire(el,t){
     html += `<p class="why">${esc(t.why)}</p>`;
     solEl.innerHTML = html;
   }
+  function drawCmp(empty){
+    const mine = (ed ? ed.value : "").trim();
+    const m = t.m || [];
+    let h = `<div class="cmp"><div class="cols">`;
+    if(!empty) h += `<div><span class="eyebrow">Tvoja koda</span><pre class="code">${hl(mine)}</pre></div>`;
+    h += `<div><span class="eyebrow">Ena od možnih rešitev</span><pre class="code">${hl(t.sol)}</pre></div></div>`;
+    h += `<p class="why">${esc(t.why)}</p>`;
+    if(!empty){
+      h += `<div class="mer"><span class="eyebrow">Primerjaj sam</span>` + m.map((x,k)=>`<label><input type="checkbox" data-k="${k}"${s.mer && s.mer[k] ? " checked":""}><span>${esc(x)}</span></label>`).join("") + `</div>`;
+      h += `<div class="verdict"><button class="btn primary js-cok" type="button">Razumem in znam sam</button><button class="btn js-cre" type="button">Moram še vaditi</button></div>`;
+    }
+    h += `</div>`;
+    solEl.innerHTML = h;
+    solEl.querySelectorAll(".mer input").forEach(i=>i.addEventListener("change",()=>{ s.mer = [...solEl.querySelectorAll(".mer input")].map(x=>x.checked); save(); }));
+    const ok2 = solEl.querySelector(".js-cok"), re2 = solEl.querySelector(".js-cre");
+    if(ok2) ok2.addEventListener("click",()=>{ s.state="cmp"; s.cmpAt=Date.now(); save(); paint(); progress(); show(true,"Shranjeno: naloga je označena kot primerjana."); });
+    if(re2) re2.addEventListener("click",()=>{ s.state="redo"; s.cmpAt=Date.now(); save(); paint(); progress(); show(false,"Shranjeno: naloga je označena za ponovitev."); });
+  }
   $(".js-sol",el).addEventListener("click",()=>{
-    if(solEl.hidden){ drawSol(); solEl.hidden=false; LavRac.solution(t.idx); $(".js-sol",el).textContent="Skrij rešitev"; }
-    else { solEl.hidden=true; $(".js-sol",el).textContent="Prikaži rešitev"; }
+    const btn = $(".js-sol",el);
+    if(solEl.hidden){ drawSol(); solEl.hidden=false; LavRac.solution(t.idx); btn.textContent="Skrij rešitev"; }
+    else { solEl.hidden=true; btn.textContent="Prikaži rešitev"; }
   });
 
   function show(ok,m){ fb.textContent=m; fb.className="feedback "+(ok?"ok":"bad"); }
@@ -2685,6 +2880,8 @@ function wire(el,t){
     const tg = $(".js-st",el);
     if(s.state==="ok"){ tg.hidden=false; tg.className="tag js-st st-ok"; tg.textContent="Rešeno"; }
     else if(s.state==="seen"){ tg.hidden=false; tg.className="tag js-st st-seen"; tg.textContent="Rešitev ogledana"; }
+    else if(s.state==="cmp"){ tg.hidden=false; tg.className="tag js-st st-cmp"; tg.textContent="Primerjano"; }
+    else if(s.state==="redo"){ tg.hidden=false; tg.className="tag js-st st-redo"; tg.textContent="Za ponovitev"; }
     else tg.hidden=true;
   }
   paint();
@@ -2710,6 +2907,589 @@ HOME.forEach((h,k)=>{
   homeEl.appendChild(el);
 });
 
+/* ---------- interaktivni gradniki v razlagi ---------- */
+(function(){
+const SVGNS = "http://www.w3.org/2000/svg";
+const wdone = root => !!(S["w-"+root.dataset.w] && S["w-"+root.dataset.w].ok);
+function finish(root){ const k = "w-"+root.dataset.w; const s = st(k); if(!s.ok){ s.ok = 1; save(); } root.classList.add("done"); }
+document.querySelectorAll(".w").forEach(r=>{ r.setAttribute("data-quiz",""); if(wdone(r)) r.classList.add("done"); });
+const el = (tag, cls, html) => { const e = document.createElement(tag); if(cls) e.className = cls; if(html!=null) e.innerHTML = html; return e; };
+const T_ = (x,y,t,cls,anchor) => `<text x="${x}" y="${y}"${cls?` class="${cls}"`:""}${anchor?` text-anchor="${anchor}"`:""}>${esc(t)}</text>`;
+
+/* ===== pravilno / napačno ===== */
+document.querySelectorAll(".wtf").forEach(root=>{
+  const items = [...root.querySelectorAll(".wi")];
+  const lab = [root.dataset.a1 || "Pravilno", root.dataset.a2 || "Napačno"];
+  const foot = el("div","wfoot",'<span class="wscore"></span><button class="btn ghost js-again" type="button">Še enkrat</button>');
+  root.appendChild(foot);
+  let answered = 0, good = 0;
+  const upd = ()=>{
+    foot.querySelector(".wscore").textContent = answered ? `${good} / ${items.length} pravilno` + (answered<items.length ? ` (odgovorjeno: ${answered})` : "") : `${items.length} trditev`;
+    if(answered===items.length) finish(root);
+  };
+  items.forEach(it=>{
+    const txt = el("div","wt"); while(it.firstChild) txt.appendChild(it.firstChild);
+    const seg = el("div","seg"); seg.setAttribute("role","group");
+    lab.forEach((l,k)=>{
+      const b = el("button"); b.type = "button"; b.textContent = l; b.setAttribute("aria-pressed","false");
+      b.addEventListener("click",()=>{
+        if(it.dataset.done) return; it.dataset.done = "1"; answered++;
+        const ok = +it.dataset.a === k; if(ok) good++;
+        it.classList.add(ok?"right":"wrong"); b.setAttribute("aria-pressed","true");
+        seg.querySelectorAll("button").forEach(x=>x.disabled = true); upd();
+      });
+      seg.appendChild(b);
+    });
+    const why = el("div","ww", it.dataset.why || "");
+    it.append(txt, seg, why);
+  });
+  foot.querySelector(".js-again").addEventListener("click",()=>{
+    items.forEach(it=>{ delete it.dataset.done; it.classList.remove("right","wrong"); it.querySelectorAll(".seg button").forEach(b=>{ b.disabled = false; b.setAttribute("aria-pressed","false"); }); });
+    answered = good = 0; upd();
+  });
+  upd();
+});
+
+/* ===== povleci in spusti (ali tapni in tapni) ===== */
+document.querySelectorAll(".wdd").forEach(root=>{
+  const cap = +root.dataset.cap || 0;
+  const pool = root.querySelector(".wpool");
+  const zones = [...root.querySelectorAll(".ws")];
+  const chips = [...root.querySelectorAll(".chip")];
+  const foot = el("div","wfoot",'<button class="btn primary js-chk" type="button">Preveri</button><button class="btn ghost js-rst" type="button">Ponastavi</button><span class="wscore"></span>');
+  root.appendChild(foot);
+  const score = foot.querySelector(".wscore");
+  let sel = null, dragged = null;
+  const clearV = ()=>{ chips.forEach(c=>c.classList.remove("right","wrong")); score.textContent = ""; };
+  const unsel = ()=>{ if(sel){ sel.classList.remove("sel"); sel = null; } };
+  function place(chip, target){
+    if(target !== pool && cap){
+      const occ = [...target.children].filter(x=>x!==chip);
+      while(occ.length >= cap) pool.appendChild(occ.shift());
+    }
+    target.appendChild(chip); clearV(); unsel();
+  }
+  chips.forEach(c=>{
+    c.draggable = true; c.tabIndex = 0;
+    c.addEventListener("dragstart",e=>{ dragged = c; c.classList.add("drag"); try{ e.dataTransfer.setData("text/plain","x"); e.dataTransfer.effectAllowed = "move"; }catch(_){} });
+    c.addEventListener("dragend",()=>{ c.classList.remove("drag"); dragged = null; zones.forEach(z=>z.classList.remove("over")); });
+    const pick = e=>{ e.stopPropagation(); if(sel===c){ unsel(); return; } if(sel){ place(sel, c.parentNode); return; } sel = c; c.classList.add("sel"); };
+    c.addEventListener("click",pick);
+    c.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); pick(e); } });
+  });
+  const targets = zones.map(z=>[z, z.querySelector(".wz")]).concat([[pool,pool]]);
+  targets.forEach(([box,t])=>{
+    box.addEventListener("dragover",e=>{ e.preventDefault(); box.classList.add("over"); });
+    box.addEventListener("dragleave",()=>box.classList.remove("over"));
+    box.addEventListener("drop",e=>{ e.preventDefault(); box.classList.remove("over"); if(dragged) place(dragged, t); });
+    box.addEventListener("click",()=>{ if(sel) place(sel, t); });
+  });
+  foot.querySelector(".js-rst").addEventListener("click",()=>{ chips.forEach(c=>pool.appendChild(c)); clearV(); unsel(); });
+  foot.querySelector(".js-chk").addEventListener("click",()=>{
+    let ok = 0, free = 0;
+    chips.forEach(c=>{
+      c.classList.remove("right","wrong");
+      const z = c.closest(".ws");
+      if(!z){ free++; return; }
+      const good = z.dataset.s === c.dataset.s;
+      c.classList.add(good?"right":"wrong"); if(good) ok++;
+    });
+    score.textContent = free ? `Najprej razvrsti vse (še ${free}).` : (ok===chips.length ? "Pravilno!" : `${ok} / ${chips.length} na pravem mestu.`);
+    if(!free && ok===chips.length) finish(root);
+  });
+});
+
+/* ===== izberi pravo sliko ===== */
+document.querySelectorAll(".wpick").forEach(root=>{
+  const fb = root.querySelector(".wfb"), why = root.querySelector(".wwhy");
+  root.querySelectorAll(".wo").forEach((b,k)=>{
+    b.addEventListener("click",()=>{
+      if(root.classList.contains("solved")) return;
+      const ok = k === +root.dataset.a;
+      b.classList.add(ok?"right":"wrong");
+      if(ok){ root.classList.add("solved"); fb.textContent = "Pravilno."; fb.className = "wfb ok"; if(why) why.style.display = "block"; finish(root); }
+      else { fb.textContent = "Ni pravilno. Poskusi še enkrat."; fb.className = "wfb bad"; }
+    });
+  });
+});
+
+/* ===== korak za korakom ===== */
+document.querySelectorAll(".wstep").forEach(root=>{
+  const lines = [...root.querySelectorAll(".wcode .ln")];
+  const frames = [...root.querySelectorAll(".wfr")];
+  const cap = root.querySelector(".wcap"), pos = root.querySelector(".wpos");
+  const prev = root.querySelector(".js-prev"), next = root.querySelector(".js-next");
+  let k = 0;
+  const show = ()=>{
+    frames.forEach((f,i)=>f.hidden = i!==k);
+    const cur = +frames[k].dataset.line;
+    lines.forEach((l,i)=>{ l.classList.toggle("cur", i===cur); l.classList.toggle("past", i<cur); });
+    cap.innerHTML = frames[k].dataset.note || "";
+    pos.textContent = `korak ${k+1} / ${frames.length}`;
+    prev.disabled = k===0; next.disabled = k===frames.length-1;
+    if(k===frames.length-1) finish(root);
+  };
+  prev.addEventListener("click",()=>{ if(k>0){ k--; show(); } });
+  next.addEventListener("click",()=>{ if(k<frames.length-1){ k++; show(); } });
+  show();
+});
+
+/* ===== pomnilniški simulator ===== */
+document.querySelectorAll(".wsim").forEach(root=>{
+  const scen = JSON.parse(root.dataset.sc);
+  const bar = root.querySelector(".wbar"), qEl = root.querySelector(".wq"), msgEl = root.querySelector(".wmsg"), outEl = root.querySelector(".wout"), svgEl = root.querySelector(".wsvg");
+  const inp = root.querySelector("input[type=text]");
+  let vars, heap, nid, hist, queue, out, last, nrun;
+  const CW = 46, CH = 30;
+  function reset(sc){ vars = []; heap = []; nid = 1; hist = []; out = []; last = null; nrun = 0; queue = sc ? sc.lines.slice() : []; msg("",false); draw(); }
+  const getVar = n => vars.find(v=>v.name===n);
+  const arr = v => v && v.ref ? heap.find(h=>h.id===v.ref) : null;
+  const CE = m => { const e = new Error(m); e.kind = "c"; return e; };
+  const RE = (n,m) => { const e = new Error(n + ": " + m); e.kind = "r"; return e; };
+  function intExpr(s){
+    s = s.trim();
+    let m;
+    const term = t=>{
+      t = t.trim(); let mm;
+      if(/^-?\d+$/.test(t)) return +t;
+      if((mm = t.match(/^(\w+)\.length$/))){ const v = getVar(mm[1]); if(!v) throw CE(`cannot find symbol: ${mm[1]}`); if(v.t!=="int[]") throw CE(`cannot find symbol: length`); const a = arr(v); if(!a) throw RE("NullPointerException", `Cannot read the array length because "${v.name}" is null`); return a.vals.length; }
+      if((mm = t.match(/^(\w+)\[(.+)\]$/))){ const v = getVar(mm[1]); if(!v) throw CE(`cannot find symbol: ${mm[1]}`); if(v.t!=="int[]") throw CE(`array required, but int found`); const a = arr(v); const i = intExpr(mm[2]); if(!a) throw RE("NullPointerException", `Cannot load from int array because "${v.name}" is null`); if(i<0||i>=a.vals.length) throw RE("ArrayIndexOutOfBoundsException", `Index ${i} out of bounds for length ${a.vals.length}`); return a.vals[i]; }
+      if(/^\w+$/.test(t)){ const v = getVar(t); if(!v) throw CE(`cannot find symbol: ${t}`); if(v.t!=="int") throw CE(`incompatible types: ${v.t} cannot be converted to int`); return v.val; }
+      throw CE(`neveljaven izraz: ${t}`);
+    };
+    if((m = s.match(/^(.+?)\s([+\-])\s(.+)$/))) return m[2]==="+" ? term(m[1]) + term(m[3]) : term(m[1]) - term(m[3]);
+    return term(s);
+  }
+  function arrExpr(s, allowInit){ // vrne {ref} za desno stran prireditve tabele
+    s = s.trim(); let m;
+    if((m = s.match(/^new int\[(.+)\]$/))){ const n = intExpr(m[1]); if(n<0) throw RE("NegativeArraySizeException", String(n)); if(n>10) throw CE("simulator podpira do 10 elementov"); return mk(new Array(n).fill(0)); }
+    if((m = s.match(/^(?:new int\[\]\s*)?\{(.*)\}$/))){
+      if(!allowInit && !/^new/.test(s)) throw CE("array constants can only be used in initializers (uporabi new int[] {...})");
+      const vals = m[1].trim()==="" ? [] : m[1].split(",").map(x=>{ if(!/^\s*-?\d+\s*$/.test(x)) throw CE("neveljavna vrednost: "+x.trim()); return +x; });
+      if(vals.length>10) throw CE("simulator podpira do 10 elementov"); return mk(vals);
+    }
+    if(s==="null") return {ref:null};
+    if((m = s.match(/^(\w+)\.clone\(\)$/))){ const v = getVar(m[1]); if(!v) throw CE(`cannot find symbol: ${m[1]}`); if(v.t!=="int[]") throw CE("cannot find symbol: clone()"); const a = arr(v); if(!a) throw RE("NullPointerException", `Cannot invoke "Object.clone()" because "${v.name}" is null`); return mk(a.vals.slice()); }
+    if(/^\w+$/.test(s)){ const v = getVar(s); if(!v) throw CE(`cannot find symbol: ${s}`); if(v.t!=="int[]") throw CE(`incompatible types: int cannot be converted to int[]`); return {ref:v.ref}; }
+    throw CE("neveljaven izraz: " + s);
+  }
+  function mk(vals){ const h = {id:nid++, vals}; heap.push(h); return {ref:h.id, fresh:true}; }
+  function exec(line){
+    let s = line.trim().replace(/;$/,"").trim(); let m;
+    if(!s) return;
+    last = null;
+    if((m = s.match(/^int\[\]\s*(\w+)\s*=\s*(.+)$/))){
+      if(getVar(m[1])) throw CE(`variable ${m[1]} is already defined`);
+      const r = arrExpr(m[2], true); vars.push({name:m[1], t:"int[]", ref:r.ref}); return;
+    }
+    if((m = s.match(/^int\s+(\w+)\s*=\s*(.+)$/))){
+      if(getVar(m[1])) throw CE(`variable ${m[1]} is already defined`);
+      vars.push({name:m[1], t:"int", val:intExpr(m[2])}); return;
+    }
+    if((m = s.match(/^(\w+)\[(.+)\]\s*=\s*(.+)$/))){
+      const v = getVar(m[1]); if(!v) throw CE(`cannot find symbol: ${m[1]}`); if(v.t!=="int[]") throw CE("array required, but int found");
+      const a = arr(v); const i = intExpr(m[2]); const x = intExpr(m[3]);
+      if(!a) throw RE("NullPointerException", `Cannot store to int array because "${v.name}" is null`);
+      if(i<0||i>=a.vals.length) throw RE("ArrayIndexOutOfBoundsException", `Index ${i} out of bounds for length ${a.vals.length}`);
+      a.vals[i] = x; last = {id:a.id, i}; return;
+    }
+    if((m = s.match(/^System\.out\.println\((.*)\)$/))){
+      const e = m[1].trim(); let mm, txt;
+      if((mm = e.match(/^(\w+)\s*(==|!=)\s*(\w+)$/)) && getVar(mm[1]) && getVar(mm[1]).t==="int[]" ){
+        const A = getVar(mm[1]), B = mm[3]==="null" ? {ref:null} : getVar(mm[3]); if(!B) throw CE(`cannot find symbol: ${mm[3]}`);
+        const eq = A.ref===B.ref; txt = String(mm[2]==="==" ? eq : !eq);
+      } else if((mm = e.match(/^(?:java\.util\.)?Arrays\.toString\((\w+)\)$/))){
+        const v = getVar(mm[1]); if(!v) throw CE(`cannot find symbol: ${mm[1]}`); const a = arr(v); txt = a ? "[" + a.vals.join(", ") + "]" : "null";
+      } else if((mm = e.match(/^(?:java\.util\.)?Arrays\.equals\((\w+),\s*(\w+)\)$/))){
+        const A = getVar(mm[1]), B = getVar(mm[2]); if(!A||!B) throw CE("cannot find symbol"); const a = arr(A), b = arr(B);
+        txt = String(a===b || (a && b && a.vals.length===b.vals.length && a.vals.every((x,i)=>x===b.vals[i])));
+      } else if(/^\w+$/.test(e) && getVar(e) && getVar(e).t==="int[]"){
+        const v = getVar(e); txt = v.ref ? "[I@" + (0x1b6d3586 + v.ref*4099).toString(16) : "null";
+      } else txt = String(intExpr(e));
+      out.push(txt); return;
+    }
+    if((m = s.match(/^(\w+)\s*=\s*(.+)$/))){
+      const v = getVar(m[1]); if(!v) throw CE(`cannot find symbol: ${m[1]}`);
+      if(v.t==="int"){ if(/new |clone|\{|null/.test(m[2])) throw CE("incompatible types: int[] cannot be converted to int"); v.val = intExpr(m[2]); return; }
+      const r = arrExpr(m[2], false); v.ref = r.ref; return;
+    }
+    throw CE("tega stavka simulator ne razume");
+  }
+  function run(line, fromQueue){
+    let status = "ok";
+    try { exec(line); msg(out.length ? "" : "", false); }
+    catch(e){
+      status = "err";
+      if(e.kind==="c") msg("Napaka pri prevajanju: " + e.message + ". Stanje pomnilnika se ni spremenilo.", true);
+      else if(e.kind==="r") msg(`Exception in thread "main" java.lang.${e.message}. V pravem programu se izvajanje tu konča.`, true);
+      else { status = "err"; msg("Napaka: " + e.message, true); }
+    }
+    hist.push({t:line.trim(), st:status}); nrun++;
+    draw();
+    if((fromQueue && !queue.length && nrun>=3) || nrun>=6) finish(root);
+  }
+  function msg(t,bad){ msgEl.textContent = t; msgEl.className = "wmsg" + (bad?" bad":""); msgEl.style.display = t ? "" : "none"; }
+  function drawQ(){
+    qEl.innerHTML = "";
+    hist.forEach(h=>qEl.appendChild(el("div","ln " + (h.st==="err"?"err":"done"), esc(h.t))));
+    queue.forEach((l,i)=>qEl.appendChild(el("div","ln" + (i===0?" next":""), esc(l))));
+    qEl.style.display = (hist.length||queue.length) ? "" : "none";
+    const bn = root.querySelector(".js-next"), ba = root.querySelector(".js-all");
+    if(bn){ bn.disabled = !queue.length; ba.disabled = !queue.length; }
+    outEl.textContent = out.length ? "Izpis:\n" + out.join("\n") : "";
+    outEl.style.display = out.length ? "" : "none";
+  }
+  function draw(){
+    drawQ();
+    const X0 = 12, SW = 190, HX = 270;
+    const nv = vars.length;
+    // kopica: vsaka tabela dobi svojo vrstico
+    let hy = 44; const pos = {};
+    heap.forEach(h=>{ pos[h.id] = hy; hy += 74; });
+    const H = Math.max(40 + nv*44 + 20, hy + 10, 120);
+    const refd = new Set(vars.filter(v=>v.t==="int[]" && v.ref).map(v=>v.ref));
+    let o = T_(12,16,"SKLAD","lbl") + T_(HX,16,"KOPICA","lbl") + `<line class="sep" x1="${HX-30}" y1="6" x2="${HX-30}" y2="${H-6}"/>`;
+    o += `<rect class="fr" x="${X0}" y="26" width="${SW}" height="${26+nv*44}" rx="6"/>` + T_(X0+8,43,"main","lbl");
+    const refs = [];
+    vars.forEach((v,i)=>{
+      const cy = 52 + i*44, cx = X0 + SW - 66;
+      o += T_(cx-8, cy+22, v.name, "", "end") + `<rect class="cell" x="${cx}" y="${cy+4}" width="58" height="${CH}"/>`;
+      if(v.t==="int") o += T_(cx+29, cy+24, v.val, "", "middle");
+      else if(v.ref){ o += `<circle class="dot" cx="${cx+29}" cy="${cy+4+CH/2}" r="4"/>`; refs.push([cx+29, cy+4+CH/2, v.ref, i]); }
+      else o += T_(cx+29, cy+24, "null", "nul", "middle");
+    });
+    heap.forEach(h=>{
+      const y = pos[h.id], gc = !refd.has(h.id);
+      o += T_(HX, y-8, `int[${h.vals.length}]` + (gc ? "  (nanjo ne kaže nobena referenca)" : ""), "lbl");
+      if(!h.vals.length) o += `<rect class="cell empty" x="${HX}" y="${y}" width="14" height="${CH}"/>`;
+      h.vals.forEach((x,k)=>{
+        const hi = last && last.id===h.id && last.i===k;
+        o += `<rect class="cell${hi?" hi":""}${gc?" gc":""}" x="${HX+k*CW}" y="${y}" width="${CW}" height="${CH}"/>` + T_(HX+k*CW+CW/2, y+CH/2+5, x, gc?"gc":"", "middle") + T_(HX+k*CW+CW/2, y+CH+13, k, "ix", "middle");
+      });
+    });
+    refs.forEach(([px,py,id,i])=>{
+      const ty = pos[id] + CH/2, mx = 218 + (i%4)*7;
+      const pts = Math.abs(ty-py)<1 ? [[px,py],[HX-1,py]] : [[px,py],[mx,py],[mx,ty],[HX-1,ty]];
+      o += `<polyline class="ar" points="${pts.map(p=>p.join(",")).join(" ")}"/><polygon class="ah" points="${HX-1},${ty} ${HX-8},${ty-4} ${HX-8},${ty+4}"/>`;
+    });
+    svgEl.innerHTML = `<svg class="mem" viewBox="0 0 ${HX+10*CW+20} ${H}" style="width:${HX+10*CW+20}px" role="img" aria-label="Pomnilnik: sklad in kopica">${o}</svg>`;
+  }
+  // kontrole
+  const sc = root.querySelector(".js-sc");
+  scen.forEach((s,i)=>{ const b = el("button","btn","" ); b.type = "button"; b.textContent = s.n; b.addEventListener("click",()=>{ reset(s); }); sc.appendChild(b); });
+  root.querySelector(".js-next").addEventListener("click",()=>{ if(queue.length) run(queue.shift(), true); });
+  root.querySelector(".js-all").addEventListener("click",()=>{ while(queue.length) run(queue.shift(), true); });
+  root.querySelector(".js-rs").addEventListener("click",()=>reset(null));
+  const go = ()=>{ const v = inp.value.trim(); if(!v) return; run(v, false); inp.value = ""; };
+  root.querySelector(".js-go").addEventListener("click",go);
+  inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); go(); } });
+  reset(scen[0]);
+});
+
+/* ===== naslov elementa in indeks ===== */
+document.querySelectorAll(".widx").forEach(root=>{
+  const svgEl = root.querySelector(".wsvg"), res = root.querySelector(".wres");
+  const selT = root.querySelector(".js-t"), selN = root.querySelector(".js-n");
+  const bPrev = root.querySelector(".js-prev"), bNext = root.querySelector(".js-next");
+  const TY = {byte:["byte",1], char:["char",2], int:["int",4], double:["double",8]};
+  let idx = 2, used = false;
+  function draw(){
+    const [tn, sz] = TY[selT.value]; const n = +selN.value; const base = 1000;
+    if(idx < -1) idx = -1; if(idx > n) idx = n;
+    const cw = 22 + 9*sz, X0 = 40, Y0 = 56;
+    const W = X0 + (n+2)*cw + 10;
+    let o = "";
+    for(let k=-1;k<=n;k++){
+      const x = X0 + (k+1)*cw, inside = k>=0 && k<n;
+      if(inside){
+        o += `<rect class="cell${k===idx?" sel":""}" x="${x}" y="${Y0}" width="${cw}" height="32"/>` + T_(x+cw/2, Y0+21, selT.value==="char" ? "'"+String.fromCharCode(97+k)+"'" : selT.value==="double" ? (k+0.5).toFixed(1) : (k*3+1), k===idx?"big":"", "middle") + T_(x+cw/2, Y0+48, k, "ix", "middle") + T_(x+cw/2, Y0+62, base+sz*k, "ix", "middle");
+      } else {
+        o += `<rect class="cell empty${k===idx?" bad":""}" x="${x}" y="${Y0}" width="${cw}" height="32"/>` + T_(x+cw/2, Y0+21, "?", "nul", "middle") + T_(x+cw/2, Y0+48, k, "ix", "middle");
+      }
+    }
+    const mx = X0 + (idx+1)*cw + cw/2;
+    o += `<polygon class="ah" points="${mx},${Y0-4} ${mx-7},${Y0-16} ${mx+7},${Y0-16}"/>` + T_(mx, Y0-22, "t["+idx+"]", "big", "middle");
+    o += T_(4, Y0+48, "indeks", "lbl") + T_(4, Y0+62, "naslov", "lbl");
+    svgEl.innerHTML = `<svg class="mem" viewBox="0 0 ${W} ${Y0+76}" style="width:${W}px" role="img" aria-label="Elementi tabele z indeksi in naslovi">${o}</svg>`;
+    if(idx>=0 && idx<n){ res.className = "wres"; res.textContent = `t[${idx}]  →  naslov = 1000 + ${idx} · ${sz} = ${base+sz*idx}   (tabela ${tn}[${n}] zasede ${n*sz} bajtov)`; }
+    else { res.className = "wres bad"; res.textContent = `t[${idx}]  →  ArrayIndexOutOfBoundsException: Index ${idx} out of bounds for length ${n}`; }
+    bPrev.disabled = idx<=-1; bNext.disabled = idx>=n;
+    if(used && idx>=n) finish(root);
+  }
+  bPrev.addEventListener("click",()=>{ idx--; used = true; draw(); });
+  bNext.addEventListener("click",()=>{ idx++; used = true; draw(); });
+  selT.addEventListener("change",draw); selN.addEventListener("change",draw);
+  draw();
+});
+
+/* ===== dvodimenzionalna tabela ===== */
+document.querySelectorAll(".wgrid").forEach(root=>{
+  const gEl = root.querySelector(".js-g"), mEl = root.querySelector(".js-m"), res = root.querySelector(".wres");
+  const selR = root.querySelector(".js-r"), selC = root.querySelector(".js-c");
+  const modes = [["cell","celica"],["row","vrstica"],["col","stolpec"],["diag","glavna diagonala"],["anti","stranska diagonala"],["edge","rob"],["inner","notranjost"]];
+  const seg = root.querySelector(".seg");
+  let mode = "cell", si = 1, sj = 2, seen = new Set();
+  modes.forEach(([k,l])=>{ const b = el("button"); b.type = "button"; b.textContent = l; b.dataset.k = k; b.setAttribute("aria-pressed", k===mode?"true":"false"); b.addEventListener("click",()=>{ mode = k; seen.add(k); seg.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b?"true":"false")); draw(); if(seen.size>=5) finish(root); }); seg.appendChild(b); });
+  function draw(){
+    const R = +selR.value, C = +selC.value; if(si>=R) si = R-1; if(sj>=C) sj = C-1;
+    const cw = 52, ch = 34, X0 = 34, Y0 = 30;
+    const hit = (i,j)=>{
+      switch(mode){
+        case "cell": return i===si && j===sj ? "sel" : "";
+        case "row": return i===si ? (j===sj?"sel":"row") : "";
+        case "col": return j===sj ? (i===si?"sel":"col") : "";
+        case "diag": return i===j ? "dg" : "";
+        case "anti": return i+j===R-1 ? "dg" : "";
+        case "edge": return (i===0||j===0||i===R-1||j===C-1) ? "dg" : "";
+        case "inner": return (i>0&&j>0&&i<R-1&&j<C-1) ? "dg" : "";
+      }
+    };
+    let o = "";
+    for(let j=0;j<C;j++) o += T_(X0+j*cw+cw/2, Y0-10, j, "ix", "middle");
+    for(let i=0;i<R;i++){
+      o += T_(X0-10, Y0+i*ch+ch/2+4, i, "ix", "end");
+      for(let j=0;j<C;j++){
+        const c = hit(i,j);
+        o += `<g data-i="${i}" data-j="${j}" style="cursor:pointer"><rect class="cell ${c}" x="${X0+j*cw}" y="${Y0+i*ch}" width="${cw}" height="${ch}"/>` + T_(X0+j*cw+cw/2, Y0+i*ch+ch/2+4, i*C+j+1, c==="sel"?"big":"", "middle") + `</g>`;
+      }
+    }
+    gEl.innerHTML = `<svg class="mem" viewBox="0 0 ${X0+C*cw+10} ${Y0+R*ch+8}" style="width:${X0+C*cw+10}px" role="img" aria-label="Dvodimenzionalna tabela">${o}</svg>`;
+    gEl.querySelectorAll("g[data-i]").forEach(g=>g.addEventListener("click",()=>{ si = +g.dataset.i; sj = +g.dataset.j; draw(); }));
+    // pomnilnik: tabela referenc na vrstice
+    let q = T_(12,16,"m","lbl") + T_(110,16,"vrstice (vsaka je svoja tabela)","lbl");
+    for(let i=0;i<R;i++){
+      const y = 28 + i*44, rowHi = (mode==="row"||mode==="cell"||mode==="col") && i===si;
+      q += `<rect class="cell${rowHi?" hi":""}" x="12" y="${y}" width="46" height="30"/><circle class="dot" cx="35" cy="${y+15}" r="4"/>` + T_(8,y+20,i,"ix","end");
+      q += `<polyline class="ar" points="35,${y+15} 104,${y+15}"/><polygon class="ah" points="105,${y+15} 98,${y+11} 98,${y+19}"/>`;
+      for(let j=0;j<C;j++){
+        const colHi = (mode==="col"||mode==="cell") && j===sj && i===si;
+        q += `<rect class="cell${rowHi && (mode==="row"||(mode!=="col"&&true))?" hi":""}${colHi?" sel":""}" x="${106+j*40}" y="${y}" width="40" height="30"/>` + T_(106+j*40+20, y+20, i*C+j+1, colHi?"big":"", "middle");
+      }
+    }
+    mEl.innerHTML = `<svg class="mem" viewBox="0 0 ${106+C*40+10} ${28+R*44}" style="width:${106+C*40+10}px" role="img" aria-label="Pomnilniška predstavitev: tabela referenc na vrstice">${q}</svg>`;
+    const cond = {cell:`m[${si}][${sj}]  je element v vrstici ${si} in stolpcu ${sj}`, row:`m[${si}]  je cela vrstica ${si} (tabela z m[${si}].length = ${C} elementi)`, col:`stolpec ${sj}: elementi m[0][${sj}], m[1][${sj}] … m[${R-1}][${sj}] (i teče po vrsticah)`, diag:"glavna diagonala: i == j" + (R!==C?"  (pri nekvadratni tabeli ni prava diagonala)":""), anti:"stranska diagonala: i + j == m.length − 1" + (R!==C?"  (velja za kvadratno tabelo)":""), edge:"rob: i == 0 || i == m.length − 1 || j == 0 || j == m[i].length − 1", inner:"notranjost: ostale celice, 0 < i < m.length − 1 in 0 < j < m[i].length − 1"}[mode];
+    res.textContent = `m.length = ${R} (vrstic)   m[0].length = ${C} (stolpcev)\n${cond}`;
+  }
+  selR.addEventListener("change",draw); selC.addEventListener("change",draw);
+  draw();
+});
+
+/* ===== kocka in tabela pogostosti ===== */
+document.querySelectorAll(".wcount").forEach(root=>{
+  const svgEl = root.querySelector(".wsvg"), res = root.querySelector(".wres");
+  let cnt, total;
+  const reset = ()=>{ cnt = new Array(7).fill(0); total = 0; res.textContent = "stevec je še sama ničla."; draw(); };
+  function draw(hi){
+    const CW = 54, X0 = 62, mx = Math.max(1, ...cnt);
+    let o = T_(4,30,"stevec","lbl");
+    for(let k=0;k<7;k++){
+      const x = X0 + k*CW;
+      o += `<rect class="cell${k===hi?" hi":""}${k===0?" empty":""}" x="${x}" y="14" width="${CW}" height="30"/>` + T_(x+CW/2,34,cnt[k],k===0?"nul":"","middle") + T_(x+CW/2,58,k,"ix","middle");
+      if(k>0){ const h = Math.round(80*cnt[k]/mx); o += `<rect class="barbg" x="${x+10}" y="70" width="${CW-20}" height="80"/><rect class="bar" x="${x+10}" y="${150-h}" width="${CW-20}" height="${h}"/>`; o += T_(x+CW/2,166,k,"sm","middle"); }
+    }
+    svgEl.innerHTML = `<svg class="mem" viewBox="0 0 ${X0+7*CW+10} 176" style="width:${X0+7*CW+10}px" role="img" aria-label="Tabela pogostosti metov kocke">${o}</svg>`;
+  }
+  const throwN = n=>{ let met = 0; for(let i=0;i<n;i++){ met = Math.floor(Math.random()*6)+1; cnt[met]++; total++; } res.textContent = `met = ${met}  →  stevec[${met}]++      skupaj metov: ${total}`; draw(met); if(total>=50) finish(root); };
+  root.querySelector(".js-1").addEventListener("click",()=>throwN(1));
+  root.querySelector(".js-10").addEventListener("click",()=>throwN(10));
+  root.querySelector(".js-100").addEventListener("click",()=>throwN(100));
+  root.querySelector(".js-rs").addEventListener("click",reset);
+  reset();
+});
+
+/* ===== izvajalnik programa: vrstica za vrstico, spremenljivke, izpis ===== */
+class JErr extends Error {}
+const TRACE_FN = {
+"t-byte-tr":function(IN,println,print,D,Ch,I,Bt,Sh,div,rem,cl,frames,out,JErr){"use strict";var b,i;
+function __l(k){ if(frames.length>500) throw new JErr("__limit"); frames.push({k:k,v:{b:cl(b),i:cl(i)},o:out.length}); }
+__l(0); b = 125;
+for (i = 1; (__l(1), i <= IN.n); i++) {
+    __l(2); b = Bt(b + 1);
+    __l(3); print(b + " ");
+} i = undefined;
+__l(5); println();
+__l(-1);
+},
+"t-int-tr":function(IN,println,print,D,Ch,I,Bt,Sh,div,rem,cl,frames,out,JErr){"use strict";var a,m,c,d;
+function __l(k){ if(frames.length>500) throw new JErr("__limit"); frames.push({k:k,v:{a:cl(a),m:cl(m),c:cl(c),d:cl(d)},o:out.length}); }
+__l(0); a = 2000000000;
+__l(1); m = IN.m;
+__l(2); c = I(a * m);
+__l(3); d = a * m;
+__l(4); println(c);
+__l(5); println(d);
+__l(-1);
+},
+"t-cast-tr":function(IN,println,print,D,Ch,I,Bt,Sh,div,rem,cl,frames,out,JErr){"use strict";var a,b,r1,r2,r3;
+function __l(k){ if(frames.length>500) throw new JErr("__limit"); frames.push({k:k,v:{a:cl(a),b:cl(b),r1:cl(r1),r2:cl(r2),r3:cl(r3)},o:out.length}); }
+__l(0); a = IN.a;
+__l(1); b = IN.b;
+__l(2); r1 = div(a, b);
+__l(3); r2 = a / b;
+__l(4); r3 = div(a, b);
+__l(5); println(D(r1) + " " + D(r2) + " " + D(r3));
+__l(-1);
+},
+"t-chr-tr":function(IN,println,print,D,Ch,I,Bt,Sh,div,rem,cl,frames,out,JErr){"use strict";var c,koda,naslednji,razlika;
+function __l(k){ if(frames.length>500) throw new JErr("__limit"); frames.push({k:k,v:{c:cl(c),koda:cl(koda),naslednji:cl(naslednji),razlika:cl(razlika)},o:out.length}); }
+__l(0); c = String(IN.c).charCodeAt(0);
+__l(1); koda = c;
+__l(2); naslednji = c + 1;
+__l(3); razlika = c - 97;
+__l(4); println(koda + " " + Ch(naslednji) + " " + razlika);
+__l(-1);
+},
+"t-pars-tr":function(IN,println,print,D,Ch,I,Bt,Sh,div,rem,cl,frames,out,JErr){"use strict";var s,n,t;
+function __l(k){ if(frames.length>500) throw new JErr("__limit"); frames.push({k:k,v:{s:cl(s),n:cl(n),t:cl(t)},o:out.length}); }
+__l(0); s = String(IN.s);
+__l(1); if (!/^[+-]?\d+$/.test(s)) throw new JErr('java.lang.NumberFormatException: For input string: "' + s + '"'); n = parseInt(s, 10);
+__l(2); println(n + 1);
+__l(3); t = String(n * 2);
+__l(4); println(t + "!");
+__l(-1);
+},
+"t-inc-tr":function(IN,println,print,D,Ch,I,Bt,Sh,div,rem,cl,frames,out,JErr){"use strict";var x,a,b,c;
+function __l(k){ if(frames.length>500) throw new JErr("__limit"); frames.push({k:k,v:{x:cl(x),a:cl(a),b:cl(b),c:cl(c)},o:out.length}); }
+__l(0); x = IN.x;
+__l(1); a = x++;
+__l(2); b = ++x;
+__l(3); c = x-- + --x;
+__l(4); println(a + " " + b + " " + c + " " + x);
+__l(-1);
+},
+"t-sc-tr":function(IN,println,print,D,Ch,I,Bt,Sh,div,rem,cl,frames,out,JErr){"use strict";var d;
+function __l(k){ if(frames.length>500) throw new JErr("__limit"); frames.push({k:k,v:{d:cl(d)},o:out.length}); }
+__l(0); d = IN.d;
+if ((__l(1), (IN.op === "&&") ? (d !== 0 && div(10, d) > 1) : (((d !== 0) & (div(10, d) > 1)) === 1))) {
+    __l(2); println("velik");
+} else {
+    __l(4); println("ne");
+}
+__l(-1);
+}
+};
+document.querySelectorAll(".wtrace").forEach(root=>{
+  const cfg = JSON.parse(root.dataset.cfg);
+  const jd = x => (typeof x==="number" && Number.isInteger(x)) ? x.toFixed(1) : String(x);
+  const fmt = (v,t) => {
+    if(v===undefined) return null;
+    if(t==="double") return jd(v);
+    if(t==="char") return "'" + String.fromCharCode(v) + "'";
+    if(t==="String") return v===null ? "null" : '"' + v + '"';
+    if(t==="boolean") return v ? "true" : "false";
+    if(/\[\]$/.test(t)) return v===null ? "null" : "{" + v.map(x=>fmt(x,t.slice(0,-2))).join(", ") + "}";
+    return String(v);
+  };
+  const names = cfg.vars.map(v=>v[0]);
+  const inEl = {};
+  const inBox = root.querySelector(".wtin"), codeEl = root.querySelector(".wcode"), varsEl = root.querySelector(".wtvars");
+  const outEl = root.querySelector(".wtout"), capEl = root.querySelector(".wcap"), posEl = root.querySelector(".wpos");
+  const tabEl = root.querySelector(".wttab");
+  const bPrev = root.querySelector(".js-prev"), bNext = root.querySelector(".js-next"), bFirst = root.querySelector(".js-first"), bLast = root.querySelector(".js-last"), bTab = root.querySelector(".js-tab");
+  let frames = [], out = [], err = null, k = 0, IN = {};
+
+  (cfg.inputs||[]).forEach(d=>{
+    const lab = el("label", "", esc(d.l||d.n)+" ");
+    let c;
+    if(d.t==="select"){ c = el("select"); d.opts.forEach(o=>{ const op = el("option"); op.value = String(o); op.textContent = String(o); c.appendChild(op); }); c.value = String(d.v); }
+    else { c = el("input"); c.type = d.t==="text" ? "text" : "number"; if(d.min!=null) c.min = d.min; if(d.max!=null) c.max = d.max; c.value = d.v; c.size = d.t==="text" ? 10 : 5; }
+    c.addEventListener("input", ()=>{ rerun(); });
+    c.setAttribute("aria-label", d.l||d.n);
+    inEl[d.n] = c; lab.appendChild(c); inBox.appendChild(lab);
+  });
+  if(!(cfg.inputs||[]).length) inBox.remove();
+
+  function readIn(){
+    const o = {};
+    (cfg.inputs||[]).forEach(d=>{
+      const v = inEl[d.n].value;
+      o[d.n] = d.t==="text" ? v : d.t==="select" ? (isNaN(+v) || v==="" ? v : +v) : (isNaN(parseInt(v,10)) ? 0 : (d.f ? parseFloat(v) : parseInt(v,10)));
+      if(d.t!=="text" && d.t!=="select" && d.min!=null) o[d.n] = Math.max(d.min, Math.min(d.max, o[d.n]));
+    });
+    return o;
+  }
+  function exec(){
+    frames = []; out = []; err = null;
+    const cl = v => Array.isArray(v) ? v.slice() : v;
+    const pr = (x,nl)=>{ out.push(String(x) + (nl ? "\n" : "")); };
+    const H = {
+      println: x=>pr(x===undefined ? "" : x, 1), print: x=>pr(x,0), D: jd, Ch: c=>String.fromCharCode(c),
+      I: x=>x|0, Bt: x=>(x<<24)>>24, Sh: x=>(x<<16)>>16,
+      div: (a,b)=>{ if(b===0) throw new JErr("java.lang.ArithmeticException: / by zero"); return Math.trunc(a/b); },
+      rem: (a,b)=>{ if(b===0) throw new JErr("java.lang.ArithmeticException: / by zero"); return a%b; }
+    };
+    const body = '"use strict";var ' + names.join(",") + ';\nfunction __l(k){ if(frames.length>500) throw new JErr("__limit"); frames.push({k:k,v:{' + names.map(n=>n+":cl("+n+")").join(",") + '},o:out.length}); }\n' + cfg.js + "\n__l(-1);";
+    try { TRACE_FN[root.dataset.w](IN,H.println,H.print,H.D,H.Ch,H.I,H.Bt,H.Sh,H.div,H.rem,cl,frames,out,JErr); }
+    catch(e){
+      const last = frames.length ? frames[frames.length-1] : {v:{}, o:0};
+      if(e instanceof JErr){ err = e.message==="__limit" ? "Izvajanje je prekinjeno: več kot 500 korakov (neskončna zanka?)." : "Izjema: " + e.message; frames.push({k:-2, v:last.v, o:out.length}); }
+      else { err = "Napaka v simulaciji: " + e.message; frames.push({k:-2, v:last.v, o:out.length}); }
+    }
+  }
+  function lineText(s){ return s.replace(/\{(\w+)\}/g, (m,n)=> n in IN ? String(IN[n]) : m); }
+  function drawCode(){
+    codeEl.innerHTML = "";
+    cfg.lines.forEach((l,i)=>{ const s = el("span","ln"); s.textContent = lineText(l) || " "; s.dataset.i = i; codeEl.appendChild(s); });
+    if(cfg.hl!==0) codeEl.querySelectorAll(".ln").forEach(s=>{ const h = hl(s.textContent); if(h!==undefined) s.innerHTML = h || " "; });
+  }
+  function show(){
+    const f = frames[k], pf = k>0 ? frames[k-1] : null;
+    codeEl.querySelectorAll(".ln").forEach((l,i)=>{ l.classList.toggle("cur", i===f.k); });
+    const cur = codeEl.querySelector(".ln.cur"); 
+    let h = "";
+    cfg.vars.forEach(([n,t])=>{
+      const v = fmt(f.v[n], t); if(v===null) return;
+      const pv = pf ? fmt(pf.v[n], t) : null;
+      h += `<span class="tv${pf && pv!==v ? " chg" : ""}"><span class="tn">${esc(t==="char"||t==="String"||t==="boolean"||t==="double"||t==="int"||/\[\]$/.test(t) ? n : n)}</span><span class="te">=</span><span class="tval">${esc(v)}</span></span>`;
+    });
+    varsEl.innerHTML = h || '<span class="tnone">Spremenljivke še ne obstajajo.</span>';
+    const o = out.slice(0, f.o).join("");
+    outEl.textContent = o || "(še nič izpisano)";
+    outEl.classList.toggle("empty", !o);
+    const last = k===frames.length-1;
+    capEl.className = "wcap" + (last && err ? " bad" : "");
+    capEl.textContent = f.k>=0 ? `Ta vrstica se bo zdaj izvedla (vrstica ${f.k+1}).` : (f.k===-1 ? "Konec programa." : err);
+    posEl.textContent = `korak ${k+1} / ${frames.length}`;
+    bPrev.disabled = bFirst.disabled = k===0; bNext.disabled = bLast.disabled = last;
+    if(last && !cfg.predict) finish(root);
+  }
+  function drawTab(){
+    const shown = names.filter(n=>frames.some(f=>f.v[n]!==undefined));
+    const ty = Object.fromEntries(cfg.vars);
+    let h = '<table><thead><tr><th>korak</th><th>vrstica</th>' + shown.map(n=>`<th>${esc(n)}</th>`).join("") + '<th>izpis</th></tr></thead><tbody>';
+    const MAX = 60;
+    frames.forEach((f,i)=>{
+      if(i>=MAX){ if(i===MAX) h += `<tr><td colspan="${shown.length+3}">… še ${frames.length-MAX} korakov</td></tr>`; return; }
+      const prevO = i>0 ? frames[i-1].o : 0;
+      const newOut = out.slice(prevO, f.o).join("").replace(/\n$/,"").replace(/\n/g,"⏎");
+      h += `<tr${i===k?' class="cur"':""}><td>${i+1}</td><td>${f.k>=0 ? f.k+1 : "konec"}</td>` + shown.map(n=>{ const v = fmt(f.v[n], ty[n]); return `<td>${v===null ? "" : esc(v)}</td>`; }).join("") + `<td>${esc(newOut)}</td></tr>`;
+    });
+    tabEl.innerHTML = h + "</tbody></table>";
+  }
+  function rerun(){
+    IN = readIn(); exec(); k = 0; drawCode(); show(); if(!tabEl.hidden) drawTab();
+    const pf = root.querySelector(".wpred"); if(pf){ pf.querySelector(".wfb").textContent = ""; pf.querySelector(".wfb").className = "wfb"; }
+  }
+  bPrev.addEventListener("click",()=>{ if(k>0){ k--; show(); if(!tabEl.hidden) drawTab(); } });
+  bNext.addEventListener("click",()=>{ if(k<frames.length-1){ k++; show(); if(!tabEl.hidden) drawTab(); } });
+  bFirst.addEventListener("click",()=>{ k = 0; show(); if(!tabEl.hidden) drawTab(); });
+  bLast.addEventListener("click",()=>{ k = frames.length-1; show(); if(!tabEl.hidden) drawTab(); });
+  bTab.addEventListener("click",()=>{ tabEl.hidden = !tabEl.hidden; bTab.textContent = tabEl.hidden ? "Pokaži sled v tabeli" : "Skrij sled"; if(!tabEl.hidden) drawTab(); });
+  const pf = root.querySelector(".wpred");
+  if(pf){
+    const ta = pf.querySelector("textarea"), fb = pf.querySelector(".wfb");
+    const norm = s => s.split("\n").map(x=>x.replace(/\s+$/,"")).join("\n").replace(/\n+$/,"").trim();
+    pf.querySelector(".js-pchk").addEventListener("click",()=>{
+      const real = norm(out.join(""));
+      if(!ta.value.trim()){ fb.className = "wfb bad"; fb.textContent = "Najprej vpiši svojo napoved."; return; }
+      if(norm(ta.value)===real){ fb.className = "wfb ok"; fb.textContent = "Pravilno! Zdaj si oglej še korake."; finish(root); }
+      else { fb.className = "wfb bad"; fb.textContent = "Ni enako. Poskusi sledenje po korakih in primerjaj."; }
+    });
+  }
+  rerun();
+});
+})();
+
 /* ---------- static highlighting ---------- */
 document.querySelectorAll(".js-hl").forEach(p=>{ p.innerHTML = hl(p.textContent); });
 
@@ -2720,7 +3500,7 @@ function progress(){
   document.querySelectorAll(".js-progtxt").forEach(e=>e.textContent=txt);
   document.querySelectorAll(".js-bar").forEach(e=>e.style.width=(100*r.tock/r.vsehTock)+"%");
   document.querySelectorAll(".cnt[data-lv]").forEach(e=>{ const k=r.sklopi[e.dataset.lv]; if(!k) return; e.textContent=`${k.resenih}/${k.vseh}`; e.classList.toggle("full", k.resenih===k.vseh); });
-  const nm = T.filter(t=>!t.own).length, ps = $("#progSrc"); if(ps) ps.textContent = `${nm} maturitetnih · ${T.length-nm} dodatnih nalog`;
+  const nm = T.filter(t=>!t.own).length, ps = $("#progSrc"); if(ps) ps.textContent = `${nm} maturitetnih · ${T.length-nm} dodatnih nalog · ${r.kodaVseh} nalog s kodo (primerjano: ${r.kodaPrimerjanih}, brez točk)`;
 }
 
 /* ---------- filters ---------- */
@@ -2728,12 +3508,12 @@ let curFilter = "all";
 function applyFilter(){
   document.querySelectorAll("#levels .task, #homeMat .task").forEach(el=>{
     const s = S[el.id.slice(2)] || {};
-    el.hidden = (curFilter==="mat" && el.dataset.kind!=="mat") || (curFilter==="own" && el.dataset.kind!=="own") || (curFilter==="open" && s.state==="ok");
+    el.hidden = (curFilter==="mat" && el.dataset.kind!=="mat") || (curFilter==="own" && el.dataset.kind!=="own") || (curFilter==="open" && (s.state==="ok" || s.state==="cmp"));
   });
   document.querySelectorAll("#levels .level, #homeMat .level").forEach(l=>{ const e=l.querySelector(".lvl-empty"); if(e) e.hidden = !!l.querySelector(".task:not([hidden])"); });
 }
-document.querySelectorAll(".chip").forEach(c=>c.addEventListener("click",()=>{
-  document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed","false"));
+document.querySelectorAll(".chip[data-f]").forEach(c=>c.addEventListener("click",()=>{
+  document.querySelectorAll(".chip[data-f]").forEach(x=>x.setAttribute("aria-pressed","false"));
   c.setAttribute("aria-pressed","true");
   curFilter = c.dataset.f; applyFilter();
 }));
