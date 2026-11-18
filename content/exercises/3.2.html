@@ -2443,7 +2443,7 @@ const srcLabel = s => { const m = /^M(\d\d)(\d)\/(\d+)$/.exec(s); return m ? `Ma
 const ptsLabel = p => p===1 ? "1 točka" : p===2 ? "2 točki" : (p<5 ? p+" točke" : p+" točk");
 
 /* ---------- render tasks ---------- */
-LavRac.prepare(T, LEVELS, {"self":["E1","E2","E3","E4","E5","E6","E7","E8","E9","E10","E11","E12","E13","E14","E15"],"example":["E1"],"nobtn":["E14"]});
+LavRac.prepare(T, LEVELS, {"self":["E1","E2","E3","E4","E5","E6","E7","E8","E9","E10","E11","E12","E13","E14","E15","F1","F2","F3","F4","F5"],"example":["E1"],"nobtn":["E14"]});
 HOME[5].fc = [inp("a", "b", "c"), p("p = (a + b + c) / 3"), out("p")]; HOME[5].jsolCode = "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        int c = sc.nextInt();\n        double p = (a + b + c) / 3.0;\n        System.out.println(p);\n    }\n}"; HOME[5].sol = "Besedno: preberi tri števila, jih seštej, vsoto deli s 3 in izpiši rezultat. Psevdokoda: preberi a, b, c; p = (a + b + c) / 3; izpiši p. Diagram in program sta zgoraj. Pozor: če so a, b, c tipa int, mora biti deljenec ali delitelj realen (3.0), sicer se rezultat zaokroži.";
 T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });
 LavRac.tasks(LEVELS.flatMap(L=>T.filter(t=>t.lv===L.tag)), { level: (t) => t.pts });

@@ -17,7 +17,7 @@ const GROUPS = [
 // The teacher's task names: the set letter and the place in the set as the artifact shows it (10. 11. 2026); B7 is
 // removed, so B8 onwards move up by one in the portal. The program tasks C6, C12 and D10 are checked by the student.
 const PREP = {
-  self: ['C6', 'C12', 'D10'],
+  self: ['C6', 'C12', 'D10', 'E6'], // E6: diagram to program, written and compared with the solution (18. 11. 2026)
   nobtn: ['A4', 'A5', 'B13', 'C2', 'C3', 'C5', 'C10', 'D3', 'E5', 'F7'],
   inline: ['A1', 'B6', 'C8'],
   same: ['B6'],

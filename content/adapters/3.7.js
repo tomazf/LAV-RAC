@@ -27,6 +27,7 @@ const PREP = {
   // A and B: the output is only true/false or a value or two the student can work out by heart, so the student writes the code
   // and checks it against the solution (agreed 18. 11. 2026).
   self: [...Array.from({ length: 20 }, (_, i) => 'G' + (i + 1)), ...Array.from({ length: 14 }, (_, i) => 'H' + (i + 1)),
+    'D7','D8','D9','D11','D13','E2','E4','E7','E8','E9','E10','E11','E12','E13','E15','E16','E19','E20','E21','E22','E27','E29','E30','E32','F10','F11','F15','F17','F18','F20','F21','F22','F24','F25','I2','I3','I6', // every program (18. 11. 2026)
     'D2', 'E31', // the statement demands a construct (a while loop, no Arrays class): the structure is what matters
     'A9', 'F8', 'D1', 'E3', 'E5', 'E6', 'E17', 'E18', 'E23', 'E25', 'E26', 'E28', 'F12', 'F14', 'F16', 'F19', 'I4', 'I5'],
   nobtn: ["B2","B3","B4","B5","B11","B12","C2","C3","C5","C7","C8"],

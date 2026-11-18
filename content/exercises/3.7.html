@@ -2591,7 +2591,7 @@ const srcLabel = s => { const r = /^MRAC\/(\d+)$/.exec(s); if(r) return `Katalog
 const ptsLabel = p => p===1 ? "1 točka" : p===2 ? "2 točki" : (p<5 ? p+" točke" : p+" točk");
 
 /* ---------- render tasks ---------- */
-LavRac.prepare(T, LEVELS, {"self":["G1","G2","G3","G4","G5","G6","G7","G8","G9","G10","G11","G12","G13","G14","G15","G16","G17","G18","G19","G20","H1","H2","H3","H4","H5","H6","H7","H8","H9","H10","H11","H12","H13","H14","D2","E31","A9","F8","D1","E3","E5","E6","E17","E18","E23","E25","E26","E28","F12","F14","F16","F19","I4","I5"],"nobtn":["B2","B3","B4","B5","B11","B12","C2","C3","C5","C7","C8"],"inline":["E1","E14","F13","I1"]});
+LavRac.prepare(T, LEVELS, {"self":["G1","G2","G3","G4","G5","G6","G7","G8","G9","G10","G11","G12","G13","G14","G15","G16","G17","G18","G19","G20","H1","H2","H3","H4","H5","H6","H7","H8","H9","H10","H11","H12","H13","H14","D7","D8","D9","D11","D13","E2","E4","E7","E8","E9","E10","E11","E12","E13","E15","E16","E19","E20","E21","E22","E27","E29","E30","E32","F10","F11","F15","F17","F18","F20","F21","F22","F24","F25","I2","I3","I6","D2","E31","A9","F8","D1","E3","E5","E6","E17","E18","E23","E25","E26","E28","F12","F14","F16","F19","I4","I5"],"nobtn":["B2","B3","B4","B5","B11","B12","C2","C3","C5","C7","C8"],"inline":["E1","E14","F13","I1"]});
 // The artifact shows the right output of every program (it was a self-assessment); a graded program hides it, as before.
 T.forEach((t) => { if (t.type === "code" && !t.self) t.hideExp = true; });
 T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });

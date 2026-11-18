@@ -17,7 +17,8 @@ const GROUPS = [
 // ask for an output have no copy / Programiz buttons.
 const PREP = {
   // Programs the student writes elsewhere: ticked by the student, the code stays to be saved, the right output is shown.
-  self: ['B8', 'B9', 'E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E8', 'E9', 'E10'],
+  // C5 and D9 as well (18. 11. 2026): the student's code is not graded by its output, so it is compared with the solution.
+  self: ['B8', 'B9', 'C5', 'D9', 'E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E8', 'E9', 'E10'],
   nobtn: ['A3', 'A11', 'B5', 'C1', 'C2', 'C3', 'C7', 'D1', 'D2', 'D3', 'D4', 'D7'],
 };
 // C5 and D9 (matura tasks with points) check the written code as well as the output: what the task asks for must be in

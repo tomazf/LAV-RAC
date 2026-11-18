@@ -2496,7 +2496,7 @@ const srcLabel = s => { const r = /^MRAC\/(\d+)$/.exec(s); if(r) return `Katalog
 const ptsLabel = p => p===1 ? "1 točka" : p===2 ? "2 točki" : (p<5 ? p+" točke" : p+" točk");
 
 /* ---------- render tasks ---------- */
-LavRac.prepare(T, LEVELS, {"self":["C6","C12","D10"],"nobtn":["A4","A5","B13","C2","C3","C5","C10","D3","E5","F7"],"inline":["A1","B6","C8"],"same":["B6"],"cols":["B4"],"list":["B12"],"remove":["B7"]});
+LavRac.prepare(T, LEVELS, {"self":["C6","C12","D10","E6"],"nobtn":["A4","A5","B13","C2","C3","C5","C10","D3","E5","F7"],"inline":["A1","B6","C8"],"same":["B6"],"cols":["B4"],"list":["B12"],"remove":["B7"]});
 HOME[4].nobtn = true; HOME[4].jsolCode = "int x = 1;           // x = 1\nint a = 5;           // x = 1, a = 5\nint b = ++x + a--;   // ++x: x = 2 (vrednost 2); a--: vrednost 5, nato a = 4; b = 2 + 5 = 7\nSystem.out.println(x + \" \" + a + \" \" + b);   // izpis: 2 4 7"; HOME[4].sol = "Razhroščevalnik v oknu s spremenljivkami (Variables) prikaže iste vrednosti kot sled v kodi. Po zadnjem stavku je x = 2, a = 4, b = 7 in program izpiše »2 4 7«.";
 T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : "own-"+i; });
 LavRac.tasks(LEVELS.flatMap(L=>T.filter(t=>t.lv===L.tag)), { level: (t) => t.pts });

@@ -19,7 +19,8 @@ const GROUPS = [
 // example with its solution open, and two tasks are new (even or odd, a product). The names are those of the artifact
 // with the new tasks put in: E3 and E7 are new, and the artifact's E12 (symbols to count) is E14.
 const PREP = {
-  self: Array.from({ length: 15 }, (_, k) => 'E' + (k + 1)),
+  // F1 to F5 (diagram to program): the student writes and saves the code, compared with the solution, no points (18. 11. 2026).
+  self: [...Array.from({ length: 15 }, (_, k) => 'E' + (k + 1)), 'F1', 'F2', 'F3', 'F4', 'F5'],
   example: ['E1'],
   nobtn: ['E14'],
 };
