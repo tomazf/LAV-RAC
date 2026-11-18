@@ -47,7 +47,7 @@ before(async () => {
 after(async () => {
   await browser?.close();
   server?.removeAllListeners('exit');
-  server?.kill();
+  server?.kill('SIGKILL'); // no graceful shutdown in tests: a connection left open must not hold the run
   mock?.server.close();
 });
 

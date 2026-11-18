@@ -116,5 +116,9 @@ app.use((err, req, res, next) => {
 await migrate();
 const server = app.listen(config.port, () => console.log(`${portal.name} posluša na vratih ${config.port}`));
 for (const sig of ['SIGTERM', 'SIGINT']) {
-  process.on(sig, () => server.close(() => pool.end().finally(() => process.exit(0))));
+  process.on(sig, () => {
+    // Graceful stop, but never wait for ever for a connection that stays open (docker stop would wait 10 s and kill).
+    setTimeout(() => process.exit(1), 8000).unref();
+    server.close(() => pool.end().finally(() => process.exit(0)));
+  });
 }
