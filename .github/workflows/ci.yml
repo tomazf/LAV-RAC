@@ -3,9 +3,15 @@ on:
   push:
     branches: [main]
   pull_request:
+# A newer push to the same branch cancels the older run; a run that hangs is stopped after 15 minutes (it took 4-6 minutes
+# normally; without a limit a hung `npm test` used the 6-hour default of GitHub).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     services:
       postgres:
         image: postgres:17-alpine
@@ -34,6 +40,7 @@ jobs:
           PG_BIN: /usr/lib/postgresql/17/bin
   docker:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - name: Build and start the demo from the Compose file
