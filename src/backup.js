@@ -13,8 +13,8 @@ import { isAdmin } from './auth.js';
 import { config } from './config.js';
 import { audit, ERASED_SALT, erasedHash, eraseUser, many, migrate, one, pool } from './db.js';
 import { portal } from './portal.js';
-import { build } from './build.js';
 import { fileStamp } from './format.js';
+import { readVersion } from './version.js';
 
 export class BackupError extends Error {
   constructor(message, status = 400) { super(message); this.userMessage = message; this.status = status; }
@@ -75,8 +75,9 @@ export async function createDump(actor) {
   dumping = true;
   const dir = tempDir('backup');
   const file = path.join(dir, 'kopija.dump');
-  // The commit of the running code and the local time, e.g. lavrac-dc8e035-2026-11-18-00-13.dump
-  const name = `${portal.slug}-${build.commit}-${fileStamp()}.dump`;
+  // The commit on the server and the local time, e.g. lavrac-dc8e035-2026-11-18-00-13.dump ("neznano" without a .git folder)
+  const commit = readVersion(process.env.PORTAL_GIT_DIR || path.join(import.meta.dirname, '..', '.git'))?.short || 'neznano';
+  const name = `${portal.slug}-${commit}-${fileStamp()}.dump`;
   let logId = null;
   try {
     // Logged first, so the entry is inside the backup it describes.

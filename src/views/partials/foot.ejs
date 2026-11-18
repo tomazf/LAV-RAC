@@ -1,7 +1,5 @@
 </main>
-<footer class="foot">
-  <% if (path !== '/zasebnost') { %><a href="/zasebnost">Kateri podatki se beležijo</a><% } %>
-  <p class="build">Koda na strežniku: <%= build.commit %><% if (build.time) { %>, posodobljeno <%= fmt.dateTime(build.time) %><% } %></p>
-</footer>
+<% if (path !== '/zasebnost') { %><footer class="foot"><a href="/zasebnost">Kateri podatki se beležijo</a>
+<% if (user && user.isAdmin) { %><p class="ver"><% if (version) { %>Koda na strežniku: <span title="<%= version.commit %>"><%= version.short %></span><% if (version.at) { %>, posodobljeno <span class="nw"><%= fmt.dateTime(version.at) %></span><% } %><% } else { %>Koda na strežniku: različica ni znana<% } %></p><% } %></footer><% } %>
 </body>
 </html>

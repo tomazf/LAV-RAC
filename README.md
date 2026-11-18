@@ -51,13 +51,13 @@ V `.env` vpiši vrednosti. `SESSION_SECRET` in `POSTGRES_PASSWORD` ustvari z `op
 S samodejnim HTTPS (Caddy, vrati 80 in 443 morata biti prosta, domena mora kazati na strežnik):
 
 ```bash
-BUILD_COMMIT=$(git rev-parse --short HEAD) BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) docker compose --profile https up -d --build
+docker compose --profile https up -d --build
 ```
 
 Če že imaš obratni posredovalnik, ga usmeri na `127.0.0.1:4001` (`APP_PORT` v `.env`, vrata 4000 uporablja LAV-ELS), nato:
 
 ```bash
-BUILD_COMMIT=$(git rev-parse --short HEAD) BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) docker compose up -d --build
+docker compose up -d --build
 ```
 
 Posredovalnik mora poslati `X-Forwarded-Proto: https`. Preveri delovanje: `curl http://127.0.0.1:4001/healthz`.
@@ -72,11 +72,13 @@ Posredovalnik mora poslati `X-Forwarded-Proto: https`. Preveri delovanje: `curl 
 
 ## Vzdrževanje
 
-Posodobitev (ukaz nastavi commit in čas gradnje, ki se pokažeta v nogi strani in v imenu kopije; brez njiju je pisano »neznano«):
+Posodobitev:
 
 ```bash
-git pull && BUILD_COMMIT=$(git rev-parse --short HEAD) BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) docker compose up -d --build
+git pull && docker compose up -d --build
 ```
+
+Skrbnik v nogi strani vidi, katera koda je na strežniku, npr. »Koda na strežniku: 7d726bd, posodobljeno 9. 11. 2026, 22:40« (zadnji `git pull`). `docker-compose.yml` zato priklopi mapo `.git` samo za branje, ukaz za posodobitev pa ostane enak. Če mape `.git` ni (datoteke so kopirane brez gita) ali je vsebnik ne more prebrati, piše »različica ni znana«; mapa je lahko drugje z `PORTAL_GIT_DIR`. To je zadnji `git pull`: če po njem ne zgradiš nove slike (`--build`) in se vsebnik nato zažene, noga kaže novi commit, teče pa stara koda.
 
 Podatki ostanejo, ker so v trajnem nosilcu `db-data`. Spremembe baze (`src/migrations/`) se izvedejo same ob zagonu. Dijaki z odprto vajo naj po posodobitvi osvežijo stran.
 

@@ -2,11 +2,7 @@
 name: lavrac
 services:
   app:
-    build:
-      context: .
-      args:
-        BUILD_COMMIT: ${BUILD_COMMIT:-neznano}
-        BUILD_TIME: ${BUILD_TIME:-}
+    build: .
     restart: unless-stopped
     env_file: .env
     environment:
@@ -14,6 +10,10 @@ services:
       TZ: Europe/Ljubljana
     ports:
       - "${BIND_ADDRESS:-127.0.0.1}:${APP_PORT:-4000}:4000"
+    volumes:
+      # Read-only, so the admin page can show which commit is on the server (src/version.js). Without a .git folder
+      # (the files copied without git) Docker creates an empty one and the portal shows "različica ni znana".
+      - ./.git:/app/.git:ro
     depends_on:
       db:
         condition: service_healthy

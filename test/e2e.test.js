@@ -1307,7 +1307,6 @@ test('login page, school logo and data notice page', async () => {
   await p.click('a:text("Kateri podatki se beležijo")');
   await p.waitForURL(/zasebnost/);
   assert.equal(await p.locator('footer a').count(), 0);
-  assert.match(await p.locator('footer').textContent(), /Koda na strežniku: .+/); // the build line shows on this page too
   await p.click('[data-back]');
   await p.waitForURL(`${APP}/`);
   await p.goto(`${APP}/zasebnost`);

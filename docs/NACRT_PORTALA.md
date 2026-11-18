@@ -123,8 +123,8 @@ Strani: Uporabniki (filter, iskanje, urejanje s svinčnikom; dijakom brez razred
 - `.env`: `PUBLIC_URL`, `OIDC_TENANT_ID`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `ADMIN_EMAILS`, `SESSION_SECRET` (vsaj 32 znakov), `POSTGRES_PASSWORD`, po potrebi `BIND_ADDRESS`, `APP_PORT`.
 - Entra: nova registracija aplikacije, en najemnik, preusmeritev `https://DOMENA/auth/callback` in še `https://DOMENA/` za vrnitev po odjavi, skrivnost z rokom veljavnosti (pred iztekom jo obnovi), brez dodatnih dovoljenj.
 - Pred njim obratni posredovalnik (pri LAV-ELS nginx v `ssl-proxy`) s `X-Forwarded-Proto: https`, za nalaganje kopij `client_max_body_size 200m;`. Lahko tudi Caddy s samodejnim HTTPS.
-- Preverjanje: `/healthz`. Posodobitev: `git pull && BUILD_COMMIT=$(git rev-parse --short HEAD) BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) docker compose up -d --build`.
-- Noga strani kaže commit in čas gradnje (dogovor 18. 11. 2026); ime varnostne kopije ima commit in lokalni čas portala. Brez spremenljivk piše »neznano«.
+- Preverjanje: `/healthz`. Posodobitev: `git pull && docker compose up -d --build`.
+- Različica kode za skrbnika (dogovor 18. 11. 2026, kot v LAV-ELS): v nogi strani je samo skrbniku vidna vrstica »Koda na strežniku: <kratek commit>, posodobljeno <čas zadnjega pulla>«. Vir je mapa `.git`, ki jo `docker-compose.yml` priklopi v vsebnik samo za branje (`src/version.js`). Ime varnostne kopije ima isti commit in lokalni čas portala; brez mape `.git` je »neznano«.
 - Demo brez Microsofta: `docker compose -f docker-compose.demo.yml up --build` (lažna prijava, samo za preizkuse).
 
 ## 11. Preizkusi in CI

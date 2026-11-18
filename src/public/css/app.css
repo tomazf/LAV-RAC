@@ -36,7 +36,7 @@ h3{font-size:1.05rem;margin:0}
 .who-name{opacity:.85}
 .linkish{background:none;border:0;color:#fff;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font:inherit;padding:6px 2px;min-height:36px}
 .foot{padding:14px 16px 22px;text-align:center;font-size:.9rem}
-.foot .build{margin:6px 0 0;color:var(--mut);font-size:.82rem}
+.foot .ver{max-width:none;margin:6px 0 0;color:var(--mut);font-size:.85rem}.foot .ver span[title]{font-variant-numeric:tabular-nums;letter-spacing:.02em}
 .btn{display:inline-flex;align-items:center;justify-content:center;border:2px solid var(--acc);border-radius:8px;padding:8px 16px;min-height:44px;background:var(--acc);color:var(--onacc);font:700 1rem var(--fb);text-decoration:none;cursor:pointer;text-align:center}
 .btn:hover{filter:brightness(1.1)}
 .btn.ghost{background:transparent;color:var(--acc)}
