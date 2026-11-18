@@ -164,7 +164,7 @@ test('parts without exercises wait for staff; a closed class shows a clear messa
   // every part has its first chapter now (LAV-RAČ4 since 4.1, 11. 11. 2026), so no whole part waits
   assert.deepEqual(await a.locator('.group.planned h2').allTextContents(), []);
   // the chapters that wait for their artifact have their places (content/sources.json "planned", 17. 11. 2026)
-  assert.deepEqual(await a.locator('.planned-ex td:first-child').allTextContents(), ['4 V pripravi', '6 V pripravi', '8 V pripravi', '9 V pripravi', '10 V pripravi', '4 V pripravi', '5 V pripravi', '6 V pripravi', '7 V pripravi']);
+  assert.deepEqual(await a.locator('.planned-ex td:first-child').allTextContents(), ['4 V pripravi', '6 V pripravi', '8 V pripravi', '9 V pripravi', '10 V pripravi', '11 V pripravi', '4 V pripravi', '5 V pripravi', '6 V pripravi', '7 V pripravi']);
   await a.goto(`${APP}/admin/razredi`);
   // a class needs its year, also when the form is sent by hand
   const csrf = await a.inputValue('form[action="/admin/razredi"] input[name=_csrf]');
@@ -1294,7 +1294,7 @@ test('Za doma: two more tasks per chapter, added in the portal, unscored', async
     assert.ok(await a.locator('.page.on article', { hasText: titles[1] }).locator('.sol').isVisible());
   }
   // unscored: the catalog has the same tasks and points as before (3.1 to 3.3 changed on 10. 11. 2026: tasks the student checks have no points)
-  assert.deepEqual(catalog.exercises.map((e) => [e.id, e.tasks.length, e.maxPoints]), [['2.1', 99, 218], ['2.2', 85, 164], ['2.3', 129, 237], ['3.1', 52, 75], ['3.2', 53, 61], ['3.3', 55, 83], ['3.4', 76, 83], ['3.5', 50, 58], ['3.6', 114, 125], ['3.7', 147, 276], ['4.1', 89, 158], ['4.2', 63, 113], ['4.3', 52, 63]]);
+  assert.deepEqual(catalog.exercises.map((e) => [e.id, e.tasks.length, e.maxPoints]), [['2.1', 99, 218], ['2.2', 85, 164], ['2.3', 129, 237], ['3.1', 52, 75], ['3.2', 53, 61], ['3.3', 55, 83], ['3.4', 76, 83], ['3.5', 50, 58], ['3.6', 114, 125], ['3.7', 147, 230], ['4.1', 89, 158], ['4.2', 63, 113], ['4.3', 52, 63]]);
   await a.context().close();
   assert.deepEqual(errors, []);
 });
@@ -2021,10 +2021,11 @@ test('3.7: four theory groups, laboratory exercises are not mentioned, programs 
   const sections = [...new Set(ex.tasks.map((t) => t.section))];
   assert.deepEqual(sections, ['Deklaracija, indeksi in dolžina', 'Sledenje izvajanju', 'Reference in prenos v metode', 'Polnjenje tabele in naključna števila', 'Algoritmi na enodimenzionalnih tabelah', 'Dvodimenzionalne tabele', 'Naloge za utrjevanje', 'Dodatne vaje', 'Ponavljanje']);
   assert.deepEqual(sections.map((n) => ex.tasks.filter((t) => t.section === n).length), [16, 12, 9, 13, 32, 25, 20, 14, 6]);
-  // 340 points of the artifact minus the 34 self-checked programs of sets G and H, which carry no points
-  assert.equal(ex.maxPoints, 276);
+  // 340 points of the artifact minus the 52 self-checked programs (sets G and H, and 18 whose output is only true/false or a value
+  // or two), which carry no points
+  assert.equal(ex.maxPoints, 230);
   const nameOf = (t) => String.fromCharCode(65 + sections.indexOf(t.section)) + (ex.tasks.filter((u) => u.section === t.section).indexOf(t) + 1);
-  assert.deepEqual(ex.tasks.filter((t) => t.self).map(nameOf), [...Array.from({ length: 20 }, (_, i) => 'G' + (i + 1)), ...Array.from({ length: 14 }, (_, i) => 'H' + (i + 1))]);
+  assert.deepEqual(ex.tasks.filter((t) => t.self).map(nameOf).sort(), [...['A9', 'D1', 'E3', 'E5', 'E6', 'E17', 'E18', 'E23', 'E25', 'E26', 'E28', 'F8', 'F12', 'F14', 'F16', 'F19', 'I4', 'I5'], ...Array.from({ length: 20 }, (_, i) => 'G' + (i + 1)), ...Array.from({ length: 14 }, (_, i) => 'H' + (i + 1))].sort());
   assert.equal(ex.tasks.filter((t) => !t.self).every((t) => t.max > 0), true);
   assert.deepEqual(await a.locator('.lr-rail a.lr-gated .lr-tg').allTextContents(), ['A ·', 'B ·', 'C ·', 'D ·', 'E ·', 'F ·', 'G ·', 'H ·', 'I ·', 'J ·']);
   assert.equal((await a.locator('.lr-rail a.lr-gated .lr-tx').last().textContent()).trim(), 'Za doma');
@@ -2058,6 +2059,10 @@ test('3.7: four theory groups, laboratory exercises are not mentioned, programs 
   assert.match(await card(a).locator('.tags').textContent(), /Sam preveri · brez točk/);
   assert.ok(await card(a).locator('.q pre.code').count() >= 1); // the artifact shows the right output, the shell adds no second box
   assert.equal(await card(a).locator('.lr-tests').count(), 0);
+  // F12 only returns true/false: the student writes it and ticks it, no points
+  await go(a, 'naloge-f/12');
+  assert.equal((await card(a).locator('.lr-check').textContent()).trim(), 'Preveril sem');
+  assert.match(await card(a).locator('.tags').textContent(), /Sam preveri · brez točk/);
   // a graded program: the artifact's own self-assessment is not used, the right output is hidden and checked
   await go(a, 'naloge-e/2');
   assert.ok(await card(a).locator('textarea.editor').isVisible());

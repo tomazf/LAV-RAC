@@ -24,7 +24,10 @@ const GROUPS = [
 //   nobtn: the tasks that only ask for an output have no copy / Programiz buttons,
 //   inline: the tasks with blanks in the code (E1, E14, F13, I1).
 const PREP = {
-  self: [...Array.from({ length: 20 }, (_, i) => 'G' + (i + 1)), ...Array.from({ length: 14 }, (_, i) => 'H' + (i + 1))],
+  // A and B: the output is only true/false or a value or two the student can work out by heart, so the student writes the code
+  // and checks it against the solution (agreed 18. 11. 2026).
+  self: [...Array.from({ length: 20 }, (_, i) => 'G' + (i + 1)), ...Array.from({ length: 14 }, (_, i) => 'H' + (i + 1)),
+    'A9', 'F8', 'D1', 'E3', 'E5', 'E6', 'E17', 'E18', 'E23', 'E25', 'E26', 'E28', 'F12', 'F14', 'F16', 'F19', 'I4', 'I5'],
   nobtn: ["B2","B3","B4","B5","B11","B12","C2","C3","C5","C7","C8"],
   inline: ['E1', 'E14', 'F13', 'I1'],
 };
@@ -87,6 +90,9 @@ export default {
     // The introduction of the tasks says nothing about the artifact's self-assessment of code tasks (not used here).
     [" Pri nalogah z oznako <span class=\"tag self\">Samoocena</span> <strong>napišeš kodo</strong>. Stran je ne more preveriti, zato točk ni: kodo in neobvezen izpis shranimo, nato klikneš »Primerjaj z rešitvijo«, kjer vidiš svojo kodo ob primeru rešitve, prečrtaš merila in sam oceniš, ali nalogo znaš. Pri metodah je glavni program že pripravljen.",
       " Pri nalogah, kjer <strong>napišeš kodo</strong>, jo zaženeš v poljubnem okolju in prilepiš izpis; stran ga preveri. Pri metodah je glavni program že pripravljen."],
+    // The chapters of LAV-RAČ3 are numbered as in the plan: strings are 8, classes are 10 (Objektno programiranje).
+    ['so v poglavjih 8 in 11.', 'so v poglavjih 8 in 10.'],
+    ['razredi so v poglavju 11.)', 'razredi so v poglavju 10.)'],
     // The blanks of E1, E14, F13 and I1 are typed in the code (inline): the shell's gap is ___ (one per field).
     ...[
 [

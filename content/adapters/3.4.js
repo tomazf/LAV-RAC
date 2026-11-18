@@ -81,6 +81,8 @@ export default {
   --seen:var(--lr-seen);--seen-soft:var(--lr-seen-bg);--f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}
   body{padding-left:0;padding-right:0}`,
   patches: [
+    // Exceptions are chapter 9 (Datoteke in izjeme v Javi) of LAV-RAČ3 (18. 11. 2026).
+    ['NumberFormatException</code> (poglavje 10)', 'NumberFormatException</code> (poglavje 9)'],
     // Partial credit for tasks with several parts (agreed 16. 11. 2026).
     ...partialCredit,
     // The typed output is compared without regard to letter case and repeated spaces (agreed 16. 11. 2026).

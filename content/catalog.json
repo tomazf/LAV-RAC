@@ -6104,7 +6104,7 @@
    "key": "scnm_lavrac_3_7_v1",
    "version": 1,
    "format": "short",
-   "maxPoints": 276,
+   "maxPoints": 230,
    "tasks": [
     {
      "i": 0,
@@ -6165,7 +6165,8 @@
     {
      "i": 8,
      "level": "lažja",
-     "max": 1,
+     "max": 0,
+     "self": true,
      "section": "Deklaracija, indeksi in dolžina",
      "q": "Želimo ustvariti tabelo, ki ima 102 celoštevilska elementa. Zapišite celotno deklaracijo tabele. (Prirejeno: za preverjanje izpiši dolžino ustvarjene tabele.)"
     },
@@ -6368,7 +6369,8 @@
     {
      "i": 37,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Polnjenje tabele in naključna števila",
      "q": "Dano imamo deklaracijo tabele znakov char[] tab = new char[10]; Z uporabo poljubne zanke napišite del programa, ki v obstoječo tabelo vpiše črke A C E G I K M O"
     },
@@ -6473,7 +6475,8 @@
     {
      "i": 52,
      "level": "težja",
-     "max": 3,
+     "max": 0,
+     "self": true,
      "section": "Algoritmi na enodimenzionalnih tabelah",
      "q": "Napišite metodo double povprecje(double tab[]), ki za parameter prejme tabelo realnih števil in vrne povprečno vrednost vseh števil v tabeli."
     },
@@ -6487,14 +6490,16 @@
     {
      "i": 54,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Algoritmi na enodimenzionalnih tabelah",
      "q": "Zapišite metodo kolikoPozitivnih, ki vrne število pozitivnih elementov celoštevilske tabele. Tabela naj bo podana kot parameter metode."
     },
     {
      "i": 55,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Algoritmi na enodimenzionalnih tabelah",
      "q": "Metoda test_3_9 vrne true, če so v tabeli tab zapisane le številke 3 ali 9, sicer vrne false. Dopišite manjkajočo kodo metode test_3_9. (Prirejeno: metoda je st"
     },
@@ -6571,14 +6576,16 @@
     {
      "i": 66,
      "level": "težja",
-     "max": 3,
+     "max": 0,
+     "self": true,
      "section": "Algoritmi na enodimenzionalnih tabelah",
      "q": "Zapišite metodo vsiRazlicni, ki vrne true natanko tedaj, ko tabela celih števil ne vsebuje dveh enakih vrednosti. Tabela naj bo podana kot parameter metode."
     },
     {
      "i": 67,
      "level": "",
-     "max": 4,
+     "max": 0,
+     "self": true,
      "section": "Algoritmi na enodimenzionalnih tabelah",
      "q": "Imamo tabelo dveh ali več elementov, v kateri so cela števila. 20.1 Napišite metodo, ki vrne true, če so števila v tabeli urejena v naraščajočem vrstnem redu, s"
     },
@@ -6613,7 +6620,8 @@
     {
      "i": 72,
      "level": "težja",
-     "max": 3,
+     "max": 0,
+     "self": true,
      "section": "Algoritmi na enodimenzionalnih tabelah",
      "q": "Napišite metodo, ki vrne največje celo število, dobljeno s kombinacijo števk tabele t. Primer: če je tabela int t[]={8,9,2,1,9}, vrne metoda število 99821."
     },
@@ -6627,14 +6635,16 @@
     {
      "i": 74,
      "level": "težja",
-     "max": 3,
+     "max": 0,
+     "self": true,
      "section": "Algoritmi na enodimenzionalnih tabelah",
      "q": "Napišite metodo prastevilo, ki vrne true, če je argument a praštevilo, sicer vrne false. Napišite zaporedje stavkov, ki izračuna vsoto vseh praštevil, ki se poj"
     },
     {
      "i": 75,
      "level": "",
-     "max": 4,
+     "max": 0,
+     "self": true,
      "section": "Algoritmi na enodimenzionalnih tabelah",
      "q": "Kontrolna vsota EMŠO se izračuna iz prvih dvanajstih števk: vsota = 7a + 6b + 5c + 4d + 3e + 2f + 7g + 6h + 5i + 4j + 3k + 2l. Trinajsta števka je kontrolna: 11"
     },
@@ -6648,7 +6658,8 @@
     {
      "i": 77,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Algoritmi na enodimenzionalnih tabelah",
      "q": "Napišite metodo public static double stdev(double []tabela), ki vrne standardni odklon δ = √( Σ(xᵢ − x̄)² / (N − 1) ). Najprej izračunajte aritmetično sredino x"
     },
@@ -6732,7 +6743,8 @@
     {
      "i": 89,
      "level": "lažja",
-     "max": 1,
+     "max": 0,
+     "self": true,
      "section": "Dvodimenzionalne tabele",
      "q": "Na tekmovanju iz kemije je bilo 40 ekip, v vsaki po 5 tekmovalcev. Ekipe so bile označene z zaporednimi številkami od 0 do 39, tekmovalci posamezne ekipe pa z z"
     },
@@ -6760,7 +6772,8 @@
     {
      "i": 93,
      "level": "težja",
-     "max": 3,
+     "max": 0,
+     "self": true,
      "section": "Dvodimenzionalne tabele",
      "q": "Napišite metodo, ki za parameter prejme dvodimenzionalno tabelo. Metoda naj vrne true, če so vsi elementi na glavni diagonali različni od nič, in false v naspro"
     },
@@ -6774,7 +6787,8 @@
     {
      "i": 95,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Dvodimenzionalne tabele",
      "q": "Tabela int deska[][] predstavlja igralno polje. Prva in zadnja vrstica ter prvi in zadnji stolpec so stražarji in imajo vedno vrednost 0. Metoda preveriNicle pr"
     },
@@ -6788,7 +6802,8 @@
     {
      "i": 97,
      "level": "",
-     "max": 4,
+     "max": 0,
+     "self": true,
      "section": "Dvodimenzionalne tabele",
      "q": "Dana je dvodimenzionalna tabela double podatki[][] = new double[12][28], v kateri so za vsak mesec (januar = indeks 0) in za 28 dni shranjene povprečne dnevne t"
     },
@@ -6809,7 +6824,8 @@
     {
      "i": 100,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Dvodimenzionalne tabele",
      "q": "Napišite metodo public static boolean Preverimo(char [][]x), ki vrne true natanko tedaj, ko je dvodimenzionalna tabela znakov magični kvadrat. Tabela je magični"
     },
@@ -7151,14 +7167,16 @@
     {
      "i": 144,
      "level": "težja",
-     "max": 3,
+     "max": 0,
+     "self": true,
      "section": "Ponavljanje",
      "q": "Vsak objekt razreda Delavec vsebuje neprazno enodimenzionalno tabelo realnih števil z imenom prejemki. Napišite metodo, ki med vsemi prejemki vrne indeks največ"
     },
     {
      "i": 145,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Ponavljanje",
      "q": "Stroj izdeluje izdelke v malih serijah. V tabeli casi so časi izdelave posamezne serije v milisekundah, v tabeli izdelki pa število izdelkov v seriji (prvih 9 i"
     },
@@ -9211,6 +9229,10 @@
   {
    "module": "LAV-RAČ3",
    "no": "10"
+  },
+  {
+   "module": "LAV-RAČ3",
+   "no": "11"
   },
   {
    "module": "LAV-RAČ4",
