@@ -460,8 +460,8 @@
       if (tags) {
         tags.classList.add('lv');
         tags.prepend(h('span', { class: 'tag lr-st', hidden: true }));
-        // The points tag is the only one that names points: a self task has none.
-        if (task.self) tags.querySelectorAll('.tag:not(.lr-st)').forEach((t) => { if (/točk/.test(t.textContent)) t.textContent = 'Sam preveri · brez točk'; });
+        // The points tag is the only one that names points: a self task has none; a matura task still says what it is worth there (18. 11. 2026).
+        if (task.self) tags.querySelectorAll('.tag:not(.lr-st)').forEach((t) => { if (/točk/.test(t.textContent)) t.textContent = 'Sam preveri · brez točk' + (task.type === 'code' && task.src && task.pts > 0 ? ' · na maturi ' + pts(task.pts) : ''); });
         if (task.example) tags.append(h('span', { class: 'tag', text: 'Rešen primer' }));
       }
     }

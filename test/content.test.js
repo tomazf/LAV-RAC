@@ -2064,6 +2064,10 @@ test('3.7: four theory groups, laboratory exercises are not mentioned, programs 
   await go(a, 'naloge-f/12');
   assert.equal((await card(a).locator('.lr-check').textContent()).trim(), 'Shrani in končaj');
   assert.match(await card(a).locator('.tags').textContent(), /Sam preveri · brez točk/);
+  // a matura task keeps what it is worth on the matura, though it gives no points here
+  assert.match(await card(a).locator('.tags').textContent(), /Sam preveri · brez točk · na maturi 3 točke/);
+  await go(a, 'naloge-g/1');
+  assert.doesNotMatch(await card(a).locator('.tags').textContent(), /na maturi/);
   // a graded program: the artifact's own self-assessment is not used, the right output is hidden and checked
   await go(a, 'naloge-e/2');
   assert.ok(await card(a).locator('textarea.editor').isVisible());
