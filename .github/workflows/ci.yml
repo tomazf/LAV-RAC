@@ -2,6 +2,8 @@ name: CI
 on:
   push:
     branches: [main]
+    # documentation-only pushes do not run the tests (saves the free minutes)
+    paths-ignore: ['**.md', 'docs/**']
   pull_request:
 # A newer push to the same branch cancels the older run; a run that hangs is stopped after 15 minutes (it took 4-6 minutes
 # normally; without a limit a hung `npm test` used the 6-hour default of GitHub).
