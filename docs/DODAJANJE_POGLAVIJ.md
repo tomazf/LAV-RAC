@@ -32,6 +32,7 @@ Potrebno je samo za preizkuse in za `npm run import` (uvoz odpre stran v brskaln
 ## Pravila za naloge (povzetek)
 
 - Naloga z `___` v kodi in polji pod vprašanjem je vedno `inline` (vrzeli so v kodi); besedne vrzeli v vprašanju ostanejo polja pod njim.
+- Naloge s kodo (18. 11. 2026): točkovane po izpisu, razen če je izpis samo `true`/`false` ali ena ali dve vrednosti, ki jih dijak izračuna na pamet, in programov iz nekdanjih laboratorijskih vaj ter dodatnih zbirk: te so `self` (»Sam preveri«, gumb »Shrani in končaj«, brez točk, namig in rešitev ostaneta). Ob uvozu izpiši seznam nalog s kodo po tem pravilu in ga pokaži učitelju. Samoocena novejših artifactov se ne prevzame (`codeAsBefore` v `qformat.js`).
 - Delno točkovanje (16. 11. 2026): naloga z več samostojnimi deli da največ točk × pravilni deli / vsi deli, navzdol na pol točke; z namigom polovica. Naloge z enim odgovorom in posebni tipi v 2.x ostanejo vse ali nič.
 - Izpis programa se primerja brez razlikovanja velikih in malih črk in brez podvojenih presledkov; strogost (`exact`) samo, kadar jo naloga izrecno zahteva.
 - Naloge »Sam preveri« nimajo točk; naloge »Za doma« se ne točkujejo; pri nalogah s programom portal hrani vpisani izpis in kodo.

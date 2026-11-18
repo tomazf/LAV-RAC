@@ -365,7 +365,7 @@
         h('li', { text: 'Najprej preglej vse razlage. Vaje se odklenejo, ko odpreš vsako stran razlage.' }),
         h('li', { text: 'Pri vsaki nalogi oddaš en odgovor. Pravilen odgovor prinese vse točke, napačen 0 točk. Pri nalogi z več deli (več vrzeli, trditev ali izbir) dobiš točke po deležu pravilnih delov, zaokroženo navzdol na pol točke.' }),
         h('li', { text: 'Namig odbije polovico točk naloge. Ogled rešitve prinese 0 točk in nalogo zaklene.' }),
-        TASKS.some((t) => t.self) ? h('li', { text: 'Naloge z oznako »Sam preveri« nimajo točk: rešitev narediš sam, jo preizkusiš in nalogo označiš s »Preveril sem«. Rešitev si lahko ogledaš brez posledic.' }) : null,
+        TASKS.some((t) => t.self) ? h('li', { text: 'Naloge z oznako »Sam preveri« nimajo točk: rešitev narediš sam, jo preizkusiš in nalogo označiš s »Preveril sem« (pri programih s »Shrani in končaj«). Rešitev si lahko ogledaš brez posledic.' }) : null,
         h('li', { text: 'Napredek se shranjuje v tvoj račun, zato lahko nadaljuješ na katerem koli računalniku.' })));
     if (c.vajeNote) rules.append(h('p', { class: 'lr-just', html: c.vajeNote }));
     p.page.append(rules);
@@ -472,7 +472,8 @@
     if (task.self && check) {
       // The artifact's own check goes away with its listener; ticking is the shell's.
       const tick = check.cloneNode(false);
-      tick.textContent = 'Preveril sem';
+      // A program is saved as it is typed; the button saves it once more and ends the task (agreed 18. 11. 2026).
+      tick.textContent = task.type === 'code' ? 'Shrani in končaj' : 'Preveril sem';
       tick.addEventListener('click', () => api.checked(i));
       check.replaceWith(tick);
       check = tick;
@@ -518,6 +519,15 @@
 
   // The options of a task (LavRac.prepare) shape the artifact's card.
   function shapeTask(card, q, task) {
+    // The window for the code grows with the code (agreed 18. 11. 2026): the lines it has plus a few to write in, so the student
+    // does not scroll all the time; it stops at 32 lines and can still be pulled taller by hand.
+    const editor = q.querySelector('textarea.editor');
+    if (editor) {
+      const fit = () => { editor.rows = Math.min(32, Math.max(9, editor.value.split('\n').length + 3)); };
+      fit();
+      editor.addEventListener('input', fit);
+      q.querySelectorAll('.js-restore').forEach((b) => b.addEventListener('click', () => setTimeout(fit, 0)));
+    }
     if (task.nobtn) {
       q.querySelectorAll('.js-copy, a[href*="programiz"]').forEach((x) => x.remove());
       q.querySelectorAll('.actions').forEach((a) => { if (!a.children.length) a.remove(); });

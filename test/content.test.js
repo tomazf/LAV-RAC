@@ -1331,7 +1331,7 @@ test('3.1: program output is the answer and stays after a reload; an empty blank
   await go(a, 'naloge-c/10');
   assert.equal(await card(a).locator('textarea.out').count(), 0);
   assert.ok(await card(a).locator('textarea.editor').isVisible());
-  assert.equal((await card(a).locator('.lr-check').textContent()).trim(), 'Preveril sem');
+  assert.equal((await card(a).locator('.lr-check').textContent()).trim(), 'Shrani in končaj');
   assert.match(await card(a).locator('.tags').textContent(), /Sam preveri · brez točk/);
   assert.ok(await card(a).locator('.js-copy').count() > 0, 'the editor keeps its own buttons');
   assert.match(await card(a).textContent(), /Program zaženi v poljubnem okolju \(Eclipse, VS Code, Programiz …\) in primerjaj njegov izpis s pričakovanim/);
@@ -1344,7 +1344,7 @@ test('3.1: program output is the answer and stays after a reload; an empty blank
   assert.match(await a.textContent('#lrPtxt'), / \/ 75 točk$/);
   await go(a, 'naloge-d/11');
   assert.equal(await card(a).locator('textarea.out').count(), 0);
-  assert.equal((await card(a).locator('.lr-check').textContent()).trim(), 'Preveril sem');
+  assert.equal((await card(a).locator('.lr-check').textContent()).trim(), 'Shrani in končaj');
   // no »Kopiraj kodo« and no »Odpri Programiz« where the teacher took them off
   for (const hash of ['naloge-c/5', 'naloge-c/6', 'naloge-c/9', 'naloge-c/11', 'naloge-c/12', 'naloge-d/9', 'naloge-d/10']) {
     await go(a, hash);
@@ -1745,7 +1745,7 @@ test('3.3: matura labels and no switch; blanks typed in the code; tasks without 
   for (const hash of ['naloge-c/6', 'naloge-c/12', 'naloge-d/10']) {
     await go(a, hash);
     assert.equal(await card(a).locator('textarea.out').count(), 0, hash);
-    assert.equal((await card(a).locator('.lr-check').textContent()).trim(), 'Preveril sem', hash);
+    assert.equal((await card(a).locator('.lr-check').textContent()).trim(), 'Shrani in končaj', hash);
     assert.ok(await card(a).locator('textarea.editor').isVisible(), hash);
   }
   assert.equal(ex.tasks.filter((t) => t.self).length, 3);
@@ -2055,19 +2055,23 @@ test('3.7: four theory groups, laboratory exercises are not mentioned, programs 
   await go(a, 'naloge-g/1');
   assert.ok(await card(a).locator('textarea.editor').isVisible());
   assert.equal(await card(a).locator('textarea.out').count(), 0);
-  assert.equal((await card(a).locator('.lr-check').textContent()).trim(), 'Preveril sem');
+  assert.equal((await card(a).locator('.lr-check').textContent()).trim(), 'Shrani in končaj');
   assert.match(await card(a).locator('.tags').textContent(), /Sam preveri · brez točk/);
   assert.ok(await card(a).locator('.q pre.code').count() >= 1); // the artifact shows the right output, the shell adds no second box
   assert.equal(await card(a).locator('.lr-tests').count(), 0);
   // F12 only returns true/false: the student writes it and ticks it, no points
   await go(a, 'naloge-f/12');
-  assert.equal((await card(a).locator('.lr-check').textContent()).trim(), 'Preveril sem');
+  assert.equal((await card(a).locator('.lr-check').textContent()).trim(), 'Shrani in končaj');
   assert.match(await card(a).locator('.tags').textContent(), /Sam preveri · brez točk/);
   // a graded program: the artifact's own self-assessment is not used, the right output is hidden and checked
   await go(a, 'naloge-e/2');
   assert.ok(await card(a).locator('textarea.editor').isVisible());
   assert.ok(await card(a).locator('textarea.out').isVisible());
   assert.equal((await card(a).locator('.lr-check').textContent()).trim(), 'Preveri');
+  // the window for the code grows with the code: the starter has 13 lines, so it has 16 rows, and more when the student writes more
+  assert.equal(await card(a).locator('textarea.editor').evaluate((e) => e.rows), 16);
+  await card(a).locator('textarea.editor').fill('1\n'.repeat(40));
+  assert.equal(await card(a).locator('textarea.editor').evaluate((e) => e.rows), 32);
   assert.equal(await card(a).locator('.js-cok, .js-cre, .selfnote').count(), 0);
   assert.doesNotMatch(await card(a).locator('.q').textContent(), /12\s*35\s*7/);
   await card(a).locator('textarea.editor').fill('int[] t = {1, 2};');
