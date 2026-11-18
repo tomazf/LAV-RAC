@@ -1294,7 +1294,7 @@ test('Za doma: two more tasks per chapter, added in the portal, unscored', async
     assert.ok(await a.locator('.page.on article', { hasText: titles[1] }).locator('.sol').isVisible());
   }
   // unscored: the catalog has the same tasks and points as before (3.1 to 3.3 changed on 10. 11. 2026: tasks the student checks have no points)
-  assert.deepEqual(catalog.exercises.map((e) => [e.id, e.tasks.length, e.maxPoints]), [['2.1', 99, 218], ['2.2', 85, 164], ['2.3', 129, 237], ['3.1', 52, 75], ['3.2', 53, 61], ['3.3', 55, 83], ['3.4', 76, 83], ['3.5', 50, 58], ['3.6', 114, 125], ['3.7', 147, 230], ['4.1', 89, 158], ['4.2', 63, 113], ['4.3', 52, 63]]);
+  assert.deepEqual(catalog.exercises.map((e) => [e.id, e.tasks.length, e.maxPoints]), [['2.1', 99, 218], ['2.2', 85, 164], ['2.3', 129, 237], ['3.1', 52, 75], ['3.2', 53, 61], ['3.3', 55, 83], ['3.4', 76, 83], ['3.5', 50, 58], ['3.6', 114, 107], ['3.7', 147, 224], ['4.1', 89, 158], ['4.2', 63, 113], ['4.3', 52, 63]]);
   await a.context().close();
   assert.deepEqual(errors, []);
 });
@@ -1942,10 +1942,10 @@ test('3.6: three theory groups, laboratory exercises are not mentioned, sets F a
   const sections = [...new Set(ex.tasks.map((t) => t.section))];
   assert.deepEqual(sections, ['Vrste zank in pogoj', 'Sledenje izvajanju zanke', 'Pisanje zank', 'Gnezdene zanke in izpisi likov', 'Stavka break in continue', 'Naloge za utrjevanje', 'Dodatne vaje', 'Ponavljanje']);
   assert.deepEqual(sections.map((n) => ex.tasks.filter((t) => t.section === n).length), [10, 19, 14, 12, 10, 37, 10, 2]);
-  // 226 points of the artifact minus the 47 self-checked programs of sets F and G, which carry no points
-  assert.equal(ex.maxPoints, 125);
+  // 226 points of the artifact minus the 56 self-checked programs (sets F and G, and nine of C and H whose structure matters), which carry no points
+  assert.equal(ex.maxPoints, 107);
   const nameOf = (t) => String.fromCharCode(65 + sections.indexOf(t.section)) + (ex.tasks.filter((u) => u.section === t.section).indexOf(t) + 1);
-  assert.deepEqual(ex.tasks.filter((t) => t.self).map(nameOf), [...Array.from({ length: 37 }, (_, i) => 'F' + (i + 1)), ...Array.from({ length: 10 }, (_, i) => 'G' + (i + 1))]);
+  assert.deepEqual(ex.tasks.filter((t) => t.self).map(nameOf).sort(), [...Array.from({ length: 37 }, (_, i) => 'F' + (i + 1)), ...Array.from({ length: 10 }, (_, i) => 'G' + (i + 1)), 'C1', 'C3', 'C4', 'C5', 'C8', 'C9', 'C10', 'C12', 'H2'].sort());
   assert.deepEqual(await a.locator('.lr-rail a.lr-gated .lr-tg').allTextContents(), ['A ·', 'B ·', 'C ·', 'D ·', 'E ·', 'F ·', 'G ·', 'H ·', 'I ·']);
   assert.equal((await a.locator('.lr-rail a.lr-gated .lr-tx').last().textContent()).trim(), 'Za doma');
   // nothing of the laboratory exercise, no chapter number of the artifact, no label switch; the collections keep their names
@@ -1988,15 +1988,16 @@ test('3.6: three theory groups, laboratory exercises are not mentioned, sets F a
     await card(a).locator('.lr-check').click();
     return [await feedback(), await card(a).getAttribute('data-lr')];
   };
-  await go(a, 'naloge-c/1');
-  assert.deepEqual(await submit('int i = 1; while (i <= 10) { System.out.print(i + "-"); i++; } // for (', '1-2-3-4-5-6-7-8-9-10-'), ['V kodi manjka zanka for.', 'open']);
-  assert.deepEqual(await submit('for (int i = 1; i <= 10; i++) System.out.print(i + "-");', '1-2-3-4-5-6-7-8-9-10-'), ['Pravilno: 2 točki.', 'ok']);
+  // C1 and C12 are written and compared with the solution, without points (18. 11. 2026)
+  for (const hash of ['naloge-c/1', 'naloge-c/12']) {
+    await go(a, hash);
+    assert.equal((await card(a).locator('.lr-check').textContent()).trim(), 'Shrani in končaj', hash);
+    assert.equal(await card(a).locator('textarea.out').count(), 0, hash);
+  }
   await go(a, 'naloge-c/7');
   assert.deepEqual(await submit('for (int i = 0; i < 5; i++) System.out.println(i);', '0\n1\n2\n3\n4'), ['Zanke for ne smeš uporabiti.', 'open']);
   assert.deepEqual(await submit('System.out.println(0); System.out.println(1); System.out.println(2); System.out.println(3); System.out.println(4);', '0\n1\n2\n3\n4'), ['Uporabi zanko while ali do-while.', 'open']);
   assert.deepEqual(await submit('int i = 0; while (i < 5) { System.out.println(i); i++; }', '0\n1\n2\n3\n4'), ['Pravilno: 2 točki.', 'ok']);
-  await go(a, 'naloge-c/12');
-  assert.deepEqual(await submit('int k = 0; while (a >= b) { a -= b; k++; } return a / b;', '3'), ['Množenja, deljenja in ostanka (*, /, %) ne smeš uporabiti.', 'open']);
   // D12 asks for the spaces in front of the stars: without them the triangle is not right
   await go(a, 'naloge-d/12');
   const [, st] = await submit('for (int i = 0; i < n; i++) { /* ... */ }', '*\n***\n*****\n*******');
@@ -2023,9 +2024,9 @@ test('3.7: four theory groups, laboratory exercises are not mentioned, programs 
   assert.deepEqual(sections.map((n) => ex.tasks.filter((t) => t.section === n).length), [16, 12, 9, 13, 32, 25, 20, 14, 6]);
   // 340 points of the artifact minus the 52 self-checked programs (sets G and H, and 18 whose output is only true/false or a value
   // or two), which carry no points
-  assert.equal(ex.maxPoints, 230);
+  assert.equal(ex.maxPoints, 224);
   const nameOf = (t) => String.fromCharCode(65 + sections.indexOf(t.section)) + (ex.tasks.filter((u) => u.section === t.section).indexOf(t) + 1);
-  assert.deepEqual(ex.tasks.filter((t) => t.self).map(nameOf).sort(), [...['A9', 'D1', 'E3', 'E5', 'E6', 'E17', 'E18', 'E23', 'E25', 'E26', 'E28', 'F8', 'F12', 'F14', 'F16', 'F19', 'I4', 'I5'], ...Array.from({ length: 20 }, (_, i) => 'G' + (i + 1)), ...Array.from({ length: 14 }, (_, i) => 'H' + (i + 1))].sort());
+  assert.deepEqual(ex.tasks.filter((t) => t.self).map(nameOf).sort(), [...['A9', 'D1', 'E3', 'E5', 'E6', 'E17', 'E18', 'E23', 'E25', 'E26', 'E28', 'F8', 'F12', 'F14', 'F16', 'F19', 'I4', 'I5', 'D2', 'E31'], ...Array.from({ length: 20 }, (_, i) => 'G' + (i + 1)), ...Array.from({ length: 14 }, (_, i) => 'H' + (i + 1))].sort());
   assert.equal(ex.tasks.filter((t) => !t.self).every((t) => t.max > 0), true);
   assert.deepEqual(await a.locator('.lr-rail a.lr-gated .lr-tg').allTextContents(), ['A ·', 'B ·', 'C ·', 'D ·', 'E ·', 'F ·', 'G ·', 'H ·', 'I ·', 'J ·']);
   assert.equal((await a.locator('.lr-rail a.lr-gated .lr-tx').last().textContent()).trim(), 'Za doma');

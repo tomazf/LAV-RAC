@@ -5144,7 +5144,7 @@
    "key": "scnm_lavrac_3_6_v1",
    "version": 1,
    "format": "short",
-   "maxPoints": 125,
+   "maxPoints": 107,
    "tasks": [
     {
      "i": 0,
@@ -5352,7 +5352,8 @@
     {
      "i": 29,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Pisanje zank",
      "q": "Na ekranu želimo dobiti izpis 1-2-3-4-5-6-7-8-9-10- (vse v eni vrstici, na koncu je pomišljaj). Zapiši del kode, ki z uporabo zanke for doseže ta izpis."
     },
@@ -5366,21 +5367,24 @@
     {
      "i": 31,
      "level": "lažja",
-     "max": 1,
+     "max": 0,
+     "self": true,
      "section": "Pisanje zank",
      "q": "Zapišite poljubno zanko, s katero se stavek System.out.print(\"*\"); izvede natanko 42-krat. (Prirejeno: po zanki izpiši še prazno vrstico, da se izpis zaključi.)"
     },
     {
      "i": 32,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Pisanje zank",
      "q": "Zapišite zanko for, v kateri števec preteče vsa zaporedna liha cela števila med 999 in 111, vključno z mejama, vsako natanko enkrat, pričnemo pa s številom 999."
     },
     {
      "i": 33,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Pisanje zank",
      "q": "Zapišite zanko for, v kateri števec preteče vsa soda cela števila med 100 in 0, vključno z mejama, vsako natanko enkrat, pričnemo pa s številom 100. Telo zanke "
     },
@@ -5401,21 +5405,24 @@
     {
      "i": 36,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Pisanje zank",
      "q": "Del programa, ki izračuna vsoto naravnih števil iz intervala [1..100], zapišite z uporabo zanke do while. Dana je zanka for: for(int num = 100, sum=0; num>0; nu"
     },
     {
      "i": 37,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Pisanje zank",
      "q": "Naslednjo zanko do while pretvorite v zanko for. (Prirejeno: po zanki izpiši x in y, ločena s presledkom; y deklariraj pred zanko.)"
     },
     {
      "i": 38,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Pisanje zank",
      "q": "Dopolnite spodnjo kodo z zanko do while, ki tvori naključna realna števila iz intervala [0, 1) in tvorjenje preneha, ko je zadnje naključno število večje od 0,7"
     },
@@ -5429,7 +5436,8 @@
     {
      "i": 40,
      "level": "srednja",
-     "max": 2,
+     "max": 0,
+     "self": true,
      "section": "Pisanje zank",
      "q": "Napišite kodo metode deli tako, da bo vrnila celi del pri deljenju števila a s številom b. Dovoljene so le dodatne spremenljivke, zanke ter operaciji seštevanja"
     },
@@ -5987,7 +5995,8 @@
     {
      "i": 113,
      "level": "težja",
-     "max": 3,
+     "max": 0,
+     "self": true,
      "section": "Ponavljanje",
      "q": "V programu imamo zanko for, s katero na zaslon zaporedoma izpišemo znake »*«. Zapiši kodo, ki stori enako, pri čemer ne smeš uporabiti zanke for. (Prirejeno: iz"
     }
@@ -6104,7 +6113,7 @@
    "key": "scnm_lavrac_3_7_v1",
    "version": 1,
    "format": "short",
-   "maxPoints": 230,
+   "maxPoints": 224,
    "tasks": [
     {
      "i": 0,
@@ -6377,7 +6386,8 @@
     {
      "i": 38,
      "level": "težja",
-     "max": 3,
+     "max": 0,
+     "self": true,
      "section": "Polnjenje tabele in naključna števila",
      "q": "Dano imamo deklaracijo int tab[] = new int[100]; Zapišite kodo, ki z uporabo zanke while napolni tabelo tab tako, da bo na začetku vsebovala vsa cela števila od"
     },
@@ -6680,7 +6690,8 @@
     {
      "i": 80,
      "level": "težja",
-     "max": 3,
+     "max": 0,
+     "self": true,
      "section": "Algoritmi na enodimenzionalnih tabelah",
      "q": "Urejanje z izbiranjem: napiši metodo static void uredi(int[] t), ki tabelo uredi naraščajoče brez uporabe razreda Arrays. Po vsakem prehodu zunanje zanke naj me"
     },

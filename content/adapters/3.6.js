@@ -23,7 +23,10 @@ const GROUPS = [
 //   inline: D4 has its blank in the code,
 //   exact: D12 asks for the spaces in front of the stars (the shape of the triangle).
 const PREP = {
-  self: [...Array.from({ length: 37 }, (_, i) => 'F' + (i + 1)), ...Array.from({ length: 10 }, (_, i) => 'G' + (i + 1))],
+  // C1, C3, C4, C5, C8, C9, C10, C12 and H2: the code and its structure are what matters, the output is a number or a short line
+  // the student works out by heart; they are written, saved and compared with the solution, without points (18. 11. 2026).
+  self: [...Array.from({ length: 37 }, (_, i) => 'F' + (i + 1)), ...Array.from({ length: 10 }, (_, i) => 'G' + (i + 1)),
+    'C1', 'C3', 'C4', 'C5', 'C8', 'C9', 'C10', 'C12', 'H2'],
   nobtn: ['A8', 'B5', 'B6', 'B7', 'B8', 'B9', 'B10', 'B11', 'B12', 'B13', 'B14', 'B16', 'B19',
     'D1', 'D5', 'D6', 'D7', 'D8', 'D9', 'D10', 'D11', 'E6', 'E7', 'E8', 'E9'],
   inline: ['D4'],
