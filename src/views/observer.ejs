@@ -1,0 +1,24 @@
+<%- include('partials/head', { pageTitle: 'Vaje' }) %>
+<section class="hello">
+  <div>
+    <h1><%= user.name %></h1>
+    <% if (years.length) { %>
+    <p class="big-line">Nadzor: <%= years.map((y) => `${y}. letnik`).join(', ') %>. Vaje si lahko ogledaš, rešitve so vidne. Napredka dijakov ne vidiš in ničesar ne shranjuješ.</p>
+    <% } else { %>
+    <p class="big-line">Skrbnik ti še ni določil letnikov. Ko jih določi, se vaje pokažejo tukaj.</p>
+    <% } %>
+  </div>
+</section>
+<% mods.forEach((m) => { %>
+<details class="module" open>
+  <summary><h2><span class="m-no"><%= m.id %></span> <%= m.title %></h2></summary>
+  <ol class="rail">
+    <% m.exercises.forEach((e) => { %>
+    <li class="node">
+      <div class="ex-main"><h3><a href="/vaje/<%= e.id %>"><span class="ex-no"><%= e.no %></span> <%= e.title %></a></h3></div>
+    </li>
+    <% }) %>
+  </ol>
+</details>
+<% }) %>
+<%- include('partials/foot') %>

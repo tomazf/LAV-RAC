@@ -94,7 +94,9 @@ export async function loadUser(req, res, next) {
       if (u) {
         u.isAdmin = isAdmin(u);
         u.isTeacher = u.isAdmin || u.role === 'teacher';
-        u.isWaiting = !u.isTeacher && !u.class_id;
+        // A supervisor (»Nadzorni«) has no class and needs none: the years they may see are in observer_years.
+        u.isObserver = !u.isTeacher && u.role === 'observer';
+        u.isWaiting = !u.isTeacher && !u.isObserver && !u.class_id;
         req.user = u;
         res.locals.user = u;
         res.locals.csrf = req.session.csrf;

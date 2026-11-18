@@ -17,6 +17,7 @@ Splošen dogovor za portal z vajami, razredi in spremljanjem napredka, kakršen 
 | Skrbnik | uporabniško ime (UPN) v `ADMIN_EMAILS` (brez razlikovanja velikih in malih črk) | ustvarja, preimenuje in briše razrede, določa učitelje in jih dodeljuje razredom, briše uporabnike, vidi dnevnik dejanj, dela kopije, lahko dela vse kot učitelj v vsakem razredu |
 | Učitelj | določi ga skrbnik, domena ne odloča | se sam pridruži razredu, **iz razreda ga odstrani samo skrbnik** (izpisa ni, dogovorjeno 4. 11. 2026). V svojih razredih dodaja in odstranjuje dijake, izbira odprte vaje in vrstni red, vidi rezultate in dijake brez razreda, ponastavi vajo dijaku ali celemu razredu, izvozi CSV. Razredov ne ustvarja |
 | Dijak | učitelj ali skrbnik ga doda v en razred | rešuje odprte vaje, vidi svoj napredek, sam ponastavi vajo. Razreda ne more zapustiti |
+| Nadzorni (dogovor 18. 11. 2026) | skrbnik mu določi enega ali več letnikov; dva nadzornika lahko letnike razdelita | vidi vaje izbranih letnikov samo za ogled, z rešitvami, brez »V pripravi«. Nima razreda, ne vidi napredka ali zgodovine dijakov, ničesar ne shrani (ni napredka, časa, točk in ponastavitve). Ne vidi seznamov učiteljev ali dijakov |
 | Brez razreda | vsak nov ali odstranjen uporabnik | vidi samo obvestilo, da čaka na razred |
 
 Pravila:
@@ -25,6 +26,7 @@ Pravila:
 - Dodati je mogoče samo uporabnika brez razreda in brez vloge učitelja. Dijak je v enem razredu. Odstranjen dijak ostane v sistemu, napredek se ohrani in se vrne z njim.
 - Uporabnika se ob vsaki zahtevi znova prebere iz baze, zato sprememba vloge ali odstranitev veljata takoj.
 - Skrbnika ni mogoče izbrisati, dokler je v `ADMIN_EMAILS`.
+- Nadzorni (`role = 'observer'`, letniki v `users.observer_years`) nima razreda in ne more biti učitelj ali dijak; pri določitvi se mu odstranijo razredi in učiteljevanje. Strežnik na poti do vaje preveri letnik, v pogledu ni shranjevanja (brez napredka, brez `/api/progress` in `/api/time`, brez sledilnika v strani). Nastavitev letnikov skrbnik vidi in spreminja v oknu uporabnika. Ob novem šolskem letu se letniki ne prenesejo samodejno.
 
 ## 3. Vaje in razredi
 
@@ -88,7 +90,7 @@ Strani: Uporabniki (filter, iskanje, urejanje s svinčnikom; dijakom brez razred
 
 **Seznami s svinčnikom** (dogovor 15. 11. 2026): v vrstici razreda ali uporabnika je samo ikona svinčnika, ki odpre eno okno za vse spremembe te vrstice; Shrani zapiše vse naenkrat, Prekliči, Escape ali klik zunaj okna ga zapre brez shranjevanja. Okno brez skripta ne dela (napisano je na strani). Besedila na teh straneh tečejo čez celotno širino strani, tudi na Kopijah in Čiščenju.
 - **Razredi:** razredi so v skupinah po letnikih (2., 3., 4., nato brez letnika), vsaka skupina ima število razredov in dijakov. Razred brez učitelja ima oznako v vrstici in opozorilo nad tabelo (število tudi v naslovu skupine). Okno razreda: ime, letnik, prejšnji letniki (vsak posebej, samo pod letnikom razreda), učitelji; izbris razreda je v istem oknu. **Imena razredov so edinstvena** brez razlikovanja velikih in malih črk ter presledkov (skrbnik ne more ustvariti ali preimenovati razreda v že obstoječe ime; to drži tudi baza, `classes_name_key`); razred sme spremeniti pisavo svojega imena.
-- **Uporabniki:** okno uporabnika: vloga (dijak ali učitelj), za dijaka razred (skrbnik ga lahko premakne v drug razred, napredek ostane pri dijaku), za učitelja razredi, ki jih poučuje; izbris je v istem oknu. Dijak je v enem razredu, učitelj ni dijak: pri spremembi vloge se razredi druge vloge odstranijo. Skrbnika iz nastavitev strežnika ni mogoče urejati. Po shranjevanju se skrbnik vrne na isti seznam z istim filtrom in stranjo. Vsaka sprememba je v dnevniku (določil učitelja, dodal učitelja razredu, dodal dijaka v razred …).
+- **Uporabniki:** okno uporabnika: vloga (dijak, učitelj ali nadzorni z izbranimi letniki), za dijaka razred (skrbnik ga lahko premakne v drug razred, napredek ostane pri dijaku), za učitelja razredi, ki jih poučuje; izbris je v istem oknu. Dijak je v enem razredu, učitelj ni dijak: pri spremembi vloge se razredi druge vloge odstranijo. Skrbnika iz nastavitev strežnika ni mogoče urejati. Po shranjevanju se skrbnik vrne na isti seznam z istim filtrom in stranjo. Vsaka sprememba je v dnevniku (določil učitelja, dodal učitelja razredu, dodal dijaka v razred …).
 - **Čiščenje:** skrbnik vpiše število dni (najmanj 30) in dobi seznam ujemajočih dijakov (ime, razred, zadnja prijava; učitelji in skrbniki niso na seznamu), privzeto vsi označeni; odznačeni ostanejo. Brisanje zahteva svež prenos kopije (30 minut) in potrditev; strežnik ob brisanju znova preveri, da je izbrani še vedno dijak brez prijave toliko dni, drugih ne izbriše (prijavljeni po predogledu se preskočijo). V dnevnik gre samo število.
 
 **Kopije** (Administracija > Kopije):
@@ -124,6 +126,7 @@ Strani: Uporabniki (filter, iskanje, urejanje s svinčnikom; dijakom brez razred
 - Entra: nova registracija aplikacije, en najemnik, preusmeritev `https://DOMENA/auth/callback` in še `https://DOMENA/` za vrnitev po odjavi, skrivnost z rokom veljavnosti (pred iztekom jo obnovi), brez dodatnih dovoljenj.
 - Pred njim obratni posredovalnik (pri LAV-ELS nginx v `ssl-proxy`) s `X-Forwarded-Proto: https`, za nalaganje kopij `client_max_body_size 200m;`. Lahko tudi Caddy s samodejnim HTTPS.
 - Preverjanje: `/healthz`. Posodobitev: `git pull && docker compose up -d --build`.
+- Noga na strani »Kateri podatki se beležijo« (`/zasebnost`) je skrita, tudi vrstica o kodi (dogovor 18. 11. 2026, kot v LAV-ELS).
 - Različica kode za skrbnika (dogovor 18. 11. 2026, kot v LAV-ELS): v nogi strani je samo skrbniku vidna vrstica »Koda na strežniku: <kratek commit>, posodobljeno <čas zadnjega pulla>«. Vir je mapa `.git`, ki jo `docker-compose.yml` priklopi v vsebnik samo za branje (`src/version.js`). Ime varnostne kopije ima isti commit in lokalni čas portala; brez mape `.git` je »neznano«.
 - Demo brez Microsofta: `docker compose -f docker-compose.demo.yml up --build` (lažna prijava, samo za preizkuse).
 

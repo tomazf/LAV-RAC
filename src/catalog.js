@@ -31,9 +31,11 @@ const FONTS_LINK = /<link[^>]*href="\/static\/fonts\/fonts\.css"[^>]*>/;
 export function renderExercise(ex, boot) {
   const json = JSON.stringify(boot).replace(/</g, '\\u003c');
   const variants = ex.hasVariants ? `<script src="${asset('js/variants/core.js')}"></script>\n<script src="${asset(`js/variants/${ex.id}.js`)}"></script>` : '';
+  // A supervisor's view is read-only: the shell still gets its data, but the tracker is left out, so nothing is sent or saved.
+  const tracker = `<script>window.__LAVELS=${json}</script>\n` + (boot.readOnly ? '' : `<script src="${asset('js/tracker.js')}"></script>`);
   return ex.html
     .replace(FONTS_LINK, () => `${fontPreloads}\n<link href="${asset('fonts/fonts.css')}" rel="stylesheet">`)
-    .replace(PLACEHOLDER, () => `<script>window.__LAVELS=${json}</script>\n<script src="${asset('js/tracker.js')}"></script>`).replace(VARIANTS, () => variants);
+    .replace(PLACEHOLDER, () => tracker).replace(VARIANTS, () => variants);
 }
 // Chapters with a place in a group but no content yet; shown only to teachers and admins.
 export const plannedExercises = raw.planned ?? [];
@@ -78,6 +80,8 @@ export async function classGroups(classId, { openOnly = false } = {}) {
   return grouped(items);
 }
 // Everything from lower years, in the standard order; open regardless of what the teachers opened.
+// Chapters of the chosen years for a supervisor: the standard order, without the chapters not yet written.
+export const observerGroups = (years) => grouped(exercises.filter((e) => years.includes(yearOf(e.module))).map((e, i) => light(e, { visible: true, order: i })));
 export const pastGroups = (year, allowed = []) => grouped(exercises.filter((e) => pastYear(year, e.module) && allowed.includes(yearOf(e.module))).map((e, i) => light(e, { visible: true, order: i })));
 export async function ensureClassRows(classId) {
   for (const [i, e] of exercises.entries()) {

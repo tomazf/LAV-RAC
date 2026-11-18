@@ -33,8 +33,8 @@ const listBack = (req) => {
 const backTo = (v) => {
   try { const u = new URL(String(v || ''), 'http://x'); return u.origin === 'http://x' && u.pathname === '/admin' ? u.pathname + u.search : '/admin'; } catch { return '/admin'; }
 };
-const ROLES = { admin: 'Skrbnik', teacher: 'Učitelj', student: 'Dijak', waiting: 'Brez razreda' };
-const roleOf = (u) => (isAdmin(u) ? 'admin' : u.role === 'teacher' ? 'teacher' : u.class_names ? 'student' : 'waiting');
+const ROLES = { admin: 'Skrbnik', teacher: 'Učitelj', observer: 'Nadzorni', student: 'Dijak', waiting: 'Brez razreda' };
+const roleOf = (u) => (isAdmin(u) ? 'admin' : u.role === 'teacher' ? 'teacher' : u.role === 'observer' ? 'observer' : u.class_names ? 'student' : 'waiting');
 
 adminRouter.get('/', async (req, res, next) => {
   try {
@@ -57,7 +57,7 @@ adminRouter.get('/', async (req, res, next) => {
     for (const u of users) { u.teach_ids = teaching.get(u.id) ?? []; u.class_id = memberOf.get(u.id) ?? null; }
     const params = { vloga: kind, q: search, na: pg.per === 50 ? '' : pg.per };
     res.render('admin/users', {
-      users, search, kind, ROLES, pg, params, groups: classGroups(classes), classes, back: listBack(req),
+      users, search, kind, ROLES, pg, params, groups: classGroups(classes), classes, years: YEARS, back: listBack(req),
       message: req.query.sporocilo || null, tab: 'users',
     });
   } catch (e) { next(e); }
@@ -67,7 +67,9 @@ adminRouter.post('/uporabniki/:id/uredi', checkCsrf, async (req, res, next) => {
   const to = backTo(req.body.back);
   try {
     const id = Number(req.params.id) || 0;
-    const role = req.body.role === 'teacher' ? 'teacher' : 'user';
+    const role = ['teacher', 'observer'].includes(req.body.role) ? req.body.role : 'user';
+    // A supervisor sees only the years ticked here; the list is checked against the years that exist.
+    const years = role === 'observer' ? YEARS.map((y) => y.year).filter((y) => asList(req.body.years).map(Number).includes(y)) : [];
     const out = await tx(async (c) => {
       const u = (await c.query('SELECT * FROM users WHERE id=$1 FOR UPDATE', [id])).rows[0];
       if (!u) return { missing: true };
@@ -77,8 +79,25 @@ adminRouter.post('/uporabniki/:id/uredi', checkCsrf, async (req, res, next) => {
       const log = [];
       if (role !== u.role) {
         await c.query('UPDATE users SET role=$2 WHERE id=$1', [id, role]);
-        log.push([role === 'teacher' ? 'Določil učitelja' : 'Odvzel vlogo učitelja', u.name]);
+        log.push([role === 'teacher' ? 'Določil učitelja' : role === 'observer' ? 'Določil nadzornega' : 'Odvzel vlogo učitelja ali nadzornega', u.name]);
       }
+      if (role === 'observer') {
+        // A supervisor has no class and no classes to teach; the progress of students is never theirs to see.
+        if (mine) {
+          await c.query('DELETE FROM class_members WHERE user_id=$1', [id]);
+          log.push(['Odstranil dijaka iz razreda', `${mine.name}: ${u.name}`]);
+        }
+        for (const t of teaching) log.push(['Odstranil učitelja iz razreda', `${t.name}: ${u.name}`]);
+        if (teaching.length) await c.query('DELETE FROM class_teachers WHERE user_id=$1', [id]);
+        const before = (await c.query('SELECT observer_years FROM users WHERE id=$1', [id])).rows[0].observer_years;
+        if (before.join() !== years.join()) {
+          await c.query('UPDATE users SET observer_years=$2 WHERE id=$1', [id, years]);
+          log.push(['Nastavil letnike nadzornemu', `${years.map((y) => `${y}. letnik`).join(', ') || 'brez letnikov'}: ${u.name}`]);
+        }
+      } else {
+        if (u.observer_years.length) await c.query("UPDATE users SET observer_years='{}' WHERE id=$1", [id]);
+      }
+      if (role !== 'observer') {
       if (role === 'teacher') {
         // A teacher is not a student; the classes they teach are exactly the ticked ones.
         if (mine) {
@@ -112,6 +131,7 @@ adminRouter.post('/uporabniki/:id/uredi', checkCsrf, async (req, res, next) => {
             log.push(['Dodal dijaka v razred', `${target.name}: ${u.name}`]);
           }
         }
+      }
       }
       return { log };
     });

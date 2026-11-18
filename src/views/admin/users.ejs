@@ -25,7 +25,7 @@
   <form class="edit-form" method="post" action="/admin/uporabniki/<%= u.id %>/uredi" data-roles><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="back" value="<%= back %>">
     <div><h2 id="ut<%= u.id %>">Uredi uporabnika <%= u.name %></h2><span class="dim"><%= u.username %></span></div>
     <fieldset class="field"><legend>Vloga</legend>
-      <div class="row"><label class="switch"><input type="radio" name="role" value="user" <%= u.role === 'teacher' ? '' : 'checked' %>> Dijak</label><label class="switch"><input type="radio" name="role" value="teacher" <%= u.role === 'teacher' ? 'checked' : '' %>> Učitelj</label></div></fieldset>
+      <div class="row"><label class="switch"><input type="radio" name="role" value="user" <%= u.role === 'user' || !['teacher','observer'].includes(u.role) ? 'checked' : '' %>> Dijak</label><label class="switch"><input type="radio" name="role" value="teacher" <%= u.role === 'teacher' ? 'checked' : '' %>> Učitelj</label><label class="switch"><input type="radio" name="role" value="observer" <%= u.role === 'observer' ? 'checked' : '' %>> Nadzorni</label></div></fieldset>
     <div class="field" data-panel="user"><label for="uc<%= u.id %>">Razred</label>
       <select id="uc<%= u.id %>" name="class_id"><option value="">brez razreda</option><% groups.forEach((g) => { %><% if (g.title) { %><optgroup label="<%= g.title %>"><% } %><% g.classes.forEach((c) => { %><option value="<%= c.id %>" <%= u.class_id === c.id ? 'selected' : '' %>><%= c.name %></option><% }) %><% if (g.title) { %></optgroup><% } %><% }) %></select>
       <span class="dim">Dijak je lahko v enem razredu. Napredek ostane pri dijaku, tudi če ga premakneš.<%= u.role === 'teacher' ? ' Ko učitelju odvzameš vlogo, izgubi vse razrede, ki jih je poučeval.' : '' %></span></div>
@@ -33,6 +33,9 @@
       <% if (!classes.length) { %><span class="dim">Še ni razredov.</span><% } %>
       <% groups.forEach((g) => { %><% if (g.title) { %><strong class="grp-name"><%= g.title %></strong><% } %><ul class="checks"><% g.classes.forEach((c) => { %><li><label class="switch"><input type="checkbox" name="teach" value="<%= c.id %>" <%= u.teach_ids.includes(c.id) ? 'checked' : '' %>> <%= c.name %></label></li><% }) %></ul><% }) %>
       <span class="dim">Učitelj ni dijak: dijak, ki ga določiš za učitelja, izgubi članstvo v razredu.</span></fieldset>
+    <fieldset class="field" data-panel="observer"><legend>Letniki, ki jih nadzoruje</legend>
+      <ul class="checks"><% years.forEach((y) => { %><li><label class="switch"><input type="checkbox" name="years" value="<%= y.year %>" <%= u.observer_years.includes(y.year) ? 'checked' : '' %>> <%= y.year %>. letnik</label></li><% }) %></ul>
+      <span class="dim">Nadzorni vidi vaje izbranih letnikov samo za ogled, z rešitvami. Nima razreda in ne vidi napredka dijakov. Ničesar ne shrani.</span></fieldset>
     <div class="dlg-actions"><button class="btn">Shrani</button><button type="button" class="btn ghost" data-close>Prekliči</button></div>
     <details class="danger-zone"><summary>Izbriši za vedno</summary>
       <p>Račun, napredek in zgodovina bodo trajno izbrisani. Tega ni mogoče razveljaviti. Če dijaka želiš samo premakniti, mu zgoraj izberi drug razred.</p>

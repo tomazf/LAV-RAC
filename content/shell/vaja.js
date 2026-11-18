@@ -23,6 +23,8 @@
   const setPos = new Map();    // set id -> shown task position
 
   function read() {
+    // A supervisor (readOnly) starts empty and saves nothing, here or on the server.
+    if (B && B.readOnly) return { t: {}, seen: [] };
     let s = null;
     try { s = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { s = null; }
     if (!s || typeof s !== 'object') s = {};
@@ -31,6 +33,7 @@
     return s;
   }
   function persist() {
+    if (B && B.readOnly) return;
     savedAt = state.at;
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* the tracker shows saving problems */ }
   }
@@ -268,6 +271,7 @@
     };
     idle();
     resetBox = reset;
+    if (B && B.readOnly) reset.hidden = true;
     // The title, progress and search sit in the middle; the portal's tracker adds »Vse vaje« before them and »Odjava« after them,
     // so those two stay at the edges of the page, away from the content. The reset button is in the left column (12. 11. 2026).
     return h('div', { class: 'lr-top' }, h('div', { class: 'lr-top-in' },

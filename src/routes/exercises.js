@@ -10,6 +10,8 @@ export const exerciseRouter = express.Router();
 const canOpen = async (user, ex) => {
   if (!ex) return false;
   if (user.isTeacher) return true;
+  // A supervisor sees the chosen years as a whole, the standard way; they have no class.
+  if (user.isObserver) return user.observer_years.includes(yearOf(ex.module));
   const s = await one(
     `SELECT c.year, c.past_years, x.visible FROM classes c LEFT JOIN class_exercises x ON x.class_id=c.id AND x.exercise_id=$2 WHERE c.id=$1`,
     [user.class_id, ex.id],
@@ -56,6 +58,13 @@ exerciseRouter.get('/vaje/:id', requireAccess, async (req, res, next) => {
   try {
     const ex = byId.get(req.params.id);
     if (!(await canOpen(req.user, ex))) return res.status(404).render('error', { title: 'Vaja ni na voljo', message: 'Učitelj te vaje še ni odprl za tvoj razred.' });
+    // A supervisor gets the exercise read-only: no progress row, no tracker, the solutions shown (staff) and a fixed variant.
+    if (req.user.isObserver) {
+      return res.type('html').send(renderExercise(ex, {
+        id: ex.id, no: ex.no, title: ex.title, key: ex.key, attempt: 0, uid: req.user.id, name: req.user.name, state: {}, csrf: req.session.csrf, staff: true, readOnly: true,
+        variant: ex.hasVariants ? { seed: 1, keep: [] } : null,
+      }));
+    }
     const p = await openAttempt(req.user, ex);
     res.type('html').send(renderExercise(ex, {
       id: ex.id, no: ex.no, title: ex.title, key: ex.key, attempt: p.attempt, uid: req.user.id, name: req.user.name, state: p.state, csrf: req.session.csrf, staff: req.user.isTeacher,
@@ -67,6 +76,7 @@ exerciseRouter.get('/vaje/:id', requireAccess, async (req, res, next) => {
 exerciseRouter.post('/api/progress/:id', async (req, res, next) => {
   try {
     if (!req.user || req.user.isWaiting) return res.status(401).json({ ok: false, code: 'login' });
+    if (req.user.isObserver) return res.status(403).json({ ok: false, code: 'readonly' });
     if (!csrfValid(req)) return res.status(403).json({ ok: false, code: 'csrf' });
     const ex = byId.get(req.params.id);
     if (!ex || !stateOk(req.body.state)) return res.status(400).json({ ok: false, code: 'bad' });
@@ -108,6 +118,7 @@ exerciseRouter.post('/api/progress/:id', async (req, res, next) => {
 exerciseRouter.post('/api/time/:id', async (req, res, next) => {
   try {
     if (!req.user || req.user.isWaiting) return res.status(401).json({ ok: false });
+    if (req.user.isObserver) return res.status(403).json({ ok: false, code: 'readonly' });
     if (!csrfValid(req)) return res.status(403).json({ ok: false });
     const ex = byId.get(req.params.id);
     const page = ex?.pageMap.get(String(req.body.page));

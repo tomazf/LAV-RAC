@@ -1,5 +1,5 @@
 import express from 'express';
-import { classGroups, pastGroups, standardGroups } from '../catalog.js';
+import { YEARS, classGroups, observerGroups, pastGroups, standardGroups } from '../catalog.js';
 import { requireAccess } from '../auth.js';
 import { many, one } from '../db.js';
 import { cell, latest, progressFor, rollup, strip } from '../stats.js';
@@ -14,6 +14,10 @@ studentRouter.get('/', (req, res) => {
 studentRouter.get('/zasebnost', (req, res) => res.render('privacy'));
 studentRouter.get('/vaje', requireAccess, async (req, res, next) => {
   try {
+    if (req.user.isObserver) {
+      const years = YEARS.map((y) => y.year).filter((y) => req.user.observer_years.includes(y));
+      return res.render('observer', { mods: observerGroups(years), years });
+    }
     const mods = req.user.isTeacher ? standardGroups() : await classGroups(req.user.class_id, { openOnly: true });
     // A class that may revisit lower years sees them in a section of their own, outside this year's totals.
     const cls = req.user.isTeacher ? null : await one('SELECT year, past_years FROM classes WHERE id=$1', [req.user.class_id]);
