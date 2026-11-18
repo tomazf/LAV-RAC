@@ -22,7 +22,7 @@ Stanje poglavij (17. 11. 2026):
 | 3.4 | Podatkovni tipi v Javi | uvožena; nov artifact čaka na posodobitev |
 | 3.5 | Pogojni stavki v Javi | uvožena; nov artifact čaka na posodobitev |
 | 3.6 | Zanke v Javi | uvožena 17. 11. 2026, čaka pregled učitelja; nov artifact čaka na posodobitev |
-| 3.7 | Tabele v Javi | artifact pripravljen, čaka uvoz |
+| 3.7 | Tabele v Javi | uvožena 18. 11. 2026, čaka pregled učitelja |
 | 3.8, 3.9, 3.10 | | V pripravi |
 | 4.1 | Relacijska algebra | uvožena 11. 11. 2026, pregledana, skupine razlag potrjene |
 | 4.2 | Podatkovne baze in SUPB | uvožena 11. 11. 2026, skupine razlag potrjene 12. 11. 2026, sklopa B in C združena |
@@ -33,7 +33,8 @@ Stanje poglavij (17. 11. 2026):
 | 4.7 | UML | V pripravi |
 
 Kaj še rabimo:
-- uvoz pripravljenih poglavij 2.5 in 3.7 (artifacta: `claude.ai/artifact/2ZG1PRMFhWNrPQHmyvAuCE`, `Ud7sBts42HGSGMeLZwnjXp`),
+- uvoz pripravljenega poglavja 2.5 (artifact `claude.ai/artifact/2ZG1PRMFhWNrPQHmyvAuCE`),
+- pregled 3.7 (učitelj): skupine razlag, sklopa G in H kot »Sam preveri«, sklici na poglavji 8 in 11 v besedilu,
 - pregled 3.6 (učitelj): skupine razlag, razvrstitev nalog (spodaj), sklopa F in G kot »Sam preveri«,
 - artifacte za poglavja »V pripravi«: 2.4, 2.6, 3.8, 3.9, 3.10, 4.4, 4.5, 4.6 in 4.7,
 - igre (Robot zankar, Kodni sprint, Kodni CTF, Vdor v šolsko bazo, Dežurni DBA) niso poglavja in se ne štejejo; o njih se odloča posebej.
@@ -44,6 +45,7 @@ Mesta »V pripravi« so v `content/sources.json` (`planned`), učitelji in skrbn
 
 - Preizkusi pri delu (17. 11. 2026): celotnega `npm test` ne zaganjamo brez izrecnega dovoljenja učitelja, ker traja dolgo. Pred objavo se poženejo samo preizkusi, ki jih sprememba zadeva; pri skupni kodi in pri dodajanju ali odstranjevanju poglavja asistent najprej vpraša in priporoči. CI požene vse ob objavi, rezultat se pogleda po objavi. Zapisano v `CLAUDE.md`.
 - Posodobitev 3.1–3.6 na nove artifacte (18. 11. 2026): artifacti imajo na koncu strani razlage male naloge »Preizkusi se« (povleci in spusti, drži ali ne, katera slika, korak za korakom, sled izvajanja) in svojo samooceno nalog s kodo. Dogovorjeno: (1) naloge s kodo ostanejo, kot jih obravnava portal (točke ali »Sam preveri«, odgovor, namigi in rešitev na strežnik); artifactova samoocena (»Primerjaj z rešitvijo«, merila) se ne prevzame (`codeAsBefore` v `content/adapters/qformat.js`); (3) male naloge »Preizkusi se« so brez točk in portal ne hrani ničesar, tudi oznake »Opravljeno« ne (`miniTasks`); iskanje po razlagah jih preskoči; (4) v 3.2 in 3.3 imajo diagrami še naprej samo maturitetne napise, besedilo artifacta se temu prilagodi. Število, vrstni red in točke nalog so enaki, zato `version` ostane. Artifactov razred `.chip` je v filtru nalog zadel tudi kocke povleci in spusti; adapter filter omeji na `.chip[data-f]` (napako je treba popraviti tudi v artifactih). Stanje: 3.1 narejena (commit `4873a75`); 3.2–3.6 čakajo (sled izvajanja je v artifactih `new Function`, ki ga stroga CSP vaj prepoveduje, zato jo je treba ob uvozu prevesti v navadno kodo).
+- 3.7 Tabele v Javi (18. 11. 2026, predlog, čaka potrditev učitelja): uvožena po dogovoru za nove artifacte (naloge s kodo ostanejo točkovane po izpisu, samoocena artifacta se ne prevzame: `codeAsBefore`; male naloge »Preizkusi se« brez točk: `miniTasks`). Programa sklopov G (prej laboratorijska vaja) in H (dodatne vaje), skupaj 34, sta »Sam preveri«; ostali programi so točkovani po izpisu in pravilni izpis je skrit; skupaj 276 točk od 340. Štiri skupine razlag: Tabela in pomnilnik · Reference in metode · Algoritmi in polnjenje · Dvodimenzionalne tabele (s Pogostimi napakami). Vrzeli v kodi (E1, E14, F13, I1) so `inline`, naloge samo z izpisom (11) so brez gumbov. Zahtevana zgradba kode (`need`) še ni določena. Besedilo še omenja poglavji 8 in 11 (razredi, nizi); LAV-RAČ3 ima trenutno mesta do 10, sklici so pustili kot v 3.3.
 - Mesta »V pripravi« (17. 11. 2026): vsako poglavje, ki čaka na artifact, ima mesto v `planned`, da ne pozabimo, kaj še rabimo; igre niso poglavja.
 - LAV-RAČ3 (8. 11. 2026): pravila za uvoz poglavij 3. letnika so v `TODO.md` (skupine teorije, »Ponavljanje«, naloge s programom v poljubnem okolju, brez omemb laboratorijskih vaj). Pri nalogah z izpisom ali programom portal hrani tudi vpisani izpis in kodo.
 - Točkovanje (6. 11. 2026): naloge »Za doma« se ne točkujejo. Maturitetne naloge se točkujejo smiselno glede na nalogo, kot v maturitetnih polah.

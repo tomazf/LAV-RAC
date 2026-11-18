@@ -6096,6 +6096,1201 @@
    ]
   },
   {
+   "id": "3.7",
+   "no": "7",
+   "module": "LAV-RAČ3",
+   "title": "Tabele v Javi",
+   "fullTitle": "Tabele v Javi",
+   "key": "scnm_lavrac_3_7_v1",
+   "version": 1,
+   "format": "short",
+   "maxPoints": 276,
+   "tasks": [
+    {
+     "i": 0,
+     "level": "srednja",
+     "max": 2,
+     "section": "Deklaracija, indeksi in dolžina",
+     "q": "Dana je deklaracija char [] seznam = new char[100]; Kateri od navedenih obsegov vrednosti predstavlja veljavne vrednosti za indeks tabele seznam?"
+    },
+    {
+     "i": 1,
+     "level": "srednja",
+     "max": 2,
+     "section": "Deklaracija, indeksi in dolžina",
+     "q": "Stavek int [] x={1,2,3,4,5};"
+    },
+    {
+     "i": 2,
+     "level": "lažja",
+     "max": 1,
+     "section": "Deklaracija, indeksi in dolžina",
+     "q": "Stavek int x[]={4};"
+    },
+    {
+     "i": 3,
+     "level": "lažja",
+     "max": 1,
+     "section": "Deklaracija, indeksi in dolžina",
+     "q": "Katera izmed deklaracij ustvari tabelo?"
+    },
+    {
+     "i": 4,
+     "level": "lažja",
+     "max": 1,
+     "section": "Deklaracija, indeksi in dolžina",
+     "q": "Elementi tabele celih števil so samodejno inicializirani na vrednost"
+    },
+    {
+     "i": 5,
+     "level": "lažja",
+     "max": 1,
+     "section": "Deklaracija, indeksi in dolžina",
+     "q": "Kateri stavek deklarira in inicializira tabelo šestih objektov razreda Dijak?"
+    },
+    {
+     "i": 6,
+     "level": "lažja",
+     "max": 1,
+     "section": "Deklaracija, indeksi in dolžina",
+     "q": "V programu imamo ustvarjeno tabelo realnih števil z imenom tabela. S katerim od naslednjih stavkov priredimo realni spremenljivki n vrednost prvega elementa tab"
+    },
+    {
+     "i": 7,
+     "level": "lažja",
+     "max": 1,
+     "section": "Deklaracija, indeksi in dolžina",
+     "q": "V programu imamo definirano tabelo int[] tab = new int[] {1,2,3,4,5}; Dopolnite stavek tako, da bo v spremenljivko x shranjeno število elementov tabele tab: int"
+    },
+    {
+     "i": 8,
+     "level": "lažja",
+     "max": 1,
+     "section": "Deklaracija, indeksi in dolžina",
+     "q": "Želimo ustvariti tabelo, ki ima 102 celoštevilska elementa. Zapišite celotno deklaracijo tabele. (Prirejeno: za preverjanje izpiši dolžino ustvarjene tabele.)"
+    },
+    {
+     "i": 9,
+     "level": "srednja",
+     "max": 2,
+     "section": "Deklaracija, indeksi in dolžina",
+     "q": "Deklarirani sta spremenljivki String str = new String(\"abc\"); in double[] A = new double[20]; Napišite stavek, ki spremenljivki i priredi dolžino spremenljivke "
+    },
+    {
+     "i": 10,
+     "level": "srednja",
+     "max": 2,
+     "section": "Deklaracija, indeksi in dolžina",
+     "q": "Napišite stavek, ki izpiše true, če ima tabela int[] več kot pet elementov, sicer naj izpiše false. (Prirejeno: tabela se imenuje tab, dopolni izraz v oklepajih"
+    },
+    {
+     "i": 11,
+     "level": "lažja",
+     "max": 1,
+     "section": "Deklaracija, indeksi in dolžina",
+     "q": "Deklarirana je tabela int[] t = {1,2,3,4,5}; V programski kodi je zapisan stavek t[5]=6; Obkrožite črko pred resnično trditvijo."
+    },
+    {
+     "i": 12,
+     "level": "težja",
+     "max": 3,
+     "section": "Deklaracija, indeksi in dolžina",
+     "q": "Ali se stavek prevede? Razvrsti."
+    },
+    {
+     "i": 13,
+     "level": "lažja",
+     "max": 1,
+     "section": "Deklaracija, indeksi in dolžina",
+     "q": "Kaj izpiše naslednji izsek? String[] imena = new String[3]; System.out.println(imena[1]);"
+    },
+    {
+     "i": 14,
+     "level": "lažja",
+     "max": 1,
+     "section": "Deklaracija, indeksi in dolžina",
+     "q": "Kaj izpiše System.out.println(t); če je t tabela, ustvarjena z int[] t = {1, 2, 3};?"
+    },
+    {
+     "i": 15,
+     "level": "srednja",
+     "max": 2,
+     "section": "Deklaracija, indeksi in dolžina",
+     "q": "Tabela je ustvarjena z double[] m = new double[8]; Izračunaj."
+    },
+    {
+     "i": 16,
+     "level": "težja",
+     "max": 3,
+     "section": "Sledenje izvajanju",
+     "q": "Zapišite vsebino tabele tab po tem, ko se izvede to zaporedje stavkov. (Elemente loči z vejico.)"
+    },
+    {
+     "i": 17,
+     "level": "težja",
+     "max": 3,
+     "section": "Sledenje izvajanju",
+     "q": "Kaj izpiše ta del programa?"
+    },
+    {
+     "i": 18,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sledenje izvajanju",
+     "q": "Kaj izpiše izsek programa?"
+    },
+    {
+     "i": 19,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sledenje izvajanju",
+     "q": "Kaj izpiše izsek programa?"
+    },
+    {
+     "i": 20,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sledenje izvajanju",
+     "q": "Kaj je izpis izseka programa?"
+    },
+    {
+     "i": 21,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sledenje izvajanju",
+     "q": "Izpis 2. vrstice programa je 32 (koda presledka). Kaj izpišejo 3., 4. in 5. vrstica programa?"
+    },
+    {
+     "i": 22,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sledenje izvajanju",
+     "q": "Kakšna je vsebina tabele podatki po izvedbi metode obdelava(podatki)? (Elemente loči z vejico.)"
+    },
+    {
+     "i": 23,
+     "level": "težja",
+     "max": 3,
+     "section": "Sledenje izvajanju",
+     "q": "Imamo enodimenzionalno tabelo z imenom meritev dolžine n (n = 6) z vsebino 5, 3, 1, 2, 7, 8. Kakšna bo vsebina tabele po izvedbi algoritma na diagramu, če za vr"
+    },
+    {
+     "i": 24,
+     "level": "težja",
+     "max": 3,
+     "section": "Sledenje izvajanju",
+     "q": "Imamo enodimenzionalno tabelo z imenom meritev z vsebino 5, 3, 1, 2, 7, 8. Kakšna bo vsebina tabele po izvedbi algoritma na diagramu, če za vrednost spremenljiv"
+    },
+    {
+     "i": 25,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sledenje izvajanju",
+     "q": "Metoda nextInt(int meja) razreda Random vrne naključno celo število iz intervala [0, meja). Koliko je najmanjša vrednost v tabeli tabela? Koliko je največja mož"
+    },
+    {
+     "i": 26,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sledenje izvajanju",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 27,
+     "level": "srednja",
+     "max": 2,
+     "section": "Sledenje izvajanju",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 28,
+     "level": "lažja",
+     "max": 1,
+     "section": "Reference in prenos v metode",
+     "q": "Kaj se izpiše po izvedbi zaporedja stavkov? int[] x = {1,2,3,4,5}; int[] y = x; y[2] = 99; System.out.println(x[2]);"
+    },
+    {
+     "i": 29,
+     "level": "srednja",
+     "max": 2,
+     "section": "Reference in prenos v metode",
+     "q": "Kaj izpiše navedeni program?"
+    },
+    {
+     "i": 30,
+     "level": "srednja",
+     "max": 2,
+     "section": "Reference in prenos v metode",
+     "q": "Kaj izpiše navedeni program?"
+    },
+    {
+     "i": 31,
+     "level": "lažja",
+     "max": 1,
+     "section": "Reference in prenos v metode",
+     "q": "V programu imamo metodo public static void vprasanje(double tab[]) { tab[0] = -1; } Obkrožite črko pred trditvijo, ki je resnična po izvedbi stavkov double tabe"
+    },
+    {
+     "i": 32,
+     "level": "srednja",
+     "max": 2,
+     "section": "Reference in prenos v metode",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 33,
+     "level": "lažja",
+     "max": 1,
+     "section": "Reference in prenos v metode",
+     "q": "V programu imamo metodo public static void naloga(String niz) { niz = \"Novo!\"; } Kaj se izpiše po izvedbi stavkov String stavek = \"Kaj se zgodi?\"; naloga(stavek"
+    },
+    {
+     "i": 34,
+     "level": "srednja",
+     "max": 2,
+     "section": "Reference in prenos v metode",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 35,
+     "level": "srednja",
+     "max": 2,
+     "section": "Reference in prenos v metode",
+     "q": "Kaj izpiše program?"
+    },
+    {
+     "i": 36,
+     "level": "težja",
+     "max": 3,
+     "section": "Reference in prenos v metode",
+     "q": "Razvrsti trditve o tabelah in metodah."
+    },
+    {
+     "i": 37,
+     "level": "srednja",
+     "max": 2,
+     "section": "Polnjenje tabele in naključna števila",
+     "q": "Dano imamo deklaracijo tabele znakov char[] tab = new char[10]; Z uporabo poljubne zanke napišite del programa, ki v obstoječo tabelo vpiše črke A C E G I K M O"
+    },
+    {
+     "i": 38,
+     "level": "težja",
+     "max": 3,
+     "section": "Polnjenje tabele in naključna števila",
+     "q": "Dano imamo deklaracijo int tab[] = new int[100]; Zapišite kodo, ki z uporabo zanke while napolni tabelo tab tako, da bo na začetku vsebovala vsa cela števila od"
+    },
+    {
+     "i": 39,
+     "level": "srednja",
+     "max": 2,
+     "section": "Polnjenje tabele in naključna števila",
+     "q": "Napišite program, ki ustvari tabelo 100 števil ter jo napolni z naključnimi števili med –500 do +500, vključno z mejama. (Prirejeno: dopolni števili v izrazu t["
+    },
+    {
+     "i": 40,
+     "level": "srednja",
+     "max": 2,
+     "section": "Polnjenje tabele in naključna števila",
+     "q": "Napišite zaporedje stavkov, ki ustvari tabelo 100 realnih števil in jo napolni z naključnimi realnimi števili iz intervala [0, 1). (Prirejeno: dopolni oba stavk"
+    },
+    {
+     "i": 41,
+     "level": "srednja",
+     "max": 2,
+     "section": "Polnjenje tabele in naključna števila",
+     "q": "Deklarirajte dvodimenzionalno tabelo celih števil, ki ima 2 vrstici in 10 stolpcev. V tabelo vpišite naključne vrednosti iz intervala [10..100]. (Prirejeno: dop"
+    },
+    {
+     "i": 42,
+     "level": "srednja",
+     "max": 2,
+     "section": "Polnjenje tabele in naključna števila",
+     "q": "Napišite program, ki v tabelo (3 vrstice, 5 stolpcev) vpiše naključna števila po pravilu: če je vsota indeksov elementa tabele soda, se vpiše naključno število "
+    },
+    {
+     "i": 43,
+     "level": "",
+     "max": 4,
+     "section": "Polnjenje tabele in naključna števila",
+     "q": "Dano je zaporedje 10, –20, 30, –40, 50, –60, 70, –80, … Napišite program, ki v tabelo vpiše prvih n členov zaporedja in nato izpiše vsebino tabele. Med posamezn"
+    },
+    {
+     "i": 44,
+     "level": "",
+     "max": 4,
+     "section": "Polnjenje tabele in naključna števila",
+     "q": "Dane imamo tri enodimenzionalne tabele desetih celih števil. Prvi dve tabeli napolnimo z naključnimi števili iz intervala [10..30]. V tretjo tabelo vstavimo man"
+    },
+    {
+     "i": 45,
+     "level": "",
+     "max": 4,
+     "section": "Polnjenje tabele in naključna števila",
+     "q": "Napišite program, ki generira 10000 naključnih celih števil iz intervala [1..10] in izpiše število oziroma vsa števila, ki so bila najpogosteje generirana. (Pri"
+    },
+    {
+     "i": 46,
+     "level": "srednja",
+     "max": 2,
+     "section": "Polnjenje tabele in naključna števila",
+     "q": "Dana imate seznama besed seznam1 (13 besed) in seznam2 (8 besed). Napišite programske stavke, ki bodo sestavili in izpisali frazo tako, da se naključno izbereta"
+    },
+    {
+     "i": 47,
+     "level": "",
+     "max": 4,
+     "section": "Polnjenje tabele in naključna števila",
+     "q": "Za slovenski loto moramo staviti kombinacijo sedmih števil med 1 in 39. 19.1 Zapišite metodo boolean vsebuje(int[] polje, int i, int x), ki vrne true, če se šte"
+    },
+    {
+     "i": 48,
+     "level": "srednja",
+     "max": 2,
+     "section": "Polnjenje tabele in naključna števila",
+     "q": "Dopolni izraze z Math.random() za naključno celo število."
+    },
+    {
+     "i": 49,
+     "level": "srednja",
+     "max": 2,
+     "section": "Polnjenje tabele in naključna števila",
+     "q": "V tabeli meti so rezultati 20 metov kocke. Z tabelo pogostosti preštej, kolikokrat je padla posamezna številka, in izpiši vrstice v obliki »k: število« za k od "
+    },
+    {
+     "i": 50,
+     "level": "srednja",
+     "max": 2,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Dijak je moral napisati program, ki za vsak element tabele celih števil stevila preveri, ali je število sodo ali liho, in ugotovitev izpiše na zaslon. Dopolnite"
+    },
+    {
+     "i": 51,
+     "level": "težja",
+     "max": 3,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "V tabeli x imamo cela števila. Napišite metodo vsota, ki vrne vsoto vseh števil iz tabele, ki so večkratniki števila k. Glava metode: int vsota(int [] x, int k)"
+    },
+    {
+     "i": 52,
+     "level": "težja",
+     "max": 3,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Napišite metodo double povprecje(double tab[]), ki za parameter prejme tabelo realnih števil in vrne povprečno vrednost vseh števil v tabeli."
+    },
+    {
+     "i": 53,
+     "level": "srednja",
+     "max": 2,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Napišite metodo int nenicelni(int polje[]), ki za parameter prejme tabelo celih števil in vrne število elementov v tabeli, ki so različni od 0."
+    },
+    {
+     "i": 54,
+     "level": "srednja",
+     "max": 2,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Zapišite metodo kolikoPozitivnih, ki vrne število pozitivnih elementov celoštevilske tabele. Tabela naj bo podana kot parameter metode."
+    },
+    {
+     "i": 55,
+     "level": "srednja",
+     "max": 2,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Metoda test_3_9 vrne true, če so v tabeli tab zapisane le številke 3 ali 9, sicer vrne false. Dopišite manjkajočo kodo metode test_3_9. (Prirejeno: metoda je st"
+    },
+    {
+     "i": 56,
+     "level": "težja",
+     "max": 3,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "V razredu imamo tabelo realnih števil z imenom tab. Zapišite metodo, ki vrne vsoto prvih n elementov tabele, pri čemer je n parameter metode. Če je n neustrezen"
+    },
+    {
+     "i": 57,
+     "level": "srednja",
+     "max": 2,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Napišite metodo public static int vsotaN(int[] tab, int n, int kje), ki vrne vsoto n elementov tabele celih števil tab. Če je vrednost argumenta kje enaka 1, me"
+    },
+    {
+     "i": 58,
+     "level": "težja",
+     "max": 3,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Recimo, da imamo metodo double povprecje(double polje[]), ki vrne povprečno vrednost elementov tabele polje. Zapišite metodo, ki vrne število elementov tabele p"
+    },
+    {
+     "i": 59,
+     "level": "",
+     "max": 4,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Delamo s tabelo realnih števil. 19.1 Napišite metodo, ki vrne indeks največjega elementa v tabeli. Če je takih elementov več, vrne prvega, ki ga najde. 19.2 Nap"
+    },
+    {
+     "i": 60,
+     "level": "težja",
+     "max": 3,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Zapišite zasebno statično metodo private static int indeksNajvecjega(int x[]), ki kot parameter prejme tabelo celih števil in kot rezultat vrne indeks največjeg"
+    },
+    {
+     "i": 61,
+     "level": "težja",
+     "max": 3,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "V enodimenzionalni tabeli je deset celih števil. Napišite metodo z imenom uredi, ki v tabeli zamenja vsa pozitivna trimestna števila z vrednostjo 100 in negativ"
+    },
+    {
+     "i": 62,
+     "level": "težja",
+     "max": 3,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Za tabelo celih števil napišite metodo vsotaBrezMin, ki vrne vsoto elementov tabele brez vrednosti najmanjšega elementa. Če je najmanjših elementov več, nobeneg"
+    },
+    {
+     "i": 63,
+     "level": "težja",
+     "max": 3,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Dopolnite program tako, da bo v tabelo desetih celih števil t2 prepisal tiste vrednosti tabele t1, ki so večkratniki prvega elementa tabele t1. V preostala polj"
+    },
+    {
+     "i": 64,
+     "level": "težja",
+     "max": 3,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Dani sta tabeli šestih celih števil a1 in a2. Dopišite metodo racun, ki sprejme dva argumenta (tabeli a1 in a2) in vrne tabelo šestih celih števil. Če sta vredn"
+    },
+    {
+     "i": 65,
+     "level": "srednja",
+     "max": 2,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Dopolnite metodo podvoji tako, da za prejeto tabelo celih števil ustvari novo tabelo celih števil, v kateri so podvojeni vsi elementi prve tabele. Klic metode n"
+    },
+    {
+     "i": 66,
+     "level": "težja",
+     "max": 3,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Zapišite metodo vsiRazlicni, ki vrne true natanko tedaj, ko tabela celih števil ne vsebuje dveh enakih vrednosti. Tabela naj bo podana kot parameter metode."
+    },
+    {
+     "i": 67,
+     "level": "",
+     "max": 4,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Imamo tabelo dveh ali več elementov, v kateri so cela števila. 20.1 Napišite metodo, ki vrne true, če so števila v tabeli urejena v naraščajočem vrstnem redu, s"
+    },
+    {
+     "i": 68,
+     "level": "težja",
+     "max": 3,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Deklarirana je tabela celih števil int x[]={1,4,6,8,2,3,14,31}; Napišite metodo, ki premakne elemente tabele za n mest desno. Na 'izpraznjena mesta' naj se vpiš"
+    },
+    {
+     "i": 69,
+     "level": "težja",
+     "max": 3,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Napišite metodo popravi, ki je podana z glavo public static int[] popravi(int tab[], int min, int max). Metoda iz podane tabele tvori novo tabelo, sestavljeno l"
+    },
+    {
+     "i": 70,
+     "level": "težja",
+     "max": 3,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Zapišite metodo preveriTabelo. Metoda prejme tabelo celih števil. Če je v tabeli sodo število elementov in so vsi elementi soda števila, metoda vrne 2. Če je v "
+    },
+    {
+     "i": 71,
+     "level": "srednja",
+     "max": 2,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Napišite javno statično metodo public static int istolezni(double tabela[]), ki za prejeto enodimenzionalno tabelo realnih števil vrne, koliko elementov v tabel"
+    },
+    {
+     "i": 72,
+     "level": "težja",
+     "max": 3,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Napišite metodo, ki vrne največje celo število, dobljeno s kombinacijo števk tabele t. Primer: če je tabela int t[]={8,9,2,1,9}, vrne metoda število 99821."
+    },
+    {
+     "i": 73,
+     "level": "srednja",
+     "max": 2,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Imamo tabelo 10000 imen. Podatki v njej so urejeni v naraščajočem vrstnem redu. Kateri iskalni algoritem je v povprečnem primeru najhitrejši?"
+    },
+    {
+     "i": 74,
+     "level": "težja",
+     "max": 3,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Napišite metodo prastevilo, ki vrne true, če je argument a praštevilo, sicer vrne false. Napišite zaporedje stavkov, ki izračuna vsoto vseh praštevil, ki se poj"
+    },
+    {
+     "i": 75,
+     "level": "",
+     "max": 4,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Kontrolna vsota EMŠO se izračuna iz prvih dvanajstih števk: vsota = 7a + 6b + 5c + 4d + 3e + 2f + 7g + 6h + 5i + 4j + 3k + 2l. Trinajsta števka je kontrolna: 11"
+    },
+    {
+     "i": 76,
+     "level": "",
+     "max": 4,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Imamo enodimenzijsko tabelo desetih celih števil. Napišite metodo, ki ustvari novo enodimenzijsko tabelo tab2[] tako, da v obstoječi tabeli tab1[] desetih celih"
+    },
+    {
+     "i": 77,
+     "level": "srednja",
+     "max": 2,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Napišite metodo public static double stdev(double []tabela), ki vrne standardni odklon δ = √( Σ(xᵢ − x̄)² / (N − 1) ). Najprej izračunajte aritmetično sredino x"
+    },
+    {
+     "i": 78,
+     "level": "",
+     "max": 4,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Podatek v tabeli zgladimo tako, da vzamemo povprečje elementa in dveh elementov pred njim. Če element nima dveh predhodnikov, povprečje nadomestimo z 0. Če je v"
+    },
+    {
+     "i": 79,
+     "level": "",
+     "max": 4,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Večinski element enodimenzionalne tabele n števil je element, ki se v tabeli pojavi strogo več kot n/2-krat. V tabeli {8, 3, 2, 2, 3, 1, 6, 9, 2, 2, 2, 2, 2} je"
+    },
+    {
+     "i": 80,
+     "level": "težja",
+     "max": 3,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Urejanje z izbiranjem: napiši metodo static void uredi(int[] t), ki tabelo uredi naraščajoče brez uporabe razreda Arrays. Po vsakem prehodu zunanje zanke naj me"
+    },
+    {
+     "i": 81,
+     "level": "srednja",
+     "max": 2,
+     "section": "Algoritmi na enodimenzionalnih tabelah",
+     "q": "Dvojiško iskanje: napiši metodo static int najdi(int[] t, int x), ki v naraščajoče urejeni tabeli z dvojiškim iskanjem poišče x in vrne njegov indeks ali −1. Me"
+    },
+    {
+     "i": 82,
+     "level": "lažja",
+     "max": 1,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Deklarirana je tabela int [][] tab = new int[3][5]; Kaj izpiše stavek System.out.print(tab[0].length);?"
+    },
+    {
+     "i": 83,
+     "level": "lažja",
+     "max": 1,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Deklarirano imamo spremenljivko float[][] tabela = new float[10][3]; Kaj izpiše stavek System.out.println(tabela.length);?"
+    },
+    {
+     "i": 84,
+     "level": "lažja",
+     "max": 1,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Deklarirana in inicializirana je tabela int[][] t = new int[][]{{1,2},{1,2},{1,2,3},{1,2,3,4}}; Kaj izpiše stavek System.out.println(t.length);?"
+    },
+    {
+     "i": 85,
+     "level": "srednja",
+     "max": 2,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Kaj izpiše izsek int[][][] podatki = new int[3][5][6]; System.out.println(podatki.length);?"
+    },
+    {
+     "i": 86,
+     "level": "srednja",
+     "max": 2,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Dana je tabela int[][][] tabela = new int[2][4][6]; Pri kateri prireditvi bo prišlo do napake?"
+    },
+    {
+     "i": 87,
+     "level": "lažja",
+     "max": 1,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Kaj izpiše izsek kode programa?"
+    },
+    {
+     "i": 88,
+     "level": "lažja",
+     "max": 1,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Kaj izpiše navedeni del programa?"
+    },
+    {
+     "i": 89,
+     "level": "lažja",
+     "max": 1,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Na tekmovanju iz kemije je bilo 40 ekip, v vsaki po 5 tekmovalcev. Ekipe so bile označene z zaporednimi številkami od 0 do 39, tekmovalci posamezne ekipe pa z z"
+    },
+    {
+     "i": 90,
+     "level": "srednja",
+     "max": 2,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Deklarirana in inicializirana je dvodimenzionalna tabela int[][] t = { {0}, {0,1}, {0,1,2}, {0,1,2,3} }; Zapišite vsebino tabele po izvedbi zanke. (Elemente vrs"
+    },
+    {
+     "i": 91,
+     "level": "",
+     "max": 4,
+     "section": "Dvodimenzionalne tabele",
+     "q": "V programu je tabela int [][] t = {{10,22,33,44,50},{61,12,13,19,12},{0,0,0,0,0}}; Napišite metodi zamenjaj() in izpisi(). 20.1 Metoda zamenjaj() naj zamenja vr"
+    },
+    {
+     "i": 92,
+     "level": "",
+     "max": 4,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Tabela je int t[][]={{4,1,5,6},{3,3,2,8},{1,2,3,7},{7,5,1,5}}; 19.1 Napišite metodo public static void obrniEno(int x[]), ki obrne vrstni red podatkov znotraj e"
+    },
+    {
+     "i": 93,
+     "level": "težja",
+     "max": 3,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Napišite metodo, ki za parameter prejme dvodimenzionalno tabelo. Metoda naj vrne true, če so vsi elementi na glavni diagonali različni od nič, in false v naspro"
+    },
+    {
+     "i": 94,
+     "level": "težja",
+     "max": 3,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Dopolnite kodo metode najNadDiagonalo. Metoda prejme dvodimenzionalno kvadratno tabelo celih števil in vrne vrednost največjega elementa, ki leži nad glavno dia"
+    },
+    {
+     "i": 95,
+     "level": "srednja",
+     "max": 2,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Tabela int deska[][] predstavlja igralno polje. Prva in zadnja vrstica ter prvi in zadnji stolpec so stražarji in imajo vedno vrednost 0. Metoda preveriNicle pr"
+    },
+    {
+     "i": 96,
+     "level": "",
+     "max": 4,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Za spletni strežnik smo v juniju beležili število obiskov na dan v dvodimenzionalni tabeli: ena dimenzija šteje tedne, druga dneve v tednu. Za dneve z vrednostj"
+    },
+    {
+     "i": 97,
+     "level": "",
+     "max": 4,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Dana je dvodimenzionalna tabela double podatki[][] = new double[12][28], v kateri so za vsak mesec (januar = indeks 0) in za 28 dni shranjene povprečne dnevne t"
+    },
+    {
+     "i": 98,
+     "level": "",
+     "max": 4,
+     "section": "Dvodimenzionalne tabele",
+     "q": "V programu imamo dvodimenzionalno tabelo realnih števil tab, za katero velja, da nobeni dve vrstici nimata enake dolžine. Napišite metodo, ki za takšno tabelo v"
+    },
+    {
+     "i": 99,
+     "level": "težja",
+     "max": 3,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Napišite javno statično metodo posodobiCelice, ki za parameter prejme poljubno dvodimenzionalno tabelo celih števil in ne vrača ničesar. Metoda naj vse elemente"
+    },
+    {
+     "i": 100,
+     "level": "srednja",
+     "max": 2,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Napišite metodo public static boolean Preverimo(char [][]x), ki vrne true natanko tedaj, ko je dvodimenzionalna tabela znakov magični kvadrat. Tabela je magični"
+    },
+    {
+     "i": 101,
+     "level": "težja",
+     "max": 3,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Napišite metodo, ki prejme dimenzijo n in generira tabelo velikosti n x n. Tabelo napolnite tako, da so vsi robni elementi in elementi na obeh diagonalah enaki "
+    },
+    {
+     "i": 102,
+     "level": "srednja",
+     "max": 2,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Radi bi ustvarili tabelo znakov velikosti 5 x 5, ki vsebuje vzorec *|*|* / |*|*| / *|*|* / |*|*| / *|*|*. Napišite izsek programa, ki tabelo ustvari, jo s pomoč"
+    },
+    {
+     "i": 103,
+     "level": "",
+     "max": 4,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Naravno število je avtomorfno, če ima njegov kvadrat isto zadnjo števko kot število samo (npr. 5, 16, 71). 19.1 Zapišite javno statično metodo, ki za parameter "
+    },
+    {
+     "i": 104,
+     "level": "",
+     "max": 4,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Napišite metodo, ki za parameter prejme pozitivno celo število n in vrne dvodimenzionalno tabelo n x n, napolnjeno z zaporednimi celimi števili od 1 do n² v spi"
+    },
+    {
+     "i": 105,
+     "level": "",
+     "max": 4,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Silhueto mesta določajo zgradbe, vsaka podana s tremi števili (xL, xD, yD): levi rob, desni rob in višina (spodaj so vse na višini 0). Vse zgradbe so v tabeli n"
+    },
+    {
+     "i": 106,
+     "level": "srednja",
+     "max": 2,
+     "section": "Dvodimenzionalne tabele",
+     "q": "Za tabelo ocen (vrstica = dijak, stolpec = predmet) izpiši za vsakega dijaka povprečno oceno na dve decimalki (»dijak i: povprečje«), nato pa še povprečje vsake"
+    },
+    {
+     "i": 107,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Napiši program, ki v tabelo desetih celih števil vpiše števila (npr. kvadrate števil od 1 do 10) in tabelo izpiše na zaslon. (Prirejeno: vpiši kvadrate, izpis v"
+    },
+    {
+     "i": 108,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Napiši program, ki v tabeli celoštevilskih elementov velikosti 15 elementov poveča vrednost vseh elementov na lihih indeksih za 1. (Prirejeno: tabela je podana,"
+    },
+    {
+     "i": 109,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Napiši program, ki v tabeli celoštevilskih elementov velikosti 15 elementov poveča vrednost vseh elementov s sodo vrednostjo za 1. (Prirejeno: tabela je podana,"
+    },
+    {
+     "i": 110,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Na kateri lokaciji (indeksu) se nahaja zadnji element v tabeli t? Zapiši izraz."
+    },
+    {
+     "i": 111,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Napiši program, ki prebere s standardnega vhoda pet nizov in jih izpiše v obratnem vrstnem redu. (Prirejeno: nizi so že v tabeli, vsak izpiši v svojo vrstico.)"
+    },
+    {
+     "i": 112,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Dana je tabela celih števil int[] a. Napiši program Najmanjsi, ki v spremenljivko int m shrani najmanjši element tabele a. (Dodano: izpis m.)"
+    },
+    {
+     "i": 113,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Dana je tabela celih števil int[] a. Napiši program IndeksNajmanjsega, ki v spremenljivko int k shrani indeks najmanjšega elementa tabele a. (Dodano: izpis k. Č"
+    },
+    {
+     "i": 114,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program, ki bo v tabeli celih števil poiskal najmanjši in največji element. (Prirejeno: izpiši »min = …, max = …«.)"
+    },
+    {
+     "i": 115,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Sestavi program, ki bo izpisal prvih n vrstic Pascalovega (binomskega) trikotnika. S poravnavo vrstic se ni potrebno ukvarjati (vsaka vrstica naj se prične ob l"
+    },
+    {
+     "i": 116,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Ali lahko tabelo ustvarimo brez ukaza new? Izberi pravilne trditve."
+    },
+    {
+     "i": 117,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Napiši program, ki izpiše vse negativne elemente v podani tabeli celih števil (ločene s presledkom)."
+    },
+    {
+     "i": 118,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Napiši program, ki izpiše vse večkratnike števila 3 v podani tabeli (ločene s presledkom)."
+    },
+    {
+     "i": 119,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Napiši program, ki izpiše število negativnih elementov v podani tabeli."
+    },
+    {
+     "i": 120,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Napiši program, ki izpiše vse indekse negativnih elementov v tabeli (ločene s presledkom)."
+    },
+    {
+     "i": 121,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Napiši program, ki vse negativne elemente v podani tabeli postavi na 0 in tabelo izpiše (ločeno s presledkom)."
+    },
+    {
+     "i": 122,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Napiši program, ki izpiše indeks zadnjega negativnega elementa v 1D tabeli. Če tabela ne vsebuje nobenega negativnega elementa, naj izpiše −1. (Preizkusi z obem"
+    },
+    {
+     "i": 123,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Napiši program, ki izpiše drugo največjo vrednost v podani 1D tabeli. Lahko predpostaviš, da ima tabela najmanj dva različna elementa in da so vsi elementi pozi"
+    },
+    {
+     "i": 124,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Napiši program, ki izpiše vse pare indeksov elementov v podani tabeli, katerih vsota je enaka podanemu številu ciljnaVsota. Vsak par izpiši v svojo vrstico v ob"
+    },
+    {
+     "i": 125,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Napiši program, ki izpiše DA, če so vsi elementi podane tabele med seboj različni, v nasprotnem primeru pa NE. (Preizkusi na obeh tabelah, vsak rezultat v svojo"
+    },
+    {
+     "i": 126,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Naloge za utrjevanje",
+     "q": "Otroci stojijo v ravni vrsti in se z »izštevalcem« igrajo izštevanko. Izštevalec v vsakem krogu šteje od 1 do stBesed in s prstom potuje po otrocih. Prične pri "
+    },
+    {
+     "i": 127,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "Vojaki: podatki o vojakih so v vzporednih tabelah (isti indeks = isti vojak). Poišči in izpiši vojaka z največ moči in vojaka z najmanj moči. Pri obeh izpiši vs"
+    },
+    {
+     "i": 128,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "Vojaki: izpiši imena in priimke vseh vojakov, ki imajo zdravje enako 0 (vsakega v svojo vrstico). Nato izpiši statistiko padlih po skupinah v obliki »B: x, Z: x"
+    },
+    {
+     "i": 129,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "Vojaki: vodja mora biti tisti bojevnik (skupina B), ki ima najvišje povprečje moči in zdravja. Poišči vodjo, mu določi skupino V in izpiši njegove podatke v obl"
+    },
+    {
+     "i": 130,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "Vojaki: izpiši, koliko zdravja skupaj imajo vsi bojevniki (B) in koliko vsi zdravilci (Z), v obliki »B: vsota« in »Z: vsota« v dveh vrsticah. (Prirejeno: namest"
+    },
+    {
+     "i": 131,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "Popravi tabelo tako, da bodo v prvi polovici vrstic zagotovo soda števila (liho povečaj za 1), v drugi polovici pa zagotovo liha (sodo povečaj za 1). Nato izpiš"
+    },
+    {
+     "i": 132,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "Kvadratna tabela je napolnjena s števili. Izpiši, katera diagonala ima večjo vsoto: »glavna«, »stranska« ali »enaki«. Pred tem izpiši obe vsoti v obliki »glavna"
+    },
+    {
+     "i": 133,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "V 2D tabelo zapiši števila Pascalovega trikotnika n-te stopnje in tabelo nato izpiši (vrstica i ima i + 1 števil, ločenih s presledkom). (Prirejeno: n = 6, brez"
+    },
+    {
+     "i": 134,
+     "level": "",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "V kvadratni tabeli so cela števila iz [−10, 50]. Izpiši (vsak odgovor v svojo vrstico): koliko števil je negativnih, najmanjše število, drugo največje število ("
+    },
+    {
+     "i": 135,
+     "level": "",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "John Snow (1854): mreža n × n celic, v nekaterih so vodnjaki. Za vsak vodnjak izpiši, kolikšno površino pokriva, t.j. kolikšnemu številu celic je ta vodnjak naj"
+    },
+    {
+     "i": 136,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "V razredu je n dijakov, ki jih uči m učiteljev. Zaključene ocene (od 1 do 5) so v tabeli n × m. Za vsakega dijaka izpiši povprečje ocen (»dijak i: povprečje«, n"
+    },
+    {
+     "i": 137,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "Križci in krožci: napiši metodo static char zmagovalec(char[][] p), ki za ploščo 3 × 3 vrne 'X' ali 'O', če je ta igralec zmagal, oziroma '-', če zmagovalca ni."
+    },
+    {
+     "i": 138,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "Minolovec: na plošči so bombe označene s številom 9. Za vsako celico brez bombe preštej bombe v sosednjih celicah (največ 8) in število zapiši v celico. Pazi na"
+    },
+    {
+     "i": 139,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "Štiri v vrsto: igralno polje ima 6 vrstic in 7 stolpcev (prazno polje je pika). Program po vrsti spušča žetone (*) v stolpce iz tabele poteze (1–7). Žeton pade "
+    },
+    {
+     "i": 140,
+     "level": "",
+     "max": 0,
+     "self": true,
+     "section": "Dodatne vaje",
+     "q": "Črkovna uganka: v tabeli poljeCrk (15 × 15) poišči besede iz tabele besede v vseh osmih smereh (vodoravno, navpično, diagonalno, tudi nazaj) in za vsako izpiši "
+    },
+    {
+     "i": 141,
+     "level": "težja",
+     "max": 3,
+     "section": "Ponavljanje",
+     "q": "Dana je tabela tabela1: 13, 18, 11, 26, 33, 39, 88, 52, 112, 212. Ustvariti želimo enako veliko tabelo tabela2, v kateri bodo samo elementi tabele tabela1, ki s"
+    },
+    {
+     "i": 142,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Dana je tabela enomestnih celih števil t. Napišite metodo public static int Vsota(int []t, int n), ki vrne vsoto prvih n števil tabele t. Če ima tabela t manj k"
+    },
+    {
+     "i": 143,
+     "level": "",
+     "max": 4,
+     "section": "Ponavljanje",
+     "q": "Dana je tabela stotih naravnih števil. 20.1 Napišite metodo, ki preveri, ali je naravno število n praštevilo. 20.2 Napišite metodo, ki v tabeli t izmed prvih n "
+    },
+    {
+     "i": 144,
+     "level": "težja",
+     "max": 3,
+     "section": "Ponavljanje",
+     "q": "Vsak objekt razreda Delavec vsebuje neprazno enodimenzionalno tabelo realnih števil z imenom prejemki. Napišite metodo, ki med vsemi prejemki vrne indeks največ"
+    },
+    {
+     "i": 145,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Stroj izdeluje izdelke v malih serijah. V tabeli casi so časi izdelave posamezne serije v milisekundah, v tabeli izdelki pa število izdelkov v seriji (prvih 9 i"
+    },
+    {
+     "i": 146,
+     "level": "",
+     "max": 4,
+     "section": "Ponavljanje",
+     "q": "Sešteti moramo dve tridesetmestni števili, zapisani v tabeli tako, da je vsaka števka v svoji celici (enice so v zadnji celici). Napišite metodo sum, ki prejme "
+    }
+   ],
+   "pages": [
+    {
+     "id": "pregled",
+     "chapter": "Teorija",
+     "label": "Pregled"
+    },
+    {
+     "id": "kaj",
+     "chapter": "Teorija",
+     "label": "Kaj je tabela"
+    },
+    {
+     "id": "ustvarjanje",
+     "chapter": "Teorija",
+     "label": "Deklaracija, ustvarjanje in inicializacija"
+    },
+    {
+     "id": "istitip",
+     "chapter": "Teorija",
+     "label": "Ena tabela, en tip: ali lahko mešamo int in char?"
+    },
+    {
+     "id": "pomnilnik",
+     "chapter": "Teorija",
+     "label": "Tabela v pomnilniku"
+    },
+    {
+     "id": "reference",
+     "chapter": "Teorija",
+     "label": "Referenca, prirejanje in kopiranje"
+    },
+    {
+     "id": "metode",
+     "chapter": "Teorija",
+     "label": "Tabele in metode: prenos parametrov"
+    },
+    {
+     "id": "sprehod",
+     "chapter": "Teorija",
+     "label": "Sprehod po tabeli in osnovni algoritmi"
+    },
+    {
+     "id": "nakljucna",
+     "chapter": "Teorija",
+     "label": "Polnjenje tabele in naključna števila"
+    },
+    {
+     "id": "dvorazsezne",
+     "chapter": "Teorija",
+     "label": "Dvodimenzionalne tabele"
+    },
+    {
+     "id": "napake",
+     "chapter": "Teorija",
+     "label": "Pogoste napake"
+    },
+    {
+     "id": "naloge-a",
+     "chapter": "Naloge",
+     "label": "Vaje A · Deklaracija, indeksi in dolžina"
+    },
+    {
+     "id": "naloge-b",
+     "chapter": "Naloge",
+     "label": "Vaje B · Sledenje izvajanju"
+    },
+    {
+     "id": "naloge-c",
+     "chapter": "Naloge",
+     "label": "Vaje C · Reference in prenos v metode"
+    },
+    {
+     "id": "naloge-d",
+     "chapter": "Naloge",
+     "label": "Vaje D · Polnjenje tabele in naključna števila"
+    },
+    {
+     "id": "naloge-e",
+     "chapter": "Naloge",
+     "label": "Vaje E · Algoritmi na enodimenzionalnih tabelah"
+    },
+    {
+     "id": "naloge-f",
+     "chapter": "Naloge",
+     "label": "Vaje F · Dvodimenzionalne tabele"
+    },
+    {
+     "id": "naloge-g",
+     "chapter": "Naloge",
+     "label": "Vaje G · Naloge za utrjevanje"
+    },
+    {
+     "id": "naloge-h",
+     "chapter": "Naloge",
+     "label": "Vaje H · Dodatne vaje"
+    },
+    {
+     "id": "doma-mat",
+     "chapter": "Naloge",
+     "label": "Vaje I · Ponavljanje"
+    },
+    {
+     "id": "doma",
+     "chapter": "Naloge",
+     "label": "Vaje J · Za doma"
+    }
+   ],
+   "gate": [
+    "kaj",
+    "ustvarjanje",
+    "istitip",
+    "pomnilnik",
+    "reference",
+    "metode",
+    "sprehod",
+    "nakljucna",
+    "dvorazsezne",
+    "napake"
+   ]
+  },
+  {
    "id": "4.1",
    "no": "1",
    "module": "LAV-RAČ4",
