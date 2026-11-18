@@ -15,7 +15,7 @@
       <td class="l"><form class="inline tight" method="post" action="/ucitelj/razredi/<%= cls.id %>/vaje/<%= e.id %>/premik"><input type="hidden" name="_csrf" value="<%= csrf %>">
         <button class="btn ghost small" name="dir" value="up" <%= i === 0 ? 'disabled' : '' %>>Gor</button><button class="btn ghost small" name="dir" value="down" <%= i === m.exercises.length - 1 ? 'disabled' : '' %>>Dol</button></form></td>
     </tr><% }) %>
-    <% plannedIn(m.id).forEach((p) => { %><tr class="unseen planned-ex"><td class="l"><strong><%= p.no %></strong> V pripravi</td><td colspan="4" class="l">Vsebina še ni dodana.</td></tr><% }) %>
+    <% plannedIn(m.id).forEach((p) => { %><tr class="unseen planned-ex"><td class="l"><strong><%= p.no %></strong> <%= p.title %></td><td colspan="4" class="l">V pripravi. Vsebina še ni dodana.</td></tr><% }) %>
   </tbody></table></div>
 </section>
 <% }) %>

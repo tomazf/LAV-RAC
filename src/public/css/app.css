@@ -36,6 +36,7 @@ h3{font-size:1.05rem;margin:0}
 .who-name{opacity:.85}
 .linkish{background:none;border:0;color:#fff;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font:inherit;padding:6px 2px;min-height:36px}
 .foot{padding:14px 16px 22px;text-align:center;font-size:.9rem}
+.foot .build{margin:6px 0 0;color:var(--mut);font-size:.82rem}
 .btn{display:inline-flex;align-items:center;justify-content:center;border:2px solid var(--acc);border-radius:8px;padding:8px 16px;min-height:44px;background:var(--acc);color:var(--onacc);font:700 1rem var(--fb);text-decoration:none;cursor:pointer;text-align:center}
 .btn:hover{filter:brightness(1.1)}
 .btn.ghost{background:transparent;color:var(--acc)}
@@ -89,6 +90,13 @@ main.stage{display:flex;align-items:center;justify-content:center;max-width:none
 .all-done{font-weight:700;color:var(--ok)}
 .module{margin-top:30px}
 .module h2{display:flex;gap:10px;align-items:baseline}
+/* Years on the vaje page: each group opens and closes on its own, closed at first */
+.module>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;min-height:44px;border-radius:8px}
+.module>summary::-webkit-details-marker{display:none}
+.module>summary h2{margin:0}
+.module>summary::before{content:"";width:0;height:0;border-left:7px solid var(--acc);border-top:6px solid transparent;border-bottom:6px solid transparent;transition:transform .15s}
+.module[open]>summary::before{transform:rotate(90deg)}
+.module>summary:focus-visible{outline:3px solid var(--sig);outline-offset:3px}
 .m-no{font:600 1.25rem var(--fm);color:var(--acc)}
 /* --cx: the middle of the wire, from the left edge of a node; the circle is centred on it */
 .rail{list-style:none;margin:0;padding:0 0 0 30px;position:relative;--cx:-17.5px}
@@ -108,7 +116,8 @@ main.stage{display:flex;align-items:center;justify-content:center;max-width:none
 .ex-main h3 a:hover{text-decoration:underline}
 .ex-no{font:600 .98rem var(--fm);color:var(--acc);margin-right:4px}
 .ex-meta{margin:4px 0 0;color:var(--mut);font-size:.93rem}
-.times{display:grid;grid-template-columns:repeat(3,auto);gap:0 18px;margin:0;font-size:.9rem}
+/* fixed columns, so the three figures line up from one chapter to the next */
+.times{display:grid;grid-template-columns:repeat(3,9.5em);gap:0 12px;margin:0;font-size:.9rem}
 .times dt{color:var(--mut)}.times dd{margin:0;white-space:nowrap}
 .strip{display:flex;flex-wrap:wrap;gap:2px;margin-top:7px;max-width:560px}
 .strip i{display:block;width:11px;height:11px;border-radius:2px}
@@ -201,7 +210,7 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 .tight{gap:6px}
 @media (max-width:820px){
   .node{grid-template-columns:minmax(0,1fr)}
-  .times{grid-column:1/-1;grid-row:2}
+  .times{grid-column:1/-1;grid-row:2;grid-template-columns:repeat(3,minmax(0,1fr))}
   .exd>summary{grid-template-columns:minmax(0,1fr)}
   .exd-m{text-align:left}
   h1{font-size:1.6rem}

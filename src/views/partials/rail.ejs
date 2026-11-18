@@ -1,7 +1,7 @@
 <% const f = fmt; %>
 <% groups.forEach((m) => { %>
-<section class="module">
-  <h2><span class="m-no"><%= m.id %></span> <%= m.title %></h2>
+<details class="module">
+  <summary><h2><span class="m-no"><%= m.id %></span> <%= m.title %></h2></summary>
   <ol class="rail">
     <% m.exercises.forEach((e) => { const r = rows.get(e.id); const finished = r.done === e.tasks.length; %>
     <li class="node <%= finished ? 'lit' : r.started ? 'half' : '' %>">
@@ -18,5 +18,5 @@
     </li>
     <% }) %>
   </ol>
-</section>
+</details>
 <% }) %>

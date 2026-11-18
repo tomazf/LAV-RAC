@@ -163,8 +163,9 @@ test('parts without exercises wait for staff; a closed class shows a clear messa
   await a.goto(`${APP}/admin/vaje`);
   // every part has its first chapter now (LAV-RAČ4 since 4.1, 11. 11. 2026), so no whole part waits
   assert.deepEqual(await a.locator('.group.planned h2').allTextContents(), []);
-  // the chapters that wait for their artifact have their places (content/sources.json "planned", 17. 11. 2026)
-  assert.deepEqual(await a.locator('.planned-ex td:first-child').allTextContents(), ['4 V pripravi', '6 V pripravi', '8 V pripravi', '9 V pripravi', '10 V pripravi', '11 V pripravi', '4 V pripravi', '5 V pripravi', '6 V pripravi', '7 V pripravi']);
+  // the chapters that wait for their artifact have their places and titles (content/sources.json "planned", 18. 11. 2026)
+  assert.deepEqual(await a.locator('.planned-ex td:first-child').allTextContents(), ['4 Omrežja', '5 Operacijski sistemi in Linux lupina', '8 Nizi v Javi', '9 Datoteke in izjeme v Javi', '10 Objektno programiranje', '11 Rekurzija', '4 SQL DDL in integritetne omejitve', '5 SQL poizvedbe', '6 SQL DML in tuji ključi', '7 UML']);
+  assert.equal(await a.locator('.planned-ex', { hasText: 'Omrežja' }).locator('td').nth(1).textContent(), 'V pripravi. Vsebina še ni dodana.');
   await a.goto(`${APP}/admin/razredi`);
   // a class needs its year, also when the form is sent by hand
   const csrf = await a.inputValue('form[action="/admin/razredi"] input[name=_csrf]');
@@ -196,7 +197,7 @@ test('parts without exercises wait for staff; a closed class shows a clear messa
   assert.match(await s.textContent('main'), /Številski sistemi, kodiranje in pariteta/);
   assert.doesNotMatch(await s.textContent('main'), /V pripravi/);
   await a.goto(`${classUrl}/vaje`);
-  assert.equal(await a.locator('.planned-ex').count(), 2); // the class of the 2nd year: places 4 and 6 of LAV-RAČ2
+  assert.equal(await a.locator('.planned-ex').count(), 2); // the class of the 2nd year: places 4 and 5 of LAV-RAČ2
   // chapters count from 1 within each year; the technical id stays in the address
   assert.equal(await s.locator('h3:has-text("Številski sistemi") .ex-no').textContent(), '1');
   assert.match(await s.textContent('main a.btn.big'), /^Začni vajo 1: Številski sistemi/);
@@ -910,6 +911,8 @@ async function timelineGeometry() {
     await p.click('a:text-is("Ana Kovač")');
     await p.waitForURL(`${APP}/**`);
     await p.goto(`${APP}/vaje`);
+    // the years are closed at first; open them all so the rail has its size
+    await p.evaluate(() => document.querySelectorAll('details.module').forEach((d) => { d.open = true; }));
     const nodes = await p.evaluate(() => [...document.querySelectorAll('.rail .node')].map((n) => {
       const wire = getComputedStyle(n, '::before');
       const dot = getComputedStyle(n, '::after');
@@ -993,7 +996,7 @@ test('a class works on its year; lower years open for revision; the admin closes
   const d = await login('Daša Horvat');
   const pastOf = async () => (await d.goto(`${APP}/vaje`), d.locator('.past-years .ex-no').allTextContents());
   assert.deepEqual(await pastOf(), []);
-  for (const [years, shown, open2, open3] of [[['3'], ['1', '2', '3', '4', '5'], 404, 200], [['2'], ['1', '2', '3'], 200, 404], [['2', '3'], ['1', '2', '3', '1', '2', '3', '4', '5'], 200, 200], [[], [], 404, 404]]) {
+  for (const [years, shown, open2, open3] of [[['3'], ['1', '2', '3', '4', '5', '6', '7'], 404, 200], [['2'], ['1', '2', '3'], 200, 404], [['2', '3'], ['1', '2', '3', '1', '2', '3', '4', '5', '6', '7'], 200, 200], [[], [], 404, 404]]) {
     await editClass(a, 'R4A', async (dlg) => {
       for (const y of ['2', '3']) await dlg.locator(`[data-past] input[value="${y}"]`)[years.includes(y) ? 'check' : 'uncheck']();
     });
@@ -1006,7 +1009,7 @@ test('a class works on its year; lower years open for revision; the admin closes
 
   // the teacher sees only the class's year: not its progress in lower years, not their results
   await a.goto(`${APP}/ucitelj/razredi/${r3}`);
-  assert.match(await a.textContent('.title-row'), /Vaje razreda \(0 od 5\)/);
+  assert.match(await a.textContent('.title-row'), /Vaje razreda \(0 od 7\)/);
   assert.match(await a.textContent('.team'), /3\. letnik, dijaki vidijo tudi 2\. letnik/);
   assert.equal((await a.goto(`${APP}/ucitelj/razredi/${r3}/rezultati/2.1`)).status(), 404);
   assert.doesNotMatch(await (await a.request.get(`${APP}/ucitelj/razredi/${r3}/izvoz.csv`)).text(), /2\.1/);

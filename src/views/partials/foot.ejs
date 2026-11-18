@@ -1,4 +1,7 @@
 </main>
-<% if (path !== '/zasebnost') { %><footer class="foot"><a href="/zasebnost">Kateri podatki se beležijo</a></footer><% } %>
+<footer class="foot">
+  <% if (path !== '/zasebnost') { %><a href="/zasebnost">Kateri podatki se beležijo</a><% } %>
+  <p class="build">Koda na strežniku: <%= build.commit %><% if (build.time) { %>, posodobljeno <%= fmt.dateTime(build.time) %><% } %></p>
+</footer>
 </body>
 </html>

@@ -2,7 +2,11 @@
 name: lavrac
 services:
   app:
-    build: .
+    build:
+      context: .
+      args:
+        BUILD_COMMIT: ${BUILD_COMMIT:-neznano}
+        BUILD_TIME: ${BUILD_TIME:-}
     restart: unless-stopped
     env_file: .env
     environment:

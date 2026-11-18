@@ -112,6 +112,9 @@ Strani: Uporabniki (filter, iskanje, urejanje s svinčnikom; dijakom brez razred
 - Rezultati razreda: tabela po vajah, izvoz CSV, podrobnosti dijaka (naloge, točke pred zadnjo ponastavitvijo, čas po straneh).
 - Podrobnosti dijaka (dogovor 15. 11. 2026): časovnica odgovorov ima obdobje 7 dni, 30 dni (privzeto), 90 dni, šolsko leto in vse (`?obdobje=`). Šolsko leto se šteje od 1. septembra. Do 92 dni je en stolpec en dan, daljše obdobje je po tednih (od ponedeljka do nedelje). Namigi se ne štejejo med odgovore, v pojavnem oknu pa so. Pojavno okno kaže dan, število odgovorov in namigov, uro prvega in zadnjega dogodka (samo pri dnevu), po vajah številke nalog in izide; podatki so iz `task_events`, časa reševanja po dnevih portal ne hrani. Okno deluje z miško, dotikom in tipkami (puščice, Home, End, Escape). Traki nalog pri vajah se začnejo povsod na istem mestu.
 - Dijak z odprto vajo po posodobitvi portala osveži stran.
+- Časi (dogovor 18. 11. 2026): pod minuto »pod 1 min«, do 60 min »N min«, od 60 min »H h M min«, od 24 h »D d H h«. Velja za vse časovne vrednosti na portalu (`duration` v `src/format.js`).
+- Stran Vaje (dogovor 18. 11. 2026): vsak letnik je zložljiv razdelek, na začetku zaprt, odpre se posamično; brez gumba »Odpri vse«.
+- Poglavja v pripravi (dogovor 18. 11. 2026): učitelji in skrbniki vidijo naslove poglavij, ki še niso uvožena (`planned` v `content/sources.json`), dijaki jih ne vidijo.
 
 ## 10. Postavitev
 
@@ -120,7 +123,8 @@ Strani: Uporabniki (filter, iskanje, urejanje s svinčnikom; dijakom brez razred
 - `.env`: `PUBLIC_URL`, `OIDC_TENANT_ID`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `ADMIN_EMAILS`, `SESSION_SECRET` (vsaj 32 znakov), `POSTGRES_PASSWORD`, po potrebi `BIND_ADDRESS`, `APP_PORT`.
 - Entra: nova registracija aplikacije, en najemnik, preusmeritev `https://DOMENA/auth/callback` in še `https://DOMENA/` za vrnitev po odjavi, skrivnost z rokom veljavnosti (pred iztekom jo obnovi), brez dodatnih dovoljenj.
 - Pred njim obratni posredovalnik (pri LAV-ELS nginx v `ssl-proxy`) s `X-Forwarded-Proto: https`, za nalaganje kopij `client_max_body_size 200m;`. Lahko tudi Caddy s samodejnim HTTPS.
-- Preverjanje: `/healthz`. Posodobitev: `git pull && docker compose up -d --build`.
+- Preverjanje: `/healthz`. Posodobitev: `git pull && BUILD_COMMIT=$(git rev-parse --short HEAD) BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) docker compose up -d --build`.
+- Noga strani kaže commit in čas gradnje (dogovor 18. 11. 2026); ime varnostne kopije ima commit in lokalni čas portala. Brez spremenljivk piše »neznano«.
 - Demo brez Microsofta: `docker compose -f docker-compose.demo.yml up --build` (lažna prijava, samo za preizkuse).
 
 ## 11. Preizkusi in CI

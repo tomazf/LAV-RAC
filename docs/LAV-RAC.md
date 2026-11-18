@@ -6,16 +6,15 @@ Splošni dogovor je v `NACRT_PORTALA.md`. Tukaj je samo, kar velja za ta portal.
 
 Postavljena je osnova: prijava, vloge, oblika, vstopna stran in struktura z deli LAV-RAČ2, LAV-RAČ3 in LAV-RAČ4. Poglavja se v vsakem letniku štejejo od 1 in tako jih vidijo dijaki in učitelji (`no`); tehnična oznaka vaje (`id`, v povezavah in bazi) je letnik.poglavje, da je enolična. Razpored je od učitelja (popravljen 6. 11. 2026, dopolnjen 17. 11. 2026). Števila nalog in točk so v `content/catalog.json`, tukaj jih ni, ker bi se hitro zastarela.
 
-Stanje poglavij (17. 11. 2026):
+Stanje poglavij (18. 11. 2026):
 
 | Vaja | Poglavje | Stanje |
 |---|---|---|
 | 2.1 | Številski sistemi, kodiranje in pariteta | uvožena |
 | 2.2 | Logične funkcije | uvožena |
 | 2.3 | Arhitektura računalniških sistemov | uvožena |
-| 2.4 | (prosto, dodamo kasneje) | V pripravi |
+| 2.4 | Omrežja | V pripravi |
 | 2.5 | Operacijski sistemi in Linux lupina | artifact pripravljen, čaka uvoz |
-| 2.6 | | V pripravi |
 | 3.1 | Java in delovanje JVM | uvožena; nov artifact z malimi nalogami 18. 11. 2026 |
 | 3.2 | Algoritmi in diagrami poteka | uvožena; nov artifact z malimi nalogami 18. 11. 2026 |
 | 3.3 | Temeljni gradniki programa | uvožena; nov artifact z malimi nalogami 18. 11. 2026 |
@@ -38,13 +37,14 @@ Stanje poglavij (17. 11. 2026):
 Kaj še rabimo:
 - uvoz pripravljenega poglavja 2.5 (artifact `claude.ai/artifact/2ZG1PRMFhWNrPQHmyvAuCE`),
 - pregled 3.6 (učitelj): skupine razlag, razvrstitev nalog (spodaj), sklopa F in G kot »Sam preveri«,
-- artifacte za poglavja »V pripravi«: 2.4, 2.6, 3.8, 3.9, 3.10, 3.11, 4.4, 4.5, 4.6 in 4.7,
+- artifacte za poglavja »V pripravi«: 2.4, 3.8, 3.9, 3.10, 3.11, 4.4, 4.5, 4.6 in 4.7,
 - igre (Robot zankar, Kodni sprint, Kodni CTF, Vdor v šolsko bazo, Dežurni DBA) niso poglavja in se ne štejejo; o njih se odloča posebej.
 
-Mesta »V pripravi« so v `content/sources.json` (`planned`), učitelji in skrbniki jih vidijo kot prazno vrstico. Uvoz poglavja mesto sam izpusti iz kataloga. Poglavje se doda, ko je vsebina (uvoz artifacta); postopek je v `docs/DODAJANJE_POGLAVIJ.md`.
+Mesta »V pripravi« so v `content/sources.json` (`planned`, z naslovom), učitelji in skrbniki jih vidijo kot vrstico z naslovom. Uvoz poglavja mesto sam izpusti iz kataloga. Poglavje se doda, ko je vsebina (uvoz artifacta); postopek je v `docs/DODAJANJE_POGLAVIJ.md`.
 
 ## Odločitve
 
+- Dogovori (18. 11. 2026): časi na portalu so »pod 1 min«, »N min«, »H h M min« in od 24 h »D d H h«; stran Vaje ima za vsak letnik zložljiv razdelek, zaprt na začetku, brez »Odpri vse«; učitelji in skrbniki vidijo naslove nezgrajenih poglavij; noga strani kaže commit in čas gradnje (spremenljivki `BUILD_COMMIT` in `BUILD_TIME`), ime kopije ima commit in lokalni čas. Zapisano v `NACRT_PORTALA.md`, razdelka 9 in 10.
 - Preizkusi pri delu (17. 11. 2026): celotnega `npm test` ne zaganjamo brez izrecnega dovoljenja učitelja, ker traja dolgo. Pred objavo se poženejo samo preizkusi, ki jih sprememba zadeva; pri skupni kodi in pri dodajanju ali odstranjevanju poglavja asistent najprej vpraša in priporoči. CI požene vse ob objavi, rezultat se pogleda po objavi. Zapisano v `CLAUDE.md`.
 - Posodobitev 3.1–3.6 na nove artifacte (18. 11. 2026): artifacti imajo na koncu strani razlage male naloge »Preizkusi se« (povleci in spusti, drži ali ne, katera slika, korak za korakom, sled izvajanja) in svojo samooceno nalog s kodo. Dogovorjeno: (1) vse naloge, kjer dijak napiše kodo, so »Sam preveri« brez točk (razdelek 4 načrta, dogovor 18. 11. 2026; v 3.2, 3.3, 3.5, 3.6 in 3.7 že uvedeno); artifactova lastna samoocena (»Primerjaj z rešitvijo«, merila) se ne prevzame, portal ostane pri svojem gumbu in shranjevanju (`codeAsBefore` v `content/adapters/qformat.js`); (3) male naloge »Preizkusi se« so brez točk in portal ne hrani ničesar, tudi oznake »Opravljeno« ne (`miniTasks`); iskanje po razlagah jih preskoči; (4) v 3.2 in 3.3 imajo diagrami še naprej samo maturitetne napise, besedilo artifacta se temu prilagodi. Število, vrstni red in točke nalog so enaki, zato `version` ostane. Artifactov razred `.chip` je v filtru nalog zadel tudi kocke povleci in spusti; adapter filter omeji na `.chip[data-f]` (napako je treba popraviti tudi v artifactih). Stanje: 3.1 uvožena iz novega artifacta (commit `4873a75`), 3.2–3.6 in 3.7 18. 11. 2026 po istem dogovoru. Sled izvajanja je v artifactih `new Function`, ki ga stroga CSP vaj prepoveduje: `traceCompile(id)` v `content/adapters/qformat.js` ob uvozu iz `data-cfg` sestavi navadne funkcije (`TRACE_FN`, po imenu gradnika `data-w`). V 3.2 je opomba o slogu Flowgorithma prilagojena maturitetnim napisom, uvod v Vaje pove, kaj dela portal (ne samoocene artifacta). Število nalog in točk je pred uvozom in po njem enako (3.2: 53/50, 3.3: 55/80, 3.4: 76/83, 3.5: 50/53, 3.6: 114/88), zato `version` in dijakov napredek ostaneta. Preizkus `3.2 to 3.6: small tasks …` preveri male naloge, sled izvajanja pod CSP in napise diagramov.
 - 3.7 Tabele v Javi (18. 11. 2026, predlog, čaka potrditev učitelja): uvožena po dogovoru za nove artifacte (samoocena artifacta se ne prevzame: `codeAsBefore`; male naloge »Preizkusi se« brez točk: `miniTasks`). Potrjeno 18. 11. 2026: skupine razlag in razvrstitev ostaneta. Vsi programi (91 nalog) so »Sam preveri«: dijak kodo napiše in shrani, primerja z rešitvijo, namig in rešitev ostaneta, brez točk; točke mature so v oznaki. Točkovane ostanejo naloge z izbiro, vrzelmi, razvrščanjem in izpisom: 106 točk. Enako pravilo je 18. 11. 2026 uvedeno v 3.2 (50 točk), 3.3 (80), 3.5 (53) in 3.6 (88): tudi naloge z diagramom poteka in nekdanje `need` naloge so »Sam preveri«. Štiri skupine razlag: Tabela in pomnilnik · Reference in metode · Algoritmi in polnjenje · Dvodimenzionalne tabele (s Pogostimi napakami). Vrzeli v kodi (E1, E14, F13, I1) so `inline`, naloge samo z izpisom (11) so brez gumbov. Sklici v besedilu so popravljeni po načrtu poglavij (nizi 8, razredi 10); v 3.4 sklic na izjeme kaže na poglavje 9.

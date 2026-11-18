@@ -51,13 +51,13 @@ V `.env` vpiši vrednosti. `SESSION_SECRET` in `POSTGRES_PASSWORD` ustvari z `op
 S samodejnim HTTPS (Caddy, vrati 80 in 443 morata biti prosta, domena mora kazati na strežnik):
 
 ```bash
-docker compose --profile https up -d --build
+BUILD_COMMIT=$(git rev-parse --short HEAD) BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) docker compose --profile https up -d --build
 ```
 
 Če že imaš obratni posredovalnik, ga usmeri na `127.0.0.1:4001` (`APP_PORT` v `.env`, vrata 4000 uporablja LAV-ELS), nato:
 
 ```bash
-docker compose up -d --build
+BUILD_COMMIT=$(git rev-parse --short HEAD) BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) docker compose up -d --build
 ```
 
 Posredovalnik mora poslati `X-Forwarded-Proto: https`. Preveri delovanje: `curl http://127.0.0.1:4001/healthz`.
@@ -72,10 +72,10 @@ Posredovalnik mora poslati `X-Forwarded-Proto: https`. Preveri delovanje: `curl 
 
 ## Vzdrževanje
 
-Posodobitev:
+Posodobitev (ukaz nastavi commit in čas gradnje, ki se pokažeta v nogi strani in v imenu kopije; brez njiju je pisano »neznano«):
 
 ```bash
-git pull && docker compose up -d --build
+git pull && BUILD_COMMIT=$(git rev-parse --short HEAD) BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) docker compose up -d --build
 ```
 
 Podatki ostanejo, ker so v trajnem nosilcu `db-data`. Spremembe baze (`src/migrations/`) se izvedejo same ob zagonu. Dijaki z odprto vajo naj po posodobitvi osvežijo stran.

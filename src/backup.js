@@ -13,6 +13,8 @@ import { isAdmin } from './auth.js';
 import { config } from './config.js';
 import { audit, ERASED_SALT, erasedHash, eraseUser, many, migrate, one, pool } from './db.js';
 import { portal } from './portal.js';
+import { build } from './build.js';
+import { fileStamp } from './format.js';
 
 export class BackupError extends Error {
   constructor(message, status = 400) { super(message); this.userMessage = message; this.status = status; }
@@ -73,7 +75,8 @@ export async function createDump(actor) {
   dumping = true;
   const dir = tempDir('backup');
   const file = path.join(dir, 'kopija.dump');
-  const name = `${portal.slug}-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')}.dump`;
+  // The commit of the running code and the local time, e.g. lavrac-dc8e035-2026-11-18-00-13.dump
+  const name = `${portal.slug}-${build.commit}-${fileStamp()}.dump`;
   let logId = null;
   try {
     // Logged first, so the entry is inside the backup it describes.

@@ -11,4 +11,8 @@ COPY test/mock-oidc.js test/demo.js ./test/
 USER node
 EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD wget -qO- http://127.0.0.1:4000/healthz >/dev/null || exit 1
+# The commit and the time of the build, shown in the footer and in backup names (see README, "Posodobitev")
+ARG BUILD_COMMIT=neznano
+ARG BUILD_TIME=
+ENV BUILD_COMMIT=$BUILD_COMMIT BUILD_TIME=$BUILD_TIME
 CMD ["node", "src/server.js"]

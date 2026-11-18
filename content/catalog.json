@@ -9277,43 +9277,53 @@
  "planned": [
   {
    "module": "LAV-RAČ2",
-   "no": "4"
+   "no": "4",
+   "title": "Omrežja"
   },
   {
    "module": "LAV-RAČ2",
-   "no": "6"
+   "no": "5",
+   "title": "Operacijski sistemi in Linux lupina"
   },
   {
    "module": "LAV-RAČ3",
-   "no": "8"
+   "no": "8",
+   "title": "Nizi v Javi"
   },
   {
    "module": "LAV-RAČ3",
-   "no": "9"
+   "no": "9",
+   "title": "Datoteke in izjeme v Javi"
   },
   {
    "module": "LAV-RAČ3",
-   "no": "10"
+   "no": "10",
+   "title": "Objektno programiranje"
   },
   {
    "module": "LAV-RAČ3",
-   "no": "11"
+   "no": "11",
+   "title": "Rekurzija"
   },
   {
    "module": "LAV-RAČ4",
-   "no": "4"
+   "no": "4",
+   "title": "SQL DDL in integritetne omejitve"
   },
   {
    "module": "LAV-RAČ4",
-   "no": "5"
+   "no": "5",
+   "title": "SQL poizvedbe"
   },
   {
    "module": "LAV-RAČ4",
-   "no": "6"
+   "no": "6",
+   "title": "SQL DML in tuji ključi"
   },
   {
    "module": "LAV-RAČ4",
-   "no": "7"
+   "no": "7",
+   "title": "UML"
   }
  ]
 }

@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { addDays, buildTimeline, DEFAULT_RANGE, MAX_DAILY, pickRange, schoolYearStart, weekStart } from '../src/timeline.js';
+import { duration, fileStamp } from '../src/format.js';
 
 const EX = [
   { id: 'a', no: '2.1', title: 'Prva', strip: [{ i: 0, n: 1 }, { i: 1, n: 2 }, { i: 2, n: 3 }] },
@@ -121,4 +122,23 @@ test('a partly right answer has its own outcome between hinted and wrong', () =>
   const d = t.buckets.find((b) => b.start === '2026-11-12');
   assert.deepEqual(d.outcomes, [{ text: 'pravilno z namigom', n: 1 }, { text: 'delno pravilno', n: 1 }, { text: 'napačno', n: 1 }]);
   assert.match(d.aria, /pravilno z namigom 1, delno pravilno 1, napačno 1$/);
+});
+
+test('every time on the timeline reads in minutes, then hours, then days; under a minute is "pod 1 min"', () => {
+  assert.equal(duration(0), '0 min');
+  assert.equal(duration(40), 'pod 1 min');
+  assert.equal(duration(59.4), 'pod 1 min');
+  assert.equal(duration(59.6), '1 min'); // rounds to whole minutes, never "60 min"
+  assert.equal(duration(45 * 60), '45 min');
+  assert.equal(duration(3570), '1 h 0 min'); // 59.5 min rounds up to an hour
+  assert.equal(duration(2 * 3600 + 15 * 60), '2 h 15 min');
+  assert.equal(duration(23 * 3600 + 59 * 60), '23 h 59 min');
+  assert.equal(duration(24 * 3600), '1 d 0 h');
+  assert.equal(duration(76 * 3600 + 30 * 60), '3 d 4 h');
+});
+
+test('the file name stamp is the local time of the portal', () => {
+  // 23:30 UTC is 00:30 in Ljubljana (winter time) on the next day
+  assert.equal(fileStamp(new Date('2026-11-17T23:30:00Z')), '2026-11-18-00-30');
+  assert.equal(fileStamp(new Date('2026-07-01T10:05:00Z')), '2026-07-01-12-05');
 });

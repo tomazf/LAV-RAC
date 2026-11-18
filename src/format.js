@@ -22,14 +22,21 @@ export const byName = (a, b) => collator.compare(a.name, b.name);
 export const bySurname = (a, b) => collator.compare(surname(a.name), surname(b.name)) || collator.compare(givenNames(a.name), givenNames(b.name));
 export const num = (x) => String(Math.round((Number(x) || 0) * 10) / 10).replace('.', ',');
 export const pct = (a, b) => (b > 0 ? Math.round((a / b) * 100) : 0);
+// Minutes up to an hour, then hours and minutes, then days and hours. The thresholds use whole rounded minutes,
+// so 59.6 s reads as "1 min" and never as "60 min".
 export function duration(sec) {
   const s = Math.round(Number(sec) || 0);
   if (s <= 0) return '0 min';
-  if (s < 60) return 'manj kot 1 min';
+  if (s < 60) return 'pod 1 min';
   const m = Math.round(s / 60);
   if (m < 60) return `${m} min`;
-  return `${Math.floor(m / 60)} h ${m % 60} min`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h} h ${m % 60} min`;
+  return `${Math.floor(h / 24)} d ${h % 24} h`;
 }
+// The same moment as a file-name stamp in the portal's time zone: "2026-11-18-00-13".
+const stampFmt = new Intl.DateTimeFormat('sv-SE', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+export const fileStamp = (d = new Date()) => stampFmt.format(d).replace(/[^0-9]+/g, '-');
 export const date = (d) => (d ? dateFmt.format(new Date(d)) : '');
 // A class name as it is kept: no stray spaces.
 export const cleanName = (s) => String(s ?? '').trim().replace(/\s+/g, ' ').slice(0, 80);

@@ -1121,7 +1121,8 @@ test('backup from the admin page: download, warning, restore keeps deleted users
   assert.equal(await a.locator('.notice-warn').count(), 0, 'the backup page has its own status line');
   // download
   const [dl] = await Promise.all([a.waitForEvent('download'), a.click('button:text("Prenesi varnostno kopijo")')]);
-  assert.match(dl.suggestedFilename(), new RegExp(`^${portal.slug}-\\d{4}-\\d\\d-\\d\\d-\\d\\d-\\d\\d\\.dump$`));
+  // the name carries the commit (neznano without a build argument) and the local time
+  assert.match(dl.suggestedFilename(), new RegExp(`^${portal.slug}-[a-z0-9]+-\\d{4}-\\d\\d-\\d\\d-\\d\\d-\\d\\d\\.dump$`));
   const good = path.join(dir, 'kopija.dump');
   await dl.saveAs(good);
   assert.equal(readFileSync(good).subarray(0, 5).toString(), 'PGDMP');
@@ -1306,6 +1307,7 @@ test('login page, school logo and data notice page', async () => {
   await p.click('a:text("Kateri podatki se beležijo")');
   await p.waitForURL(/zasebnost/);
   assert.equal(await p.locator('footer a').count(), 0);
+  assert.match(await p.locator('footer').textContent(), /Koda na strežniku: .+/); // the build line shows on this page too
   await p.click('[data-back]');
   await p.waitForURL(`${APP}/`);
   await p.goto(`${APP}/zasebnost`);
