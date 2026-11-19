@@ -819,7 +819,7 @@ test('users: one pencil opens one window for the role, the class of a student an
   assert.deepEqual((await log()).map((l) => l[0]), [
     'Odstranil dijaka iz razreda', 'Dodal dijaka v razred', 'Odstranil dijaka iz razreda',
     'Določil učitelja', 'Dodal učitelja razredu', 'Dodal učitelja razredu', 'Odstranil učitelja iz razreda',
-    'Odvzel vlogo učitelja', 'Odstranil učitelja iz razreda', 'Dodal dijaka v razred',
+    'Odvzel vlogo učitelja ali nadzornega', 'Odstranil učitelja iz razreda', 'Dodal dijaka v razred',
   ]);
   assert.equal(await progress(), had);
 
@@ -849,6 +849,9 @@ test('users: one pencil opens one window for the role, the class of a student an
   await a.context().close();
 });
 test('each class has its own open exercises and order; closed exercises stay in the results', async () => {
+  // the test before moved Ana to U2: she is back in this class, as the test is about this class
+  await sql(`DELETE FROM class_members WHERE user_id=(SELECT id FROM users WHERE oid='u-ana')`);
+  await sql(`INSERT INTO class_members(class_id, user_id) VALUES(${Number(classId)}, (SELECT id FROM users WHERE oid='u-ana'))`);
   const t = await login('Tomaž Učitelj');
   await t.goto(`${APP}/ucitelj/razredi/${classId}/vaje`);
   await t.locator('tr', { hasText: 'Kodiranje in pariteta' }).locator('input[name=visible]').uncheck();

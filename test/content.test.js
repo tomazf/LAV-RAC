@@ -2445,7 +2445,7 @@ test('4.3: conceptual and logical model: five theory groups, the drawing tasks a
 
 test('long task statements are laid out as paragraphs, lists and bold words in every chapter that has them, and the markup never reaches the catalog', async () => {
   // number of statements that carry the light markup (content/adapters/qformat.js, content/shell/vaja.js formatQ)
-  const laid = { '2.1': 1, '2.2': 20, '2.3': 14, '3.1': 5, '3.2': 5, '3.3': 6, '3.4': 3, '3.5': 8, '3.6': 2, '4.1': 0, '4.2': 0, '4.3': 0 };
+  const laid = { '2.1': 1, '2.2': 20, '2.3': 14, '3.1': 5, '3.2': 5, '3.3': 6, '3.4': 3, '3.5': 8, '3.6': 2, '3.7': 0, '4.1': 0, '4.2': 0, '4.3': 0 };
   assert.deepEqual(Object.keys(laid).sort(), catalog.exercises.map((e) => e.id).sort());
   for (const ex of catalog.exercises) assert.ok(ex.tasks.every((t) => !/\*\*/.test(t.q) && !/\n/.test(t.q)), `${ex.id}: the catalog keeps plain one-line statements`);
   const a = await login('Sara Skrbnik');
@@ -2544,7 +2544,10 @@ test('no exercise carries an inline event handler attribute (the portal does not
 test('a self-checked task counts as done but never as points: the server forces 0, the teacher sees it apart', async () => {
   const ex = catalog.exercises.find((e) => e.id === '3.2');
   const selfIdx = ex.tasks.filter((t) => t.self).map((t) => t.i);
-  assert.equal(selfIdx.length, 15);
+  // E1 to E15 and the code tasks F1 to F5 (18. 11. 2026) are self-checked
+  assert.equal(selfIdx.length, 20);
+  // the first login creates Ana's account, so it comes before the lookup in the database
+  const c = await login('Ana Kovač');
   const db = new pg.Client({ connectionString: DB });
   await db.connect();
   const stud = (await db.query(`SELECT u.id, m.class_id FROM users u JOIN class_members m ON m.user_id=u.id WHERE u.oid='u-ana'`)).rows[0];
@@ -2552,14 +2555,13 @@ test('a self-checked task counts as done but never as points: the server forces 
   const row = async () => (await db.query(`SELECT * FROM progress WHERE user_id=$1 AND exercise_id='3.2'`, [stud.id])).rows[0];
   try {
     // Ana's class is the 3rd year (R3A); she reads the theory and ticks E4
-    const c = await login('Ana Kovač');
     await c.goto(`${APP}/vaje/3.2#pregled`);
     await at(c, 'pregled');
     for (const id of ex.gate) await go(c, id);
     await go(c, 'naloge-e/4');
     await card(c).locator('.lr-check').click();
     assert.equal(await card(c).getAttribute('data-lr'), 'self');
-    await c.waitForFunction(() => /Shranjeno|0 \/ 61 točk/.test(document.body.textContent));
+    await c.waitForFunction(() => /Shranjeno|0 \/ 50 točk/.test(document.body.textContent));
     await c.waitForTimeout(2500);
     const first = await row();
     assert.equal(Number(first.score), 0);
@@ -2589,10 +2591,10 @@ test('a self-checked task counts as done but never as points: the server forces 
     assert.equal(await a.locator('.strip-cell .s-self').count(), 2);
     assert.ok(await a.locator('.legend .s-self, .lr-legend .s-self, i.s-self').count() > 0);
     const tasksTable = a.locator('section.block', { has: a.locator('h2:text-is("Naloge")') });
-    assert.equal(await tasksTable.locator('.tag:text-is("sam preveri, brez točk")').count(), 15);
+    assert.equal(await tasksTable.locator('.tag:text-is("sam preveri, brez točk")').count(), 20);
     const e4 = tasksTable.locator('tr', { has: a.locator(`td:text-is("${selfIdx[3] + 1}")`) });
     assert.match((await e4.textContent()).replace(/\s+/g, ' '), /sam preveri, brez točk\s*srednja\s*1\s*–\s*0\s*0/);
-    assert.match((await a.locator('tbody tr', { has: a.locator('a', { hasText: 'Ana Kovač' }) }).first().textContent()).replace(/\s+/g, ' '), /0 \/ 61/);
+    assert.match((await a.locator('tbody tr', { has: a.locator('a', { hasText: 'Ana Kovač' }) }).first().textContent()).replace(/\s+/g, ' '), /0 \/ 50/);
     await a.goto(`${APP}/ucitelj/razredi/${stud.class_id}/dijaki/${stud.id}`);
     const rows = a.locator('tr', { has: a.locator('i.dot.s-self') });
     assert.equal(await rows.count(), 2);

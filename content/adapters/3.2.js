@@ -79,6 +79,8 @@ export default {
   --seen:var(--lr-seen);--seen-soft:var(--lr-seen-bg);--f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}
   body{padding-left:0;padding-right:0}`,
   patches: [
+    // The question figure of the pick task is a smaller figure: it sits in the middle like the other figures (17. 11. 2026).
+    ['<figure class="fig" style="max-width:240px;margin:6px 0">', '<figure class="fig" style="max-width:240px;margin:6px auto">'],
     // Partial credit for tasks with several parts (agreed 16. 11. 2026).
     ...partialCredit,
     // The typed output is compared without regard to letter case and repeated spaces (agreed 16. 11. 2026).

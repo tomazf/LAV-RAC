@@ -1,7 +1,13 @@
 // »Nadzorni« (observer): the chosen years are shown read-only, with solutions, and without the tracker that saves anything.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { observerGroups, renderExercise, byId, yearOf } from '../src/catalog.js';
+// src/catalog.js loads the configuration, which exits without these settings; this file runs without the app's .env (CI).
+const defaults = {
+  PUBLIC_URL: 'http://localhost:4000', DATABASE_URL: 'postgres://unused@localhost/unused', OIDC_TENANT_ID: 'test-tenant',
+  OIDC_CLIENT_ID: 'test-client', OIDC_CLIENT_SECRET: 'test-secret', SESSION_SECRET: 'x'.repeat(40), ADMIN_EMAILS: 'admin@sola.test',
+};
+for (const [k, v] of Object.entries(defaults)) process.env[k] ||= v;
+const { observerGroups, renderExercise, byId, yearOf } = await import('../src/catalog.js');
 
 const sample = [...byId.values()].find((e) => yearOf(e.module) === 2 && e.html);
 
