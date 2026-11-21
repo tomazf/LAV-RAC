@@ -61,7 +61,10 @@ export default {
   --seen:var(--lr-seen);--seen-soft:var(--lr-seen-bg);--amber:var(--lr-half);--amber-soft:var(--lr-half-bg);
   --f-display:var(--lr-fb);--f-body:var(--lr-fb);--f-mono:var(--lr-fm)}
   body{padding-left:0;padding-right:0}
-figure.fig{margin-left:0;margin-right:0;max-width:100%;box-sizing:border-box}`,
+  /* the wide schema figure scrolls inside its box instead of widening the page */
+  .fig{max-width:100%}
+  /* the result grid of a statement is as wide as its columns, not as wide as the box */
+  .wbt table.rel{width:auto}`,
   patches: [
     // Partial credit for tasks with several parts (agreed 16. 11. 2026); the blanks and the control results of a query are
     // counted here, the other kinds are the shared ones.
@@ -73,6 +76,8 @@ figure.fig{margin-left:0;margin-right:0;max-width:100%;box-sizing:border-box}`,
       '      ok = all; if(!ok) msg = "Preveri poizvedbo v Workbenchu (pogoje, stik, GROUP BY) in jo izvedi znova.";\n      part = { right: t.checks.filter((b,k)=>matchBlank($(`#b-${t.id}-${k}`,el).value,b)).length, of: t.checks.length };'],
     partialCredit[3],
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
+    // the two result tables of one statement sit side by side, as one row of the page
+    ['<div class="gviz">', '<div class="gviz two">'],
     // The revision set (artifact id "doma", which is also the id of the Za doma section) is "Ponavljanje" and gets its own id.
     ['{"id": "doma", "tag": "H", "title": "Za doma", "note": "Maturitetne naloge, ki so se na kasnejših polah ponovile z enakim besedilom. Rešuj jih za ponavljanje.", "home": true}',
       '{"id": "doma-mat", "tag": "H", "title": "Ponavljanje", "note": "Maturitetne naloge, ki so se na kasnejših polah ponovile z enakim besedilom. Rešuj jih za ponavljanje.", "home": true}'],
