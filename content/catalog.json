@@ -9317,7 +9317,7 @@
      "level": "lažja",
      "max": 1,
      "section": "Baza, tabele in tipi",
-     "q": "Kaj je napačno v stavku? CREATE TABLE t_pes ( id INT NOT NULL PRIMARY KEY, ime VARCHAR(20) NOT NULL, );"
+     "q": "Kaj je napačno v stavku? <code>CREATE TABLE t_pes ( id INT NOT NULL PRIMARY KEY, ime VARCHAR(20) NOT NULL, );</code>"
     },
     {
      "i": 5,
@@ -9398,14 +9398,14 @@
      "level": "težja",
      "max": 3,
      "section": "Ključi in referenčna integriteta",
-     "q": "Tabela Ponudba je ustvarjena s stavkom CREATE TABLE Ponudba(PonudbaID int not null primary key, Vsebina varchar(10) not null, Opis varchar(200), KategorijaID in"
+     "q": "Tabela Ponudba je ustvarjena s stavkom <code>CREATE TABLE Ponudba(PonudbaID int not null primary key, Vsebina varchar(10) not null, Opis varchar(200), Kategorij"
     },
     {
      "i": 16,
      "level": "težja",
      "max": 3,
      "section": "Ključi in referenčna integriteta",
-     "q": "Tabela Ponudba je ustvarjena s stavkom CREATE TABLE Ponudba(PonudbaID int not null primary key, Vsebina varchar(10) not null, Opis varchar(200), KategorijaID in"
+     "q": "Tabela Ponudba je ustvarjena s stavkom <code>CREATE TABLE Ponudba(PonudbaID int not null primary key, Vsebina varchar(10) not null, Opis varchar(200), Kategorij"
     },
     {
      "i": 17,
@@ -9426,7 +9426,7 @@
      "level": "lažja",
      "max": 1,
      "section": "Ključi in referenčna integriteta",
-     "q": "V MySQL izvedemo CREATE TABLE t (id INT PRIMARY KEY, kat INT NOT NULL REFERENCES kategorija (id)). Kaj se zgodi s tujim ključem?"
+     "q": "V MySQL izvedemo <code>CREATE TABLE t (id INT PRIMARY KEY, kat INT NOT NULL REFERENCES kategorija (id))</code>. Kaj se zgodi s tujim ključem?"
     },
     {
      "i": 20,
@@ -9496,7 +9496,7 @@
      "level": "srednja",
      "max": 2,
      "section": "Piši stavke DDL",
-     "q": "Dopolni stavek, ki ustvari tabelo predmet. CREATE TABLE predmet ( id_predmet INT NOT NULL [1], kratica VARCHAR(5) NOT NULL [2], ur_tedensko TINYINT NOT NULL, [3"
+     "q": "Dopolni stavek, ki ustvari tabelo predmet. <code>CREATE TABLE predmet ( id_predmet INT NOT NULL [1], kratica VARCHAR(5) NOT NULL [2], ur_tedensko TINYINT NOT NU"
     },
     {
      "i": 29,
@@ -9542,7 +9542,7 @@
      "level": "težja",
      "max": 3,
      "section": "Preizkus: napake in posledice",
-     "q": "Napovej kodo napake za vsak stavek nad šolsko bazo z začetnimi podatki (razlaga 9). Nato jih izvedi in preveri. (a) INSERT INTO kraj VALUES (1, '9000', 'Test');"
+     "q": "Napovej kodo napake za vsak stavek nad šolsko bazo z začetnimi podatki (razlaga 9). Nato jih izvedi in preveri. (a) <code>INSERT INTO kraj VALUES (1, '9000', 'T"
     },
     {
      "i": 35,
@@ -9604,7 +9604,7 @@
      "max": 0,
      "self": true,
      "section": "Preizkus: napake in posledice",
-     "q": "V šolski bazi izvedi spodnjih pet stavkov <b>vsakega posebej</b> in preštej, koliko jih uspe (brez napake).<br>(1) <code>INSERT INTO kraj VALUES (5,'8210','Treb"
+     "q": "V šolski bazi izvedi spodnjih pet stavkov vsakega posebej in preštej, koliko jih uspe (brez napake).<br>(1) <code>INSERT INTO kraj VALUES (5,'8210','Trebnje');<"
     },
     {
      "i": 43,

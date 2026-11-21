@@ -80,6 +80,64 @@ document.querySelectorAll(".js-getfile").forEach(b=>b.addEventListener("click",(
 }));
 `;
 
+// Question and explanation texts: the source's own markup (<code>, <b>) is read as markup, and SQL statements written
+// in plain text are set in code, so that they stand out from the Slovene text (21. 11. 2026).
+const SQL_START = /\b(?:CREATE TABLE(?=\s+[\w.]+\s*\()|CREATE DATABASE(?=\s+\w)|CREATE INDEX(?=\s+\w+\s+ON\b)|ALTER TABLE(?=\s+[\w.]+\s+(?:ADD|DROP|MODIFY|CHANGE|ALTER|RENAME)\b)|DROP TABLE(?=\s+IF EXISTS\b|\s+[\w.]+\s*(?:[;.?]|$)|\s*[.?]?$)|DROP DATABASE(?=\s+\w)|TRUNCATE TABLE(?=\s+\w)|INSERT INTO(?=\s+[\w.]+\s*(?:\(|VALUES\b))|UPDATE(?=\s+[\w.]+\s+SET\b)|DELETE FROM(?=\s+[\w.]+(?:\s+WHERE\b|\s*[;.?]|\s*$))|SELECT(?=\s+(?:\*|COUNT\s*\(|[\w.,()*\s]+?\s+FROM\b)))/g;
+function wrapSql(plain){
+  let out = '', i = 0;
+  for (;;) {
+    SQL_START.lastIndex = i;
+    const m = SQL_START.exec(plain);
+    if (!m) return out + plain.slice(i);
+    out += plain.slice(i, m.index);
+    let j = m.index, depth = 0;
+    for (; j < plain.length; j++) {
+      const c = plain[j];
+      if (c === '(') depth++;
+      else if (c === ')') depth = Math.max(0, depth - 1);
+      else if (depth === 0 && (c === '.' || c === '?' || c === '!' || c === ';' || c === '\n') && (j + 1 >= plain.length || /\s/.test(plain[j + 1]))) {
+        if (c === ';') j++;
+        break;
+      }
+    }
+    const stmt = plain.slice(m.index, j).trimEnd();
+    out += '<code>' + stmt + '</code>';
+    i = m.index + stmt.length;
+  }
+}
+const fixText = (s) => {
+  if (typeof s !== 'string') return s;
+  s = s.replace(/<(b|strong)>([\s\S]*?)<\/\1>/g, '**$2**');
+  return s.split(/(<code>[\s\S]*?<\/code>|`[^`]*`|\*\*[\s\S]*?\*\*)/).map((p, k) => (k % 2 ? p : wrapSql(p))).join('');
+};
+const LINES = SRC.split('\n');
+const toJs = (v) => JSON.stringify(v).replace(/<\//g, '<\\/');
+const TASKS_LINE = LINES.find((l) => l.startsWith('const T = '));
+const TRY_LINE = LINES.find((l) => l.startsWith('const TRY = '));
+const FMTQ_LINE = LINES.find((l) => l.startsWith('const fmtQ = '));
+const TASKS_SRC = JSON.parse(TASKS_LINE.slice('const T = '.length).replace(/;$/, ''));
+const TRY_SRC = JSON.parse(TRY_LINE.slice('const TRY = '.length).replace(/;$/, ''));
+for (const t of TASKS_SRC) { t.q = fixText(t.q); t.why = fixText(t.why); }
+// The practice tasks on the explanation pages get their own label (they had none: "undefined. naloga").
+for (const t of TRY_SRC) { t.q = fixText(t.q); t.why = fixText(t.why); t.tryLabel = 'Naloga ' + t.key.slice(1); }
+
+// The ER diagram of the first page: full screen, and a print sheet of the figure alone (the browser saves it as PDF).
+const ER_JS = `document.addEventListener("click", (e) => {
+  const fig = document.getElementById("erfig");
+  if (!fig) return;
+  if (e.target.closest(".js-er-full")) {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else if (fig.requestFullscreen) fig.requestFullscreen();
+  }
+  if (e.target.closest(".js-er-pdf")) {
+    document.body.classList.add("er-print");
+    const done = () => { document.body.classList.remove("er-print"); window.removeEventListener("afterprint", done); };
+    window.addEventListener("afterprint", done);
+    window.print();
+  }
+});
+`;
+
 export default {
   module: 'LAV-RAČ4',
   title: TITLE,
@@ -93,6 +151,19 @@ export default {
   .fig{max-width:100%}
   /* long names and statements break instead of widening the page on a phone */
   .q p, ul.shl li, .q code{overflow-wrap:anywhere}
+  /* SQL in the questions and explanations: bold, in a tinted box */
+  p.qtext code, p.why code, .qtext code{font-weight:700;background:var(--accent-soft);color:var(--fg);padding:.1em .4em}
+  /* the ER figure: a button row above it; full screen and print show the figure alone */
+  .erbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  figure.schemafig:fullscreen{background:var(--surface);padding:24px;overflow:auto;display:flex;align-items:center;justify-content:center;max-width:none;border:0}
+  figure.schemafig:fullscreen svg.schema{min-width:0;width:min(100%,1400px);height:auto}
+  @media print{
+    body.er-print *{visibility:hidden!important}
+    body.er-print #erfig, body.er-print #erfig *{visibility:visible!important}
+    body.er-print #erfig{position:absolute;left:0;top:0;width:100%;border:0;background:#fff;--fg:#111;--surface:#fff;--bg:#fff;--muted:#444;--line:#999;color:#111}
+    body.er-print #erfig .erbar{display:none}
+    body.er-print #erfig svg.schema{min-width:0;width:100%;height:auto}
+  }
   /* the result grid of a statement is as wide as its columns, not as wide as the box */
   .wbt table.rel{width:auto}`,
   patches: [
@@ -162,6 +233,13 @@ S = LavRac.loadUi();`],
     ['window.addEventListener("hashchange",()=>showPage(location.hash.slice(1)));', ''],
     ['cur = location.hash.slice(1) || "uvod";\n', ''],
     // Start.
-    ['fillRels(); fillPlay(); fillFormulas(); fillSteps(); fillQuiz(); fillTry();\n\nrenderAll();\nprogress();\nif(location.hash) setTimeout(()=>window.scrollTo(0,0), 0);', ZAGON],
+    ['fillRels(); fillPlay(); fillFormulas(); fillSteps(); fillQuiz(); fillTry();\n\nrenderAll();\nprogress();\nif(location.hash) setTimeout(()=>window.scrollTo(0,0), 0);', ER_JS + ZAGON],
+    // The question and explanation texts, the practice tasks and their labels (see above).
+    [TASKS_LINE, `const T = ${toJs(TASKS_SRC)};`],
+    [TRY_LINE, `const TRY = ${toJs(TRY_SRC)};`],
+    // <code> from the source is read as code, not shown as text.
+    [FMTQ_LINE, FMTQ_LINE.replace(/;$/, '.replace(/&lt;code&gt;([\\s\\S]+?)&lt;\\/code&gt;/g,"<code>$1</code>");')],
+    // The ER figure gets its buttons.
+    ['<figure class="fig schemafig">', '<figure class="fig schemafig" id="erfig"><div class="erbar"><button type="button" class="btn js-er-full">Celozaslonsko</button><button type="button" class="btn primary js-er-pdf">Prenesi PDF</button></div>'],
   ],
 };
