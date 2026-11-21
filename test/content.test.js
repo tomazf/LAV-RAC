@@ -164,7 +164,7 @@ test('parts without exercises wait for staff; a closed class shows a clear messa
   // every part has its first chapter now (LAV-RAČ4 since 4.1, 11. 11. 2026), so no whole part waits
   assert.deepEqual(await a.locator('.group.planned h2').allTextContents(), []);
   // the chapters that wait for their artifact have their places and titles (content/sources.json "planned", 18. 11. 2026)
-  assert.deepEqual(await a.locator('.planned-ex td:first-child').allTextContents(), ['4 Omrežja', '5 Operacijski sistemi in Linux lupina', '8 Nizi v Javi', '9 Datoteke in izjeme v Javi', '10 Objektno programiranje', '11 Rekurzija', '5 SQL poizvedbe', '6 SQL DML in tuji ključi', '7 UML']);
+  assert.deepEqual(await a.locator('.planned-ex td:first-child').allTextContents(), ['4 Omrežja', '5 Operacijski sistemi in Linux lupina', '8 Nizi v Javi', '9 Datoteke in izjeme v Javi', '10 Objektno programiranje', '11 Rekurzija', '6 SQL DML in tuji ključi', '7 UML']);
   assert.equal(await a.locator('.planned-ex', { hasText: 'Omrežja' }).locator('td').nth(1).textContent(), 'V pripravi. Vsebina še ni dodana.');
   await a.goto(`${APP}/admin/razredi`);
   // a class needs its year, also when the form is sent by hand
