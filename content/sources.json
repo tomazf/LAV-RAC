@@ -111,6 +111,13 @@
       "artifactTitle": "SQL DDL in integritetne omejitve",
       "version": 1,
       "no": "4"
+    },
+    {
+      "id": "4.5",
+      "artifact": "https://claude.ai/artifact/HnUFEvSJ7vBvJEPoj1Rtba",
+      "artifactTitle": "SQL poizvedbe",
+      "version": 1,
+      "no": "5"
     }
   ],
   "planned": [
@@ -143,11 +150,6 @@
       "module": "LAV-RAČ3",
       "no": "11",
       "title": "Rekurzija"
-    },
-    {
-      "module": "LAV-RAČ4",
-      "no": "5",
-      "title": "SQL poizvedbe"
     },
     {
       "module": "LAV-RAČ4",

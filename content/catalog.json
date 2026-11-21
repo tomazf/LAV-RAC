@@ -9846,6 +9846,785 @@
     "dokumentiranje",
     "povzetek"
    ]
+  },
+  {
+   "id": "4.5",
+   "no": "5",
+   "module": "LAV-RAČ4",
+   "title": "SQL poizvedbe",
+   "fullTitle": "SQL poizvedbe",
+   "key": "scnm_lavrac_4_5_v1",
+   "version": 1,
+   "format": "short",
+   "maxPoints": 105,
+   "tasks": [
+    {
+     "i": 0,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Stolpci, vrstice in funkcije",
+     "q": "Izpiši ime, priimek in telefon dijakov, katerih priimek se začne s črko Ž, urejeno po priimku in imenu."
+    },
+    {
+     "i": 1,
+     "level": "lažja",
+     "max": 1,
+     "section": "Stolpci, vrstice in funkcije",
+     "q": "Koliko dijakov ima id_kraj enak 1 (Novo mesto)?"
+    },
+    {
+     "i": 2,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Stolpci, vrstice in funkcije",
+     "q": "Izpiši ime in priimek dijakov, ki nimajo vpisanega telefona ali nimajo vpisane e-pošte."
+    },
+    {
+     "i": 3,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Stolpci, vrstice in funkcije",
+     "q": "Izpiši id_dijak, oceno in datum za ocene iz predmeta z id_predmet 1 v decembru 2025, ki so nižje od 3. Uredi po datumu."
+    },
+    {
+     "i": 4,
+     "level": "lažja",
+     "max": 1,
+     "section": "Stolpci, vrstice in funkcije",
+     "q": "Izpiši vse različne vrste ocen."
+    },
+    {
+     "i": 5,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Stolpci, vrstice in funkcije",
+     "q": "Izpiši dijake, rojene aprila (katerega koli leta), v enem stolpcu z imenom »dijak« v obliki »Priimek Ime«, urejeno po datumu rojstva."
+    },
+    {
+     "i": 6,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Stolpci, vrstice in funkcije",
+     "q": "Izpiši ime, priimek in datum zaposlitve učiteljev, zaposlenih pred letom 2000, urejeno od najdlje zaposlenega."
+    },
+    {
+     "i": 7,
+     "level": "lažja",
+     "max": 1,
+     "section": "Agregati in združevanje",
+     "q": "Koliko ocen 5 je v tabeli ocena?"
+    },
+    {
+     "i": 8,
+     "level": "lažja",
+     "max": 1,
+     "section": "Agregati in združevanje",
+     "q": "Izpiši povprečno pisno oceno, zaokroženo na dve decimalki."
+    },
+    {
+     "i": 9,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Agregati in združevanje",
+     "q": "Za vsako vrsto ocene izpiši vrsto, število ocen in povprečno oceno."
+    },
+    {
+     "i": 10,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Agregati in združevanje",
+     "q": "Za vsak mesec izpiši številko meseca in število vpisanih ocen, urejeno po številki meseca."
+    },
+    {
+     "i": 11,
+     "level": "srednja",
+     "max": 2,
+     "section": "Agregati in združevanje",
+     "q": "Izpiši id_dijak in vsoto ur neopravičenih izostankov za dijake, ki imajo 10 ali več neopravičenih ur. Uredi padajoče po vsoti."
+    },
+    {
+     "i": 12,
+     "level": "srednja",
+     "max": 2,
+     "section": "Agregati in združevanje",
+     "q": "Za vsako leto rojstva izpiši leto in število dijakov."
+    },
+    {
+     "i": 13,
+     "level": "srednja",
+     "max": 2,
+     "section": "Stiki",
+     "q": "Izpiši imena predmetov, ki jih poučuje Miha Novak (vsak predmet enkrat)."
+    },
+    {
+     "i": 14,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Stiki",
+     "q": "Za dijake oddelka 2B izpiši ime, priimek in ime kraja, urejeno po kraju, nato po priimku."
+    },
+    {
+     "i": 15,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Stiki",
+     "q": "Za oddelke 4. letnika izpiši oznako ter ime in priimek razrednika."
+    },
+    {
+     "i": 16,
+     "level": "srednja",
+     "max": 2,
+     "section": "Stiki",
+     "q": "Izpiši datum in oceno za vse ocene Ane Novak iz predmeta Podatkovne baze, urejeno po datumu."
+    },
+    {
+     "i": 17,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Stiki",
+     "q": "Za vsak predmet izpiši ime predmeta in število nezadostnih ocen (1). Izpiši le predmete z vsaj eno nezadostno, urejeno padajoče po številu."
+    },
+    {
+     "i": 18,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Stiki",
+     "q": "Za vsak oddelek izpiši oznako in skupno število ur izostankov, urejeno od največ ur navzdol."
+    },
+    {
+     "i": 19,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Zunanji stiki in podpoizvedbe",
+     "q": "Izpiši ime in priimek dijakov, ki nimajo nobenega izostanka, urejeno po priimku."
+    },
+    {
+     "i": 20,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Zunanji stiki in podpoizvedbe",
+     "q": "Za vsak oddelek izpiši oznako in število dijakov brez telefona. Oddelki, kjer imajo vsi telefon, naj bodo izpisani z 0."
+    },
+    {
+     "i": 21,
+     "level": "težja",
+     "max": 3,
+     "section": "Zunanji stiki in podpoizvedbe",
+     "q": "Izpiši ime in priimek dijaka (ali dijakov) z najvišjim povprečjem ocen."
+    },
+    {
+     "i": 22,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Zunanji stiki in podpoizvedbe",
+     "q": "Izpiši imena predmetov, katerih povprečna ocena je nižja od povprečja vseh ocen."
+    },
+    {
+     "i": 23,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Zunanji stiki in podpoizvedbe",
+     "q": "Izpiši ime in priimek učiteljev, ki so dali vsaj eno oceno 1."
+    },
+    {
+     "i": 24,
+     "level": "lažja",
+     "max": 1,
+     "section": "Zunanji stiki in podpoizvedbe",
+     "q": "Izpiši imena krajev, iz katerih ni nobenega dijaka."
+    },
+    {
+     "i": 25,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: ena tabela in branje stavkov",
+     "q": "V podatkovni bazi je tabela Dijak kreirana s stavkom CREATE TABLE Dijak(DijakID int not null, Priimek char(20) not null, Ime char(10) not null, DatumRojstva dat"
+    },
+    {
+     "i": 26,
+     "level": "lažja",
+     "max": 1,
+     "section": "Matura: ena tabela in branje stavkov",
+     "q": "Dana je relacijska shema Izdelek(IzdelekID:N, Ime:A20, Cena:N, Opomba°:A20). Dopolnite stavek SELECT tako, da vrne vse podatke o izdelkih, pri katerih je podate"
+    },
+    {
+     "i": 27,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: ena tabela in branje stavkov",
+     "q": "V podatkovni bazi je tabela Dijak(DijakID:N, Priimek:A20, Ime:A20, Ocena:N). Dopolnite stavek SQL tako, da vrne podatke, urejene po padajoči vrednosti podatka O"
+    },
+    {
+     "i": 28,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: ena tabela in branje stavkov",
+     "q": "Dana je tabela Tab(A:N, B:N). Podatki v tabeli so (A, B): (10, 1), (15, 2), (20, 1), (30, 1), (35, 2). Kaj vrne stavek SQL select sum(a) from Tab group by B?"
+    },
+    {
+     "i": 29,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: ena tabela in branje stavkov",
+     "q": "Katere so združevalne (agregacijske) funkcije v SQL?"
+    },
+    {
+     "i": 30,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: ena tabela in branje stavkov",
+     "q": "Tabela Aplikacije: (ID, IDAvtorja, ime, kategorija, stPrenosov, cena) = (1000, 1, Srečni Joža, igra, 12675, 0,00), (1001, 2, Bloki, igra, 212, 0,99), (1002, 3, "
+    },
+    {
+     "i": 31,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: ena tabela in branje stavkov",
+     "q": "Za relacijo Vozilo(RegSt:N, Znamka:A10, Letnik:N, Cena:N) zapišite stavek SQL, ki izpiše vse različne znamke vozil, urejene po padajoči ceni vozila."
+    },
+    {
+     "i": 32,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: ena tabela in branje stavkov",
+     "q": "Za model ER Zdravnik–Pregled–Pacient napišite stavek SQL, ki prešteje preglede, ki jih je opravil zdravnik z ZdravnikID = 1."
+    },
+    {
+     "i": 33,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Matura: ena tabela in branje stavkov",
+     "q": "Napišite stavek SQL, ki bo izpisal vse podatke o predmetih, ki imajo več kot 5 kreditnih točk."
+    },
+    {
+     "i": 34,
+     "level": "lažja",
+     "max": 1,
+     "section": "Matura: ena tabela in branje stavkov",
+     "q": "Zapišite stavek SQL, ki vrne abecedni seznam naslovov filmov, posnetih leta 2016."
+    },
+    {
+     "i": 35,
+     "level": "lažja",
+     "max": 1,
+     "section": "Matura: ena tabela in branje stavkov",
+     "q": "Napišite ukaz SQL, ki izpiše priimke in imena oseb iz Ljubljane."
+    },
+    {
+     "i": 36,
+     "level": "lažja",
+     "max": 1,
+     "section": "Matura: ena tabela in branje stavkov",
+     "q": "Napišite stavek SQL, ki vrne, koliko prenosov ima največkrat prenesena aplikacija."
+    },
+    {
+     "i": 37,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: ena tabela in branje stavkov",
+     "q": "Napišite stavek SQL, ki za vsako ceno prešteje, koliko aplikacij je na voljo po tej ceni."
+    },
+    {
+     "i": 38,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Matura: ena tabela in branje stavkov",
+     "q": "Dana je relacija Vozilo(RegSt:A10, Znamka:A20, Letnik:N, Lastnik:A20). Zapišite stavek SQL, ki izpiše vsa vozila letnik 2013."
+    },
+    {
+     "i": 39,
+     "level": "lažja",
+     "max": 1,
+     "section": "Matura: ena tabela in branje stavkov",
+     "q": "Zapišite stavek SQL, ki vrne, koliko tekmovalcev je v prvi seriji skočilo več kot 100 metrov."
+    },
+    {
+     "i": 40,
+     "level": "lažja",
+     "max": 1,
+     "section": "Matura: ena tabela in branje stavkov",
+     "q": "V podatkovni bazi je tabela Elipsa(id:N, a:N, b:N). Zapišite stavek SQL, ki vrne število elips s polosjo a med 10 in 20 (vključno z mejama)."
+    },
+    {
+     "i": 41,
+     "level": "lažja",
+     "max": 1,
+     "section": "Matura: ena tabela in branje stavkov",
+     "q": "Zapišite stavek SQL, ki vrne število učnih ur, ki so bile izvedene na daljavo. »na daljavo« je način izvedbe učne ure."
+    },
+    {
+     "i": 42,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: ena tabela in branje stavkov",
+     "q": "Napišite stavek SQL, ki vrne abecedni seznam podjetij, registriranih leta 2011."
+    },
+    {
+     "i": 43,
+     "level": "lažja",
+     "max": 1,
+     "section": "Matura: ena tabela in branje stavkov",
+     "q": "Zapišite stavek SQL, ki za vsak oddelek vrne oznako oddelka (oID) in datum rojstva najmlajšega dijaka tega razreda."
+    },
+    {
+     "i": 44,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in seznam",
+     "q": "Napišite stavek SQL, ki izpiše abecedni seznam priimkov in imen oseb, ki uporabljajo portal s šifro 707."
+    },
+    {
+     "i": 45,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in seznam",
+     "q": "Napišite stavek SQL, ki vrne število hotelov v Ljubljani."
+    },
+    {
+     "i": 46,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in seznam",
+     "q": "Napišite stavek SQL, ki izpiše vse različne nazive kupcev izdelka, za katerega je IDIzdelka = 2."
+    },
+    {
+     "i": 47,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in seznam",
+     "q": "Napišite stavek SQL, ki izpiše skupno ceno vseh izdelkov, kupljenih 24. 12. 2013."
+    },
+    {
+     "i": 48,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Matura: stik in seznam",
+     "q": "Napišite SQL-stavek, ki vrne imena dvoran, datume in termine, v katerih se igra košarka."
+    },
+    {
+     "i": 49,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in seznam",
+     "q": "Napišite stavek SQL, ki vrne abecedni seznam kandidatov iz Medvod."
+    },
+    {
+     "i": 50,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Matura: stik in seznam",
+     "q": "Napišite stavek SQL, ki vrne seznam vseh kupcev (priimek, ime, naslov, kraj), ki so v trgovini Abrakadabra v Butalah hkrati kupili za več kakor 100 € izdelkov."
+    },
+    {
+     "i": 51,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in seznam",
+     "q": "Zapišite stavek SQL, ki vrne abecedni seznam priimkov in imen igralcev v filmu Amarcord."
+    },
+    {
+     "i": 52,
+     "level": "težja",
+     "max": 3,
+     "section": "Matura: stik in seznam",
+     "q": "Napišite ukaz SQL za izpis abecedno urejenega seznama knjig, ki jih je prebrala Milena Jošt."
+    },
+    {
+     "i": 53,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in seznam",
+     "q": "Zapišite stavek SQL, ki vrne skupni znesek naročil Janeza Novaka."
+    },
+    {
+     "i": 54,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in seznam",
+     "q": "Napišite stavek SQL, ki vrne imena predmetov, za katere so bili razpisani izpiti v letu 2017 brez opomb."
+    },
+    {
+     "i": 55,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Matura: stik in seznam",
+     "q": "Zapišite stavek SQL, ki vrne abecedno urejen seznam imen pokrajin Slovenije."
+    },
+    {
+     "i": 56,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Matura: stik in seznam",
+     "q": "Napišite stavek SQL, ki izpiše vse podatke o osebah, ki jih zanima lokostrelstvo."
+    },
+    {
+     "i": 57,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in seznam",
+     "q": "Zapišite stavek SQL, ki vrne priimek in ime zmagovalca oz. zmagovalcev tekmovanja Bralna značka 2018. Če je več dijakov doseglo prvo mesto, naj bo izpis urejen "
+    },
+    {
+     "i": 58,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Matura: stik in seznam",
+     "q": "Zapišite stavek SQL, ki vrne šifre, imena in priimke izrednih študentov (ime statusa je 'izredni'), rojenih pred letom 2000."
+    },
+    {
+     "i": 59,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Matura: stik in seznam",
+     "q": "Zapišite stavek SQL, ki vrne IDPotovanja, znesek ter ime stranke pripadajočega potovanja za vsa potovanja, ki imajo znesek med 100 in 500."
+    },
+    {
+     "i": 60,
+     "level": "težja",
+     "max": 3,
+     "section": "Matura: stik in seznam",
+     "q": "Zapišite stavek SQL, ki vrne vrednost zaloge izdelkov dobavitelja 'KupimProdam'. Lahko predpostavite, da so imena dobaviteljev enolična."
+    },
+    {
+     "i": 61,
+     "level": "težja",
+     "max": 3,
+     "section": "Matura: stik in seznam",
+     "q": "Zapišite stavek SQL, ki vrne abecedno urejen seznam priimkov in imen učiteljev, ki izvajajo učne ure iz matematike."
+    },
+    {
+     "i": 62,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in seznam",
+     "q": "Zapišite SQL-stavek, ki vrne ime dobaviteljev kruha iz Ljubljane."
+    },
+    {
+     "i": 63,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Matura: stik in seznam",
+     "q": "Zapišite stavek SQL, ki vrne rezultate kandidatov, pri katerih ni vpisan podatek SolaID. Stavek vrne priimek in ime kandidata, ime predmeta in točke. Izpis naj "
+    },
+    {
+     "i": 64,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in seznam",
+     "q": "Zapišite stavek SQL, ki izpiše imena strank, ki so kupovale marca leta 2024."
+    },
+    {
+     "i": 65,
+     "level": "težja",
+     "max": 3,
+     "section": "Matura: stik in seznam",
+     "q": "Zapišite stavek SQL, ki vrne abecedni seznam priimkov in imen dijakov, katerih razrednik je Miha Novak."
+    },
+    {
+     "i": 66,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in seznam",
+     "q": "Zapišite stavek SQL, ki vrne abecedno urejen seznam priimkov in imen kandidatov iz šole 'MojaNajŠola'."
+    },
+    {
+     "i": 67,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in združevanje",
+     "q": "Napišite stavek SQL, ki za vsako dejavnost izpiše ime dejavnosti in število podjetij, ki jo izvajajo."
+    },
+    {
+     "i": 68,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in združevanje",
+     "q": "Napišite stavek SQL, ki za vsako šolo izpiše njeno ime in število njenih kandidatov."
+    },
+    {
+     "i": 69,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in združevanje",
+     "q": "Napišite stavek SQL, ki za vsak dan izpiše skupen znesek prodanega blaga v trgovini Abrakadabra v Butalah."
+    },
+    {
+     "i": 70,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Matura: stik in združevanje",
+     "q": "Napišite stavek SQL, ki bo izpisal ime in priimek študenta ter število izpitov, ki jih je opravil (ocena je več kot 5)."
+    },
+    {
+     "i": 71,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in združevanje",
+     "q": "Zapišite stavek SQL, ki vrne imena filmov, v katerih igra najmanj pet igralcev."
+    },
+    {
+     "i": 72,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in združevanje",
+     "q": "Zapišite stavek SQL, ki za vsakega uporabnika izpiše priimek in število naročil leta 2016."
+    },
+    {
+     "i": 73,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in združevanje",
+     "q": "Napišite stavek SQL, ki izpiše, koliko vozil je letos izdelalo posamezno podjetje."
+    },
+    {
+     "i": 74,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Matura: stik in združevanje",
+     "q": "Napišite stavek SQL, ki izpiše StudentID, Ime, Priimek in kolikokrat so opravljali izpit iz matematike, za študente, ki so ta izpit opravljali vsaj enkrat. Mate"
+    },
+    {
+     "i": 75,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in združevanje",
+     "q": "Zapišite stavek SQL, ki za vsako državo izpiše ime države in skupno število prebivalcev."
+    },
+    {
+     "i": 76,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in združevanje",
+     "q": "Napišite stavek SQL, ki za vsak hobi izpiše število oseb, ki jih ta hobi zanima."
+    },
+    {
+     "i": 77,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Matura: stik in združevanje",
+     "q": "Zapišite stavek SQL, ki vrne TID, priimek tekmovalca in skupno dolžino njegovih skokov. Izpis naj bo urejen po padajoči vrednosti skupne dolžine skokov."
+    },
+    {
+     "i": 78,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Matura: stik in združevanje",
+     "q": "Napišite stavek SQL, ki vrne davčne številke ter imena in priimke oseb, pri katerih je vsota stanj na vseh računih večja od 10.000."
+    },
+    {
+     "i": 79,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Matura: stik in združevanje",
+     "q": "Zapišite stavek SQL, ki vrne število tekmovalcev iz posamezne šole, ki so bili na tekmovanju. Primer izpisa: ImeTekmovanja | ImeSole | sTekmovalcev."
+    },
+    {
+     "i": 80,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in združevanje",
+     "q": "Zapišite stavek SQL, ki izpiše število kandidatov po šolah. Stavek vrne ime šole in število kandidatov."
+    },
+    {
+     "i": 81,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Matura: stik in združevanje",
+     "q": "Zapišite stavek SQL, ki za vsako stranko vrne ID stranke, ime in skupno število kupljenih izdelkov."
+    },
+    {
+     "i": 82,
+     "level": "srednja",
+     "max": 2,
+     "section": "Matura: stik in združevanje",
+     "q": "Zapišite stavek, ki za vsak predmet vrne ime predmeta in število prijavljenih kandidatov na opravljanje maturitetnega izpita."
+    },
+    {
+     "i": 83,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Napišite stavek SQL, ki izpiše vse različne nazive kupcev izdelka, za katerega je IDIzdelka = 2."
+    },
+    {
+     "i": 84,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ponavljanje",
+     "q": "Napišite stavek SQL, ki izpiše skupno ceno vseh izdelkov, kupljenih na datum 24. 12. 2013."
+    },
+    {
+     "i": 85,
+     "level": "težja",
+     "max": 3,
+     "section": "Ponavljanje",
+     "q": "Zapišite stavek SQL, ki vrne imena filmov, v katerih igra vsaj pet igralcev."
+    },
+    {
+     "i": 86,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Ponavljanje",
+     "q": "Zapišite stavek SQL, ki vrne IDPotovanja, znesek ter ime stranke pripadajočega potovanja za vsa potovanja, ki imajo znesek med 100 in 500 (meje so vključene)."
+    }
+   ],
+   "pages": [
+    {
+     "id": "pregled",
+     "chapter": "Teorija",
+     "label": "Pregled"
+    },
+    {
+     "id": "uvod",
+     "chapter": "Teorija",
+     "label": "Baza in Workbench"
+    },
+    {
+     "id": "select",
+     "chapter": "Teorija",
+     "label": "SELECT, DISTINCT, ORDER BY"
+    },
+    {
+     "id": "where",
+     "chapter": "Teorija",
+     "label": "WHERE: izbira vrstic"
+    },
+    {
+     "id": "funkcije",
+     "chapter": "Teorija",
+     "label": "Vgrajene funkcije"
+    },
+    {
+     "id": "agregati",
+     "chapter": "Teorija",
+     "label": "Agregatne funkcije"
+    },
+    {
+     "id": "group",
+     "chapter": "Teorija",
+     "label": "GROUP BY in HAVING"
+    },
+    {
+     "id": "join",
+     "chapter": "Teorija",
+     "label": "Stiki: JOIN"
+    },
+    {
+     "id": "joingroup",
+     "chapter": "Teorija",
+     "label": "Stik in združevanje"
+    },
+    {
+     "id": "outer",
+     "chapter": "Teorija",
+     "label": "Zunanji stiki: LEFT JOIN"
+    },
+    {
+     "id": "sub",
+     "chapter": "Teorija",
+     "label": "Podpoizvedbe"
+    },
+    {
+     "id": "view",
+     "chapter": "Teorija",
+     "label": "Pogledi (VIEW)"
+    },
+    {
+     "id": "povzetek",
+     "chapter": "Teorija",
+     "label": "Povzetek in rešeni primeri"
+    },
+    {
+     "id": "naloge-a",
+     "chapter": "Naloge",
+     "label": "Vaje A · Stolpci, vrstice in funkcije"
+    },
+    {
+     "id": "naloge-b",
+     "chapter": "Naloge",
+     "label": "Vaje B · Agregati in združevanje"
+    },
+    {
+     "id": "naloge-c",
+     "chapter": "Naloge",
+     "label": "Vaje C · Stiki"
+    },
+    {
+     "id": "naloge-d",
+     "chapter": "Naloge",
+     "label": "Vaje D · Zunanji stiki in podpoizvedbe"
+    },
+    {
+     "id": "naloge-m1",
+     "chapter": "Naloge",
+     "label": "Vaje E · Matura: ena tabela in branje stavkov"
+    },
+    {
+     "id": "naloge-m2",
+     "chapter": "Naloge",
+     "label": "Vaje F · Matura: stik in seznam"
+    },
+    {
+     "id": "naloge-m3",
+     "chapter": "Naloge",
+     "label": "Vaje G · Matura: stik in združevanje"
+    },
+    {
+     "id": "doma-mat",
+     "chapter": "Naloge",
+     "label": "Vaje H · Ponavljanje"
+    },
+    {
+     "id": "doma",
+     "chapter": "Naloge",
+     "label": "Vaje I · Za doma"
+    }
+   ],
+   "gate": [
+    "uvod",
+    "select",
+    "where",
+    "funkcije",
+    "agregati",
+    "group",
+    "join",
+    "joingroup",
+    "outer",
+    "sub",
+    "view",
+    "povzetek"
+   ]
   }
  ],
  "planned": [
@@ -9878,11 +10657,6 @@
    "module": "LAV-RAČ3",
    "no": "11",
    "title": "Rekurzija"
-  },
-  {
-   "module": "LAV-RAČ4",
-   "no": "5",
-   "title": "SQL poizvedbe"
   },
   {
    "module": "LAV-RAČ4",
