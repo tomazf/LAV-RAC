@@ -20,8 +20,8 @@ Stanje poglavij (18. 11. 2026):
 | 3.3 | Temeljni gradniki programa | uvožena; nov artifact z malimi nalogami 18. 11. 2026 |
 | 3.4 | Podatkovni tipi v Javi | uvožena; nov artifact z malimi nalogami 18. 11. 2026 |
 | 3.5 | Pogojni stavki v Javi | uvožena; nov artifact z malimi nalogami 18. 11. 2026 |
-| 3.6 | Zanke v Javi | uvožena 17. 11. 2026, čaka pregled učitelja; nov artifact z malimi nalogami 18. 11. 2026 |
-| 3.7 | Tabele v Javi | uvožena 18. 11. 2026, čaka pregled učitelja |
+| 3.6 | Zanke v Javi | uvožena 17. 11. 2026, pregled učitelja narejen 21. 11. 2026; nov artifact z malimi nalogami 18. 11. 2026 |
+| 3.7 | Tabele v Javi | uvožena 18. 11. 2026, pregled učitelja narejen 21. 11. 2026 |
 | 3.8 | Nizi v Javi | V pripravi |
 | 3.9 | Datoteke in izjeme v Javi | V pripravi |
 | 3.10 | Objektno programiranje | V pripravi |
@@ -29,14 +29,13 @@ Stanje poglavij (18. 11. 2026):
 | 4.1 | Relacijska algebra | uvožena 11. 11. 2026, pregledana, skupine razlag potrjene |
 | 4.2 | Podatkovne baze in SUPB | uvožena 11. 11. 2026, skupine razlag potrjene 12. 11. 2026, sklopa B in C združena |
 | 4.3 | Konceptualni in logični model | uvožena in potrjena 17. 11. 2026; risarske naloge s samooceno so »Sam preveri« (brez točk), pet skupin razlag |
-| 4.4 | SQL DDL in integritetne omejitve | uvožena 21. 11. 2026, čaka pregled učitelja: skupine razlag (predlog), naloge SQL so »Sam preveri« (brez točk) |
-| 4.5 | SQL poizvedbe | uvožena 21. 11. 2026, čaka pregled učitelja; poizvedbe z rezultatom v tabeli so »Sam preveri« (brez točk), pet skupin razlag, skripti `sola.sql` in `matura_baze.sql` sta prenosa iz `/static` |
+| 4.4 | SQL DDL in integritetne omejitve | uvožena 21. 11. 2026, pregled učitelja narejen 21. 11. 2026: skupine razlag (predlog), naloge SQL so »Sam preveri« (brez točk) |
+| 4.5 | SQL poizvedbe | uvožena 21. 11. 2026, pregled učitelja narejen 21. 11. 2026; poizvedbe z rezultatom v tabeli so »Sam preveri« (brez točk), pet skupin razlag, skripti `sola.sql` in `matura_baze.sql` sta prenosa iz `/static` |
 | 4.6 | SQL DML in tuji ključi | V pripravi |
 | 4.7 | UML | V pripravi |
 
 Kaj še rabimo:
 - uvoz pripravljenega poglavja 2.5 (artifact `claude.ai/artifact/2ZG1PRMFhWNrPQHmyvAuCE`),
-- pregled 3.6 (učitelj): skupine razlag, razvrstitev nalog (spodaj), sklopa F in G kot »Sam preveri«,
 - artifacte za poglavja »V pripravi«: 2.4, 3.8, 3.9, 3.10, 3.11, 4.6 in 4.7,
 - igre (Robot zankar, Kodni sprint, Kodni CTF, Vdor v šolsko bazo, Dežurni DBA) niso poglavja in se ne štejejo; o njih se odloča posebej.
 
