@@ -104,6 +104,13 @@
       "artifactTitle": "Konceptualni in logični model",
       "version": 1,
       "no": "3"
+    },
+    {
+      "id": "4.4",
+      "artifact": "https://claude.ai/artifact/SQk3HttqQ31fVfWESUf3kp",
+      "artifactTitle": "SQL DDL in integritetne omejitve",
+      "version": 1,
+      "no": "4"
     }
   ],
   "planned": [
@@ -136,11 +143,6 @@
       "module": "LAV-RAČ3",
       "no": "11",
       "title": "Rekurzija"
-    },
-    {
-      "module": "LAV-RAČ4",
-      "no": "4",
-      "title": "SQL DDL in integritetne omejitve"
     },
     {
       "module": "LAV-RAČ4",

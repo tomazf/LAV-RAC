@@ -164,7 +164,7 @@ test('parts without exercises wait for staff; a closed class shows a clear messa
   // every part has its first chapter now (LAV-RAČ4 since 4.1, 11. 11. 2026), so no whole part waits
   assert.deepEqual(await a.locator('.group.planned h2').allTextContents(), []);
   // the chapters that wait for their artifact have their places and titles (content/sources.json "planned", 18. 11. 2026)
-  assert.deepEqual(await a.locator('.planned-ex td:first-child').allTextContents(), ['4 Omrežja', '5 Operacijski sistemi in Linux lupina', '8 Nizi v Javi', '9 Datoteke in izjeme v Javi', '10 Objektno programiranje', '11 Rekurzija', '4 SQL DDL in integritetne omejitve', '5 SQL poizvedbe', '6 SQL DML in tuji ključi', '7 UML']);
+  assert.deepEqual(await a.locator('.planned-ex td:first-child').allTextContents(), ['4 Omrežja', '5 Operacijski sistemi in Linux lupina', '8 Nizi v Javi', '9 Datoteke in izjeme v Javi', '10 Objektno programiranje', '11 Rekurzija', '5 SQL poizvedbe', '6 SQL DML in tuji ključi', '7 UML']);
   assert.equal(await a.locator('.planned-ex', { hasText: 'Omrežja' }).locator('td').nth(1).textContent(), 'V pripravi. Vsebina še ni dodana.');
   await a.goto(`${APP}/admin/razredi`);
   // a class needs its year, also when the form is sent by hand
@@ -607,8 +607,8 @@ test('corrected chapter and topic titles (10. 11. 2026) are the same in the cata
   assert.deepEqual(errors, []);
 });
 
-test('2.2, 2.3, 3.1 to 3.7 and 4.1 to 4.3: every page opens without errors, with their theory groups', async () => {
-  const want = { '2.2': [85, ['Logična vrata', 'Funkcije in poenostavljanje', 'Aritmetična vezja', 'Vaje']], '2.3': [129, ['Podatki in procesor', 'Zbirnik', 'Prekinitve in pomnilniki', 'Vhod, izhod in cevovod', 'Vaje']], '3.1': [52, ['Jezik in prevajanje', 'Orodja, zagon in napake', 'Vaje']], '3.2': [53, ['Algoritem in zapis', 'Gradniki in sled', 'Od diagrama do programa', 'Vaje']], '3.3': [55, ['Program in podatki', 'Izpis in vnos', 'Računanje in potek programa', 'Vaje']], '3.4': [76, ['Tipi in pretvorbe', 'Znaki in nizi', 'Operatorji', 'Vaje']], '3.5': [50, ['Stavek IF', 'Več možnosti', 'Vaje']], '3.6': [114, ['Vrste zank', 'Gnezdenje, break in continue', 'Vzorci', 'Vaje']], '3.7': [147, ['Tabela in pomnilnik', 'Reference in metode', 'Algoritmi in polnjenje', 'Dvodimenzionalne tabele', 'Vaje']], '4.1': [89, ['Pojmi in baza', 'Osnovne operacije', 'Množične operacije', 'Stiki in količnik', 'Izrazi v praksi', 'Vaje']], '4.2': [63, ['Podatki in podatkovna baza', 'Naloge SUPB', 'Zgradba baze in jeziki', 'Uporabniki in pravice', 'Informacijski sistemi in povzetek', 'Vaje']], '4.3': [52, ['Od zahtev do modela', 'Entitete, atributi in ključi', 'Razmerja in števnosti', 'Diagram ER in relacijske sheme', 'Postopek, orodje in povzetek', 'Vaje']] };
+test('2.2, 2.3, 3.1 to 3.7 and 4.1 to 4.4: every page opens without errors, with their theory groups', async () => {
+  const want = { '2.2': [85, ['Logična vrata', 'Funkcije in poenostavljanje', 'Aritmetična vezja', 'Vaje']], '2.3': [129, ['Podatki in procesor', 'Zbirnik', 'Prekinitve in pomnilniki', 'Vhod, izhod in cevovod', 'Vaje']], '3.1': [52, ['Jezik in prevajanje', 'Orodja, zagon in napake', 'Vaje']], '3.2': [53, ['Algoritem in zapis', 'Gradniki in sled', 'Od diagrama do programa', 'Vaje']], '3.3': [55, ['Program in podatki', 'Izpis in vnos', 'Računanje in potek programa', 'Vaje']], '3.4': [76, ['Tipi in pretvorbe', 'Znaki in nizi', 'Operatorji', 'Vaje']], '3.5': [50, ['Stavek IF', 'Več možnosti', 'Vaje']], '3.6': [114, ['Vrste zank', 'Gnezdenje, break in continue', 'Vzorci', 'Vaje']], '3.7': [147, ['Tabela in pomnilnik', 'Reference in metode', 'Algoritmi in polnjenje', 'Dvodimenzionalne tabele', 'Vaje']], '4.1': [89, ['Pojmi in baza', 'Osnovne operacije', 'Množične operacije', 'Stiki in količnik', 'Izrazi v praksi', 'Vaje']], '4.2': [63, ['Podatki in podatkovna baza', 'Naloge SUPB', 'Zgradba baze in jeziki', 'Uporabniki in pravice', 'Informacijski sistemi in povzetek', 'Vaje']], '4.3': [52, ['Od zahtev do modela', 'Entitete, atributi in ključi', 'Razmerja in števnosti', 'Diagram ER in relacijske sheme', 'Postopek, orodje in povzetek', 'Vaje']], '4.4': [57, ['Od diagrama ER do baze', 'Tabela in ključi', 'Referenčna integriteta in CHECK', 'Šolska baza v praksi', 'Spreminjanje, indeksi in povzetek', 'Vaje']] };
   for (const [id, [n, groups]] of Object.entries(want)) {
     const ex = catalog.exercises.find((e) => e.id === id);
     assert.equal(ex.module, { 2: 'LAV-RAČ2', 3: 'LAV-RAČ3', 4: 'LAV-RAČ4' }[id[0]]);
@@ -1297,7 +1297,7 @@ test('Za doma: two more tasks per chapter, added in the portal, unscored', async
     assert.ok(await a.locator('.page.on article', { hasText: titles[1] }).locator('.sol').isVisible());
   }
   // unscored: the catalog has the same tasks and points as before (3.1 to 3.3 changed on 10. 11. 2026: tasks the student checks have no points)
-  assert.deepEqual(catalog.exercises.map((e) => [e.id, e.tasks.length, e.maxPoints]), [['2.1', 99, 218], ['2.2', 85, 164], ['2.3', 129, 237], ['3.1', 52, 75], ['3.2', 53, 50], ['3.3', 55, 80], ['3.4', 76, 83], ['3.5', 50, 53], ['3.6', 114, 88], ['3.7', 147, 106], ['4.1', 89, 158], ['4.2', 63, 113], ['4.3', 52, 63]]);
+  assert.deepEqual(catalog.exercises.map((e) => [e.id, e.tasks.length, e.maxPoints]), [['2.1', 99, 218], ['2.2', 85, 164], ['2.3', 129, 237], ['3.1', 52, 75], ['3.2', 53, 50], ['3.3', 55, 80], ['3.4', 76, 83], ['3.5', 50, 53], ['3.6', 114, 88], ['3.7', 147, 106], ['4.1', 89, 158], ['4.2', 63, 113], ['4.3', 52, 63], ['4.4', 57, 49]]);
   await a.context().close();
   assert.deepEqual(errors, []);
 });
@@ -2443,9 +2443,79 @@ test('4.3: conceptual and logical model: five theory groups, the drawing tasks a
   assert.deepEqual(errors, []);
 });
 
+test('4.4: SQL DDL: five theory groups, the tasks that write SQL are checked by the student without points, what is typed stays, the three SQL files can be saved, the revision set is last', async () => {
+  const ex = catalog.exercises.find((e) => e.id === '4.4');
+  assert.equal(ex.module, 'LAV-RAČ4');
+  assert.equal(ex.no, '4');
+  const sections = [...new Set(ex.tasks.map((t) => t.section))];
+  assert.deepEqual(sections, ['Baza, tabele in tipi', 'Ključi in referenčna integriteta', 'Piši stavke DDL', 'Preizkus: napake in posledice', 'ALTER, DROP, indeksi, dokumentacija', 'Ponavljanje']);
+  assert.deepEqual(sections.map((n) => ex.tasks.filter((t) => t.section === n).length), [9, 14, 11, 9, 12, 2]);
+  // the 28 tasks where the student writes SQL are »Sam preveri«: no points (agreed 21. 11. 2026, as the programs of 3.x)
+  assert.deepEqual(sections.map((n) => ex.tasks.filter((t) => t.section === n && t.self).length), [4, 2, 9, 6, 7, 0]);
+  assert.deepEqual(sections.map((n) => ex.tasks.filter((t) => t.section === n).reduce((a, t) => a + t.max, 0)), [6, 24, 4, 6, 7, 2]);
+  assert.equal(ex.maxPoints, 49);
+  const a = await login('Sara Skrbnik');
+  await a.goto(`${APP}/vaje/4.4#pregled`);
+  await at(a, 'pregled');
+  assert.deepEqual(await a.locator('.lr-rail .lr-grp b').allTextContents(), ['Od diagrama ER do baze', 'Tabela in ključi', 'Referenčna integriteta in CHECK', 'Šolska baza v praksi', 'Spreminjanje, indeksi in povzetek', 'Vaje']);
+  assert.deepEqual(await a.locator('.lr-rail a.lr-gated .lr-tg').allTextContents(), ['A ·', 'B ·', 'C ·', 'D ·', 'E ·', 'F ·', 'G ·']);
+  assert.equal((await a.locator('.lr-rail a.lr-gated .lr-tx').last().textContent()).trim(), 'Za doma');
+  assert.doesNotMatch(await a.locator('body').innerText(), /zastonj|RAČ-LAV|aboratorij/);
+  // nothing is loaded from another server (the page's ZIP library is gone)
+  assert.equal(await a.locator('script[src]').evaluateAll((els) => els.filter((e) => /^https?:/.test(e.getAttribute('src'))).length), 0);
+  // the three SQL files are saved from the page, with the right names and the text of the files
+  for (const [page, f] of [['lab', 'sola_struktura.sql'], ['lab', 'sola_zacetni_podatki.sql'], ['indeksi', 'indeks_test.sql']]) {
+    await go(a, page);
+    const btn = a.locator(`.page.on .js-getfile[data-f="${f}"]`);
+    assert.equal(await btn.count(), 1, f);
+    const [dl] = await Promise.all([a.waitForEvent('download'), btn.click()]);
+    assert.equal(dl.suggestedFilename(), f);
+    const text = readFileSync(await dl.path(), 'utf8');
+    assert.equal(text, readFileSync(new URL(`../content/sources/4.4/${f}`, import.meta.url), 'utf8'));
+    assert.match(text, /CREATE|INSERT|INDEX/i);
+  }
+  // A6: a task that writes SQL: no inputs for the results, the right results are shown, the statements typed are kept
+  await go(a, 'naloge-a/6');
+  assert.match(await card(a).innerText(), /Sam preveri · brez točk/);
+  assert.equal(await card(a).locator('.chk input').count(), 0);
+  assert.match(await card(a).locator('.lr-tests').innerText(), /Pravilni kontrolni rezultati/);
+  await card(a).locator('textarea.sqled').fill('CREATE TABLE t_krozek (id_krozek INT PRIMARY KEY);');
+  await card(a).locator('.lr-sol').click();
+  assert.equal(await card(a).getAttribute('data-lr'), 'open');
+  assert.ok(await card(a).locator('.sol pre.code').count() >= 1);
+  assert.equal((await card(a).locator('.lr-check').textContent()).trim(), 'Preveril sem');
+  await card(a).locator('.lr-check').click();
+  assert.equal(await card(a).getAttribute('data-lr'), 'self');
+  // a scored task of the same chapter: a choice, the right answer is worth its points
+  await go(a, 'naloge-a/1');
+  assert.equal(await card(a).locator('textarea').count(), 0);
+  // after a reload the statements are still there; the ticked task is done and gives no points
+  await a.waitForTimeout(2500);
+  await a.reload();
+  await at(a, 'naloge-a/1');
+  await go(a, 'naloge-a/6');
+  assert.equal(await card(a).locator('textarea.sqled').inputValue(), 'CREATE TABLE t_krozek (id_krozek INT PRIMARY KEY);');
+  assert.match(await a.textContent('#lrPtxt'), /^1 \/ 57 nalog · 0 \/ 49 točk$/);
+  // the revision set has the letter F, the practice items are Za doma with the letter G
+  await go(a, 'doma-mat');
+  assert.match(await a.locator('.page.on .lr-shead').innerText(), /sklop F[\s\S]*Ponavljanje/);
+  await go(a, 'doma');
+  assert.match(await a.locator('.page.on .lr-shead').innerText(), /sklop G[\s\S]*Za doma/);
+  // on a phone no page is wider than the screen
+  await a.setViewportSize({ width: 360, height: 740 });
+  for (const pg of ex.pages) {
+    await go(a, pg.id);
+    const w = await a.evaluate(() => ({ sw: document.documentElement.scrollWidth, iw: window.innerWidth,
+      wide: [...document.querySelectorAll('body *')].filter((e) => e.getBoundingClientRect().right > window.innerWidth + 1 && !e.parentElement.closest('svg')).slice(0, 5).map((e) => e.tagName + '.' + e.className + ' ' + Math.round(e.getBoundingClientRect().right)) }));
+    assert.ok(w.sw <= w.iw + 1, `4.4 ${pg.id}: page is ${w.sw}px wide on a ${w.iw}px screen: ${w.wide.join(' | ')}`);
+  }
+  await a.context().close();
+  assert.deepEqual(errors, []);
+});
+
 test('long task statements are laid out as paragraphs, lists and bold words in every chapter that has them, and the markup never reaches the catalog', async () => {
   // number of statements that carry the light markup (content/adapters/qformat.js, content/shell/vaja.js formatQ)
-  const laid = { '2.1': 1, '2.2': 20, '2.3': 14, '3.1': 5, '3.2': 5, '3.3': 6, '3.4': 3, '3.5': 8, '3.6': 2, '3.7': 0, '4.1': 0, '4.2': 0, '4.3': 0 };
+  const laid = { '2.1': 1, '2.2': 20, '2.3': 14, '3.1': 5, '3.2': 5, '3.3': 6, '3.4': 3, '3.5': 8, '3.6': 2, '3.7': 0, '4.1': 0, '4.2': 0, '4.3': 0, '4.4': 0 };
   assert.deepEqual(Object.keys(laid).sort(), catalog.exercises.map((e) => e.id).sort());
   for (const ex of catalog.exercises) assert.ok(ex.tasks.every((t) => !/\*\*/.test(t.q) && !/\n/.test(t.q)), `${ex.id}: the catalog keeps plain one-line statements`);
   const a = await login('Sara Skrbnik');

@@ -9272,6 +9272,580 @@
     "workbench",
     "utrjevanje"
    ]
+  },
+  {
+   "id": "4.4",
+   "no": "4",
+   "module": "LAV-RAČ4",
+   "title": "SQL DDL in integritetne omejitve",
+   "fullTitle": "SQL DDL in integritetne omejitve",
+   "key": "scnm_lavrac_4_4_v1",
+   "version": 1,
+   "format": "short",
+   "maxPoints": 49,
+   "tasks": [
+    {
+     "i": 0,
+     "level": "lažja",
+     "max": 1,
+     "section": "Baza, tabele in tipi",
+     "q": "Razvrsti stavke po skupini jezika SQL."
+    },
+    {
+     "i": 1,
+     "level": "lažja",
+     "max": 1,
+     "section": "Baza, tabele in tipi",
+     "q": "Standardni stavek jezika SQL, s katerim se ustvari tabela, je"
+    },
+    {
+     "i": 2,
+     "level": "srednja",
+     "max": 2,
+     "section": "Baza, tabele in tipi",
+     "q": "Zapiši podatkovni tip v MySQL za vsak stolpec (izberi najprimernejšega):"
+    },
+    {
+     "i": 3,
+     "level": "lažja",
+     "max": 1,
+     "section": "Baza, tabele in tipi",
+     "q": "V katerem tipu shraniš EMŠO (13 števk, lahko se začne z 0)?"
+    },
+    {
+     "i": 4,
+     "level": "lažja",
+     "max": 1,
+     "section": "Baza, tabele in tipi",
+     "q": "Kaj je napačno v stavku? CREATE TABLE t_pes ( id INT NOT NULL PRIMARY KEY, ime VARCHAR(20) NOT NULL, );"
+    },
+    {
+     "i": 5,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Baza, tabele in tipi",
+     "q": "Ustvari tabelo <code>t_krozek</code> s stolpci: <code>id_krozek</code> (celo število, primarni ključ), <code>ime</code> (besedilo do 30 znakov, obvezno) in <cod"
+    },
+    {
+     "i": 6,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Baza, tabele in tipi",
+     "q": "Ustvari tabelo <code>t_vrsta</code> (<code>id</code> celo število, primarni ključ; <code>naziv</code> besedilo do 20 znakov, obvezno; <code>aktivna</code> logič"
+    },
+    {
+     "i": 7,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Baza, tabele in tipi",
+     "q": "Ustvari <code>t_zapisnik</code> (<code>id</code> samodejno številčen ključ, <code>besedilo</code> VARCHAR(40) obvezno). Vstavi tri vrstice brez ID-ja, izbriši z"
+    },
+    {
+     "i": 8,
+     "level": "lažja",
+     "max": 0,
+     "self": true,
+     "section": "Baza, tabele in tipi",
+     "q": "V tabelo <code>t_datumi</code> (stolpec <code>d DATE</code>) poskusi vstaviti <code>'2026-02-30'</code>. Katero kodo napake izpiše Workbench? Če tabela že obsta"
+    },
+    {
+     "i": 9,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ključi in referenčna integriteta",
+     "q": "Obvezna značilnost primarnega ključa tabele je, da"
+    },
+    {
+     "i": 10,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ključi in referenčna integriteta",
+     "q": "Obkrožite črki pred resničnima trditvama. Primarni ključ tabele"
+    },
+    {
+     "i": 11,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ključi in referenčna integriteta",
+     "q": "Kateri stavek SQL ustvari tabelo Tab(A:N, B:N, C:N), kjer sta A in B skupaj primarni ključ?"
+    },
+    {
+     "i": 12,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ključi in referenčna integriteta",
+     "q": "Kateri dve od danih trditev veljata za dobro načrtovane relacijske podatkovne baze?"
+    },
+    {
+     "i": 13,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ključi in referenčna integriteta",
+     "q": "Kateri trditvi sta resnični za tuji ključ tabele?"
+    },
+    {
+     "i": 14,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ključi in referenčna integriteta",
+     "q": "Relacijska shema opisuje podatke o strankah in njihovih osebnih svetovalcih v banki. Stranka(IDStranke:N, ime:A20, IDSvetovalca:N->Svetovalec) Svetovalec(IDSvet"
+    },
+    {
+     "i": 15,
+     "level": "težja",
+     "max": 3,
+     "section": "Ključi in referenčna integriteta",
+     "q": "Tabela Ponudba je ustvarjena s stavkom CREATE TABLE Ponudba(PonudbaID int not null primary key, Vsebina varchar(10) not null, Opis varchar(200), KategorijaID in"
+    },
+    {
+     "i": 16,
+     "level": "težja",
+     "max": 3,
+     "section": "Ključi in referenčna integriteta",
+     "q": "Tabela Ponudba je ustvarjena s stavkom CREATE TABLE Ponudba(PonudbaID int not null primary key, Vsebina varchar(10) not null, Opis varchar(200), KategorijaID in"
+    },
+    {
+     "i": 17,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ključi in referenčna integriteta",
+     "q": "Dopolni zapis tujega ključa v tabeli ocena (ocena pripada dijaku; ko izbrišemo dijaka, se izbrišejo tudi njegove ocene): CONSTRAINT fk_ocena_dijak [1] (id_dijak"
+    },
+    {
+     "i": 18,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ključi in referenčna integriteta",
+     "q": "Za vsak tuji ključ izberi najprimernejše pravilo ob brisanju starša."
+    },
+    {
+     "i": 19,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ključi in referenčna integriteta",
+     "q": "V MySQL izvedemo CREATE TABLE t (id INT PRIMARY KEY, kat INT NOT NULL REFERENCES kategorija (id)). Kaj se zgodi s tujim ključem?"
+    },
+    {
+     "i": 20,
+     "level": "srednja",
+     "max": 2,
+     "section": "Ključi in referenčna integriteta",
+     "q": "V kakšnem vrstnem redu ustvariš tabele ocena, oddelek, dijak, ucitelj (oddelek ima razrednika, dijak oddelek, ocena dijaka in učitelja)? Zapiši imena z vejicami"
+    },
+    {
+     "i": 21,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Ključi in referenčna integriteta",
+     "q": "Ustvari tabeli <code>t_oddelek</code> (<code>id_oddelek INT</code> PK, <code>oznaka CHAR(2)</code> obvezna) in <code>t_dijak</code> (<code>id_dijak INT</code> P"
+    },
+    {
+     "i": 22,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Ključi in referenčna integriteta",
+     "q": "Ustvari <code>t_razred</code> (<code>id_razred INT</code> PK, <code>ime VARCHAR(10)</code>) in <code>t_ucenec</code> (<code>id_ucenec INT</code> PK, <code>id_ra"
+    },
+    {
+     "i": 23,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Piši stavke DDL",
+     "q": "Ustvari tabelo <code>t_predmet</code>: <code>id_predmet</code> celo število, primarni ključ; <code>kratica</code> do 5 znakov, obvezna in enolična; <code>ime_pr"
+    },
+    {
+     "i": 24,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Piši stavke DDL",
+     "q": "Ustvari <code>t_vpis</code> za razmerje n:m: dijak se vpiše v več krožkov, krožek ima več dijakov. Stolpca <code>id_dijak</code> in <code>id_krozek</code> sta s"
+    },
+    {
+     "i": 25,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Piši stavke DDL",
+     "q": "Ustvari <code>t_ucitelj</code> (<code>id_ucitelj</code> PK, <code>priimek</code> obvezen) in <code>t_oddelek2</code> (<code>id_oddelek</code> PK, <code>oznaka C"
+    },
+    {
+     "i": 26,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Piši stavke DDL",
+     "q": "Ustvari <code>t_ocena2</code>: <code>id_ocena</code> samodejno številčen ključ, <code>ocena</code> celo število od 1 do 5 (<code>CONSTRAINT ck_tocena_ocena</cod"
+    },
+    {
+     "i": 27,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Piši stavke DDL",
+     "q": "Ustvari <code>t_izostanek2</code>: <code>id_izostanek</code> samodejno številčen ključ, <code>ure</code> majhno celo število 1 do 8, <code>opravicen</code> logi"
+    },
+    {
+     "i": 28,
+     "level": "srednja",
+     "max": 2,
+     "section": "Piši stavke DDL",
+     "q": "Dopolni stavek, ki ustvari tabelo predmet. CREATE TABLE predmet ( id_predmet INT NOT NULL [1], kratica VARCHAR(5) NOT NULL [2], ur_tedensko TINYINT NOT NULL, [3"
+    },
+    {
+     "i": 29,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Piši stavke DDL",
+     "q": "Pretvori relacijsko shemo v MySQL: <code>Knjiga(ISBN:A13, Naslov:A60, Leto:N, Cena:R)</code> in <code>Izposoja(IzposojaID:N, ISBN:A13→Knjiga, Datum:D, DatumVrni"
+    },
+    {
+     "i": 30,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Piši stavke DDL",
+     "q": "Razmerje 1:1: vsak uporabnik ima največ en profil. Ustvari <code>t_uporabnik</code> (<code>id_uporabnik</code> PK, <code>ime</code> obvezno) in <code>t_profil</"
+    },
+    {
+     "i": 31,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Piši stavke DDL",
+     "q": "Ustvari <code>t_urnik</code>: <code>id_urnik</code> PK (samodejen), <code>dan</code> TINYINT (1–5), <code>ura</code> TINYINT, <code>id_ucilnica</code> INT, vse "
+    },
+    {
+     "i": 32,
+     "level": "srednja",
+     "max": 2,
+     "section": "Piši stavke DDL",
+     "q": "Katera shema pravilno opisuje CREATE TABLE za tabelo oddelek(id_oddelek PK, oznaka obvezna enolična, id_razrednik neobvezen tuji ključ na ucitelj, ob brisanju u"
+    },
+    {
+     "i": 33,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "Piši stavke DDL",
+     "q": "Po razlagi 9 imaš v svoji shemi tabele <code>dijak</code>, <code>predmet</code> in <code>ucitelj</code>. Ustvari <code>t_ocena3</code> kot <code>ocena</code> iz"
+    },
+    {
+     "i": 34,
+     "level": "težja",
+     "max": 3,
+     "section": "Preizkus: napake in posledice",
+     "q": "Napovej kodo napake za vsak stavek nad šolsko bazo z začetnimi podatki (razlaga 9). Nato jih izvedi in preveri. (a) INSERT INTO kraj VALUES (1, '9000', 'Test');"
+    },
+    {
+     "i": 35,
+     "level": "srednja",
+     "max": 2,
+     "section": "Preizkus: napake in posledice",
+     "q": "Poveži kodo napake z vzrokom."
+    },
+    {
+     "i": 36,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Preizkus: napake in posledice",
+     "q": "V šolski bazi (z začetnimi podatki) izbriši oddelek 8 (4B), v katerem so dijaki. Katero kodo napake dobiš in koliko dijakov je po poskusu v tabeli <code>dijak</"
+    },
+    {
+     "i": 37,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Preizkus: napake in posledice",
+     "q": "V šolski bazi (z začetnimi podatki) izbriši dijaka z <code>id_dijak = 1</code> (Ana). Koliko vrstic je potem v tabelah <code>ocena</code> in <code>izostanek</co"
+    },
+    {
+     "i": 38,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Preizkus: napake in posledice",
+     "q": "V šolski bazi izbriši učitelja <code>id_ucitelj = 14</code> (razrednik oddelka 4A in učitelj z ocenami). Katero kodo napake dobiš in v katerem pravilu je vzrok "
+    },
+    {
+     "i": 39,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Preizkus: napake in posledice",
+     "q": "V šolski bazi spremeni ključ kraja Ljubljana: <code>UPDATE kraj SET id_kraj = 20 WHERE id_kraj = 2;</code>. Koliko dijakov ima po tem <code>id_kraj = 20</code>?"
+    },
+    {
+     "i": 40,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Preizkus: napake in posledice",
+     "q": "V šolski bazi poskusi <code>UPDATE oddelek SET id_oddelek = 70 WHERE id_oddelek = 7;</code>. Zakaj javi napako, čeprav ima dijak pravilo ON UPDATE CASCADE? Vpiš"
+    },
+    {
+     "i": 41,
+     "level": "lažja",
+     "max": 1,
+     "section": "Preizkus: napake in posledice",
+     "q": "Sporočilo: Cannot delete or update a parent row: a foreign key constraint fails (`moja`.`ocena`, CONSTRAINT `fk_ocena_predmet` FOREIGN KEY (`id_predmet`) REFERE"
+    },
+    {
+     "i": 42,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "Preizkus: napake in posledice",
+     "q": "V šolski bazi izvedi spodnjih pet stavkov <b>vsakega posebej</b> in preštej, koliko jih uspe (brez napake).<br>(1) <code>INSERT INTO kraj VALUES (5,'8210','Treb"
+    },
+    {
+     "i": 43,
+     "level": "lažja",
+     "max": 1,
+     "section": "ALTER, DROP, indeksi, dokumentacija",
+     "q": "S katerim stavkom SQL izbrišemo tabelo iz podatkovne baze?"
+    },
+    {
+     "i": 44,
+     "level": "srednja",
+     "max": 2,
+     "section": "ALTER, DROP, indeksi, dokumentacija",
+     "q": "Da bi pospešili operacijo iskanja podatkov v podatkovni bazi po vrednosti določenega atributa, se"
+    },
+    {
+     "i": 45,
+     "level": "lažja",
+     "max": 1,
+     "section": "ALTER, DROP, indeksi, dokumentacija",
+     "q": "Pri dodajanju in brisanju zapisov iz podatkovne baze posodabljanje vsebine indeksov izvaja"
+    },
+    {
+     "i": 46,
+     "level": "srednja",
+     "max": 2,
+     "section": "ALTER, DROP, indeksi, dokumentacija",
+     "q": "Razvrsti trditve: kateri stavek velja?"
+    },
+    {
+     "i": 47,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "ALTER, DROP, indeksi, dokumentacija",
+     "q": "Tabela <code>t_ucenec</code> ima stolpca <code>id</code> in <code>ime VARCHAR(20)</code> ter tri vrstice. Dodaj stolpec <code>telefon VARCHAR(15)</code> (neobve"
+    },
+    {
+     "i": 48,
+     "level": "težja",
+     "max": 0,
+     "self": true,
+     "section": "ALTER, DROP, indeksi, dokumentacija",
+     "q": "V <code>t_ucenec</code> (iz prejšnje naloge) dodaj stolpec <code>oddelek CHAR(2)</code> in vsem vpiši <code>'4A'</code>. Ustvari prazno <code>t_oddelek (id_odde"
+    },
+    {
+     "i": 49,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "ALTER, DROP, indeksi, dokumentacija",
+     "q": "Ustvari <code>t_a (id INT PK)</code>, <code>t_b (id INT PK, id_a INT NOT NULL, FK → t_a)</code> in <code>t_c (id INT PK, id_b INT NOT NULL, FK → t_b)</code>. Po"
+    },
+    {
+     "i": 50,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "ALTER, DROP, indeksi, dokumentacija",
+     "q": "Uvozi <code>indeks_test.sql</code> (razlaga 13). Izvedi <code>EXPLAIN SELECT * FROM t_zapis WHERE koda = 'K004711';</code> pred in po <code>CREATE INDEX idx_zap"
+    },
+    {
+     "i": 51,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "ALTER, DROP, indeksi, dokumentacija",
+     "q": "V <code>t_zapis</code> ustvari indeks <code>idx_zapis_priimek</code> na stolpcu <code>priimek</code>. Koliko zapisov ima priimek Pavlin, koliko je vseh različni"
+    },
+    {
+     "i": 52,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "ALTER, DROP, indeksi, dokumentacija",
+     "q": "Po razlagi 9 imaš zgrajeno šolsko bazo. S poizvedbo na <code>information_schema</code> preštej: (a) tuje ključe v shemi, (b) omejitve CHECK v shemi in (c) tuje "
+    },
+    {
+     "i": 53,
+     "level": "lažja",
+     "max": 1,
+     "section": "ALTER, DROP, indeksi, dokumentacija",
+     "q": "Kateri ukaz izpiše, kako je tabela ustvarjena (z vsemi ključi in pravili)?"
+    },
+    {
+     "i": 54,
+     "level": "srednja",
+     "max": 0,
+     "self": true,
+     "section": "ALTER, DROP, indeksi, dokumentacija",
+     "q": "Ustvari <code>t_stevec (id INT AUTO_INCREMENT PK, x INT)</code>, vstavi tri vrstice, izvedi <code>TRUNCATE TABLE t_stevec;</code> in vstavi novo. Kolikšen je <c"
+    },
+    {
+     "i": 55,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "S katerim stavkom izbrišemo tabelo iz podatkovne baze?"
+    },
+    {
+     "i": 56,
+     "level": "lažja",
+     "max": 1,
+     "section": "Ponavljanje",
+     "q": "Pri dodajanju in brisanju zapisov iz podatkovne baze posodabljanje vsebine indeksov izvaja"
+    }
+   ],
+   "pages": [
+    {
+     "id": "pregled",
+     "chapter": "Teorija",
+     "label": "Pregled"
+    },
+    {
+     "id": "uvod",
+     "chapter": "Teorija",
+     "label": "Od diagrama ER do baze"
+    },
+    {
+     "id": "baza",
+     "chapter": "Teorija",
+     "label": "Podatkovna baza"
+    },
+    {
+     "id": "tipi",
+     "chapter": "Teorija",
+     "label": "Podatkovni tipi"
+    },
+    {
+     "id": "create",
+     "chapter": "Teorija",
+     "label": "CREATE TABLE"
+    },
+    {
+     "id": "kljuci",
+     "chapter": "Teorija",
+     "label": "Ključi"
+    },
+    {
+     "id": "tuji",
+     "chapter": "Teorija",
+     "label": "Tuji ključ"
+    },
+    {
+     "id": "ref",
+     "chapter": "Teorija",
+     "label": "Referenčna integriteta"
+    },
+    {
+     "id": "check",
+     "chapter": "Teorija",
+     "label": "CHECK in integriteta"
+    },
+    {
+     "id": "lab",
+     "chapter": "Teorija",
+     "label": "Vaja: zgradi šolsko bazo"
+    },
+    {
+     "id": "preizkus",
+     "chapter": "Teorija",
+     "label": "Preizkus omejitev"
+    },
+    {
+     "id": "alter",
+     "chapter": "Teorija",
+     "label": "ALTER TABLE"
+    },
+    {
+     "id": "drop",
+     "chapter": "Teorija",
+     "label": "DROP, TRUNCATE, DELETE"
+    },
+    {
+     "id": "indeksi",
+     "chapter": "Teorija",
+     "label": "Indeksi"
+    },
+    {
+     "id": "dokumentiranje",
+     "chapter": "Teorija",
+     "label": "Dokumentiranje"
+    },
+    {
+     "id": "povzetek",
+     "chapter": "Teorija",
+     "label": "Povzetek in rešeni primeri"
+    },
+    {
+     "id": "naloge-a",
+     "chapter": "Naloge",
+     "label": "Vaje A · Baza, tabele in tipi"
+    },
+    {
+     "id": "naloge-b",
+     "chapter": "Naloge",
+     "label": "Vaje B · Ključi in referenčna integriteta"
+    },
+    {
+     "id": "naloge-c",
+     "chapter": "Naloge",
+     "label": "Vaje C · Piši stavke DDL"
+    },
+    {
+     "id": "naloge-d",
+     "chapter": "Naloge",
+     "label": "Vaje D · Preizkus: napake in posledice"
+    },
+    {
+     "id": "naloge-e",
+     "chapter": "Naloge",
+     "label": "Vaje E · ALTER, DROP, indeksi, dokumentacija"
+    },
+    {
+     "id": "doma-mat",
+     "chapter": "Naloge",
+     "label": "Vaje F · Ponavljanje"
+    },
+    {
+     "id": "doma",
+     "chapter": "Naloge",
+     "label": "Vaje G · Za doma"
+    }
+   ],
+   "gate": [
+    "uvod",
+    "baza",
+    "tipi",
+    "create",
+    "kljuci",
+    "tuji",
+    "ref",
+    "check",
+    "lab",
+    "preizkus",
+    "alter",
+    "drop",
+    "indeksi",
+    "dokumentiranje",
+    "povzetek"
+   ]
   }
  ],
  "planned": [
@@ -9304,11 +9878,6 @@
    "module": "LAV-RAČ3",
    "no": "11",
    "title": "Rekurzija"
-  },
-  {
-   "module": "LAV-RAČ4",
-   "no": "4",
-   "title": "SQL DDL in integritetne omejitve"
   },
   {
    "module": "LAV-RAČ4",

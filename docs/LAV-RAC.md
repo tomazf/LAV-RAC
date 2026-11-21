@@ -29,7 +29,7 @@ Stanje poglavij (18. 11. 2026):
 | 4.1 | Relacijska algebra | uvožena 11. 11. 2026, pregledana, skupine razlag potrjene |
 | 4.2 | Podatkovne baze in SUPB | uvožena 11. 11. 2026, skupine razlag potrjene 12. 11. 2026, sklopa B in C združena |
 | 4.3 | Konceptualni in logični model | uvožena in potrjena 17. 11. 2026; risarske naloge s samooceno so »Sam preveri« (brez točk), pet skupin razlag |
-| 4.4 | SQL DDL in integritetne omejitve | V pripravi |
+| 4.4 | SQL DDL in integritetne omejitve | uvožena 21. 11. 2026, čaka pregled učitelja: skupine razlag (predlog), naloge SQL so »Sam preveri« (brez točk) |
 | 4.5 | SQL poizvedbe | V pripravi |
 | 4.6 | SQL DML in tuji ključi | V pripravi |
 | 4.7 | UML | V pripravi |
@@ -37,7 +37,7 @@ Stanje poglavij (18. 11. 2026):
 Kaj še rabimo:
 - uvoz pripravljenega poglavja 2.5 (artifact `claude.ai/artifact/2ZG1PRMFhWNrPQHmyvAuCE`),
 - pregled 3.6 (učitelj): skupine razlag, razvrstitev nalog (spodaj), sklopa F in G kot »Sam preveri«,
-- artifacte za poglavja »V pripravi«: 2.4, 3.8, 3.9, 3.10, 3.11, 4.4, 4.5, 4.6 in 4.7,
+- artifacte za poglavja »V pripravi«: 2.4, 3.8, 3.9, 3.10, 3.11, 4.5, 4.6 in 4.7,
 - igre (Robot zankar, Kodni sprint, Kodni CTF, Vdor v šolsko bazo, Dežurni DBA) niso poglavja in se ne štejejo; o njih se odloča posebej.
 
 Mesta »V pripravi« so v `content/sources.json` (`planned`, z naslovom), učitelji in skrbniki jih vidijo kot vrstico z naslovom. Uvoz poglavja mesto sam izpusti iz kataloga. Poglavje se doda, ko je vsebina (uvoz artifacta); postopek je v `docs/DODAJANJE_POGLAVIJ.md`.
@@ -134,6 +134,13 @@ Prilagoditve 2.1 in 2.2 (odločeno in narejeno 10. 11. 2026). Daljša koda ni ve
 
 - Artifactov stavek »Namigi so zastonj« je izpuščen, ker bi nasprotoval pravilom portala (namig odbije polovico točk); pri virih ni več imena RAČ-LAV (kot pri 3.x); stran »Za doma« v artifactu je med Vajami sklop »Ponavljanje«, kot v 2.3 in 3.x.
 - Dosledno z artifactom ostanejo naslovi strani razlage in oznake nalog (Matura · leto · naloga, Vaje · n, Dodatna).
+
+4.4 SQL DDL in integritetne omejitve (LAV-RAČ4, 4. poglavje; uvožena 21. 11. 2026, različica 1): 57 nalog, 49 točk, 15 strani razlage. Sklopi A Baza, tabele in tipi (9 nalog), B Ključi in referenčna integriteta (14), C Piši stavke DDL (11), D Preizkus: napake in posledice (9), E ALTER, DROP, indeksi, dokumentacija (12), F Ponavljanje (2 točkovani maturitetni nalogi, v artifactu na strani Za doma), G Za doma (3 praktične vaje v MySQL, brez točk). Posebnosti:
+- 28 nalog, kjer dijak piše stavke SQL (`sql`), je »Sam preveri« (brez točk; po dogovoru 21. 11. 2026 enako kot programi v 3.x, ker portal stavkov ne izvaja in ne more presojati). Okno za stavke ostane in se shrani (portal hrani besedilo), polj za kontrolne rezultate ni: pravilni kontrolni rezultati so izpisani nad oknom za primerjavo, namig in rešitev ostaneta, »Preveril sem« zaključi nalogo. Točkovane ostanejo naloge z izbiro, vrzelmi in razvrščanjem (49 točk).
+- Tri datoteke SQL (`sola_struktura.sql`, `sola_zacetni_podatki.sql`, `indeks_test.sql`) so v strani kot besedilo (`content/sources/4.4/`, vstavi jih adapter): gumb »Prenesi« shrani datoteko, gumb »Kopiraj« jo kopira v odložišče. Artifactov ZIP in knjižnica JSZip z drugega strežnika sta odstranjena (strani ne smejo nalagati z drugih strežnikov).
+- Shema šolske baze (široka slika) se v ozkem zaslonu drsi znotraj okvirja, dolga imena v nalogah se prelomijo (CSS v adapterju).
+- Skupine razlag (predlog 21. 11. 2026, čaka potrditev učitelja): Od diagrama ER do baze (uvod, baza, tipi), Tabela in ključi (create, kljuci, tuji), Referenčna integriteta in CHECK (ref, check), Šolska baza v praksi (lab, preizkus), Spreminjanje, indeksi in povzetek (alter, drop, indeksi, dokumentiranje, povzetek).
+- Stavkov SQL strežnik ne izvaja; vaje izvajajo dijaki v MySQL Workbenchu. Datoteki `sola.sql` in `matura_baze.sql` (4.5) sta posebej in nista del tega poglavja.
 
 Vrste nalog pri uvozu (odločeno 10. 11. 2026 po pregledu 3.1–3.5; velja za vsako novo poglavje že ob prvem uvozu, ne šele po pregledu učitelja). Ob uvozu vsako nalogo s programom uvrstim v eno vrsto in uvrstitev pokažem skupaj s poglavjem:
 1. **Samo izpis**: program je dan v nalogi, dijak napiše izpis (sledenje, kaj izpiše). Možnost `nobtn`: brez »Kopiraj kodo« in »Odpri Programiz«; izgine tudi vrstica z navodilom v istem redu. Naloga ostane točkovana. Izpis se primerja brez razlikovanja velikih in malih črk ter podvojenih presledkov (dogovor 16. 11. 2026, razdelek 5 načrta); če je v nalogi velikost črk ali presledek bistven in to piše v besedilu, dobi možnost `exact`.
