@@ -10053,7 +10053,7 @@
      "level": "srednja",
      "max": 2,
      "section": "Matura: ena tabela in branje stavkov",
-     "q": "V podatkovni bazi je tabela Dijak kreirana s stavkom CREATE TABLE Dijak(DijakID int not null, Priimek char(20) not null, Ime char(10) not null, DatumRojstva dat"
+     "q": "V podatkovni bazi je tabela Dijak kreirana s stavkom <code>CREATE TABLE Dijak(DijakID int not null, Priimek char(20) not null, Ime char(10) not null, DatumRojst"
     },
     {
      "i": 26,

@@ -2602,6 +2602,42 @@ test('4.4: no undefined and no raw markup on the pages, SQL in the texts is set 
   await a.context().close();
 });
 
+test('4.5: no undefined and no raw markup on the pages, SQL in the texts is set in code, the ER figure has full screen and a print sheet', async () => {
+  const ex = catalog.exercises.find((e) => e.id === '4.5');
+  const a = await login('Sara Skrbnik');
+  await a.addInitScript(() => { window.__printed = 0; window.print = () => { window.__printed++; }; });
+  await a.goto(`${APP}/vaje/4.5#pregled`);
+  await at(a, 'pregled');
+  for (const pg of ex.pages) {
+    await go(a, pg.id);
+    const txt = await a.locator('.page.on').innerText();
+    assert.doesNotMatch(txt, /undefined/, `${pg.id}: undefined in the text`);
+    assert.doesNotMatch(txt, /<\/?code>|&lt;|<\/?b>/, `${pg.id}: raw markup in the text`);
+  }
+  // the practice tasks have their own label
+  await go(a, 'povzetek');
+  assert.match(await a.locator('.page.on .tnum').allTextContents().then((x) => x.join('|')), /Naloga 1\b/);
+  // SQL in a statement of set E is bold and in a tinted box (the statement written in plain text, M1 task 1)
+  await go(a, 'naloge-m1');
+  const codes = a.locator('p.qtext code', { hasText: 'CREATE TABLE Dijak' });
+  assert.ok(await codes.count() >= 1);
+  assert.ok(Number(await codes.first().evaluate((e) => getComputedStyle(e).fontWeight)) >= 600);
+  // the ER figure: full screen, and the print sheet (the browser saves it as PDF)
+  await go(a, 'uvod');
+  const fig = a.locator('#erfig');
+  assert.equal(await fig.count(), 1);
+  await fig.locator('.js-er-pdf').click();
+  assert.equal(await a.evaluate(() => window.__printed), 1);
+  if (await a.evaluate(() => document.fullscreenEnabled)) {
+    await fig.locator('.js-er-full').click();
+    await a.waitForTimeout(300);
+    assert.equal(await a.evaluate(() => document.fullscreenElement && document.fullscreenElement.id), 'erfig');
+    await a.evaluate(() => document.exitFullscreen());
+  }
+  assert.deepEqual(errors, []);
+  await a.context().close();
+});
+
 test('long task statements are laid out as paragraphs, lists and bold words in every chapter that has them, and the markup never reaches the catalog', async () => {
   // number of statements that carry the light markup (content/adapters/qformat.js, content/shell/vaja.js formatQ)
   const laid = { '2.1': 1, '2.2': 20, '2.3': 14, '3.1': 5, '3.2': 5, '3.3': 6, '3.4': 3, '3.5': 8, '3.6': 2, '3.7': 0, '4.1': 0, '4.2': 0, '4.3': 0, '4.4': 0, '4.5': 0 };
