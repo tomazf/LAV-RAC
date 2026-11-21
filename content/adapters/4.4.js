@@ -92,7 +92,9 @@ export default {
   /* the wide schema figure scrolls inside its box instead of widening the page */
   .fig{max-width:100%}
   /* long names and statements break instead of widening the page on a phone */
-  .q p, ul.shl li, .q code{overflow-wrap:anywhere}`,
+  .q p, ul.shl li, .q code{overflow-wrap:anywhere}
+  /* the result grid of a statement is as wide as its columns, not as wide as the box */
+  .wbt table.rel{width:auto}`,
   patches: [
     // Partial credit for tasks with several parts (agreed 16. 11. 2026).
     ...PARTIAL,
