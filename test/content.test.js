@@ -608,12 +608,12 @@ test('corrected chapter and topic titles (10. 11. 2026) are the same in the cata
 });
 
 test('2.2, 2.3, 3.1 to 3.7 and 4.1 to 4.5: every page opens without errors, with their theory groups', async () => {
-  const want = { '2.2': [85, ['Logična vrata', 'Funkcije in poenostavljanje', 'Aritmetična vezja', 'Vaje']], '2.3': [129, ['Podatki in procesor', 'Zbirnik', 'Prekinitve in pomnilniki', 'Vhod, izhod in cevovod', 'Vaje']], '3.1': [52, ['Jezik in prevajanje', 'Orodja, zagon in napake', 'Vaje']], '3.2': [53, ['Algoritem in zapis', 'Gradniki in sled', 'Od diagrama do programa', 'Vaje']], '3.3': [55, ['Program in podatki', 'Izpis in vnos', 'Računanje in potek programa', 'Vaje']], '3.4': [76, ['Tipi in pretvorbe', 'Znaki in nizi', 'Operatorji', 'Vaje']], '3.5': [50, ['Stavek IF', 'Več možnosti', 'Vaje']], '3.6': [114, ['Vrste zank', 'Gnezdenje, break in continue', 'Vzorci', 'Vaje']], '3.7': [147, ['Tabela in pomnilnik', 'Reference in metode', 'Algoritmi in polnjenje', 'Dvodimenzionalne tabele', 'Vaje']], '4.1': [89, ['Pojmi in baza', 'Osnovne operacije', 'Množične operacije', 'Stiki in količnik', 'Izrazi v praksi', 'Vaje']], '4.2': [63, ['Podatki in podatkovna baza', 'Naloge SUPB', 'Zgradba baze in jeziki', 'Uporabniki in pravice', 'Informacijski sistemi in povzetek', 'Vaje']], '4.3': [52, ['Od zahtev do modela', 'Entitete, atributi in ključi', 'Razmerja in števnosti', 'Diagram ER in relacijske sheme', 'Postopek, orodje in povzetek', 'Vaje']], '4.4': [57, ['Od diagrama ER do baze', 'Tabela in ključi', 'Referenčna integriteta in CHECK', 'Šolska baza v praksi', 'Spreminjanje, indeksi in povzetek', 'Vaje']], '4.5': [87, ['Šolska baza in osnove SELECT', 'Združevanje podatkov', 'Stiki tabel', 'Zunanji stiki in podpoizvedbe', 'Pogledi in povzetek', 'Vaje']] };
+  const want = { '2.2': [85, ['Logična vrata', 'Funkcije in poenostavljanje', 'Aritmetična vezja', 'Vaje']], '2.3': [129, ['Podatki in procesor', 'Zbirnik', 'Prekinitve in pomnilniki', 'Vhod, izhod in cevovod', 'Vaje']], '3.1': [52, ['Jezik in prevajanje', 'Orodja, zagon in napake', 'Vaje']], '3.2': [53, ['Algoritem in zapis', 'Gradniki in sled', 'Od diagrama do programa', 'Vaje']], '3.3': [55, ['Program in podatki', 'Izpis in vnos', 'Računanje in potek programa', 'Vaje']], '3.4': [76, ['Tipi in pretvorbe', 'Znaki in nizi', 'Operatorji', 'Vaje']], '3.5': [50, ['Stavek IF', 'Več možnosti', 'Vaje']], '3.6': [114, ['Vrste zank', 'Gnezdenje, break in continue', 'Vzorci', 'Vaje']], '3.7': [147, ['Tabela in pomnilnik', 'Reference in metode', 'Algoritmi in polnjenje', 'Dvodimenzionalne tabele', 'Vaje']], '4.1': [89, ['Pojmi in baza', 'Osnovne operacije', 'Množične operacije', 'Stiki in količnik', 'Izrazi v praksi', 'Vaje']], '4.2': [63, ['Podatki in podatkovna baza', 'Naloge SUPB', 'Zgradba baze in jeziki', 'Uporabniki in pravice', 'Informacijski sistemi in povzetek', 'Vaje']], '4.3': [52, ['Od zahtev do modela', 'Entitete, atributi in ključi', 'Razmerja in števnosti', 'Diagram ER in relacijske sheme', 'Postopek, orodje in povzetek', 'Vaje']], '4.4': [57, ['Od diagrama ER do baze', 'Tabela in ključi', 'Referenčna integriteta in CHECK', 'Šolska baza v praksi', 'Spreminjanje, indeksi in povzetek', 'Vaje']], '4.5': [86, ['Šolska baza in osnove SELECT', 'Združevanje podatkov', 'Stiki tabel', 'Zunanji stiki in podpoizvedbe', 'Množice in povzetek', 'Vaje']] };
   for (const [id, [n, groups]] of Object.entries(want)) {
     const ex = catalog.exercises.find((e) => e.id === id);
     assert.equal(ex.module, { 2: 'LAV-RAČ2', 3: 'LAV-RAČ3', 4: 'LAV-RAČ4' }[id[0]]);
     assert.equal(ex.tasks.length, n);
-    if (id !== '2.2') assert.equal(ex.tasks.at(-1).section, 'Ponavljanje'); // the revision set is graded, last among the sets
+    if (id !== '2.2' && id !== '4.5') assert.equal(ex.tasks.at(-1).section, 'Ponavljanje'); // the revision set is graded, last among the sets
     const a = await login('Sara Skrbnik');
     await a.goto(`${APP}/vaje/${id}`);
     assert.deepEqual(await a.locator('.lr-grp b').allTextContents(), groups);
@@ -1297,7 +1297,7 @@ test('Za doma: two more tasks per chapter, added in the portal, unscored', async
     assert.ok(await a.locator('.page.on article', { hasText: titles[1] }).locator('.sol').isVisible());
   }
   // unscored: the catalog has the same tasks and points as before (3.1 to 3.3 changed on 10. 11. 2026: tasks the student checks have no points)
-  assert.deepEqual(catalog.exercises.map((e) => [e.id, e.tasks.length, e.maxPoints]), [['2.1', 99, 218], ['2.2', 85, 164], ['2.3', 129, 237], ['3.1', 52, 75], ['3.2', 53, 50], ['3.3', 55, 80], ['3.4', 76, 83], ['3.5', 50, 53], ['3.6', 114, 88], ['3.7', 147, 106], ['4.1', 89, 158], ['4.2', 63, 113], ['4.3', 52, 63], ['4.4', 57, 49], ['4.5', 87, 105]]);
+  assert.deepEqual(catalog.exercises.map((e) => [e.id, e.tasks.length, e.maxPoints]), [['2.1', 99, 218], ['2.2', 85, 164], ['2.3', 129, 237], ['3.1', 52, 75], ['3.2', 53, 50], ['3.3', 55, 80], ['3.4', 76, 83], ['3.5', 50, 53], ['3.6', 114, 88], ['3.7', 147, 106], ['4.1', 89, 158], ['4.2', 63, 113], ['4.3', 52, 63], ['4.4', 57, 49], ['4.5', 86, 104]]);
   await a.context().close();
   assert.deepEqual(errors, []);
 });
@@ -2517,18 +2517,18 @@ test('4.5: SQL queries: five theory groups, table results are checked by the stu
   const ex = catalog.exercises.find((e) => e.id === '4.5');
   assert.equal(ex.module, 'LAV-RAČ4');
   assert.equal(ex.no, '5');
-  assert.equal(ex.tasks.length, 87);
+  assert.equal(ex.tasks.length, 86);
   const sections = [...new Set(ex.tasks.map((t) => t.section))];
-  assert.deepEqual(sections, ['Stolpci, vrstice in funkcije', 'Agregati in združevanje', 'Stiki', 'Zunanji stiki in podpoizvedbe', 'Matura: ena tabela in branje stavkov', 'Matura: stik in seznam', 'Matura: stik in združevanje', 'Ponavljanje']);
-  assert.deepEqual(sections.map((n) => ex.tasks.filter((t) => t.section === n).length), [7, 6, 6, 6, 19, 23, 16, 4]);
+  assert.deepEqual(sections, ['Stolpci, vrstice in funkcije', 'Agregati in združevanje', 'Stiki', 'Zunanji stiki, podpoizvedbe in množice', 'Matura: ena tabela in branje stavkov', 'Matura: stik in seznam', 'Matura: stik in združevanje']);
+  assert.deepEqual(sections.map((n) => ex.tasks.filter((t) => t.section === n).length), [7, 6, 6, 9, 19, 23, 16]);
   // the tasks whose result is a table are »Sam preveri«: no points (agreed 21. 11. 2026)
-  assert.deepEqual(sections.map((n) => ex.tasks.filter((t) => t.section === n && t.self).length), [5, 2, 4, 4, 2, 7, 6, 1]);
-  assert.deepEqual(sections.map((n) => ex.tasks.filter((t) => t.section === n).reduce((a, t) => a + t.max, 0)), [2, 6, 4, 4, 26, 36, 20, 7]);
-  assert.equal(ex.maxPoints, 105);
+  assert.deepEqual(sections.map((n) => ex.tasks.filter((t) => t.section === n && t.self).length), [5, 2, 4, 4, 2, 7, 6]);
+  assert.deepEqual(sections.map((n) => ex.tasks.filter((t) => t.section === n).reduce((a, t) => a + t.max, 0)), [2, 6, 4, 10, 26, 36, 20]);
+  assert.equal(ex.maxPoints, 104);
   const a = await login('Sara Skrbnik');
   await a.goto(`${APP}/vaje/4.5#pregled`);
   await at(a, 'pregled');
-  assert.deepEqual(await a.locator('.lr-rail .lr-grp b').allTextContents(), ['Šolska baza in osnove SELECT', 'Združevanje podatkov', 'Stiki tabel', 'Zunanji stiki in podpoizvedbe', 'Pogledi in povzetek', 'Vaje']);
+  assert.deepEqual(await a.locator('.lr-rail .lr-grp b').allTextContents(), ['Šolska baza in osnove SELECT', 'Združevanje podatkov', 'Stiki tabel', 'Zunanji stiki in podpoizvedbe', 'Množice in povzetek', 'Vaje']);
   assert.doesNotMatch(await a.locator('body').innerText(), /zastonj|JSZip|RAČ-LAV|aboratorij/);
   // the .sql files are downloads served by the portal
   await go(a, 'uvod');
@@ -2548,9 +2548,7 @@ test('4.5: SQL queries: five theory groups, table results are checked by the stu
   await go(a, 'naloge-a/2');
   assert.doesNotMatch(await card(a).innerText(), /Sam preveri/);
   assert.ok(await card(a).locator('.chk').count() >= 1);
-  // the revision set is Ponavljanje, Za doma is the next set
-  await go(a, 'doma-mat');
-  assert.match(await a.locator('.page.on .lr-shead').innerText(), /Ponavljanje/);
+  // the revision set (Ponavljanje) is removed: Za doma is the last set
   await go(a, 'doma');
   assert.match(await a.locator('.page.on .lr-shead').innerText(), /Za doma/);
   // on a phone no page is wider than the screen
@@ -2600,6 +2598,18 @@ test('4.4: no undefined and no raw markup on the pages, SQL in the texts is set 
   }
   assert.deepEqual(errors, []);
   await a.context().close();
+});
+
+test('4.5: the control results are not tied to the date, the new union page and set D are in place', () => {
+  // G7 used YEAR(CURDATE()): a control result for a task that is graded must not depend on the day it is checked (agreed 23. 11. 2026)
+  const html = readFileSync(path.join(root, 'content', 'exercises', '4.5.html'), 'utf8');
+  const T = JSON.parse(html.split('\n').find((l) => l.startsWith('const T = ')).slice('const T = '.length).replace(/;$/, ''));
+  const graded = T.filter((t) => t.pts > 0 && !t.self);
+  const dated = graded.filter((t) => /CURDATE|CURRENT_DATE|NOW\(\)/.test(t.sol || ''));
+  assert.deepEqual(dated.map((t) => t.q.slice(0, 40)), []);
+  assert.equal(graded.filter((t) => t.lv === 'D').length, 9);
+  // the page is built in the browser: the script inserts the union page and removes the VIEW page
+  assert.ok(html.includes('section id=\\"unija\\"') && html.includes('getElementById("view").remove()'));
 });
 
 test('4.5: no undefined and no raw markup on the pages, SQL in the texts is set in code, the ER figure has full screen and a print sheet', async () => {

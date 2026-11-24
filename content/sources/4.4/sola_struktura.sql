@@ -1,9 +1,10 @@
 -- ============================================================
--- Šolska baza SOLA · RAČ-LAV 4 · poglavje 4 (SQL DDL)
+-- Šolska baza SOLA · LAV-RAČ4 · poglavje 4 (SQL DDL)
 -- Samo STRUKTURA (brez podatkov): osem tabel, ključi in omejitve.
 -- MySQL 8.0 · utf8mb4 · slovenska collation.
 -- Uporaba: v MySQL Workbench dvoklikni SVOJO shemo (postane krepka),
 --          File > Open SQL Script > sola_struktura.sql in zaženi (strela).
+-- Skripta najprej izbriše tabele z istimi imeni v izbrani shemi (tudi tiste, ki si jih naredil sam). Za vsako poglavje uporabi svojo shemo (npr. sola4, sola5).
 -- To je REŠITEV vodene vaje: najprej poskusi tabele ustvariti sam.
 -- Poglavje 5 uvozi skripto sola.sql: ta isto strukturo napolni s podatki.
 -- ============================================================

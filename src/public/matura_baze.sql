@@ -1,5 +1,5 @@
 -- ============================================================
--- MATURA_BAZE · RAČ-LAV 4 · poglavje 5 (SQL poizvedbe)
+-- MATURA_BAZE · LAV-RAČ4 · poglavje 5 (SQL poizvedbe)
 -- Tabele iz maturitetnih nalog (izpitna pola 2, 2012–2026)
 -- z izmišljenimi podatki. Predpona = šifra pole (m171_film = pola M171).
 -- Imena stolpcev so enaka kot na poli. Če se shema na več polah

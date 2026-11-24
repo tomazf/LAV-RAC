@@ -25,7 +25,7 @@ const GROUPS = [
   { id: 'g-zdruzi', icon: 'zdruzi', title: 'Združevanje podatkov', pages: ['agregati', 'group'] },
   { id: 'g-stiki', icon: 'stik', title: 'Stiki tabel', pages: ['join', 'joingroup'] },
   { id: 'g-zunanji', icon: 'podpoizv', title: 'Zunanji stiki in podpoizvedbe', pages: ['outer', 'sub'] },
-  { id: 'g-pogledi', icon: 'pogled', title: 'Pogledi in povzetek', pages: ['view', 'povzetek'] },
+  { id: 'g-mnozice', icon: 'zdruzi', title: 'Množice in povzetek', pages: ['unija', 'povzetek'] },
 ];
 const TITLE = 'SQL poizvedbe';
 const KICKER = 'LAV-RAČ4 · 5. poglavje';
@@ -33,9 +33,18 @@ const KICKER = 'LAV-RAČ4 · 5. poglavje';
 // compares the Workbench result with the solution. Names as the shell reads them: the artifact's set tag and the place in the set
 // (M1 = set E, M2 = F, M3 = G, H = Ponavljanje on the portal).
 const SELF = ['A1', 'A3', 'A4', 'A6', 'A7', 'B3', 'B4', 'C2', 'C3', 'C5', 'C6', 'D1', 'D2', 'D4', 'D5',
-  'M19', 'M114', 'M25', 'M27', 'M212', 'M213', 'M215', 'M216', 'M220', 'M34', 'M38', 'M311', 'M312', 'M313', 'M315', 'H4'];
-const ZAGON = `fillRels(); fillPlay(); fillFormulas(); fillSteps(); fillQuiz(); fillTry();
+  'M19', 'M114', 'M25', 'M27', 'M212', 'M213', 'M215', 'M216', 'M220', 'M34', 'M38', 'M311', 'M312', 'M313', 'M315'];
+// The union, intersection and difference page (razlaga 11) takes the place of the VIEW page, which is removed (agreed 23. 11. 2026).
+const UNIJA_HTML = "<section id=\"unija\">\n<div class=\"eyebrow\">Razlaga 11</div>\n<h2>Unija, presek in razlika</h2>\n<p class=\"badge-un\">Po katalogu 4.5.4 (raven III): zapiše stavek SQL, ki vrne razliko, unijo ali presek dveh tabel</p>\n<div class=\"blk\"><div class=\"lbl\">1 · Unija: UNION in UNION ALL</div>\n<p class=\"goal\">Dva izpisa z enakim številom stolpcev združimo v enega. Stolpca morata biti enake ali združljive vrste, imena pa vzame prvi del.</p>\n<pre class=\"code js-hl\">SELECT ime FROM dijak\nUNION\nSELECT ime FROM ucitelj;</pre>\n<p class=\"meaning\"><strong>Kaj to pomeni:</strong> <code>UNION</code> odstrani podvojene vrednosti. <code>UNION ALL</code> jih ohrani, zato je hitrejši.</p></div>\n<div class=\"blk\"><div class=\"lbl\">2 · Presek: IN (SELECT …)</div>\n<p class=\"goal\">Vrnemo vrednosti, ki so v obeh tabelah. Podpoizvedba v IN vrne seznam vrednosti iz druge tabele.</p>\n<pre class=\"code js-hl\">SELECT DISTINCT ime FROM dijak\nWHERE ime IN (SELECT ime FROM ucitelj);</pre></div>\n<div class=\"blk\"><div class=\"lbl\">3 · Razlika: NOT IN ali LEFT JOIN … IS NULL</div>\n<p class=\"goal\">Vrnemo vrednosti iz prve tabele, ki jih ni v drugi.</p>\n<pre class=\"code js-hl\">SELECT ime, priimek FROM ucitelj\nWHERE id_ucitelj NOT IN (SELECT id_razrednik FROM oddelek WHERE id_razrednik IS NOT NULL);</pre>\n<p class=\"meaning\"><strong>Pozor:</strong> če v podpoizvedbi ni NULL, <code>NOT IN</code> ne vrne ničesar. Brez pogoja <code>id_razrednik IS NOT NULL</code> v tej bazi ne dobimo nobene vrstice, ker en oddelek nima razrednika.</p>\n<pre class=\"code js-hl\">SELECT u.ime, u.priimek FROM ucitelj u\n  LEFT JOIN oddelek o ON o.id_razrednik = u.id_ucitelj\nWHERE o.id_oddelek IS NULL;</pre></div>\n<div class=\"blk\"><div class=\"lbl\">4 · INTERSECT in EXCEPT</div>\n<p class=\"goal\">MySQL od različice 8.0.31 pozna tudi neposredna stavka <code>INTERSECT</code> (presek) in <code>EXCEPT</code> (razlika). Na maturi ju ne uporabljamo, zato ju pri nalogah ne zahtevamo.</p></div>\n<div class=\"blk\"><div class=\"lbl\">5 · Povezava z algebro</div>\n<p class=\"goal\">Unija ustreza ∪, presek ∩ in razlika −, kot smo jih spoznali pri relacijski algebri (razlaga 4.1). Razlika ustreza <code>NOT IN</code>, presek <code>IN</code>, unija <code>UNION</code>.</p></div>\n<div class=\"remember\">Zapomni si: <code>UNION</code> za unijo, <code>IN (SELECT …)</code> za presek, <code>NOT IN (SELECT …)</code> ali <code>LEFT JOIN … IS NULL</code> za razliko; pri <code>NOT IN</code> pazi na NULL.</div>\n</section>";
+// Three tasks for set D (points 2 each, control results from the sola.sql script; agreed 23. 11. 2026). Their result
+// is the same in MySQL and in the portal's Workbench check: the number of rows and one value that does not depend on the order.
+const NEW_D = [{"own":true,"pts":2,"lv":"D","type":"sql","q":"Izpiši e-poštne naslove vseh dijakov in učiteljev (brez praznih), po abecedi.","sch":["dijak(id_dijak, ime, priimek, spol, datum_rojstva, id_oddelek→oddelek, id_kraj→kraj, email, telefon)","ucitelj(id_ucitelj, ime, priimek, email, datum_zaposlitve)"],"sol":"SELECT email\nFROM dijak\nWHERE email IS NOT NULL AND email <> ''\nUNION\nSELECT email\nFROM ucitelj\nWHERE email IS NOT NULL AND email <> ''\nORDER BY email;","h":["UNION združi dva izpisa z enakim številom stolpcev.","Prazne naslove izloči pogoj email <> '' v vsakem delu posebej."],"why":"UNION odstrani podvojene vrednosti, zato se naslov, ki je v obeh tabelah, pojavi enkrat. Stolpca obeh delov morata imeti enako število in tip. Pogoje zapišemo v vsakem delu posebej.","res":{"cols":["email"],"rows":[["ajda.avsec81@dijak.sc-nm.si"],["alenka.zagar@sc-nm.si"],["ales.vovko@sc-nm.si"],["aljaz.hocevar38@dijak.sc-nm.si"],["aljaz.kovac94@dijak.sc-nm.si"],["aljaz.turk25@dijak.sc-nm.si"],["ana.kos97@dijak.sc-nm.si"],["ana.novak1@dijak.sc-nm.si"],["andrej.kastelic@sc-nm.si"],["anze.jakse101@dijak.sc-nm.si"],["anze.znidarsic118@dijak.sc-nm.si"],["anze.zupancic29@dijak.sc-nm.si"],["barbara.strbenc@sc-nm.si"],["blaz.hocevar75@dijak.sc-nm.si"],["blaz.jakse106@dijak.sc-nm.si"],["blaz.pucelj74@dijak.sc-nm.si"],["blaz.smrke9@dijak.sc-nm.si"],["bostjan.hrovat@sc-nm.si"],["domen.bele95@dijak.sc-nm.si"],["domen.bizjak19@dijak.sc-nm.si"],["domen.bobnar30@dijak.sc-nm.si"],["domen.retelj46@dijak.sc-nm.si"],["dusan.gorenc@sc-nm.si"],["erik.murn96@dijak.sc-nm.si"],["erik.plut92@dijak.sc-nm.si"],["eva.horvat3@dijak.sc-nm.si"],["gal.bozic17@dijak.sc-nm.si"],["gregor.jakse@sc-nm.si"],["hana.bucar112@dijak.sc-nm.si"],["hana.kovac79@dijak.sc-nm.si"],["hana.mlakar47@dijak.sc-nm.si"],["irena.zupancic@sc-nm.si"],["iza.bobnar57@dijak.sc-nm.si"],["jaka.novak85@dijak.sc-nm.si"],["jaka.rozman24@dijak.sc-nm.si"],["jan.krajnc4@dijak.sc-nm.si"],["jan.znidarsic61@dijak.sc-nm.si"],["jost.bele116@dijak.sc-nm.si"],["jure.kovac90@dijak.sc-nm.si"],["katja.bele15@dijak.sc-nm.si"],["katja.pungercar@sc-nm.si"],["katja.vovk87@dijak.sc-nm.si"],["klara.horvat64@dijak.sc-nm.si"],["klara.kralj50@dijak.sc-nm.si"],["klemen.ban6@dijak.sc-nm.si"],["lana.bizjak40@dijak.sc-nm.si"],["lana.krajnc52@dijak.sc-nm.si"],["lana.retelj51@dijak.sc-nm.si"],["lara.fabjan62@dijak.sc-nm.si"],["lara.luksic56@dijak.sc-nm.si"],["luka.kovac2@dijak.sc-nm.si"],["manca.jakse53@dijak.sc-nm.si"],["manca.kos10@dijak.sc-nm.si"],["manca.retelj93@dijak.sc-nm.si"],["manca.strukelj83@dijak.sc-nm.si"],["manca.turk58@dijak.sc-nm.si"],["martin.pavlic22@dijak.sc-nm.si"],["martin.skufca34@dijak.sc-nm.si"],["matej.turk@sc-nm.si"],["matic.avsec48@dijak.sc-nm.si"],["matic.medle60@dijak.sc-nm.si"],["miha.bele107@dijak.sc-nm.si"],["miha.hribar86@dijak.sc-nm.si"],["miha.korosec114@dijak.sc-nm.si"],["miha.novak@sc-nm.si"],["mojca.bregar@sc-nm.si"],["nace.bobnar103@dijak.sc-nm.si"],["nace.rozman108@dijak.sc-nm.si"],["natasa.sinkovec@sc-nm.si"],["nejc.kovacic43@dijak.sc-nm.si"],["nejc.zibert28@dijak.sc-nm.si"],["nejc.zupan115@dijak.sc-nm.si"],["neza.golob31@dijak.sc-nm.si"],["neza.zibert42@dijak.sc-nm.si"],["nik.fabjan98@dijak.sc-nm.si"],["nik.kos78@dijak.sc-nm.si"],["nik.kotnik8@dijak.sc-nm.si"],["nik.novak26@dijak.sc-nm.si"],["nika.kotnik84@dijak.sc-nm.si"],["nika.znidarsic11@dijak.sc-nm.si"],["petra.kos@sc-nm.si"],["pia.ceh67@dijak.sc-nm.si"],["pia.kralj89@dijak.sc-nm.si"],["robert.murn@sc-nm.si"],["sara.zupan20@dijak.sc-nm.si"],["simona.fink@sc-nm.si"],["spela.korosec49@dijak.sc-nm.si"],["spela.pucelj72@dijak.sc-nm.si"],["spela.retelj37@dijak.sc-nm.si"],["spela.zibert7@dijak.sc-nm.si"],["tanja.pavlin@sc-nm.si"],["tilen.ceh70@dijak.sc-nm.si"],["tilen.gliha68@dijak.sc-nm.si"],["tina.bucar113@dijak.sc-nm.si"],["tine.jakse76@dijak.sc-nm.si"],["tine.mlakar16@dijak.sc-nm.si"],["tjasa.gliha36@dijak.sc-nm.si"],["tjasa.hribar100@dijak.sc-nm.si"],["tjasa.kotnik44@dijak.sc-nm.si"],["ula.cerne66@dijak.sc-nm.si"],["ula.gazvoda117@dijak.sc-nm.si"],["ula.zupan110@dijak.sc-nm.si"],["urban.bele88@dijak.sc-nm.si"],["urban.gazvoda23@dijak.sc-nm.si"],["urban.turk32@dijak.sc-nm.si"],["uros.lindic@sc-nm.si"],["vesna.kralj@sc-nm.si"],["vid.retelj69@dijak.sc-nm.si"],["vita.jakse80@dijak.sc-nm.si"],["zala.hribar109@dijak.sc-nm.si"],["zan.hocevar77@dijak.sc-nm.si"],["zan.jakse111@dijak.sc-nm.si"],["ziga.zupan63@dijak.sc-nm.si"],["ziva.bizjak18@dijak.sc-nm.si"],["ziva.strukelj82@dijak.sc-nm.si"],["zoja.kobe59@dijak.sc-nm.si"],["zoja.pavlic12@dijak.sc-nm.si"]],"n":117},"checks":[{"l":"Število vrstic v rezultatu","acc":["117"],"num":true},{"l":"Prvi naslov po abecedi","acc":["ajda.avsec81@dijak.sc-nm.si"],"num":true}]},{"own":true,"pts":2,"lv":"D","type":"sql","q":"Izpiši imena, ki jih ima vsaj en dijak in vsaj en učitelj.","sch":["dijak(id_dijak, ime, priimek, spol, datum_rojstva, id_oddelek→oddelek, id_kraj→kraj, email, telefon)","ucitelj(id_ucitelj, ime, priimek, email, datum_zaposlitve)"],"sol":"SELECT DISTINCT ime\nFROM dijak\nWHERE ime IN (SELECT ime FROM ucitelj)\nORDER BY ime;","h":["Presek dveh množic: vrednost mora biti v obeh.","IN (SELECT …) vrne vrednosti iz podpoizvedbe."],"why":"Pogoj IN (SELECT …) obdrži le imena, ki se pojavijo tudi med učitelji. DISTINCT odstrani ponovitve, ker je isto ime lahko pri več dijakih.","res":{"cols":["ime"],"rows":[["Katja"],["Miha"]],"n":2},"checks":[{"l":"Število vrstic v rezultatu","acc":["2"],"num":true},{"l":"Prvo ime po abecedi","acc":["Katja"],"num":true}]},{"own":true,"pts":2,"lv":"D","type":"sql","q":"Izpiši ime in priimek učiteljev, ki niso razredniki.","sch":["ucitelj(id_ucitelj, ime, priimek, email, datum_zaposlitve)","oddelek(id_oddelek, oznaka, letnik, id_razrednik→ucitelj)"],"sol":"SELECT ime, priimek\nFROM ucitelj\nWHERE id_ucitelj NOT IN (SELECT id_razrednik FROM oddelek WHERE id_razrednik IS NOT NULL)\nORDER BY priimek;","h":["Razlika: učitelji, ki niso v množici razrednikov.","Pri NOT IN v podpoizvedbi izloči NULL (oddelek brez razrednika)."],"why":"NOT IN izloči učitelje, ki so razredniki. Pogoj id_razrednik IS NOT NULL je potreben: če bi bil v podpoizvedbi NULL, NOT IN ne bi vrnil ničesar, ker primerjava z NULL ni resnična.","res":{"cols":["ime","priimek"],"rows":[["Simona","Fink"],["Boštjan","Hrovat"],["Gregor","Jakše"],["Tomaž","Jerele"],["Andrej","Kastelic"],["Vesna","Kralj"],["Uroš","Lindič"],["Robert","Murn"],["Katja","Pungerčar"],["Nataša","Šinkovec"],["Barbara","Štrbenc"],["Aleš","Vovko"],["Irena","Zupančič"]],"n":13},"checks":[{"l":"Število vrstic v rezultatu","acc":["13"],"num":true},{"l":"Najmanjši priimek po abecedi","acc":["Fink"],"num":true}]}];
+const ZAGON = `fillRels(); fillPlay(); fillFormulas(); fillSteps(); fillQuiz(); fillTry();fillRels(); fillPlay(); fillFormulas(); fillSteps(); fillQuiz(); fillTry();
 renderAll();
+// The VIEW page is removed and the union page takes its place, before the summary (agreed 23. 11. 2026).
+document.getElementById("view").remove();
+document.querySelectorAll('a[href="#view"]').forEach((a) => a.remove());
+document.getElementById("povzetek").insertAdjacentHTML("beforebegin", ${JSON.stringify(UNIJA_HTML).replace(/<\//g, '<\\/')});
 {
   const title = id => (PAGES.find(p=>p[0]===id) || [id, id])[1];
   const home = document.getElementById("doma");
@@ -91,9 +100,37 @@ const toJs = (v) => JSON.stringify(v).replace(/<\//g, '<\\/');
 const TASKS_LINE = LINES.find((l) => l.startsWith('const T = '));
 const TRY_LINE = LINES.find((l) => l.startsWith('const TRY = '));
 const FMTQ_LINE = LINES.find((l) => l.startsWith('const fmtQ = '));
-const TASKS_SRC = JSON.parse(TASKS_LINE.slice('const T = '.length).replace(/;$/, ''));
+let TASKS_SRC = JSON.parse(TASKS_LINE.slice('const T = '.length).replace(/;$/, ''));
 const TRY_SRC = JSON.parse(TRY_LINE.slice('const TRY = '.length).replace(/;$/, ''));
 for (const t of TASKS_SRC) { t.q = fixText(t.q); t.why = fixText(t.why); }
+// Five control results added to the tasks without ORDER BY (agreed 23. 11. 2026): the smallest value in alphabetical order,
+// which is the same for every order of the rows.
+const EXTRA = [
+  { src: 'M181/19.1', acc: 'Ahčin' }, { src: 'M141/20.1', acc: 'Hofer' }, { src: 'M192/20.1', acc: 'Fizika' },
+  { src: 'M242/17', acc: 'Mlekarna Krepko' }, { src: 'M251/20.2', acc: 'Hana' }, { src: 'M171/20.2', acc: 'Amarcord' },
+  { q: 'Izpiši vse različne vrste ocen.', acc: 'pisna' },
+  { q: 'Izpiši imena predmetov, ki jih poučuje Miha Novak (vsak predmet enkrat).', acc: 'Programiranje' },
+  { q: 'Izpiši imena krajev, iz katerih ni nobenega dijaka.', acc: 'Brežice' },
+];
+for (const e of EXTRA) {
+  const t = TASKS_SRC.find((x) => (e.src ? x.src === e.src : x.q === e.q));
+  if (!t) throw new Error('4.5: no task for ' + (e.src || e.q));
+  t.checks.push({ l: 'Najmanjša vrednost po abecedi', acc: [e.acc], num: true });
+}
+// The matura statements as they are written on the exam: the table names without the pole prefix (mNNN_).
+for (const t of TASKS_SRC) if (t.sol && /\bm\d{3}_/.test(t.sol)) t.maturi = t.sol.replace(/\bm\d{3}_/g, '');
+// G7 (M191/20.2) asked for "letos", which is YEAR(CURDATE()): the control result is for 2026 and would be wrong from 1 January 2027.
+// The task now names 2026 and carries the label »Prirejeno« (agreed 23. 11. 2026).
+const G7 = TASKS_SRC.find((t) => t.src === 'M191/20.2');
+G7.q = 'Napišite stavek SQL, ki izpiše, koliko vozil je leta 2026 izdelalo posamezno podjetje.';
+G7.sol = G7.sol.replace('YEAR(CURDATE())', '2026');
+G7.h = ['»Leta 2026« pomeni, da je letoizdelave enako 2026.'];
+G7.why = 'Kontrolni rezultat velja za leto 2026.';
+G7.adapt = true;
+// The revision set (sklop H, »Ponavljanje«) is removed: its four tasks repeat tasks of sets F and G (agreed 23. 11. 2026).
+TASKS_SRC = TASKS_SRC.filter((t) => t.lv !== 'H');
+// The three new tasks follow the last task of set D.
+TASKS_SRC.splice(TASKS_SRC.map((t) => t.lv).lastIndexOf('D') + 1, 0, ...NEW_D);
 // The practice tasks on the explanation pages get their own label (they had none: "undefined. naloga").
 for (const t of TRY_SRC) { t.q = fixText(t.q); t.why = fixText(t.why); t.tryLabel = 'Naloga ' + t.key.slice(1); }
 
@@ -141,7 +178,14 @@ export default {
   /* the result grid of a statement is as wide as its columns, not as wide as the box */
   .wbt table.rel{width:auto}`,
   patches: [
-    // Partial credit for tasks with several parts (agreed 16. 11. 2026); the blanks and the control results of a query are
+    // The VIEW page is replaced by the union, intersection and difference page (see UNIJA_HTML and ZAGON).
+    ['["view", "Pogledi (VIEW)"]', '["unija", "Unija, presek in razlika"]'],
+    // Set D is renamed: the union, intersection and difference tasks are in it.
+    ['"title": "Zunanji stiki in podpoizvedbe", "note": "LEFT JOIN, iskanje »brez«, podpoizvedbe in neodločen izid (razlagi 9 in 10)."',
+      '"title": "Zunanji stiki, podpoizvedbe in množice", "note": "LEFT JOIN, iskanje »brez«, podpoizvedbe, unija, presek in razlika (razlage 9, 10 in 11)."'],
+    // The solution of a matura task shows the statement as it is written on the exam, below the portal's own solution.
+    ['html += `<div class="eyebrow">Rešitev</div><pre class="code">${hl(t.sol)}</pre>`;',
+      'html += `<div class="eyebrow">Rešitev</div><pre class="code">${hl(t.sol)}</pre>${t.maturi ? `<div class="eyebrow">Na maturi</div><pre class="code">${hl(t.maturi)}</pre>` : ""}`;'],    // Partial credit for tasks with several parts (agreed 16. 11. 2026); the blanks and the control results of a query are
     // counted here, the other kinds are the shared ones.
     partialCredit[0],
     partialCredit[1],
@@ -153,9 +197,9 @@ export default {
     ['Pokaži rešitev', 'Prikaži rešitev', 'all'],
     // the two result tables of one statement sit side by side, as one row of the page
     ['<div class="gviz">', '<div class="gviz two">'],
-    // The revision set (artifact id "doma", which is also the id of the Za doma section) is "Ponavljanje" and gets its own id.
-    ['{"id": "doma", "tag": "H", "title": "Za doma", "note": "Maturitetne naloge, ki so se na kasnejših polah ponovile z enakim besedilom. Rešuj jih za ponavljanje.", "home": true}',
-      '{"id": "doma-mat", "tag": "H", "title": "Ponavljanje", "note": "Maturitetne naloge, ki so se na kasnejših polah ponovile z enakim besedilom. Rešuj jih za ponavljanje.", "home": true}'],
+    // The revision set (artifact level "doma", tag H, "Ponavljanje") is removed from the levels; its tasks are removed above.
+    [', {"id": "doma", "tag": "H", "title": "Za doma", "note": "Maturitetne naloge, ki so se na kasnejših polah ponovile z enakim besedilom. Rešuj jih za ponavljanje.", "home": true}]',
+      ']'],
     // The portal's own rules say how hints and solutions count; the note must not contradict them. A longer result is compared, not typed.
     ['Poizvedbo napiši in izvedi v Workbenchu, nato v polja <b>Kontrolni rezultat</b> vpiši, kar ti vrne (število vrstic, izbrano vrednost) in pritisni Preveri. Decimalna števila lahko zaokrožiš na dve decimalki.',
       'Poizvedbo napiši in izvedi v Workbenchu. Pri nalogah s kratkim izpisom v polja <b>Kontrolni rezultat</b> vpiši, kar ti vrne (število vrstic, izbrano vrednost), in pritisni Preveri. Decimalna števila lahko zaokrožiš na dve decimalki. Pri nalogah z daljšim izpisom (tabela) rezultat sam primerjaš z rešitvijo: označene so s »Sam preveri« in nimajo točk.'],
@@ -163,10 +207,10 @@ export default {
     // The scripts are downloads from the portal, not text to copy; the ZIP, the copy buttons and the external script go.
     ['<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>\n', ''],
     ['Prenesi ZIP z obema skriptama ali pa skripto kopiraj in jo v 4. koraku prilepi v okno za poizvedbe.<div class="actions dlrow"><button class="btn primary js-zip" type="button" hidden>⬇ Prenesi ZIP (sola.sql + matura_baze.sql)</button><button class="btn js-copyfile" type="button" data-f="sola.sql">Kopiraj sola.sql</button><a class="btn ghost" href="sola.sql.txt" target="_blank" rel="noopener">Odpri sola.sql ↗</a></div>',
-      'Prenesi jo na svoj računalnik.<div class="actions dlrow"><a class="btn primary" href="/static/sola.sql" download>⬇ Prenesi sola.sql</a></div>'],
+      'Prenesi jo na svoj računalnik.<div class="actions dlrow"><a class="btn primary" href="/static/sola.sql" download>⬇ Prenesi sola.sql</a></div><p class="note">Skripta najprej izbriše tabele z istimi imeni v izbrani shemi (tudi tiste, ki si jih naredil sam). Za vsako poglavje uporabi svojo shemo (npr. sola4, sola5).</p>'],
     [' (ali pa kopirano besedilo prilepi v novo okno, <span class="kbd">Ctrl</span> + <span class="kbd">T</span>)', ''],
     ['<div class="actions dlrow"><button class="btn primary js-zip" type="button" hidden>⬇ Prenesi ZIP (obe skripti)</button><button class="btn js-copyfile" type="button" data-f="matura_baze.sql">Kopiraj matura_baze.sql</button><a class="btn ghost" href="matura_baze.sql.txt" target="_blank" rel="noopener">Odpri matura_baze.sql ↗</a><span class="muted">94 majhnih tabel · naloge so v sklopih M1–M3</span></div>',
-      '<div class="actions dlrow"><a class="btn primary" href="/static/matura_baze.sql" download>⬇ Prenesi matura_baze.sql</a><span class="muted">94 majhnih tabel · naloge so v sklopih E–G</span></div>'],
+      '<div class="actions dlrow"><a class="btn primary" href="/static/matura_baze.sql" download>⬇ Prenesi matura_baze.sql</a><span class="muted">94 majhnih tabel · naloge so v sklopih E–G</span></div><p class="note">Skripta najprej izbriše tabele z istimi imeni v izbrani shemi (tudi tiste, ki si jih naredil sam). Za vsako poglavje uporabi svojo shemo (npr. sola4, sola5).</p>'],
     ['["sola.sql","matura_baze.sql"].forEach(f=>{ try { fetch(f+".txt").then(r=>r.ok?r.text():null).then(t=>{ if(t) FTXT[f]=t; }).catch(()=>{}); } catch(e){} });\n', ''],
     // A task marked "Sam preveri" has no control result to type: the student compares the Workbench result with the solution.
     ['    body += `<div class="chk"><div class="lbl">Kontrolni rezultat</div>`', '    if(!t.self) body += `<div class="chk"><div class="lbl">Kontrolni rezultat</div>`'],

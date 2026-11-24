@@ -1,10 +1,11 @@
 -- ============================================================
--- Šolska baza SOLA · RAČ-LAV 4 · poglavje 5 (SQL poizvedbe)
+-- Šolska baza SOLA · LAV-RAČ4 · poglavje 5 (SQL poizvedbe)
 -- MySQL 8.0 · utf8mb4 · slovenska collation (Č za C, Š za S, Ž za Z)
 -- Uvoz: v MySQL Workbench dvoklikni SVOJO shemo (postane krepka),
 --       nato File > Open SQL Script > sola.sql in zaženi (strela).
 -- Skripta ne ustvari baze in ne vsebuje USE: tabele nastanejo v
 -- trenutno izbrani shemi. Ob ponovnem zagonu najprej pobriše stare tabele.
+-- Skripta najprej izbriše tabele z istimi imeni v izbrani shemi (tudi tiste, ki si jih naredil sam). Za vsako poglavje uporabi svojo shemo (npr. sola4, sola5).
 -- Podatki so izmišljeni. Šolsko leto 2025/26.
 -- ============================================================
 SET NAMES utf8mb4;
@@ -37,8 +38,8 @@ CREATE TABLE oddelek (
   id_razrednik  INT      NULL,
   PRIMARY KEY (id_oddelek),
   UNIQUE (oznaka),
-  CHECK (letnik BETWEEN 1 AND 4),
-  FOREIGN KEY (id_razrednik) REFERENCES ucitelj (id_ucitelj)
+  CONSTRAINT ck_oddelek_letnik CHECK (letnik BETWEEN 1 AND 4),
+  CONSTRAINT fk_oddelek_razrednik FOREIGN KEY (id_razrednik) REFERENCES ucitelj (id_ucitelj)
     ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_sl_0900_ai_ci;
 
@@ -53,10 +54,10 @@ CREATE TABLE dijak (
   email          VARCHAR(50)  NULL,
   telefon        VARCHAR(15)  NULL,
   PRIMARY KEY (id_dijak),
-  CHECK (spol IN ('M', 'Ž')),
-  FOREIGN KEY (id_oddelek) REFERENCES oddelek (id_oddelek)
+  CONSTRAINT ck_dijak_spol CHECK (spol IN ('M', 'Ž')),
+  CONSTRAINT fk_dijak_oddelek FOREIGN KEY (id_oddelek) REFERENCES oddelek (id_oddelek)
     ON DELETE RESTRICT ON UPDATE CASCADE,
-  FOREIGN KEY (id_kraj) REFERENCES kraj (id_kraj)
+  CONSTRAINT fk_dijak_kraj FOREIGN KEY (id_kraj) REFERENCES kraj (id_kraj)
     ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_sl_0900_ai_ci;
 
@@ -75,9 +76,9 @@ CREATE TABLE poucuje (
   id_predmet  INT  NOT NULL,
   id_oddelek  INT  NOT NULL,
   PRIMARY KEY (id_ucitelj, id_predmet, id_oddelek),
-  FOREIGN KEY (id_ucitelj) REFERENCES ucitelj (id_ucitelj) ON DELETE CASCADE,
-  FOREIGN KEY (id_predmet) REFERENCES predmet (id_predmet) ON DELETE CASCADE,
-  FOREIGN KEY (id_oddelek) REFERENCES oddelek (id_oddelek) ON DELETE CASCADE
+  CONSTRAINT fk_poucuje_ucitelj FOREIGN KEY (id_ucitelj) REFERENCES ucitelj (id_ucitelj) ON DELETE CASCADE,
+  CONSTRAINT fk_poucuje_predmet FOREIGN KEY (id_predmet) REFERENCES predmet (id_predmet) ON DELETE CASCADE,
+  CONSTRAINT fk_poucuje_oddelek FOREIGN KEY (id_oddelek) REFERENCES oddelek (id_oddelek) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_sl_0900_ai_ci;
 
 CREATE TABLE ocena (
@@ -89,13 +90,13 @@ CREATE TABLE ocena (
   vrsta       VARCHAR(10)  NOT NULL,
   datum       DATE         NOT NULL,
   PRIMARY KEY (id_ocena),
-  CHECK (ocena BETWEEN 1 AND 5),
-  CHECK (vrsta IN ('pisna', 'ustna', 'projekt')),
-  FOREIGN KEY (id_dijak) REFERENCES dijak (id_dijak)
+  CONSTRAINT ck_ocena_ocena CHECK (ocena BETWEEN 1 AND 5),
+  CONSTRAINT ck_ocena_vrsta CHECK (vrsta IN ('pisna', 'ustna', 'projekt')),
+  CONSTRAINT fk_ocena_dijak FOREIGN KEY (id_dijak) REFERENCES dijak (id_dijak)
     ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (id_predmet) REFERENCES predmet (id_predmet)
+  CONSTRAINT fk_ocena_predmet FOREIGN KEY (id_predmet) REFERENCES predmet (id_predmet)
     ON DELETE RESTRICT ON UPDATE CASCADE,
-  FOREIGN KEY (id_ucitelj) REFERENCES ucitelj (id_ucitelj)
+  CONSTRAINT fk_ocena_ucitelj FOREIGN KEY (id_ucitelj) REFERENCES ucitelj (id_ucitelj)
     ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_sl_0900_ai_ci;
 
@@ -107,8 +108,8 @@ CREATE TABLE izostanek (
   opravicen     BOOLEAN      NOT NULL DEFAULT 0,
   opomba        VARCHAR(60)  NULL,
   PRIMARY KEY (id_izostanek),
-  CHECK (ure BETWEEN 1 AND 8),
-  FOREIGN KEY (id_dijak) REFERENCES dijak (id_dijak)
+  CONSTRAINT ck_izostanek_ure CHECK (ure BETWEEN 1 AND 8),
+  CONSTRAINT fk_izostanek_dijak FOREIGN KEY (id_dijak) REFERENCES dijak (id_dijak)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_sl_0900_ai_ci;
 
