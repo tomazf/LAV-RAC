@@ -12,13 +12,13 @@ const ICONS = {
   prav: '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="19" cy="15" r="7"/><path d="M5 40a14 14 0 0 1 22-11.5"/><circle cx="36" cy="30" r="4.5"/><path d="M36 34.5V43M36 39h4"/><circle cx="19" cy="15" r="7" class="fill" opacity=".35"/></svg>',
   is: '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="11" r="5"/><circle cx="10" cy="36" r="5"/><circle cx="38" cy="36" r="5"/><path d="M21.5 15.5L12.5 31.5M26.5 15.5L35.5 31.5M15 36h18"/><circle cx="24" cy="11" r="5" class="fill" opacity=".35"/></svg>',
 };
-// Theory groups (proposed 11. 11. 2026, confirmed by the teacher 12. 11. 2026): pages in the artifact's own order, matching the task sets
-// A (1-5), B (6-9, after the merge below), C (10-14), D (15).
+// Theory groups (proposed 11. 11. 2026, confirmed by the teacher 12. 11. 2026; ACID and ROLE removed and shranjevanje added 24. 11. 2026):
+// pages in the artifact's own order, matching the task sets A (1-4), B (6-9, after the merge below), C (10-13), D (14).
 const GROUPS = [
-  { id: 'g-baza', icon: 'baza', title: 'Podatki in podatkovna baza', pages: ['uvod', 'datoteke'] },
-  { id: 'g-supb', icon: 'supb', title: 'Naloge SUPB', pages: ['supb', 'integriteta', 'transakcije'] },
+  { id: 'g-baza', icon: 'baza', title: 'Podatki in podatkovna baza', pages: ['uvod', 'datoteke', 'shranjevanje'] },
+  { id: 'g-supb', icon: 'supb', title: 'Naloge SUPB', pages: ['supb', 'integriteta'] },
   { id: 'g-arh', icon: 'arh', title: 'Zgradba baze in jeziki', pages: ['ansi', 'neodvisnost', 'relmodel', 'jeziki'] },
-  { id: 'g-prav', icon: 'prav', title: 'Uporabniki in pravice', pages: ['uporabniki', 'racuni', 'grant', 'revoke', 'vloge'] },
+  { id: 'g-prav', icon: 'prav', title: 'Uporabniki in pravice', pages: ['uporabniki', 'racuni', 'grant', 'revoke'] },
   { id: 'g-is', icon: 'is', title: 'Informacijski sistemi in povzetek', pages: ['is', 'utrjevanje'] },
 ];
 const TITLE = 'Podatkovne baze in SUPB';
@@ -82,7 +82,7 @@ function saveLocal(){ LavRac.saveUi(S); }
 function save(){ LavRac.saveUi(S); }`],
     // Task ids exist only from here on, so the shell learns the tasks here. No task needs options (no programs).
     ['T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : t.key ? t.key : "own-"+i; });',
-      `LavRac.prepare(T, LEVELS, {});
+      `LavRac.prepare(T, LEVELS, { remove: ['A12', 'A13', 'F5', 'H1', 'H2', 'H5'] });
 T.forEach((t,i)=>{ t.id = t.src ? t.src.replace("/","-") : t.key ? t.key : "own-"+i; });
 LavRac.tasks(LEVELS.flatMap(L=>T.filter(t=>t.lv===L.tag)), { level: (t) => t.pts });
 S = LavRac.loadUi();`],

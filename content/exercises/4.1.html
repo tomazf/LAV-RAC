@@ -1758,7 +1758,7 @@ html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-ti
     </div>
     <div class="crumb" id="crumb"><span class="eyebrow">Poglavje 1 · Relacijska algebra</span><span class="eyebrow" id="crumbN"></span></div>
     <header class="hero" id="hero">
-      <div class="eyebrow">Splošna matura · Računalništvo · Izpitna pola 2</div>
+      <div class="eyebrow">LAV-RAČ4 · Most do SQL</div>
       <h1>Relacijska algebra</h1>
       <p class="lead">Preden se v naslednjih poglavjih lotimo jezika SQL, spoznajmo njegovo teoretično podlago: devet operacij, s katerimi iz tabel izračunamo odgovor na skoraj vsako vprašanje. Vsaka poizvedba, ki jo bo kdaj izvedla podatkovna baza, je v resnici izraz relacijske algebre.</p>
       <div class="magic" aria-label="Teme poglavja">
@@ -1795,7 +1795,7 @@ html:not(#lr):root{--bg:var(--lr-bg);--surface:var(--lr-card);--sunk:var(--lr-ti
 <div class="prose"><p>Vsako operacijo spoznaš na svoji strani in vedno v istem vrstnem redu: <strong>1 · kaj želimo doseči</strong> (ena vrstica), <strong>2 · zapis</strong> v relacijski algebri, <strong>3 · tabela</strong> z vhodom in rezultatom ter <strong>4 · isto v SQL</strong> kot alternativa. Na koncu sta še igrišče in hitri preizkus.</p>
 <p>Vsi primeri uporabljajo <strong>isto šolsko bazo</strong> (Dijak, Predmet, Ocena, Robotika, Šah, Nagrada), zato lahko rezultate primerjaš med stranmi. Rumeno obarvane vrstice ali stolpci so tisti, ki jih operacija izbere. Vrstice z <strong>isto barvo</strong> imajo isto vrednost ključa (npr. isti ID).</p></div>
 <p class="note"><strong>Zapis:</strong> pogoj ali seznam stolpcev pišemo v oglatih oklepajih, relacijo pa v okroglih: <span class="ra">σ[Kraj='Kranj'](Dijak)</span>. V literaturi in na maturi boš srečal tudi podpisani zapis <span class="ra">σ<sub>Kraj='Kranj'</sub>(Dijak)</span> — pomen je popolnoma enak, na tej strani pa povsod uporabljamo oglate oklepaje, ker jih zahteva tudi preverjalnik nalog.</p>
-<p class="note"><strong>Matura:</strong> relacijska algebra je del vsebin izpitne pole 2. Na dosedanjih izpitih sta bili dve nalogi: prevod stavka SQL v izraz relacijske algebre (2012) in prepoznavanje operacije za filtriranje (2013, jesen). Obe najdeš med nalogami tega poglavja.</p>
+<p class="note"><strong>Matura:</strong> relacijske algebre v veljavnem katalogu (2023–2028) ni. Pomaga razumeti, kaj naredi stavek SQL, zato je most do poglavja 5. Na izpitih sta bili dve nalogi (2012 in 2013): prevod stavka SQL v izraz relacijske algebre in prepoznavanje operacije za filtriranje. Obe najdeš med nalogami tega poglavja.</p>
 </section>
 
 <section id="pojmi">
@@ -2041,10 +2041,13 @@ WHERE NOT EXISTS (
 <tr><td><span class="ra">p × r</span></td><td><code>FROM p CROSS JOIN r</code></td></tr>
 <tr><td><span class="ra">p ⋈ r</span></td><td><code>FROM p NATURAL JOIN r</code></td></tr>
 <tr><td><span class="ra">p ⋈[i Θ j] r</span></td><td><code>FROM p JOIN r ON p.i Θ r.j</code></td></tr>
-<tr><td><span class="ra">p ∪ r &nbsp;·&nbsp; p ∩ r &nbsp;·&nbsp; p − r</span></td><td><code>UNION</code> · <code>INTERSECT</code> · <code>EXCEPT</code></td></tr>
+<tr><td><span class="ra">p ∪ r</span></td><td><code>SELECT … UNION SELECT …</code></td></tr>
+<tr><td><span class="ra">p ∩ r</span></td><td><code>WHERE … IN (SELECT …)</code></td></tr>
+<tr><td><span class="ra">p − r</span></td><td><code>WHERE … NOT IN (SELECT …)</code> ali <code>LEFT JOIN … WHERE … IS NULL</code></td></tr>
 <tr><td><span class="ra">p ÷ r</span></td><td><code>NOT EXISTS</code> (dvojna negacija) ali <code>GROUP BY … HAVING COUNT</code></td></tr>
 </tbody>
 </table></div>
+<p>Več o uniji, preseku in razliki v SQL je v poglavju 5, stran <strong>Unija, presek in razlika</strong>.</p>
 <p class="note"><strong>Zakaj DISTINCT?</strong> SQL obravnava tabele kot <em>multimnožice</em> — podvojene vrstice dovoli. Relacija v algebri je množica, zato projekciji π v SQL ustreza SELECT z DISTINCT.</p>
 <div class="prose">
   <p>Prevod v obe smeri je tudi maturitetna naloga. Primer iz pole (2012): stavek <code>SELECT Ime FROM Vaja WHERE Tocke &gt; 8;</code> zapiši kot izraz relacijske algebre. Rešitev: <span class="ra">π[Ime](σ[Tocke&gt;8](Vaja))</span> — WHERE postane σ, seznam stolpcev pa π. Celotna naloga te čaka v sklopu C.</p>

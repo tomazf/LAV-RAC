@@ -36,7 +36,10 @@ const GROUPS = [
 ];
 // Every task where the student writes SQL (set letter and place in the set, as the teacher sees them in the artifact).
 const PREP = {
-  self: ['A6', 'A7', 'A8', 'A9', 'B13', 'B14', 'C1', 'C2', 'C3', 'C4', 'C5', 'C7', 'C8', 'C9', 'C11', 'D3', 'D4', 'D5', 'D6', 'D7', 'D9', 'E5', 'E6', 'E7', 'E8', 'E9', 'E10', 'E12'],
+  // E8 (EXPLAIN), B1 and B2 (copies of 4.3): removed (navodila 24. 11. 2026). The revision set H1 and H2 (copies of E1 and E3)
+  // is dropped below with its level, so that its names are not needed here.
+  remove: ['E8', 'B1', 'B2'],
+  self: ['A6', 'A7', 'A8', 'A9', 'B13', 'B14', 'C1', 'C2', 'C3', 'C4', 'C5', 'C7', 'C8', 'C9', 'C11', 'D3', 'D4', 'D5', 'D6', 'D7', 'D9', 'E5', 'E6', 'E7', 'E9', 'E10', 'E12'],
 };
 // In this artifact the blanks check is followed by the SQL one, not by the sorting, so that one replacement has its own anchor.
 const PARTIAL = partialCredit.map((p) => (p[0] === '      ok = all;\n    }\n    if(t.type==="cls"){'
@@ -117,7 +120,56 @@ const TRY_LINE = LINES.find((l) => l.startsWith('const TRY = '));
 const FMTQ_LINE = LINES.find((l) => l.startsWith('const fmtQ = '));
 const TASKS_SRC = JSON.parse(TASKS_LINE.slice('const T = '.length).replace(/;$/, ''));
 const TRY_SRC = JSON.parse(TRY_LINE.slice('const TRY = '.length).replace(/;$/, ''));
+// Changes of 24. 11. 2026 (navodila/POPRAVKI_4_LETNIK.md, 4.4): EXPLAIN out, B11 for the MySQL versions (TRUNCATE stays by the teacher's decision).
+for (let i = TASKS_SRC.length - 1; i >= 0; i--) if (TASKS_SRC[i].lv === 'H') TASKS_SRC.splice(i, 1);
+const taskQ = (start) => {
+  const t = TASKS_SRC.find((x) => typeof x.q === 'string' && x.q.startsWith(start));
+  if (!t) throw new Error('4.4: naloga ni najdena: ' + start);
+  return t;
+};
+{
+  // E9: the count of the two checks, without EXPLAIN.
+  const e9 = taskQ('V <code>t_zapis</code> ustvari indeks');
+  e9.q = 'V <code>t_zapis</code> ustvari indeks <code>idx_zapis_priimek</code> na stolpcu <code>priimek</code>. Koliko zapisov ima priimek Pavlin in koliko je vseh različnih priimkov?';
+  e9.checks = [
+    { l: 'Število zapisov s priimkom Pavlin', acc: ['1000'], num: true },
+    { l: 'Število različnih priimkov', acc: ['10'], num: true },
+  ];
+  e9.snip = "-- Število zapisov s priimkom Pavlin\nSELECT COUNT(*) FROM t_zapis WHERE priimek = 'Pavlin';\n\n-- Število različnih priimkov\nSELECT COUNT(DISTINCT priimek) FROM t_zapis;";
+  e9.why = 'Vsak od 10 priimkov nastopa 1000-krat. Indeks ne spremeni rezultata, pospeši pa iskanje po priimku.';
+
+  // B11: a classification of four statements (2 points, partial credit in qformat.js).
+  const b11 = taskQ('V MySQL izvedemo CREATE TABLE t');
+  delete b11.o;
+  delete b11.a;
+  Object.assign(b11, {
+    pts: 2,
+    type: 'cls',
+    q: 'Isti stavek <code>CREATE TABLE t (id INT PRIMARY KEY, kat INT NOT NULL REFERENCES kategorija (id));</code> izvedemo v različnih različicah MySQL. Ali v tabeli <code>t</code> nastane tuji ključ?',
+    cats: ['tuji ključ ne nastane (zapis se prezre)', 'tuji ključ nastane'],
+    items: [
+      ['MySQL 8.0', 0],
+      ['MySQL 8.4', 0],
+      ['MySQL 9.0 ali novejši', 1],
+      ['Isti tuji ključ, zapisan s CONSTRAINT … FOREIGN KEY (kat) REFERENCES kategorija (id) na koncu tabele, v kateri koli od teh različic', 1],
+    ],
+    why: 'MySQL 8.0 in 8.4 zapis pri stolpcu prezreta, MySQL 9 iz njega naredi tuji ključ. Zapis s FOREIGN KEY na koncu tabele deluje povsod. Preveriš s SHOW CREATE TABLE.',
+    h: ['Razlaga 6, točka 5.'],
+  });
+}
 for (const t of TASKS_SRC) { t.q = fixText(t.q); t.why = fixText(t.why); }
+{
+  // Poskusi sam (p13): the check of the plan (type) is replaced by counts.
+  const p13 = TRY_SRC.find((x) => x.key === 'p13');
+  p13.q = 'Uvozi <code>indeks_test.sql</code>. Naredi indeks <code>idx_zapis_mesto</code> na <code>mesto</code>. Nato preštej zapise z mestom Metlika in število različnih mest.';
+  p13.checks = [
+    { l: 'Število zapisov Metlika', acc: ['1667'], num: true },
+    { l: 'Število različnih mest', acc: ['6'], num: true },
+  ];
+  p13.snip = "-- Število zapisov Metlika\nSELECT COUNT(*) FROM t_zapis WHERE mesto = 'Metlika';\n\n-- Število različnih mest\nSELECT COUNT(DISTINCT mesto) FROM t_zapis;";
+  p13.h = ['Štetje da enak rezultat z indeksom in brez njega.'];
+  p13.why = 'Indeks ne spremeni rezultata štetja. Pospeši pa iskanje po stolpcu mesto.';
+}
 // The practice tasks on the explanation pages get their own label (they had none: "undefined. naloga").
 for (const t of TRY_SRC) { t.q = fixText(t.q); t.why = fixText(t.why); t.tryLabel = 'Naloga ' + t.key.slice(1); }
 
@@ -183,8 +235,8 @@ export default {
     [OLD_FILES_JS, FILES_JS + '\n'],
     // The revision set (artifact id "doma", which is also the id of the Za doma section) is "Ponavljanje" and gets its
     // own id; the shell lettering puts it after the sets A–E, and Za doma takes the next letter.
-    ['{"id": "doma", "tag": "H", "title": "Maturitetne naloge za ponavljanje", "note": "Naloge iz prejšnjih let za utrjevanje; štejejo k točkam.", "home": true}',
-      '{"id": "doma-mat", "tag": "H", "title": "Ponavljanje", "note": "Maturitetne naloge iz prejšnjih let za utrjevanje; štejejo k točkam.", "home": true}'],
+    // The revision level (artifact tag H) is removed; its two tasks are removed with "remove" above (navodila 4.4, point 4).
+    [', {"id": "doma", "tag": "H", "title": "Maturitetne naloge za ponavljanje", "note": "Naloge iz prejšnjih let za utrjevanje; štejejo k točkam.", "home": true}]', ']'],
     // The tasks that write SQL are »Sam preveri«: no inputs for the control results, the results are shown to compare with.
     ['    body += `<div class="chk"><div class="lbl">Kontrolni rezultat</div>` + t.checks.map((b,k)=>`<div class="blank"><label for="b-${t.id}-${k}">${esc(b.l)}</label><input type="text" id="b-${t.id}-${k}" class="mono" autocomplete="off" spellcheck="false" autocapitalize="off"></div>`).join("") + `</div>`;',
       '    if(!t.self) body += `<div class="chk"><div class="lbl">Kontrolni rezultat</div>` + t.checks.map((b,k)=>`<div class="blank"><label for="b-${t.id}-${k}">${esc(b.l)}</label><input type="text" id="b-${t.id}-${k}" class="mono" autocomplete="off" spellcheck="false" autocapitalize="off"></div>`).join("") + `</div>`;\n    else body += `<div class="lr-tests"><b>Pravilni kontrolni rezultati za preverjanje</b><ul>` + t.checks.map(b=>`<li>${esc(b.l)}: <code>${esc(b.acc[0])}</code></li>`).join("") + `</ul></div>`;'],

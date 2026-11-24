@@ -8154,10 +8154,10 @@
    "module": "LAV-RAČ4",
    "title": "Podatkovne baze in SUPB",
    "fullTitle": "Podatkovne baze in SUPB",
-   "key": "scnm_lavrac_4_2_v1",
-   "version": 1,
+   "key": "scnm_lavrac_4_2_v2",
+   "version": 2,
    "format": "short",
-   "maxPoints": 113,
+   "maxPoints": 108,
    "tasks": [
     {
      "i": 0,
@@ -8241,315 +8241,315 @@
      "level": "srednja",
      "max": 2,
      "section": "Podatki, podatkovna baza in SUPB",
-     "q": "Razvrsti opise k lastnostim transakcij (ACID)."
+     "q": "Katera je slabost podatkovne baze v primerjavi z eno samo datoteko?"
     },
     {
      "i": 12,
-     "level": "lažja",
-     "max": 1,
+     "level": "srednja",
+     "max": 2,
      "section": "Podatki, podatkovna baza in SUPB",
-     "q": "Kateri stavek prekliče vse spremembe v trenutni transakciji?"
+     "q": "Razvrsti način organizacije zapisov k opisu."
     },
     {
      "i": 13,
+     "level": "lažja",
+     "max": 1,
+     "section": "Podatki, podatkovna baza in SUPB",
+     "q": "Podatkovna baza je shranjena pri ponudniku storitve, do nje dostopamo prek interneta. Kako imenujemo ta način shranjevanja?"
+    },
+    {
+     "i": 14,
      "level": "težja",
      "max": 3,
      "section": "Zgradba baze in jeziki",
      "q": "Naštejte vse tri nivoje ANSI/SPARC arhitekture podatkovne baze."
     },
     {
-     "i": 14,
+     "i": 15,
      "level": "srednja",
      "max": 2,
      "section": "Zgradba baze in jeziki",
      "q": "Pri podatkovnih bazah govorimo o trinivojski arhitekturi. Namen je ločiti načine fizičnega shranjevanja podatkov od načinov modeliranja okolja in le-te od upora"
     },
     {
-     "i": 15,
+     "i": 16,
      "level": "težja",
      "max": 3,
      "section": "Zgradba baze in jeziki",
      "q": "Povežite vsak nivo ANSI/SPARC arhitekture podatkovne baze z ustreznimi opisi, ki za povezani nivo veljajo. Vsakemu nivoju pripadata natanko dva ustrezna opisa."
     },
     {
-     "i": 16,
+     "i": 17,
      "level": "lažja",
      "max": 1,
      "section": "Zgradba baze in jeziki",
      "q": "Kaj določa fizični sloj v arhitekturi ANSI/SPARC podatkovne baze?"
     },
     {
-     "i": 17,
+     "i": 18,
      "level": "srednja",
      "max": 2,
      "section": "Zgradba baze in jeziki",
      "q": "ANSI/SPARC-arhitektura podatkovne baze opredeljuje, da je podatkovna baza opisana na treh nivojih: notranjem, konceptualnem in zunanjem. Dopolni število shem na"
     },
     {
-     "i": 18,
+     "i": 19,
      "level": "srednja",
      "max": 2,
      "section": "Zgradba baze in jeziki",
      "q": "Z besedama DA ali NE odgovorite na spodnji vprašanji."
     },
     {
-     "i": 19,
+     "i": 20,
      "level": "lažja",
      "max": 1,
      "section": "Zgradba baze in jeziki",
      "q": "ANSI/SPARC-arhitektura podatkovne baze opredeljuje, da je podatkovna baza (PB) opisana na treh nivojih: notranjem, konceptualnem in zunanjem. Kateri nivo je odv"
     },
     {
-     "i": 20,
+     "i": 21,
      "level": "srednja",
      "max": 2,
      "section": "Zgradba baze in jeziki",
      "q": "ANSI/SPARC-arhitektura podatkovne baze opredeljuje, da je podatkovna baza opisana na treh nivojih: notranjem, konceptualnem in zunanjem. Dopolni povedi."
     },
     {
-     "i": 21,
+     "i": 22,
      "level": "lažja",
      "max": 1,
      "section": "Zgradba baze in jeziki",
      "q": "V tabelo Dijak dodamo stolpec Email. Pogled tajništva in tajniška aplikacija delujeta naprej brez sprememb. To je …"
     },
     {
-     "i": 22,
+     "i": 23,
      "level": "srednja",
      "max": 2,
      "section": "Zgradba baze in jeziki",
      "q": "Na kateri nivo arhitekture ANSI/SPARC spada?"
     },
     {
-     "i": 23,
+     "i": 24,
      "level": "srednja",
      "max": 2,
      "section": "Zgradba baze in jeziki",
      "q": "S katerim stavkom SQL spremenimo strukturo podatkov v podatkovni bazi?"
     },
     {
-     "i": 24,
+     "i": 25,
      "level": "srednja",
      "max": 2,
      "section": "Zgradba baze in jeziki",
      "q": "Katera stavka SQL spreminjata metapodatke podatkovne baze?"
     },
     {
-     "i": 25,
+     "i": 26,
      "level": "srednja",
      "max": 2,
      "section": "Zgradba baze in jeziki",
      "q": "Katera stavka SQL spadata v skupino stavkov SQL DML?"
     },
     {
-     "i": 26,
+     "i": 27,
      "level": "srednja",
      "max": 2,
      "section": "Zgradba baze in jeziki",
      "q": "Razvrsti stavke v skupine."
     },
     {
-     "i": 27,
+     "i": 28,
      "level": "srednja",
      "max": 2,
      "section": "Zgradba baze in jeziki",
      "q": "Dana je relacijska shema Izdelek(IzdelekID:N, Naziv:A30, Cena:R, Opomba°:A100). Dopolni."
     },
     {
-     "i": 28,
+     "i": 29,
      "level": "lažja",
      "max": 1,
      "section": "Zgradba baze in jeziki",
      "q": "Kaj pomeni zapis PID:A1→Predmet v shemi Ocena?"
     },
     {
-     "i": 29,
+     "i": 30,
      "level": "lažja",
      "max": 1,
      "section": "Zgradba baze in jeziki",
      "q": "Kaj se zgodi s stavkom DROP TABLE Ocena?"
     },
     {
-     "i": 30,
+     "i": 31,
      "level": "srednja",
      "max": 2,
      "section": "Uporabniki in pravice",
      "q": "Skrbnik podatkovne baze (administrator) skrbi za"
     },
     {
-     "i": 31,
+     "i": 32,
      "level": "lažja",
      "max": 1,
      "section": "Uporabniki in pravice",
      "q": "Skrb za izdelavo arhivskih kopij podatkovne baze (PB) je naloga"
     },
     {
-     "i": 32,
+     "i": 33,
      "level": "srednja",
      "max": 2,
      "section": "Uporabniki in pravice",
      "q": "Kateri izmed naštetih sta nalogi skrbnika podatkovne baze?"
     },
     {
-     "i": 33,
+     "i": 34,
      "level": "srednja",
      "max": 2,
      "section": "Uporabniki in pravice",
      "q": "Kateri sta značilni opravili, ki ju izvaja administrator oz. skrbnik podatkovnega strežnika?"
     },
     {
-     "i": 34,
+     "i": 35,
      "level": "srednja",
      "max": 2,
      "section": "Uporabniki in pravice",
      "q": "Obkrožite črki pred resničnima trditvama."
     },
     {
-     "i": 35,
+     "i": 36,
      "level": "srednja",
      "max": 2,
      "section": "Uporabniki in pravice",
      "q": "Povežite skupine uporabnikov SUPB in njihove tipične naloge."
     },
     {
-     "i": 36,
+     "i": 37,
      "level": "lažja",
      "max": 1,
      "section": "Uporabniki in pravice",
      "q": "Kateri stavek SQL je namenjen dodeljevanju uporabniških pravic za delo s podatki?"
     },
     {
-     "i": 37,
+     "i": 38,
      "level": "lažja",
      "max": 1,
      "section": "Uporabniki in pravice",
      "q": "Skrbnik je izvedel CREATE USER 'ana'@'localhost' IDENTIFIED BY 'Ana123!'; Kaj lahko ana zdaj naredi v bazi sola?"
     },
     {
-     "i": 38,
+     "i": 39,
      "level": "srednja",
      "max": 2,
      "section": "Uporabniki in pravice",
      "q": "SHOW GRANTS FOR 'profesor'@'%' izpiše vrstico GRANT SELECT, INSERT ON `sola`.`Ocena` TO `profesor`@`%`. Kaj profesor sme? Izberi vse pravilne odgovore."
     },
     {
-     "i": 39,
+     "i": 40,
      "level": "srednja",
      "max": 2,
      "section": "Uporabniki in pravice",
      "q": "Kateri stavek uporabiš?"
     },
     {
-     "i": 40,
+     "i": 41,
      "level": "lažja",
      "max": 1,
      "section": "Informacijski sistemi",
      "q": "Elektronska redovalnica je primer"
     },
     {
-     "i": 41,
+     "i": 42,
      "level": "srednja",
      "max": 2,
      "section": "Informacijski sistemi",
      "q": "Kateri izmed naštetih lastnosti lahko opredelimo kot lastnost transakcijskega informacijskega sistema (TIS)?"
     },
     {
-     "i": 42,
+     "i": 43,
      "level": "srednja",
      "max": 2,
      "section": "Informacijski sistemi",
      "q": "Obkrožite črko R, če je trditev resnična, oziroma N, če je neresnična. Za transakcijske informacijske sisteme je značilno:"
     },
     {
-     "i": 43,
+     "i": 44,
      "level": "lažja",
      "max": 1,
      "section": "Informacijski sistemi",
      "q": "Katera od navedenih značilnosti velja za transakcijske informacijske sisteme?"
     },
     {
-     "i": 44,
+     "i": 45,
      "level": "srednja",
      "max": 2,
      "section": "Informacijski sistemi",
      "q": "Obkrožite dve značilnosti transakcijskega informacijskega sistema."
     },
     {
-     "i": 45,
+     "i": 46,
      "level": "srednja",
      "max": 2,
      "section": "Informacijski sistemi",
      "q": "Pred vsako trditvijo obkrožite R, če je trditev resnična, in N, če je trditev neresnična."
     },
     {
-     "i": 46,
+     "i": 47,
      "level": "srednja",
      "max": 2,
      "section": "Informacijski sistemi",
      "q": "Transakcijski informacijski sistem (TIS) je programska oprema, ki omogoča izvajanje in upravljanje poslovnih transakcij v računalniškem okolju. Kateri od naštet"
     },
     {
-     "i": 47,
+     "i": 48,
      "level": "lažja",
      "max": 1,
      "section": "Informacijski sistemi",
      "q": "Informacijski sistem (IS), katerega namen je pomoč uporabnikom pri nakupu novega izdelka, sodi"
     },
     {
-     "i": 48,
+     "i": 49,
      "level": "težja",
      "max": 3,
      "section": "Informacijski sistemi",
      "q": "Povežite vrsto informacijskega sistema s pravilnim opisom ali lastnostjo tega sistema."
     },
     {
-     "i": 49,
+     "i": 50,
      "level": "težja",
      "max": 3,
      "section": "Informacijski sistemi",
      "q": "Povežite tip informacijskega sistema z njegovo pomembno značilnostjo."
     },
     {
-     "i": 50,
+     "i": 51,
      "level": "srednja",
      "max": 2,
      "section": "Informacijski sistemi",
      "q": "Kaj je značilno za transakcijske informacijske sisteme? Izberi štiri lastnosti. (V izvirniku jih je treba našteti.)"
     },
     {
-     "i": 51,
+     "i": 52,
      "level": "srednja",
      "max": 2,
      "section": "Zapiši stavke SQL",
      "q": "Zapiši stavek, ki ustvari uporabnika ravnatelj, ki se prijavlja z lokalnega računalnika (localhost), z geslom Ravn4telj!."
     },
     {
-     "i": 52,
+     "i": 53,
      "level": "srednja",
      "max": 2,
      "section": "Zapiši stavke SQL",
      "q": "Uporabniku 'ravnatelj'@'localhost' dodeli pravico branja vseh tabel v bazi sola."
     },
     {
-     "i": 53,
+     "i": 54,
      "level": "srednja",
      "max": 2,
      "section": "Zapiši stavke SQL",
      "q": "Uporabniku 'profesor'@'%' dodeli pravice branja, vnašanja in popravljanja v tabeli Ocena baze sola."
     },
     {
-     "i": 54,
+     "i": 55,
      "level": "srednja",
      "max": 2,
      "section": "Zapiši stavke SQL",
      "q": "Uporabniku 'profesor'@'%' odvzemi pravico brisanja v tabeli Ocena baze sola."
-    },
-    {
-     "i": 55,
-     "level": "težja",
-     "max": 3,
-     "section": "Zapiši stavke SQL",
-     "q": "Ustvari vlogo ucitelj, ji dodeli pravico branja vseh tabel baze sola in vanjo dodaj uporabnika 'profesor'@'%'."
     },
     {
      "i": 56,
@@ -8570,35 +8570,14 @@
      "level": "srednja",
      "max": 2,
      "section": "Ponavljanje",
-     "q": "Pri podatkovnih bazah govorimo o trinivojski arhitekturi. Namen je ločiti načine fizičnega shranjevanja podatkov od načinov modeliranja okolja in le-te od upora"
-    },
-    {
-     "i": 59,
-     "level": "lažja",
-     "max": 1,
-     "section": "Ponavljanje",
-     "q": "Kaj določa fizični sloj v arhitekturi ANSI/SPARC podatkovne baze?"
-    },
-    {
-     "i": 60,
-     "level": "srednja",
-     "max": 2,
-     "section": "Ponavljanje",
      "q": "Katere trditve o SUPB so resnične? Izberi vse pravilne odgovore."
     },
     {
-     "i": 61,
+     "i": 59,
      "level": "srednja",
      "max": 2,
      "section": "Ponavljanje",
      "q": "Kdo opravi nalogo?"
-    },
-    {
-     "i": 62,
-     "level": "lažja",
-     "max": 1,
-     "section": "Ponavljanje",
-     "q": "Bančna aplikacija odšteje denar z enega računa, pred prištevanjem na drug račun pa zmanjka elektrike. Katera lastnost transakcije poskrbi, da denar ne izgine?"
     }
    ],
    "pages": [
@@ -8618,6 +8597,11 @@
      "label": "Od datotek do PB"
     },
     {
+     "id": "shranjevanje",
+     "chapter": "Teorija",
+     "label": "Shranjevanje in organizacija podatkov"
+    },
+    {
      "id": "supb",
      "chapter": "Teorija",
      "label": "SUPB"
@@ -8626,11 +8610,6 @@
      "id": "integriteta",
      "chapter": "Teorija",
      "label": "Integriteta"
-    },
-    {
-     "id": "transakcije",
-     "chapter": "Teorija",
-     "label": "Transakcije (ACID)"
     },
     {
      "id": "ansi",
@@ -8671,11 +8650,6 @@
      "id": "revoke",
      "chapter": "Teorija",
      "label": "Odvzem: REVOKE"
-    },
-    {
-     "id": "vloge",
-     "chapter": "Teorija",
-     "label": "Vloge: ROLE"
     },
     {
      "id": "is",
@@ -8726,9 +8700,9 @@
    "gate": [
     "uvod",
     "datoteke",
+    "shranjevanje",
     "supb",
     "integriteta",
-    "transakcije",
     "ansi",
     "neodvisnost",
     "relmodel",
@@ -8737,7 +8711,6 @@
     "racuni",
     "grant",
     "revoke",
-    "vloge",
     "is",
     "utrjevanje"
    ]
@@ -9279,10 +9252,10 @@
    "module": "LAV-RAČ4",
    "title": "SQL DDL in integritetne omejitve",
    "fullTitle": "SQL DDL in integritetne omejitve",
-   "key": "scnm_lavrac_4_4_v1",
-   "version": 1,
+   "key": "scnm_lavrac_4_4_v2",
+   "version": 2,
    "format": "short",
-   "maxPoints": 49,
+   "maxPoints": 44,
    "tasks": [
     {
      "i": 0,
@@ -9353,90 +9326,76 @@
     },
     {
      "i": 9,
-     "level": "srednja",
-     "max": 2,
-     "section": "Ključi in referenčna integriteta",
-     "q": "Obvezna značilnost primarnega ključa tabele je, da"
-    },
-    {
-     "i": 10,
-     "level": "srednja",
-     "max": 2,
-     "section": "Ključi in referenčna integriteta",
-     "q": "Obkrožite črki pred resničnima trditvama. Primarni ključ tabele"
-    },
-    {
-     "i": 11,
      "level": "lažja",
      "max": 1,
      "section": "Ključi in referenčna integriteta",
      "q": "Kateri stavek SQL ustvari tabelo Tab(A:N, B:N, C:N), kjer sta A in B skupaj primarni ključ?"
     },
     {
-     "i": 12,
+     "i": 10,
      "level": "srednja",
      "max": 2,
      "section": "Ključi in referenčna integriteta",
      "q": "Kateri dve od danih trditev veljata za dobro načrtovane relacijske podatkovne baze?"
     },
     {
-     "i": 13,
+     "i": 11,
      "level": "srednja",
      "max": 2,
      "section": "Ključi in referenčna integriteta",
      "q": "Kateri trditvi sta resnični za tuji ključ tabele?"
     },
     {
-     "i": 14,
+     "i": 12,
      "level": "srednja",
      "max": 2,
      "section": "Ključi in referenčna integriteta",
      "q": "Relacijska shema opisuje podatke o strankah in njihovih osebnih svetovalcih v banki. Stranka(IDStranke:N, ime:A20, IDSvetovalca:N->Svetovalec) Svetovalec(IDSvet"
     },
     {
+     "i": 13,
+     "level": "težja",
+     "max": 3,
+     "section": "Ključi in referenčna integriteta",
+     "q": "Tabela Ponudba je ustvarjena s stavkom <code>CREATE TABLE Ponudba(PonudbaID int not null primary key, Vsebina varchar(10) not null, Opis varchar(200), Kategorij"
+    },
+    {
+     "i": 14,
+     "level": "težja",
+     "max": 3,
+     "section": "Ključi in referenčna integriteta",
+     "q": "Tabela Ponudba je ustvarjena s stavkom <code>CREATE TABLE Ponudba(PonudbaID int not null primary key, Vsebina varchar(10) not null, Opis varchar(200), Kategorij"
+    },
+    {
      "i": 15,
-     "level": "težja",
-     "max": 3,
-     "section": "Ključi in referenčna integriteta",
-     "q": "Tabela Ponudba je ustvarjena s stavkom <code>CREATE TABLE Ponudba(PonudbaID int not null primary key, Vsebina varchar(10) not null, Opis varchar(200), Kategorij"
-    },
-    {
-     "i": 16,
-     "level": "težja",
-     "max": 3,
-     "section": "Ključi in referenčna integriteta",
-     "q": "Tabela Ponudba je ustvarjena s stavkom <code>CREATE TABLE Ponudba(PonudbaID int not null primary key, Vsebina varchar(10) not null, Opis varchar(200), Kategorij"
-    },
-    {
-     "i": 17,
      "level": "srednja",
      "max": 2,
      "section": "Ključi in referenčna integriteta",
      "q": "Dopolni zapis tujega ključa v tabeli ocena (ocena pripada dijaku; ko izbrišemo dijaka, se izbrišejo tudi njegove ocene): CONSTRAINT fk_ocena_dijak [1] (id_dijak"
     },
     {
-     "i": 18,
+     "i": 16,
      "level": "srednja",
      "max": 2,
      "section": "Ključi in referenčna integriteta",
      "q": "Za vsak tuji ključ izberi najprimernejše pravilo ob brisanju starša."
     },
     {
-     "i": 19,
-     "level": "lažja",
-     "max": 1,
+     "i": 17,
+     "level": "srednja",
+     "max": 2,
      "section": "Ključi in referenčna integriteta",
-     "q": "V MySQL izvedemo <code>CREATE TABLE t (id INT PRIMARY KEY, kat INT NOT NULL REFERENCES kategorija (id))</code>. Kaj se zgodi s tujim ključem?"
+     "q": "Isti stavek <code>CREATE TABLE t (id INT PRIMARY KEY, kat INT NOT NULL REFERENCES kategorija (id));</code> izvedemo v različnih različicah MySQL. Ali v tabeli <"
     },
     {
-     "i": 20,
+     "i": 18,
      "level": "srednja",
      "max": 2,
      "section": "Ključi in referenčna integriteta",
      "q": "V kakšnem vrstnem redu ustvariš tabele ocena, oddelek, dijak, ucitelj (oddelek ima razrednika, dijak oddelek, ocena dijaka in učitelja)? Zapiši imena z vejicami"
     },
     {
-     "i": 21,
+     "i": 19,
      "level": "srednja",
      "max": 0,
      "self": true,
@@ -9444,7 +9403,7 @@
      "q": "Ustvari tabeli <code>t_oddelek</code> (<code>id_oddelek INT</code> PK, <code>oznaka CHAR(2)</code> obvezna) in <code>t_dijak</code> (<code>id_dijak INT</code> P"
     },
     {
-     "i": 22,
+     "i": 20,
      "level": "srednja",
      "max": 0,
      "self": true,
@@ -9452,7 +9411,7 @@
      "q": "Ustvari <code>t_razred</code> (<code>id_razred INT</code> PK, <code>ime VARCHAR(10)</code>) in <code>t_ucenec</code> (<code>id_ucenec INT</code> PK, <code>id_ra"
     },
     {
-     "i": 23,
+     "i": 21,
      "level": "težja",
      "max": 0,
      "self": true,
@@ -9460,7 +9419,7 @@
      "q": "Ustvari tabelo <code>t_predmet</code>: <code>id_predmet</code> celo število, primarni ključ; <code>kratica</code> do 5 znakov, obvezna in enolična; <code>ime_pr"
     },
     {
-     "i": 24,
+     "i": 22,
      "level": "težja",
      "max": 0,
      "self": true,
@@ -9468,7 +9427,7 @@
      "q": "Ustvari <code>t_vpis</code> za razmerje n:m: dijak se vpiše v več krožkov, krožek ima več dijakov. Stolpca <code>id_dijak</code> in <code>id_krozek</code> sta s"
     },
     {
-     "i": 25,
+     "i": 23,
      "level": "težja",
      "max": 0,
      "self": true,
@@ -9476,7 +9435,7 @@
      "q": "Ustvari <code>t_ucitelj</code> (<code>id_ucitelj</code> PK, <code>priimek</code> obvezen) in <code>t_oddelek2</code> (<code>id_oddelek</code> PK, <code>oznaka C"
     },
     {
-     "i": 26,
+     "i": 24,
      "level": "težja",
      "max": 0,
      "self": true,
@@ -9484,7 +9443,7 @@
      "q": "Ustvari <code>t_ocena2</code>: <code>id_ocena</code> samodejno številčen ključ, <code>ocena</code> celo število od 1 do 5 (<code>CONSTRAINT ck_tocena_ocena</cod"
     },
     {
-     "i": 27,
+     "i": 25,
      "level": "srednja",
      "max": 0,
      "self": true,
@@ -9492,14 +9451,14 @@
      "q": "Ustvari <code>t_izostanek2</code>: <code>id_izostanek</code> samodejno številčen ključ, <code>ure</code> majhno celo število 1 do 8, <code>opravicen</code> logi"
     },
     {
-     "i": 28,
+     "i": 26,
      "level": "srednja",
      "max": 2,
      "section": "Piši stavke DDL",
      "q": "Dopolni stavek, ki ustvari tabelo predmet. <code>CREATE TABLE predmet ( id_predmet INT NOT NULL [1], kratica VARCHAR(5) NOT NULL [2], ur_tedensko TINYINT NOT NU"
     },
     {
-     "i": 29,
+     "i": 27,
      "level": "težja",
      "max": 0,
      "self": true,
@@ -9507,7 +9466,7 @@
      "q": "Pretvori relacijsko shemo v MySQL: <code>Knjiga(ISBN:A13, Naslov:A60, Leto:N, Cena:R)</code> in <code>Izposoja(IzposojaID:N, ISBN:A13→Knjiga, Datum:D, DatumVrni"
     },
     {
-     "i": 30,
+     "i": 28,
      "level": "težja",
      "max": 0,
      "self": true,
@@ -9515,7 +9474,7 @@
      "q": "Razmerje 1:1: vsak uporabnik ima največ en profil. Ustvari <code>t_uporabnik</code> (<code>id_uporabnik</code> PK, <code>ime</code> obvezno) in <code>t_profil</"
     },
     {
-     "i": 31,
+     "i": 29,
      "level": "srednja",
      "max": 0,
      "self": true,
@@ -9523,14 +9482,14 @@
      "q": "Ustvari <code>t_urnik</code>: <code>id_urnik</code> PK (samodejen), <code>dan</code> TINYINT (1–5), <code>ura</code> TINYINT, <code>id_ucilnica</code> INT, vse "
     },
     {
-     "i": 32,
+     "i": 30,
      "level": "srednja",
      "max": 2,
      "section": "Piši stavke DDL",
      "q": "Katera shema pravilno opisuje CREATE TABLE za tabelo oddelek(id_oddelek PK, oznaka obvezna enolična, id_razrednik neobvezen tuji ključ na ucitelj, ob brisanju u"
     },
     {
-     "i": 33,
+     "i": 31,
      "level": "težja",
      "max": 0,
      "self": true,
@@ -9538,21 +9497,21 @@
      "q": "Po razlagi 9 imaš v svoji shemi tabele <code>dijak</code>, <code>predmet</code> in <code>ucitelj</code>. Ustvari <code>t_ocena3</code> kot <code>ocena</code> iz"
     },
     {
-     "i": 34,
+     "i": 32,
      "level": "težja",
      "max": 3,
      "section": "Preizkus: napake in posledice",
      "q": "Napovej kodo napake za vsak stavek nad šolsko bazo z začetnimi podatki (razlaga 9). Nato jih izvedi in preveri. (a) <code>INSERT INTO kraj VALUES (1, '9000', 'T"
     },
     {
-     "i": 35,
+     "i": 33,
      "level": "srednja",
      "max": 2,
      "section": "Preizkus: napake in posledice",
      "q": "Poveži kodo napake z vzrokom."
     },
     {
-     "i": 36,
+     "i": 34,
      "level": "srednja",
      "max": 0,
      "self": true,
@@ -9560,7 +9519,7 @@
      "q": "V šolski bazi (z začetnimi podatki) izbriši oddelek 8 (4B), v katerem so dijaki. Katero kodo napake dobiš in koliko dijakov je po poskusu v tabeli <code>dijak</"
     },
     {
-     "i": 37,
+     "i": 35,
      "level": "srednja",
      "max": 0,
      "self": true,
@@ -9568,7 +9527,7 @@
      "q": "V šolski bazi (z začetnimi podatki) izbriši dijaka z <code>id_dijak = 1</code> (Ana). Koliko vrstic je potem v tabelah <code>ocena</code> in <code>izostanek</co"
     },
     {
-     "i": 38,
+     "i": 36,
      "level": "srednja",
      "max": 0,
      "self": true,
@@ -9576,7 +9535,7 @@
      "q": "V šolski bazi izbriši učitelja <code>id_ucitelj = 14</code> (razrednik oddelka 4A in učitelj z ocenami). Katero kodo napake dobiš in v katerem pravilu je vzrok "
     },
     {
-     "i": 39,
+     "i": 37,
      "level": "srednja",
      "max": 0,
      "self": true,
@@ -9584,7 +9543,7 @@
      "q": "V šolski bazi spremeni ključ kraja Ljubljana: <code>UPDATE kraj SET id_kraj = 20 WHERE id_kraj = 2;</code>. Koliko dijakov ima po tem <code>id_kraj = 20</code>?"
     },
     {
-     "i": 40,
+     "i": 38,
      "level": "srednja",
      "max": 0,
      "self": true,
@@ -9592,14 +9551,14 @@
      "q": "V šolski bazi poskusi <code>UPDATE oddelek SET id_oddelek = 70 WHERE id_oddelek = 7;</code>. Zakaj javi napako, čeprav ima dijak pravilo ON UPDATE CASCADE? Vpiš"
     },
     {
-     "i": 41,
+     "i": 39,
      "level": "lažja",
      "max": 1,
      "section": "Preizkus: napake in posledice",
      "q": "Sporočilo: Cannot delete or update a parent row: a foreign key constraint fails (`moja`.`ocena`, CONSTRAINT `fk_ocena_predmet` FOREIGN KEY (`id_predmet`) REFERE"
     },
     {
-     "i": 42,
+     "i": 40,
      "level": "srednja",
      "max": 0,
      "self": true,
@@ -9607,35 +9566,35 @@
      "q": "V šolski bazi izvedi spodnjih pet stavkov vsakega posebej in preštej, koliko jih uspe (brez napake).<br>(1) <code>INSERT INTO kraj VALUES (5,'8210','Trebnje');<"
     },
     {
-     "i": 43,
+     "i": 41,
      "level": "lažja",
      "max": 1,
      "section": "ALTER, DROP, indeksi, dokumentacija",
      "q": "S katerim stavkom SQL izbrišemo tabelo iz podatkovne baze?"
     },
     {
-     "i": 44,
+     "i": 42,
      "level": "srednja",
      "max": 2,
      "section": "ALTER, DROP, indeksi, dokumentacija",
      "q": "Da bi pospešili operacijo iskanja podatkov v podatkovni bazi po vrednosti določenega atributa, se"
     },
     {
-     "i": 45,
+     "i": 43,
      "level": "lažja",
      "max": 1,
      "section": "ALTER, DROP, indeksi, dokumentacija",
      "q": "Pri dodajanju in brisanju zapisov iz podatkovne baze posodabljanje vsebine indeksov izvaja"
     },
     {
-     "i": 46,
+     "i": 44,
      "level": "srednja",
      "max": 2,
      "section": "ALTER, DROP, indeksi, dokumentacija",
      "q": "Razvrsti trditve: kateri stavek velja?"
     },
     {
-     "i": 47,
+     "i": 45,
      "level": "težja",
      "max": 0,
      "self": true,
@@ -9643,7 +9602,7 @@
      "q": "Tabela <code>t_ucenec</code> ima stolpca <code>id</code> in <code>ime VARCHAR(20)</code> ter tri vrstice. Dodaj stolpec <code>telefon VARCHAR(15)</code> (neobve"
     },
     {
-     "i": 48,
+     "i": 46,
      "level": "težja",
      "max": 0,
      "self": true,
@@ -9651,7 +9610,7 @@
      "q": "V <code>t_ucenec</code> (iz prejšnje naloge) dodaj stolpec <code>oddelek CHAR(2)</code> in vsem vpiši <code>'4A'</code>. Ustvari prazno <code>t_oddelek (id_odde"
     },
     {
-     "i": 49,
+     "i": 47,
      "level": "srednja",
      "max": 0,
      "self": true,
@@ -9659,23 +9618,15 @@
      "q": "Ustvari <code>t_a (id INT PK)</code>, <code>t_b (id INT PK, id_a INT NOT NULL, FK → t_a)</code> in <code>t_c (id INT PK, id_b INT NOT NULL, FK → t_b)</code>. Po"
     },
     {
-     "i": 50,
+     "i": 48,
      "level": "srednja",
      "max": 0,
      "self": true,
      "section": "ALTER, DROP, indeksi, dokumentacija",
-     "q": "Uvozi <code>indeks_test.sql</code> (razlaga 13). Izvedi <code>EXPLAIN SELECT * FROM t_zapis WHERE koda = 'K004711';</code> pred in po <code>CREATE INDEX idx_zap"
+     "q": "V <code>t_zapis</code> ustvari indeks <code>idx_zapis_priimek</code> na stolpcu <code>priimek</code>. Koliko zapisov ima priimek Pavlin in koliko je vseh različ"
     },
     {
-     "i": 51,
-     "level": "srednja",
-     "max": 0,
-     "self": true,
-     "section": "ALTER, DROP, indeksi, dokumentacija",
-     "q": "V <code>t_zapis</code> ustvari indeks <code>idx_zapis_priimek</code> na stolpcu <code>priimek</code>. Koliko zapisov ima priimek Pavlin, koliko je vseh različni"
-    },
-    {
-     "i": 52,
+     "i": 49,
      "level": "srednja",
      "max": 0,
      "self": true,
@@ -9683,33 +9634,19 @@
      "q": "Po razlagi 9 imaš zgrajeno šolsko bazo. S poizvedbo na <code>information_schema</code> preštej: (a) tuje ključe v shemi, (b) omejitve CHECK v shemi in (c) tuje "
     },
     {
-     "i": 53,
+     "i": 50,
      "level": "lažja",
      "max": 1,
      "section": "ALTER, DROP, indeksi, dokumentacija",
      "q": "Kateri ukaz izpiše, kako je tabela ustvarjena (z vsemi ključi in pravili)?"
     },
     {
-     "i": 54,
+     "i": 51,
      "level": "srednja",
      "max": 0,
      "self": true,
      "section": "ALTER, DROP, indeksi, dokumentacija",
      "q": "Ustvari <code>t_stevec (id INT AUTO_INCREMENT PK, x INT)</code>, vstavi tri vrstice, izvedi <code>TRUNCATE TABLE t_stevec;</code> in vstavi novo. Kolikšen je <c"
-    },
-    {
-     "i": 55,
-     "level": "lažja",
-     "max": 1,
-     "section": "Ponavljanje",
-     "q": "S katerim stavkom izbrišemo tabelo iz podatkovne baze?"
-    },
-    {
-     "i": 56,
-     "level": "lažja",
-     "max": 1,
-     "section": "Ponavljanje",
-     "q": "Pri dodajanju in brisanju zapisov iz podatkovne baze posodabljanje vsebine indeksov izvaja"
     }
    ],
    "pages": [
@@ -9819,14 +9756,9 @@
      "label": "Vaje E · ALTER, DROP, indeksi, dokumentacija"
     },
     {
-     "id": "doma-mat",
-     "chapter": "Naloge",
-     "label": "Vaje F · Ponavljanje"
-    },
-    {
      "id": "doma",
      "chapter": "Naloge",
-     "label": "Vaje G · Za doma"
+     "label": "Vaje F · Za doma"
     }
    ],
    "gate": [
