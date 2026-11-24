@@ -4,6 +4,7 @@ import { byId, inYear, pastYear, renderExercise, yearOf } from '../catalog.js';
 import { csrfValid, requireAccess } from '../auth.js';
 import { many, one, tx } from '../db.js';
 import { merge, summarize, recordReset } from '../progress.js';
+import { moveProgress } from '../taskmap.js';
 
 export const exerciseRouter = express.Router();
 
@@ -42,6 +43,10 @@ async function openAttempt(user, ex) {
     );
     const p = (await c.query('SELECT * FROM progress WHERE user_id=$1 AND exercise_id=$2 FOR UPDATE', [user.id, ex.id])).rows[0];
     if (p.content_version === ex.version) return withSeed(c, user, ex, p);
+    // The answers of the tasks the new version still has move to their new places (src/taskmap.js). Exercises with variants,
+    // and versions that were never recorded, start afresh as before.
+    const moved = ex.hasVariants ? null : await moveProgress(c, user, ex, p);
+    if (moved) return moved;
     if (p.done_count > 0) {
       await recordReset(c, { userId: user.id, exId: ex.id, attempt: p.attempt, score: Number(p.score), done: p.done_count, reason: 'version' });
     }

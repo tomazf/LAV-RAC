@@ -8,7 +8,8 @@ import { migrate, pool } from './db.js';
 import { isMaintenance } from './backup.js';
 import { portal } from './portal.js';
 import { asset, fontPreloads } from './assets.js';
-import { pastText, yearsOn } from './catalog.js';
+import { exercises, pastText, yearsOn } from './catalog.js';
+import { recordTaskMap } from './taskmap.js';
 import { listUrl, pageNumbers, PER_PAGE } from './paging.js';
 import * as fmt from './format.js';
 import { readVersion } from './version.js';
@@ -114,6 +115,7 @@ app.use((err, req, res, next) => {
 });
 
 await migrate();
+await recordTaskMap(pool, exercises);
 const server = app.listen(config.port, () => console.log(`${portal.name} posluša na vratih ${config.port}`));
 for (const sig of ['SIGTERM', 'SIGINT']) {
   process.on(sig, () => {

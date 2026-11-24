@@ -108,3 +108,35 @@ export async function recordReset(c, { userId, exId, attempt, score, done, reaso
   await c.query('DELETE FROM resets WHERE user_id=$1 AND exercise_id=$2', [userId, exId]);
   await c.query('INSERT INTO resets(user_id, exercise_id, attempt, score, done_count, reason) VALUES($1,$2,$3,$4,$5,$6)', [userId, exId, attempt, keep.score, keep.done, reason]);
 }
+
+// A task is the same in two versions when its question is the same: the first 80 letters, without markup, spaces or case.
+export const fingerprint = (task) => String(task.q ?? '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().toLowerCase().slice(0, 80);
+// Old position -> new position for every old task that the new version still has (matched in order, so a repeated question stays paired).
+export function remapTasks(oldFps, newTasks) {
+  const queues = new Map();
+  for (const t of newTasks) {
+    const fp = fingerprint(t);
+    if (!queues.has(fp)) queues.set(fp, []);
+    queues.get(fp).push(t.i);
+  }
+  const map = new Map();
+  oldFps.forEach((fp, oldIdx) => {
+    const q = queues.get(fp);
+    if (q && q.length) map.set(oldIdx, q.shift());
+  });
+  return map;
+}
+// The state of a student under the new version: the answers of the tasks that stay move to their new positions, the rest is dropped.
+export function migrateState(ex, state, oldFps) {
+  const map = remapTasks(oldFps, ex.tasks);
+  const old = state?.t && typeof state.t === 'object' ? state.t : {};
+  const t = {};
+  let dropped = 0;
+  for (const [k, v] of Object.entries(old)) {
+    const n = map.get(Number(k));
+    if (n === undefined) { if (v && typeof v === 'object') dropped++; continue; }
+    t[n] = v;
+  }
+  const next = { ...state, t };
+  return { state: next, summary: summarize(ex, next), dropped, kept: Object.keys(t).length };
+}

@@ -73,3 +73,26 @@ test('a partly right task is locked like any other', () => {
   assert.equal(again.state.t[0].p, 2);
   assert.deepEqual(again.events, []);
 });
+
+// A new version of an exercise: the answers of the tasks it still has move to their new places, the removed ones are dropped.
+test('a new exercise version keeps the answers of the tasks that stay, by their question, and drops the others', async () => {
+  const { migrateState, fingerprint } = await import('../src/progress.js');
+  const old = [{ i: 0, q: 'Prva naloga?' }, { i: 1, q: 'Odstranjena naloga?' }, { i: 2, q: 'Tretja <b>naloga</b>?' }];
+  const oldFps = old.map(fingerprint);
+  const next = { format: 'short', tasks: [{ i: 0, q: 'Tretja naloga?', max: 2 }, { i: 1, q: 'Prva naloga?', max: 2 }] };
+  const state = { seen: ['uvod'], t: { 0: { d: true, p: 2 }, 1: { d: true, p: 1 }, 2: { d: true, p: 2, h: true } } };
+  const r = migrateState(next, state, oldFps);
+  assert.deepEqual(r.state.t, { 0: { d: true, p: 2, h: true }, 1: { d: true, p: 2 } });
+  assert.deepEqual(r.state.seen, ['uvod']);
+  assert.deepEqual(r.summary, { score: 4, done: 2, hints: 1, solutions: 0 });
+  assert.equal(r.dropped, 1);
+  assert.equal(r.kept, 2);
+});
+test('a repeated question stays paired in order, and an unrecorded version gives no map', async () => {
+  const { migrateState, fingerprint } = await import('../src/progress.js');
+  const oldFps = [{ q: 'Isto?' }, { q: 'Isto?' }].map(fingerprint);
+  const next = { format: 'short', tasks: [{ i: 0, q: 'Isto?', max: 1 }] };
+  const r = migrateState(next, { t: { 1: { d: true, p: 1 } } }, oldFps);
+  assert.deepEqual(r.state.t, {});
+  assert.equal(r.dropped, 1);
+});
