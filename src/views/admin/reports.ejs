@@ -1,6 +1,6 @@
 <%- include('../partials/head', { pageTitle: 'Prijave', mainClass: 'wide' }) %>
 <%- include('../partials/adminnav') %>
-<p class="dim">Prijave napak in nejasnosti v vsebini, ki jih pošljejo dijaki, učitelji in nadzorni. Kraj (vaja, stran, naloga) se izpolni sam; povezava odpre točno to mesto. Odgovor in stanje vidi avtor v razdelku »Moje prijave«.</p>
+<p class="dim">Prijave napak in nejasnosti v vsebini, ki jih pošljejo dijaki, učitelji in nadzorni. Vsebina (vaja, stran, naloga) se izpolni sama; povezava odpre točno to mesto. Odgovor in stanje vidi avtor v razdelku »Moje prijave«.</p>
 <%- include('../partials/reportfilter', { path: '/admin/prijave' }) %>
 <% if (!items.length) { %><p class="empty"><%= state === 'odprte' ? 'Odprtih prijav ni.' : state === 'resene' ? 'Rešenih prijav ni.' : 'Prijav še ni.' %></p><% } else { %>
 <% if (more) { %><p class="notice-warn">Prikazanih je zadnjih 500 prijav; ostale zožaj s filtrom.</p><% } %>

@@ -154,7 +154,7 @@
       document.body.appendChild(repDlg);
     }
     repDlg._place = place();
-    repDlg._where.replaceChildren(document.createTextNode('Kraj: '), el('b', { text: repDlg._place.text }));
+    repDlg._where.replaceChildren(document.createTextNode('Vsebina: '), el('b', { text: repDlg._place.text }));
     repDlg._msg.textContent = '';
     repDlg._update();
     repDlg.showModal();
