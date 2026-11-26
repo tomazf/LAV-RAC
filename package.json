@@ -11,7 +11,8 @@
     "start": "node src/server.js",
     "import": "node scripts/import-artifacts.js",
     "demo": "node test/demo.js",
-    "test": "node --test --test-concurrency=1 test/*.test.js"
+    "test": "node --test --test-concurrency=1 test/*.test.js",
+    "build:editor": "node scripts/editor/build.mjs"
   },
   "dependencies": {
     "connect-pg-simple": "^10.0.0",
@@ -19,12 +20,22 @@
     "express": "^5.3.0",
     "express-session": "^1.19.0",
     "helmet": "^8.3.0",
+    "mysql2": "^3.24.6",
     "openid-client": "^6.8.9",
     "pg": "^8.23.1"
   },
   "devDependencies": {
+    "@codemirror/autocomplete": "^6.20.4",
+    "@codemirror/commands": "^6.11.2",
+    "@codemirror/lang-sql": "^6.10.0",
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/search": "^6.7.3",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.44.2",
     "@fontsource/atkinson-hyperlegible": "^5.3.0",
     "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@lezer/highlight": "^1.2.5",
+    "esbuild": "^0.28.2",
     "playwright": "1.63.0"
   }
 }

@@ -13,3 +13,6 @@ portal.plannedModules ??= [];
 // Years (letniki): which group of exercises each year works on, e.g. { "2": "LAV-RAČ2" }. Empty means classes have no year.
 portal.years ??= {};
 if (typeof portal.years !== 'object' || Object.entries(portal.years).some(([y, m]) => !/^[1-9]$/.test(y) || typeof m !== 'string')) bad('"years" mora biti npr. { "2": "LAV-RAČ2" }');
+// SQL sandbox: the years whose classes get it (e.g. [4]); without the key, the 4th year.
+portal.sqlYears ??= [4];
+if (!Array.isArray(portal.sqlYears) || portal.sqlYears.some((y) => !Number.isInteger(y) || y < 1 || y > 9)) bad('"sqlYears" mora biti seznam letnikov, npr. [4]');

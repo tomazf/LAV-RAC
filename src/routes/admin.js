@@ -7,6 +7,7 @@ import { byName, cleanName } from '../format.js';
 import { paging } from '../paging.js';
 import { backupRouter } from './backup.js';
 import { adminReportsRouter } from './reports.js';
+import { adminSqlRouter } from './sql.js';
 import { ACTION_YEAR, yearRouter } from './year.js';
 
 export const adminRouter = express.Router();
@@ -18,6 +19,7 @@ adminRouter.use(async (req, res, next) => {
 adminRouter.use('/kopije', backupRouter);
 adminRouter.use('/prijave', adminReportsRouter);
 adminRouter.use('/solsko-leto', yearRouter);
+adminRouter.use('/sql', adminSqlRouter);
 
 const yearIn = (v) => (YEARS.some((y) => y.year === Number(v)) ? Number(v) : null);
 const flash = (res, path, msg) => res.redirect(`${path}${path.includes('?') ? '&' : '?'}sporocilo=${encodeURIComponent(msg)}`);

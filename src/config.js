@@ -18,5 +18,7 @@ export const config = {
   clientSecret: need('OIDC_CLIENT_SECRET'),
   issuer: process.env.OIDC_ISSUER || `https://login.microsoftonline.com/${tenantId}/v2.0`,
   allowInsecureOidc: process.env.OIDC_ALLOW_INSECURE === 'true',
+  // SQL sandbox: encrypts the MySQL passwords in the portal's database (32 bytes, base64). Without it the sandbox is off.
+  sqlKey: process.env.SQL_KEY || '',
   admins: new Set(need('ADMIN_EMAILS').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean)),
 };

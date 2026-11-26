@@ -23,6 +23,14 @@ jobs:
         ports: ["5432:5432"]
         options: >-
           --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 3s --health-retries 20
+      # the SQL sandbox (test/sqlbox.test.js) runs statements on a real MySQL server
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: test
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -ptest" --health-interval 5s --health-timeout 3s --health-retries 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -39,6 +47,7 @@ jobs:
       - run: npm test
         env:
           TEST_DATABASE_URL: postgres://postgres:test@localhost:5432/lav_test
+          TEST_MYSQL_URL: mysql://root:test@127.0.0.1:3306
           PG_BIN: /usr/lib/postgresql/17/bin
   docker:
     runs-on: ubuntu-latest

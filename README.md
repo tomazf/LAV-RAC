@@ -103,6 +103,24 @@ Ukazna vrstica ne pozna seznama izbrisanih, zato po takšni obnovitvi ročno izb
 
 Skrivnost v Entra poteče. Pred iztekom ustvari novo in posodobi `OIDC_CLIENT_SECRET`.
 
+### SQL peskovnik (4. letnik)
+
+Dijaki 4. letnika izvajajo SQL v portalu (meni **SQL peskovnik**) na ločenem strežniku MySQL: vsak ima svojo bazo in račun, ki ju lahko uporabi tudi v MySQL Workbenchu, za poizvedbe iz 4.5 pa sta na voljo skupni bazi samo za branje. Načrt in dogovori: [`docs/NACRT_SQL_PESKOVNIK.md`](docs/NACRT_SQL_PESKOVNIK.md).
+
+1. Postavi strežnik MySQL 8.4 LTS. V `mysqld.cnf`: `bind-address` na naslov v šolskem omrežju, `local_infile=0`, `max_connections=300`; požarni zid odpre 3306 samo strežniku portala in učilnicam (Workbench), nikoli internetu. Root naj bo dosegljiv samo lokalno.
+2. Ustvari skrbniški račun portala (ne root; `lr_` je predpona, ki jo vpišeš tudi v portalu):
+   ```sql
+   CREATE USER 'lavrac'@'IP_PORTALA' IDENTIFIED BY 'geslo' REQUIRE SSL;
+   GRANT CREATE USER ON *.* TO 'lavrac'@'IP_PORTALA';
+   GRANT ALL PRIVILEGES ON `lr\_%`.* TO 'lavrac'@'IP_PORTALA' WITH GRANT OPTION;
+   ```
+   Pravica `CREATE USER` ni omejena na predpono, zato naj bo strežnik namenjen samo peskovniku.
+3. V `.env` portala dodaj `SQL_KEY` (`openssl rand -base64 32`) in ga shrani tudi posebej: gesla računov MySQL so z njim šifrirana, ključ pa ni del varnostne kopije.
+4. **Administracija > SQL**: vpiši naslov, vrata, skrbniški račun in omejitve, nato **Shrani in preizkusi** in **Uvozi skupni bazi**.
+5. Učitelj pri razredu 4. letnika odpre **SQL baze** in ustvari baze. Dijaki vidijo podatke za Workbench v peskovniku.
+
+Ob izbrisu uporabnika (tudi ob koncu šolskega leta) portal izbriše njegovo bazo in račun na strežniku MySQL; če strežnik takrat ni dosegljiv, to naredi pozneje sam. Baze brez lastnika (npr. po obnovitvi stare kopije) najdeš pod **Administracija > SQL**.
+
 ### Konec šolskega leta
 
 Če ima portal letnike, skrbnik ob koncu leta odpre **Administracija > Šolsko leto**: najprej prenese kopijo, pregleda predogled (izbris zadnjega letnika, napredovanje in nova imena razredov, kateri dijaki gredo z razredom), vpiše PREHOD in potrdi. Nato razredom dodeli učitelje.
@@ -164,13 +182,14 @@ npx playwright install chromium
 TEST_DATABASE_URL=postgres://uporabnik@localhost/lav_test npm test
 ```
 
-Preizkusi uporabijo pravi strežnik, PostgreSQL in brskalnik, prijavo pa nadomesti `test/mock-oidc.js`. **Baza `TEST_DATABASE_URL` se ob vsakem zagonu izbriše.** `test/variants.test.js` vsako spremenljivo nalogo primerja z ločenim izračunom in jo reši na strani ter ne potrebuje baze. Preizkus kopij potrebuje `pg_dump`, `pg_restore` in `psql` iste različice kot strežnik baze (po potrebi `PG_BIN=/usr/lib/postgresql/17/bin`). GitHub Actions ob vsaki objavi požene preizkuse in gradnjo slike Docker.
+Preizkusi uporabijo pravi strežnik, PostgreSQL in brskalnik, prijavo pa nadomesti `test/mock-oidc.js`. Preizkusi SQL peskovnika (`test/sqlbox.test.js`) potrebujejo še strežnik MySQL in račun, ki sme ustvarjati uporabnike: `TEST_MYSQL_URL=mysql://root:geslo@127.0.0.1:3306`; brez njega se preskočijo. Urejevalnik SQL (CodeMirror) je zapakiran v `src/public/js/vendor/sqleditor.js`; po spremembi `scripts/editor/entry.js` ga znova zgradi z `npm run build:editor`. **Baza `TEST_DATABASE_URL` se ob vsakem zagonu izbriše.** `test/variants.test.js` vsako spremenljivo nalogo primerja z ločenim izračunom in jo reši na strani ter ne potrebuje baze. Preizkus kopij potrebuje `pg_dump`, `pg_restore` in `psql` iste različice kot strežnik baze (po potrebi `PG_BIN=/usr/lib/postgresql/17/bin`). GitHub Actions ob vsaki objavi požene preizkuse in gradnjo slike Docker.
 
 ## Zgradba
 
 - `src/server.js`: strežnik in varnostne nastavitve
 - `src/auth.js`: prijava Entra in vloge
 - `src/backup.js`: varnostna kopija in obnovitev baze (`pg_dump`, `pg_restore`, `psql`)
+- `src/sqlbox.js`, `src/sqlsplit.js`, `src/routes/sql.js`: SQL peskovnik (strežnik MySQL, baze dijakov, izvajanje stavkov)
 - `src/progress.js`: pravila za točke, zaklepanje in namige na strežniku
 - `src/public/js/tracker.js`: sledilnik, ki se naloži pred vsako vajo
 - `src/public/js/variants/`: spremenljiva števila po vajah

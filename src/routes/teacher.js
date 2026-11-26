@@ -9,6 +9,7 @@ import { readTask, recordReset, summarize } from '../progress.js';
 import { cell, progressFor, rollup, strip } from '../stats.js';
 import { teacherReportsRouter } from './reports.js';
 import { describe, flagsFor, label, STATUS } from '../flags.js';
+import { teacherSql } from './sql.js';
 
 export const teacherRouter = express.Router();
 teacherRouter.use(requireTeacher);
@@ -103,6 +104,7 @@ const SORTS = {
   time: (a, b) => b.total.seconds - a.total.seconds,
   last: (a, b) => new Date(b.total.last || 0) - new Date(a.total.last || 0),
 };
+teacherSql(teacherRouter, { loadClass, members });
 teacherRouter.get('/razredi/:id', loadClass, async (req, res, next) => {
   try {
     const ms = await members(req.cls.id);

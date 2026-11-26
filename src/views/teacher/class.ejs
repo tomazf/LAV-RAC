@@ -3,6 +3,7 @@
 <div class="title-row"><h1><%= cls.name %></h1>
   <div class="row"><a class="btn" href="/ucitelj/razredi/<%= cls.id %>/vaje">Vaje razreda (<%= openCount %> od <%= list.length %>)</a>
   <a class="btn ghost" href="#dodaj">Dodaj dijake (<%= unassigned.length %>)</a>
+  <% if (user.sqlOn && sqlClass(cls.year)) { %><a class="btn ghost" href="/ucitelj/razredi/<%= cls.id %>/sql">SQL baze</a><% } %>
   <a class="btn ghost" href="/ucitelj/razredi/<%= cls.id %>/izvoz.csv">Izvozi CSV</a></div>
 </div>
 <p class="dim team"><% if (cls.year) { %><%= cls.year %>. letnik<%= pastText(cls.year, cls.past_years) ? `, dijaki vidijo tudi ${pastText(cls.year, cls.past_years)}` : '' %> · <% } %>Učitelji: <%= teachers.map((t) => t.name).join(', ') || 'še brez učitelja' %></p>

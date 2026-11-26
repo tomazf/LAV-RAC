@@ -1,0 +1,98 @@
+<%- include('../partials/head', { pageTitle: 'SQL peskovnik', mainClass: 'wide' }) %>
+<link rel="stylesheet" href="<%= asset('css/sqlbox.css') %>">
+<% const f = fmt; %>
+<%- include('../partials/adminnav') %>
+<% if (error) { %><p class="notice-warn" role="alert"><%= error %></p><% } %>
+<p class="lead-sql">SQL peskovnik je za dijake <strong>4. letnika</strong>: vsak dijak ima na strežniku MySQL svojo bazo in račun, stavke izvaja v portalu ali v MySQL Workbenchu. Strežnik vpišeš samo ti; baze dijakov ustvarjajo učitelji pri svojih razredih.</p>
+
+<% if (!keyOk) { %>
+<section class="block sql-card warn">
+  <h2>Najprej ključ za šifriranje</h2>
+  <p>Gesla računov MySQL so v bazi portala šifrirana s ključem <code>SQL_KEY</code> iz datoteke <code>.env</code>. Ključa še ni (ali ni dolg 32 bajtov), zato je peskovnik izklopljen.</p>
+  <ol class="plain">
+    <li>Na strežniku portala ustvari ključ: <code>openssl rand -base64 32</code></li>
+    <li>V <code>.env</code> dodaj vrstico <code>SQL_KEY=…</code> in znova zaženi portal (<code>docker compose up -d</code>).</li>
+    <li>Ključ shrani tudi na varno mesto: ni del varnostne kopije, brez njega se gesel iz kopije ne da prebrati.</li>
+  </ol>
+</section>
+<% } %>
+
+<section class="block sql-card" id="streznik">
+  <div class="sql-card-h"><h2>Strežnik MySQL</h2>
+    <% if (s) { %><span class="tag <%= s.checked_at ? 'ok' : 'warn' %>"><%= s.checked_at ? `povezava deluje · ${s.server_version}` : 'povezava ni preverjena' %></span><% } %></div>
+  <% if (s && s.checked_at) { %><p class="dim">Zadnji preizkus: <%= f.dateTime(s.checked_at) %>.</p><% } %>
+  <form class="sql-form" method="post" action="/admin/sql/nastavitve" autocomplete="off"><input type="hidden" name="_csrf" value="<%= csrf %>">
+    <div class="sql-grid">
+      <div class="field wide"><label for="host">Naslov (IP ali ime)</label><input id="host" name="host" required value="<%= s?.host ?? '' %>" placeholder="npr. 10.10.12.40" <%= keyOk ? '' : 'disabled' %>></div>
+      <div class="field"><label for="port">Vrata</label><input id="port" name="port" type="number" min="1" max="65535" value="<%= s?.port ?? 3306 %>" <%= keyOk ? '' : 'disabled' %>></div>
+      <div class="field"><label for="admin_user">Skrbniški uporabnik</label><input id="admin_user" name="admin_user" required value="<%= s?.admin_user ?? 'lavrac' %>" <%= keyOk ? '' : 'disabled' %>></div>
+      <div class="field"><label for="admin_pass">Geslo</label><input id="admin_pass" name="admin_pass" type="password" autocomplete="new-password" <%= s ? '' : 'required' %> placeholder="<%= s ? 'ostane, če je prazno' : '' %>" <%= keyOk ? '' : 'disabled' %>></div>
+      <div class="field"><label for="prefix">Predpona baz in računov</label><input id="prefix" name="prefix" value="<%= s?.prefix ?? 'lr_' %>" pattern="[a-z][a-z0-9]{0,8}_" <%= locked || !keyOk ? 'disabled' : '' %>>
+        <span class="dim small"><%= locked ? 'Baze že obstajajo, predpone ni več mogoče spremeniti.' : 'Baze dijakov so npr. lr_u12.' %></span></div>
+    </div>
+    <label class="switch"><input type="checkbox" name="tls" <%= !s || s.tls ? 'checked' : '' %> <%= keyOk ? '' : 'disabled' %>> Šifrirana povezava (TLS) med portalom in strežnikom</label>
+    <details class="sql-more"><summary>Certifikat CA (neobvezno)</summary>
+      <p class="dim">Če strežnik uporablja certifikat, ki ga podpiše tvoj CA, ga prilepi sem (PEM). Brez njega je povezava šifrirana, certifikat strežnika pa se ne preverja.</p>
+      <textarea name="ca" rows="5" class="mono" spellcheck="false" placeholder="-----BEGIN CERTIFICATE-----" <%= keyOk ? '' : 'disabled' %>><%= s?.ca ?? '' %></textarea>
+    </details>
+    <fieldset class="field"><legend>Omejitve za dijake</legend>
+      <div class="sql-grid limits">
+        <label>Čas stavka <span class="u"><input name="timeout" type="number" min="1" max="30" value="<%= limits.timeout %>"> s</span></label>
+        <label>Vrstic v izpisu <span class="u"><input name="rows" type="number" min="50" max="5000" value="<%= limits.rows %>"></span></label>
+        <label>Velikost baze <span class="u"><input name="sizeMb" type="number" min="1" max="500" value="<%= limits.sizeMb %>"> MB</span></label>
+        <label>Dolžina skripta <span class="u"><input name="scriptKb" type="number" min="4" max="512" value="<%= limits.scriptKb %>"> kB</span></label>
+        <label>Zagonov na minuto <span class="u"><input name="perMinute" type="number" min="5" max="300" value="<%= limits.perMinute %>"></span></label>
+        <label>Povezav na račun <span class="u"><input name="connections" type="number" min="1" max="20" value="<%= limits.connections %>"></span></label>
+      </div>
+      <span class="dim small">Število povezav velja za nove račune (tudi Workbench šteje).</span>
+    </fieldset>
+    <div class="row"><button class="btn" <%= keyOk ? '' : 'disabled' %>>Shrani in preizkusi</button></div>
+  </form>
+  <% if (s) { %><form method="post" action="/admin/sql/preizkus" class="row"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn ghost small">Samo preizkusi povezavo</button></form><% } %>
+  <details class="sql-more"><summary>Kako pripraviti strežnik</summary>
+    <p>Na strežniku MySQL (8.4 LTS) ustvari skrbniški račun portala. To ni root: sme ustvarjati račune in ima vse pravice samo na baze s predpono.</p>
+<pre class="code">CREATE USER 'lavrac'@'<i>IP portala</i>' IDENTIFIED BY '<i>geslo</i>' REQUIRE SSL;
+GRANT CREATE USER ON *.* TO 'lavrac'@'<i>IP portala</i>';
+GRANT ALL PRIVILEGES ON `<%= (s?.prefix ?? 'lr_').replace(/_/g, '\\_') %>%`.* TO 'lavrac'@'<i>IP portala</i>' WITH GRANT OPTION;</pre>
+    <p>V <code>mysqld.cnf</code>: <code>bind-address</code> na naslov v šolskem omrežju, <code>local_infile=0</code>, <code>max_connections=300</code>. Požarni zid: 3306 samo s strežnika portala in iz učilnic (za Workbench), nikoli z interneta. Pravica <code>CREATE USER</code> ni omejena na predpono, zato naj bo strežnik namenjen samo peskovniku, root pa dosegljiv samo lokalno.</p>
+  </details>
+</section>
+
+<% if (s) { %>
+<section class="block sql-card" id="skupne">
+  <div class="sql-card-h"><h2>Skupni bazi samo za branje</h2>
+    <span class="tag <%= s.shared_at ? 'ok' : 'warn' %>"><%= s.shared_at ? 'uvoženi ' + f.dateTime(s.shared_at) : 'še nista uvoženi' %></span></div>
+  <p>Za poizvedbe v 4.5: <% SHARED.forEach((x, i) => { %><code><%= x.db(s) %></code> (<%= x.title %>)<%= i < SHARED.length - 1 ? ', ' : '' %><% }) %>. Dijaki jih berejo z računom <code><%= s.prefix %>bralec</code>, spremeniti jih ne morejo. Uvoz znova naloži datoteki <code>sola.sql</code> in <code>matura_baze.sql</code> s portala.</p>
+  <form method="post" action="/admin/sql/skupne"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn ghost"><%= s.shared_at ? 'Uvozi znova' : 'Uvozi skupni bazi' %></button></form>
+</section>
+
+<section class="block" id="pregled">
+  <h2>Pregled po razredih</h2>
+  <% if (!sqlClasses.length) { %><p class="empty">Ni razredov 4. letnika.</p><% } else { %>
+  <div class="scroll"><table class="data">
+    <thead><tr><th class="l">Razred</th><th>Dijaki</th><th>Z bazo</th><th>Aktivni v 7 dneh</th><th>Skupaj</th><th class="l"></th></tr></thead>
+    <tbody><% sqlClasses.forEach((c) => { %><tr>
+      <td class="l"><strong><%= c.name %></strong></td><td><%= c.students %></td><td><%= c.accounts %></td><td><%= c.active %></td><td class="nw"><%= mb(c.bytes) %></td>
+      <td class="l"><a href="/ucitelj/razredi/<%= c.id %>/sql">SQL baze razreda</a></td>
+    </tr><% }) %></tbody>
+  </table></div><% } %>
+  <% if (others.length) { %>
+  <h3 class="sql-h3">Baze brez razreda (učitelji, dijaki brez razreda)</h3>
+  <ul class="sql-people"><% others.forEach((o) => { const l = light(o); %><li><span class="light <%= l %>" title="<%= LIGHTS[l] %>"></span> <%= o.name %> <span class="dim">· <%= o.db_name %> · <%= mb(o.size_bytes) %> · <%= o.last_used_at ? f.ago(o.last_used_at) : 'še ni uporabljal' %></span></li><% }) %></ul>
+  <% } %>
+</section>
+
+<section class="block" id="osirotele">
+  <h2>Baze brez lastnika</h2>
+  <p>Baze na strežniku, ki v portalu nimajo uporabnika (npr. po obnovi stare kopije ali če strežnik ob izbrisu ni bil dosegljiv). <% if (queued) { %><strong>Za brisanje čaka še <%= queued %> baz izbrisanih uporabnikov</strong>; portal jih izbriše sam, ko je strežnik dosegljiv.<% } %></p>
+  <% if (orphanList && orphanList.length) { %>
+  <form method="post" action="/admin/sql/osirotele"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="akcija" value="izbrisi">
+    <ul class="checks"><% orphanList.forEach((n) => { %><li><label><input type="checkbox" name="db" value="<%= n %>" checked> <code><%= n %></code></label></li><% }) %></ul>
+    <button class="btn danger">Izbriši izbrane baze in račune</button>
+  </form>
+  <% } else { %>
+  <form method="post" action="/admin/sql/osirotele"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn ghost">Poišči na strežniku</button></form>
+  <% } %>
+</section>
+<% } %>
+<%- include('../partials/foot') %>

@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import path from 'node:path';
 import express from 'express';
 import session from 'express-session';
@@ -19,6 +20,8 @@ import { studentRouter } from './routes/student.js';
 import { teacherRouter } from './routes/teacher.js';
 import { adminRouter } from './routes/admin.js';
 import { reportApiRouter } from './routes/reports.js';
+import { sqlRouter } from './routes/sql.js';
+import { SQL_YEARS } from './sqlbox.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -32,6 +35,7 @@ app.locals.asset = asset;
 app.locals.fontPreloads = fontPreloads;
 app.locals.yearsOn = yearsOn;
 app.locals.pastText = pastText;
+app.locals.sqlClass = (year) => !yearsOn || SQL_YEARS.includes(Number(year));
 Object.assign(app.locals, { listUrl, pageNumbers, PER_PAGE });
 app.locals.path = '/';
 app.locals.user = null;
@@ -72,8 +76,19 @@ const exerciseCsp = helmet.contentSecurityPolicy({
     baseUri: ["'self'"], frameAncestors: ["'none'"], formAction: ["'self'"], upgradeInsecureRequests: config.secureCookies ? [] : null,
   },
 });
+// The SQL sandbox editor (CodeMirror) writes its own styles into a <style> element: allowed with a nonce for that page only.
+const sqlCsp = helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'", (req, res) => `'nonce-${res.locals.styleNonce}'`], styleSrcAttr: ["'unsafe-inline'"],
+    imgSrc: ["'self'", 'data:', 'blob:'], fontSrc: ["'self'"], connectSrc: ["'self'"], objectSrc: ["'none'"],
+    baseUri: ["'self'"], frameAncestors: ["'none'"], formAction: ["'self'"], upgradeInsecureRequests: config.secureCookies ? [] : null,
+  },
+});
 app.use(helmet({ contentSecurityPolicy: false, strictTransportSecurity: config.secureCookies, crossOriginOpenerPolicy: false }));
-app.use((req, res, next) => (req.path.startsWith('/vaje/') ? exerciseCsp : portalCsp)(req, res, next));
+app.use((req, res, next) => {
+  if (req.path === '/sql') { res.locals.styleNonce = crypto.randomBytes(16).toString('base64'); return sqlCsp(req, res, next); }
+  return (req.path.startsWith('/vaje/') ? exerciseCsp : portalCsp)(req, res, next);
+});
 
 // While the database is being replaced from a backup, nothing else may touch it (this includes sessions).
 app.use((req, res, next) => {
@@ -106,6 +121,7 @@ app.use('/auth', authRouter);
 app.use('/', exerciseRouter);
 app.use('/', studentRouter);
 app.use('/', reportApiRouter);
+app.use('/', sqlRouter);
 app.use('/ucitelj', teacherRouter);
 app.use('/admin', adminRouter);
 app.use((req, res) => res.status(404).render('error', { title: 'Stran ne obstaja', message: 'Povezava je napačna ali stran ni več na voljo.' }));

@@ -6,5 +6,6 @@
   "about": "portal z laboratorijskimi vajami iz računalništva za dijake 2., 3. in 4. letnika Tehniške gimnazije Šolskega centra Novo mesto",
   "school": { "name": "Šolski center Novo mesto", "url": "https://www.sc-nm.si", "logo": "img/sc-nm-logo.jpg" },
   "plannedModules": ["LAV-RAČ2", "LAV-RAČ3", "LAV-RAČ4"],
-  "years": { "2": "LAV-RAČ2", "3": "LAV-RAČ3", "4": "LAV-RAČ4" }
+  "years": { "2": "LAV-RAČ2", "3": "LAV-RAČ3", "4": "LAV-RAČ4" },
+  "sqlYears": [4]
 }

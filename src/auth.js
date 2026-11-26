@@ -6,6 +6,7 @@ import { one } from './db.js';
 import { portal } from './portal.js';
 import { htmlAttrs } from './prefs.js';
 import { countOpenFor } from './reports.js';
+import { available as sqlAvailable, mayUse as mayUseSql } from './sqlbox.js';
 
 let discovered = null;
 async function oidcConfig() {
@@ -92,6 +93,7 @@ export async function loadUser(req, res, next) {
     if (req.session?.uid) {
       const u = await one(
         `SELECT u.*, (SELECT m.class_id FROM class_members m WHERE m.user_id=u.id) AS class_id,
+           (SELECT c.year FROM class_members m JOIN classes c ON c.id=m.class_id WHERE m.user_id=u.id) AS class_year,
            (SELECT count(*) FROM reports r WHERE r.user_id=u.id AND r.unseen) AS reports_unseen FROM users u WHERE u.id=$1`,
         [req.session.uid],
       );
@@ -104,6 +106,8 @@ export async function loadUser(req, res, next) {
         // The display settings go into the <html> tag of every page; staff see how many reports wait for them.
         u.reportsOpen = u.isTeacher ? await countOpenFor(u) : 0;
         res.locals.htmlPrefs = htmlAttrs(u.prefs);
+        // The SQL sandbox in the menu: when the admin has set up the server and the user's class (or role) may use it.
+        u.sqlOn = mayUseSql(u) && await sqlAvailable();
         req.user = u;
         res.locals.user = u;
         res.locals.csrf = req.session.csrf;

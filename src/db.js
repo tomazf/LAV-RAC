@@ -52,6 +52,8 @@ export const DELETED_NAME = 'izbrisan uporabnik';
 // Same calculation as in SQL (backup.js): encode(sha256(convert_to(ERASED_SALT || oid, 'UTF8')), 'hex')
 export const ERASED_SALT = `${portal.slug}-erased:`;
 export const erasedHash = (oid) => crypto.createHash('sha256').update(`${ERASED_SALT}${oid}`).digest('hex');
+// Called after a user is erased (the SQL sandbox then drops their database on its server).
+export const afterErase = new Set();
 // Pass a client to erase as part of a larger transaction (the end of the school year).
 export async function eraseUser(user, client = null) {
   const run = client ? (fn) => fn(client) : tx;
@@ -61,6 +63,9 @@ export async function eraseUser(user, client = null) {
     await c.query('UPDATE audit_log SET actor_name=replace(actor_name, $1, $2), detail=replace(detail, $1, $2) WHERE actor_name LIKE $3 OR detail LIKE $3',
       [user.name, DELETED_NAME, `%${user.name.replace(/[\\%_]/g, '\\$&')}%`]);
     await c.query(`DELETE FROM session WHERE (sess->>'uid')::bigint = $1`, [user.id]);
+    // their SQL sandbox database goes too; the queue keeps it until the MySQL server has dropped it
+    await c.query('INSERT INTO sql_drop_queue(db_name, db_user) SELECT db_name, db_user FROM sql_accounts WHERE user_id=$1 ON CONFLICT DO NOTHING', [user.id]);
     await c.query('DELETE FROM users WHERE id=$1', [user.id]);
   });
+  for (const f of afterErase) f();
 }

@@ -1,0 +1,111 @@
+<%- include('../partials/head', { pageTitle: 'SQL peskovnik', mainClass: 'wide sqlmain' }) %>
+<link rel="stylesheet" href="<%= asset('css/sqlbox.css') %>">
+<% const f = fmt; %>
+<div class="sq-head">
+  <div>
+    <h1>SQL peskovnik</h1>
+    <p class="dim sq-sub">Stavki se izvedejo na šolskem strežniku MySQL<% if (s.server_version) { %> <%= s.server_version.split('-')[0] %><% } %>. V svoji bazi lahko vse, skupne baze samo bereš.</p>
+  </div>
+  <div class="sq-target">
+    <label for="sq-db">Baza</label>
+    <select id="sq-db"><% targets.forEach((t) => { %><option value="<%= t.id %>" <%= t.id === start ? 'selected' : '' %> <%= t.id === 'moja' && !acc ? 'disabled' : '' %>><%= t.id === 'moja' ? (acc ? `Moja baza (${acc.db_name})` : 'Moja baza (še ni ustvarjena)') : t.title + ' · samo branje' %></option><% }) %></select>
+  </div>
+</div>
+<% if (message) { %><p class="notice" role="status"><%= message %></p><% } %>
+<% if (error) { %><p class="notice-warn" role="alert"><%= error %></p><% } %>
+<% if (!acc) { %>
+<div class="notice-warn sq-noacc"><% if (user.isTeacher) { %>Še nimaš svoje baze za preizkušanje. <form method="post" action="/sql/ustvari" class="inline-form"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn small">Ustvari mojo bazo</button></form><% } else { %>Tvoje baze učitelj še ni ustvaril.<%= targets.length > 1 ? ' Skupne baze lahko že bereš.' : '' %><% } %></div>
+<% } %>
+<noscript><p class="notice-warn">Peskovnik potrebuje JavaScript.</p></noscript>
+
+<div class="sq" id="sq" data-csrf="<%= csrf %>" data-nonce="<%= styleNonce %>" data-has="<%= acc ? '1' : '' %>" data-rows="<%= limits.rows %>" data-timeout="<%= limits.timeout %>" hidden>
+  <aside class="sq-side" aria-label="Zgradba baze">
+    <div class="sq-side-h"><h2 id="sq-tables-h">Tabele</h2>
+      <button type="button" class="sq-ibtn" id="sq-refresh" title="Osveži tabele" aria-label="Osveži tabele"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+    <div id="sq-tree" class="sq-tree" aria-labelledby="sq-tables-h" aria-live="polite"><p class="dim">Nalagam …</p></div>
+    <div class="sq-side-actions">
+      <button type="button" class="btn ghost small" id="sq-er-open">ER diagram</button>
+      <% if (acc) { %><button type="button" class="btn ghost small" data-open="sq-wb">Podatki za Workbench</button>
+      <button type="button" class="btn ghost small" data-open="sq-reset">Ponastavi mojo bazo</button><% } %>
+    </div>
+  </aside>
+
+  <section class="sq-work" aria-label="Urejevalnik in rezultati">
+    <div class="sq-bar" role="toolbar" aria-label="Ukazi">
+      <button type="button" class="btn sq-run" id="sq-run" title="Ctrl+Enter"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg><span id="sq-run-l">Zaženi vse</span></button>
+      <button type="button" class="btn ghost" id="sq-run1" title="Ctrl+Shift+Enter">Zaženi stavek</button>
+      <span class="sq-sep" aria-hidden="true"></span>
+      <button type="button" class="btn ghost small" data-open="sq-scripts">Skripti</button>
+      <button type="button" class="btn ghost small" data-open="sq-hist">Zgodovina</button>
+      <span class="sq-status dim" id="sq-saved" role="status"></span>
+    </div>
+    <div class="sq-ed" id="sq-ed"></div>
+    <p class="sq-tip dim">Ctrl+Enter zažene vse (ali izbrano), Ctrl+Shift+Enter stavek pod kazalcem. Vsak zagon je nova povezava: spremenljivke, začasne tabele in transakcije ne ostanejo do naslednjega zagona.</p>
+    <div class="sq-out" id="sq-out" aria-live="polite">
+      <div class="sq-empty"><p><strong>Rezultati se pokažejo tukaj.</strong></p><p class="dim">Za vsak stavek dobiš svoj zavihek: tabelo, število spremenjenih vrstic ali napako z vrstico v urejevalniku.</p></div>
+    </div>
+  </section>
+</div>
+
+<% if (acc) { %>
+<dialog class="edit-dlg sq-dlg" id="sq-wb" aria-labelledby="sq-wb-h">
+  <div class="edit-form">
+    <h2 id="sq-wb-h">Povezava iz MySQL Workbencha</h2>
+    <p>V Workbenchu: <strong>Database › Manage Connections › New</strong>, vpiši spodnje podatke in shrani geslo (<em>Store in Vault</em>). Deluje v šolskem omrežju.</p>
+    <dl class="cred">
+      <div><dt>Hostname</dt><dd><code data-copy><%= s.host %></code></dd></div>
+      <div><dt>Port</dt><dd><code data-copy><%= s.port %></code></dd></div>
+      <div><dt>Username</dt><dd><code data-copy><%= acc.db_user %></code></dd></div>
+      <div><dt>Password</dt><dd><code data-copy class="sq-secret"><%= pass || '(geslo ni dosegljivo, vprašaj učitelja)' %></code></dd></div>
+      <div><dt>Default Schema</dt><dd><code data-copy><%= acc.db_name %></code></dd></div>
+    </dl>
+    <p class="dim">Klik na podatek ga kopira. Geslo ti lahko ponastavi učitelj.</p>
+    <div class="dlg-actions"><button type="button" class="btn ghost" data-close>Zapri</button></div>
+  </div>
+</dialog>
+<dialog class="edit-dlg sq-dlg" id="sq-reset" aria-labelledby="sq-reset-h">
+  <form class="edit-form" method="post" action="/sql/ponastavi"><input type="hidden" name="_csrf" value="<%= csrf %>">
+    <h2 id="sq-reset-h">Ponastavi mojo bazo</h2>
+    <p>Baza <code><%= acc.db_name %></code> se izprazni; po želji se napolni z eno od pripravljenih skript iz poglavij 4.4 in 4.5. Velikost zdaj: <%= mb(acc.size_bytes) %> od <%= limits.sizeMb %> MB.</p>
+    <div class="field"><label for="sq-tpl">Začetna vsebina</label>
+      <select id="sq-tpl" name="predloga"><% TEMPLATES.forEach((t) => { %><option value="<%= t.id %>"><%= t.title %></option><% }) %></select></div>
+    <label class="switch"><input type="checkbox" name="potrdi" required> Vse moje tabele in podatki se izbrišejo.</label>
+    <div class="dlg-actions"><button class="btn danger">Ponastavi</button><button type="button" class="btn ghost" data-close>Prekliči</button></div>
+  </form>
+</dialog>
+<% } %>
+<dialog class="edit-dlg sq-dlg" id="sq-scripts" aria-labelledby="sq-scripts-h">
+  <div class="edit-form">
+    <h2 id="sq-scripts-h">Moji skripti</h2>
+    <form class="row" id="sq-save"><label class="sr" for="sq-name">Ime skripta</label><input id="sq-name" maxlength="80" placeholder="Ime, npr. 4.4 vaja C3" required><button class="btn small">Shrani trenutnega</button></form>
+    <p class="sq-msg dim" id="sq-scripts-msg" role="status"></p>
+    <ul class="sq-list" id="sq-scripts-list"></ul>
+    <div class="dlg-actions"><button type="button" class="btn ghost" data-close>Zapri</button></div>
+  </div>
+</dialog>
+<dialog class="edit-dlg sq-dlg" id="sq-hist" aria-labelledby="sq-hist-h">
+  <div class="edit-form">
+    <h2 id="sq-hist-h">Zgodovina zagonov</h2>
+    <p class="dim">Zadnjih 100 zagonov. Vidiš jih samo ti. Klik prenese skript v urejevalnik.</p>
+    <ul class="sq-list" id="sq-hist-list"></ul>
+    <div class="dlg-actions"><button type="button" class="btn ghost" data-close>Zapri</button></div>
+  </div>
+</dialog>
+<dialog class="sq-er" id="sq-er" aria-labelledby="sq-er-h">
+  <div class="sq-er-bar">
+    <h2 id="sq-er-h">ER diagram · <span id="sq-er-db"></span></h2>
+    <div class="row">
+      <button type="button" class="btn ghost small" id="sq-er-minus" aria-label="Pomanjšaj">−</button>
+      <button type="button" class="btn ghost small" id="sq-er-plus" aria-label="Povečaj">+</button>
+      <button type="button" class="btn ghost small" id="sq-er-fit">Prilagodi</button>
+      <button type="button" class="btn ghost small" id="sq-er-svg">Prenesi SVG</button>
+      <button type="button" class="btn small" data-close>Zapri</button>
+    </div>
+  </div>
+  <p class="dim sq-er-tip">Tabele lahko premikaš z miško. Ključ: primarni ključ · → tuji ključ.</p>
+  <div class="sq-er-canvas" id="sq-er-canvas"></div>
+</dialog>
+<textarea id="sq-draft" hidden aria-hidden="true"><%= draft %></textarea>
+<script src="<%= asset('js/vendor/sqleditor.js') %>"></script>
+<script src="<%= asset('js/sqlbox.js') %>"></script>
+<%- include('../partials/foot') %>

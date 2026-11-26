@@ -1,6 +1,6 @@
 # Načrt: SQL peskovnik (4. letnik)
 
-Stanje: **predlog za potrditev** (26. 11. 2026), odprta vprašanja odgovorjena isti dan (razdelek 11). Nič od tega še ni narejeno. Ko učitelj potrdi, se dogovori prenesejo v `docs/NACRT_PORTALA.md`, delo pa gre po fazah (razdelek 10).
+Stanje: potrjeno 26. 11. 2026 (odgovori v razdelku 11); fazi 1 in 2 sta narejeni (razdelek 12), faza 3 je narejena delno. Dogovori so povzeti v `docs/NACRT_PORTALA.md`.
 
 ## 1. Namen
 
@@ -135,3 +135,16 @@ Vsaka faza je svoj commit (ali nekaj commitov) s preizkusi; pred vsako vprašam,
 3. Učitelj vidi samo semafor uporabe (razdelek 7), ne sheme ali podatkov.
 4. Zgodovina zagonov je vidna samo dijaku.
 5. Omrežje (požarni zid, dostop iz učilnic za Workbench) uredi učitelj sam.
+
+## 12. Izvedba (26. 11. 2026)
+
+- Strežnik: **MySQL 8.4 LTS** (odločitev učitelja). Preizkušeno z MySQL 8.0 lokalno, CI uporablja `mysql:8.4`. MariaDB portal podpira (kolacija in časovna omejitev se izbereta po različici), a ni preizkušena.
+- Koda: `src/sqlbox.js` (šifriranje, nastavitve, računi, izvajanje, shema), `src/sqlsplit.js` (deli skript na stavke in pozna vrstice), `src/routes/sql.js` (skrbnik, učitelj, peskovnik, API), pogledi `src/views/admin/sql.ejs`, `src/views/teacher/sql.ejs`, `src/views/sql/sandbox.ejs`, `src/public/js/sqlbox.js`, `src/public/css/sqlbox.css`, migracija `017_sqlbox.sql`. Letniki s peskovnikom so v `content/portal.json` (`sqlYears`, privzeto `[4]`).
+- Urejevalnik: CodeMirror 6, zapakiran z esbuild v `src/public/js/vendor/sqleditor.js` (vir `scripts/editor/entry.js`, gradnja `npm run build:editor`; datoteka je v repozitoriju, slika Docker ne potrebuje esbuild). Urejevalnik piše svoje sloge v element `<style>`, zato ima stran `/sql` svoj CSP z enkratnim `nonce` samo za sloge (skripte ostanejo samo s strežnika).
+- Stavki se izvajajo **eden za drugim** na eni povezavi (ne `multipleStatements`), zato ima vsak svoj rezultat, napaka pove svoj stavek in vrstico (`at line N` v sporočilu MySQL se prišteje vrstici, kjer se stavek začne), izvajanje se ustavi pri prvi napaki (kot Workbench).
+- Časovna omejitev: `max_execution_time` v seji (velja za SELECT) in `KILL QUERY` z drugo povezavo **istega** računa ob izteku (račun sme ustaviti svoje stavke brez dodatnih pravic). SELECT, ki doseže omejitev, vrne, kar je imel, z opozorilom.
+- Izpis: vrstice se berejo sproti, nad omejitvijo se ne hranijo (število vseh se šteje).
+- Pravice v GRANT: podčrtaj v imenu baze je nadomestni znak, zato portal ime v GRANT zapiše z `\_` (`lr\_u12`), sicer ga skrbnikova pravica na `lr\_%` ne pokrije.
+- Izbris uporabnika: `eraseUser` v isti transakciji zapiše bazo v `sql_drop_queue`; portal jo izbriše na strežniku MySQL čez nekaj sekund oziroma ob naslednjem poskusu (vsakih 5 minut, ob odprtju strani SQL). Pri zaključku šolskega leta se baze 4. letnika izbrišejo po potrditvi prehoda.
+- Povezava iz vaje (za fazo 3): `/sql#koda=<base64url>&baza=sola` doda kodo pod vsebino urejevalnika in izbere bazo. Gumbov »Odpri v peskovniku« v poglavjih 4.4–4.6 še ni: zahtevajo spremembo skupne lupine ali adapterjev in se dodajo v svojem pogovoru.
+- Preizkusi: `test/sqlsplit.test.js` (brez baze), `test/sqlbox.test.js` (PostgreSQL, MySQL, brskalnik; brez `TEST_MYSQL_URL` se preskoči).

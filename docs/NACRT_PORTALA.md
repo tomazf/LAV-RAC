@@ -196,3 +196,14 @@ Strani: Uporabniki (filter, iskanje, urejanje s svinčnikom; dijakom brez razred
 - Učitelj (svoji razredi) in skrbnik (vsi) vidita klicaj pri dijaku in v celici vaje (rezultati razreda, rezultati vaje) in razdelek »Opozorila« pri dijaku: razlaga v slovenščini, **Potrdi**, **Razveljavi**, **Spet odpri** in neobvezna opomba (do 500 znakov). V dnevnik gre samo številka opozorila.
 - Dijak vidi **samo potrjeno** opozorilo: nevtralno obvestilo na seznamu vaj in na vrhu vaje, ki jo zadeva. Odprto in razveljavljeno opozorilo ostane pri učitelju. Potrditev je samo zapis (ne ponastavi vaje in ne spremeni točk; ponastavitev učitelj še vedno naredi sam).
 - Opozorila se izbrišejo skupaj z uporabnikom, so del kopij in so opisana na strani »Kateri podatki se beležijo«.
+
+## Dogovori 26. 11. 2026 (SQL peskovnik)
+
+Načrt in izvedba: `docs/NACRT_SQL_PESKOVNIK.md`.
+- Dijaki 4. letnika (`sqlYears` v `content/portal.json`) imajo v meniju **SQL peskovnik**: stavki se izvedejo na ločenem strežniku MySQL 8.4 z dijakovim računom, vsak dijak ima svojo bazo (`lr_u<id>`), skupni bazi `sola` in `matura` sta samo za branje.
+- Strežnik vpiše **samo skrbnik** (Administracija > SQL): naslov, vrata, skrbniški račun (ne root), TLS, predpona, omejitve (čas stavka, vrstice, velikost baze, dolžina skripta, zagoni na minuto, povezave). Gesla so v bazi portala šifrirana s `SQL_KEY` iz `.env` (ni del kopij). Skrbnik vidi pregled po razredih in baze brez lastnika.
+- **Učitelj** v svojih razredih 4. letnika ustvari baze, jih ponastavi (prazna ali iz skript 4.4 in 4.5), nastavi novo geslo (prikaže se enkrat) in izbriše bazo. Vidi samo **semafor** uporabe (zelena: v zadnjih 7 dneh, rumena: prej, siva: še ne, brez pike: ni baze), ne sheme, podatkov, skriptov ali zgodovine. Učitelj ima lahko svojo bazo za preizkušanje.
+- **Dijak** vidi podatke za MySQL Workbench (strežnik, vrata, uporabnik, geslo, baza), sam ponastavi svojo bazo, shranjuje skripte (do 50), osnutek urejevalnika se shrani na strežnik; zadnjih 100 zagonov vidi samo on.
+- Dejanja gredo v dnevnik brez gesel. Ob izbrisu uporabnika se izbrišeta tudi baza in račun na strežniku MySQL.
+- CSP: stran `/sql` dovoli sloge z enkratnim `nonce` (urejevalnik CodeMirror), skripte ostanejo samo s strežnika. Izjema od dogovora 18. 11. 2026: urejevalnik SQL ima barvanje kode.
+- Omrežje (požarni zid, dostop iz učilnic za Workbench) ureja učitelj sam.
