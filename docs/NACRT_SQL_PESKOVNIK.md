@@ -1,6 +1,6 @@
 # Načrt: SQL peskovnik (4. letnik)
 
-Stanje: **predlog za potrditev** (26. 11. 2026). Nič od tega še ni narejeno. Ko učitelj potrdi, se dogovori prenesejo v `docs/NACRT_PORTALA.md`, delo pa gre po fazah (razdelek 10).
+Stanje: **predlog za potrditev** (26. 11. 2026), odprta vprašanja odgovorjena isti dan (razdelek 11). Nič od tega še ni narejeno. Ko učitelj potrdi, se dogovori prenesejo v `docs/NACRT_PORTALA.md`, delo pa gre po fazah (razdelek 10).
 
 ## 1. Namen
 
@@ -15,8 +15,8 @@ Dijaki 4. letnika (4.4 DDL, 4.5 poizvedbe, 4.6 DML) pišejo SQL in ga izvedejo n
 | Vloga | Kaj lahko |
 |---|---|
 | Skrbnik | **edini** vpiše strežnik SQL (naslov, vrata, skrbniški račun, TLS) in omejitve; uvozi skupne baze; vidi vse baze vseh razredov (velikost, zadnja uporaba), lahko vse kot učitelj; vidi in počisti »osirotele« baze (na strežniku so, v portalu nimajo dijaka) |
-| Učitelj | v **svojih razredih 4. letnika**: ustvari baze (vsem ali izbranim dijakom), ponastavi bazo (prazna ali iz predloge), ponastavi geslo, izbriše bazo; vidi stanje in velikost; ima svojo bazo za preizkušanje |
-| Dijak 4. letnika | uporablja svojo bazo in skupne baze samo za branje; vidi svoje podatke za Workbench; sam ponastavi svojo bazo |
+| Učitelj | v **svojih razredih 4. letnika**: ustvari baze (vsem ali izbranim dijakom), ponastavi bazo (prazna ali iz predloge), ponastavi geslo, izbriše bazo; vidi samo »semafor« uporabe (razdelek 7), ne sheme, podatkov ali zgodovine; ima svojo bazo za preizkušanje |
+| Dijak 4. letnika | uporablja svojo bazo in skupne baze samo za branje; vidi svoje podatke za Workbench (strežnik, vrata, ime baze, uporabnik, geslo); sam ponastavi svojo bazo; edini vidi svojo zgodovino zagonov |
 | Nadzorni, drugi letniki | peskovnika ne vidijo |
 
 Peskovnik se pokaže samo razredom z letnikom 4 (iz `content/portal.json`, `years`) in samo, ko je strežnik v nastavitvah in povezava deluje.
@@ -31,7 +31,7 @@ Predpona `lr_` je nastavitev (privzeto `lr_`) in se po začetku uporabe ne sprem
 
 ## 4. Strežnik SQL
 
-**Izbira (odloči učitelj):** priporočam **MySQL 8.4 LTS**, ker so gradiva (4.4 B11, razlaga 6) in Workbench vezani na MySQL. MariaDB 10.11 ali 11.4 deluje enako dobro s strani portala (isti gonilnik, `mysql2`); ima uporabniško omejitev `MAX_STATEMENT_TIME`, ki je MySQL nima, a portal čas omeji sam (razdelek 6), zato to ni odločilno. »Preizkusi povezavo« pokaže različico.
+**Izbira (odloči učitelj):** za maturo izbira ni pomembna (vse, kar zahteva, deluje v obeh). Priporočam **MySQL 8.4 LTS**, ker so gradiva (4.4 B11, razlaga 6) in Workbench vezani na MySQL; Workbench ob povezavi na MariaDB opozori na nepodprt strežnik. MariaDB 10.11 ali 11.4 deluje enako dobro s strani portala (isti gonilnik, `mysql2`); ima uporabniško omejitev `MAX_STATEMENT_TIME`, ki je MySQL nima, a portal čas omeji sam (razdelek 6), zato to ni odločilno. »Preizkusi povezavo« pokaže različico.
 
 Priprava strežnika (pošljem točne ukaze ob izvedbi):
 
@@ -94,12 +94,13 @@ Gesla (skrbniško, dijakov, bralca) so v bazi portala šifrirana (AES-256-GCM) s
 - **ER diagram** osebne baze, narisan iz `information_schema` (lastna koda, SVG, brez knjižnice): tabele, ključi, povezave; premikanje, povečava, prenos SVG. Poveže 4.3 s 4.4.
 - **Skripti**: dijak shrani skript z imenom (na strežniku portala, do 50 skriptov), da doma nadaljuje. Zadnje stanje urejevalnika se shrani samodejno. **Zgodovina** zadnjih 100 zagonov z izidom.
 - **Ponastavi mojo bazo**: izbira predloge in potrditev.
+- Zgodovina zagonov je vidna samo dijaku (dogovor 26. 11. 2026).
 - **Workbench**: okno s strežnikom, vrati, uporabnikom in geslom (gumb Kopiraj) ter kratkim navodilom za novo povezavo.
 - Telefon: urejevalnik, rezultat in drevo drug pod drugim; drevo je zložljivo.
 
 **V poglavjih** (faza 3): ob primerih in nalogah s SQL v 4.4, 4.5 in 4.6 gumb »Odpri v peskovniku« (koda se prenese, pri 4.5 se izbere skupna baza) in stranska plošča v vaji za delo ob branju. Naloge ostanejo »Sam preveri« po dogovorih 21. 11. 2026.
 
-**Učitelj**, pri razredu 4. letnika zavihek »SQL baze«: dijaki v slovenski abecedi, stanje (ni / ustvarjena), velikost, zadnja uporaba; gumbi »Ustvari vsem, ki je nimajo«, pri dijaku Ponastavi bazo, Ponastavi geslo, Izbriši; vsako dejanje v dnevnik (brez gesel).
+**Učitelj**, pri razredu 4. letnika zavihek »SQL baze«: dijaki v slovenski abecedi in **semafor** (dogovor 26. 11. 2026): zelena = zagon v zadnjih 7 dneh, rumena = baza je bila uporabljena, a ne v zadnjih 7 dneh, siva = še ni uporabljena, brez pike = baze ni; ob piki datum zadnje uporabe. Sheme, podatkov in zagonov dijaka učitelj ne vidi. Geslo dijaka učitelj vidi samo takoj po ponastavitvi (da ga lahko pove dijaku); gumbi »Ustvari vsem, ki je nimajo«, pri dijaku Ponastavi bazo, Ponastavi geslo, Izbriši; vsako dejanje v dnevnik (brez gesel).
 
 ## 8. Podatki v portalu (migracija 017)
 
@@ -127,10 +128,10 @@ Vse se izbriše z uporabnikom; pri izbrisu uporabnika in ob zaključku šolskega
 
 Vsaka faza je svoj commit (ali nekaj commitov) s preizkusi; pred vsako vprašam, katere preizkuse poženem, in opomnim na CI.
 
-## 11. Odprto (odloči učitelj)
+## 11. Odgovori učitelja (26. 11. 2026)
 
-1. MySQL 8.4 LTS (priporočam) ali MariaDB?
-2. Ali učitelj vidi geslo dijaka (pomoč v učilnici) ali ga lahko samo ponastavi? Predlog: vidi.
-3. Ali učitelj vidi shemo dijakove baze (samo ogled tabel in ER, brez podatkov in zgodovine)? Predlog: da.
-4. Ali naj bo zgodovina zagonov vidna samo dijaku (predlog) ali tudi učitelju?
-5. Ali se Workbench iz učilnic poveže neposredno na strežnik (potrebno odpiranje 3306 za učilnice) ali Workbench uporabljajo samo z lokalnim strežnikom na računalniku?
+1. MySQL ali MariaDB: za maturo ni pomembno (raven zahtev je v obeh enaka: DDL, omejitve, SELECT z JOIN, GROUP BY, podpoizvedbe, UNION/INTERSECT/EXCEPT, DML). Priporočilo ostane MySQL 8.4 LTS zaradi Workbencha in razlag v 4.4; končna izbira je pri učitelju ob postavitvi strežnika, portal podpira oba.
+2. Dijak vidi strežnik, vrata, ime baze, uporabnika in geslo, da nastavi MySQL Workbench.
+3. Učitelj vidi samo semafor uporabe (razdelek 7), ne sheme ali podatkov.
+4. Zgodovina zagonov je vidna samo dijaku.
+5. Omrežje (požarni zid, dostop iz učilnic za Workbench) uredi učitelj sam.
