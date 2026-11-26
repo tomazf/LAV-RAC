@@ -1,0 +1,20 @@
+<%# Groups of reports. Needs groups, view ('razredi' or 'letniki'), admin, back, csrf, MAX_TEXT. %>
+<% groups.forEach((g) => { %>
+<% if (view === 'letniki') { %>
+<section class="rp-group">
+  <h2><%= g.title %> <span class="dim">(<%= g.count %>)</span></h2>
+  <% g.chapters.forEach((c) => { %>
+  <h3><%= c.id ? c.id + ' · ' + c.title : 'Brez vaje' %> <span class="dim">(<%= c.items.length %>)</span></h3>
+  <% c.items.forEach((r) => { %><%- include('report', { r, admin, who: true, where: false, back, csrf, MAX_TEXT }) %><% }) %>
+  <% }) %>
+</section>
+<% } else { %>
+<section class="rp-group">
+  <h2><%= g.name %> <% if (g.year) { %><span class="dim">· <%= g.year %>. letnik</span><% } %> <span class="dim">(<%= g.count %>)</span></h2>
+  <% g.students.forEach((s) => { %>
+  <h3><%= s.name %> <span class="dim">(<%= s.items.length %>)</span></h3>
+  <% s.items.forEach((r) => { %><%- include('report', { r, admin, who: false, where: true, back, csrf, MAX_TEXT }) %><% }) %>
+  <% }) %>
+</section>
+<% } %>
+<% }) %>

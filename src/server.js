@@ -18,6 +18,7 @@ import { exerciseRouter } from './routes/exercises.js';
 import { studentRouter } from './routes/student.js';
 import { teacherRouter } from './routes/teacher.js';
 import { adminRouter } from './routes/admin.js';
+import { reportApiRouter } from './routes/reports.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -35,6 +36,7 @@ Object.assign(app.locals, { listUrl, pageNumbers, PER_PAGE });
 app.locals.path = '/';
 app.locals.user = null;
 app.locals.csrf = '';
+app.locals.htmlPrefs = '';
 
 // Browsers and bookmarks ask for /favicon.ico on their own, also on exercise pages.
 app.get('/favicon.ico', (req, res) => {
@@ -103,6 +105,7 @@ app.use((req, res, next) => {
 app.use('/auth', authRouter);
 app.use('/', exerciseRouter);
 app.use('/', studentRouter);
+app.use('/', reportApiRouter);
 app.use('/ucitelj', teacherRouter);
 app.use('/admin', adminRouter);
 app.use((req, res) => res.status(404).render('error', { title: 'Stran ne obstaja', message: 'Povezava je napačna ali stran ni več na voljo.' }));

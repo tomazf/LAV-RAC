@@ -6,6 +6,7 @@ import { ACTION_BACKUP, backupWarning, recentBackup } from '../backup.js';
 import { byName, cleanName } from '../format.js';
 import { paging } from '../paging.js';
 import { backupRouter } from './backup.js';
+import { adminReportsRouter } from './reports.js';
 import { ACTION_YEAR, yearRouter } from './year.js';
 
 export const adminRouter = express.Router();
@@ -15,6 +16,7 @@ adminRouter.use(async (req, res, next) => {
   try { if (req.method === 'GET') res.locals.backupWarn = await backupWarning(); next(); } catch (e) { next(e); }
 });
 adminRouter.use('/kopije', backupRouter);
+adminRouter.use('/prijave', adminReportsRouter);
 adminRouter.use('/solsko-leto', yearRouter);
 
 const yearIn = (v) => (YEARS.some((y) => y.year === Number(v)) ? Number(v) : null);

@@ -1,0 +1,13 @@
+<%# Filter of the lists of reports. Needs path, state, view, year, classId, classes, years, counts. %>
+<form class="rp-filter" method="get" action="<%= path %>">
+  <label>Stanje <select name="stanje">
+    <option value="odprte" <%- state === 'odprte' ? 'selected' : '' %>>Odprte (<%= counts.open %>)</option>
+    <option value="resene" <%- state === 'resene' ? 'selected' : '' %>>Rešene (<%= counts.resolved %>)</option>
+    <option value="vse" <%- state === 'vse' ? 'selected' : '' %>>Vse</option></select></label>
+  <label>Razred <select name="razred"><option value="">Vsi</option><% classes.forEach((c) => { %><option value="<%= c.id %>" <%- classId === c.id ? 'selected' : '' %>><%= c.name %></option><% }) %></select></label>
+  <% if (years.length) { %><label>Letnik vaje <select name="letnik"><option value="">Vsi</option><% years.forEach((y) => { %><option value="<%= y.year %>" <%- year === y.year ? 'selected' : '' %>><%= y.year %>. letnik</option><% }) %></select></label><% } %>
+  <label>Razvrsti <select name="pogled">
+    <option value="razredi" <%- view === 'razredi' ? 'selected' : '' %>>po razredih in dijakih</option>
+    <option value="letniki" <%- view === 'letniki' ? 'selected' : '' %>>po letnikih in poglavjih</option></select></label>
+  <button class="btn small">Pokaži</button>
+</form>

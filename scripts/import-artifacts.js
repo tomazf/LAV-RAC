@@ -40,6 +40,9 @@ function build(id, src, adapter) {
   s = s.replace(/<link[^>]*fonts\.(googleapis|gstatic)\.com[^>]*>\n?/g, '');
   s = s.replace(/<meta name="claude:[^>]*>\n?/g, '');
   if (/https?:\/\/fonts\./.test(s)) throw new Error(`${id}: outside font left`);
+  // Option letters for any number of options: the artifacts take them from the string "ABCDEF", which has six letters, so a seventh option
+  // (4.2, set E, task 11) was labelled "undefined". This holds for every exercise, so it is done here and not in each adapter.
+  s = s.split('"ABCDEF"[k]').join('String.fromCharCode(65+k)');
   for (const p of adapter.patches) s = patch(s, p, id);
   // The artifact's head part (title, styles) goes into <head>, the rest into <body>.
   const firstScript = s.indexOf('<script');

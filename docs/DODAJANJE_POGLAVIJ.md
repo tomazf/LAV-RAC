@@ -25,7 +25,7 @@ Potrebno je samo za preizkuse in za `npm run import` (uvoz odpre stran v brskaln
 2. **Vir**: artifact prenesi z orodjem Artifact (`read`) in ga shrani nespremenjenega v `content/sources/<id>.html`.
 3. **Adapter** `content/adapters/<id>.js`: po zgledu sosednjega poglavja istega letnika (2.x: `2.3.js`, 3.x: `3.5.js`, 4.x: `4.2.js`). Uporabi skupne dele iz `content/adapters/qformat.js`: `statements`, `QTEXT`, `outputCompare` (izpis programa), `partialCredit` (delno točkovanje; v 2.x `partialCredit2`). Vsaka zamenjava (`patches`) mora najti natanko eno mesto, sicer uvoz javi napako.
 4. **Uvoz**: `npm run import -- <id>` zgradi `content/exercises/<id>.html` in posodobi `content/catalog.json` (druge vaje ostanejo, kot so). Uvoz preveri oštevilčenje nalog, črke sklopov brez vrzeli in napake na strani.
-5. **Pregled na zaslonu** (učitelj): levi stolpec, skupine razlag (potrdi učitelj), legenda, sklop Za doma, naloge z izpisom, nobenih omemb laboratorijskih vaj v 3. letniku. Pri 4. letniku se sklici na druga poglavja ujemajo z načrtom poglavij.
+5. **Pregled na zaslonu** (učitelj): levi stolpec, skupine razlag (potrdi učitelj), legenda, sklop Za doma, naloge z izpisom, nobenih omemb laboratorijskih vaj v 3. letniku. Pri 4. letniku se sklici na druga poglavja ujemajo z načrtom poglavij. Pri nalogah z več kot šestimi možnostmi preveri črke (uvoz sam nadomesti niz `"ABCDEF"`, glej `docs/NACRT_PORTALA.md`, dogovori 26. 11. 2026).
 6. **Dokumentacija**: posodobi tabelo in seznam »Kaj še rabimo« v `docs/LAV-RAC.md`; nov dogovor, ki ni zapisan, najprej poročaj in nato zapiši v `docs/NACRT_PORTALA.md`.
 7. **Preizkusi** (glej spodaj), commit, push v `main`, CI.
 

@@ -7,9 +7,11 @@ import { byName, bySurname, csvCell, dayKey, date, duration, num, pct } from '..
 import { buildTimeline, RANGES } from '../timeline.js';
 import { readTask, recordReset, summarize } from '../progress.js';
 import { cell, progressFor, rollup, strip } from '../stats.js';
+import { teacherReportsRouter } from './reports.js';
 
 export const teacherRouter = express.Router();
 teacherRouter.use(requireTeacher);
+teacherRouter.use('/prijave', teacherReportsRouter);
 
 // Listed by name; each person also carries their place in the order by surname, so the page can switch without a reload.
 const unassignedUsers = async () => {

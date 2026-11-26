@@ -67,13 +67,14 @@ exerciseRouter.get('/vaje/:id', requireAccess, async (req, res, next) => {
     if (req.user.isObserver) {
       return res.type('html').send(renderExercise(ex, {
         id: ex.id, no: ex.no, title: ex.title, key: ex.key, attempt: 0, uid: req.user.id, name: req.user.name, state: {}, csrf: req.session.csrf, staff: true, readOnly: true,
-        variant: ex.hasVariants ? { seed: 1, keep: [] } : null,
+        variant: ex.hasVariants ? { seed: 1, keep: [] } : null, prefs: req.user.prefs, report: true, unseen: req.user.reports_unseen,
       }));
     }
     const p = await openAttempt(req.user, ex);
     res.type('html').send(renderExercise(ex, {
       id: ex.id, no: ex.no, title: ex.title, key: ex.key, attempt: p.attempt, uid: req.user.id, name: req.user.name, state: p.state, csrf: req.session.csrf, staff: req.user.isTeacher,
       variant: ex.hasVariants ? { seed: p.variant_seed, keep: p.variant_keep } : null,
+      prefs: req.user.prefs, report: !req.user.isAdmin, unseen: req.user.reports_unseen,
     }));
   } catch (e) { next(e); }
 });

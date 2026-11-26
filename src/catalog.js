@@ -3,6 +3,7 @@ import path from 'node:path';
 import { asset, fontPreloads } from './assets.js';
 import { many, one, q } from './db.js';
 import { portal } from './portal.js';
+import { htmlAttrs } from './prefs.js';
 
 const root = path.resolve(import.meta.dirname, '..');
 // The tests run on their own exercises (test/fixtures/content), because the portal's content changes.
@@ -30,10 +31,15 @@ export const totalTasks = exercises.reduce((a, e) => a + e.tasks.length, 0);
 const FONTS_LINK = /<link[^>]*href="\/static\/fonts\/fonts\.css"[^>]*>/;
 export function renderExercise(ex, boot) {
   const json = JSON.stringify(boot).replace(/</g, '\\u003c');
+  // The buttons in the header (display settings, reports) need the token and what the user may do; no tracker is needed for that.
+  const hd = JSON.stringify({ csrf: boot.csrf, report: !!boot.report, unseen: Number(boot.unseen) || 0, exercise: ex.id }).replace(/</g, '\\u003c');
+  const header = `<link href="${asset('css/hdr.css')}" rel="stylesheet">\n<script>window.__LAVHD=${hd}</script>\n<script src="${asset('js/hdr.js')}" defer></script>\n`;
   const variants = ex.hasVariants ? `<script src="${asset('js/variants/core.js')}"></script>\n<script src="${asset(`js/variants/${ex.id}.js`)}"></script>` : '';
   // A supervisor's view is read-only: the shell still gets its data, but the tracker is left out, so nothing is sent or saved.
-  const tracker = `<script>window.__LAVELS=${json}</script>\n` + (boot.readOnly ? '' : `<script src="${asset('js/tracker.js')}"></script>`);
+  const tracker = header + `<script>window.__LAVELS=${json}</script>\n` + (boot.readOnly ? '' : `<script src="${asset('js/tracker.js')}"></script>`);
+  // The user's display settings (theme, text size ...) are in the <html> tag, as on the portal's own pages.
   return ex.html
+    .replace(/<html([^>]*)>/, (m, a) => `<html${a}${htmlAttrs(boot.prefs)}>`)
     .replace(FONTS_LINK, () => `${fontPreloads}\n<link href="${asset('fonts/fonts.css')}" rel="stylesheet">`)
     .replace(PLACEHOLDER, () => tracker).replace(VARIANTS, () => variants);
 }

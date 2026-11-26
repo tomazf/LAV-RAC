@@ -1,0 +1,7 @@
+<%- include('partials/head', { pageTitle: 'Moje prijave' }) %>
+<div class="title-row"><h1>Moje prijave</h1></div>
+<p class="dim">Prijave napak in nejasnosti, ki si jih poslal. Novo prijavo pošlješ z gumbom z zastavico v vrstici na vrhu strani (v vaji se kraj izpolni sam). Največ <%= PER_DAY %> prijav na dan.</p>
+<% if (!rows.length) { %><p class="empty">Še nisi poslal nobene prijave.</p><% } else { %>
+<% rows.forEach((r) => { %><%- include('partials/report', { r, admin: false, who: false, where: true, back: '', csrf, MAX_TEXT, fresh }) %><% }) %>
+<% } %>
+<%- include('partials/foot') %>

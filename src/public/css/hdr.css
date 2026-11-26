@@ -1,0 +1,71 @@
+/* Header buttons (display settings, reports) and the display settings themselves (text size, spacing, contrast, motion).
+   Loaded by the portal's pages and by every exercise, so it reads the colours of both: the portal's (--card, --ink ...) and the exercise's (--lr-card ...). */
+
+/* ---- display settings, written into the <html> tag by the server ---- */
+html[data-size="large"]{font-size:118.75%}
+html[data-size="xlarge"]{font-size:137.5%}
+/* Text spacing as WCAG 1.4.12 asks for it, applied to everything that is text. */
+html[data-spacing="wide"] body *:not(svg):not(svg *){line-height:1.7!important;letter-spacing:.05em!important;word-spacing:.12em!important}
+html[data-spacing="wide"] p{margin-block-end:1.5em!important}
+html[data-motion="reduce"] *,html[data-motion="reduce"] *::before,html[data-motion="reduce"] *::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+html[data-contrast="high"]{
+  --bg:#fff;--card:#fff;--ink:#000;--mut:#2b2b2b;--acc:#4b0f5c;--line:#555;--tile:#eeeeee;--wire:#555;--ok:#145c25;--bad:#9c1515;--self:#0f5670;--amb:#7a4a00;--part:#3d4a05;--okbg:#dff3e4;--badbg:#fbe0e0;--sig:#8a3a00;--sigbg:#fff0d6;
+  --lr-bg:#fff;--lr-card:#fff;--lr-ink:#000;--lr-mut:#2b2b2b;--lr-acc:#4b0f5c;--lr-acc-soft:#f1e3f6;--lr-line:#555;--lr-tile:#eeeeee;--lr-ring:#555;--lr-seen:#2b2b2b;
+  --lr-ok:#145c25;--lr-ok-bg:#dff3e4;--lr-half:#7a4a00;--lr-part:#3d4a05;--lr-bad:#9c1515;--lr-bad-bg:#fbe0e0;--lr-self:#0f5670;--lr-self-bg:#dbeef5;--hd-focus:#000}
+html[data-contrast="high"][data-theme="dark"]{
+  --bg:#000;--card:#0c0c0c;--ink:#fff;--mut:#e6e6e6;--acc:#f3d0ff;--line:#b5b5b5;--tile:#1c1c1c;--wire:#b5b5b5;--ok:#8be7a2;--bad:#ff9d9d;--self:#8fd8ee;--amb:#ffd37a;--part:#e3f08a;--okbg:#0c2a18;--badbg:#3a0f0f;--sig:#ffc16a;--sigbg:#2b1c05;
+  --lr-bg:#000;--lr-card:#0c0c0c;--lr-ink:#fff;--lr-mut:#e6e6e6;--lr-acc:#f3d0ff;--lr-acc-soft:#2a1636;--lr-line:#b5b5b5;--lr-tile:#1c1c1c;--lr-ring:#b5b5b5;--lr-seen:#e6e6e6;
+  --lr-ok:#8be7a2;--lr-ok-bg:#0c2a18;--lr-half:#ffd37a;--lr-part:#e3f08a;--lr-bad:#ff9d9d;--lr-bad-bg:#3a0f0f;--lr-self:#8fd8ee;--lr-self-bg:#0d2a35;--hd-focus:#fff}
+@media (prefers-color-scheme:dark){html[data-contrast="high"]:not([data-theme="light"]){
+  --bg:#000;--card:#0c0c0c;--ink:#fff;--mut:#e6e6e6;--acc:#f3d0ff;--line:#b5b5b5;--tile:#1c1c1c;--wire:#b5b5b5;--ok:#8be7a2;--bad:#ff9d9d;--self:#8fd8ee;--amb:#ffd37a;--part:#e3f08a;--okbg:#0c2a18;--badbg:#3a0f0f;--sig:#ffc16a;--sigbg:#2b1c05;
+  --lr-bg:#000;--lr-card:#0c0c0c;--lr-ink:#fff;--lr-mut:#e6e6e6;--lr-acc:#f3d0ff;--lr-acc-soft:#2a1636;--lr-line:#b5b5b5;--lr-tile:#1c1c1c;--lr-ring:#b5b5b5;--lr-seen:#e6e6e6;
+  --lr-ok:#8be7a2;--lr-ok-bg:#0c2a18;--lr-half:#ffd37a;--lr-part:#e3f08a;--lr-bad:#ff9d9d;--lr-bad-bg:#3a0f0f;--lr-self:#8fd8ee;--lr-self-bg:#0d2a35;--hd-focus:#fff}}
+html[data-contrast="high"] a{text-decoration:underline}
+html[data-contrast="high"] :focus-visible{outline:4px solid var(--hd-focus,#000)!important;outline-offset:3px!important}
+
+/* ---- the two buttons in the header ---- */
+.hd-btns{display:inline-flex;gap:2px;align-items:center;flex:none}
+.hd-btn{position:relative;display:inline-grid;place-items:center;width:40px;height:40px;padding:0;border:0;border-radius:8px;background:transparent;color:#fff;cursor:pointer;text-decoration:none}
+.hd-btn:hover{background:#ffffff26}
+.hd-btn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hd-btn svg .fill{fill:currentColor}
+.hd-btn:focus-visible{outline:3px solid #e9a23b;outline-offset:1px}
+.hd-badge{position:absolute;top:1px;right:1px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#ffc45c;color:#1b1206;font:700 11px/17px system-ui,sans-serif;text-align:center}
+/* in the exercise header (a light bar) the buttons are tinted plates like the links next to them */
+.lr-top .hd-btn{color:var(--lr-acc);background:var(--lr-acc-soft);border:1.5px solid var(--lr-acc-soft);width:36px;height:36px}
+.lr-top .hd-btn:hover{border-color:var(--lr-acc);background:var(--lr-acc-soft)}
+.lr-top .hd-btns{gap:6px}
+.hd-float{position:fixed;top:8px;right:8px;z-index:60;background:#2e1a40;border-radius:10px;padding:2px}
+
+/* ---- the windows ---- */
+dialog.hd-dlg{--hd-card:var(--lr-card,var(--card,#fff));--hd-ink:var(--lr-ink,var(--ink,#241433));--hd-mut:var(--lr-mut,var(--mut,#5f5470));--hd-line:var(--lr-line,var(--line,#ddd6e6));
+  --hd-acc:var(--lr-acc,var(--acc,#6b2a7a));--hd-onacc:var(--onacc,var(--lr-card,#fff));--hd-tile:var(--lr-tile,var(--tile,#ece6f2));--hd-ok:var(--lr-ok,var(--ok,#2b8a3e));--hd-bad:var(--lr-bad,var(--bad,#c92a2a));
+  width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 24px);padding:0;border:2px solid var(--hd-line);border-radius:14px;background:var(--hd-card);color:var(--hd-ink);font:1rem/1.5 var(--lr-fb,var(--fb,system-ui,sans-serif));box-shadow:0 18px 60px #0007;overflow:auto}
+dialog.hd-dlg::backdrop{background:#0b0614a6}
+.hd-in{padding:18px 20px 20px}
+.hd-dlg h2{margin:0 0 6px;font-size:1.3rem;line-height:1.25}
+.hd-dlg p{margin:0 0 12px;color:var(--hd-mut)}
+.hd-dlg fieldset{margin:0 0 14px;padding:0;border:0;min-width:0}
+.hd-dlg legend{padding:0;margin:0 0 6px;font-weight:700}
+.hd-seg{display:flex;flex-wrap:wrap;gap:6px}
+.hd-seg label{position:relative;display:inline-flex}
+.hd-seg input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.hd-seg span{display:inline-flex;align-items:center;min-height:42px;padding:6px 14px;border:2px solid var(--hd-line);border-radius:8px;background:var(--hd-card);color:var(--hd-ink);font-weight:600}
+.hd-seg input:checked+span{border-color:var(--hd-acc);background:var(--hd-acc);color:var(--hd-onacc)}
+.hd-seg input:checked+span::before{content:"✓";margin-right:6px}
+.hd-seg input:focus-visible+span{outline:3px solid #e9a23b;outline-offset:2px}
+.hd-dlg textarea{width:100%;min-height:130px;resize:vertical;padding:10px 12px;border:2px solid var(--hd-line);border-radius:8px;background:var(--hd-card);color:var(--hd-ink);font:inherit}
+.hd-dlg textarea:focus-visible{outline:3px solid #e9a23b;outline-offset:1px}
+.hd-dlg label.hd-lab{display:block;margin:0 0 4px;font-weight:700}
+.hd-where{margin:0 0 12px;padding:8px 12px;border-radius:8px;background:var(--hd-tile);color:var(--hd-ink)}
+.hd-where b{font-weight:700}
+.hd-row{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin-top:12px}
+.hd-row .hd-grow{flex:1 1 auto}
+.hd-count{color:var(--hd-mut);font-size:.9rem}
+.hd-act{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:6px 16px;border:2px solid var(--hd-acc);border-radius:8px;background:var(--hd-acc);color:var(--hd-onacc);font:700 1rem var(--lr-fb,var(--fb,system-ui,sans-serif));cursor:pointer;text-decoration:none}
+.hd-act.ghost{background:transparent;color:var(--hd-acc)}
+.hd-act:disabled{opacity:.45;cursor:default}
+.hd-act:focus-visible{outline:3px solid #e9a23b;outline-offset:2px}
+.hd-msg{min-height:1.4em;margin:10px 0 0;font-weight:600}
+.hd-msg.ok{color:var(--hd-ok)}.hd-msg.bad{color:var(--hd-bad)}
+.hd-link{color:var(--hd-acc);text-underline-offset:3px}

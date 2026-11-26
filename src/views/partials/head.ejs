@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="sl">
+<html lang="sl"<%- htmlPrefs %>>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -8,6 +8,8 @@
 <link rel="stylesheet" href="<%= asset('fonts/fonts.css') %>">
 <link rel="stylesheet" href="<%= asset('css/app.css') %>">
 <link rel="stylesheet" href="<%= asset('css/panel.css') %>">
+<% if (user) { %><link rel="stylesheet" href="<%= asset('css/hdr.css') %>">
+<script src="<%= asset('js/hdr.js') %>" defer></script><% } %>
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="<%= asset('favicon.svg') %>" type="image/svg+xml">
 </head>
@@ -26,9 +28,10 @@
     <nav aria-label="Glavni meni">
       <% if (!user.isWaiting) { %><a href="/vaje" <%- path.startsWith('/vaje') ? 'aria-current="page"' : '' %>>Vaje</a><% } %>
       <% if (user.isTeacher) { %><a href="/ucitelj" <%- path.startsWith('/ucitelj') ? 'aria-current="page"' : '' %>>Razredi</a><% } %>
-      <% if (user.isAdmin) { %><a href="/admin" <%- path.startsWith('/admin') ? 'aria-current="page"' : '' %>>Administracija</a><% } %>
+      <% if (user.isTeacher && !user.isAdmin) { %><a href="/ucitelj/prijave" <%- path.startsWith('/ucitelj/prijave') ? 'aria-current="page"' : '' %>>Prijave<% if (user.reportsOpen) { %> <span class="cnt" aria-label="<%= user.reportsOpen %> odprtih"><%= user.reportsOpen %></span><% } %></a><% } %>
+      <% if (user.isAdmin) { %><a href="/admin" <%- path.startsWith('/admin') ? 'aria-current="page"' : '' %>>Administracija<% if (user.reportsOpen) { %> <span class="cnt" aria-label="<%= user.reportsOpen %> odprtih prijav"><%= user.reportsOpen %></span><% } %></a><% } %>
     </nav>
-    <div class="who">
+    <div class="who" id="hd-root" data-csrf="<%= csrf %>" data-report="<%= !user.isAdmin && !user.isWaiting ? '1' : '' %>" data-unseen="<%= user.reports_unseen || 0 %>">
       <span class="who-name"><%= user.name %></span>
       <form method="post" action="/auth/logout"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="linkish">Odjava</button></form>
     </div>

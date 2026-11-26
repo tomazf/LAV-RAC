@@ -1,0 +1,26 @@
+<%# One report. Needs r, admin (may answer), who (show the author and class), where (show the place), back (admin lists), csrf. %>
+<% const f = fmt; const open = r.status === 'open'; %>
+<article class="rp <%= open ? 'is-open' : 'is-done' %>" id="r<%= r.id %>">
+  <header class="rp-head">
+    <span class="rp-st <%= open ? 'open' : 'done' %>"><%= open ? '○ Odprto' : '✓ Rešeno' %></span>
+    <% if (who) { %><strong><%= r.user_name %></strong><% if (r.class_name) { %> <span class="dim">· <%= r.class_name %></span><% } else if (r.user_role === 'teacher') { %> <span class="dim">· učitelj</span><% } else if (r.user_role === 'observer') { %> <span class="dim">· nadzorni</span><% } %><% } %>
+    <% if (where) { %><span class="rp-where"><% if (r.link) { %><a href="<%= r.link %>"><%= r.exNo ? r.exercise_id + ' · ' + r.exTitle : r.where %><%= r.exNo && r.where ? ' · ' + r.where : '' %></a><% } else { %><%= r.where %><% } %></span><% } else if (r.where) { %><span class="rp-where"><% if (r.link) { %><a href="<%= r.link %>"><%= r.where %></a><% } else { %><%= r.where %><% } %></span><% } %>
+    <time class="dim nw" datetime="<%= new Date(r.created_at).toISOString() %>"><%= f.dateTime(r.created_at) %></time>
+    <% if (typeof fresh !== 'undefined' && fresh && fresh.has(r.id)) { %><span class="rp-new">Novo</span><% } %>
+  </header>
+  <p class="rp-body"><%= r.body %></p>
+  <% if (r.reply) { %><div class="rp-reply"><strong>Odgovor skrbnika</strong> <span class="dim nw"><%= f.dateTime(r.replied_at) %></span><p><%= r.reply %></p></div><% } %>
+  <% if (!open && r.resolved_at) { %><p class="dim rp-meta">Rešeno <%= f.dateTime(r.resolved_at) %>.</p><% } %>
+  <% if (admin) { %>
+  <form class="rp-form" method="post" action="/admin/prijave/<%= r.id %>">
+    <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="back" value="<%= back %>">
+    <label for="rep<%= r.id %>">Odgovor (viden avtorju)</label>
+    <textarea id="rep<%= r.id %>" name="reply" rows="2" maxlength="<%= MAX_TEXT %>"><%= r.reply || '' %></textarea>
+    <div class="row">
+      <button class="btn ghost small" name="akcija" value="shrani">Shrani odgovor</button>
+      <% if (open) { %><button class="btn small" name="akcija" value="resi">Shrani in označi kot rešeno</button>
+      <% } else { %><button class="btn ghost small" name="akcija" value="odpri">Ponovno odpri</button><% } %>
+    </div>
+  </form>
+  <% } %>
+</article>

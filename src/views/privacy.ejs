@@ -8,13 +8,15 @@
   <li>Pri nalogah: odgovori, točke, uporabljeni namigi, ogledane rešitve in čas oddaje.</li>
   <li>Pri vajah: katere strani so bile odprte in ocena porabljenega časa. Čas se šteje samo, ko je zavihek viden in je bila v zadnji minuti kakšna aktivnost.</li>
   <li>Zadnja ponastavitev vaje: datum in rezultat tik pred njo (prejšnje se ne hranijo).</li>
+  <li>Nastavitve prikaza (tema, velikost besedila, razmik, kontrast, animacije), da se ujemajo na vseh računalnikih.</li>
+  <li>Prijave napak, ki jih pošlješ sam: besedilo, kraj v portalu (vaja, stran, naloga), čas, stanje in odgovor skrbnika.</li>
 </ul>
 <h2>Kdo vidi podatke</h2>
 <ul>
-  <li>Dijak vidi svoj napredek.</li>
-  <li>Učitelj vidi podatke dijakov v razredih, ki jim je pridružen, Učitelj vidi tudi imena dijakov brez razreda.</li>
-  <li>Skrbnik vidi vse podatke, določa učitelje in lahko izbriše uporabnika z vsemi njegovimi podatki.</li>
+  <li>Dijak vidi svoj napredek in svoje prijave z odgovori.</li>
+  <li>Učitelj vidi podatke dijakov v razredih, ki jim je pridružen, Učitelj vidi tudi imena dijakov brez razreda. Prijave napak dijakov svojih razredov samo vidi.</li>
+  <li>Skrbnik vidi vse podatke, bere prijave in nanje odgovarja, določa učitelje in lahko izbriše uporabnika z vsemi njegovimi podatki (tudi prijavami).</li>
 </ul>
-<p>Podatki so na šolskem strežniku. Stran ne uporablja zunanjih pisav, analitike ali oglasov.</p>
+<p>Podatki so na šolskem strežniku. Stran ne uporablja zunanjih pisav, skript, analitike ali oglasov; tudi nastavitve prikaza so naše, ne zunanji vtičnik.</p>
 <script src="<%= asset('js/back.js') %>"></script>
 <%- include('partials/foot') %>

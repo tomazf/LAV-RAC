@@ -4,6 +4,8 @@ import * as oidc from 'openid-client';
 import { config } from './config.js';
 import { one } from './db.js';
 import { portal } from './portal.js';
+import { htmlAttrs } from './prefs.js';
+import { countOpenFor } from './reports.js';
 
 let discovered = null;
 async function oidcConfig() {
@@ -86,9 +88,11 @@ authRouter.post('/logout', async (req, res, next) => {
 export async function loadUser(req, res, next) {
   try {
     res.locals.user = null;
+    res.locals.htmlPrefs = '';
     if (req.session?.uid) {
       const u = await one(
-        `SELECT u.*, (SELECT m.class_id FROM class_members m WHERE m.user_id=u.id) AS class_id FROM users u WHERE u.id=$1`,
+        `SELECT u.*, (SELECT m.class_id FROM class_members m WHERE m.user_id=u.id) AS class_id,
+           (SELECT count(*) FROM reports r WHERE r.user_id=u.id AND r.unseen) AS reports_unseen FROM users u WHERE u.id=$1`,
         [req.session.uid],
       );
       if (u) {
@@ -97,6 +101,9 @@ export async function loadUser(req, res, next) {
         // A supervisor (»Nadzorni«) has no class and needs none: the years they may see are in observer_years.
         u.isObserver = !u.isTeacher && u.role === 'observer';
         u.isWaiting = !u.isTeacher && !u.isObserver && !u.class_id;
+        // The display settings go into the <html> tag of every page; staff see how many reports wait for them.
+        u.reportsOpen = u.isTeacher ? await countOpenFor(u) : 0;
+        res.locals.htmlPrefs = htmlAttrs(u.prefs);
         req.user = u;
         res.locals.user = u;
         res.locals.csrf = req.session.csrf;
