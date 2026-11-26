@@ -285,6 +285,12 @@ test('the admin sees reports by class and student or by year and chapter, the te
   assert.match(await admin.locator('nav[aria-label="Glavni meni"] a:has-text("Prijave") .cnt').innerText(), /6/);
   assert.equal(await admin.locator('nav[aria-label="Glavni meni"] a:has-text("Administracija") .cnt').count(), 0);
   assert.equal(await admin.locator('nav[aria-label="Glavni meni"] a[aria-current="page"]').innerText().then((t) => t.replace(/\s*\d+$/, '')), 'Prijave');
+  // no tab of Administracija for it: the button in the main menu is the way in
+  assert.equal(await admin.locator('nav[aria-label="Administracija"]').count(), 0);
+  assert.equal(await admin.locator('h1').innerText(), 'Prijave');
+  await admin.goto(`${APP}/admin`);
+  assert.equal(await admin.locator('nav[aria-label="Administracija"] a:text-is("Prijave")').count(), 0);
+  await admin.goto(`${APP}/admin/prijave`);
   await admin.goto(`${APP}/admin/prijave?pogled=letniki`);
   assert.deepEqual(await admin.locator('.rp-group h2').allInnerTexts(), ['2. letnik (1)', '4. letnik (3)', 'Splošno (ni vezano na vajo) (2)']);
   assert.match((await admin.locator('.rp-group h3').allInnerTexts()).join('|'), /^2\.1 · .*\(1\)\|4\.2 · .*\(3\)\|Brez vaje \(2\)$/);
