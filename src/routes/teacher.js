@@ -8,6 +8,7 @@ import { buildTimeline, RANGES } from '../timeline.js';
 import { readTask, recordReset, summarize } from '../progress.js';
 import { cell, progressFor, rollup, strip } from '../stats.js';
 import { teacherReportsRouter } from './reports.js';
+import { describe, flagsFor, label, STATUS } from '../flags.js';
 
 export const teacherRouter = express.Router();
 teacherRouter.use(requireTeacher);
@@ -109,7 +110,8 @@ teacherRouter.get('/razredi/:id', loadClass, async (req, res, next) => {
     const open = sums(list.filter((e) => e.visible));
     const map = ofList(await progressFor(ms.map((m) => m.id)), list);
     const sort = SORTS[req.query.sort] ? req.query.sort : 'name';
-    const rows = ms.map((m) => ({ ...m, total: rollup(map.get(m.id), open.ids), cells: map.get(m.id) })).sort(SORTS[sort]);
+    const flags = await flagsFor(ms.map((m) => m.id), list.map((e) => e.id));
+    const rows = ms.map((m) => ({ ...m, total: rollup(map.get(m.id), open.ids), cells: map.get(m.id), flags: flags.get(m.id) ?? [] })).sort(SORTS[sort]);
     const stats = {
       avg: rows.length ? Math.round(rows.reduce((a, r) => a + pct(r.total.score, open.maxPoints), 0) / rows.length) : 0,
       active: rows.filter((r) => r.total.last && Date.now() - new Date(r.total.last) < 7 * 864e5).length,
@@ -247,9 +249,10 @@ teacherRouter.get('/razredi/:id/rezultati/:eid', loadClass, async (req, res, nex
     if (!ex) return res.status(404).render('error', { title: 'Vaja ne obstaja', message: 'Povezava je napačna.' });
     const ms = await members(req.cls.id);
     const map = await progressFor(ms.map((m) => m.id));
+    const flags = await flagsFor(ms.map((m) => m.id), [ex.id]);
     const students = ms.map((m) => {
       const c = cell(map.get(m.id), ex.id);
-      return { ...m, c, strip: strip(ex, c.state) };
+      return { ...m, c, strip: strip(ex, c.state), flags: flags.get(m.id) ?? [] };
     });
     const tasks = ex.tasks.map((t, n) => {
       const r = { n: n + 1, ...t, self: !!t.self, answered: 0, right: 0, hints: 0, solutions: 0 };
@@ -265,6 +268,27 @@ teacherRouter.get('/razredi/:id/rezultati/:eid', loadClass, async (req, res, nex
       return r;
     });
     res.render('teacher/exercise', { cls: req.cls, ex, students, tasks, message: req.query.sporocilo || null });
+  } catch (e) { next(e); }
+});
+// The teacher decides on a flag: confirm it, dismiss it, or put it back to open. Only a record, the points do not change.
+const FLAG_ACTIONS = { potrdi: 'confirmed', razveljavi: 'dismissed', odpri: 'open' };
+teacherRouter.post('/razredi/:id/dijaki/:uid/opozorila/:fid', loadClass, checkCsrf, async (req, res, next) => {
+  try {
+    const uid = Number(req.params.uid) || 0;
+    const back = (msg) => res.redirect(`/ucitelj/razredi/${req.cls.id}/dijaki/${uid}?sporocilo=${encodeURIComponent(msg)}#opozorila`);
+    const m = (await members(req.cls.id)).find((x) => x.id === uid);
+    const status = FLAG_ACTIONS[req.body.akcija];
+    const list = new Set((await exerciseList(req.cls.id)).map((e) => e.id));
+    const f = m && status ? await one('SELECT * FROM flags WHERE id=$1 AND user_id=$2', [Number(req.params.fid) || 0, uid]) : null;
+    if (!f || !list.has(f.exercise_id)) return back('Opozorila ni več.');
+    if (f.status === status) return back('Ni sprememb.');
+    const note = String(req.body.note ?? '').replace(/\r\n/g, '\n').trim().slice(0, 500);
+    await q(
+      `UPDATE flags SET status=$2, note=NULLIF($3,''), decided_by=CASE WHEN $2='open' THEN NULL ELSE $4::bigint END, decided_at=CASE WHEN $2='open' THEN NULL ELSE now() END WHERE id=$1`,
+      [f.id, status, note, req.user.id],
+    );
+    await audit(req.user, status === 'confirmed' ? 'Potrdil opozorilo' : status === 'dismissed' ? 'Razveljavil opozorilo' : 'Ponovno odprl opozorilo', `#${f.id}`);
+    back(status === 'confirmed' ? 'Opozorilo je potrjeno. Dijak ga vidi.' : status === 'dismissed' ? 'Opozorilo je razveljavljeno.' : 'Opozorilo je spet odprto.');
   } catch (e) { next(e); }
 });
 teacherRouter.get('/razredi/:id/dijaki/:uid', loadClass, async (req, res, next) => {
@@ -288,6 +312,7 @@ teacherRouter.get('/razredi/:id/dijaki/:uid', loadClass, async (req, res, next) 
       };
     });
     const timeline = buildTimeline(events, exs, String(req.query.obdobje ?? ''), dayKey(Date.now()));
-    res.render('teacher/student', { cls: req.cls, m, exs, total: rollup(map, open.ids), maxPoints: open.maxPoints, maxTasks: open.maxTasks, timeline, RANGES, CHAPTERS, duration });
+    const flags = ((await flagsFor([uid], ids)).get(uid) ?? []).map((x) => ({ ...x, text: describe(x), title: label(x), ex: byId.get(x.exercise_id) })).reverse();
+    res.render('teacher/student', { flags, STATUS, message: req.query.sporocilo || null, cls: req.cls, m, exs, total: rollup(map, open.ids), maxPoints: open.maxPoints, maxTasks: open.maxTasks, timeline, RANGES, CHAPTERS, duration });
   } catch (e) { next(e); }
 });

@@ -5,6 +5,7 @@ import { csrfValid, requireAccess } from '../auth.js';
 import { many, one, tx } from '../db.js';
 import { merge, summarize, recordReset } from '../progress.js';
 import { moveProgress } from '../taskmap.js';
+import { confirmedFor, detect, notice } from '../flags.js';
 
 export const exerciseRouter = express.Router();
 
@@ -71,10 +72,12 @@ exerciseRouter.get('/vaje/:id', requireAccess, async (req, res, next) => {
       }));
     }
     const p = await openAttempt(req.user, ex);
+    const flagged = (await confirmedFor(req.user.id)).some((f) => f.exercise_id === ex.id);
     res.type('html').send(renderExercise(ex, {
       id: ex.id, no: ex.no, title: ex.title, key: ex.key, attempt: p.attempt, uid: req.user.id, name: req.user.name, state: p.state, csrf: req.session.csrf, staff: req.user.isTeacher,
       variant: ex.hasVariants ? { seed: p.variant_seed, keep: p.variant_keep } : null,
       prefs: req.user.prefs, report: !req.user.isAdmin, unseen: req.user.reports_unseen,
+      notice: flagged ? notice([`${ex.no} ${ex.title}`]) : '',
     }));
   } catch (e) { next(e); }
 });
@@ -112,6 +115,7 @@ exerciseRouter.post('/api/progress/:id', async (req, res, next) => {
         for (const ev of events) {
           await c.query('INSERT INTO task_events(user_id, exercise_id, attempt, task_index, kind, points) VALUES($1,$2,$3,$4,$5,$6)', [req.user.id, ex.id, p.attempt, ev.task, ev.kind, ev.points]);
         }
+        await detect(c, { user: req.user, ex, attempt: p.attempt, events });
       }
       return { attempt: p.attempt, score: summary.score, done: summary.done };
     });

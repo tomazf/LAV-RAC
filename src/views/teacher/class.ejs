@@ -23,10 +23,11 @@
     <th>Odprte vaje</th><th>Čas</th><th class="l">Zadnja aktivnost</th></tr></thead>
   <tbody>
   <% rows.forEach((r, i) => { %><tr>
-    <td class="l stick"><span class="rn"><%= i + 1 %>.</span> <a href="/ucitelj/razredi/<%= cls.id %>/dijaki/<%= r.id %>"><%= r.name %></a></td>
+    <td class="l stick"><span class="rn"><%= i + 1 %>.</span> <a href="/ucitelj/razredi/<%= cls.id %>/dijaki/<%= r.id %>"><%= r.name %></a> <%- include('../partials/flagmark', { flags: r.flags, href: '/ucitelj/razredi/' + cls.id + '/dijaki/' + r.id }) %></td>
     <% list.forEach((e) => { const c = cell(r.cells, e.id); const p = f.pct(c.score, e.maxPoints); const d = f.pct(c.done, e.tasks.length); %>
     <td class="heat <%= e.visible ? '' : 'closed' %>" style="--p:<%= p %>" title="<%= e.no %> <%= e.title %>: <%= f.num(c.score) %> od <%= e.maxPoints %> t, <%= c.done %> od <%= e.tasks.length %> nalog, <%= f.duration(c.seconds) %><%= c.prev?.counts ? ', točke pred ponastavitvijo' : '' %>">
       <% if (c.started) { %><span class="hv"><%= p %></span><span class="hb" style="width:<%= d %>%"></span><% } else { %><span class="hn">–</span><% } %>
+      <%- include('../partials/flagmark', { flags: r.flags.filter((x) => x.exercise_id === e.id), href: '/ucitelj/razredi/' + cls.id + '/dijaki/' + r.id }) %>
     </td><% }) %>
     <td><strong><%= f.pct(r.total.score, maxPoints) %> %</strong></td>
     <td class="nw"><%= f.duration(r.total.seconds) %></td>

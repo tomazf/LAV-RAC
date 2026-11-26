@@ -69,3 +69,4 @@ dialog.hd-dlg::backdrop{background:#0b0614a6}
 .hd-msg{min-height:1.4em;margin:10px 0 0;font-weight:600}
 .hd-msg.ok{color:var(--hd-ok)}.hd-msg.bad{color:var(--hd-bad)}
 .hd-link{color:var(--hd-acc);text-underline-offset:3px}
+.hd-notice{margin:0;padding:10px 16px;border-bottom:3px solid #e9a23b;background:var(--hd-card);color:var(--hd-ink);font:600 1rem var(--lr-fb,var(--fb,system-ui,sans-serif))}

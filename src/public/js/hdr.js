@@ -180,6 +180,12 @@
     else if (who) who.insertBefore(box, who.firstChild);
     else { box.className += ' hd-float'; document.body.appendChild(box); }
   }
+  // A confirmed flag (opozorilo) of the teacher on this exercise: a short notice at the top of the page.
+  function notice() {
+    if (!cfg.notice) return;
+    var bar = el('div', { class: 'hd-notice', role: 'status' }, [el('b', { text: '! Opozorilo: ' }), document.createTextNode(cfg.notice)]);
+    document.body.insertBefore(bar, document.body.firstChild);
+  }
   // After the tracker has built its part of the exercise header (it does that when the page is read).
-  if (document.readyState === 'complete') mount(); else document.addEventListener('DOMContentLoaded', mount);
+  if (document.readyState === 'complete') { mount(); notice(); } else document.addEventListener('DOMContentLoaded', function () { mount(); notice(); });
 })();

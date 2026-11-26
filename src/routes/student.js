@@ -1,8 +1,9 @@
 import express from 'express';
-import { YEARS, classGroups, observerGroups, pastGroups, standardGroups } from '../catalog.js';
+import { YEARS, byId, classGroups, observerGroups, pastGroups, standardGroups } from '../catalog.js';
 import { requireAccess } from '../auth.js';
 import { many, one } from '../db.js';
 import { cell, latest, progressFor, rollup, strip } from '../stats.js';
+import { confirmedFor, notice } from '../flags.js';
 
 export const studentRouter = express.Router();
 
@@ -34,6 +35,9 @@ studentRouter.get('/vaje', requireAccess, async (req, res, next) => {
     const unfinished = list.filter((e) => rows.get(e.id).done < e.tasks.length);
     const inProgress = unfinished.filter((e) => rows.get(e.id).started).sort((a, b) => (rows.get(b.id).last ?? 0) - (rows.get(a.id).last ?? 0));
     const next_ = inProgress[0] ?? unfinished[0] ?? null;
-    res.render('dashboard', { mods, past, rows, total, maxPoints, maxTasks, next_, nextStarted: next_ ? rows.get(next_.id).started : false });
+    // The teacher's confirmed flags: one neutral notice, naming the exercises.
+    const titles = req.user.isTeacher ? [] : [...new Set((await confirmedFor(req.user.id)).map((f) => byId.get(f.exercise_id)).filter(Boolean).map((e) => `${e.no} ${e.title}`))];
+    const flagText = titles.length ? notice(titles) : '';
+    res.render('dashboard', { flagText, mods, past, rows, total, maxPoints, maxTasks, next_, nextStarted: next_ ? rows.get(next_.id).started : false });
   } catch (e) { next(e); }
 });

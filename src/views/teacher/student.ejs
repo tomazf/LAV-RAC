@@ -6,6 +6,23 @@
   <p>Dijak ostane v sistemu in obdrži napredek. Nima dostopa do vaj, dokler ga učitelj ne doda v razred, tudi v drugega.</p>
   <form method="post" action="/ucitelj/razredi/<%= cls.id %>/odstrani"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="user" value="<%= m.id %>"><button class="btn danger">Da, odstrani</button></form></details>
 </div>
+<% if (message) { %><p class="notice"><%= message %></p><% } %>
+<% if (flags.length) { %><section class="block" id="opozorila">
+  <h2>Opozorila</h2>
+  <p class="dim">Portal označi odgovore, ki so nenavadni (na primer več nalog hkrati ali zelo kratek čas). Označba ni dokaz: odločiš ti. Potrjeno opozorilo vidi tudi dijak, točke se ne spremenijo.</p>
+  <% flags.forEach((x) => { %><article class="flag <%= x.status %>">
+    <h3><span class="flagmark <%= x.status === 'open' ? 'open' : x.status === 'confirmed' ? 'conf' : 'off' %>" aria-hidden="true">!</span> <%= x.title %> <span class="tag"><%= STATUS[x.status] %></span></h3>
+    <p><%= x.ex ? x.ex.no + ' ' + x.ex.title : x.exercise_id %> · <%= f.dateTime(x.created_at) %></p>
+    <p><%= x.text %></p>
+    <% if (x.status !== 'open' && x.decided_at) { %><p class="dim"><%= x.decided_name || 'Učitelj' %>, <%= f.dateTime(x.decided_at) %><%= x.note ? ': ' + x.note : '' %></p><% } %>
+    <form method="post" action="<%= base %>/opozorila/<%= x.id %>" class="flag-form"><input type="hidden" name="_csrf" value="<%= csrf %>">
+      <label>Opomba (neobvezno) <input name="note" maxlength="500" value="<%= x.note || '' %>"></label>
+      <% if (x.status !== 'confirmed') { %><button class="btn small" name="akcija" value="potrdi">Potrdi</button><% } %>
+      <% if (x.status !== 'dismissed') { %><button class="btn small ghost" name="akcija" value="razveljavi">Razveljavi</button><% } %>
+      <% if (x.status !== 'open') { %><button class="btn small ghost" name="akcija" value="odpri">Spet odpri</button><% } %>
+    </form>
+  </article><% }) %>
+</section><% } %>
 <dl class="stats">
   <div><dt>Točke v odprtih vajah</dt><dd><%= f.num(total.score) %> <small>od <%= maxPoints %></small></dd></div>
   <div><dt>Naloge v odprtih vajah</dt><dd><%= total.done %> <small>od <%= maxTasks %></small></dd></div>

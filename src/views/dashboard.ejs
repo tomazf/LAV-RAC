@@ -9,6 +9,7 @@
   <a class="btn big" href="/vaje/<%= next_.id %>"><%= nextStarted ? 'Nadaljuj' : 'Začni' %> vajo <%= next_.no %>: <%= next_.title %></a>
   <% } else if (maxTasks) { %><p class="all-done">Vse naloge so rešene.</p><% } %>
 </section>
+<% if (flagText) { %><p class="notice-warn" role="status"><strong>! Opozorilo:</strong> <%= flagText %></p><% } %>
 <% if (!mods.length) { %><p class="empty">Učitelj še ni odprl nobene vaje. Ko jih odpre, se pojavijo tukaj.</p><% } %>
 <%- include('partials/rail', { groups: mods }) %>
 <% if (past.length) { %>

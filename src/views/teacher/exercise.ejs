@@ -8,7 +8,7 @@
   <div class="scroll"><table class="data">
     <thead><tr><th class="l">Dijak</th><th class="l">Naloge</th><th>Točke</th><th>Namigi</th><th>Rešitve</th><th>Teorija</th><th>Simulacija</th><th>Naloge</th><th>Pred ponastavitvijo</th><th class="l">Zadnja aktivnost</th></tr></thead>
     <tbody><% students.forEach((s) => { %><tr>
-      <td class="l"><a href="/ucitelj/razredi/<%= cls.id %>/dijaki/<%= s.id %>"><%= s.name %></a></td>
+      <td class="l"><a href="/ucitelj/razredi/<%= cls.id %>/dijaki/<%= s.id %>"><%= s.name %></a> <%- include('../partials/flagmark', { flags: s.flags, href: '/ucitelj/razredi/' + cls.id + '/dijaki/' + s.id }) %></td>
       <td class="l strip-cell"><%- include('../partials/strip', { items: s.strip }) %></td>
       <td class="nw"><%= f.num(s.c.score) %> / <%= ex.maxPoints %></td><td><%= s.c.hints %></td><td><%= s.c.solutions %></td>
       <td class="nw"><%= f.duration(s.c.time.Teorija) %></td><td class="nw"><%= f.duration(s.c.time.Simulacija) %></td><td class="nw"><%= f.duration(s.c.time.Naloge) %></td>

@@ -1,0 +1,3 @@
+<%# One marker for a list of flags: open ones (waiting for the teacher) win over confirmed; dismissed ones show nothing. %>
+<% const _open = flags.filter((x) => x.status === 'open').length; const _conf = flags.filter((x) => x.status === 'confirmed').length; %>
+<% if (_open || _conf) { %><a class="flagmark <%= _open ? 'open' : 'conf' %>" href="<%= href %>#opozorila" title="<%= _open ? _open + ' opozorila čakajo na tvojo odločitev' : _conf + ' potrjeno opozorilo' %>" aria-label="<%= _open ? 'Opozorilo čaka na odločitev' : 'Potrjeno opozorilo' %>">!</a><% } %>
