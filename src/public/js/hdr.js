@@ -105,7 +105,9 @@
     var num = on && on.querySelector('.lr-num[aria-current="step"]');
     var m = kick && /sklop\s+([A-Z])/.exec(kick.textContent);
     var label = m && num ? m[1] + '.' + num.textContent.trim() : null;
-    var parts = [title ? title.textContent.trim() : 'Vaja ' + cfg.exercise];
+    // Year and chapter first, as the teacher names them: »4. letnik · 2. poglavje · title › page › naloga B.11«.
+    var name = title ? title.textContent.trim() : 'Vaja ' + cfg.exercise;
+    var parts = [[cfg.year ? cfg.year + '. letnik' : '', cfg.chapter ? cfg.chapter + '. poglavje' : '', name].filter(Boolean).join(' · ')];
     if (page) parts.push(page.textContent.trim());
     if (label) parts.push('naloga ' + label);
     return { text: parts.join(' › '), data: { exercise: cfg.exercise, hash: decodeURIComponent(location.hash.replace(/^#/, '')), label: label } };

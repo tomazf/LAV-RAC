@@ -210,7 +210,7 @@ test('a report from a task knows where it was written; empty, too long and too m
   await go(a, 'naloge-b/3');
   await a.click('.hd-btn[aria-label="Prijavi napako ali težavo"]');
   const d = dlg(a);
-  assert.match(await d.locator('.hd-where').innerText(), /Kraj: .*naloga B\.3/);
+  assert.match(await d.locator('.hd-where').innerText(), /Kraj: 4\. letnik · 2\. poglavje · .*naloga B\.3/);
   assert.equal(await d.locator('button:text-is("Oddaj")').isDisabled(), true);
   await d.locator('textarea').fill('V tej nalogi manjka pravilni odgovor.');
   await d.locator('button:text-is("Oddaj")').click();
