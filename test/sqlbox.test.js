@@ -125,6 +125,14 @@ test('sandbox: off until the admin enters the server; only the admin sees the se
   await a.fill('input[name=timeout]', '2');
   await a.click('button:text-is("Shrani in preizkusi")');
   assert.match(await a.textContent('.notice[role=status]'), /Povezava deluje \(8\./);
+  // once it works, the settings are a one-card summary; »Uredi« opens the form, »Prekliči« closes it
+  assert.equal(await a.locator('#host').count(), 0);
+  assert.match(await a.textContent('#streznik .cfg-dl'), new RegExp(`Strežnik\\s*${myUrl.hostname}:${myUrl.port || 3306}[\\s\\S]*Predpona\\s*lt_[\\s\\S]*TLS\\s*ne`));
+  assert.match(await a.textContent('#streznik .cfg-line'), /2 s na stavek · 500 vrstic/);
+  await a.click('#streznik a:text-is("Uredi")');
+  assert.equal(await a.inputValue('#host'), myUrl.hostname);
+  await a.click('#streznik a:text-is("Prekliči")');
+  assert.equal(await a.locator('#host').count(), 0);
   // the password is sealed in the portal's database, never in plain text
   const row = (await sql('SELECT admin_pass, prefix, limits FROM sql_server'))[0];
   assert.ok(row.admin_pass.startsWith('v1:') && !row.admin_pass.includes(ADMIN.pass));

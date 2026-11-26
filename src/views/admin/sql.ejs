@@ -17,53 +17,69 @@
 </section>
 <% } %>
 
-<section class="block sql-card" id="streznik">
-  <div class="sql-card-h"><h2>Strežnik MySQL</h2>
-    <% if (s) { %><span class="tag <%= s.checked_at ? 'ok' : 'warn' %>"><%= s.checked_at ? `povezava deluje · ${s.server_version}` : 'povezava ni preverjena' %></span><% } %></div>
-  <% if (s && s.checked_at) { %><p class="dim">Zadnji preizkus: <%= f.dateTime(s.checked_at) %>.</p><% } %>
-  <form class="sql-form" method="post" action="/admin/sql/nastavitve" autocomplete="off"><input type="hidden" name="_csrf" value="<%= csrf %>">
-    <div class="sql-grid">
-      <div class="field wide"><label for="host">Naslov (IP ali ime)</label><input id="host" name="host" required value="<%= s?.host ?? '' %>" placeholder="npr. 10.10.12.40" <%= keyOk ? '' : 'disabled' %>></div>
-      <div class="field"><label for="port">Vrata</label><input id="port" name="port" type="number" min="1" max="65535" value="<%= s?.port ?? 3306 %>" <%= keyOk ? '' : 'disabled' %>></div>
-      <div class="field"><label for="admin_user">Skrbniški uporabnik</label><input id="admin_user" name="admin_user" required value="<%= s?.admin_user ?? 'lavrac' %>" <%= keyOk ? '' : 'disabled' %>></div>
-      <div class="field"><label for="admin_pass">Geslo</label><input id="admin_pass" name="admin_pass" type="password" autocomplete="new-password" <%= s ? '' : 'required' %> placeholder="<%= s ? 'ostane, če je prazno' : '' %>" <%= keyOk ? '' : 'disabled' %>></div>
-      <div class="field"><label for="prefix">Predpona baz in računov</label><input id="prefix" name="prefix" value="<%= s?.prefix ?? 'lr_' %>" pattern="[a-z][a-z0-9]{0,8}_" <%= locked || !keyOk ? 'disabled' : '' %>>
-        <span class="dim small"><%= locked ? 'Baze že obstajajo, predpone ni več mogoče spremeniti.' : 'Baze dijakov so npr. lr_u12.' %></span></div>
+<% const dis = keyOk ? '' : 'disabled'; %>
+<% if (s && s.checked_at && !editing) { %>
+<section class="block sql-card cfg" id="streznik">
+  <div class="cfg-sum">
+    <h2>Strežnik MySQL</h2>
+    <span class="tag ok">povezava deluje · <%= (s.server_version || '').split('-')[0] %></span>
+    <div class="cfg-push">
+      <form method="post" action="/admin/sql/preizkus"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn ghost small">Preizkusi</button></form>
+      <a class="btn small" href="/admin/sql?uredi=1#streznik">Uredi</a>
     </div>
-    <label class="switch"><input type="checkbox" name="tls" <%= !s || s.tls ? 'checked' : '' %> <%= keyOk ? '' : 'disabled' %>> Šifrirana povezava (TLS) med portalom in strežnikom</label>
-    <details class="sql-more"><summary>Certifikat CA (neobvezno)</summary>
-      <p class="dim">Če strežnik uporablja certifikat, ki ga podpiše tvoj CA, ga prilepi sem (PEM). Brez njega je povezava šifrirana, certifikat strežnika pa se ne preverja.</p>
-      <textarea name="ca" rows="5" class="mono" spellcheck="false" placeholder="-----BEGIN CERTIFICATE-----" <%= keyOk ? '' : 'disabled' %>><%= s?.ca ?? '' %></textarea>
-    </details>
-    <fieldset class="field"><legend>Omejitve za dijake</legend>
-      <div class="sql-grid limits">
-        <label>Čas stavka <span class="u"><input name="timeout" type="number" min="1" max="30" value="<%= limits.timeout %>"> s</span></label>
-        <label>Vrstic v izpisu <span class="u"><input name="rows" type="number" min="50" max="5000" value="<%= limits.rows %>"></span></label>
-        <label>Velikost baze <span class="u"><input name="sizeMb" type="number" min="1" max="500" value="<%= limits.sizeMb %>"> MB</span></label>
-        <label>Dolžina skripta <span class="u"><input name="scriptKb" type="number" min="4" max="512" value="<%= limits.scriptKb %>"> kB</span></label>
-        <label>Zagonov na minuto <span class="u"><input name="perMinute" type="number" min="5" max="300" value="<%= limits.perMinute %>"></span></label>
-        <label>Povezav na račun <span class="u"><input name="connections" type="number" min="1" max="20" value="<%= limits.connections %>"></span></label>
-      </div>
-      <span class="dim small">Število povezav velja za nove račune (tudi Workbench šteje).</span>
-    </fieldset>
-    <div class="row"><button class="btn" <%= keyOk ? '' : 'disabled' %>>Shrani in preizkusi</button></div>
-  </form>
-  <% if (s) { %><form method="post" action="/admin/sql/preizkus" class="row"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn ghost small">Samo preizkusi povezavo</button></form><% } %>
-  <details class="sql-more"><summary>Kako pripraviti strežnik</summary>
-    <p>Na strežniku MySQL (8.4 LTS) ustvari skrbniški račun portala. To ni root: sme ustvarjati račune in ima vse pravice samo na baze s predpono.</p>
+    <dl class="cfg-dl"><div><dt>Strežnik</dt><dd><%= s.host %>:<%= s.port %></dd></div><div><dt>Račun</dt><dd><%= s.admin_user %></dd></div><div><dt>Predpona</dt><dd><%= s.prefix %></dd></div><div><dt>TLS</dt><dd><%= s.tls ? (s.ca ? 'da, s CA' : 'da') : 'ne' %></dd></div></dl>
+    <p class="cfg-line">Omejitve: <%= limits.timeout %> s na stavek · <%= limits.rows %> vrstic · baza do <%= limits.sizeMb %> MB · skript do <%= limits.scriptKb %> kB · <%= limits.perMinute %> zagonov na minuto · <%= limits.connections %> povezav na račun · preizkušeno <%= f.dateTime(s.checked_at) %></p>
+  </div>
+</section>
+<% } else { %>
+<section class="block sql-card cfg" id="streznik">
+  <div class="sql-card-h"><h2>Strežnik MySQL</h2>
+    <span class="tag <%= s && s.checked_at ? 'ok' : 'warn' %>"><%= !s ? 'še ni nastavljen' : s.checked_at ? `povezava deluje · ${(s.server_version || '').split('-')[0]}` : 'povezava ne deluje' %></span></div>
+  <form class="cfg-form" method="post" action="/admin/sql/nastavitve" autocomplete="off"><input type="hidden" name="_csrf" value="<%= csrf %>">
+    <div class="cfg-row">
+      <label>Naslov (IP ali ime)<input id="host" name="host" required value="<%= s?.host ?? '' %>" placeholder="npr. 10.10.12.40" <%= dis %>></label>
+      <label>Vrata<input id="port" name="port" type="number" min="1" max="65535" value="<%= s?.port ?? 3306 %>" <%= dis %>></label>
+      <label>Skrbniški uporabnik<input id="admin_user" name="admin_user" required value="<%= s?.admin_user ?? 'lavrac' %>" <%= dis %>></label>
+      <label>Geslo<input id="admin_pass" name="admin_pass" type="password" autocomplete="new-password" <%= s ? '' : 'required' %> placeholder="<%= s ? 'ostane, če je prazno' : '' %>" <%= dis %>></label>
+      <label title="<%= locked ? 'Baze že obstajajo, predpone ni več mogoče spremeniti.' : 'Baze dijakov so npr. lr_u12.' %>">Predpona<input id="prefix" name="prefix" value="<%= s?.prefix ?? 'lr_' %>" pattern="[a-z][a-z0-9]{0,8}_" <%= locked || !keyOk ? 'disabled' : '' %>></label>
+    </div>
+    <div class="cfg-opts">
+      <label class="switch"><input type="checkbox" name="tls" <%= !s || s.tls ? 'checked' : '' %> <%= dis %>> Šifrirana povezava (TLS)</label>
+      <details class="cfg-more"><summary>+ certifikat CA</summary>
+        <p class="dim small">Če strežnik uporablja certifikat, ki ga podpiše tvoj CA, ga prilepi sem (PEM). Brez njega je povezava šifrirana, certifikat strežnika pa se ne preverja.</p>
+        <textarea name="ca" rows="4" class="mono" spellcheck="false" placeholder="-----BEGIN CERTIFICATE-----" <%= dis %>><%= s?.ca ?? '' %></textarea>
+      </details>
+      <details class="cfg-more"><summary>Kako pripraviti strežnik</summary>
+        <p class="small">Na strežniku MySQL (8.4 LTS) ustvari skrbniški račun portala. To ni root: sme ustvarjati račune in ima vse pravice samo na baze s predpono.</p>
 <pre class="code">CREATE USER 'lavrac'@'<i>IP portala</i>' IDENTIFIED BY '<i>geslo</i>' REQUIRE SSL;
 GRANT CREATE USER ON *.* TO 'lavrac'@'<i>IP portala</i>';
 GRANT ALL PRIVILEGES ON `<%= (s?.prefix ?? 'lr_').replace(/_/g, '\\_') %>%`.* TO 'lavrac'@'<i>IP portala</i>' WITH GRANT OPTION;</pre>
-    <p>V <code>mysqld.cnf</code>: <code>bind-address</code> na naslov v šolskem omrežju, <code>local_infile=0</code>, <code>max_connections=300</code>. Požarni zid: 3306 samo s strežnika portala in iz učilnic (za Workbench), nikoli z interneta. Pravica <code>CREATE USER</code> ni omejena na predpono, zato naj bo strežnik namenjen samo peskovniku, root pa dosegljiv samo lokalno.</p>
-  </details>
+        <p class="small">V <code>mysqld.cnf</code>: <code>bind-address</code> na naslov v šolskem omrežju, <code>local_infile=0</code>, <code>max_connections=300</code>. Požarni zid: 3306 samo s strežnika portala in iz učilnic (za Workbench), nikoli z interneta. Pravica <code>CREATE USER</code> ni omejena na predpono, zato naj bo strežnik namenjen samo peskovniku, root pa dosegljiv samo lokalno.</p>
+      </details>
+    </div>
+    <fieldset class="cfg-lim"><legend>Omejitve za dijake</legend>
+      <label>Čas stavka<span class="u"><input name="timeout" type="number" min="1" max="30" value="<%= limits.timeout %>"> s</span></label>
+      <label>Vrstic v izpisu<span class="u"><input name="rows" type="number" min="50" max="5000" value="<%= limits.rows %>"></span></label>
+      <label>Velikost baze<span class="u"><input name="sizeMb" type="number" min="1" max="500" value="<%= limits.sizeMb %>"> MB</span></label>
+      <label>Dolžina skripta<span class="u"><input name="scriptKb" type="number" min="4" max="512" value="<%= limits.scriptKb %>"> kB</span></label>
+      <label>Zagonov / min<span class="u"><input name="perMinute" type="number" min="5" max="300" value="<%= limits.perMinute %>"></span></label>
+      <label>Povezav / račun<span class="u"><input name="connections" type="number" min="1" max="20" value="<%= limits.connections %>"></span></label>
+    </fieldset>
+    <div class="cfg-act"><button class="btn" <%= dis %>>Shrani in preizkusi</button>
+      <% if (s && s.checked_at) { %><a class="btn ghost" href="/admin/sql">Prekliči</a><% } %>
+      <span class="dim small">Povezave na račun veljajo za nove račune (tudi Workbench šteje).</span></div>
+  </form>
 </section>
+<% } %>
 
 <% if (s) { %>
-<section class="block sql-card" id="skupne">
-  <div class="sql-card-h"><h2>Skupni bazi samo za branje</h2>
-    <span class="tag <%= s.shared_at ? 'ok' : 'warn' %>"><%= s.shared_at ? 'uvoženi ' + f.dateTime(s.shared_at) : 'še nista uvoženi' %></span></div>
-  <p>Za poizvedbe v 4.5: <% SHARED.forEach((x, i) => { %><code><%= x.db(s) %></code> (<%= x.title %>)<%= i < SHARED.length - 1 ? ', ' : '' %><% }) %>. Dijaki jih berejo z računom <code><%= s.prefix %>bralec</code>, spremeniti jih ne morejo. Uvoz znova naloži datoteki <code>sola.sql</code> in <code>matura_baze.sql</code> s portala.</p>
-  <form method="post" action="/admin/sql/skupne"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn ghost"><%= s.shared_at ? 'Uvozi znova' : 'Uvozi skupni bazi' %></button></form>
+<section class="block sql-card cfg" id="skupne">
+  <div class="cfg-sum">
+    <h2>Skupni bazi samo za branje</h2>
+    <span class="tag <%= s.shared_at ? 'ok' : 'warn' %>"><%= s.shared_at ? 'uvoženi ' + f.date(s.shared_at) : 'še nista uvoženi' %></span>
+    <div class="cfg-push"><form method="post" action="/admin/sql/skupne"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn <%= s.shared_at ? 'ghost small' : 'small' %>"><%= s.shared_at ? 'Uvozi znova' : 'Uvozi skupni bazi' %></button></form></div>
+    <p class="cfg-line"><% SHARED.forEach((x, i) => { %><%= x.db(s) %> (<%= x.title.replace(/^[^(]*\(|\)$/g, '') %>)<%= i < SHARED.length - 1 ? ' · ' : '' %><% }) %> · račun za branje <%= s.prefix %>bralec · uvoz naloži <code>sola.sql</code> in <code>matura_baze.sql</code> s portala</p>
+  </div>
 </section>
 
 <section class="block" id="pregled">

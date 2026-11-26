@@ -166,19 +166,38 @@ main.sqlmain{max-width:1480px;padding-top:18px}
 .sql-card-h{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin-bottom:6px}
 .sql-card-h h2{margin:0}
 .tag.ok{background:var(--okbg);color:var(--ink);border:1px solid var(--ok)}
-.sql-form{display:grid;gap:14px;margin:12px 0}
-.sql-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(13rem,1fr));gap:12px 16px}
-.sql-grid .field{display:grid;gap:4px;align-content:start}
-.sql-grid .field.wide{grid-column:span 2}
-.sql-grid .field>label{font-weight:700}
-.sql-grid.limits label{display:grid;gap:4px;font-size:.92rem;color:var(--mut)}
-.sql-grid .u{display:flex;align-items:center;gap:6px;color:var(--ink)}
-.sql-grid .u input{width:7.5rem}
-.sql-form fieldset{border:0;padding:0;margin:0;min-width:0}
-.sql-form legend{font-weight:700;padding:0;margin-bottom:6px}
-.sql-form textarea{width:100%;font:.85rem var(--fm);color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:8px;padding:8px}
-.sql-more{margin:10px 0 0}
-.sql-more summary{cursor:pointer;color:var(--acc);min-height:32px;padding:4px 0}
 pre.code{background:var(--tile);border-radius:8px;padding:10px 12px;overflow:auto;font:.85rem/1.5 var(--fm)}
+
+/* compact server settings: a summary once it works, the form (two rows) on first entry or after »Uredi« */
+.cfg{padding:14px 18px}
+.cfg-sum{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.cfg-sum h2{margin:0;font-size:1.15rem}
+.cfg-push{margin-left:auto;display:flex;gap:8px;align-items:center}
+.cfg-push form{margin:0}
+.cfg-dl{flex-basis:100%;display:flex;flex-wrap:wrap;gap:4px 20px;margin:0;font-size:.95rem}
+.cfg-dl dt{display:inline;color:var(--mut)}.cfg-dl dd{display:inline;margin:0 0 0 5px;font:.92rem var(--fm)}
+.cfg-line{flex-basis:100%;margin:0;color:var(--mut);font-size:.88rem;max-width:none}
+.cfg .sql-card-h{margin-bottom:10px}
+.cfg .sql-card-h h2{font-size:1.15rem}
+.cfg-form{display:grid;gap:10px}
+.cfg-row{display:grid;grid-template-columns:minmax(10rem,2fr) 6rem minmax(7rem,1.2fr) minmax(7rem,1.2fr) 6rem;gap:10px}
+.cfg-row label{display:grid;gap:3px;font:700 .85rem var(--fb);align-content:start}
+.cfg-row input,.cfg-lim input{min-height:38px;padding:5px 9px;width:100%}
+.cfg-opts{display:flex;flex-wrap:wrap;gap:6px 22px;align-items:center;font-size:.95rem}
+.cfg-more summary{cursor:pointer;color:var(--acc);text-decoration:underline;text-underline-offset:3px;list-style:none;min-height:32px;display:flex;align-items:center}
+.cfg-more summary::-webkit-details-marker{display:none}
+.cfg-more[open]{flex-basis:100%}
+.cfg-more[open] summary{text-decoration:none;font-weight:700}
+.cfg-more textarea{width:100%;font:.85rem var(--fm);color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:8px;padding:8px}
+.cfg-lim{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;border:0;padding:0;margin:0;min-width:0}
+.cfg-lim legend{grid-column:1/-1;font:700 .8rem var(--fb);letter-spacing:.06em;text-transform:uppercase;color:var(--mut);padding:0;margin:4px 0 6px}
+.cfg-lim label{display:grid;gap:2px;font-size:.8rem;color:var(--mut)}
+.cfg-lim .u{display:flex;align-items:center;gap:4px;color:var(--ink);font-size:.85rem}
+.cfg-act{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:4px}
+@media (max-width:900px){
+  .cfg-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cfg-row label:first-child{grid-column:1/-1}
+  .cfg-lim{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .cfg-push{margin-left:0;flex-basis:100%}
+}
 pre.code i{color:var(--sig);font-style:normal}
-@media (max-width:700px){.sql-grid .field.wide{grid-column:auto}}

@@ -41,16 +41,18 @@ adminSqlRouter.get('/', async (req, res, next) => {
     const others = rows.filter((r) => !r.class_id).sort(byName);
     const queued = (await one('SELECT count(*)::int AS n FROM sql_drop_queue')).n;
     res.render('admin/sql', {
-      tab: 'sql', s, keyOk: sb.keyOk(), limits: s?.limits ?? sb.DEFAULT_LIMITS, sqlClasses, others, queued, mb, light: sb.light, LIGHTS: sb.LIGHTS,
+      tab: 'sql', s, keyOk: sb.keyOk(), editing: req.query.uredi !== undefined, limits: s?.limits ?? sb.DEFAULT_LIMITS, sqlClasses, others, queued, mb, light: sb.light, LIGHTS: sb.LIGHTS,
       locked: rows.length > 0,
       orphanList: req.query.osirotele === undefined ? null : String(req.query.osirotele).split(',').filter((n) => /^[a-z0-9_]+$/.test(n)), SHARED: sb.SHARED,
       message: req.query.sporocilo || null, error: req.query.napaka || null,
     });
   } catch (e) { next(e); }
 });
+// After a mistake the form stays open (the page otherwise shows a summary once the connection works).
+const EDIT = '/admin/sql?uredi=1#streznik';
 adminSqlRouter.post('/nastavitve', checkCsrf, async (req, res, next) => {
   try {
-    if (!sb.keyOk()) return flash(res, '/admin/sql', 'Najprej nastavi SQL_KEY v datoteki .env.', true);
+    if (!sb.keyOk()) return flash(res, EDIT, 'Najprej nastavi SQL_KEY v datoteki .env.', true);
     const old = await sb.settings();
     const b = req.body;
     const host = String(b.host ?? '').trim();
@@ -59,16 +61,16 @@ adminSqlRouter.post('/nastavitve', checkCsrf, async (req, res, next) => {
     const pass = String(b.admin_pass ?? '');
     const hasAccounts = !!(await one('SELECT 1 AS x FROM sql_accounts LIMIT 1'));
     const prefix = hasAccounts && old ? old.prefix : String(b.prefix ?? 'lr_').trim().toLowerCase();
-    if (!/^[A-Za-z0-9.-]{1,253}$/.test(host)) return flash(res, '/admin/sql', 'Naslov strežnika ni pravilen (ime ali IP).', true);
-    if (port < 1 || port > 65535) return flash(res, '/admin/sql', 'Vrata morajo biti med 1 in 65535.', true);
-    if (!/^[A-Za-z0-9_.-]{1,32}$/.test(adminUser)) return flash(res, '/admin/sql', 'Uporabniško ime skrbniškega računa ni pravilno.', true);
-    if (!sb.PREFIX_RE.test(prefix)) return flash(res, '/admin/sql', 'Predpona ima male črke in številke ter konča s podčrtajem, npr. lr_.', true);
-    if (!pass && !old) return flash(res, '/admin/sql', 'Vpiši geslo skrbniškega računa.', true);
+    if (!/^[A-Za-z0-9.-]{1,253}$/.test(host)) return flash(res, EDIT, 'Naslov strežnika ni pravilen (ime ali IP).', true);
+    if (port < 1 || port > 65535) return flash(res, EDIT, 'Vrata morajo biti med 1 in 65535.', true);
+    if (!/^[A-Za-z0-9_.-]{1,32}$/.test(adminUser)) return flash(res, EDIT, 'Uporabniško ime skrbniškega računa ni pravilno.', true);
+    if (!sb.PREFIX_RE.test(prefix)) return flash(res, EDIT, 'Predpona ima male črke in številke ter konča s podčrtajem, npr. lr_.', true);
+    if (!pass && !old) return flash(res, EDIT, 'Vpiši geslo skrbniškega računa.', true);
     const limits = sb.clampLimits({
       timeout: b.timeout, rows: b.rows, sizeMb: b.sizeMb, scriptKb: b.scriptKb, perMinute: b.perMinute, connections: b.connections,
     });
     const ca = String(b.ca ?? '').trim();
-    if (ca && !/^-----BEGIN CERTIFICATE-----[\s\S]+-----END CERTIFICATE-----$/.test(ca)) return flash(res, '/admin/sql', 'Certifikat CA mora biti v obliki PEM (BEGIN CERTIFICATE).', true);
+    if (ca && !/^-----BEGIN CERTIFICATE-----[\s\S]+-----END CERTIFICATE-----$/.test(ca)) return flash(res, EDIT, 'Certifikat CA mora biti v obliki PEM (BEGIN CERTIFICATE).', true);
     const sealed = pass ? sb.seal(pass) : old.admin_pass;
     // A different server or account: the shared databases have to be imported there again.
     const moved = old && (old.host !== host || old.port !== port || old.prefix !== prefix);
@@ -88,7 +90,7 @@ adminSqlRouter.post('/nastavitve', checkCsrf, async (req, res, next) => {
       flash(res, '/admin/sql', `Nastavitve so shranjene. Povezava deluje (${t.version}).`);
     } catch (e) {
       if (!(e instanceof sb.SqlAdminError)) throw e;
-      flash(res, '/admin/sql', `Nastavitve so shranjene, povezava pa ne deluje: ${e.message}`, true);
+      flash(res, EDIT, `Nastavitve so shranjene, povezava pa ne deluje: ${e.message}`, true);
     }
   } catch (e) { next(e); }
 });
@@ -101,7 +103,13 @@ adminSqlRouter.post('/preizkus', checkCsrf, async (req, res, next) => {
       await q('UPDATE sql_server SET server_version=$1, checked_at=now() WHERE id=1', [t.version]);
       sb.forget();
       flash(res, '/admin/sql', `Povezava deluje: ${t.version}. Skrbniški račun lahko ustvari in izbriše bazo in uporabnika.`);
-    } catch (e) { if (e instanceof sb.SqlAdminError) flash(res, '/admin/sql', e.message, true); else throw e; }
+    } catch (e) {
+      if (!(e instanceof sb.SqlAdminError)) throw e;
+      // the summary must not say "works" any more: the form opens with the message
+      await q('UPDATE sql_server SET checked_at=NULL WHERE id=1');
+      sb.forget();
+      flash(res, EDIT, e.message, true);
+    }
   } catch (e) { next(e); }
 });
 adminSqlRouter.post('/skupne', checkCsrf, async (req, res, next) => {
