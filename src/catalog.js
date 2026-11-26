@@ -32,7 +32,7 @@ const FONTS_LINK = /<link[^>]*href="\/static\/fonts\/fonts\.css"[^>]*>/;
 export function renderExercise(ex, boot) {
   const json = JSON.stringify(boot).replace(/</g, '\\u003c');
   // The buttons in the header (display settings, reports) need the token and what the user may do; no tracker is needed for that.
-  const hd = JSON.stringify({ csrf: boot.csrf, report: !!boot.report, unseen: Number(boot.unseen) || 0, exercise: ex.id, year: yearOf(ex.module), chapter: ex.no ?? null, notice: boot.notice || '' }).replace(/</g, '\\u003c');
+  const hd = JSON.stringify({ csrf: boot.csrf, report: !!boot.report, unseen: Number(boot.unseen) || 0, exercise: ex.id, year: yearOf(ex.module), chapter: ex.no ?? null, notice: boot.notice || '', sql: boot.sql || null }).replace(/</g, '\\u003c');
   const header = `<link href="${asset('css/hdr.css')}" rel="stylesheet">\n<script>window.__LAVHD=${hd}</script>\n<script src="${asset('js/hdr.js')}" defer></script>\n`;
   const variants = ex.hasVariants ? `<script src="${asset('js/variants/core.js')}"></script>\n<script src="${asset(`js/variants/${ex.id}.js`)}"></script>` : '';
   // A supervisor's view is read-only: the shell still gets its data, but the tracker is left out, so nothing is sent or saved.

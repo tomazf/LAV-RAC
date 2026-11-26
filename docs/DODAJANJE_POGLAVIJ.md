@@ -22,6 +22,7 @@ Potrebno je samo za preizkuse in za `npm run import` (uvoz odpre stran v brskaln
 ## Novo poglavje
 
 1. **Vnos v `content/sources.json`**: `id` (letnik.poglavje, na primer `2.5`), `artifact` (povezava), `artifactTitle`, `version` 1, `no` (številka poglavja v letniku). Mesto v `planned` pobriši (uvoz ga sam izpusti iz kataloga, a datoteka naj ne laže).
+   Poglavje s SQL za peskovnik (4. letnik) dobi v istem vnosu `sandbox`: `{"db": "moja"}` (dijakova baza) ali `{"db": "sola", "sets": {"E": "matura"}}` (skupna baza, pri sklopih iz `sets` druga). Portal sam doda ikono v glavi in gumb »Odpri v peskovniku« pod vsak blok s celotnim stavkom SQL; v adapterju ni treba storiti ničesar.
 2. **Vir**: artifact prenesi z orodjem Artifact (`read`) in ga shrani nespremenjenega v `content/sources/<id>.html`.
 3. **Adapter** `content/adapters/<id>.js`: po zgledu sosednjega poglavja istega letnika (2.x: `2.3.js`, 3.x: `3.5.js`, 4.x: `4.2.js`). Uporabi skupne dele iz `content/adapters/qformat.js`: `statements`, `QTEXT`, `outputCompare` (izpis programa), `partialCredit` (delno točkovanje; v 2.x `partialCredit2`). Vsaka zamenjava (`patches`) mora najti natanko eno mesto, sicer uvoz javi napako.
 4. **Uvoz**: `npm run import -- <id>` zgradi `content/exercises/<id>.html` in posodobi `content/catalog.json` (druge vaje ostanejo, kot so). Uvoz preveri oštevilčenje nalog, črke sklopov brez vrzeli in napake na strani.

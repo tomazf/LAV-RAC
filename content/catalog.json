@@ -9254,6 +9254,9 @@
    "fullTitle": "SQL DDL in integritetne omejitve",
    "key": "scnm_lavrac_4_4_v2",
    "version": 2,
+   "sandbox": {
+    "db": "moja"
+   },
    "format": "short",
    "maxPoints": 44,
    "tasks": [
@@ -9787,6 +9790,14 @@
    "fullTitle": "SQL poizvedbe",
    "key": "scnm_lavrac_4_5_v2",
    "version": 2,
+   "sandbox": {
+    "db": "sola",
+    "sets": {
+     "E": "matura",
+     "F": "matura",
+     "G": "matura"
+    }
+   },
    "format": "short",
    "maxPoints": 104,
    "tasks": [

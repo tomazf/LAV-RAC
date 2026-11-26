@@ -110,6 +110,8 @@ for (const src of sources.exercises) {
   fs.writeFileSync(C('exercises', `${src.id}.html`), html);
   built.push({
     id: src.id, no: src.no ?? src.id, module: adapter.module, title: adapter.title, fullTitle: adapter.title, key, version: src.version,
+    // The chapter has SQL to try in the sandbox (sources.json "sandbox": {db, sets}); the portal adds the buttons (src/public/js/hdr.js).
+    ...(src.sandbox ? { sandbox: src.sandbox } : {}),
     format: 'short', maxPoints, tasks: data.tasks, pages: data.pages, gate: data.gate,
   });
   console.log(src.id, key, `${data.tasks.length} nalog, ${maxPoints} točk, ${data.pages.length} strani, ${data.gate.length} razlag pred vajami`);

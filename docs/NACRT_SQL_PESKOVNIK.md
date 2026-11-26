@@ -1,6 +1,6 @@
 # Načrt: SQL peskovnik (4. letnik)
 
-Stanje: potrjeno 26. 11. 2026 (odgovori v razdelku 11); fazi 1 in 2 sta narejeni (razdelek 12), faza 3 je narejena delno. Dogovori so povzeti v `docs/NACRT_PORTALA.md`.
+Stanje: potrjeno 26. 11. 2026 (odgovori v razdelku 11); fazi 1 in 2 sta narejeni (razdelek 12), faza 3 je narejena za 4.4 in 4.5 (gumbi, 26. 11. 2026); stranska plošča v vaji se ne dela (dva zavihka ob strani), 4.6 dobi gumbe z vnosom `sandbox`, ko bo uvožena. Dogovori so povzeti v `docs/NACRT_PORTALA.md`.
 
 ## 1. Namen
 
@@ -98,7 +98,7 @@ Gesla (skrbniško, dijakov, bralca) so v bazi portala šifrirana (AES-256-GCM) s
 - **Workbench**: okno s strežnikom, vrati, uporabnikom in geslom (gumb Kopiraj) ter kratkim navodilom za novo povezavo.
 - Telefon: urejevalnik, rezultat in drevo drug pod drugim; drevo je zložljivo.
 
-**V poglavjih** (faza 3): ob primerih in nalogah s SQL v 4.4, 4.5 in 4.6 gumb »Odpri v peskovniku« (koda se prenese, pri 4.5 se izbere skupna baza) in stranska plošča v vaji za delo ob branju. Naloge ostanejo »Sam preveri« po dogovorih 21. 11. 2026.
+**V poglavjih** (faza 3, narejeno 26. 11. 2026 za 4.4 in 4.5): v glavi vaje ikona »SQL peskovnik« in pod vsakim blokom s celotnim stavkom SQL gumb »Odpri v peskovniku«; oboje se odpre v svojem zavihku (isto okno ob vsakem kliku), da dijak vzporedno gleda nalogo in peskovnik. Koda se prenese, baza je dijakova (4.4) ali skupna (4.5: `sola`, v sklopih E–G `matura`). Stranske plošče v vaji ni (odločitev učitelja 26. 11. 2026: nov zavihek je dovolj in ne potrebuje spremembe CSP). Naloge ostanejo »Sam preveri« po dogovorih 21. 11. 2026.
 
 **Učitelj**, pri razredu 4. letnika zavihek »SQL baze«: dijaki v slovenski abecedi in **semafor** (dogovor 26. 11. 2026): zelena = zagon v zadnjih 7 dneh, rumena = baza je bila uporabljena, a ne v zadnjih 7 dneh, siva = še ni uporabljena, brez pike = baze ni; ob piki datum zadnje uporabe. Sheme, podatkov in zagonov dijaka učitelj ne vidi. Geslo dijaka učitelj vidi samo takoj po ponastavitvi (da ga lahko pove dijaku); gumbi »Ustvari vsem, ki je nimajo«, pri dijaku Ponastavi bazo, Ponastavi geslo, Izbriši; vsako dejanje v dnevnik (brez gesel).
 
@@ -123,7 +123,7 @@ Vse se izbriše z uporabnikom; pri izbrisu uporabnika in ob zaključku šolskega
 
 1. **Strežnik in baze**: nastavitve skrbnika, šifriranje, ustvarjanje in brisanje baz (učitelj, skrbnik), skupne baze, stran dijaka s podatki za Workbench, brisanje ob izbrisu uporabnika in ob koncu leta. Preizkusi z MariaDB ali MySQL v CI (dodatna storitev; podaljša CI za približno minuto).
 2. **Peskovnik**: stran z urejevalnikom, izvajanje, rezultati, napake, drevo tabel, skripti, zgodovina, ponastavitev.
-3. **Poglavja**: »Odpri v peskovniku« in stranska plošča v 4.4, 4.5 in 4.6; ER diagram.
+3. **Poglavja**: »Odpri v peskovniku« v 4.4 in 4.5 (narejeno 26. 11. 2026; 4.6 z vnosom `sandbox` v `content/sources.json`, ko bo uvožena); ER diagram je že v peskovniku.
 4. **Za naprej** (ni v tem načrtu): samodejno preverjanje nalog 4.5 s primerjavo rezultata z referenčno poizvedbo na skupni bazi (vrstni red stolpcev in vrstic, ORDER BY, podvojene vrstice), da bi del nalog »Sam preveri« postal točkovan.
 
 Vsaka faza je svoj commit (ali nekaj commitov) s preizkusi; pred vsako vprašam, katere preizkuse poženem, in opomnim na CI.
@@ -146,5 +146,5 @@ Vsaka faza je svoj commit (ali nekaj commitov) s preizkusi; pred vsako vprašam,
 - Izpis: vrstice se berejo sproti, nad omejitvijo se ne hranijo (število vseh se šteje).
 - Pravice v GRANT: podčrtaj v imenu baze je nadomestni znak, zato portal ime v GRANT zapiše z `\_` (`lr\_u12`), sicer ga skrbnikova pravica na `lr\_%` ne pokrije.
 - Izbris uporabnika: `eraseUser` v isti transakciji zapiše bazo v `sql_drop_queue`; portal jo izbriše na strežniku MySQL čez nekaj sekund oziroma ob naslednjem poskusu (vsakih 5 minut, ob odprtju strani SQL). Pri zaključku šolskega leta se baze 4. letnika izbrišejo po potrditvi prehoda.
-- Povezava iz vaje (za fazo 3): `/sql#koda=<base64url>&baza=sola` doda kodo pod vsebino urejevalnika in izbere bazo. Gumbov »Odpri v peskovniku« v poglavjih 4.4–4.6 še ni: zahtevajo spremembo skupne lupine ali adapterjev in se dodajo v svojem pogovoru.
+- Povezava iz vaje (za fazo 3): `/sql#koda=<base64url>&baza=sola` doda kodo pod vsebino urejevalnika in izbere bazo. Gumbi v poglavjih (26. 11. 2026): `sandbox` v `content/sources.json` (`db`, po želji `sets`) gre v `catalog.json`; `src/routes/exercises.js` ga pošlje glavi samo uporabniku s `user.sqlOn`; `src/public/js/hdr.js` doda ikono v glavi in gumb pod `pre.code`, ki se začne s stavkom SQL (poznejše strani opazuje `MutationObserver`). Koda je v povezavi kot `base64url`, okno se imenuje `lavrac-sql`, zato ga naslednji klik uporabi znova (`hashchange` v `sqlbox.js` doda kodo). Preizkus: `test/sqlhdr.test.js`.
 - Preizkusi: `test/sqlsplit.test.js` (brez baze), `test/sqlbox.test.js` (PostgreSQL, MySQL, brskalnik; brez `TEST_MYSQL_URL` se preskoči).

@@ -1,6 +1,8 @@
 // Two buttons in the header, on the portal's pages and inside every exercise:
 //  - »Prikaz«: theme, text size, spacing, contrast and motion, saved in the user's account (the server writes them into the <html> tag);
-//  - »Prijava«: a short message to the admin about a bug or a mistake; the place (exercise, page, task) is filled in by this page.
+//  - »Prijava«: a short message to the admin about a bug or a mistake; the place (exercise, page, task) is filled in by this page;
+//  - »SQL peskovnik«: in a chapter with SQL (cfg.sql, set by the server for a user who may use the sandbox) a link to /sql in its own tab
+//    and a button under every block of SQL that opens the sandbox with that code.
 (function () {
   'use strict';
   var root = document.getElementById('hd-root');
@@ -23,6 +25,7 @@
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { status: r.status, d: d }; }); });
   }
   var ICON_VIEW = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path class="fill" d="M12 3.5a8.5 8.5 0 0 1 0 17z"/></svg>';
+  var ICON_DB = '<svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="7.5" ry="3"/><path d="M4.5 6v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6"/><path d="M4.5 12v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6"/></svg>';
   var ICON_FLAG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 21V3.5"/><path d="M5.5 4.5h12l-2.5 4 2.5 4h-12"/></svg>';
 
   // ---------- display settings ----------
@@ -161,12 +164,59 @@
     repDlg._area.focus();
   }
 
+  // ---------- the SQL sandbox ----------
+  // One tab for the sandbox: every button opens (or reuses) the window named SQL_TAB, so the student has the exercise and the sandbox side by side.
+  var SQL_TAB = 'lavrac-sql';
+  // Whole statements only; a fragment (»FOREIGN KEY …«), a line with blanks (___) or an ellipsis would only give an error.
+  var SQL_START = /^\s*(CREATE|INSERT|SELECT|ALTER|UPDATE|DELETE|DROP|TRUNCATE|RENAME|SHOW|DESCRIBE|DESC|SET|USE|WITH|EXPLAIN)\b/i;
+  var SQL_SKIP = /___|\u2026|\.\.\./;
+  function b64url(text) {
+    var bytes = new TextEncoder().encode(text);
+    var bin = '';
+    for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  // The database a block belongs to: the chapter's own (cfg.sql.db), or the one of its set of tasks (cfg.sql.sets, e.g. E: matura).
+  function dbFor(pre) {
+    var sets = cfg.sql.sets || {};
+    var page = pre.closest('.page');
+    var kick = page && page.querySelector('.lr-kick');
+    var m = kick && /sklop\s+([A-Z])/.exec(kick.textContent);
+    return (m && sets[m[1]]) || cfg.sql.db;
+  }
+  function openSandbox(code, db) {
+    var w = window.open('/sql#koda=' + b64url(code) + (db ? '&baza=' + encodeURIComponent(db) : ''), SQL_TAB);
+    if (w) w.focus();
+  }
+  function sqlButtons() {
+    document.querySelectorAll('pre.code:not([data-sqlbtn])').forEach(function (pre) {
+      pre.setAttribute('data-sqlbtn', '1');
+      var code = pre.textContent.trim();
+      // A block may begin with comment lines (»-- vsi trije …«); the statement is what follows.
+      if (!SQL_START.test(code.replace(/^(\s*--[^\n]*\n)+/, '')) || SQL_SKIP.test(code)) return;
+      var btn = el('button', { type: 'button', class: 'hd-sqlgo', title: 'Odpri to kodo v SQL peskovniku (v svojem zavihku)', html: ICON_DB + '<span>Odpri v peskovniku</span>' });
+      btn.addEventListener('click', function () { openSandbox(pre.textContent.trim(), dbFor(pre)); });
+      pre.insertAdjacentElement('afterend', el('div', { class: 'hd-sqlbar' }, [btn]));
+    });
+  }
+  function watchSql() {
+    var queued = false;
+    var scan = function () { queued = false; sqlButtons(); };
+    sqlButtons();
+    // The pages and tasks of an exercise are built when they are opened.
+    new MutationObserver(function () { if (!queued) { queued = true; requestAnimationFrame(scan); } }).observe(document.body, { childList: true, subtree: true });
+  }
+
   // ---------- the buttons ----------
   function mount() {
     var kids = [];
     var view = el('button', { type: 'button', class: 'hd-btn', title: 'Prikaz: tema, velikost besedila, kontrast', 'aria-label': 'Prikaz', html: ICON_VIEW });
     view.addEventListener('click', openView);
     kids.push(view);
+    if (cfg.sql) {
+      var sql = el('a', { class: 'hd-btn hd-sql', href: '/sql', target: SQL_TAB, title: 'SQL peskovnik (odpre se v svojem zavihku)', 'aria-label': 'SQL peskovnik (odpre se v svojem zavihku)', html: ICON_DB });
+      kids.unshift(sql);
+    }
     if (cfg.report) {
       var rep = el('button', { type: 'button', class: 'hd-btn', title: 'Prijavi napako ali težavo', 'aria-label': 'Prijavi napako ali težavo', html: ICON_FLAG });
       if (cfg.unseen > 0) rep.appendChild(el('span', { class: 'hd-badge', text: String(cfg.unseen), title: 'Odgovori na tvoje prijave' }));
@@ -189,5 +239,6 @@
     document.body.insertBefore(bar, document.body.firstChild);
   }
   // After the tracker has built its part of the exercise header (it does that when the page is read).
-  if (document.readyState === 'complete') { mount(); notice(); } else document.addEventListener('DOMContentLoaded', function () { mount(); notice(); });
+  var start = function () { mount(); notice(); if (cfg.sql) watchSql(); };
+  if (document.readyState === 'complete') start(); else document.addEventListener('DOMContentLoaded', start);
 })();
