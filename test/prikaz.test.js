@@ -281,7 +281,10 @@ test('the admin sees reports by class and student or by year and chapter, the te
   const admin = pages.get('Sara Skrbnik');
   await admin.goto(`${APP}/admin/prijave`);
   assert.deepEqual(await admin.locator('.rp-group h2').allInnerTexts(), ['R2B · 2. letnik (1)', 'R4A · 4. letnik (5)']);
-  assert.match(await admin.locator('nav[aria-label="Administracija"] a:has-text("Prijave") .cnt').innerText(), /6/);
+  // the counter is on Prijave in the main menu (like the teacher's), not on Administracija
+  assert.match(await admin.locator('nav[aria-label="Glavni meni"] a:has-text("Prijave") .cnt').innerText(), /6/);
+  assert.equal(await admin.locator('nav[aria-label="Glavni meni"] a:has-text("Administracija") .cnt').count(), 0);
+  assert.equal(await admin.locator('nav[aria-label="Glavni meni"] a[aria-current="page"]').innerText().then((t) => t.replace(/\s*\d+$/, '')), 'Prijave');
   await admin.goto(`${APP}/admin/prijave?pogled=letniki`);
   assert.deepEqual(await admin.locator('.rp-group h2').allInnerTexts(), ['2. letnik (1)', '4. letnik (3)', 'Splošno (ni vezano na vajo) (2)']);
   assert.match((await admin.locator('.rp-group h3').allInnerTexts()).join('|'), /^2\.1 · .*\(1\)\|4\.2 · .*\(3\)\|Brez vaje \(2\)$/);

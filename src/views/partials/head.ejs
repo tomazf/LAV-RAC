@@ -28,8 +28,8 @@
     <nav aria-label="Glavni meni">
       <% if (!user.isWaiting) { %><a href="/vaje" <%- path.startsWith('/vaje') ? 'aria-current="page"' : '' %>>Vaje</a><% } %>
       <% if (user.isTeacher) { %><a href="/ucitelj" <%- path.startsWith('/ucitelj') ? 'aria-current="page"' : '' %>>Razredi</a><% } %>
-      <% if (user.isTeacher && !user.isAdmin) { %><a href="/ucitelj/prijave" <%- path.startsWith('/ucitelj/prijave') ? 'aria-current="page"' : '' %>>Prijave<% if (user.reportsOpen) { %> <span class="cnt" aria-label="<%= user.reportsOpen %> odprtih"><%= user.reportsOpen %></span><% } %></a><% } %>
-      <% if (user.isAdmin) { %><a href="/admin" <%- path.startsWith('/admin') ? 'aria-current="page"' : '' %>>Administracija<% if (user.reportsOpen) { %> <span class="cnt" aria-label="<%= user.reportsOpen %> odprtih prijav"><%= user.reportsOpen %></span><% } %></a><% } %>
+      <% if (user.isTeacher) { const rp = user.isAdmin ? '/admin/prijave' : '/ucitelj/prijave'; %><a href="<%= rp %>" <%- path.startsWith(rp) ? 'aria-current="page"' : '' %>>Prijave<% if (user.reportsOpen) { %> <span class="cnt" aria-label="<%= user.reportsOpen %> odprtih"><%= user.reportsOpen %></span><% } %></a><% } %>
+      <% if (user.isAdmin) { %><a href="/admin" <%- path.startsWith('/admin') && !path.startsWith('/admin/prijave') ? 'aria-current="page"' : '' %>>Administracija</a><% } %>
     </nav>
     <div class="who" id="hd-root" data-csrf="<%= csrf %>" data-report="<%= !user.isAdmin && !user.isWaiting ? '1' : '' %>" data-unseen="<%= user.reports_unseen || 0 %>">
       <span class="who-name"><%= user.name %></span>
