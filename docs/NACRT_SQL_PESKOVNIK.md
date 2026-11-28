@@ -23,9 +23,9 @@ Peskovnik se pokaže samo razredom z letnikom 4 (iz `content/portal.json`, `year
 
 ## 3. Baze
 
-1. **Osebna baza** vsakega dijaka (in učitelja): baza `lr_u<id>`, uporabnik `lr_u<id>` z `ALL` samo na svojo bazo, brez globalnih pravic. Za 4.4 in 4.6.
+1. **Dve osebni bazi** vsakega dijaka (in učitelja), en račun (dogovor 28. 11. 2026): račun `lr_u<id>` z `ALL` samo na obe bazi, brez globalnih pravic in brez `GRANT OPTION`. Baza `lr_u<id>_4_4` (cilj `moja`, »Moja baza (4.4)«) je za poglavje 4.4, baza `lr_u<id>_4_6` (cilj `moja6`, »Moja baza za poglavje 6 (4.6)«) za poglavje 4.6, da ponastavitev na K0 ne uniči dela iz 4.4. Imena so brez pik (pika bi zahtevala obrnjene narekovaje povsod). Vsaka baza ima svojo omejitev velikosti (`size_bytes`, `size_bytes6`). Strežnik SQL ob uvedbi dveh baz še ni bil postavljen, zato starih računov z eno bazo ni in nadgradnje ni (dogovor 28. 11. 2026).
 2. **Skupne baze samo za branje**: `lr_skupno_sola`, `lr_skupno_matura` (iz `src/public/sola.sql` in `matura_baze.sql`). En uporabnik `lr_bralec` s `SELECT`. Za 4.5. Nihče jih ne more spremeniti; skrbnik jih po potrebi znova uvozi.
-3. **Predloge** za ponastavitev osebne baze: prazna, `sola_struktura.sql`, `sola_struktura.sql` + `sola_zacetni_podatki.sql` (iz 4.4). Seznam predlog je v kodi; skrbnik jih ne nalaga sam (manj napak).
+3. **Predloge** za ponastavitev osebne baze: prazna, `sola_struktura.sql`, `sola_struktura.sql` + `sola_zacetni_podatki.sql` (iz 4.4), za poglavje 6 prazna in K0 do K6. Vsaka predloga pripada eni bazi (`db: 'moja'` ali `'moja6'`) in ponastavi samo njo. Seznam predlog je v kodi; skrbnik jih ne nalaga sam (manj napak).
 
 Predpona `lr_` je nastavitev (privzeto `lr_`) in se po začetku uporabe ne spreminja. Portal nikoli ne dela z bazo ali uporabnikom brez predpone.
 
@@ -93,7 +93,9 @@ Gesla (skrbniško, dijakov, bralca) so v bazi portala šifrirana (AES-256-GCM) s
 - **Drevo tabel** (levo): tabele s številom vrstic; razširitev pokaže stolpce, tipe, PK, FK, NULL; klik vstavi ime v urejevalnik. Osveži se po vsakem zagonu, ki spremeni shemo.
 - **ER diagram** osebne baze, narisan iz `information_schema` (lastna koda, SVG, brez knjižnice): tabele, ključi, povezave; premikanje, povečava, prenos SVG. Poveže 4.3 s 4.4.
 - **Skripti**: dijak shrani skript z imenom (na strežniku portala, do 50 skriptov), da doma nadaljuje. Zadnje stanje urejevalnika se shrani samodejno. **Zgodovina** zadnjih 100 zagonov z izidom.
-- **Ponastavi mojo bazo**: izbira predloge in potrditev.
+- **Ponastavi bazo**: izbira predloge (skupine »Moja baza (4.4)« in »Moja baza za poglavje 6 (4.6)«) in potrditev; ponastavi se samo baza, ki ji predloga pripada.
+- **Katera baza**: izbira baze je v glavi in vsebuje pravo ime (»Moja baza za poglavje 6 (4.6): lr_u57_4_6«); nad urejevalnikom je stalna oznaka »Stavki se izvedejo v bazi …«. Gumb »Odpri v peskovniku« v poglavju izbere bazo poglavja sam (`USE` ni potreben).
+- **Moj račun in pravice**: opis (kaj lahko dijak) in zapis pravic v SQL (`GRANT …`); podatki za Workbench vsebujejo obe imeni baz.
 - Zgodovina zagonov je vidna samo dijaku (dogovor 26. 11. 2026).
 - **Workbench**: okno s strežnikom, vrati, uporabnikom in geslom (gumb Kopiraj) ter kratkim navodilom za novo povezavo.
 - Telefon: urejevalnik, rezultat in drevo drug pod drugim; drevo je zložljivo.
@@ -102,10 +104,16 @@ Gesla (skrbniško, dijakov, bralca) so v bazi portala šifrirana (AES-256-GCM) s
 
 **Učitelj**, pri razredu 4. letnika zavihek »SQL baze«: dijaki v slovenski abecedi in **semafor** (dogovor 26. 11. 2026): zelena = zagon v zadnjih 7 dneh, rumena = baza je bila uporabljena, a ne v zadnjih 7 dneh, siva = še ni uporabljena, brez pike = baze ni; ob piki datum zadnje uporabe. Sheme, podatkov in zagonov dijaka učitelj ne vidi. Geslo dijaka učitelj vidi samo takoj po ponastavitvi (da ga lahko pove dijaku); gumbi »Ustvari vsem, ki je nimajo«, pri dijaku Ponastavi bazo, Ponastavi geslo, Izbriši; vsako dejanje v dnevnik (brez gesel).
 
+## 7a. Preizkus, statistika in stanje za učitelja (dogovor 28. 11. 2026)
+
+- **Celoten preizkus** (Administracija > SQL, gumb »Celoten preizkus«, samo skrbnik): začasen račun `lr_u0` (id 0, nikoli pravi uporabnik) z bazama `lr_u0_4_4` in `lr_u0_4_6`. Preizkusi: skrbniška povezava in TLS; ustvarjanje računa in obeh baz; pisanje in branje v vsaki (tudi šumniki); ponastavitev na predlogo (struktura šolske baze in K0); račun vidi samo svoji bazi in ne more ustvarjati baz, brati sistemskih baz ali dajati pravic; nastavitev časa stavka in omejitev povezav (največ `connections` povezav, naslednja je zavrnjena); skupni bazi se berejo, pisanje je zavrnjeno. Na koncu se račun in bazi izbrišejo (tudi ob napaki). Izid je tabela po korakih (v redu, napaka, preskočeno); zadnji čas in izid sta v `sql_server.selftest_at/selftest_ok`. Pravih računov se ne dotakne.
+- **Statistika uporabe** (samo skrbnik, isti pogled): zagoni, zagoni z napako in povprečni čas po dnevih (14 dni), zagoni po bazi (7 dni), aktivni ljudje na dan, računi (aktivni, neuporabljeni), skupna velikost, največja baza, baze nad omejitvijo, čakalna vrsta za brisanje. Samo števila (tabeli `sql_daily`, `sql_daily_users`, migracija 020), brez besedila stavkov; hrani se 90 dni; zapisi o aktivnosti se izbrišejo z uporabnikom.
+- **Stanje za učitelja** (na strani »SQL baze« razreda): pet vrstic z lučkami: povezava s strežnikom je bila preizkušena, celoten preizkus (datum in izid), skupni bazi sta uvoženi, koliko dijakov ima bazi, povezava na lastni bazi za preizkus kot dijak. Brez imen strežnika, računov in drugih podrobnosti; gumba za preizkus učitelj nima (potrebuje skrbniške pravice).
+
 ## 8. Podatki v portalu (migracija 017)
 
 - `sql_server`: ena vrstica z nastavitvami, šifrirano skrbniško geslo, omejitve, stanje skupnih baz.
-- `sql_accounts`: `user_id`, ime baze in uporabnika, šifrirano geslo, kdaj in kdo ustvaril, zadnja uporaba, velikost.
+- `sql_accounts`: `user_id`, imeni obeh baz (`db_name` = 4.4, `db_name6` = 4.6, migracija 019), uporabnik, šifrirano geslo, kdaj in kdo ustvaril, zadnja uporaba, velikosti (`size_bytes`, `size_bytes6`).
 - `sql_scripts`: shranjeni skripti dijaka (ime, besedilo, čas).
 - `sql_history`: zadnjih 100 zagonov na uporabnika (skrajšano besedilo, izid, čas, število vrstic).
 

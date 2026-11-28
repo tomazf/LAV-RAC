@@ -154,13 +154,18 @@ test('teacher: creates the class databases; the traffic light shows only whether
   assert.equal(new URL(t.url()).pathname, `/ucitelj/razredi/${r4}/sql`);
   assert.equal(await t.locator('.sql-class tbody tr').count(), 2);
   assert.equal(await t.locator('.light.none').count(), 2 + 1, 'two students without a database (and the legend)');
-  await t.click('button:has-text("Ustvari bazo vsem")');
-  assert.match(await t.textContent('.notice[role=status]'), /Ustvarjenih baz: 2/);
+  await t.click('button:has-text("Ustvari baze vsem")');
+  assert.match(await t.textContent('.notice[role=status]'), /Ustvarjenih računov z dvema bazama: 2/);
   const accs = await sql('SELECT a.*, u.username FROM sql_accounts a JOIN users u ON u.id=a.user_id ORDER BY u.username');
-  assert.deepEqual(accs.map((x) => x.db_name), [`${PREFIX}u${await userId('ana.kovac@sola.test')}`, `${PREFIX}u${await userId('bor.novak@sola.test')}`]);
+  const anaAcc = `${PREFIX}u${await userId('ana.kovac@sola.test')}`;
+  const borAcc = `${PREFIX}u${await userId('bor.novak@sola.test')}`;
+  // one account, two databases (4.4 and 4.6) with names without dots
+  assert.deepEqual(accs.map((x) => x.db_user), [anaAcc, borAcc]);
+  assert.deepEqual(accs.map((x) => x.db_name), [`${anaAcc}_4_4`, `${borAcc}_4_4`]);
+  assert.deepEqual(accs.map((x) => x.db_name6), [`${anaAcc}_4_6`, `${borAcc}_4_6`]);
   assert.ok(accs.every((x) => x.password.startsWith('v1:')));
   const [dbs] = await my.query("SHOW DATABASES LIKE 'lt\\_u%'");
-  assert.equal(dbs.length, 2);
+  assert.equal(dbs.length, 4);
   assert.equal(await t.locator('.sql-class .light.grey').count(), 2);
   await shot(t, '03-ucitelj-baze');
   // a 2nd-year class has no SQL databases
@@ -176,7 +181,9 @@ test('student: runs a script; results per statement, an error with its line and 
   await p.goto(`${APP}/vaje`);
   await p.click('nav a:text-is("SQL peskovnik")');
   await p.waitForSelector('.sq-ed .cm-content');
-  assert.match(await p.textContent('#sq-db'), /Moja baza \(lt_u\d+\)/);
+  assert.match(await p.textContent('#sq-db'), /Moja baza \(4\.4\): lt_u\d+_4_4/);
+  assert.match(await p.textContent('#sq-db'), /Moja baza za poglavje 6 \(4\.6\): lt_u\d+_4_6/);
+  assert.match(await p.textContent('#sq-banner'), /v bazi lt_u\d+_4_4 \(Moja baza \(4\.4\)\)/);
   await typeSql(p, [
     'CREATE TABLE kraj (',
     '  id INT PRIMARY KEY,',
@@ -217,7 +224,7 @@ test('student: runs a script; results per statement, an error with its line and 
 
 test('student: only their own database; the shared ones are read-only; limits and DELIMITER', { skip }, async () => {
   const p = pages.get('Ana Kovač');
-  const bor = `${PREFIX}u${await userId('bor.novak@sola.test')}`;
+  const bor = `${PREFIX}u${await userId('bor.novak@sola.test')}_4_4`;
   let r = await api(p, '/api/sql/run', { target: 'moja', sql: `SELECT * FROM ${bor}.kraj` });
   assert.equal(r.d.results[0].ok, false);
   assert.match(r.d.results[0].message, /denied/);
@@ -290,7 +297,7 @@ test('student: Workbench data; the teacher sets a new password and resets the da
   const pass1 = (await p.textContent('#sq-wb .sq-secret')).trim();
   assert.match(user, /^lt_u\d+$/);
   await shot(p, '08-workbench');
-  const conn = (pw) => mysql.createConnection({ host: myUrl.hostname, port: Number(myUrl.port || 3306), user, password: pw, database: user });
+  const conn = (pw) => mysql.createConnection({ host: myUrl.hostname, port: Number(myUrl.port || 3306), user, password: pw, database: `${user}_4_4` });
   await (await conn(pass1)).end();
   // traffic light: Ana is green now, Bor still grey; the teacher sees no tables or statements
   const t = pages.get('Tomaž Učitelj');
@@ -317,7 +324,7 @@ test('student: Workbench data; the teacher sets a new password and resets the da
   await t.check(`#e${anaId} form[action$="/ponastavi"] input[name=potrdi]`);
   await t.click(`#e${anaId} button:text-is("Ponastavi")`);
   assert.match(await t.textContent('.notice[role=status]'), /ponastavljena \(Šolska baza: samo struktura/);
-  const [tables] = await my.query(`SHOW TABLES FROM ${user}`);
+  const [tables] = await my.query(`SHOW TABLES FROM ${user}_4_4`);
   assert.deepEqual(tables.map((x) => Object.values(x)[0]).sort(), ['dijak', 'izostanek', 'kraj', 'ocena', 'oddelek', 'poucuje', 'predmet', 'ucitelj']);
   const log = await sql(`SELECT action FROM audit_log WHERE action LIKE '%SQL%' ORDER BY id`);
   assert.deepEqual([...new Set(log.map((x) => x.action))], ['Spremenil nastavitve SQL', 'Uvozil skupne baze SQL', 'Ustvaril baze SQL', 'Ponastavil geslo SQL', 'Ponastavil bazo SQL']);
@@ -346,7 +353,69 @@ test('the year rule: a 2nd-year student has no sandbox; a teacher makes their ow
   await t.goto(`${APP}/sql`);
   await t.click('button:text-is("Ustvari mojo bazo")');
   assert.match(await t.textContent('.notice[role=status]'), /Tvoja baza je ustvarjena/);
-  assert.match(await t.textContent('#sq-db'), /Moja baza \(lt_u\d+\)/);
+  assert.match(await t.textContent('#sq-db'), /Moja baza \(4\.4\): lt_u\d+_4_4/);
+});
+
+test('student: the 4.6 database is separate from the 4.4 one; resetting one leaves the other', { skip }, async () => {
+  const p = pages.get('Ana Kovač');
+  const ana = await userId('ana.kovac@sola.test');
+  await p.goto(`${APP}/sql`);
+  await p.waitForSelector('.sq-ed .cm-content');
+  // 4.4 database has the table from the earlier test; the 4.6 one is empty and its name is written above the editor
+  let r = await api(p, '/api/sql/run', { target: 'moja6', sql: 'SHOW TABLES' });
+  assert.equal(r.d.results[0].total, 0);
+  assert.equal((await api(p, '/api/sql/run', { target: 'moja6', sql: 'SELECT DATABASE()' })).d.results[0].rows[0][0], `${PREFIX}u${ana}_4_6`);
+  assert.equal((await api(p, '/api/sql/run', { target: 'moja', sql: 'SELECT DATABASE()' })).d.results[0].rows[0][0], `${PREFIX}u${ana}_4_4`);
+  await p.selectOption('#sq-db', 'moja6');
+  assert.match(await p.textContent('#sq-banner'), new RegExp(`v bazi ${PREFIX}u${ana}_4_6 \\(Moja baza za poglavje 6`));
+  // the link from chapter 4.6 chooses the 4.6 database
+  const code = Buffer.from('SELECT 1;').toString('base64url');
+  await p.goto(`${APP}/sql#koda=${code}&baza=moja6`);
+  await p.reload();
+  await p.evaluate(() => { location.hash = ''; });
+  // reset the 4.6 database to checkpoint K0 from the page: the 4.4 database keeps its tables
+  const before = (await api(p, '/api/sql/run', { target: 'moja', sql: 'SHOW TABLES' })).d.results[0].total;
+  assert.ok(before > 0);
+  await p.goto(`${APP}/sql`);
+  await p.click('button[data-open=sq-reset]');
+  await p.selectOption('#sq-tpl', 'p6k0');
+  await p.check('#sq-reset input[name=potrdi]');
+  await p.click('#sq-reset button.danger');
+  assert.match(await p.textContent('.notice[role=status]'), new RegExp(`Baza ${PREFIX}u${ana}_4_6 je ponastavljena`));
+  assert.ok((await api(p, '/api/sql/run', { target: 'moja6', sql: 'SHOW TABLES' })).d.results[0].total > 0);
+  assert.equal((await api(p, '/api/sql/run', { target: 'moja', sql: 'SHOW TABLES' })).d.results[0].total, before);
+  // the account and its rights, written for the student
+  await p.click('button[data-open=sq-acc]');
+  const txt = await p.textContent('#sq-acc');
+  assert.ok(txt.includes(`${PREFIX}u${ana}_4_4`) && txt.includes(`${PREFIX}u${ana}_4_6`));
+  assert.match(txt, /GRANT ALL PRIVILEGES ON/);
+  assert.match(txt, /GRANT SELECT, SHOW VIEW ON/);
+});
+
+test('admin: the full check passes and cleans up; the statistics are numbers; the teacher sees the state', { skip }, async () => {
+  const a = pages.get('Sara Skrbnik');
+  await a.goto(`${APP}/admin/sql`);
+  const st = await a.textContent('#statistika');
+  assert.match(st, /Računi\s*\d+/);
+  assert.doesNotMatch(st, /SELECT|CREATE|INSERT/, 'no statement text in the statistics');
+  assert.ok((await sql('SELECT count(*)::int n FROM sql_daily'))[0].n > 0, 'the students runs were counted');
+  await a.click('button:text-is("Celoten preizkus")');
+  await a.waitForSelector('table.sql-check', { timeout: 60000 });
+  const rows = await a.locator('table.sql-check tbody tr').allTextContents();
+  assert.ok(rows.length >= 8, rows.join('\n'));
+  assert.equal(await a.locator('table.sql-check .tag.bad').count(), 0, rows.join('\n'));
+  assert.match(await a.textContent('.notice[role=status]'), /Vse deluje/);
+  // nothing is left behind and the throwaway account is gone
+  assert.equal((await my.query(`SHOW DATABASES LIKE 'lt\\_u0\\_4\\_%'`))[0].length, 0);
+  assert.equal((await my.query(`SELECT 1 FROM mysql.user WHERE user='lt_u0'`))[0].length, 0);
+  assert.equal((await sql('SELECT selftest_ok FROM sql_server'))[0].selftest_ok, true);
+  // the teacher sees the state without details
+  const t = pages.get('Tomaž Učitelj');
+  await t.goto(`${APP}/ucitelj/razredi/${r4}/sql`);
+  const state = await t.textContent('.sql-state');
+  assert.match(state, /Celoten preizkus \(skrbnik\): .*uspešen/);
+  assert.match(state, /Dijaki z bazama: 2 od 2/);
+  assert.doesNotMatch(state, /preizkus_|host|lt_/, 'no server details for the teacher');
 });
 
 test('erasing a user drops their database and account on the MySQL server', { skip }, async () => {
@@ -357,7 +426,7 @@ test('erasing a user drops their database and account on the MySQL server', { sk
     const csrf = document.getElementById('hd-root').dataset.csrf;
     await fetch(`/admin/uporabniki/${id}/izbrisi`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: `_csrf=${csrf}` });
   }, borId);
-  const gone = async () => (await my.query(`SHOW DATABASES LIKE 'lt\\_u${borId}'`))[0].length === 0;
+  const gone = async () => (await my.query(`SHOW DATABASES LIKE 'lt\\_u${borId}\\_4\\_%'`))[0].length === 0 && (await my.query(`SHOW DATABASES LIKE 'lt\\_u${borId}'`))[0].length === 0;
   const end = Date.now() + 10000;
   while (!(await gone()) && Date.now() < end) await new Promise((r) => setTimeout(r, 300));
   assert.ok(await gone(), 'the database is dropped');

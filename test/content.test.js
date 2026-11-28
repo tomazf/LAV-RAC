@@ -2664,7 +2664,7 @@ test('4.6: SQL DML: four theory groups, the tasks keep their control results and
   assert.equal(ex.tasks.filter((t) => t.self).length, 0);
   assert.equal(ex.maxPoints, 85);
   // the chapter works in the student's own database of the sandbox
-  assert.deepEqual(ex.sandbox, { db: 'moja' });
+  assert.deepEqual(ex.sandbox, { db: 'moja6' });
   const a = await login('Sara Skrbnik');
   await a.goto(`${APP}/vaje/4.6#pregled`);
   await at(a, 'pregled');
@@ -2731,6 +2731,7 @@ test('4.6: no undefined and no raw markup on the pages, SQL in the texts is set 
     const line = box.split('\n').find((l) => l.includes(`id: 'p6${k}'`));
     assert.ok(line, k);
     assert.match(line, /title: 'Poglavje 6: /);
+    assert.match(line, /db: 'moja6'/, `${k} fills the 4.6 database, not the 4.4 one`);
     const files = [...line.matchAll(/'((?:content|src)\/[^']+\.sql)'/g)].map((m) => m[1]);
     assert.equal(files.length, 2, k);
     for (const f of files) readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');

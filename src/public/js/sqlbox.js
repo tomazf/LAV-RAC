@@ -31,7 +31,8 @@
   // ---------- editor ----------
   const db = $('sq-db');
   const STARTER = {
-    moja: '-- Tvoja baza: tukaj ustvarjaš tabele (4.4) in spreminjaš podatke (4.6).\n-- Zaženi s Ctrl+Enter.\n\nSHOW TABLES;\n',
+    moja: '-- Moja baza (4.4): tukaj ustvarjaš tabele in omejitve.\n-- Zaženi s Ctrl+Enter.\n\nSHOW TABLES;\n',
+    moja6: '-- Moja baza za poglavje 6 (4.6): INSERT, UPDATE, DELETE in tuji ključi.\n-- Zaženi s Ctrl+Enter.\n\nSHOW TABLES;\n',
     sola: '-- Šolska baza (samo branje), za poizvedbe iz 4.5.\n\nSELECT ime, priimek\nFROM dijak\nORDER BY priimek, ime\nLIMIT 10;\n',
     matura: '-- Tabele maturitetnih nalog (samo branje). Predpona je šifra pole, npr. m171_film.\n\nSHOW TABLES;\n',
   };
@@ -74,7 +75,7 @@
   const fkOf = (t, c) => schema.fks.find((f) => f.table === t && f.column === c);
   function drawTree() {
     if (!schema.tables.length) {
-      tree.replaceChildren(el('p', { class: 'dim', text: db.value === 'moja' ? 'Baza je prazna. Ustvari tabelo s CREATE TABLE ali jo ponastavi s pripravljeno skripto.' : 'V bazi ni tabel.' }));
+      tree.replaceChildren(el('p', { class: 'dim', text: db.value.startsWith('moja') ? 'Baza je prazna. Ustvari tabelo s CREATE TABLE ali jo ponastavi s pripravljeno skripto.' : 'V bazi ni tabel.' }));
       return;
     }
     const open = new Set([...tree.querySelectorAll('details[open]')].map((d) => d.dataset.t));
@@ -92,8 +93,19 @@
         })))))));
   }
   $('sq-refresh').addEventListener('click', loadSchema);
+  // Which database the statements run on is always written above the editor (also for the read-only shared ones).
+  const banner = $('sq-banner');
+  function showBanner() {
+    const o = db.selectedOptions[0];
+    if (!o || !banner) return;
+    banner.classList.toggle('ro', !!o.dataset.ro);
+    banner.replaceChildren(document.createTextNode('Stavki se izvedejo v bazi '), el('code', {}, o.dataset.real || ''),
+      document.createTextNode(` (${o.dataset.title || ''}${o.dataset.ro ? ', samo branje' : ''}).`));
+  }
+  showBanner();
   db.addEventListener('change', () => {
     if (!ed.value.trim() || Object.values(STARTER).includes(ed.value)) ed.value = STARTER[db.value] || '';
+    showBanner();
     loadSchema();
     saveDraft();
   });
@@ -271,7 +283,7 @@
   $('sq-hist').addEventListener('open', async () => {
     const d = await get('/api/sql/zgodovina');
     if (!d.ok) return;
-    const names = Object.fromEntries([...db.options].map((o) => [o.value, o.textContent.split(' (')[0].split(' ·')[0]]));
+    const names = Object.fromEntries([...db.options].map((o) => [o.value, `${o.dataset.title || o.value}${o.dataset.real ? ` (${o.dataset.real})` : ''}`]));
     if (!d.list.length) { hList.replaceChildren(el('li', { class: 'dim' }, 'Še ni zagonov.')); return; }
     hList.replaceChildren(...d.list.map((x) => el('li', {},
       el('button', { type: 'button', class: 'sq-li-main', onclick: () => { ed.value = x.body; $('sq-hist').close(); ed.focus(); } },
@@ -416,7 +428,7 @@
       const b64 = link.get('koda').replace(/-/g, '+').replace(/_/g, '/');
       const code = new TextDecoder().decode(Uint8Array.from(atob(b64), (ch) => ch.charCodeAt(0))).trim();
       const want = link.get('baza');
-      if (want && [...db.options].some((o) => o.value === want && !o.disabled)) db.value = want;
+      if (want && [...db.options].some((o) => o.value === want && !o.disabled)) { db.value = want; showBanner(); }
       const now = ed.value.trim();
       ed.value = !now || Object.values(STARTER).some((x) => x.trim() === now) ? `${code}\n` : `${ed.value.replace(/\s+$/, '')}\n\n-- Iz vaje:\n${code}\n`;
       saveDraft();

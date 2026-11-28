@@ -64,7 +64,8 @@ export async function eraseUser(user, client = null) {
       [user.name, DELETED_NAME, `%${user.name.replace(/[\\%_]/g, '\\$&')}%`]);
     await c.query(`DELETE FROM session WHERE (sess->>'uid')::bigint = $1`, [user.id]);
     // their SQL sandbox database goes too; the queue keeps it until the MySQL server has dropped it
-    await c.query('INSERT INTO sql_drop_queue(db_name, db_user) SELECT db_name, db_user FROM sql_accounts WHERE user_id=$1 ON CONFLICT DO NOTHING', [user.id]);
+    await c.query(`INSERT INTO sql_drop_queue(db_name, db_user)
+      SELECT n, db_user FROM sql_accounts, LATERAL unnest(ARRAY[db_name, db_name6]) AS n WHERE user_id=$1 ON CONFLICT DO NOTHING`, [user.id]);
     await c.query('DELETE FROM users WHERE id=$1', [user.id]);
   });
   for (const f of afterErase) f();

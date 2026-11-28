@@ -61,26 +61,38 @@ export const forget = () => { cached = undefined; };
 // The sandbox is on when the key is set and the admin has entered the server.
 export const available = async () => keyOk() && !!(await settings());
 export const PREFIX_RE = /^[a-z][a-z0-9]{0,8}_$/;
+// The account is lr_u<id>; its two databases (4.4 and 4.6) are lr_u<id>_4_4 and lr_u<id>_4_6 (no dots: they would need backticks everywhere).
 export const dbNameFor = (s, userId) => `${s.prefix}u${Number(userId)}`;
+export const PERSONAL = {
+  moja: { suffix: '_4_4', col: 'db_name', size: 'size_bytes', title: 'Moja baza (4.4)' },
+  moja6: { suffix: '_4_6', col: 'db_name6', size: 'size_bytes6', title: 'Moja baza za poglavje 6 (4.6)' },
+};
+export const isPersonal = (target) => Object.hasOwn(PERSONAL, target);
+export const personalNames = (s, userId) => Object.fromEntries(Object.entries(PERSONAL).map(([k, v]) => [k, `${dbNameFor(s, userId)}${v.suffix}`]));
+// The database of a target in an account row.
+export const dbOf = (acc, target) => (acc ? acc[PERSONAL[target].col] ?? null : null);
+const personalRe = (s) => new RegExp(`^${s.prefix}u\\d+_4_[46]$`);
 export const SHARED = [
   { id: 'sola', title: 'sola (šolska baza)', file: 'src/public/sola.sql', db: (s) => `${s.prefix}sola` },
   { id: 'matura', title: 'matura_baze (maturitetne naloge)', file: 'src/public/matura_baze.sql', db: (s) => `${s.prefix}matura` },
 ];
 export const readerName = (s) => `${s.prefix}bralec`;
 // What a personal database can be reset to (files of the chapters 4.4, 4.5 and 4.6; 4.6 offers its checkpoints K0 to K6, 28. 11. 2026).
+// db: the personal database a template fills (moja = 4.4, moja6 = 4.6).
 export const TEMPLATES = [
-  { id: 'prazna', title: 'Prazna baza', files: [] },
-  { id: 'struktura', title: 'Šolska baza: samo struktura (4.4)', files: ['content/sources/4.4/sola_struktura.sql'] },
-  { id: 'zacetni', title: 'Šolska baza: struktura in začetni podatki (4.4)', files: ['content/sources/4.4/sola_struktura.sql', 'content/sources/4.4/sola_zacetni_podatki.sql'] },
-  { id: 'sola', title: 'Šolska baza s podatki (sola.sql, 4.5)', files: ['src/public/sola.sql'] },
-  { id: 'matura', title: 'Maturitetne baze (matura_baze.sql, 4.5)', files: ['src/public/matura_baze.sql'] },
-  { id: 'indeks', title: 'Tabela za indekse (indeks_test.sql, 4.4)', files: ['content/sources/4.4/indeks_test.sql'] },
-  { id: 'p6k0', title: 'Poglavje 6: K0 začetek (šolska baza in matura, 4.6)', files: ['content/sources/4.6/sola6_ponastavi.sql', 'src/public/matura_baze.sql'] },
-  { id: 'p6k2', title: 'Poglavje 6: K2 po INSERT (šolska baza in matura, 4.6)', files: ['content/sources/4.6/sola6_k2.sql', 'src/public/matura_baze.sql'] },
-  { id: 'p6k3', title: 'Poglavje 6: K3 po INSERT … SELECT (šolska baza in matura, 4.6)', files: ['content/sources/4.6/sola6_k3.sql', 'src/public/matura_baze.sql'] },
-  { id: 'p6k4', title: 'Poglavje 6: K4 po UPDATE (šolska baza in matura, 4.6)', files: ['content/sources/4.6/sola6_k4.sql', 'src/public/matura_baze.sql'] },
-  { id: 'p6k5', title: 'Poglavje 6: K5 po DELETE (šolska baza in matura, 4.6)', files: ['content/sources/4.6/sola6_k5.sql', 'src/public/matura_baze.sql'] },
-  { id: 'p6k6', title: 'Poglavje 6: K6 končno stanje (šolska baza in matura, 4.6)', files: ['content/sources/4.6/sola6_k6.sql', 'src/public/matura_baze.sql'] },
+  { id: 'prazna', db: 'moja', title: 'Prazna baza', files: [] },
+  { id: 'prazna6', db: 'moja6', title: 'Prazna baza', files: [] },
+  { id: 'struktura', db: 'moja', title: 'Šolska baza: samo struktura (4.4)', files: ['content/sources/4.4/sola_struktura.sql'] },
+  { id: 'zacetni', db: 'moja', title: 'Šolska baza: struktura in začetni podatki (4.4)', files: ['content/sources/4.4/sola_struktura.sql', 'content/sources/4.4/sola_zacetni_podatki.sql'] },
+  { id: 'sola', db: 'moja', title: 'Šolska baza s podatki (sola.sql, 4.5)', files: ['src/public/sola.sql'] },
+  { id: 'matura', db: 'moja', title: 'Maturitetne baze (matura_baze.sql, 4.5)', files: ['src/public/matura_baze.sql'] },
+  { id: 'indeks', db: 'moja', title: 'Tabela za indekse (indeks_test.sql, 4.4)', files: ['content/sources/4.4/indeks_test.sql'] },
+  { id: 'p6k0', db: 'moja6', title: 'Poglavje 6: K0 začetek (šolska baza in matura)', files: ['content/sources/4.6/sola6_ponastavi.sql', 'src/public/matura_baze.sql'] },
+  { id: 'p6k2', db: 'moja6', title: 'Poglavje 6: K2 po INSERT (šolska baza in matura)', files: ['content/sources/4.6/sola6_k2.sql', 'src/public/matura_baze.sql'] },
+  { id: 'p6k3', db: 'moja6', title: 'Poglavje 6: K3 po INSERT … SELECT (šolska baza in matura)', files: ['content/sources/4.6/sola6_k3.sql', 'src/public/matura_baze.sql'] },
+  { id: 'p6k4', db: 'moja6', title: 'Poglavje 6: K4 po UPDATE (šolska baza in matura)', files: ['content/sources/4.6/sola6_k4.sql', 'src/public/matura_baze.sql'] },
+  { id: 'p6k5', db: 'moja6', title: 'Poglavje 6: K5 po DELETE (šolska baza in matura)', files: ['content/sources/4.6/sola6_k5.sql', 'src/public/matura_baze.sql'] },
+  { id: 'p6k6', db: 'moja6', title: 'Poglavje 6: K6 končno stanje (šolska baza in matura)', files: ['content/sources/4.6/sola6_k6.sql', 'src/public/matura_baze.sql'] },
 ];
 const readScript = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 
@@ -153,6 +165,13 @@ async function freshDatabase(c, s, name) {
   await query(c, `DROP DATABASE IF EXISTS ${ident(name)}`);
   await query(c, `CREATE DATABASE ${ident(name)} CHARACTER SET utf8mb4 COLLATE ${collation(s)}`);
 }
+// A database made fresh and filled from a template with the owner's own account (as if the student ran the script).
+async function fillTemplate(s, adminConn, t, name, user, password) {
+  await freshDatabase(adminConn, s, name);
+  if (!t.files.length) return;
+  const c = await connect(connOpts(s, user, password, name));
+  try { for (const f of t.files) await runScript(c, readScript(f)); } finally { await end(c).catch(() => c.destroy()); }
+}
 export async function importShared(s, actor) {
   const reader = readerName(s);
   let pass = unseal(s.reader_pass);
@@ -178,8 +197,9 @@ export async function orphans(s) {
   try {
     return await asAdmin(s, async (c) => {
       const like = `${s.prefix.replace(/_/g, '\\_')}u%`;
-      const names = (await query(c, 'SHOW DATABASES LIKE ?', [like])).map((r) => Object.values(r)[0]).filter((n) => new RegExp(`^${s.prefix}u\\d+$`).test(n));
-      const known = new Set((await many('SELECT db_name FROM sql_accounts')).map((r) => r.db_name));
+      const names = (await query(c, 'SHOW DATABASES LIKE ?', [like])).map((r) => Object.values(r)[0]).filter((n) => personalRe(s).test(n));
+      const known = new Set((await many('SELECT db_name, db_name6 FROM sql_accounts')).flatMap((r) => [r.db_name, r.db_name6]));
+      (await many('SELECT db_name FROM sql_drop_queue')).forEach((r) => known.add(r.db_name));
       return names.filter((n) => !known.has(n)).sort();
     });
   } catch (e) { throw adminFail(e, 'osirotele'); }
@@ -201,21 +221,26 @@ export async function dropOrphans(s, names, actor) {
 
 // ---------- personal databases ----------
 export const accountOf = (userId) => one('SELECT * FROM sql_accounts WHERE user_id=$1', [userId]);
+// Both databases and the account; the account has ALL on its two databases and nothing else.
+async function makeDatabases(c, s, account, names, pass) {
+  await query(c, `CREATE USER IF NOT EXISTS ${userAt(account)} IDENTIFIED BY ? WITH MAX_USER_CONNECTIONS ${Number(s.limits.connections)}`, [pass]);
+  await query(c, `ALTER USER ${userAt(account)} IDENTIFIED BY ? WITH MAX_USER_CONNECTIONS ${Number(s.limits.connections)}`, [pass]);
+  for (const name of Object.values(names)) {
+    await freshDatabase(c, s, name);
+    await query(c, `GRANT ALL PRIVILEGES ON ${grantOn(name)} TO ${userAt(account)}`);
+  }
+}
 export async function createAccount(s, user, actor) {
-  const name = dbNameFor(s, user.id);
+  const account = dbNameFor(s, user.id);
+  const names = personalNames(s, user.id);
   const pass = newPassword();
   try {
-    await asAdmin(s, async (c) => {
-      await freshDatabase(c, s, name);
-      await query(c, `CREATE USER IF NOT EXISTS ${userAt(name)} IDENTIFIED BY ? WITH MAX_USER_CONNECTIONS ${Number(s.limits.connections)}`, [pass]);
-      await query(c, `ALTER USER ${userAt(name)} IDENTIFIED BY ? WITH MAX_USER_CONNECTIONS ${Number(s.limits.connections)}`, [pass]);
-      await query(c, `GRANT ALL PRIVILEGES ON ${grantOn(name)} TO ${userAt(name)}`);
-    });
+    await asAdmin(s, (c) => makeDatabases(c, s, account, names, pass));
   } catch (e) { throw adminFail(e, 'nova baza'); }
   await q(
-    `INSERT INTO sql_accounts(user_id, db_name, db_user, password, created_by) VALUES($1,$2,$2,$3,$4)
-     ON CONFLICT (user_id) DO UPDATE SET db_name=$2, db_user=$2, password=$3, created_by=$4, created_at=now(), last_used_at=NULL, size_bytes=0`,
-    [user.id, name, seal(pass), actor?.id ?? null],
+    `INSERT INTO sql_accounts(user_id, db_name, db_name6, db_user, password, created_by) VALUES($1,$2,$3,$4,$5,$6)
+     ON CONFLICT (user_id) DO UPDATE SET db_name=$2, db_name6=$3, db_user=$4, password=$5, created_by=$6, created_at=now(), last_used_at=NULL, size_bytes=0, size_bytes6=0`,
+    [user.id, names.moja, names.moja6, account, seal(pass), actor?.id ?? null],
   );
   return pass;
 }
@@ -227,23 +252,20 @@ export async function resetPassword(s, acc) {
   await q('UPDATE sql_accounts SET password=$2 WHERE user_id=$1', [acc.user_id, seal(pass)]);
   return pass;
 }
-// A fresh database, filled from a template with the owner's own account (as if the student ran the script).
+// A fresh database (the one the template belongs to), filled from the template with the owner's own account (as if the student ran the script).
 export async function resetDatabase(s, acc, templateId) {
   const t = TEMPLATES.find((x) => x.id === templateId) ?? TEMPLATES[0];
+  const name = dbOf(acc, t.db);
   try {
-    await asAdmin(s, (c) => freshDatabase(c, s, acc.db_name));
-    if (t.files.length) {
-      const c = await connect(connOpts(s, acc.db_user, unseal(acc.password), acc.db_name));
-      try { for (const f of t.files) await runScript(c, readScript(f)); } finally { await end(c).catch(() => c.destroy()); }
-    }
+    await asAdmin(s, (c) => fillTemplate(s, c, t, name, acc.db_user, unseal(acc.password)));
   } catch (e) { throw adminFail(e, 'ponastavitev'); }
-  await measure(s, acc);
-  return t;
+  await measure(s, acc, t.db);
+  return { ...t, name };
 }
 export async function dropAccount(s, acc) {
   try {
     await asAdmin(s, async (c) => {
-      await query(c, `DROP DATABASE IF EXISTS ${ident(acc.db_name)}`);
+      for (const name of [acc.db_name, acc.db_name6]) await query(c, `DROP DATABASE IF EXISTS ${ident(name)}`);
       await query(c, `DROP USER IF EXISTS ${userAt(acc.db_user)}`);
     });
   } catch (e) { throw adminFail(e, 'brisanje'); }
@@ -260,7 +282,7 @@ export async function drainDropQueue() {
     if (!list.length) return 0;
     await asAdmin(s, async (c) => {
       for (const r of list) {
-        if (!new RegExp(`^${s.prefix}u\\d+$`).test(r.db_name)) { await q('DELETE FROM sql_drop_queue WHERE db_name=$1', [r.db_name]); continue; }
+        if (!personalRe(s).test(r.db_name)) { await q('DELETE FROM sql_drop_queue WHERE db_name=$1', [r.db_name]); continue; }
         await query(c, `DROP DATABASE IF EXISTS ${ident(r.db_name)}`);
         await query(c, `DROP USER IF EXISTS ${userAt(r.db_user)}`);
         await q('DELETE FROM sql_drop_queue WHERE db_name=$1', [r.db_name]);
@@ -276,11 +298,11 @@ export const drainSoon = () => setTimeout(() => drainDropQueue(), 2000).unref();
 afterErase.add(drainSoon);
 setInterval(() => drainDropQueue(), 5 * 60 * 1000).unref();
 
-async function measure(s, acc) {
+async function measure(s, acc, target) {
   try {
     const bytes = await asAdmin(s, async (c) => Number((await query(c,
-      'SELECT COALESCE(SUM(data_length + index_length), 0) AS b FROM information_schema.tables WHERE table_schema=?', [acc.db_name]))[0].b));
-    await q('UPDATE sql_accounts SET size_bytes=$2 WHERE user_id=$1', [acc.user_id, bytes]);
+      'SELECT COALESCE(SUM(data_length + index_length), 0) AS b FROM information_schema.tables WHERE table_schema=?', [dbOf(acc, target)]))[0].b));
+    await q(`UPDATE sql_accounts SET ${PERSONAL[target].size}=$2 WHERE user_id=$1`, [acc.user_id, bytes]);
     return bytes;
   } catch { return null; }
 }
@@ -350,7 +372,7 @@ function runOne(c, st, limits, killer) {
   });
 }
 
-// target: 'moja' (the personal database) or one of SHARED (read-only).
+// target: 'moja' (4.4) or 'moja6' (4.6), the personal databases, or one of SHARED (read-only).
 export async function run(user, target, text) {
   const s = await settings();
   const limits = s.limits;
@@ -362,17 +384,17 @@ export async function run(user, target, text) {
   if (statements.length > MAX_STATEMENTS) return { ok: false, error: `Skript ima več kot ${MAX_STATEMENTS} stavkov. Razdeli ga.` };
   let cred;
   let acc = null;
-  if (target === 'moja') {
+  if (isPersonal(target)) {
     acc = await accountOf(user.id);
     if (!acc) return { ok: false, error: 'Nimaš še svoje baze. Ustvari jo učitelj.' };
-    cred = { user: acc.db_user, password: unseal(acc.password), database: acc.db_name };
+    cred = { user: acc.db_user, password: unseal(acc.password), database: dbOf(acc, target) };
   } else {
     const sh = SHARED.find((x) => x.id === target);
     if (!sh || !s.shared_at) return { ok: false, error: 'Ta skupna baza še ni pripravljena.' };
     cred = { user: readerName(s), password: unseal(s.reader_pass), database: sh.db(s) };
   }
   if (!cred.password) return { ok: false, error: 'Gesla ni mogoče prebrati (ključ SQL_KEY se je spremenil). Obvesti učitelja.' };
-  const over = acc && acc.size_bytes > limits.sizeMb * 1024 * 1024;
+  const over = acc && acc[PERSONAL[target].size] > limits.sizeMb * 1024 * 1024;
   const opts = connOpts(s, cred.user, cred.password, cred.database);
   let c;
   try { c = await connect(opts); } catch (e) {
@@ -389,7 +411,7 @@ export async function run(user, target, text) {
     for (const [n, st] of statements.entries()) {
       const word = firstWord(st.sql);
       if (over && !SHRINK.has(word)) {
-        results.push({ ok: false, n: n + 1, line: st.line, sql: st.sql.slice(0, 200), message: `Tvoja baza je večja od ${limits.sizeMb} MB. Najprej jo zmanjšaj (DELETE, DROP, TRUNCATE) ali ponastavi.` });
+        results.push({ ok: false, n: n + 1, line: st.line, sql: st.sql.slice(0, 200), message: `Tvoja baza ${cred.database} je večja od ${limits.sizeMb} MB. Najprej jo zmanjšaj (DELETE, DROP, TRUNCATE) ali ponastavi.` });
         break;
       }
       const r = await runOne(c, st, limits, killer);
@@ -401,7 +423,7 @@ export async function run(user, target, text) {
   const failed = results.find((r) => !r.ok);
   if (acc) {
     await q('UPDATE sql_accounts SET last_used_at=now() WHERE user_id=$1', [user.id]);
-    if (changed) await measure(s, acc);
+    if (changed) await measure(s, acc, target);
   }
   return { ok: !failed, results, statements: statements.length, changed, ran: results.length };
 }
@@ -410,10 +432,10 @@ export async function run(user, target, text) {
 export async function schema(user, target) {
   const s = await settings();
   let cred;
-  if (target === 'moja') {
+  if (isPersonal(target)) {
     const acc = await accountOf(user.id);
     if (!acc) return null;
-    cred = { user: acc.db_user, password: unseal(acc.password), database: acc.db_name };
+    cred = { user: acc.db_user, password: unseal(acc.password), database: dbOf(acc, target) };
   } else {
     const sh = SHARED.find((x) => x.id === target);
     if (!sh || !s.shared_at) return null;
@@ -450,4 +472,149 @@ export async function remember(userId, target, text, out) {
     [userId, target, String(text).slice(0, 4000), !!out.ok, (out.results ?? []).reduce((a, r) => a + (r.ms || 0), 0), out.ran ?? 0],
   );
   await q(`DELETE FROM sql_history WHERE user_id=$1 AND id NOT IN (SELECT id FROM sql_history WHERE user_id=$1 ORDER BY id DESC LIMIT ${historyKeep})`, [userId]);
+  // counters for the admin's statistics: numbers only
+  const ms = (out.results ?? []).reduce((a, r) => a + (r.ms || 0), 0);
+  await q(
+    `INSERT INTO sql_daily(day, target, runs, failed, ms) VALUES (current_date, $1, 1, $2, $3)
+     ON CONFLICT (day, target) DO UPDATE SET runs=sql_daily.runs+1, failed=sql_daily.failed+$2, ms=sql_daily.ms+$3`,
+    [target, out.ok ? 0 : 1, ms],
+  );
+  await q('INSERT INTO sql_daily_users(day, user_id) VALUES (current_date, $1) ON CONFLICT DO NOTHING', [userId]);
+}
+
+// ---------- the admin's statistics (numbers only; the teacher never sees statements, and neither does the admin here) ----------
+export async function stats(limits) {
+  await q(`DELETE FROM sql_daily WHERE day < current_date - 90`);
+  await q(`DELETE FROM sql_daily_users WHERE day < current_date - 90`);
+  const days = await many(
+    `SELECT d::date AS day, COALESCE(sum(x.runs), 0)::int AS runs, COALESCE(sum(x.failed), 0)::int AS failed, COALESCE(sum(x.ms), 0)::bigint AS ms,
+            (SELECT count(*)::int FROM sql_daily_users u WHERE u.day = d::date) AS users
+     FROM generate_series(current_date - 13, current_date, interval '1 day') d LEFT JOIN sql_daily x ON x.day = d::date
+     GROUP BY d ORDER BY d DESC`,
+  );
+  const byTarget = await many(`SELECT target, sum(runs)::int AS runs, sum(failed)::int AS failed FROM sql_daily WHERE day > current_date - 7 GROUP BY target ORDER BY target`);
+  const totals = await one(
+    `SELECT count(*)::int AS accounts, count(*) FILTER (WHERE last_used_at IS NULL)::int AS never,
+            count(*) FILTER (WHERE last_used_at > now() - interval '7 days')::int AS active,
+            COALESCE(sum(size_bytes + size_bytes6), 0)::bigint AS bytes, COALESCE(max(GREATEST(size_bytes, size_bytes6)), 0)::bigint AS biggest,
+            count(*) FILTER (WHERE GREATEST(size_bytes, size_bytes6) > $1)::int AS over
+     FROM sql_accounts`,
+    [Number(limits.sizeMb) * 1048576],
+  );
+  const queued = (await one('SELECT count(*)::int AS n FROM sql_drop_queue')).n;
+  return { days, byTarget, totals, queued };
+}
+
+// ---------- the admin's full check ----------
+// Makes a throwaway account (user id 0, so it can never be a real person's) with both databases, tries what a student does and what a student
+// must not be able to do, and removes everything. Each line is ok (true), failed (false) or not run (null).
+export async function selfTest(s) {
+  const out = [];
+  const step = async (name, fn) => {
+    const t0 = Date.now();
+    try { out.push({ ok: true, name, detail: (await fn()) ?? '', ms: Date.now() - t0 }); return true; } catch (e) {
+      out.push({ ok: false, name, detail: e.sqlMessage || e.message, ms: Date.now() - t0 }); return false;
+    }
+  };
+  const skip = (name, why) => out.push({ ok: null, name, detail: why, ms: 0 });
+  const mustFail = async (fn, what) => {
+    let failed = false;
+    try { await fn(); } catch { failed = true; }
+    if (!failed) throw new Error(`${what}: ukaz je uspel, a ne bi smel`);
+  };
+  const account = dbNameFor(s, 0);
+  const names = personalNames(s, 0);
+  const pass = newPassword();
+  const limits = s.limits;
+  let admin;
+  const asTest = async (database, fn) => {
+    const c = await connect(connOpts(s, account, pass, database));
+    try { return await fn(c); } finally { await end(c).catch(() => c.destroy()); }
+  };
+  const dropTest = async () => {
+    for (const name of Object.values(names)) await query(admin, `DROP DATABASE IF EXISTS ${ident(name)}`);
+    await query(admin, `DROP USER IF EXISTS ${userAt(account)}`);
+  };
+  try {
+    const connected = await step('Skrbniška povezava na strežnik', async () => {
+      admin = await connect(connOpts(s, s.admin_user, unseal(s.admin_pass)));
+      const version = (await query(admin, 'SELECT VERSION() AS v'))[0].v;
+      if (!s.tls) return `${version} (TLS je izklopljen)`;
+      const cipher = (await query(admin, `SHOW SESSION STATUS LIKE 'Ssl_cipher'`))[0]?.Value;
+      if (!cipher) throw new Error('Povezava ni šifrirana (TLS), čeprav je vklopljen v nastavitvah');
+      return `${version}, TLS: ${cipher}`;
+    });
+    if (!connected) return out;
+    const made = await step('Preizkusni račun in obe osebni bazi se ustvarita', async () => {
+      await dropTest();
+      await makeDatabases(admin, s, account, names, pass);
+      return `${account}, ${Object.values(names).join(', ')}`;
+    });
+    if (!made) return out;
+    for (const [key, p] of Object.entries(PERSONAL)) {
+      await step(`${p.title}: ustvarjanje tabele, pisanje, branje in brisanje`, () => asTest(names[key], async (c) => {
+        await query(c, 'CREATE TABLE preizkus (id INT PRIMARY KEY, x VARCHAR(20)) ENGINE=InnoDB');
+        await query(c, `INSERT INTO preizkus VALUES (1, 'č')`);
+        await query(c, `UPDATE preizkus SET x = 'š' WHERE id = 1`);
+        const r = await query(c, 'SELECT x FROM preizkus WHERE id = 1');
+        if (r[0]?.x !== 'š') throw new Error('Prebrana vrednost ni enaka zapisani (nabor znakov?)');
+        await query(c, 'DELETE FROM preizkus WHERE id = 1');
+        await query(c, 'DROP TABLE preizkus');
+        return names[key];
+      }));
+      const t = TEMPLATES.find((x) => x.db === key && x.files.length);
+      await step(`${p.title}: ponastavitev na predlogo »${t.title}«`, async () => {
+        await fillTemplate(s, admin, t, names[key], account, pass);
+        const n = (await query(admin, 'SELECT count(*) AS n FROM information_schema.tables WHERE table_schema = ?', [names[key]]))[0].n;
+        if (!Number(n)) throw new Error('Po ponastavitvi v bazi ni nobene tabele');
+        return `${n} tabel`;
+      });
+    }
+    await step('Račun vidi samo svoji bazi in ne more ustvarjati baz, brati sistemskih ali dajati pravic', () => asTest(names.moja, async (c) => {
+      const seen = (await query(c, 'SHOW DATABASES')).map((r) => Object.values(r)[0]);
+      const foreign = seen.filter((n) => n !== 'information_schema' && n !== 'performance_schema' && !Object.values(names).includes(n));
+      if (foreign.length) throw new Error(`Račun vidi tuje baze: ${foreign.join(', ')}`);
+      await mustFail(() => query(c, `CREATE DATABASE ${ident(`${s.prefix}u0_tuja`)}`), 'Ustvarjanje nove baze');
+      await mustFail(() => query(c, 'SELECT * FROM mysql.user LIMIT 1'), 'Branje sistemske baze');
+      await mustFail(() => query(c, `GRANT SELECT ON ${grantOn(names.moja)} TO ${userAt(readerName(s))}`), 'Dajanje pravic');
+      return 'tuje baze niso vidne, ukazi so zavrnjeni';
+    }));
+    await step('Čas stavka in število povezav sta omejena', async () => {
+      await asTest(names.moja, async (c) => {
+        await query(c, isMaria(s) ? `SET SESSION max_statement_time=${Number(limits.timeout)}` : `SET SESSION max_execution_time=${Number(limits.timeout) * 1000}`);
+        const v = (await query(c, isMaria(s) ? 'SELECT @@SESSION.max_statement_time AS v' : 'SELECT @@SESSION.max_execution_time AS v'))[0].v;
+        const want = isMaria(s) ? Number(limits.timeout) : Number(limits.timeout) * 1000;
+        if (Number(v) !== want) throw new Error(`Čas stavka se ni nastavil (${v})`);
+      });
+      const open = [];
+      try {
+        for (let i = 0; i < Number(limits.connections); i++) open.push(await connect(connOpts(s, account, pass, names.moja)));
+        await mustFail(async () => { open.push(await connect(connOpts(s, account, pass, names.moja))); }, `Povezava številka ${Number(limits.connections) + 1}`);
+      } finally { await Promise.all(open.map((c) => end(c).catch(() => c.destroy()))); }
+      return `čas ${limits.timeout} s, povezav ${limits.connections}`;
+    });
+    if (s.shared_at) {
+      await step('Skupni bazi: branje je mogoče, pisanje ne', async () => {
+        for (const sh of SHARED) {
+          const c = await connect(connOpts(s, readerName(s), unseal(s.reader_pass), sh.db(s)));
+          try {
+            const n = (await query(c, 'SELECT count(*) AS n FROM information_schema.tables WHERE table_schema = ?', [sh.db(s)]))[0].n;
+            if (!Number(n)) throw new Error(`V bazi ${sh.db(s)} ni nobene tabele`);
+            await mustFail(() => query(c, 'CREATE TABLE preizkus (a INT)'), `Pisanje v ${sh.db(s)}`);
+          } finally { await end(c).catch(() => c.destroy()); }
+        }
+        return SHARED.map((x) => x.db(s)).join(', ');
+      });
+    } else skip('Skupni bazi: branje je mogoče, pisanje ne', 'Skupni bazi še nista uvoženi.');
+  } finally {
+    if (admin) {
+      await step('Pospravljanje: preizkusni račun in bazi se izbrišejo', async () => {
+        await dropTest();
+        const left = await query(admin, 'SHOW DATABASES LIKE ?', [`${s.prefix.replace(/_/g, '\_')}u0\_4\_%`]);
+        if (left.length) throw new Error('Preizkusni bazi sta ostali na strežniku');
+      });
+      await end(admin).catch(() => admin.destroy());
+    }
+  }
+  return out;
 }

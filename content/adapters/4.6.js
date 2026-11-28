@@ -1,7 +1,7 @@
 // SQL DML in posledice pri tujih ključih (LAV-RAČ4, 6. poglavje; 4.6). Connects the published artifact to the exercise shell: the
 // portal's storage, one answer per task, four theory groups, the practice items without points left as "Za doma".
 // The student changes the school database step by step, in MySQL Workbench or in the portal's SQL sandbox (their own database,
-// `sandbox: {"db": "moja"}` in sources.json). The portal never judges the statements: the student runs the control queries and
+// `sandbox: {"db": "moja6"}` in sources.json). The portal never judges the statements: the student runs the control queries and
 // types what the server returns (a number, a value, an error code). Tasks keep their control results and points as in 4.5.
 // The checkpoint scripts K0 to K6 are served from the page itself (the exercise is one file) and are also templates of the
 // sandbox (src/sqlbox.js, TEMPLATES), so that a student can start again from any checkpoint with one click.
@@ -82,7 +82,7 @@ const fileButtons = FILES.flatMap((f) => {
   const k = f.replace('sola6_', '').replace('.sql', '');
   const label = k === 'ponastavi' ? 'K0' : k.toUpperCase();
   const dl = `<button class="btn primary js-getfile" type="button" data-f="${f}">⬇ Prenesi ${f}</button><button class="btn js-copyfile" type="button" data-f="${f}">Kopiraj</button>`;
-  const hint = `<p class="kp-note">V SQL peskovniku portala: Ponastavi mojo bazo, predloga »Poglavje 6: ${label}«.</p>`;
+  const hint = `<p class="kp-note">V SQL peskovniku portala: Ponastavi bazo, predloga »Poglavje 6: ${label}« (ponastavi samo bazo za poglavje 6).</p>`;
   return [[`<button class="btn primary js-copyfile" type="button" data-f="${f}">Kopiraj ${f}</button><a class="btn ghost" href="${f}.txt" target="_blank" rel="noopener">Odpri ↗</a></div>`, dl + '</div>' + hint]];
 });
 
@@ -116,7 +116,7 @@ export default {
     ...fileButtons,
     // The sandbox: the same states as templates (the note on Safe Updates in a new connection is in the artifact itself).
     ['Podatki poglavja 5 se izgubijo, a jih lahko kadarkoli spet uvoziš s <code>sola.sql</code>.</p>',
-      'Podatki poglavja 5 se izgubijo, a jih lahko kadarkoli spet uvoziš s <code>sola.sql</code>.</p><p class="note"><strong>V SQL peskovniku portala</strong> (meni SQL peskovnik, »Moja baza«) ti skripte ni treba prenašati: klikni »Ponastavi mojo bazo« in izberi predlogo »Poglavje 6: K0« (šolska baza in maturitetne tabele). Za vsako kontrolno točko je predloga z njenim imenom. Ponastavitev izbriše vse v tvoji bazi.</p>'],
+      'Podatki poglavja 5 se izgubijo, a jih lahko kadarkoli spet uvoziš s <code>sola.sql</code>.</p><p class="note"><strong>V SQL peskovniku portala</strong> (meni SQL peskovnik) imaš za to poglavje svojo bazo »Moja baza za poglavje 6 (4.6)«, na primer <code>lr_u57_4_6</code>; njeno ime piše nad urejevalnikom in gumb »Odpri v peskovniku« jo izbere sam. Skripte ti ni treba prenašati: klikni »Ponastavi bazo« in izberi predlogo »Poglavje 6: K0« (šolska baza in maturitetne tabele). Za vsako kontrolno točko je predloga z njenim imenom. Ponastavitev izbriše vse samo v bazi za poglavje 6; tvoja baza iz poglavja 4.4 ostane.</p>'],
     [OLD_FILES_JS, FILES_JS + '\n'],
     // The page's account sync and downloads are not used (they run only inside claude.ai).
     ['if(!window.claude || !window.claude.use) return;', 'return;', 'all'],

@@ -3,7 +3,7 @@
 <% const f = fmt; const without = rows.filter((r) => !r.acc).length; %>
 <p class="crumbs"><a href="/ucitelj/razredi/<%= cls.id %>"><%= cls.name %></a> ›</p>
 <div class="title-row"><h1>SQL baze · <%= cls.name %></h1>
-  <% if (without) { %><form method="post" action="/ucitelj/razredi/<%= cls.id %>/sql/ustvari"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn">Ustvari bazo vsem, ki je nimajo (<%= without %>)</button></form><% } %>
+  <% if (without) { %><form method="post" action="/ucitelj/razredi/<%= cls.id %>/sql/ustvari"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn">Ustvari baze vsem, ki jih nimajo (<%= without %>)</button></form><% } %>
 </div>
 <% if (message) { %><p class="notice" role="status"><%= message %></p><% } %>
 <% if (error) { %><p class="notice-warn" role="alert"><%= error %></p><% } %>
@@ -14,7 +14,17 @@
   <dl class="cred"><div><dt>Uporabnik</dt><dd><code><%= shown.user %></code></dd></div><div><dt>Geslo</dt><dd><code class="big-code"><%= shown.pass %></code></dd></div></dl>
 </div>
 <% } %>
-<p class="dim">Vsak dijak ima svojo bazo in račun na strežniku <code><%= s.host %></code>. Učitelj vidi samo, ali dijak bazo uporablja; sheme, podatkov in ukazov dijaka ne vidi.</p>
+<section class="sql-state" aria-label="Stanje SQL peskovnika">
+  <h2 class="sql-h3">Stanje</h2>
+  <ul class="sql-state-list">
+    <li><span class="light <%= s.checked_at ? 'green' : 'grey' %>"></span> Strežnik: <%= s.checked_at ? 'povezava je bila preizkušena' : 'povezava še ni bila preizkušena' %></li>
+    <li><span class="light <%= s.selftest_at ? (s.selftest_ok ? 'green' : 'yellow') : 'grey' %>"></span> Celoten preizkus (skrbnik): <%= s.selftest_at ? `${f.dateTime(s.selftest_at)}, ${s.selftest_ok ? 'uspešen' : 'z napakami, javi skrbniku'}` : 'še ni bil narejen' %></li>
+    <li><span class="light <%= s.shared_at ? 'green' : 'grey' %>"></span> Skupni bazi za poglavje 4.5: <%= s.shared_at ? 'pripravljeni' : 'še nista uvoženi' %></li>
+    <li><span class="light <%= without ? 'yellow' : 'green' %>"></span> Dijaki z bazama: <%= rows.length - without %> od <%= rows.length %><%= without ? ' (gumb zgoraj ustvari manjkajoče)' : '' %></li>
+    <li><span class="light green"></span> Svoji bazi za preizkus kot dijak: <a href="/sql">odpri SQL peskovnik</a></li>
+  </ul>
+</section>
+<p class="dim">Vsak dijak ima svoj račun in dve bazi (za poglavje 4.4 in za poglavje 4.6) na strežniku <code><%= s.host %></code>. Učitelj vidi samo, ali dijak bazo uporablja; sheme, podatkov in ukazov dijaka ne vidi.</p>
 <ul class="legend sql-legend">
   <% ['green', 'yellow', 'grey', 'none'].forEach((k) => { %><li><span class="light <%= k %>"></span> <%= LIGHTS[k] %></li><% }) %>
 </ul>
@@ -26,7 +36,7 @@
     <td class="l"><%= r.name %></td>
     <td><span class="light <%= r.light %>" role="img" aria-label="<%= LIGHTS[r.light] %>" title="<%= LIGHTS[r.light] %>"></span></td>
     <td class="l nw"><%= r.acc ? (r.acc.last_used_at ? f.ago(r.acc.last_used_at) : 'še ni uporabljal') : '–' %></td>
-    <td class="nw <%= r.acc && r.acc.size_bytes > limits.sizeMb * 1048576 ? 'weak' : '' %>"><%= r.acc ? mb(r.acc.size_bytes) : '–' %></td>
+    <td class="nw <%= r.acc && (r.acc.size_bytes > limits.sizeMb * 1048576 || r.acc.size_bytes6 > limits.sizeMb * 1048576) ? 'weak' : '' %>"><%= r.acc ? `${mb(r.acc.size_bytes)} (4.4) · ${mb(r.acc.size_bytes6)} (4.6)` : '–' %></td>
     <td class="l"><%= r.acc ? r.acc.db_user : '' %></td>
     <td class="r"><% if (r.acc) { %><button type="button" class="icon-btn" data-edit="e<%= r.id %>" aria-label="Uredi bazo: <%= r.name %>" title="Uredi"><%- include('../partials/icon', { name: 'edit' }) %></button><% } else { %>
       <form method="post" action="/ucitelj/razredi/<%= cls.id %>/sql/dijaki/<%= r.id %>/ustvari"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn small ghost">Ustvari bazo</button></form><% } %></td>
@@ -36,12 +46,12 @@
 <% rows.filter((r) => r.acc).forEach((r) => { const act = (a) => `/ucitelj/razredi/${cls.id}/sql/dijaki/${r.id}/${a}`; %>
 <dialog class="edit-dlg" id="e<%= r.id %>" aria-labelledby="t<%= r.id %>">
   <div class="edit-form">
-    <h2 id="t<%= r.id %>"><%= r.name %> · <code><%= r.acc.db_name %></code></h2>
-    <p class="dim">Ustvarjena <%= f.dateTime(r.acc.created_at) %> · <%= mb(r.acc.size_bytes) %> · <%= r.acc.last_used_at ? 'zadnja uporaba ' + f.ago(r.acc.last_used_at) : 'še ni uporabljal' %></p>
+    <h2 id="t<%= r.id %>"><%= r.name %> · <code><%= r.acc.db_user %></code></h2>
+    <p class="dim">Bazi <code><%= r.acc.db_name %></code> (4.4) in <code><%= r.acc.db_name6 %></code> (4.6). Ustvarjena <%= f.dateTime(r.acc.created_at) %> · <%= mb(r.acc.size_bytes) %> + <%= mb(r.acc.size_bytes6) %> · <%= r.acc.last_used_at ? 'zadnja uporaba ' + f.ago(r.acc.last_used_at) : 'še ni uporabljal' %></p>
     <form class="field" method="post" action="<%= act('ponastavi') %>"><input type="hidden" name="_csrf" value="<%= csrf %>">
       <label for="p<%= r.id %>">Ponastavi bazo</label>
-      <select id="p<%= r.id %>" name="predloga"><% TEMPLATES.forEach((t) => { %><option value="<%= t.id %>"><%= t.title %></option><% }) %></select>
-      <label class="switch"><input type="checkbox" name="potrdi" required> Vse tabele in podatki dijaka se izbrišejo.</label>
+      <select id="p<%= r.id %>" name="predloga"><% Object.entries(PERSONAL).forEach(([k, p]) => { %><optgroup label="<%= p.title %>"><% TEMPLATES.filter((t) => t.db === k).forEach((t) => { %><option value="<%= t.id %>"><%= t.title %></option><% }) %></optgroup><% }) %></select>
+      <label class="switch"><input type="checkbox" name="potrdi" required> Vse tabele in podatki dijaka v izbrani bazi se izbrišejo (druga ostane).</label>
       <div><button class="btn small">Ponastavi</button></div>
     </form>
     <form class="field" method="post" action="<%= act('geslo') %>"><input type="hidden" name="_csrf" value="<%= csrf %>">
@@ -50,7 +60,7 @@
     </form>
     <details class="danger-zone"><summary>Izbriši bazo in račun</summary>
       <form class="field" method="post" action="<%= act('izbrisi') %>"><input type="hidden" name="_csrf" value="<%= csrf %>">
-        <label class="switch"><input type="checkbox" name="potrdi" required> Baza, vse tabele in račun se trajno izbrišejo.</label>
+        <label class="switch"><input type="checkbox" name="potrdi" required> Obe bazi, vse tabele in račun se trajno izbrišejo.</label>
         <div><button class="btn small danger">Izbriši</button></div>
       </form>
     </details>

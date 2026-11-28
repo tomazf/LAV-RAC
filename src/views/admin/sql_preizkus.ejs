@@ -1,0 +1,18 @@
+<%- include('../partials/head', { pageTitle: 'Celoten preizkus SQL', mainClass: 'wide' }) %>
+<link rel="stylesheet" href="<%= asset('css/sqlbox.css') %>">
+<%- include('../partials/adminnav') %>
+<p class="crumbs"><a href="/admin/sql">SQL peskovnik</a> ›</p>
+<h1>Celoten preizkus</h1>
+<% if (ok) { %><p class="notice" role="status">Vse deluje: dijaki lahko ustvarjajo, berejo in pišejo v svojih bazah, tuje baze so jim nedostopne, skupni bazi sta samo za branje.</p>
+<% } else { %><p class="notice-warn" role="alert">Preizkus je našel napake. Popravi prvo rdečo vrstico in ga ponovi; vrstice pod njo so lahko samo posledica.</p><% } %>
+<div class="scroll"><table class="data sql-check">
+  <thead><tr><th class="l">Korak</th><th>Izid</th><th class="l">Podrobnosti</th><th>Čas</th></tr></thead>
+  <tbody><% results.forEach((r) => { %><tr>
+    <td class="l"><%= r.name %></td>
+    <td><span class="tag <%= r.ok ? 'ok' : r.ok === false ? 'bad' : '' %>"><%= r.ok ? 'v redu' : r.ok === false ? 'napaka' : 'preskočeno' %></span></td>
+    <td class="l"><%= r.detail %></td><td class="nw"><%= r.ms ? `${r.ms} ms` : '' %></td>
+  </tr><% }) %></tbody>
+</table></div>
+<p class="dim">Preizkus uporabi začasen račun <code><%= s.prefix %>u0</code> z bazama <code><%= s.prefix %>u0_4_4</code> in <code><%= s.prefix %>u0_4_6</code> ter ga na koncu izbriše. Pravih dijakov in njihovih baz se ne dotakne.</p>
+<form method="post" action="/admin/sql/celoten-preizkus"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn">Ponovi preizkus</button> <a class="btn ghost" href="/admin/sql">Nazaj na SQL</a></form>
+<%- include('../partials/foot') %>

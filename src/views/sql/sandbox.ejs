@@ -8,9 +8,10 @@
   </div>
   <div class="sq-target">
     <label for="sq-db">Baza</label>
-    <select id="sq-db"><% targets.forEach((t) => { %><option value="<%= t.id %>" <%= t.id === start ? 'selected' : '' %> <%= t.id === 'moja' && !acc ? 'disabled' : '' %>><%= t.id === 'moja' ? (acc ? `Moja baza (${acc.db_name})` : 'Moja baza (še ni ustvarjena)') : t.title + ' · samo branje' %></option><% }) %></select>
+    <select id="sq-db"><% targets.forEach((t) => { const mine = !!PERSONAL[t.id]; const real = mine ? (acc ? acc[PERSONAL[t.id].col] : null) : SHARED.find((x) => x.id === t.id)?.db(s); %><option value="<%= t.id %>" data-real="<%= real || '' %>" data-title="<%= t.title %>" data-ro="<%= mine ? '' : '1' %>" <%= t.id === start ? 'selected' : '' %> <%= mine && !real ? 'disabled' : '' %>><%= mine ? (real ? `${t.title}: ${real}` : `${t.title} (še ni ustvarjena)`) : `${t.title} · samo branje` %></option><% }) %></select>
   </div>
 </div>
+<p class="sq-banner" id="sq-banner" role="status" aria-live="polite"></p>
 <% if (message) { %><p class="notice" role="status"><%= message %></p><% } %>
 <% if (error) { %><p class="notice-warn" role="alert"><%= error %></p><% } %>
 <% if (!acc) { %>
@@ -26,7 +27,8 @@
     <div class="sq-side-actions">
       <button type="button" class="btn ghost small" id="sq-er-open">ER diagram</button>
       <% if (acc) { %><button type="button" class="btn ghost small" data-open="sq-wb">Podatki za Workbench</button>
-      <button type="button" class="btn ghost small" data-open="sq-reset">Ponastavi mojo bazo</button><% } %>
+      <button type="button" class="btn ghost small" data-open="sq-acc">Moj račun in pravice</button>
+      <button type="button" class="btn ghost small" data-open="sq-reset">Ponastavi bazo</button><% } %>
     </div>
   </aside>
 
@@ -57,19 +59,46 @@
       <div><dt>Port</dt><dd><code data-copy><%= s.port %></code></dd></div>
       <div><dt>Username</dt><dd><code data-copy><%= acc.db_user %></code></dd></div>
       <div><dt>Password</dt><dd><code data-copy class="sq-secret"><%= pass || '(geslo ni dosegljivo, vprašaj učitelja)' %></code></dd></div>
-      <div><dt>Default Schema</dt><dd><code data-copy><%= acc.db_name %></code></dd></div>
+      <div><dt>Default Schema (4.4)</dt><dd><code data-copy><%= acc.db_name %></code></dd></div>
+      <div><dt>Poglavje 6 (4.6)</dt><dd><code data-copy><%= acc.db_name6 %></code></dd></div>
     </dl>
-    <p class="dim">Klik na podatek ga kopira. Geslo ti lahko ponastavi učitelj.</p>
+    <p class="dim">Klik na podatek ga kopira. Za poglavje 6 v Workbenchu izberi bazo <code><%= acc.db_name6 %></code> (dvoklik na ime v levem stolpcu) ali napiši <code>USE <%= acc.db_name6 %>;</code>. Geslo ti lahko ponastavi učitelj.</p>
+    <div class="dlg-actions"><button type="button" class="btn ghost" data-close>Zapri</button></div>
+  </div>
+</dialog>
+<dialog class="edit-dlg sq-dlg" id="sq-acc" aria-labelledby="sq-acc-h">
+  <div class="edit-form">
+    <h2 id="sq-acc-h">Moj SQL račun in pravice</h2>
+    <p>Tvoj uporabnik na strežniku je <code data-copy><%= acc.db_user %></code> (geslo je v oknu »Podatki za Workbench«). Z njim lahko:</p>
+    <ul>
+      <li>v bazi <code><%= acc.db_name %></code> (<%= PERSONAL.moja.title %>) in v bazi <code><%= acc.db_name6 %></code> (<%= PERSONAL.moja6.title %>) delaš karkoli: ustvarjaš, spreminjaš in brišeš tabele, poglede, indekse in podatke;</li>
+      <li>v skupnih bazah <code><%= SHARED.map((x) => x.db(s)).join('</code> in <code>') %></code> samo bereš (<code>SELECT</code>), to je za poglavje 4.5;</li>
+      <li>nimaš pravic nad drugimi bazami: ne moreš ustvariti novih baz, videti baz drugih dijakov ali dajati pravic drugim;</li>
+      <li>imaš lahko največ <%= limits.connections %> hkratnih povezav (Workbench in peskovnik skupaj).</li>
+    </ul>
+    <p>Pravice v jeziku SQL (podobno vrne <code>SHOW GRANTS;</code>, ki ga lahko zaženeš v urejevalniku):</p>
+    <pre class="sq-code"><code>GRANT ALL PRIVILEGES ON `<%= acc.db_name.replace(/_/g, '\\_') %>`.* TO '<%= acc.db_user %>'@'%';
+GRANT ALL PRIVILEGES ON `<%= acc.db_name6.replace(/_/g, '\\_') %>`.* TO '<%= acc.db_user %>'@'%';
+-- skupne baze (račun <%= s.prefix %>bralec, samo branje):
+<% SHARED.forEach((x) => { %>GRANT SELECT, SHOW VIEW ON `<%= x.db(s).replace(/_/g, '\\_') %>`.* TO '<%= s.prefix %>bralec'@'%';
+<% }) %></code></pre>
+    <p class="dim">Poševnica pred podčrtajem je samo zapis v ukazu GRANT, ime baze je <code><%= acc.db_name6 %></code>. Ob vsakem zagonu v peskovniku je izbrana baza že nastavljena (<code>USE</code> ni potreben); ime izbrane baze piše nad urejevalnikom.</p>
     <div class="dlg-actions"><button type="button" class="btn ghost" data-close>Zapri</button></div>
   </div>
 </dialog>
 <dialog class="edit-dlg sq-dlg" id="sq-reset" aria-labelledby="sq-reset-h">
   <form class="edit-form" method="post" action="/sql/ponastavi"><input type="hidden" name="_csrf" value="<%= csrf %>">
     <h2 id="sq-reset-h">Ponastavi mojo bazo</h2>
-    <p>Baza <code><%= acc.db_name %></code> se izprazni; po želji se napolni z eno od pripravljenih skript iz poglavij 4.4 in 4.5. Velikost zdaj: <%= mb(acc.size_bytes) %> od <%= limits.sizeMb %> MB.</p>
+    <p>Ponastavi se samo ena baza, tista, ki ji pripada izbrana vsebina. Druga ostane, kakršna je.</p>
+    <ul class="sq-dbs">
+      <li><strong><%= PERSONAL.moja.title %></strong>: <code><%= acc.db_name %></code> (<%= mb(acc.size_bytes) %> od <%= limits.sizeMb %> MB)</li>
+      <li><strong><%= PERSONAL.moja6.title %></strong>: <code><%= acc.db_name6 %></code> (<%= mb(acc.size_bytes6) %> od <%= limits.sizeMb %> MB)</li>
+    </ul>
     <div class="field"><label for="sq-tpl">Začetna vsebina</label>
-      <select id="sq-tpl" name="predloga"><% TEMPLATES.forEach((t) => { %><option value="<%= t.id %>"><%= t.title %></option><% }) %></select></div>
-    <label class="switch"><input type="checkbox" name="potrdi" required> Vse moje tabele in podatki se izbrišejo.</label>
+      <select id="sq-tpl" name="predloga">
+        <% Object.entries(PERSONAL).forEach(([k, p]) => { %><optgroup label="<%= p.title %> · <%= acc[p.col] %>"><% TEMPLATES.filter((t) => t.db === k).forEach((t) => { %><option value="<%= t.id %>" <%= t.id === 'p6k0' ? 'selected' : '' %>><%= t.title %></option><% }) %></optgroup><% }) %>
+      </select></div>
+    <label class="switch"><input type="checkbox" name="potrdi" required> Vse tabele in podatki v izbrani bazi se izbrišejo.</label>
     <div class="dlg-actions"><button class="btn danger">Ponastavi</button><button type="button" class="btn ghost" data-close>Prekliči</button></div>
   </form>
 </dialog>

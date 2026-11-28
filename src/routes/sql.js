@@ -35,12 +35,14 @@ adminSqlRouter.get('/', async (req, res, next) => {
       const accs = rows.filter((r) => r.class_id === c.id);
       return {
         ...c, accounts: accs.length, active: accs.filter((a) => sb.light(a) === 'green').length,
-        bytes: accs.reduce((x, a) => x + Number(a.size_bytes), 0),
+        bytes: accs.reduce((x, a) => x + Number(a.size_bytes) + Number(a.size_bytes6), 0),
       };
     });
     const others = rows.filter((r) => !r.class_id).sort(byName);
     const queued = (await one('SELECT count(*)::int AS n FROM sql_drop_queue')).n;
+    const statistics = s ? await sb.stats(s.limits) : null;
     res.render('admin/sql', {
+      statistics,
       tab: 'sql', s, keyOk: sb.keyOk(), editing: req.query.uredi !== undefined, limits: s?.limits ?? sb.DEFAULT_LIMITS, sqlClasses, others, queued, mb, light: sb.light, LIGHTS: sb.LIGHTS,
       locked: rows.length > 0,
       orphanList: req.query.osirotele === undefined ? null : String(req.query.osirotele).split(',').filter((n) => /^[a-z0-9_]+$/.test(n)), SHARED: sb.SHARED,
@@ -112,6 +114,20 @@ adminSqlRouter.post('/preizkus', checkCsrf, async (req, res, next) => {
     }
   } catch (e) { next(e); }
 });
+// The full check: a throwaway account tries what students do (and must not be able to do); the page shows each line and the result is kept
+// (date and ok/failed) so the teachers' page can say whether the server was checked.
+adminSqlRouter.post('/celoten-preizkus', checkCsrf, async (req, res, next) => {
+  try {
+    const s = await sb.settings();
+    if (!s || !sb.keyOk()) return flash(res, '/admin/sql', 'Strežnik še ni nastavljen.', true);
+    const results = await sb.selfTest(s);
+    const ok = results.every((r) => r.ok !== false);
+    await q('UPDATE sql_server SET selftest_at=now(), selftest_ok=$1 WHERE id=1', [ok]);
+    sb.forget();
+    await audit(req.user, 'Celoten preizkus SQL', ok ? 'uspešen' : `napake: ${results.filter((r) => r.ok === false).length}`);
+    res.render('admin/sql_preizkus', { results, ok, s });
+  } catch (e) { next(e); }
+});
 adminSqlRouter.post('/skupne', checkCsrf, async (req, res, next) => {
   try {
     const s = await sb.settings();
@@ -165,7 +181,7 @@ export function teacherSql(router, { loadClass, members }) {
       if (shown) { delete req.session.sqlShown; }
       const s = await sb.settings();
       res.render('teacher/sql', {
-        cls: req.cls, rows, shown, s, TEMPLATES: sb.TEMPLATES, LIGHTS: sb.LIGHTS, mb, limits: s.limits,
+        cls: req.cls, rows, shown, s, TEMPLATES: sb.TEMPLATES, PERSONAL: sb.PERSONAL, LIGHTS: sb.LIGHTS, mb, limits: s.limits, SHARED: sb.SHARED,
         message: req.query.sporocilo || null, error: req.query.napaka || null,
       });
     } catch (e) { next(e); }
@@ -189,7 +205,7 @@ export function teacherSql(router, { loadClass, members }) {
         return true;
       });
       if (n) await audit(req.user, 'Ustvaril baze SQL', `${req.cls.name}: ${n}`);
-      if (ok) flash(res, base(req), n ? `Ustvarjenih baz: ${n}. Dijaki vidijo svoje podatke za prijavo v peskovniku.` : 'Vsi dijaki že imajo bazo.');
+      if (ok) flash(res, base(req), n ? `Ustvarjenih računov z dvema bazama: ${n}. Dijaki vidijo svoje podatke za prijavo v peskovniku.` : 'Vsi dijaki že imajo bazi.');
     } catch (e) { next(e); }
   });
   router.post('/razredi/:id/sql/dijaki/:uid/:akcija', loadClass, sqlClass, ready, checkCsrf, async (req, res, next) => {
@@ -201,7 +217,7 @@ export function teacherSql(router, { loadClass, members }) {
       const to = `${base(req)}#d${m.id}`;
       const act = req.params.akcija;
       if (act === 'ustvari') {
-        if (acc) return flash(res, to, 'Dijak že ima bazo.');
+        if (acc) return flash(res, to, 'Dijak že ima obe bazi.');
         if (await tryAdmin(res, to, () => sb.createAccount(s, m, req.user)) === undefined) return;
         await audit(req.user, 'Ustvaril bazo SQL', `${req.cls.name}: ${m.name}`);
         return flash(res, to, `Baza za ${m.name} je ustvarjena.`);
@@ -211,8 +227,8 @@ export function teacherSql(router, { loadClass, members }) {
         if (req.body.potrdi !== 'on') return flash(res, to, 'Za ponastavitev označi potrditev.', true);
         const t = await tryAdmin(res, to, () => sb.resetDatabase(s, acc, String(req.body.predloga ?? '')));
         if (!t) return;
-        await audit(req.user, 'Ponastavil bazo SQL', `${req.cls.name}: ${m.name}: ${t.id}`);
-        return flash(res, to, `Baza za ${m.name} je ponastavljena (${t.title}).`);
+        await audit(req.user, 'Ponastavil bazo SQL', `${req.cls.name}: ${m.name}: ${t.name}: ${t.id}`);
+        return flash(res, to, `Baza ${t.name} za ${m.name} je ponastavljena (${t.title}).`);
       }
       if (act === 'geslo') {
         const pass = await tryAdmin(res, to, () => sb.resetPassword(s, acc));
@@ -225,7 +241,7 @@ export function teacherSql(router, { loadClass, members }) {
         if (req.body.potrdi !== 'on') return flash(res, to, 'Za izbris označi potrditev.', true);
         if (await tryAdmin(res, to, () => sb.dropAccount(s, acc)) === undefined) return;
         await audit(req.user, 'Izbrisal bazo SQL', `${req.cls.name}: ${m.name}`);
-        return flash(res, to, `Baza za ${m.name} je izbrisana.`);
+        return flash(res, to, `Bazi za ${m.name} sta izbrisani.`);
       }
       flash(res, to, 'Neznano dejanje.', true);
     } catch (e) { next(e); }
@@ -247,7 +263,7 @@ const sandboxGate = async (req, res, next) => {
 const apiCsrf = (req, res, next) => (csrfValid(req) ? next() : res.status(403).json({ ok: false, error: 'Stran je potekla. Osveži jo in poskusi znova.' }));
 const targets = async () => {
   const s = await sb.settings();
-  return [{ id: 'moja', title: 'Moja baza' }, ...(s.shared_at ? sb.SHARED.map((x) => ({ id: x.id, title: x.title, readonly: true })) : [])];
+  return [...Object.entries(sb.PERSONAL).map(([id, p]) => ({ id, title: p.title })), ...(s.shared_at ? sb.SHARED.map((x) => ({ id: x.id, title: x.title, readonly: true })) : [])];
 };
 const targetOk = async (t) => (await targets()).some((x) => x.id === t);
 
@@ -257,10 +273,11 @@ sqlRouter.get('/sql', requireLogin, sandboxGate, async (req, res, next) => {
     const acc = await sb.accountOf(req.user.id);
     const draft = await one('SELECT * FROM sql_drafts WHERE user_id=$1', [req.user.id]);
     const list = await targets();
-    const start = draft && list.some((t) => t.id === draft.target) ? draft.target : acc ? 'moja' : list[1]?.id ?? 'moja';
+    const usable = (t) => (sb.isPersonal(t) ? !!sb.dbOf(acc, t) : true);
+    const start = draft && list.some((t) => t.id === draft.target && usable(t.id)) ? draft.target : acc ? 'moja' : list.find((t) => !sb.isPersonal(t.id))?.id ?? 'moja';
     res.render('sql/sandbox', {
       s, acc, pass: acc ? sb.unseal(acc.password) : null, targets: list, start, draft: draft?.body ?? '',
-      TEMPLATES: sb.TEMPLATES, limits: s.limits, mb, years: YEARS,
+      TEMPLATES: sb.TEMPLATES, PERSONAL: sb.PERSONAL, SHARED: sb.SHARED, limits: s.limits, mb, years: YEARS,
       message: req.query.sporocilo || null, error: req.query.napaka || null,
     });
   } catch (e) { next(e); }
@@ -288,8 +305,8 @@ sqlRouter.post('/sql/ponastavi', requireLogin, sandboxGate, checkCsrf, async (re
       if (e instanceof sb.SqlAdminError) return flash(res, '/sql', e.message, true);
       throw e;
     }
-    await audit(req.user, 'Ponastavil svojo bazo SQL', t.id);
-    flash(res, '/sql', `Baza je ponastavljena: ${t.title}.`);
+    await audit(req.user, 'Ponastavil svojo bazo SQL', `${t.name}: ${t.id}`);
+    flash(res, '/sql', `Baza ${t.name} je ponastavljena: ${t.title}.`);
   } catch (e) { next(e); }
 });
 

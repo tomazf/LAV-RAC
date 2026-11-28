@@ -24,6 +24,11 @@ main.sqlmain{max-width:1480px;padding-top:18px}
 .sq-sub{margin:4px 0 0;font-size:.95rem}
 .sq-target{display:flex;align-items:center;gap:10px}
 .sq-target label{font-weight:700}
+.sq-banner{margin:6px 0 10px;padding:6px 10px;border-left:4px solid var(--acc);background:var(--card);font-weight:600}
+.sq-banner.ro{border-left-color:#8a8a8a}
+.sq-banner code{font-weight:700}
+.sq-dbs{margin:0 0 .8rem;padding-left:1.2rem}
+.sq-code{overflow-x:auto;padding:.6rem .8rem;border:1px solid var(--line);border-radius:6px;font-size:.88rem}
 .sq-target select{min-width:min(22rem,100%);font-weight:700}
 .sq-noacc{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0 0 14px}
 .sq-noacc form{margin:0}
@@ -166,6 +171,7 @@ main.sqlmain{max-width:1480px;padding-top:18px}
 .sql-card-h{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin-bottom:6px}
 .sql-card-h h2{margin:0}
 .tag.ok{background:var(--okbg);color:var(--ink);border:1px solid var(--ok)}
+.tag.bad{background:var(--badbg);color:var(--ink);border:1px solid var(--bad)}
 pre.code{background:var(--tile);border-radius:8px;padding:10px 12px;overflow:auto;font:.85rem/1.5 var(--fm)}
 
 /* compact server settings: a summary once it works, the form (two rows) on first entry or after »Uredi« */
@@ -201,3 +207,8 @@ pre.code{background:var(--tile);border-radius:8px;padding:10px 12px;overflow:aut
   .cfg-push{margin-left:0;flex-basis:100%}
 }
 pre.code i{color:var(--sig);font-style:normal}
+
+.sql-state{margin:.4rem 0 1rem}
+.sql-state-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.sql-state-list .light{display:inline-block;vertical-align:middle;margin-right:6px}
+.sql-check td{vertical-align:top}
