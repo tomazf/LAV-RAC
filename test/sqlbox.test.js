@@ -106,6 +106,7 @@ let r4;
 let taskNo = 0;
 async function task(page, click, { confirmText, expectIn } = {}) {
   const n = String(++taskNo).padStart(2, '0');
+  await page.waitForSelector('html[data-tk=ready]'); // a click before the script is ready would send the form the old way
   await page.click(click);
   await page.waitForSelector('.tk-dlg[data-phase=confirm]');
   await shot(page, `w${n}-potrditev`);
@@ -297,6 +298,24 @@ test('student: shared databases in the editor, scripts and history are their own
   await p.waitForSelector('#sq-er-canvas svg .er-t');
   assert.ok(await p.locator('#sq-er-canvas svg path[d^="M"]').count() >= 8, 'lines for the foreign keys');
   await shot(p, '07-er');
+  // a card dragged to the right or down is never cut off: the drawing grows with it (at any zoom)
+  const reach = () => p.evaluate(() => {
+    const svg = document.querySelector('#sq-er-canvas svg');
+    const k = svg.getBoundingClientRect().width / svg.viewBox.baseVal.width;
+    const cards = [...svg.querySelectorAll('.er-t')].map((g) => g.getBoundingClientRect());
+    return { svgRight: svg.getBoundingClientRect().right, svgBottom: svg.getBoundingClientRect().bottom, right: Math.max(...cards.map((r) => r.right)), bottom: Math.max(...cards.map((r) => r.bottom)), k };
+  });
+  for (const zoomOut of [false, true]) {
+    if (zoomOut) { await p.click('#sq-er-minus'); await p.click('#sq-er-minus'); }
+    const card = p.locator('#sq-er-canvas .er-t').first();
+    const box = await card.boundingBox();
+    await p.mouse.move(box.x + 20, box.y + 12);
+    await p.mouse.down();
+    await p.mouse.move(box.x + 20 + 900, box.y + 12 + 500, { steps: 6 });
+    await p.mouse.up();
+    const r = await reach();
+    assert.ok(r.svgRight >= r.right - 1 && r.svgBottom >= r.bottom - 1, `the drawing covers every card (${JSON.stringify(r)})`);
+  }
   await p.click('#sq-er [data-close]');
   // the draft is on the server: after a reload it is back, with the same database
   await p.waitForFunction(() => document.getElementById('sq-saved')?.textContent === 'Osnutek shranjen', null, { timeout: 8000 });
@@ -333,6 +352,7 @@ test('student: Workbench data; the teacher sets a new password and resets the da
   assert.doesNotMatch(await t.textContent('main'), /kraj|SELECT [*\w]/);
   // a new password, shown once
   await t.click(`button[data-edit=e${anaId}]`);
+  await t.waitForSelector('html[data-tk=ready]');
   await t.click(`#e${anaId} button:text-is("Novo geslo")`);
   await t.waitForSelector('.tk-dlg[data-phase=confirm]');
   assert.match(await t.textContent('.tk-dlg'), /Staro geslo preneha veljati takoj/);

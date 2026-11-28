@@ -196,7 +196,7 @@ pre.code{background:var(--tile);border-radius:8px;padding:10px 12px;overflow:aut
 .cfg-more summary::-webkit-details-marker{display:none}
 .cfg-more[open]{flex-basis:100%}
 .cfg-more[open] summary{text-decoration:none;font-weight:700}
-.cfg-more textarea{width:100%;font:.85rem var(--fm);color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:8px;padding:8px}
+.cfg-more textarea{width:100%;resize:vertical;max-width:100%;font:.85rem var(--fm);color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:8px;padding:8px}
 .cfg-lim{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;border:0;padding:0;margin:0;min-width:0}
 .cfg-lim legend{grid-column:1/-1;font:700 .8rem var(--fb);letter-spacing:.06em;text-transform:uppercase;color:var(--mut);padding:0;margin:4px 0 6px}
 .cfg-lim label{display:grid;gap:2px;font-size:.8rem;color:var(--mut)}
@@ -286,3 +286,4 @@ pre.code i{color:var(--sig);font-style:normal}
 .tk-stats dd{margin:1px 0 0;font:700 1.05rem var(--fb);overflow-wrap:anywhere}
 .tk-cred{margin:0 0 12px;padding:10px 14px;border:1px solid var(--line);border-radius:10px}
 .tk-cred p{margin:0 0 6px}
+#sq-er-canvas svg{display:block}

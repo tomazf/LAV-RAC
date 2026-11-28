@@ -176,4 +176,5 @@
       confirm(form, spec, () => run(form, spec));
     });
   }
+  document.documentElement.dataset.tk = 'ready'; // the buttons are wired (tests wait for it)
 })();

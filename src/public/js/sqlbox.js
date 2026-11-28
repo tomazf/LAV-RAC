@@ -303,7 +303,8 @@
     return e;
   };
   let zoom = 1;
-  let erBox = null;
+  let erBox = null; // the size of the content (cards plus margin)
+  let relayout = null; // sets the size of the drawing: the content, but at least the visible window, so a card can be dragged anywhere
   function drawEr() {
     if (!schema) return;
     $('sq-er-db').textContent = schema.database;
@@ -346,7 +347,8 @@
     const height = Math.max(...[...pos.values()].map((p) => p.y + p.h)) + 30;
     erBox = { width, height };
     const svg = svgEl('svg', { xmlns: NS, viewBox: `0 0 ${width} ${height}`, width: Math.round(width * zoom), height: Math.round(height * zoom), role: 'img', 'aria-label': `ER diagram baze ${schema.database}`, 'font-family': 'IBM Plex Mono, Consolas, monospace', 'font-size': '13' });
-    svg.append(svgEl('rect', { x: 0, y: 0, width, height, fill: col.bg }));
+    const bg = svgEl('rect', { x: 0, y: 0, width, height, fill: col.bg });
+    svg.append(bg);
     const links = svgEl('g', { fill: 'none', stroke: col.acc, 'stroke-width': '1.6' });
     svg.append(links);
     const rowY = (t, cname) => {
@@ -390,7 +392,7 @@
       g.addEventListener('pointerdown', (e) => {
         g.setPointerCapture(e.pointerId);
         const sx = e.clientX; const sy = e.clientY; const ox = p.x; const oy = p.y;
-        const move = (m) => { p.x = Math.max(0, ox + (m.clientX - sx) / zoom); p.y = Math.max(0, oy + (m.clientY - sy) / zoom); g.setAttribute('transform', `translate(${p.x},${p.y})`); drawLinks(); };
+        const move = (m) => { p.x = Math.max(0, ox + (m.clientX - sx) / zoom); p.y = Math.max(0, oy + (m.clientY - sy) / zoom); g.setAttribute('transform', `translate(${p.x},${p.y})`); drawLinks(); relayout?.(); };
         const up = () => { g.removeEventListener('pointermove', move); g.removeEventListener('pointerup', up); };
         g.addEventListener('pointermove', move);
         g.addEventListener('pointerup', up);
@@ -399,11 +401,23 @@
     }
     drawLinks();
     canvas.replaceChildren(svg);
+    relayout = () => {
+      const cw = Math.max(...[...pos.values()].map((p) => p.x + p.w)) + 30;
+      const ch = Math.max(...[...pos.values()].map((p) => p.y + p.h)) + 30;
+      erBox = { width: cw, height: ch };
+      const W = Math.max(cw, (canvas.clientWidth - 4) / zoom);
+      const H = Math.max(ch, (canvas.clientHeight - 4) / zoom);
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      svg.setAttribute('width', Math.round(W * zoom));
+      svg.setAttribute('height', Math.round(H * zoom));
+      bg.setAttribute('width', W);
+      bg.setAttribute('height', H);
+    };
+    relayout();
   }
   const setZoom = (z) => {
     zoom = Math.min(2.5, Math.max(0.3, z));
-    const svg = canvas.querySelector('svg');
-    if (svg && erBox) { svg.setAttribute('width', Math.round(erBox.width * zoom)); svg.setAttribute('height', Math.round(erBox.height * zoom)); }
+    relayout?.();
   };
   $('sq-er-open').addEventListener('click', async () => {
     if (!schema) await loadSchema();
