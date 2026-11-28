@@ -340,6 +340,10 @@ test('student: Workbench data; the teacher sets a new password and resets the da
   await p.click('button[data-open=sq-wb]');
   const user = (await p.textContent('#sq-wb .cred div:has(dt:text-is("Username")) code')).trim();
   const pass1 = (await p.textContent('#sq-wb .sq-secret')).trim();
+  // the shared databases for chapter 4.5 are named too, so a student can practise on them in Workbench
+  const wb = await p.textContent('#sq-wb');
+  assert.ok(wb.includes(`${PREFIX}sola`) && wb.includes(`${PREFIX}matura`), 'names of the shared databases');
+  assert.match(wb, /samo branje/);
   assert.match(user, /^lt_u\d+$/);
   await shot(p, '08-workbench');
   const conn = (pw) => mysql.createConnection({ host: myUrl.hostname, port: Number(myUrl.port || 3306), user, password: pw, database: `${user}_4_4` });
@@ -478,7 +482,7 @@ test('student: the editor opens with six lines, shows a Shift+arrow selection an
   await p.click('button[data-open=sq-reset]');
   const opts = await p.locator('#sq-tpl option').allTextContents();
   assert.ok(opts.length >= 8);
-  assert.ok(opts.every((o) => !/matura|\.sql/i.test(o) && !/^Šolska baza s podatki/.test(o)), opts.join(' | '));
+  assert.ok(opts.every((o) => !/\.sql/i.test(o) && !/^(Maturitetne baze|Šolska baza s podatki)/.test(o)), opts.join(' | '));
   let shown = 'sq-reset';
   for (const id of ['sq-reset', 'sq-acc', 'sq-wb']) {
     if (id !== shown) { await p.click(`#${shown} [data-close]`); await p.click(`button[data-open=${id}]`); shown = id; }

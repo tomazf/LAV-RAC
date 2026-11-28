@@ -77,6 +77,8 @@
       <div><dt>Password</dt><dd><code data-copy class="sq-secret"><%= pass || '(geslo ni dosegljivo, vprašaj učitelja)' %></code></dd></div>
       <div><dt>Default Schema (4.4)</dt><dd><code data-copy><%= acc.db_name %></code></dd></div>
       <div><dt>Poglavje 6 (4.6)</dt><dd><code data-copy><%= acc.db_name6 %></code></dd></div>
+      <% SHARED.forEach((x) => { %><div><dt><%= x.id === 'sola' ? 'Šolska baza (4.5)' : 'Matura (4.5)' %></dt><dd><code data-copy><%= x.db(s) %></code> <span class="dim">samo branje</span></dd></div>
+      <% }) %>
     </dl>
     <% if (s.ca) { %>
     <h3 class="sql-h3">Šifrirana povezava (SSL)</h3>
@@ -85,7 +87,7 @@
     <% } else if (s.tls) { %>
     <p class="dim">Strežnik podpira šifrirano povezavo: v Workbenchu na zavihku <strong>SSL</strong> pri <strong>Use SSL</strong> izberi <code>Require</code>.</p>
     <% } %>
-    <p class="dim">Klik na podatek ga kopira. Za poglavje 6 v Workbenchu izberi bazo <code><%= acc.db_name6 %></code> (dvoklik na ime v levem stolpcu) ali napiši <code>USE <%= acc.db_name6 %>;</code>. Geslo ti lahko ponastavi učitelj.</p>
+    <p class="dim">Klik na podatek ga kopira. Za poglavje 6 v Workbenchu izberi bazo <code><%= acc.db_name6 %></code> (dvoklik na ime v levem stolpcu) ali napiši <code>USE <%= acc.db_name6 %>;</code>. Za poglavje 4.5 uporabi skupni bazi (<code>USE <%= SHARED[0].db(s) %>;</code> ali <code>USE <%= SHARED[1].db(s) %>;</code>): v njiju lahko samo bereš, spreminjaš pa jih ne moreš. Geslo ti lahko ponastavi učitelj.</p>
     <div class="dlg-actions"><button type="button" class="btn ghost" data-close><%- ic('x') %>Zapri</button></div>
   </div>
 </dialog>
