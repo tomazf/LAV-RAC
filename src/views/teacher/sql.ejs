@@ -58,10 +58,10 @@
       <label>Geslo</label><span class="dim">Novo geslo se prikaže enkrat, da ga poveš dijaku. Staro preneha veljati (tudi v Workbenchu).</span>
       <div><button class="btn small ghost">Novo geslo</button></div>
     </form>
-    <details class="danger-zone"><summary>Izbriši bazo in račun</summary>
-      <form class="field" method="post" action="<%= act('izbrisi') %>" data-hash="d<%= r.id %>" data-task="<%= task({ title: 'Izbriši bazi: ' + r.name, lead: 'Dijaku se trajno izbrišeta obe bazi in račun.', bullets: ['Izbrišeta se bazi ' + r.acc.db_name + ' in ' + r.acc.db_name6 + ' z vsemi tabelami in podatki.', 'Izbriše se račun ' + r.acc.db_user + '; dijak se z njim ne more več prijaviti (tudi v Workbenchu).', 'Dijak lahko dobi novo, prazno bazo, če mu jo ustvariš znova.'], warn: 'Podatkov ni mogoče obnoviti.', danger: true, confirm: 'Izbriši trajno' }) %>"><input type="hidden" name="_csrf" value="<%= csrf %>">
-        <label class="switch"><input type="checkbox" name="potrdi" required> Obe bazi, vse tabele in račun se trajno izbrišejo.</label>
-        <div><button class="btn small danger">Izbriši</button></div>
+    <details class="danger-zone"><summary>Izbriši SQL bazi in račun</summary>
+      <form class="field" method="post" action="<%= act('izbrisi') %>" data-hash="d<%= r.id %>" data-task="<%= task({ title: 'Izbriši SQL bazi: ' + r.name, lead: 'Izbriše se samo dijakov SQL dostop: obe bazi in račun na strežniku MySQL. Dijak v portalu ostane.', bullets: ['Izbrišeta se bazi ' + r.acc.db_name + ' in ' + r.acc.db_name6 + ' z vsemi tabelami in podatki.', 'Izbriše se račun ' + r.acc.db_user + '; dijak se z njim ne more več prijaviti (tudi v Workbenchu).', 'Dijakov uporabniški račun v portalu, njegova prijava, točke in napredek pri vajah se ne spremenijo. Če mu bazo ustvariš znova, dobi novo, prazno.'], warn: 'Podatkov ni mogoče obnoviti.', danger: true, confirm: 'Izbriši trajno' }) %>"><input type="hidden" name="_csrf" value="<%= csrf %>">
+        <label class="switch"><input type="checkbox" name="potrdi" required> Trajno se izbrišejo obe SQL bazi, vse tabele in SQL račun. Dijak v portalu ostane (prijava, točke in napredek se ne spremenijo); dobi lahko novo, prazno bazo.</label>
+        <div><button class="btn small danger">Izbriši SQL bazi</button></div>
       </form>
     </details>
     <div class="dlg-actions"><button type="button" class="btn ghost" data-close>Zapri</button></div>

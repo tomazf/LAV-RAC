@@ -448,7 +448,8 @@ test('admin: the full check passes and cleans up; the statistics are numbers; th
   const a = pages.get('Sara Skrbnik');
   await a.goto(`${APP}/admin/sql`);
   const st = await a.textContent('#statistika');
-  assert.match(st, /Računi\s*\d+/);
+  assert.match(await a.textContent('#skupaj'), /računov z bazama[\s\S]*baz na strežniku[\s\S]*velikost vseh osebnih baz/);
+  assert.equal(await a.locator('#skupaj .tile').count(), 6);
   assert.doesNotMatch(st, /SELECT|CREATE|INSERT/, 'no statement text in the statistics');
   assert.ok((await sql('SELECT count(*)::int n FROM sql_daily'))[0].n > 0, 'the students runs were counted');
   const full = await task(a, 'button:text-is("Celoten preizkus")', { expectIn: /začasen račun/ });

@@ -268,7 +268,8 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 .edit-form .field>.switch{font-weight:400}
 .edit-form .checks{columns:2 12rem;margin:0}
 .edit-form .grp-name{margin-top:4px}
-.dlg-actions{display:flex;flex-wrap:wrap;gap:10px}
+.dlg-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end}
+.edit-form .field>div:has(>button){display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end}
 /* Admin lists: filter, search and button in one row; paging below */
 form.user-filter{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
 form.user-filter .sorter{margin:0 8px 0 0}

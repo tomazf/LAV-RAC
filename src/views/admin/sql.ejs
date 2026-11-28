@@ -85,6 +85,20 @@ GRANT ALL PRIVILEGES ON `<%= (s?.prefix ?? 'lr_').replace(/_/g, '\\_') %>%`.* TO
   </div>
 </section>
 
+<% if (statistics) { const tt = statistics.totals, students = sqlClasses.reduce((n, c) => n + c.students, 0), inClasses = sqlClasses.reduce((n, c) => n + c.accounts, 0);
+  const withDb = sqlClasses.filter((c) => c.accounts > 0).length; %>
+<section class="block" id="skupaj">
+  <h2>Skupaj</h2>
+  <div class="tiles">
+    <div class="tile"><b><%= tt.accounts %></b><span>računov z bazama<%= students ? ` · ${inClasses} od ${students} dijakov v razredih (${Math.round(100 * inClasses / students)} %)` : '' %></span></div>
+    <div class="tile"><b><%= tt.accounts * 2 + (s.shared_at ? SHARED.length : 0) %></b><span>baz na strežniku · <%= tt.accounts * 2 %> osebnih<%= s.shared_at ? ` + ${SHARED.length} skupni` : '' %></span></div>
+    <div class="tile"><b><%= mb(tt.bytes) %></b><span>velikost vseh osebnih baz · največja <%= mb(tt.biggest) %><%= tt.over ? `, nad omejitvijo: ${tt.over}` : '' %></span></div>
+    <div class="tile"><b><%= tt.active %></b><span>dijakov je uporabljalo bazo v 7 dneh<%= tt.accounts ? ` (${Math.round(100 * tt.active / tt.accounts)} % računov)` : '' %></span></div>
+    <div class="tile"><b><%= tt.never %></b><span>računov, ki jih dijak še ni uporabil</span></div>
+    <div class="tile"><b><%= withDb %></b><span>od <%= sqlClasses.length %> razredov ima baze<%= statistics.queued ? ` · za brisanje čaka ${statistics.queued}` : '' %></span></div>
+  </div>
+</section>
+<% } %>
 <section class="block" id="pregled">
   <h2>Pregled po razredih</h2>
   <% if (!sqlClasses.length) { %><p class="empty">Ni razredov 4. letnika.</p><% } else { %>
@@ -122,8 +136,6 @@ GRANT ALL PRIVILEGES ON `<%= (s?.prefix ?? 'lr_').replace(/_/g, '\\_') %>%`.* TO
     <div class="tile"><b><%= sm.avg === null ? '–' : `${sm.avg} ms` %></b><span>povprečni čas zagona</span></div>
   </div>
   <dl class="cfg-dl cfg-grid">
-    <div><dt>Računi</dt><dd><%= st.totals.accounts %> (uporabljeni v 7 dneh: <%= st.totals.active %>, še ne uporabljeni: <%= st.totals.never %>)</dd></div>
-    <div><dt>Velikost vseh baz</dt><dd><%= mb(st.totals.bytes) %> (največja <%= mb(st.totals.biggest) %>, nad omejitvijo: <%= st.totals.over %>)</dd></div>
     <div><dt>Čakajo na brisanje</dt><dd><%= st.queued %></dd></div>
     <% if (s && s.selftest_at) { %><div><dt>Zadnji celoten preizkus</dt><dd><%= f.dateTime(s.selftest_at) %> · <%= s.selftest_ok ? 'uspešen' : 'z napakami' %></dd></div><% } %>
   </dl>

@@ -275,7 +275,7 @@ export function teacherSql(router, { loadClass, members }) {
           if (req.body.potrdi !== 'on') throw new TaskError('Za izbris označi potrditev.');
           await on.run(`Brisanje baz ${acc.db_name}, ${acc.db_name6} in računa`, () => sb.dropAccount(s, acc));
           await audit(req.user, 'Izbrisal bazo SQL', `${req.cls.name}: ${m.name}`);
-          return { message: `Bazi za ${m.name} sta izbrisani.`, stats: [['Izbrisanih baz', 2], ['Izbrisanih računov', 1]] };
+          return { message: `SQL bazi za ${m.name} sta izbrisani. Dijak v portalu ostane.`, stats: [['Izbrisanih baz', 2], ['Izbrisanih računov', 1]] };
         }
         throw new TaskError('Neznano dejanje.');
       });
