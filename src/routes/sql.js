@@ -71,7 +71,7 @@ adminSqlRouter.post('/nastavitve', checkCsrf, async (req, res, next) => {
     const limits = sb.clampLimits({
       timeout: b.timeout, rows: b.rows, sizeMb: b.sizeMb, scriptKb: b.scriptKb, perMinute: b.perMinute, connections: b.connections,
     });
-    const ca = String(b.ca ?? '').trim();
+    const ca = String(b.ca ?? '').replace(/\r\n?/g, '\n').trim(); // a browser textarea sends CRLF
     if (ca && !/^-----BEGIN CERTIFICATE-----[\s\S]+-----END CERTIFICATE-----$/.test(ca)) return flash(res, EDIT, 'Certifikat CA mora biti v obliki PEM (BEGIN CERTIFICATE).', true);
     const sealed = pass ? sb.seal(pass) : old.admin_pass;
     // A different server or account: the shared databases have to be imported there again.
@@ -289,7 +289,7 @@ sqlRouter.get('/sql/ca.pem', requireLogin, sandboxGate, async (req, res, next) =
     const s = await sb.settings();
     if (!s?.ca) return res.status(404).type('text/plain; charset=utf-8').send('Certifikat CA ni nastavljen.');
     res.set({ 'Content-Type': 'application/x-pem-file; charset=utf-8', 'Content-Disposition': 'attachment; filename="ca.pem"', 'Cache-Control': 'no-store' });
-    res.send(`${s.ca.trim()}\n`);
+    res.send(`${s.ca.replace(/\r\n?/g, '\n').trim()}\n`);
   } catch (e) { next(e); }
 });
 sqlRouter.post('/sql/ustvari', requireLogin, sandboxGate, checkCsrf, async (req, res, next) => {
