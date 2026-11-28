@@ -129,6 +129,16 @@
           "G": "matura"
         }
       }
+    },
+    {
+      "id": "4.6",
+      "artifact": "https://claude.ai/artifact/9MvjtTpFY9VPU4ur4ZxLqx",
+      "artifactTitle": "SQL DML in posledice pri tujih ključih",
+      "version": 1,
+      "no": "6",
+      "sandbox": {
+        "db": "moja"
+      }
     }
   ],
   "planned": [
@@ -161,11 +171,6 @@
       "module": "LAV-RAČ3",
       "no": "11",
       "title": "Rekurzija"
-    },
-    {
-      "module": "LAV-RAČ4",
-      "no": "6",
-      "title": "SQL DML in tuji ključi"
     },
     {
       "module": "LAV-RAČ4",

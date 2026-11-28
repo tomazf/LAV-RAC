@@ -67,7 +67,7 @@ export const SHARED = [
   { id: 'matura', title: 'matura_baze (maturitetne naloge)', file: 'src/public/matura_baze.sql', db: (s) => `${s.prefix}matura` },
 ];
 export const readerName = (s) => `${s.prefix}bralec`;
-// What a personal database can be reset to (files of the chapters 4.4 and 4.5).
+// What a personal database can be reset to (files of the chapters 4.4, 4.5 and 4.6; 4.6 offers its checkpoints K0 to K6, 28. 11. 2026).
 export const TEMPLATES = [
   { id: 'prazna', title: 'Prazna baza', files: [] },
   { id: 'struktura', title: 'Šolska baza: samo struktura (4.4)', files: ['content/sources/4.4/sola_struktura.sql'] },
@@ -75,6 +75,12 @@ export const TEMPLATES = [
   { id: 'sola', title: 'Šolska baza s podatki (sola.sql, 4.5)', files: ['src/public/sola.sql'] },
   { id: 'matura', title: 'Maturitetne baze (matura_baze.sql, 4.5)', files: ['src/public/matura_baze.sql'] },
   { id: 'indeks', title: 'Tabela za indekse (indeks_test.sql, 4.4)', files: ['content/sources/4.4/indeks_test.sql'] },
+  { id: 'p6k0', title: 'Poglavje 6: K0 začetek (šolska baza in matura, 4.6)', files: ['content/sources/4.6/sola6_ponastavi.sql', 'src/public/matura_baze.sql'] },
+  { id: 'p6k2', title: 'Poglavje 6: K2 po INSERT (šolska baza in matura, 4.6)', files: ['content/sources/4.6/sola6_k2.sql', 'src/public/matura_baze.sql'] },
+  { id: 'p6k3', title: 'Poglavje 6: K3 po INSERT … SELECT (šolska baza in matura, 4.6)', files: ['content/sources/4.6/sola6_k3.sql', 'src/public/matura_baze.sql'] },
+  { id: 'p6k4', title: 'Poglavje 6: K4 po UPDATE (šolska baza in matura, 4.6)', files: ['content/sources/4.6/sola6_k4.sql', 'src/public/matura_baze.sql'] },
+  { id: 'p6k5', title: 'Poglavje 6: K5 po DELETE (šolska baza in matura, 4.6)', files: ['content/sources/4.6/sola6_k5.sql', 'src/public/matura_baze.sql'] },
+  { id: 'p6k6', title: 'Poglavje 6: K6 končno stanje (šolska baza in matura, 4.6)', files: ['content/sources/4.6/sola6_k6.sql', 'src/public/matura_baze.sql'] },
 ];
 const readScript = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 

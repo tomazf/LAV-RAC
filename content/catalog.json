@@ -10555,6 +10555,442 @@
     "unija",
     "povzetek"
    ]
+  },
+  {
+   "id": "4.6",
+   "no": "6",
+   "module": "LAV-RAČ4",
+   "title": "SQL DML in posledice pri tujih ključih",
+   "fullTitle": "SQL DML in posledice pri tujih ključih",
+   "key": "scnm_lavrac_4_6_v1",
+   "version": 1,
+   "sandbox": {
+    "db": "moja"
+   },
+   "format": "short",
+   "maxPoints": 85,
+   "tasks": [
+    {
+     "i": 0,
+     "level": "srednja",
+     "max": 2,
+     "section": "Varno delo in INSERT",
+     "q": "Safe Updates je vklopljen. Kateri stavek se izvede in katerega varovalo zavrne?"
+    },
+    {
+     "i": 1,
+     "level": "srednja",
+     "max": 2,
+     "section": "Varno delo in INSERT",
+     "q": "Dana je tabela Primer(X:N, Y°:A10). Katera stavka v tabelo vstavita zapis, v katerem je vrednost atributa X 30, vrednost atributa Y pa ni podana?"
+    },
+    {
+     "i": 2,
+     "level": "srednja",
+     "max": 2,
+     "section": "Varno delo in INSERT",
+     "q": "Dana je tabela T (ID:N, Ime:A20, Komentar°:A20). (1) Dopolnite stavek, s katerim v tabelo dodamo zapis, v katerem podamo samo podatka ID (vrednost 320) in Ime ("
+    },
+    {
+     "i": 3,
+     "level": "lažja",
+     "max": 1,
+     "section": "Varno delo in INSERT",
+     "q": "Tabela Primer(podatek1:N, podatek2:N, opis°:A20) je pri tebi <code>t_primer</code>. Ustvari jo s stavkom spodaj (če že obstaja, jo najprej izbriši). Nato zapiši"
+    },
+    {
+     "i": 4,
+     "level": "srednja",
+     "max": 2,
+     "section": "Varno delo in INSERT",
+     "q": "V oddelek 2A se vpiše Tjaša Kotnik (id 44, Ž, rojena 25. 4. 2009) iz Šentjerneja, e-pošta <code>tjasa.kotnik44@dijak.sc-nm.si</code>. Telefona še nima."
+    },
+    {
+     "i": 5,
+     "level": "srednja",
+     "max": 2,
+     "section": "Varno delo in INSERT",
+     "q": "V 2A se vpiše Aljaž Hočevar (id 38, M, rojen 14. 12. 2008) iz Straže (poštna številka 8351). Straže v bazi še ni; dobi <code>id_kraj</code> 11. E-pošte in telef"
+    },
+    {
+     "i": 6,
+     "level": "srednja",
+     "max": 2,
+     "section": "Varno delo in INSERT",
+     "q": "Tanja Pavlin (id 3) je 10. 3. 2026 v 2A pisala test iz slovenščine (id_predmet 2): Špela (37) je dobila 4, Anže (41) 3 in Nejc (43) 5. Vse tri ocene vpiši z <b>"
+    },
+    {
+     "i": 7,
+     "level": "srednja",
+     "max": 2,
+     "section": "Varno delo in INSERT",
+     "q": "Nejc (43) je 12. 3. 2026 manjkal 3 ure. Opravičila še ni prinesel, opombe ni. Vpiši izostanek tako, da našteješ samo potrebne stolpce."
+    },
+    {
+     "i": 8,
+     "level": "srednja",
+     "max": 2,
+     "section": "Varno delo in INSERT",
+     "q": "Napovej izid vsakega stavka v stanju K6."
+    },
+    {
+     "i": 9,
+     "level": "lažja",
+     "max": 1,
+     "section": "INSERT … SELECT in kopije",
+     "q": "Kaj velja za stavek INSERT INTO cilj (a, b) SELECT x, y FROM vir; ?"
+    },
+    {
+     "i": 10,
+     "level": "srednja",
+     "max": 2,
+     "section": "INSERT … SELECT in kopije",
+     "q": "Za razredni izlet 2A potrebuje razredničarka seznam z imeni in telefoni. Ustvari tabelo s spodnjim stavkom in jo napolni z INSERT … SELECT z dijaki oddelka 2A. "
+    },
+    {
+     "i": 11,
+     "level": "srednja",
+     "max": 2,
+     "section": "INSERT … SELECT in kopije",
+     "q": "Naredi kopijo maturitetne tabele <code>m221_racun</code> z imenom <code>t_m221_racun</code> (razlaga 3, točka 5). Na njej boš rešil nalogo C1. Če kopija že obst"
+    },
+    {
+     "i": 12,
+     "level": "srednja",
+     "max": 2,
+     "section": "INSERT … SELECT in kopije",
+     "q": "Učiteljica Pungerčar želi seznam dijakov, ki so iz podatkovnih baz (PB, id_predmet 13) dobili oceno 4 ali 5. Ustvari tabelo in jo napolni; v stolpec oddelek vpi"
+    },
+    {
+     "i": 13,
+     "level": "srednja",
+     "max": 2,
+     "section": "INSERT … SELECT in kopije",
+     "q": "Pred zimskimi počitnicami arhiviraj izostanke do vključno 28. 2. 2026: ustvari kopijo zgradbe <code>t_arhiv_izostanek</code> tabele <code>izostanek</code> in va"
+    },
+    {
+     "i": 14,
+     "level": "srednja",
+     "max": 2,
+     "section": "INSERT … SELECT in kopije",
+     "q": "Kaj naredi vsak stavek? (t_izlet ima stolpce id_dijak, ime, priimek, telefon.)"
+    },
+    {
+     "i": 15,
+     "level": "lažja",
+     "max": 1,
+     "section": "UPDATE",
+     "q": "V podatkovni bazi so tabele Banka(BID:N, ImeBanke:A20), Oseba(DavcnaSt:N, Ime:A20, Priimek:A20) in Racun(StevilkaRacuna:N, DavcnaSt:N→Oseba, BID:N→Banka, Stanje"
+    },
+    {
+     "i": 16,
+     "level": "lažja",
+     "max": 1,
+     "section": "UPDATE",
+     "q": "V podatkovni bazi Univerza sta tabeli Status(StatusID:N, ImeStatusa:A20) in Student(StudentID:N, Ime:A20, Priimek:A20, StatusID:N→Status, DatumRojstva:D). Zapiš"
+    },
+    {
+     "i": 17,
+     "level": "srednja",
+     "max": 2,
+     "section": "UPDATE",
+     "q": "Špela (37) je za izostanek 6. 2. 2026 prinesla zdravniško opravičilo. Izostanek označi kot opravičen, z opombo <code>zdravnik</code>."
+    },
+    {
+     "i": 18,
+     "level": "srednja",
+     "max": 2,
+     "section": "UPDATE",
+     "q": "Eva Horvat (3) je dobila telefon <code>041 222 333</code> in nov e-poštni naslov <code>eva.horvat@dijak.sc-nm.si</code>. Popravi oba podatka z enim stavkom."
+    },
+    {
+     "i": 19,
+     "level": "srednja",
+     "max": 2,
+     "section": "UPDATE",
+     "q": "Strokovni predmeti računalništvo (RAČ) in podatkovne baze (PB) dobijo vsak po eno uro več na teden. Napiši en stavek, ki ga Safe Updates sprejme."
+    },
+    {
+     "i": 20,
+     "level": "srednja",
+     "max": 2,
+     "section": "UPDATE",
+     "q": "Vse ocene, ki jih je Katja Pungerčar (17) dala 20. 1. 2026, niso bile iz pisnega testa, ampak iz projekta. Popravi vrsto teh ocen."
+    },
+    {
+     "i": 21,
+     "level": "srednja",
+     "max": 2,
+     "section": "UPDATE",
+     "q": "Razred 2A je bil 2. 3. 2026 na ekskurziji. Vse izostanke dijakov 2A tega dne označi kot opravičene z opombo <code>ekskurzija</code>. Uporabi podpoizvedbo, ki po"
+    },
+    {
+     "i": 22,
+     "level": "lažja",
+     "max": 1,
+     "section": "UPDATE",
+     "q": "Kateri stavek javi napako 1093?"
+    },
+    {
+     "i": 23,
+     "level": "srednja",
+     "max": 2,
+     "section": "UPDATE",
+     "q": "Nejca (43) poskusi prestaviti v oddelek 2B z <code>id_oddelek = 4</code>. Kaj vrne strežnik in v katerem oddelku je Nejc po poskusu?"
+    },
+    {
+     "i": 24,
+     "level": "srednja",
+     "max": 2,
+     "section": "DELETE",
+     "q": "Janu (4) so 2. 3. 2026 izostanek vpisali pomotoma; v šoli je bil. Izbriši ta izostanek."
+    },
+    {
+     "i": 25,
+     "level": "srednja",
+     "max": 2,
+     "section": "DELETE",
+     "q": "Ocene iz predmetov naravoslovnega področja v 2A so bile vpisane za preizkus sistema. Izbriši vse ocene predmetov, ki imajo <code>podrocje = 'naravoslovje'</code"
+    },
+    {
+     "i": 26,
+     "level": "srednja",
+     "max": 2,
+     "section": "DELETE",
+     "q": "Počisti šifrant krajev: izbriši kraje, v katerih ne stanuje noben dijak. Najprej jih preveri s SELECT."
+    },
+    {
+     "i": 27,
+     "level": "srednja",
+     "max": 2,
+     "section": "DELETE",
+     "q": "Koliko vrstic izbriše stavek <code>DELETE FROM izostanek WHERE id_dijak = 41 OR opravicen = 0;</code>? Najprej napoved, nato izvedi in preberi Action Output. Va"
+    },
+    {
+     "i": 28,
+     "level": "lažja",
+     "max": 1,
+     "section": "DELETE",
+     "q": "Iz tabele t_izlet želiš izbrisati vse vrstice, Safe Updates pa je vklopljen. Kateri stavek to naredi?"
+    },
+    {
+     "i": 29,
+     "level": "lažja",
+     "max": 1,
+     "section": "DELETE",
+     "q": "Kaj izbriše stavek DELETE FROM dijak WHERE id_oddelek = 8; v šolski bazi?"
+    },
+    {
+     "i": 30,
+     "level": "srednja",
+     "max": 2,
+     "section": "DELETE",
+     "q": "V arhivu <code>t_arhiv_ocena</code> je Anžetova ocena iz matematike (15. 12. 2025) dvakrat, ker smo arhiv naredili pred popravkom na strani 5. Izbriši iz arhiva"
+    },
+    {
+     "i": 31,
+     "level": "težja",
+     "max": 3,
+     "section": "Posledice pri tujih ključih",
+     "q": "Kaj se zgodi v stanju K6? Za vsak stavek izberi posledico."
+    },
+    {
+     "i": 32,
+     "level": "srednja",
+     "max": 2,
+     "section": "Posledice pri tujih ključih",
+     "q": "Anže (41) se izpiše. Izbriši ga iz tabele dijak in preveri posledice."
+    },
+    {
+     "i": 33,
+     "level": "srednja",
+     "max": 2,
+     "section": "Posledice pri tujih ključih",
+     "q": "Poskusi izbrisati učiteljico Tanjo Pavlin (3). Katero kodo dobiš in koliko vrstic v <code>poucuje</code> pripada njej po poskusu?"
+    },
+    {
+     "i": 34,
+     "level": "težja",
+     "max": 3,
+     "section": "Posledice pri tujih ključih",
+     "q": "Učiteljica Pavlin (3) odide. Šola se odloči, da ocene prepiše na Mojco Bregar (1), ki prevzame tudi razredništvo 2A. Nato učiteljico Pavlin izbriši. Zapiši vse "
+    },
+    {
+     "i": 35,
+     "level": "srednja",
+     "max": 2,
+     "section": "Posledice pri tujih ključih",
+     "q": "Oddelek 4B (8) se ukine; njegove dijake prestavi v 4A (7). Nato oddelek 4B izbriši."
+    },
+    {
+     "i": 36,
+     "level": "srednja",
+     "max": 2,
+     "section": "Posledice pri tujih ključih",
+     "q": "Dijaku Špeli (37) popravi napačno vpisano številko v 137."
+    },
+    {
+     "i": 37,
+     "level": "lažja",
+     "max": 1,
+     "section": "Posledice pri tujih ključih",
+     "q": "DELETE FROM ucitelj WHERE id_ucitelj = 3; vrne 1451. Vrstice v poucuje imajo za tega učitelja ON DELETE CASCADE. Kaj velja?"
+    },
+    {
+     "i": 38,
+     "level": "srednja",
+     "max": 2,
+     "section": "Posledice pri tujih ključih",
+     "q": "Napovej število vrstic v stanju K6. Stavek: DELETE FROM dijak WHERE id_oddelek = 7; (oddelek 4A: Ana in Eva)"
+    },
+    {
+     "i": 39,
+     "level": "lažja",
+     "max": 1,
+     "section": "Posledice pri tujih ključih",
+     "q": "Katera sprememba v tabeli kraj nima nobenih posledic za druge tabele?"
+    },
+    {
+     "i": 40,
+     "level": "težja",
+     "max": 3,
+     "section": "Branje CREATE TABLE in osirotele vrstice",
+     "q": "Tabela Pregled je ustvarjena s stavkom Create Table Pregled( ID_Zdravnik Char(4) NOT NULL, EMSO Char(13) NOT NULL, Datum Date NOT NULL, Diagnoza Char(20) NOT NU"
+    },
+    {
+     "i": 41,
+     "level": "srednja",
+     "max": 2,
+     "section": "Branje CREATE TABLE in osirotele vrstice",
+     "q": "Tabela je ustvarjena s stavkom CREATE TABLE izposoja ( id_clan INT NOT NULL, isbn CHAR(13) NOT NULL, datum DATE NOT NULL, vrnjeno DATE, PRIMARY KEY (id_clan, is"
+    },
+    {
+     "i": 42,
+     "level": "lažja",
+     "max": 1,
+     "section": "Branje CREATE TABLE in osirotele vrstice",
+     "q": "V MySQL 8.4 je tuji ključ napisan z ON DELETE NO ACTION. Kateremu pravilu je enak?"
+    },
+    {
+     "i": 43,
+     "level": "srednja",
+     "max": 2,
+     "section": "Branje CREATE TABLE in osirotele vrstice",
+     "q": "Iz starega sistema smo dobili izostanke brez tujega ključa. Ustvari tabelo s stavki spodaj, nato poišči izostanke, za katere ni dijaka. <code>CREATE TABLE t_uvo"
+    },
+    {
+     "i": 44,
+     "level": "srednja",
+     "max": 2,
+     "section": "Branje CREATE TABLE in osirotele vrstice",
+     "q": "Nadaljuj prejšnjo nalogo: izbriši osirotele vrstice iz <code>t_uvoz_izostanek</code> in tabeli dodaj tuji ključ <code>fk_uvoz_dijak</code> na <code>dijak</code>"
+    },
+    {
+     "i": 45,
+     "level": "srednja",
+     "max": 2,
+     "section": "Branje CREATE TABLE in osirotele vrstice",
+     "q": "V tabelo <code>t_uvoz_izostanek</code> iz prejšnje naloge (že s tujim ključem) poskusi vstaviti vrstico <code>(7, 99, 1)</code>. Katero kodo dobiš? Nato izbriši"
+    }
+   ],
+   "pages": [
+    {
+     "id": "pregled",
+     "chapter": "Teorija",
+     "label": "Pregled"
+    },
+    {
+     "id": "uvod",
+     "chapter": "Teorija",
+     "label": "Varno spreminjanje podatkov"
+    },
+    {
+     "id": "insert",
+     "chapter": "Teorija",
+     "label": "INSERT"
+    },
+    {
+     "id": "inssel",
+     "chapter": "Teorija",
+     "label": "INSERT … SELECT"
+    },
+    {
+     "id": "update",
+     "chapter": "Teorija",
+     "label": "UPDATE"
+    },
+    {
+     "id": "delete",
+     "chapter": "Teorija",
+     "label": "DELETE"
+    },
+    {
+     "id": "posledice",
+     "chapter": "Teorija",
+     "label": "Posledice pri tujih ključih"
+    },
+    {
+     "id": "branje",
+     "chapter": "Teorija",
+     "label": "Branje posledic iz CREATE TABLE"
+    },
+    {
+     "id": "sirote",
+     "chapter": "Teorija",
+     "label": "Osirotele vrstice"
+    },
+    {
+     "id": "povzetek",
+     "chapter": "Teorija",
+     "label": "Povzetek in rešeni primeri"
+    },
+    {
+     "id": "naloge-a",
+     "chapter": "Naloge",
+     "label": "Vaje A · Varno delo in INSERT"
+    },
+    {
+     "id": "naloge-b",
+     "chapter": "Naloge",
+     "label": "Vaje B · INSERT … SELECT in kopije"
+    },
+    {
+     "id": "naloge-c",
+     "chapter": "Naloge",
+     "label": "Vaje C · UPDATE"
+    },
+    {
+     "id": "naloge-d",
+     "chapter": "Naloge",
+     "label": "Vaje D · DELETE"
+    },
+    {
+     "id": "naloge-e",
+     "chapter": "Naloge",
+     "label": "Vaje E · Posledice pri tujih ključih"
+    },
+    {
+     "id": "naloge-f",
+     "chapter": "Naloge",
+     "label": "Vaje F · Branje CREATE TABLE in osirotele vrstice"
+    },
+    {
+     "id": "doma",
+     "chapter": "Naloge",
+     "label": "Vaje G · Za doma"
+    }
+   ],
+   "gate": [
+    "uvod",
+    "insert",
+    "inssel",
+    "update",
+    "delete",
+    "posledice",
+    "branje",
+    "sirote",
+    "povzetek"
+   ]
   }
  ],
  "planned": [
@@ -10587,11 +11023,6 @@
    "module": "LAV-RAČ3",
    "no": "11",
    "title": "Rekurzija"
-  },
-  {
-   "module": "LAV-RAČ4",
-   "no": "6",
-   "title": "SQL DML in tuji ključi"
   },
   {
    "module": "LAV-RAČ4",

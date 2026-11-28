@@ -212,3 +212,9 @@ Načrt in izvedba: `docs/NACRT_SQL_PESKOVNIK.md`.
 
 **Zgodovina popravkov** (dogovor 28. 11. 2026). Rešene prijave samodejno ne poniknejo po določenem času; dijak jih vidi do izbrisa računa. Skrbnik pa ima v tabeli `report_history` (migracija 018) povzetek vsake rešene prijave: vsebina (vaja, stran, naloga), besedilo, odgovor in datumi (prijava, odgovor, rešitev). Povzetek **nima povezave na osebo** (ne imena, ne razreda), zato ostane, ko se dijak izbriše; prijava sama se izbriše z dijakom (`ON DELETE CASCADE` ostane). Zapis nastane ob rešitvi, se osveži ob spremenjenem odgovoru in izgine ob ponovnem odprtju. Migracija prepiše že rešene prijave. Stran `/admin/prijave/zgodovina` (samo skrbnik): mesečni naslovi, od najnovejše, filtri od, do (po datumu rešitve), letnik in vaja; povezava je na strani »Prijave«. Učitelj in dijak zgodovine ne vidita. Besedilo prijave se po izbrisu dijaka ohrani, zato je to zapisano na strani o zasebnosti.
 
+
+## Dogovori 28. 11. 2026 (poglavje 4.6, SQL DML)
+
+- 4.6 »SQL DML in posledice pri tujih ključih« je uvoženo (različica 1, 46 nalog, 85 točk, brez sklopa Ponavljanje). Nobena naloga ni »Sam preveri«: vsaka ima kontrolne rezultate (število, vrednost ali kodo napake), ki jih dijak vpiše; portal stavka še vedno ne presoja.
+- 4.6 dela v dijakovi bazi (`sandbox: {"db": "moja"}`), nove baze ni, `SHARED` je nespremenjen; `sola.sql` in `matura_baze.sql` sta nespremenjena. Kontrolne točke K0 do K6 so skripte (prenos in kopiranje s strani) in hkrati predloge za ponastavitev baze (`TEMPLATES`, »Poglavje 6: K0 …« do »K6 …«, vsaka skupaj z maturitetnimi tabelami, ker naloge delajo kopije `t_mNNN_…`).
+- Peskovnik ne vklopi Safe Updates (vsak zagon je nova povezava brez nastavitev). Do odločitve učitelja ima razlaga 1 opombo, da naj dijak da na začetek skripta `SET SQL_SAFE_UPDATES = 1;`.
