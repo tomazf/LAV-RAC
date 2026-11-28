@@ -62,6 +62,13 @@
       <div><dt>Default Schema (4.4)</dt><dd><code data-copy><%= acc.db_name %></code></dd></div>
       <div><dt>Poglavje 6 (4.6)</dt><dd><code data-copy><%= acc.db_name6 %></code></dd></div>
     </dl>
+    <% if (s.ca) { %>
+    <h3 class="sql-h3">Šifrirana povezava (SSL)</h3>
+    <p><a class="btn ghost small" href="/sql/ca.pem" download="ca.pem">Prenesi ca.pem</a></p>
+    <p>V Workbenchu odpri zavihek <strong>SSL</strong>, pri <strong>Use SSL</strong> izberi <code>Require and Verify CA</code> in pri <strong>SSL CA File</strong> izberi preneseno datoteko <code>ca.pem</code>. <code>Verify Identity</code> ne izbiraj: certifikat je samopodpisan in ime strežnika se ne ujema.</p>
+    <% } else if (s.tls) { %>
+    <p class="dim">Strežnik podpira šifrirano povezavo: v Workbenchu na zavihku <strong>SSL</strong> pri <strong>Use SSL</strong> izberi <code>Require</code>.</p>
+    <% } %>
     <p class="dim">Klik na podatek ga kopira. Za poglavje 6 v Workbenchu izberi bazo <code><%= acc.db_name6 %></code> (dvoklik na ime v levem stolpcu) ali napiši <code>USE <%= acc.db_name6 %>;</code>. Geslo ti lahko ponastavi učitelj.</p>
     <div class="dlg-actions"><button type="button" class="btn ghost" data-close>Zapri</button></div>
   </div>

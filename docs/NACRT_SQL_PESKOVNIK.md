@@ -95,6 +95,7 @@ Gesla (skrbniško, dijakov, bralca) so v bazi portala šifrirana (AES-256-GCM) s
 - **Skripti**: dijak shrani skript z imenom (na strežniku portala, do 50 skriptov), da doma nadaljuje. Zadnje stanje urejevalnika se shrani samodejno. **Zgodovina** zadnjih 100 zagonov z izidom.
 - **Ponastavi bazo**: izbira predloge (skupine »Moja baza (4.4)« in »Moja baza za poglavje 6 (4.6)«) in potrditev; ponastavi se samo baza, ki ji predloga pripada.
 - **Katera baza**: izbira baze je v glavi in vsebuje pravo ime (»Moja baza za poglavje 6 (4.6): lr_u57_4_6«); nad urejevalnikom je stalna oznaka »Stavki se izvedejo v bazi …«. Gumb »Odpri v peskovniku« v poglavju izbere bazo poglavja sam (`USE` ni potreben).
+- **Certifikat CA za Workbench**: če je v nastavitvah strežnika vnesen CA, okno »Podatki za Workbench« ponudi `ca.pem` (pot `/sql/ca.pem`, ista vsebina kot polje `ca`, brez ključa, za vse z dostopom do peskovnika) in navodilo: zavihek SSL, `Require and Verify CA`, datoteka CA; `Verify Identity` se ne priporoča, ker je certifikat samopodpisan. Brez CA, a s TLS, velja navodilo `Require`. Portal sam CA uporablja za svoje povezave (`rejectUnauthorized`), ime v certifikatu mora ustrezati vpisanemu strežniku (SAN).
 - **Moj račun in pravice**: opis (kaj lahko dijak) in zapis pravic v SQL (`GRANT …`); podatki za Workbench vsebujejo obe imeni baz.
 - Zgodovina zagonov je vidna samo dijaku (dogovor 26. 11. 2026).
 - **Workbench**: okno s strežnikom, vrati, uporabnikom in geslom (gumb Kopiraj) ter kratkim navodilom za novo povezavo.

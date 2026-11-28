@@ -418,6 +418,34 @@ test('admin: the full check passes and cleans up; the statistics are numbers; th
   assert.doesNotMatch(state, /preizkus_|host|lt_/, 'no server details for the teacher');
 });
 
+test('the CA certificate for Workbench is offered to students only when the admin has entered one', { skip }, async () => {
+  const p = pages.get('Ana Kovač');
+  const a = pages.get('Sara Skrbnik');
+  await p.goto(`${APP}/sql`);
+  assert.equal((await p.request.get(`${APP}/sql/ca.pem`)).status(), 404, 'no CA entered: nothing to download');
+  assert.equal(await p.locator('#sq-wb a[href="/sql/ca.pem"]').count(), 0);
+  // the admin enters a CA (TLS stays off, so the portal's own connection is untouched)
+  const PEM = '-----BEGIN CERTIFICATE-----\nMIIBfakeFAKEfake\n-----END CERTIFICATE-----';
+  const save = async (ca) => {
+    await a.goto(`${APP}/admin/sql?uredi=1`);
+    await a.fill('textarea[name=ca]', ca);
+    await a.fill('#admin_pass', ADMIN.pass);
+    await a.click('button:text-is("Shrani in preizkusi")');
+    await a.waitForSelector('.notice[role=status]');
+  };
+  await save(PEM);
+  try {
+    const r = await p.request.get(`${APP}/sql/ca.pem`);
+    assert.equal(r.status(), 200);
+    assert.match(r.headers()['content-disposition'], /attachment; filename="ca\.pem"/);
+    assert.equal((await r.text()).trim(), PEM);
+    await p.goto(`${APP}/sql`);
+    assert.equal(await p.locator('#sq-wb a[href="/sql/ca.pem"]').count(), 1);
+    assert.match(await p.textContent('#sq-wb'), /Require and Verify CA/);
+  } finally { await save(''); }
+  assert.equal((await p.request.get(`${APP}/sql/ca.pem`)).status(), 404);
+});
+
 test('erasing a user drops their database and account on the MySQL server', { skip }, async () => {
   const a = pages.get('Sara Skrbnik');
   const borId = await userId('bor.novak@sola.test');

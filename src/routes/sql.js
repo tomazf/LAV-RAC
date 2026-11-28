@@ -283,6 +283,15 @@ sqlRouter.get('/sql', requireLogin, sandboxGate, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 // A teacher (or admin) makes their own database for trying things out.
+// The CA certificate the admin entered for the server (public, no key), so Workbench can verify the server: the same text the portal itself trusts.
+sqlRouter.get('/sql/ca.pem', requireLogin, sandboxGate, async (req, res, next) => {
+  try {
+    const s = await sb.settings();
+    if (!s?.ca) return res.status(404).type('text/plain; charset=utf-8').send('Certifikat CA ni nastavljen.');
+    res.set({ 'Content-Type': 'application/x-pem-file; charset=utf-8', 'Content-Disposition': 'attachment; filename="ca.pem"', 'Cache-Control': 'no-store' });
+    res.send(`${s.ca.trim()}\n`);
+  } catch (e) { next(e); }
+});
 sqlRouter.post('/sql/ustvari', requireLogin, sandboxGate, checkCsrf, async (req, res, next) => {
   try {
     if (!req.user.isTeacher) return flash(res, '/sql', 'Bazo dijaku ustvari učitelj.', true);
