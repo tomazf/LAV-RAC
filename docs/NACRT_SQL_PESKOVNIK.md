@@ -74,7 +74,7 @@ Gesla (skrbniško, dijakov, bralca) so v bazi portala šifrirana (AES-256-GCM) s
 
 ```
 ┌───────────────┬────────────────────────────────────────────────┐
-│ Baza [Moja ▾] │  ▶ Zaženi (Ctrl+Enter)  ▶ Izbrano  Skripti ▾  │
+│ Baza [Moja ▾] │  ▶ Zaženi (Ctrl+Enter)  ▶ Izbrano  Shrani poizvedbo  Zgodovina poizvedb  │
 │               │ ┌────────────────────────────────────────────┐ │
 │ ▾ Tabele      │ │ 1  SELECT ime, priimek                     │ │
 │   ▸ dijak     │ │ 2  FROM dijak d JOIN razred r ON …         │ │
@@ -92,8 +92,9 @@ Gesla (skrbniško, dijakov, bralca) so v bazi portala šifrirana (AES-256-GCM) s
 - **Napake**: rdeč okvir s kodo in sporočilom strežnika, vrstica je označena v urejevalniku; pod njo kratek slovenski namig za najpogostejše kode (1064 skladnja, 1146 ni tabele, 1054 ni stolpca, 1062 podvojen ključ, 1451/1452 tuji ključ).
 - **Drevo tabel** (levo): tabele s številom vrstic; razširitev pokaže stolpce, tipe, PK, FK, NULL; klik vstavi ime v urejevalnik. Osveži se po vsakem zagonu, ki spremeni shemo.
 - **ER diagram** osebne baze, narisan iz `information_schema` (lastna koda, SVG, brez knjižnice): tabele, ključi, povezave; premikanje, povečava, prenos SVG. Poveže 4.3 s 4.4.
-- **Skripti**: dijak shrani skript z imenom (na strežniku portala, do 50 skriptov), da doma nadaljuje. Zadnje stanje urejevalnika se shrani samodejno. **Zgodovina** zadnjih 100 zagonov z izidom.
-- **Ponastavi bazo**: izbira predloge (skupine »Moja baza (4.4)« in »Moja baza za poglavje 6 (4.6)«) in potrditev; ponastavi se samo baza, ki ji predloga pripada.
+- **Shrani poizvedbo**: dijak shrani poizvedbo z imenom (na strežniku portala, do 50), da doma nadaljuje. Zadnje stanje urejevalnika se shrani samodejno. **Zgodovina poizvedb**: zadnjih 100 zagonov z izidom.
+- **Urejevalnik** (dogovor 28. 11. 2026): privzeta višina je 6 vrstic (dijak jo povečuje z ročko). Izbira z Shift in puščicami je vidna (označena vrstica je prosojna). Samodejno dopolnjevanje (CodeMirror) ponuja ključne besede, tabele izbrane baze (po `FROM`/`JOIN`) in stolpce (po `tabela.` ali vzdevku; tip in PK/UQ); Ctrl+preslednica ga odpre sam. Gumbi podoken so desno, glavno dejanje skrajno desno; ikone so lastne vgrajene SVG (brez pisave ikon in CDN).
+- **Ponastavi bazo** (brez `matura_baze.sql` in `sola.sql`: skupni bazi sta za branje, naslovi ne kažejo imen datotek): izbira predloge (skupine »Moja baza (4.4)« in »Moja baza za poglavje 6 (4.6)«) in potrditev; ponastavi se samo baza, ki ji predloga pripada.
 - **Katera baza**: izbira baze je v glavi in vsebuje pravo ime (»Moja baza za poglavje 6 (4.6): lr_u57_4_6«); nad urejevalnikom je stalna oznaka »Stavki se izvedejo v bazi …«. Gumb »Odpri v peskovniku« v poglavju izbere bazo poglavja sam (`USE` ni potreben).
 - **Certifikat CA za Workbench**: če je v nastavitvah strežnika vnesen CA, okno »Podatki za Workbench« ponudi `ca.pem` (pot `/sql/ca.pem`, ista vsebina kot polje `ca`, brez ključa, za vse z dostopom do peskovnika) in navodilo: zavihek SSL, `Require and Verify CA`, datoteka CA; `Verify Identity` se ne priporoča, ker je certifikat samopodpisan. Brez CA, a s TLS, velja navodilo `Require`. Portal sam CA uporablja za svoje povezave (`rejectUnauthorized`), ime v certifikatu mora ustrezati vpisanemu strežniku (SAN).
 - **Moj račun in pravice**: opis (kaj lahko dijak) in zapis pravic v SQL (`GRANT …`); podatki za Workbench vsebujejo obe imeni baz.

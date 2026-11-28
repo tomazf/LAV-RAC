@@ -444,6 +444,51 @@ test('student: the 4.6 database is separate from the 4.4 one; resetting one leav
   assert.match(txt, /GRANT SELECT, SHOW VIEW ON/);
 });
 
+test('student: the editor opens with six lines, shows a Shift+arrow selection and offers completion; buttons and dialogs', { skip }, async () => {
+  const p = pages.get('Ana Kovač');
+  await p.goto(`${APP}/sql`);
+  await p.waitForSelector('.sq-ed .cm-content');
+  // the buttons are named after what they do
+  assert.equal((await p.locator('button[data-open=sq-scripts]').innerText()).trim(), 'Shrani poizvedbo');
+  assert.equal((await p.locator('button[data-open=sq-hist]').innerText()).trim(), 'Zgodovina poizvedb');
+  assert.ok(await p.locator('.sq-bar .btn svg.ic, .sq-bar .btn svg').count() >= 2, 'the buttons carry icons');
+  // the default height is six lines (line height × 6, editor padding 16 px, border 4 px)
+  const h = await p.locator('.sq-ed').evaluate((e) => ({ box: e.getBoundingClientRect().height, line: parseFloat(getComputedStyle(e.querySelector('.cm-line')).lineHeight) }));
+  assert.ok(Math.abs(h.box - (6 * h.line + 20)) < 4, `six lines: ${JSON.stringify(h)}`);
+  // a selection made with Shift+arrow is drawn: the active line is translucent, so the selection under it shows
+  await p.evaluate(() => { document.getElementById('sq').sqEditor.value = 'SELECT ime\nFROM dijak;'; });
+  await p.click('.sq-ed .cm-content');
+  await p.keyboard.press('Control+Home');
+  for (let i = 0; i < 6; i++) await p.keyboard.press('Shift+ArrowRight');
+  assert.equal(await p.evaluate(() => document.getElementById('sq').sqEditor.selection().text), 'SELECT');
+  assert.ok(await p.locator('.cm-selectionBackground').count() >= 1);
+  const bg = await p.locator('.cm-activeLine').first().evaluate((e) => getComputedStyle(e).backgroundColor);
+  const alpha = /\/\s*([\d.]+)\s*\)/.exec(bg)?.[1] ?? /rgba\([^)]*,\s*([\d.]+)\)/.exec(bg)?.[1];
+  assert.ok(alpha !== undefined && Number(alpha) < 1, `the active line must not cover the selection: ${bg}`);
+  // completion: tables of the chosen database after FROM
+  await p.selectOption('#sq-db', 'sola');
+  await p.waitForSelector('.sq-tables .sq-name:text-is("dijak")');
+  await p.evaluate(() => { document.getElementById('sq').sqEditor.value = ''; });
+  await p.click('.sq-ed .cm-content');
+  await p.keyboard.type('SELECT * FROM dij');
+  await p.waitForSelector('.cm-tooltip-autocomplete li');
+  assert.match(await p.textContent('.cm-tooltip-autocomplete'), /dijak/);
+  await p.keyboard.press('Escape');
+  // the reset list has no matura or sola scripts and no file names; the buttons of the dialogs are on the right
+  await p.click('button[data-open=sq-reset]');
+  const opts = await p.locator('#sq-tpl option').allTextContents();
+  assert.ok(opts.length >= 8);
+  assert.ok(opts.every((o) => !/matura|\.sql/i.test(o) && !/^Šolska baza s podatki/.test(o)), opts.join(' | '));
+  let shown = 'sq-reset';
+  for (const id of ['sq-reset', 'sq-acc', 'sq-wb']) {
+    if (id !== shown) { await p.click(`#${shown} [data-close]`); await p.click(`button[data-open=${id}]`); shown = id; }
+    const d = await p.locator(`#${id}`).boundingBox();
+    const last = await p.locator(`#${id} .dlg-actions .btn`).last().boundingBox();
+    assert.ok(last.x + last.width > d.x + d.width - 40, `${id}: the action buttons are right-aligned`);
+  }
+  await p.click('#sq-wb [data-close]');
+});
+
 test('admin: the full check passes and cleans up; the statistics are numbers; the teacher sees the state', { skip }, async () => {
   const a = pages.get('Sara Skrbnik');
   await a.goto(`${APP}/admin/sql`);

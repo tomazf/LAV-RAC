@@ -62,7 +62,8 @@ main.sqlmain{max-width:1480px;padding-top:18px}
 .sq-run{gap:8px}
 .sq-sep{width:1px;align-self:stretch;background:var(--line);margin:0 4px}
 .sq-status{margin-left:auto;font-size:.88rem}
-.sq-ed{border:2px solid var(--line);border-radius:10px;overflow:hidden;height:clamp(220px,38vh,460px);resize:vertical;min-height:160px;background:var(--sq-bg)}
+/* default height: 6 lines (line 1.55 × font size, editor padding 16px, border 4px); the handle enlarges it */
+.sq-ed{--sq-line:calc(1.55 * var(--sq-size,.98rem));border:2px solid var(--line);border-radius:10px;overflow:hidden;height:calc(6 * var(--sq-line) + 20px);min-height:calc(3 * var(--sq-line) + 20px);max-height:85vh;resize:vertical;background:var(--sq-bg)}
 .sq-ed:focus-within{border-color:var(--acc)}
 .sq-ed .cm-editor{height:100%}
 .sq-ed .cm-editor.cm-focused{outline:none}
@@ -107,6 +108,11 @@ main.sqlmain{max-width:1480px;padding-top:18px}
 .sq-hint::before{content:"Namig: ";font-weight:700}
 
 /* dialogs */
+.sq-dlg .dlg-actions{justify-content:flex-end}
+.sq-dlg h2{display:flex;align-items:center;gap:10px}
+.sq-dlg h2 .ic{width:1.3rem;height:1.3rem;color:var(--acc)}
+.ic{width:1.1em;height:1.1em;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn .ic{margin-right:7px}
 .sq-dlg{width:min(40rem,calc(100vw - 24px))}
 .cred{display:grid;gap:6px;margin:0}
 .cred>div{display:grid;grid-template-columns:9.5rem minmax(0,1fr);align-items:center;gap:10px}
@@ -140,7 +146,6 @@ main.sqlmain{max-width:1480px;padding-top:18px}
   .sq{grid-template-columns:minmax(0,1fr)}
   .sq-side{position:static;max-height:none;order:2}
   .sq-tree{max-height:40vh}
-  .sq-ed{height:clamp(200px,42vh,380px)}
   .sq-status{margin-left:0;flex-basis:100%}
   .cred>div{grid-template-columns:minmax(0,1fr)}
   .sq-target{flex:1 1 100%}

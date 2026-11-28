@@ -27,7 +27,8 @@ const theme = EditorView.theme({
   '.cm-content': { caretColor: 'var(--acc)', padding: '8px 0' },
   '.cm-cursor': { borderLeftColor: 'var(--acc)', borderLeftWidth: '2px' },
   '.cm-gutters': { backgroundColor: 'var(--sq-gut)', color: 'var(--mut)', border: 'none', borderRight: '1px solid var(--line)' },
-  '.cm-activeLine': { backgroundColor: 'var(--sq-act)' },
+  // The active line is a translucent tint: the selection is drawn under the text lines, an opaque colour would hide it.
+  '.cm-activeLine': { backgroundColor: 'color-mix(in srgb, var(--acc) 8%, transparent)' },
   '.cm-activeLineGutter': { backgroundColor: 'var(--sq-act)', color: 'var(--ink)' },
   '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': { backgroundColor: 'var(--sq-sel) !important' },
   '.cm-selectionMatch': { backgroundColor: 'var(--sq-match)' },
@@ -35,6 +36,7 @@ const theme = EditorView.theme({
   '.cm-tooltip': { backgroundColor: 'var(--card)', color: 'var(--ink)', border: '1px solid var(--wire)', borderRadius: '8px', overflow: 'hidden' },
   '.cm-tooltip-autocomplete > ul > li': { padding: '3px 10px' },
   '.cm-tooltip-autocomplete > ul > li[aria-selected]': { backgroundColor: 'var(--acc)', color: 'var(--onacc)' },
+  '.cm-completionIcon': { width: '1.2em', opacity: '.9', paddingRight: '.4em', textAlign: 'center' },
   '.cm-completionDetail': { color: 'inherit', opacity: '.7', marginLeft: '10px', fontStyle: 'normal' },
   '.cm-errline': { backgroundColor: 'var(--sq-err)' },
   '.cm-runline': { backgroundColor: 'var(--sq-run)' },
@@ -66,7 +68,7 @@ export function create(parent, opts = {}) {
       doc: opts.doc ?? '',
       extensions: [
         lineNumbers(), highlightActiveLineGutter(), history(), drawSelection(), indentOnInput(), bracketMatching(), closeBrackets(),
-        highlightActiveLine(), highlightSelectionMatches(), autocompletion({ activateOnTyping: true, icons: false }),
+        highlightActiveLine(), highlightSelectionMatches(), autocompletion({ activateOnTyping: true, icons: true, maxRenderedOptions: 60 }),
         lang.of(sql({ dialect: MySQL, upperCaseKeywords: true })),
         syntaxHighlighting(style), theme, marks, EditorView.lineWrapping,
         // the portal's CSP allows the editor's own <style> only with this page's nonce
@@ -120,8 +122,11 @@ export function create(parent, opts = {}) {
     // table -> columns for completion (tables of the chosen database)
     setSchema(tables) {
       const schema = {};
-      for (const tb of tables ?? []) schema[tb.name] = tb.columns.map((c) => ({ label: c.name, detail: c.type, type: 'property' }));
-      view.dispatch({ effects: lang.reconfigure(sql({ dialect: MySQL, upperCaseKeywords: true, schema, tables: (tables ?? []).map((tb) => ({ label: tb.name, type: 'type', detail: tb.view ? 'pogled' : 'tabela' })) })) });
+      // a column shows its type and a key mark (PK primary, UQ unique)
+      const mark = (c) => (c.key === 'PRI' ? ' · PK' : c.key === 'UNI' ? ' · UQ' : '');
+      for (const tb of tables ?? []) schema[tb.name] = tb.columns.map((c) => ({ label: c.name, detail: `${c.type}${mark(c)}`, type: 'property', boost: c.key === 'PRI' ? 1 : 0 }));
+      const names = (tables ?? []).map((tb) => ({ label: tb.name, type: 'type', detail: tb.view ? 'pogled' : 'tabela', boost: 2 }));
+      view.dispatch({ effects: lang.reconfigure(sql({ dialect: MySQL, upperCaseKeywords: true, schema, tables: names })) });
     },
   };
 }

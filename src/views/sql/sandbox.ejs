@@ -1,6 +1,22 @@
 <%- include('../partials/head', { pageTitle: 'SQL peskovnik', mainClass: 'wide sqlmain' }) %>
 <link rel="stylesheet" href="<%= asset('css/sqlbox.css') %>">
 <% const f = fmt; %>
+<%
+  // Own line icons (no icon font, no CDN: strict CSP). Colour follows the text.
+  const IC = {
+    play: '<path d="M8 5l11 7-11 7z"/>',
+    save: '<path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
+    plug: '<path d="M9 3v5M15 3v5M6 8h12v4a6 6 0 0 1-12 0zM12 18v3"/>',
+    reset: '<path d="M4 12a8 8 0 1 1 2.5 5.8"/><path d="M4 5v6h6"/>',
+    er: '<rect x="3" y="4" width="7" height="6" rx="1"/><rect x="14" y="14" width="7" height="6" rx="1"/><path d="M10 7h4a3 3 0 0 1 3 3v4"/>',
+    download: '<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>',
+    shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+    x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  };
+  const ic = (n) => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
+%>
 <div class="sq-head">
   <div>
     <h1>SQL peskovnik</h1>
@@ -25,24 +41,24 @@
       <button type="button" class="sq-ibtn" id="sq-refresh" title="Osveži tabele" aria-label="Osveži tabele"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
     <div id="sq-tree" class="sq-tree" aria-labelledby="sq-tables-h" aria-live="polite"><p class="dim">Nalagam …</p></div>
     <div class="sq-side-actions">
-      <button type="button" class="btn ghost small" id="sq-er-open">ER diagram</button>
-      <% if (acc) { %><button type="button" class="btn ghost small" data-open="sq-wb">Podatki za Workbench</button>
-      <button type="button" class="btn ghost small" data-open="sq-acc">Moj račun in pravice</button>
-      <button type="button" class="btn ghost small" data-open="sq-reset">Ponastavi bazo</button><% } %>
+      <button type="button" class="btn ghost small" id="sq-er-open"><%- ic('er') %>ER diagram</button>
+      <% if (acc) { %><button type="button" class="btn ghost small" data-open="sq-wb"><%- ic('plug') %>Podatki za Workbench</button>
+      <button type="button" class="btn ghost small" data-open="sq-acc"><%- ic('user') %>Moj račun in pravice</button>
+      <button type="button" class="btn ghost small" data-open="sq-reset"><%- ic('reset') %>Ponastavi bazo</button><% } %>
     </div>
   </aside>
 
   <section class="sq-work" aria-label="Urejevalnik in rezultati">
     <div class="sq-bar" role="toolbar" aria-label="Ukazi">
       <button type="button" class="btn sq-run" id="sq-run" title="Ctrl+Enter"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg><span id="sq-run-l">Zaženi vse</span></button>
-      <button type="button" class="btn ghost" id="sq-run1" title="Ctrl+Shift+Enter">Zaženi stavek</button>
+      <button type="button" class="btn ghost" id="sq-run1" title="Ctrl+Shift+Enter"><%- ic('play') %>Zaženi stavek</button>
       <span class="sq-sep" aria-hidden="true"></span>
-      <button type="button" class="btn ghost small" data-open="sq-scripts">Skripti</button>
-      <button type="button" class="btn ghost small" data-open="sq-hist">Zgodovina</button>
+      <button type="button" class="btn ghost small" data-open="sq-scripts"><%- ic('save') %>Shrani poizvedbo</button>
+      <button type="button" class="btn ghost small" data-open="sq-hist"><%- ic('clock') %>Zgodovina poizvedb</button>
       <span class="sq-status dim" id="sq-saved" role="status"></span>
     </div>
     <div class="sq-ed" id="sq-ed"></div>
-    <p class="sq-tip dim">Ctrl+Enter zažene vse (ali izbrano), Ctrl+Shift+Enter stavek pod kazalcem. Vsak zagon je nova povezava: spremenljivke, začasne tabele in transakcije ne ostanejo do naslednjega zagona.</p>
+    <p class="sq-tip dim">Ctrl+Enter zažene vse (ali izbrano), Ctrl+Shift+Enter stavek pod kazalcem, Ctrl+preslednica odpre predloge (tabele, stolpci, ukazi). Vsak zagon je nova povezava: spremenljivke, začasne tabele in transakcije ne ostanejo do naslednjega zagona.</p>
     <div class="sq-out" id="sq-out" aria-live="polite">
       <div class="sq-empty"><p><strong>Rezultati se pokažejo tukaj.</strong></p><p class="dim">Za vsak stavek dobiš svoj zavihek: tabelo, število spremenjenih vrstic ali napako z vrstico v urejevalniku.</p></div>
     </div>
@@ -52,7 +68,7 @@
 <% if (acc) { %>
 <dialog class="edit-dlg sq-dlg" id="sq-wb" aria-labelledby="sq-wb-h">
   <div class="edit-form">
-    <h2 id="sq-wb-h">Povezava iz MySQL Workbencha</h2>
+    <h2 id="sq-wb-h"><%- ic('plug') %>Povezava iz MySQL Workbencha</h2>
     <p>V Workbenchu: <strong>Database › Manage Connections › New</strong>, vpiši spodnje podatke in shrani geslo (<em>Store in Vault</em>). Deluje v šolskem omrežju.</p>
     <dl class="cred">
       <div><dt>Hostname</dt><dd><code data-copy><%= s.host %></code></dd></div>
@@ -64,18 +80,18 @@
     </dl>
     <% if (s.ca) { %>
     <h3 class="sql-h3">Šifrirana povezava (SSL)</h3>
-    <p><a class="btn ghost small" href="/sql/ca.pem" download="ca.pem">Prenesi ca.pem</a></p>
+    <p><a class="btn ghost small" href="/sql/ca.pem" download="ca.pem"><%- ic('download') %>Prenesi ca.pem</a></p>
     <p>V Workbenchu odpri zavihek <strong>SSL</strong>, pri <strong>Use SSL</strong> izberi <code>Require and Verify CA</code> in pri <strong>SSL CA File</strong> izberi preneseno datoteko <code>ca.pem</code>. <code>Verify Identity</code> ne izbiraj: certifikat je samopodpisan in ime strežnika se ne ujema.</p>
     <% } else if (s.tls) { %>
     <p class="dim">Strežnik podpira šifrirano povezavo: v Workbenchu na zavihku <strong>SSL</strong> pri <strong>Use SSL</strong> izberi <code>Require</code>.</p>
     <% } %>
     <p class="dim">Klik na podatek ga kopira. Za poglavje 6 v Workbenchu izberi bazo <code><%= acc.db_name6 %></code> (dvoklik na ime v levem stolpcu) ali napiši <code>USE <%= acc.db_name6 %>;</code>. Geslo ti lahko ponastavi učitelj.</p>
-    <div class="dlg-actions"><button type="button" class="btn ghost" data-close>Zapri</button></div>
+    <div class="dlg-actions"><button type="button" class="btn ghost" data-close><%- ic('x') %>Zapri</button></div>
   </div>
 </dialog>
 <dialog class="edit-dlg sq-dlg" id="sq-acc" aria-labelledby="sq-acc-h">
   <div class="edit-form">
-    <h2 id="sq-acc-h">Moj SQL račun in pravice</h2>
+    <h2 id="sq-acc-h"><%- ic('shield') %>Moj SQL račun in pravice</h2>
     <p>Tvoj uporabnik na strežniku je <code data-copy><%= acc.db_user %></code> (geslo je v oknu »Podatki za Workbench«). Z njim lahko:</p>
     <ul>
       <li>v bazi <code><%= acc.db_name %></code> (<%= PERSONAL.moja.title %>) in v bazi <code><%= acc.db_name6 %></code> (<%= PERSONAL.moja6.title %>) delaš karkoli: ustvarjaš, spreminjaš in brišeš tabele, poglede, indekse in podatke;</li>
@@ -90,12 +106,12 @@ GRANT ALL PRIVILEGES ON `<%= acc.db_name6.replace(/_/g, '\\_') %>`.* TO '<%= acc
 <% SHARED.forEach((x) => { %>GRANT SELECT, SHOW VIEW ON `<%= x.db(s).replace(/_/g, '\\_') %>`.* TO '<%= s.prefix %>bralec'@'%';
 <% }) %></code></pre>
     <p class="dim">Poševnica pred podčrtajem je samo zapis v ukazu GRANT, ime baze je <code><%= acc.db_name6 %></code>. Ob vsakem zagonu v peskovniku je izbrana baza že nastavljena (<code>USE</code> ni potreben); ime izbrane baze piše nad urejevalnikom.</p>
-    <div class="dlg-actions"><button type="button" class="btn ghost" data-close>Zapri</button></div>
+    <div class="dlg-actions"><button type="button" class="btn ghost" data-close><%- ic('x') %>Zapri</button></div>
   </div>
 </dialog>
 <dialog class="edit-dlg sq-dlg" id="sq-reset" aria-labelledby="sq-reset-h">
   <form class="edit-form" method="post" action="/sql/ponastavi"><input type="hidden" name="_csrf" value="<%= csrf %>">
-    <h2 id="sq-reset-h">Ponastavi mojo bazo</h2>
+    <h2 id="sq-reset-h"><%- ic('reset') %>Ponastavi mojo bazo</h2>
     <p>Ponastavi se samo ena baza, tista, ki ji pripada izbrana vsebina. Druga ostane, kakršna je.</p>
     <ul class="sq-dbs">
       <li><strong><%= PERSONAL.moja.title %></strong>: <code><%= acc.db_name %></code> (<%= mb(acc.size_bytes) %> od <%= limits.sizeMb %> MB)</li>
@@ -106,25 +122,25 @@ GRANT ALL PRIVILEGES ON `<%= acc.db_name6.replace(/_/g, '\\_') %>`.* TO '<%= acc
         <% Object.entries(PERSONAL).forEach(([k, p]) => { %><optgroup label="<%= p.title %> · <%= acc[p.col] %>"><% TEMPLATES.filter((t) => t.db === k).forEach((t) => { %><option value="<%= t.id %>" <%= t.id === 'p6k0' ? 'selected' : '' %>><%= t.title %></option><% }) %></optgroup><% }) %>
       </select></div>
     <label class="switch"><input type="checkbox" name="potrdi" required> Vse tabele in podatki v izbrani bazi se izbrišejo.</label>
-    <div class="dlg-actions"><button class="btn danger">Ponastavi</button><button type="button" class="btn ghost" data-close>Prekliči</button></div>
+    <div class="dlg-actions"><button type="button" class="btn ghost" data-close><%- ic('x') %>Prekliči</button><button class="btn danger"><%- ic('reset') %>Ponastavi</button></div>
   </form>
 </dialog>
 <% } %>
 <dialog class="edit-dlg sq-dlg" id="sq-scripts" aria-labelledby="sq-scripts-h">
   <div class="edit-form">
-    <h2 id="sq-scripts-h">Moji skripti</h2>
-    <form class="row" id="sq-save"><label class="sr" for="sq-name">Ime skripta</label><input id="sq-name" maxlength="80" placeholder="Ime, npr. 4.4 vaja C3" required><button class="btn small">Shrani trenutnega</button></form>
+    <h2 id="sq-scripts-h"><%- ic('save') %>Shranjene poizvedbe</h2>
+    <form class="row" id="sq-save"><label class="sr" for="sq-name">Ime poizvedbe</label><input id="sq-name" maxlength="80" placeholder="Ime, npr. 4.4 vaja C3" required><button class="btn small"><%- ic('save') %>Shrani trenutno</button></form>
     <p class="sq-msg dim" id="sq-scripts-msg" role="status"></p>
     <ul class="sq-list" id="sq-scripts-list"></ul>
-    <div class="dlg-actions"><button type="button" class="btn ghost" data-close>Zapri</button></div>
+    <div class="dlg-actions"><button type="button" class="btn ghost" data-close><%- ic('x') %>Zapri</button></div>
   </div>
 </dialog>
 <dialog class="edit-dlg sq-dlg" id="sq-hist" aria-labelledby="sq-hist-h">
   <div class="edit-form">
-    <h2 id="sq-hist-h">Zgodovina zagonov</h2>
+    <h2 id="sq-hist-h"><%- ic('clock') %>Zgodovina poizvedb</h2>
     <p class="dim">Zadnjih 100 zagonov. Vidiš jih samo ti. Klik prenese skript v urejevalnik.</p>
     <ul class="sq-list" id="sq-hist-list"></ul>
-    <div class="dlg-actions"><button type="button" class="btn ghost" data-close>Zapri</button></div>
+    <div class="dlg-actions"><button type="button" class="btn ghost" data-close><%- ic('x') %>Zapri</button></div>
   </div>
 </dialog>
 <dialog class="sq-er" id="sq-er" aria-labelledby="sq-er-h">

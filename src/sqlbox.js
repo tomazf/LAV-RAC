@@ -77,16 +77,14 @@ export const SHARED = [
   { id: 'matura', title: 'matura_baze (maturitetne naloge)', file: 'src/public/matura_baze.sql', db: (s) => `${s.prefix}matura` },
 ];
 export const readerName = (s) => `${s.prefix}bralec`;
-// What a personal database can be reset to (files of the chapters 4.4, 4.5 and 4.6; 4.6 offers its checkpoints K0 to K6, 28. 11. 2026).
+// What a personal database can be reset to (files of the chapters 4.4 and 4.6; 4.6 offers its checkpoints K0 to K6, 28. 11. 2026).
 // db: the personal database a template fills (moja = 4.4, moja6 = 4.6).
 export const TEMPLATES = [
   { id: 'prazna', db: 'moja', title: 'Prazna baza', files: [] },
   { id: 'prazna6', db: 'moja6', title: 'Prazna baza', files: [] },
   { id: 'struktura', db: 'moja', title: 'Šolska baza: samo struktura (4.4)', files: ['content/sources/4.4/sola_struktura.sql'] },
   { id: 'zacetni', db: 'moja', title: 'Šolska baza: struktura in začetni podatki (4.4)', files: ['content/sources/4.4/sola_struktura.sql', 'content/sources/4.4/sola_zacetni_podatki.sql'] },
-  { id: 'sola', db: 'moja', title: 'Šolska baza s podatki (sola.sql, 4.5)', files: ['src/public/sola.sql'] },
-  { id: 'matura', db: 'moja', title: 'Maturitetne baze (matura_baze.sql, 4.5)', files: ['src/public/matura_baze.sql'] },
-  { id: 'indeks', db: 'moja', title: 'Tabela za indekse (indeks_test.sql, 4.4)', files: ['content/sources/4.4/indeks_test.sql'] },
+  { id: 'indeks', db: 'moja', title: 'Tabela za indekse (4.4)', files: ['content/sources/4.4/indeks_test.sql'] },
   { id: 'p6k0', db: 'moja6', title: 'Poglavje 6: K0 začetek (šolska baza in matura)', files: ['content/sources/4.6/sola6_ponastavi.sql', 'src/public/matura_baze.sql'] },
   { id: 'p6k2', db: 'moja6', title: 'Poglavje 6: K2 po INSERT (šolska baza in matura)', files: ['content/sources/4.6/sola6_k2.sql', 'src/public/matura_baze.sql'] },
   { id: 'p6k3', db: 'moja6', title: 'Poglavje 6: K3 po INSERT … SELECT (šolska baza in matura)', files: ['content/sources/4.6/sola6_k3.sql', 'src/public/matura_baze.sql'] },
