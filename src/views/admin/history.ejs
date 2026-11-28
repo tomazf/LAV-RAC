@@ -1,0 +1,20 @@
+<%- include('../partials/head', { pageTitle: 'Zgodovina popravkov', mainClass: 'wide' }) %>
+<%- include('../partials/adminnav') %>
+<p class="dim">Rešene prijave napak in nejasnosti, od najnovejše. Zapis je povzetek (vsebina, besedilo, odgovor in datumi) brez dijaka, zato ostane, tudi ko se dijak izbriše iz portala. Rešitev ob ponovnem odprtju prijave odstrani zapis do nove rešitve.</p>
+<p><a href="/admin/prijave">← Prijave</a></p>
+<form class="rp-filter" method="get" action="/admin/prijave/zgodovina">
+  <label>Od <input type="date" name="od" value="<%= from || '' %>"></label>
+  <label>Do <input type="date" name="do" value="<%= to || '' %>"></label>
+  <% if (years.length) { %><label>Letnik vaje <select name="letnik"><option value="">Vsi</option><% years.forEach((y) => { %><option value="<%= y.year %>" <%- year === y.year ? 'selected' : '' %>><%= y.year %>. letnik</option><% }) %></select></label><% } %>
+  <label>Vaja <select name="vaja"><option value="">Vse</option><% list.forEach((e) => { %><option value="<%= e.id %>" <%- exercise === e.id ? 'selected' : '' %>><%= e.id %> · <%= e.title %></option><% }) %></select></label>
+  <button class="btn small">Pokaži</button>
+</form>
+<% if (!items.length) { %><p class="notice">Ni rešenih prijav za ta izbor.</p><% } %>
+<% months.forEach((m) => { %>
+<section class="rp-group">
+  <h2><%= m.title %> <span class="dim">(<%= m.items.length %>)</span></h2>
+  <% m.items.forEach((r) => { %><%- include('../partials/report', { r, admin: false, who: false, where: true, back, csrf, MAX_TEXT: 0 }) %><% }) %>
+</section>
+<% }) %>
+<% if (more) { %><p class="dim">Prikazanih je prvih 500; zoži izbor z datumom ali vajo.</p><% } %>
+<%- include('../partials/foot') %>

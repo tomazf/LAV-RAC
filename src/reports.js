@@ -1,6 +1,6 @@
 // Reports (»Prijave«): a user tells the admin about a bug or a mistake. The page fills in where the user was.
 import { byId, exercises, yearOf } from './catalog.js';
-import { many, one } from './db.js';
+import { many, one, q } from './db.js';
 import { byName } from './format.js';
 
 export const MAX_TEXT = 2000;
@@ -112,4 +112,40 @@ export function byClass(items) {
   return [...classes.values()]
     .sort((a, b) => (a.id === null) - (b.id === null) || (a.year ?? 99) - (b.year ?? 99) || byName(a, b))
     .map((c) => ({ ...c, count: [...c.students.values()].reduce((n, s) => n + s.items.length, 0), students: [...c.students.values()].sort(byName) }));
+}
+
+// The summary of a resolved report, kept without the person; made again when the answer changes, removed when the report is opened again.
+export async function syncHistory(r) {
+  if (r.status !== 'resolved') return q('DELETE FROM report_history WHERE report_id=$1', [r.id]);
+  return q(
+    `INSERT INTO report_history(report_id, exercise_id, page_id, task_label, task_no, path, body, reply, created_at, replied_at, resolved_at)
+     VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+     ON CONFLICT (report_id) DO UPDATE SET reply=EXCLUDED.reply, replied_at=EXCLUDED.replied_at, resolved_at=EXCLUDED.resolved_at`,
+    [r.id, r.exercise_id, r.page_id, r.task_label, r.task_no, r.path, r.body, r.reply, r.created_at, r.replied_at, r.resolved_at],
+  );
+}
+
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
+const day = (v) => (DAY.test(String(v ?? '')) && !Number.isNaN(Date.parse(`${v}T00:00:00Z`)) ? String(v) : null);
+const month = new Intl.DateTimeFormat('sl-SI', { month: 'long', year: 'numeric', timeZone: 'Europe/Ljubljana' });
+const key = new Intl.DateTimeFormat('sv-SE', { year: 'numeric', month: '2-digit', timeZone: 'Europe/Ljubljana' });
+// The history, newest first, in months. from/to are days (by the date of resolution), year the year of the exercise.
+export async function listHistory({ from, to, year = null, exercise = null }) {
+  const f = day(from), t = day(to);
+  const rows = await many(
+    `SELECT * FROM report_history
+     WHERE ($1::date IS NULL OR (resolved_at AT TIME ZONE 'Europe/Ljubljana')::date >= $1)
+       AND ($2::date IS NULL OR (resolved_at AT TIME ZONE 'Europe/Ljubljana')::date <= $2)
+       AND ($3::text IS NULL OR exercise_id = $3)
+     ORDER BY resolved_at DESC, id DESC LIMIT ${LIMIT + 1}`,
+    [f, t, exercise || null],
+  );
+  const items = rows.slice(0, LIMIT).map((r) => ({ ...r, status: 'resolved', ...describe(r) })).filter((r) => !year || r.year === year);
+  const months = new Map();
+  for (const r of items) {
+    const k = key.format(new Date(r.resolved_at));
+    if (!months.has(k)) months.set(k, { title: month.format(new Date(r.resolved_at)), items: [] });
+    months.get(k).items.push(r);
+  }
+  return { from: f, to: t, items, more: rows.length > LIMIT, months: [...months.values()] };
 }

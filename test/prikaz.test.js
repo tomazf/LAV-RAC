@@ -315,6 +315,12 @@ test('the admin answers and resolves; the author sees the status and the answer 
   const row = (await sql('SELECT * FROM reports WHERE id=$1', [first]))[0];
   assert.deepEqual([row.status, row.reply, row.unseen], ['resolved', 'Popravljeno, hvala za opozorilo.', true]);
   assert.ok(row.resolved_at && row.replied_at);
+  // the summary for the history: text, place, answer and dates, no person
+  const hist = await sql('SELECT * FROM report_history WHERE report_id=$1', [first]);
+  assert.equal(hist.length, 1);
+  assert.equal(hist[0].reply, 'Popravljeno, hvala za opozorilo.');
+  assert.equal(hist[0].task_label, 'B.3');
+  assert.ok(!('user_id' in hist[0]), 'the summary has no link to the person');
   // it left the open list, and it is in the resolved one
   assert.equal(await admin.locator(`#r${first}`).count(), 0);
   await admin.goto(`${APP}/admin/prijave?stanje=resene`);
@@ -354,15 +360,51 @@ test('the admin answers and resolves; the author sees the status and the answer 
   await admin.locator(`#r${first}`).locator('button:text-is("Ponovno odpri")').click();
   await admin.locator('.notice:has-text("spet odprta")').waitFor();
   assert.deepEqual((await sql('SELECT status, resolved_at FROM reports WHERE id=$1', [first]))[0], { status: 'open', resolved_at: null });
+  assert.equal((await sql('SELECT 1 FROM report_history WHERE report_id=$1', [first])).length, 0, 'opened again: no summary until it is resolved again');
 });
 
-test('deleting a user removes their reports; the counters follow', async () => {
+test('deleting a user removes their reports; the summary of a resolved one stays, without the person; the counters follow', async () => {
   const cene = await userId('cene.zupan@sola.test');
+  const admin = pages.get('Sara Skrbnik');
+  const rid = (await sql('SELECT id FROM reports WHERE user_id=$1', [cene]))[0].id;
   assert.equal(Number((await sql('SELECT count(*) AS n FROM reports WHERE user_id=$1', [cene]))[0].n), 1);
+  await admin.goto(`${APP}/admin/prijave`);
+  await admin.locator(`#r${rid}`).locator('textarea').fill('Popravljeno v 2.1.');
+  await admin.locator(`#r${rid}`).locator('button:text-is("Shrani in označi kot rešeno")').click();
+  await admin.locator('.notice:has-text("označena kot rešena")').waitFor();
+  // the answer changes after the resolution: the summary follows
+  await admin.goto(`${APP}/admin/prijave?stanje=resene`);
+  await admin.locator(`#r${rid}`).locator('textarea').fill('Popravljeno v 2.1, slika zamenjana.');
+  await admin.locator(`#r${rid}`).locator('button:text-is("Shrani odgovor")').click();
+  await admin.locator('.notice:has-text("Odgovor je shranjen")').waitFor();
+  assert.equal((await sql('SELECT reply FROM report_history WHERE report_id=$1', [rid]))[0].reply, 'Popravljeno v 2.1, slika zamenjana.');
   await sql('DELETE FROM users WHERE id=$1', [cene]);
   assert.equal(Number((await sql('SELECT count(*) AS n FROM reports WHERE user_id=$1', [cene]))[0].n), 0);
-  const admin = pages.get('Sara Skrbnik');
+  assert.equal((await sql('SELECT 1 FROM reports WHERE id=$1', [rid])).length, 0, 'the report itself went with the student');
+  assert.equal((await sql('SELECT 1 FROM report_history WHERE report_id=$1', [rid])).length, 1, 'the summary stayed');
   await admin.goto(`${APP}/admin/prijave?stanje=vse`);
   assert.doesNotMatch(await admin.locator('main').innerText(), /Simulacija v 2\.1/);
+  // the history page: the summary, no name; the filters by date, year and exercise
+  await admin.goto(`${APP}/admin/prijave/zgodovina`);
+  assert.equal(await admin.locator('h1').innerText(), 'Zgodovina popravkov');
+  assert.equal(await admin.locator('nav[aria-label="Administracija"]').count(), 0);
+  const text = await admin.locator('main').innerText();
+  assert.match(text, /Simulacija v 2\.1/);
+  assert.match(text, /Popravljeno v 2\.1, slika zamenjana\./);
+  assert.doesNotMatch(text, /Cene|Zupan/);
+  const cards = (qs) => admin.goto(`${APP}/admin/prijave/zgodovina${qs}`).then(() => admin.locator('.rp').count());
+  assert.ok((await cards('')) >= 1);
+  const today = new Date().toISOString().slice(0, 10);
+  assert.equal(await cards(`?od=${today}&do=${today}`), (await cards('')), 'resolved today');
+  assert.equal(await cards('?od=2999-01-01'), 0);
+  assert.equal(await cards('?do=2000-01-01'), 0);
+  assert.equal(await cards('?od=ni-datum&do=%27'), (await cards('')), 'a bad date is ignored');
+  assert.equal(await cards('?letnik=4&vaja=2.1'), 0);
+  assert.equal(await cards('?letnik=2&vaja=2.1'), 1);
+  // only the admin
+  for (const who of ['Tomaž Učitelj', 'Bor Novak']) {
+    const r = await pages.get(who).goto(`${APP}/admin/prijave/zgodovina`);
+    assert.equal(r.status(), 403, who);
+  }
   assert.deepEqual(errors, []);
 });

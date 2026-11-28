@@ -1,6 +1,6 @@
 <%# Prijave has its own button in the main menu, so its page has no tabs of Administracija. %>
-<% const own = tab === 'reports'; %>
-<div class="title-row"><h1><%= own ? 'Prijave' : 'Administracija' %></h1></div>
+<% const own = tab === 'reports' || tab === 'history'; %>
+<div class="title-row"><h1><%= tab === 'history' ? 'Zgodovina popravkov' : own ? 'Prijave' : 'Administracija' %></h1></div>
 <% if (!own) { %><nav class="tabs" aria-label="Administracija">
   <a href="/admin" <%- tab==='users' ? 'aria-current="page"' : '' %>>Uporabniki</a>
   <a href="/admin/vaje" <%- tab==='exercises' ? 'aria-current="page"' : '' %>>Vaje</a>

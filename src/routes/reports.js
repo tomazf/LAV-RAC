@@ -1,10 +1,10 @@
 import express from 'express';
 import { checkCsrf, csrfValid, requireAccess, requireAdmin, requireTeacher } from '../auth.js';
-import { YEARS } from '../catalog.js';
+import { YEARS, exercises, yearOf } from '../catalog.js';
 import { audit, many, one, q } from '../db.js';
 import { byName } from '../format.js';
 import { normalizePrefs } from '../prefs.js';
-import { byClass, byYear, createReport, describe, listReports, MAX_TEXT, PER_DAY, stateOf } from '../reports.js';
+import { byClass, byYear, createReport, describe, listHistory, listReports, MAX_TEXT, PER_DAY, stateOf, syncHistory } from '../reports.js';
 
 // --- for every signed-in user: display settings, sending a report, own reports -------------------------------------
 export const reportApiRouter = express.Router();
@@ -91,6 +91,16 @@ adminReportsRouter.use(requireAdmin);
 adminReportsRouter.get('/', async (req, res, next) => {
   try { await renderList(req, res, 'admin/reports', 'all', { tab: 'reports' }); } catch (e) { next(e); }
 });
+// The history of the corrections: resolved reports as summaries without the person, also after the author is deleted.
+adminReportsRouter.get('/zgodovina', async (req, res, next) => {
+  try {
+    const year = YEARS.find((y) => y.year === Number(req.query.letnik))?.year ?? null;
+    const list = exercises.filter((e) => !year || yearOf(e.module) === year);
+    const exercise = list.find((e) => e.id === String(req.query.vaja ?? ''))?.id ?? null;
+    const h = await listHistory({ from: req.query.od, to: req.query.do, year, exercise });
+    res.render('admin/history', { ...h, year, exercise, years: YEARS, list, tab: 'history', message: null, back: '/admin/prijave/zgodovina' });
+  } catch (e) { next(e); }
+});
 const ACTIONS = { shrani: null, resi: 'resolved', odpri: 'open' };
 adminReportsRouter.post('/:id', checkCsrf, async (req, res, next) => {
   try {
@@ -117,6 +127,7 @@ adminReportsRouter.post('/:id', checkCsrf, async (req, res, next) => {
          unseen=(unseen OR $5::boolean OR ($3::boolean AND $2<>'')), updated_at=now() WHERE id=$1`,
       [r.id, reply, replyChanged, status, statusChanged],
     );
+    await syncHistory(await one('SELECT * FROM reports WHERE id=$1', [r.id]));
     await audit(req.user, status === 'resolved' && statusChanged ? 'Rešil prijavo' : statusChanged ? 'Ponovno odprl prijavo' : 'Odgovoril na prijavo', `#${r.id}`);
     to(statusChanged ? (status === 'resolved' ? 'Prijava je označena kot rešena.' : 'Prijava je spet odprta.') : 'Odgovor je shranjen.');
   } catch (e) { next(e); }
