@@ -125,7 +125,7 @@ adminSqlRouter.post('/celoten-preizkus', checkCsrf, async (req, res, next) => {
     await q('UPDATE sql_server SET selftest_at=now(), selftest_ok=$1 WHERE id=1', [ok]);
     sb.forget();
     await audit(req.user, 'Celoten preizkus SQL', ok ? 'uspešen' : `napake: ${results.filter((r) => r.ok === false).length}`);
-    res.render('admin/sql_preizkus', { results, ok, s });
+    res.render('admin/sql_preizkus', { tab: 'sql', results, ok, s });
   } catch (e) { next(e); }
 });
 adminSqlRouter.post('/skupne', checkCsrf, async (req, res, next) => {
