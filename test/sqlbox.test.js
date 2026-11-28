@@ -428,6 +428,7 @@ test('the CA certificate for Workbench is offered to students only when the admi
   const PEM = '-----BEGIN CERTIFICATE-----\nMIIBfakeFAKEfake\n-----END CERTIFICATE-----';
   const save = async (ca) => {
     await a.goto(`${APP}/admin/sql?uredi=1`);
+    await a.click('summary:has-text("certifikat CA")');
     await a.fill('textarea[name=ca]', ca);
     await a.fill('#admin_pass', ADMIN.pass);
     await a.click('button:text-is("Shrani in preizkusi")');
