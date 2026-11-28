@@ -10764,7 +10764,7 @@
      "level": "srednja",
      "max": 2,
      "section": "DELETE",
-     "q": "Koliko vrstic izbriše stavek <code>DELETE FROM izostanek WHERE id_dijak = 41 OR opravicen = 0;</code>? Najprej napoved, nato izvedi in preberi Action Output. Va"
+     "q": "Koliko vrstic izbriše stavek <code>DELETE FROM izostanek WHERE id_dijak = 41 OR opravicen = 0;</code>? Najprej napoved, nato izvedi in preberi Action Output (v "
     },
     {
      "i": 28,

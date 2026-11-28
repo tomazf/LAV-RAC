@@ -114,11 +114,9 @@ export default {
     ['<button class="btn primary js-zip" type="button" hidden>⬇ Prenesi ZIP (vse skripte poglavja 6)</button><button class="btn js-copyfile" type="button" data-f="sola6_ponastavi.sql">Kopiraj sola6_ponastavi.sql</button><a class="btn ghost" href="sola6_ponastavi.sql.txt" target="_blank" rel="noopener">Odpri sola6_ponastavi.sql ↗</a><button class="btn js-copyfile" type="button" data-f="matura_baze.sql">Kopiraj matura_baze.sql</button>',
       '<button class="btn primary js-getfile" type="button" data-f="sola6_ponastavi.sql">⬇ Prenesi sola6_ponastavi.sql</button><button class="btn js-copyfile" type="button" data-f="sola6_ponastavi.sql">Kopiraj sola6_ponastavi.sql</button><a class="btn primary" href="/static/matura_baze.sql" download>⬇ Prenesi matura_baze.sql</a>'],
     ...fileButtons,
-    // The sandbox: the same states as templates; Safe Updates is off in a new connection of the sandbox, so the script turns it on.
+    // The sandbox: the same states as templates (the note on Safe Updates in a new connection is in the artifact itself).
     ['Podatki poglavja 5 se izgubijo, a jih lahko kadarkoli spet uvoziš s <code>sola.sql</code>.</p>',
       'Podatki poglavja 5 se izgubijo, a jih lahko kadarkoli spet uvoziš s <code>sola.sql</code>.</p><p class="note"><strong>V SQL peskovniku portala</strong> (meni SQL peskovnik, »Moja baza«) ti skripte ni treba prenašati: klikni »Ponastavi mojo bazo« in izberi predlogo »Poglavje 6: K0« (šolska baza in maturitetne tabele). Za vsako kontrolno točko je predloga z njenim imenom. Ponastavitev izbriše vse v tvoji bazi.</p>'],
-    ['<p class="note"><strong>Pozor:</strong> varovala ne izklapljaj v nastavitvah za stalno.',
-      '<p class="note"><strong>V SQL peskovniku portala</strong> varovalo Safe Updates ni vklopljeno: <code>DELETE FROM tabela;</code> bi izbrisal vse vrstice. Če hočeš videti napako 1175, daj na začetek skripta <code>SET SQL_SAFE_UPDATES = 1;</code> (velja za en zagon).</p><p class="note"><strong>Pozor:</strong> varovala ne izklapljaj v nastavitvah za stalno.'],
     [OLD_FILES_JS, FILES_JS + '\n'],
     // The page's account sync and downloads are not used (they run only inside claude.ai).
     ['if(!window.claude || !window.claude.use) return;', 'return;', 'all'],

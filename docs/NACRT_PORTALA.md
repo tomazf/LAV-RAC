@@ -217,4 +217,4 @@ Načrt in izvedba: `docs/NACRT_SQL_PESKOVNIK.md`.
 
 - 4.6 »SQL DML in posledice pri tujih ključih« je uvoženo (različica 1, 46 nalog, 85 točk, brez sklopa Ponavljanje). Nobena naloga ni »Sam preveri«: vsaka ima kontrolne rezultate (število, vrednost ali kodo napake), ki jih dijak vpiše; portal stavka še vedno ne presoja.
 - 4.6 dela v dijakovi bazi (`sandbox: {"db": "moja"}`), nove baze ni, `SHARED` je nespremenjen; `sola.sql` in `matura_baze.sql` sta nespremenjena. Kontrolne točke K0 do K6 so skripte (prenos in kopiranje s strani) in hkrati predloge za ponastavitev baze (`TEMPLATES`, »Poglavje 6: K0 …« do »K6 …«, vsaka skupaj z maturitetnimi tabelami, ker naloge delajo kopije `t_mNNN_…`).
-- Peskovnik ne vklopi Safe Updates (vsak zagon je nova povezava brez nastavitev). Do odločitve učitelja ima razlaga 1 opombo, da naj dijak da na začetek skripta `SET SQL_SAFE_UPDATES = 1;`.
+- Peskovnik ne vklopi Safe Updates (vsak zagon je nova povezava brez nastavitev). Zaenkrat (odločitev učitelja 28. 11. 2026) velja navodilo v razlagi 1: če varovala ni, naj dijak da na začetek skripta `SET SQL_SAFE_UPDATES = 1;`. Peskovnik sam ga ne vklopi.
