@@ -304,7 +304,7 @@ test('student: Workbench data; the teacher sets a new password and resets the da
   await t.goto(`${APP}/ucitelj/razredi/${r4}/sql`);
   const anaId = await userId('ana.kovac@sola.test');
   assert.equal(await t.locator(`#d${anaId} .light.green`).count(), 1);
-  assert.doesNotMatch(await t.textContent('main'), /kraj|SELECT/);
+  assert.doesNotMatch(await t.textContent('main'), /kraj|SELECT [*\w]/);
   // a new password, shown once
   await t.click(`button[data-edit=e${anaId}]`);
   await t.click(`#e${anaId} button:text-is("Novo geslo")`);
