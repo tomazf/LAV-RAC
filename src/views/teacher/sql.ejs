@@ -1,9 +1,9 @@
 <%- include('../partials/head', { pageTitle: `${cls.name} · SQL baze`, mainClass: 'wide' }) %>
 <link rel="stylesheet" href="<%= asset('css/sqlbox.css') %>">
-<% const f = fmt; const without = rows.filter((r) => !r.acc).length; %>
+<% const task = (o) => JSON.stringify(o); const f = fmt; const without = rows.filter((r) => !r.acc).length; %>
 <p class="crumbs"><a href="/ucitelj/razredi/<%= cls.id %>"><%= cls.name %></a> ›</p>
 <div class="title-row"><h1>SQL baze · <%= cls.name %></h1>
-  <% if (without) { %><form method="post" action="/ucitelj/razredi/<%= cls.id %>/sql/ustvari"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn">Ustvari baze vsem, ki jih nimajo (<%= without %>)</button></form><% } %>
+  <% if (without) { %><form method="post" action="/ucitelj/razredi/<%= cls.id %>/sql/ustvari" data-hash="" data-task="<%= task({ title: 'Ustvari baze razredu ' + cls.name, lead: 'Vsakemu dijaku, ki še nima baze, sistem ustvari račun in dve bazi na strežniku MySQL.', bullets: [without + ' dijakov dobi račun (npr. ' + s.prefix + 'u12) in naključno geslo.', 'Vsak dobi bazi za poglavje 4.4 in bazo za poglavje 4.6 (prazni), na kateri ima vse pravice; drugih baz ne vidi.', 'Dijaki, ki že imajo bazi, se ne dotaknejo.', 'Podatke za prijavo dijak vidi v svojem peskovniku, vidi pa jih tudi v MySQL Workbenchu. Za vsakega dijaka traja manj kot sekundo.'], confirm: 'Ustvari baze' }) %>"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn">Ustvari baze vsem, ki jih nimajo (<%= without %>)</button></form><% } %>
 </div>
 <% if (message) { %><p class="notice" role="status"><%= message %></p><% } %>
 <% if (error) { %><p class="notice-warn" role="alert"><%= error %></p><% } %>
@@ -39,7 +39,7 @@
     <td class="nw <%= r.acc && (r.acc.size_bytes > limits.sizeMb * 1048576 || r.acc.size_bytes6 > limits.sizeMb * 1048576) ? 'weak' : '' %>"><%= r.acc ? `${mb(r.acc.size_bytes)} (4.4) · ${mb(r.acc.size_bytes6)} (4.6)` : '–' %></td>
     <td class="l"><%= r.acc ? r.acc.db_user : '' %></td>
     <td class="r"><% if (r.acc) { %><button type="button" class="icon-btn" data-edit="e<%= r.id %>" aria-label="Uredi bazo: <%= r.name %>" title="Uredi"><%- include('../partials/icon', { name: 'edit' }) %></button><% } else { %>
-      <form method="post" action="/ucitelj/razredi/<%= cls.id %>/sql/dijaki/<%= r.id %>/ustvari"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn small ghost">Ustvari bazo</button></form><% } %></td>
+      <form method="post" action="/ucitelj/razredi/<%= cls.id %>/sql/dijaki/<%= r.id %>/ustvari" data-hash="d<%= r.id %>" data-task="<%= task({ title: 'Ustvari bazo: ' + r.name, lead: 'Dijaku sistem ustvari račun in dve bazi na strežniku MySQL.', bullets: ['Račun ' + s.prefix + 'u' + r.id + ' z naključnim geslom.', 'Bazi za poglavje 4.4 in za poglavje 4.6 (prazni), z vsemi pravicami samo na njiju.'], confirm: 'Ustvari' }) %>"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn small ghost">Ustvari bazo</button></form><% } %></td>
   </tr><% }) %></tbody>
 </table></div>
 <noscript><p class="notice-warn">Za urejanje baz je potreben JavaScript.</p></noscript>
@@ -48,18 +48,18 @@
   <div class="edit-form">
     <h2 id="t<%= r.id %>"><%= r.name %> · <code><%= r.acc.db_user %></code></h2>
     <p class="dim">Bazi <code><%= r.acc.db_name %></code> (4.4) in <code><%= r.acc.db_name6 %></code> (4.6). Ustvarjena <%= f.dateTime(r.acc.created_at) %> · <%= mb(r.acc.size_bytes) %> + <%= mb(r.acc.size_bytes6) %> · <%= r.acc.last_used_at ? 'zadnja uporaba ' + f.ago(r.acc.last_used_at) : 'še ni uporabljal' %></p>
-    <form class="field" method="post" action="<%= act('ponastavi') %>"><input type="hidden" name="_csrf" value="<%= csrf %>">
+    <form class="field" method="post" action="<%= act('ponastavi') %>" data-hash="d<%= r.id %>" data-task="<%= task({ title: 'Ponastavi bazo: ' + r.name, lead: 'Izbrana baza dijaka se izprazni in napolni iz izbrane predloge.', bullets: ['Baza dijaka: {predloga}.', 'Vse tabele in podatki dijaka v tej bazi se izbrišejo; druga dijakova baza ostane.', 'Predlogo sistem izvede z dijakovim računom, kot bi dijak sam zagnal skript.'], warn: 'Dijakovega dela v tej bazi ni mogoče obnoviti.', danger: true, confirm: 'Ponastavi' }) %>"><input type="hidden" name="_csrf" value="<%= csrf %>">
       <label for="p<%= r.id %>">Ponastavi bazo</label>
       <select id="p<%= r.id %>" name="predloga"><% Object.entries(PERSONAL).forEach(([k, p]) => { %><optgroup label="<%= p.title %>"><% TEMPLATES.filter((t) => t.db === k).forEach((t) => { %><option value="<%= t.id %>"><%= t.title %></option><% }) %></optgroup><% }) %></select>
       <label class="switch"><input type="checkbox" name="potrdi" required> Vse tabele in podatki dijaka v izbrani bazi se izbrišejo (druga ostane).</label>
       <div><button class="btn small">Ponastavi</button></div>
     </form>
-    <form class="field" method="post" action="<%= act('geslo') %>"><input type="hidden" name="_csrf" value="<%= csrf %>">
+    <form class="field" method="post" action="<%= act('geslo') %>" data-hash="d<%= r.id %>" data-task="<%= task({ title: 'Novo geslo: ' + r.name, lead: 'Dijaku se nastavi novo geslo za račun ' + r.acc.db_user + '.', bullets: ['Novo geslo se zapiše na strežnik MySQL in v portal.', 'Staro geslo preneha veljati takoj, tudi v MySQL Workbenchu.', 'Novo geslo se prikaže enkrat v oknu z rezultatom, da ga poveš dijaku; dijak ga vidi tudi v svojem peskovniku.'], confirm: 'Nastavi novo geslo' }) %>"><input type="hidden" name="_csrf" value="<%= csrf %>">
       <label>Geslo</label><span class="dim">Novo geslo se prikaže enkrat, da ga poveš dijaku. Staro preneha veljati (tudi v Workbenchu).</span>
       <div><button class="btn small ghost">Novo geslo</button></div>
     </form>
     <details class="danger-zone"><summary>Izbriši bazo in račun</summary>
-      <form class="field" method="post" action="<%= act('izbrisi') %>"><input type="hidden" name="_csrf" value="<%= csrf %>">
+      <form class="field" method="post" action="<%= act('izbrisi') %>" data-hash="d<%= r.id %>" data-task="<%= task({ title: 'Izbriši bazi: ' + r.name, lead: 'Dijaku se trajno izbrišeta obe bazi in račun.', bullets: ['Izbrišeta se bazi ' + r.acc.db_name + ' in ' + r.acc.db_name6 + ' z vsemi tabelami in podatki.', 'Izbriše se račun ' + r.acc.db_user + '; dijak se z njim ne more več prijaviti (tudi v Workbenchu).', 'Dijak lahko dobi novo, prazno bazo, če mu jo ustvariš znova.'], warn: 'Podatkov ni mogoče obnoviti.', danger: true, confirm: 'Izbriši trajno' }) %>"><input type="hidden" name="_csrf" value="<%= csrf %>">
         <label class="switch"><input type="checkbox" name="potrdi" required> Obe bazi, vse tabele in račun se trajno izbrišejo.</label>
         <div><button class="btn small danger">Izbriši</button></div>
       </form>
@@ -69,5 +69,6 @@
 </dialog>
 <% }) %>
 <script src="<%= asset('js/admin-edit.js') %>"></script>
+<script src="<%= asset('js/sqltask.js') %>"></script>
 <% } %>
 <%- include('../partials/foot') %>

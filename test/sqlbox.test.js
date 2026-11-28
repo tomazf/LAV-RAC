@@ -101,6 +101,27 @@ after(async () => {
 });
 
 let r4;
+// A button with a window (sqltask.js): the window says what will happen, the confirm button starts it, the result stays until »Zapri«.
+// Returns the text of the result and keeps the numbers; the page reloads after Zapri.
+let taskNo = 0;
+async function task(page, click, { confirmText, expectIn } = {}) {
+  const n = String(++taskNo).padStart(2, '0');
+  await page.click(click);
+  await page.waitForSelector('.tk-dlg[data-phase=confirm]');
+  await shot(page, `w${n}-potrditev`);
+  const said = await page.textContent('.tk-dlg');
+  if (expectIn) assert.match(said, expectIn);
+  assert.match(said, /Kaj bo naredil sistem/);
+  await page.click(confirmText ? `.tk-actions button:text-is("${confirmText}")` : '.tk-actions button:last-child');
+  await page.waitForSelector('.tk-dlg[data-phase=done]', { timeout: 90000 });
+  await shot(page, `w${n}-rezultat`);
+  const out = { message: (await page.textContent('.tk-result')).trim(), stats: await page.$$eval('.tk-stats > div', (ds) => ds.map((d) => `${d.children[0].textContent} ${d.children[1].textContent}`).join(' · ')), steps: await page.locator('.tk-step').count(), failed: await page.locator('.tk-step[data-state=fail]').count(), cred: await page.locator('.tk-cred .big-code').count() ? (await page.textContent('.tk-cred .big-code')).trim() : null };
+  const reloaded = page.waitForEvent('load');
+  await page.click('.tk-dlg button:text-is("Zapri")');
+  await reloaded;
+  return out;
+}
+
 test('sandbox: off until the admin enters the server; only the admin sees the settings', { skip }, async () => {
   const ana = pages.get('Ana Kovač');
   await ana.goto(`${APP}/vaje`);
@@ -139,8 +160,11 @@ test('sandbox: off until the admin enters the server; only the admin sees the se
   assert.equal(row.prefix, PREFIX);
   assert.equal(row.limits.timeout, 2);
   // the shared databases
-  await a.click('button:text-is("Uvozi skupni bazi")');
-  assert.match(await a.textContent('.notice[role=status]'), /Skupni bazi sta uvoženi/);
+  const imp = await task(a, 'button:text-is("Uvozi skupni bazi")', { expectIn: /sola\.sql.*matura_baze\.sql/s });
+  assert.match(imp.message, /Skupni bazi sta uvoženi/);
+  assert.match(imp.stats, /Trajanje .* · Baz 2 · Tabel \d+/);
+  assert.equal(imp.steps, 4, 'reader account, two databases, the entry in the portal');
+  assert.equal(imp.failed, 0);
   const [[cnt]] = await my.query('SELECT count(*) AS n FROM lt_sola.dijak');
   assert.equal(Number(cnt.n), 119);
   await shot(a, '02-admin-nastavljeno');
@@ -154,8 +178,10 @@ test('teacher: creates the class databases; the traffic light shows only whether
   assert.equal(new URL(t.url()).pathname, `/ucitelj/razredi/${r4}/sql`);
   assert.equal(await t.locator('.sql-class tbody tr').count(), 2);
   assert.equal(await t.locator('.light.none').count(), 2 + 1, 'two students without a database (and the legend)');
-  await t.click('button:has-text("Ustvari baze vsem")');
-  assert.match(await t.textContent('.notice[role=status]'), /Ustvarjenih računov z dvema bazama: 2/);
+  const made = await task(t, 'button:has-text("Ustvari baze vsem")', { expectIn: /2 dijakov dobi račun/ });
+  assert.match(made.message, /Ustvarjenih računov z dvema bazama: 2/);
+  assert.equal(made.steps, 2, 'one line for each student');
+  assert.match(made.stats, /Računov 2 · Baz 4/);
   const accs = await sql('SELECT a.*, u.username FROM sql_accounts a JOIN users u ON u.id=a.user_id ORDER BY u.username');
   const anaAcc = `${PREFIX}u${await userId('ana.kovac@sola.test')}`;
   const borAcc = `${PREFIX}u${await userId('bor.novak@sola.test')}`;
@@ -308,11 +334,17 @@ test('student: Workbench data; the teacher sets a new password and resets the da
   // a new password, shown once
   await t.click(`button[data-edit=e${anaId}]`);
   await t.click(`#e${anaId} button:text-is("Novo geslo")`);
-  const pass2 = (await t.textContent('#novo-geslo .big-code')).trim();
+  await t.waitForSelector('.tk-dlg[data-phase=confirm]');
+  assert.match(await t.textContent('.tk-dlg'), /Staro geslo preneha veljati takoj/);
+  await t.click('.tk-actions button:last-child');
+  await t.waitForSelector('.tk-dlg[data-phase=done]');
+  const pass2 = (await t.textContent('.tk-cred .big-code')).trim();
   assert.notEqual(pass2, pass1);
   await shot(t, '09-ucitelj-geslo');
-  await t.reload();
-  assert.equal(await t.locator('#novo-geslo').count(), 0);
+  const back = t.waitForEvent('load');
+  await t.click('.tk-dlg button:text-is("Zapri")');
+  await back;
+  assert.equal(await t.locator('#novo-geslo').count(), 0, 'the password is not kept on the page');
   await assert.rejects(conn(pass1));
   await (await conn(pass2)).end();
   await p.reload();
@@ -322,8 +354,8 @@ test('student: Workbench data; the teacher sets a new password and resets the da
   await t.click(`button[data-edit=e${anaId}]`);
   await t.selectOption(`#p${anaId}`, 'struktura');
   await t.check(`#e${anaId} form[action$="/ponastavi"] input[name=potrdi]`);
-  await t.click(`#e${anaId} button:text-is("Ponastavi")`);
-  assert.match(await t.textContent('.notice[role=status]'), /ponastavljena \(Šolska baza: samo struktura/);
+  const reset = await task(t, `#e${anaId} button:text-is("Ponastavi")`, { expectIn: /Šolska baza: samo struktura \(4\.4\)/ });
+  assert.match(reset.message, /ponastavljena \(Šolska baza: samo struktura/);
   const [tables] = await my.query(`SHOW TABLES FROM ${user}_4_4`);
   assert.deepEqual(tables.map((x) => Object.values(x)[0]).sort(), ['dijak', 'izostanek', 'kraj', 'ocena', 'oddelek', 'poucuje', 'predmet', 'ucitelj']);
   const log = await sql(`SELECT action FROM audit_log WHERE action LIKE '%SQL%' ORDER BY id`);
@@ -399,16 +431,39 @@ test('admin: the full check passes and cleans up; the statistics are numbers; th
   assert.match(st, /Računi\s*\d+/);
   assert.doesNotMatch(st, /SELECT|CREATE|INSERT/, 'no statement text in the statistics');
   assert.ok((await sql('SELECT count(*)::int n FROM sql_daily'))[0].n > 0, 'the students runs were counted');
-  await a.click('button:text-is("Celoten preizkus")');
-  await a.waitForSelector('table.sql-check', { timeout: 60000 });
-  const rows = await a.locator('table.sql-check tbody tr').allTextContents();
-  assert.ok(rows.length >= 8, rows.join('\n'));
-  assert.equal(await a.locator('table.sql-check .tag.bad').count(), 0, rows.join('\n'));
-  assert.match(await a.textContent('.notice[role=status]'), /Vse deluje/);
+  const full = await task(a, 'button:text-is("Celoten preizkus")', { expectIn: /začasen račun/ });
+  assert.ok(full.steps >= 8, `${full.steps} steps`);
+  assert.equal(full.failed, 0, full.message);
+  assert.match(full.message, /Vse deluje/);
+  assert.match(full.stats, /Trajanje .* · Korakov \d+ v redu/);
   // nothing is left behind and the throwaway account is gone
   assert.equal((await my.query(`SHOW DATABASES LIKE 'lt\\_u0\\_4\\_%'`))[0].length, 0);
   assert.equal((await my.query(`SELECT 1 FROM mysql.user WHERE user='lt_u0'`))[0].length, 0);
   assert.equal((await sql('SELECT selftest_ok FROM sql_server'))[0].selftest_ok, true);
+  await shot(a, '12-admin-stran');
+  // statistics: a period the admin picks (7 days by default, a month, 3 months, from-to); without script the full check is still a page
+  await a.goto(`${APP}/admin/sql`);
+  assert.equal(await a.locator('#statistika .seg a.on').textContent(), '7 dni');
+  assert.equal(await a.locator('#statistika tbody tr').count(), 7);
+  await a.click('#statistika .seg a:text-is("3 meseci")');
+  assert.equal(await a.locator('#statistika tbody tr').count(), 90);
+  await shot(a, '13-statistika-3-mesece');
+  assert.match(await a.textContent('#statistika .dim'), /Zadnji 3 meseci/);
+  await a.click('#statistika .seg a:text-is("Mesec")');
+  assert.equal(await a.locator('#statistika tbody tr').count(), 30);
+  const day = (n) => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);
+  await a.goto(`${APP}/admin/sql?obdobje=od-do&od=${day(3)}&do=${day(1)}#statistika`);
+  assert.equal(await a.locator('#statistika tbody tr').count(), 3);
+  assert.equal(await a.locator('#statistika .seg a.on').textContent(), 'Od–do');
+  await a.goto(`${APP}/admin/sql?obdobje=od-do&od=2001-01-01&do=${day(0)}`);
+  assert.equal(await a.locator('#statistika tbody tr').count(), 90, 'the start is limited to the days that are kept');
+  await a.goto(`${APP}/admin/sql?obdobje=neznano`);
+  assert.equal(await a.locator('#statistika tbody tr').count(), 7, 'an unknown period falls back to 7 days');
+  const plain = await a.evaluate(async () => {
+    const r = await fetch('/admin/sql/preizkus', { method: 'POST', redirect: 'manual', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: `_csrf=${document.getElementById('hd-root').dataset.csrf}` });
+    return r.type;
+  });
+  assert.equal(plain, 'opaqueredirect', 'without the task header the old redirect with a message still works');
   // the teacher sees the state without details
   const t = pages.get('Tomaž Učitelj');
   await t.goto(`${APP}/ucitelj/razredi/${r4}/sql`);
@@ -463,8 +518,8 @@ test('erasing a user drops their database and account on the MySQL server', { sk
   assert.equal(u.length, 0);
   assert.equal((await sql('SELECT count(*)::int n FROM sql_drop_queue'))[0].n, 0);
   await a.goto(`${APP}/admin/sql`);
-  await a.click('button:text-is("Poišči na strežniku")');
-  assert.match(await a.textContent('.notice[role=status]'), /ni baz brez lastnika/);
+  const found = await task(a, 'button:text-is("Poišči na strežniku")');
+  assert.match(found.message, /ni baz brez lastnika/);
 });
 
 test('sandbox: the narrow screen and the dark theme', { skip }, async () => {

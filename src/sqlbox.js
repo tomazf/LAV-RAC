@@ -142,16 +142,23 @@ const adminFail = (e, what) => {
 };
 
 // ---------- the admin: test the connection, import the shared databases, clean up ----------
-export async function testConnection(s) {
+// One reported step: the name is shown while it runs, the returned text as its detail. Without `on` it just runs.
+const step = (on, name, fn) => (on ? on.run(name, fn) : fn());
+// `on` (optional) reports the steps to the window with progress (see tasks.js).
+export async function testConnection(s, on) {
   try {
     return await asAdmin(s, async (c) => {
-      const version = (await query(c, 'SELECT VERSION() AS v'))[0].v;
+      const version = (await step(on, 'Prijava skrbniškega računa', async () => { const v = (await query(c, 'SELECT VERSION() AS v'))[0].v; return `MySQL ${v}`; })).replace('MySQL ', '');
       const probe = `${s.prefix}_preizkus`;
-      await query(c, `CREATE DATABASE IF NOT EXISTS ${ident(probe)}`);
-      await query(c, `DROP DATABASE ${ident(probe)}`);
+      await step(on, 'Ustvarjanje in brisanje preizkusne baze', async () => {
+        await query(c, `CREATE DATABASE IF NOT EXISTS ${ident(probe)}`);
+        await query(c, `DROP DATABASE ${ident(probe)}`);
+      });
       const probeUser = `${s.prefix}_preizkus`;
-      await query(c, `CREATE USER IF NOT EXISTS ${userAt(probeUser)} IDENTIFIED BY ?`, [newPassword()]);
-      await query(c, `DROP USER ${userAt(probeUser)}`);
+      await step(on, 'Ustvarjanje in brisanje preizkusnega uporabnika', async () => {
+        await query(c, `CREATE USER IF NOT EXISTS ${userAt(probeUser)} IDENTIFIED BY ?`, [newPassword()]);
+        await query(c, `DROP USER ${userAt(probeUser)}`);
+      });
       return { version };
     });
   } catch (e) { throw adminFail(e, 'preizkus'); }
@@ -172,25 +179,38 @@ async function fillTemplate(s, adminConn, t, name, user, password) {
   const c = await connect(connOpts(s, user, password, name));
   try { for (const f of t.files) await runScript(c, readScript(f)); } finally { await end(c).catch(() => c.destroy()); }
 }
-export async function importShared(s, actor) {
+export async function importShared(s, actor, on) {
   const reader = readerName(s);
   let pass = unseal(s.reader_pass);
+  const done = [];
+  on?.plan(2 + SHARED.length);
   try {
     await asAdmin(s, async (c) => {
-      if (!pass) pass = newPassword(20);
-      await query(c, `CREATE USER IF NOT EXISTS ${userAt(reader)} IDENTIFIED BY ? WITH MAX_USER_CONNECTIONS 30`, [pass]);
-      await query(c, `ALTER USER ${userAt(reader)} IDENTIFIED BY ?`, [pass]);
+      await step(on, `Račun za branje ${reader} (samo SELECT)`, async () => {
+        if (!pass) pass = newPassword(20);
+        await query(c, `CREATE USER IF NOT EXISTS ${userAt(reader)} IDENTIFIED BY ? WITH MAX_USER_CONNECTIONS 30`, [pass]);
+        await query(c, `ALTER USER ${userAt(reader)} IDENTIFIED BY ?`, [pass]);
+      });
       for (const sh of SHARED) {
-        await freshDatabase(c, s, sh.db(s));
-        await query(c, `USE ${ident(sh.db(s))}`);
-        await runScript(c, readScript(sh.file));
-        await query(c, `GRANT SELECT, SHOW VIEW ON ${grantOn(sh.db(s))} TO ${userAt(reader)}`);
+        await step(on, `Baza ${sh.db(s)}: izbris, ustvarjanje in uvoz ${sh.file.split('/').pop()}`, async () => {
+          await freshDatabase(c, s, sh.db(s));
+          await query(c, `USE ${ident(sh.db(s))}`);
+          const statements = splitSql(readScript(sh.file)).statements;
+          for (const st of statements) await query(c, st.sql);
+          await query(c, `GRANT SELECT, SHOW VIEW ON ${grantOn(sh.db(s))} TO ${userAt(reader)}`);
+          const tables = Number((await query(c, 'SELECT count(*) AS n FROM information_schema.tables WHERE table_schema = ?', [sh.db(s)]))[0].n);
+          done.push({ db: sh.db(s), statements: statements.length, tables });
+          return `${statements.length} stavkov, ${tables} tabel`;
+        });
       }
     });
   } catch (e) { throw adminFail(e, 'skupne baze'); }
-  await q(`UPDATE sql_server SET reader_pass=$1, shared_at=now() WHERE id=1`, [seal(pass)]);
-  forget();
-  await audit(actor, 'Uvozil skupne baze SQL', SHARED.map((x) => x.db(s)).join(', '));
+  await step(on, 'Zapis v portal', async () => {
+    await q(`UPDATE sql_server SET reader_pass=$1, shared_at=now() WHERE id=1`, [seal(pass)]);
+    forget();
+    await audit(actor, 'Uvozil skupne baze SQL', SHARED.map((x) => x.db(s)).join(', '));
+  });
+  return done;
 }
 // Personal databases on the server that have no owner in the portal (left after a failed delete or a restored backup).
 export async function orphans(s) {
@@ -204,14 +224,17 @@ export async function orphans(s) {
     });
   } catch (e) { throw adminFail(e, 'osirotele'); }
 }
-export async function dropOrphans(s, names, actor) {
+export async function dropOrphans(s, names, actor, on) {
   const ok = new Set(await orphans(s));
   const list = names.filter((n) => ok.has(n));
+  on?.plan(list.length);
   try {
     await asAdmin(s, async (c) => {
       for (const n of list) {
-        await query(c, `DROP DATABASE IF EXISTS ${ident(n)}`);
-        await query(c, `DROP USER IF EXISTS ${userAt(n)}`);
+        await step(on, `Brisanje baze in računa ${n}`, async () => {
+          await query(c, `DROP DATABASE IF EXISTS ${ident(n)}`);
+          await query(c, `DROP USER IF EXISTS ${userAt(n)}`);
+        });
       }
     });
   } catch (e) { throw adminFail(e, 'brisanje osirotelih'); }
@@ -483,16 +506,39 @@ export async function remember(userId, target, text, out) {
 }
 
 // ---------- the admin's statistics (numbers only; the teacher never sees statements, and neither does the admin here) ----------
-export async function stats(limits) {
-  await q(`DELETE FROM sql_daily WHERE day < current_date - 90`);
-  await q(`DELETE FROM sql_daily_users WHERE day < current_date - 90`);
+// The period the admin picks: 7 days (default), a month, 3 months or from-to; the data is kept 90 days.
+export const KEEP_DAYS = 90;
+export const PERIODS = { 7: 'Zadnjih 7 dni', 30: 'Zadnji mesec', 90: 'Zadnji 3 meseci' };
+const ymd = (d) => d.toISOString().slice(0, 10);
+export function period(query = {}, now = new Date()) {
+  const today = ymd(now);
+  const back = (n) => ymd(new Date(now.getTime() - n * 864e5));
+  const oldest = back(KEEP_DAYS - 1);
+  const valid = (v) => /^\d{4}-\d{2}-\d{2}$/.test(String(v ?? '')) && !Number.isNaN(Date.parse(`${v}T00:00:00Z`));
+  if (query.obdobje === 'od-do' && valid(query.od) && valid(query.do)) {
+    let from = String(query.od), to = String(query.do);
+    if (from > to) [from, to] = [to, from];
+    from = from < oldest ? oldest : from;
+    to = to > today ? today : to;
+    if (from > to) from = to;
+    return { key: 'od-do', from, to, label: `${from.split('-').reverse().map(Number).join('. ')}. – ${to.split('-').reverse().map(Number).join('. ')}.`, clamped: String(query.od) < oldest };
+  }
+  const key = PERIODS[query.obdobje] ? String(query.obdobje) : '7';
+  return { key, from: back(Number(key) - 1), to: today, label: PERIODS[key], clamped: false };
+}
+export async function stats(limits, per = period()) {
+  await q(`DELETE FROM sql_daily WHERE day < current_date - $1::int`, [KEEP_DAYS]);
+  await q(`DELETE FROM sql_daily_users WHERE day < current_date - $1::int`, [KEEP_DAYS]);
   const days = await many(
     `SELECT d::date AS day, COALESCE(sum(x.runs), 0)::int AS runs, COALESCE(sum(x.failed), 0)::int AS failed, COALESCE(sum(x.ms), 0)::bigint AS ms,
             (SELECT count(*)::int FROM sql_daily_users u WHERE u.day = d::date) AS users
-     FROM generate_series(current_date - 13, current_date, interval '1 day') d LEFT JOIN sql_daily x ON x.day = d::date
+     FROM generate_series($1::date, $2::date, interval '1 day') d LEFT JOIN sql_daily x ON x.day = d::date
      GROUP BY d ORDER BY d DESC`,
+    [per.from, per.to],
   );
-  const byTarget = await many(`SELECT target, sum(runs)::int AS runs, sum(failed)::int AS failed FROM sql_daily WHERE day > current_date - 7 GROUP BY target ORDER BY target`);
+  const byTarget = await many(`SELECT target, sum(runs)::int AS runs, sum(failed)::int AS failed FROM sql_daily WHERE day BETWEEN $1::date AND $2::date GROUP BY target ORDER BY target`, [per.from, per.to]);
+  const sum = days.reduce((a, d) => ({ runs: a.runs + d.runs, failed: a.failed + d.failed, ms: a.ms + Number(d.ms) }), { runs: 0, failed: 0, ms: 0 });
+  const who = (await one(`SELECT count(DISTINCT user_id)::int AS n FROM sql_daily_users WHERE day BETWEEN $1::date AND $2::date`, [per.from, per.to])).n;
   const totals = await one(
     `SELECT count(*)::int AS accounts, count(*) FILTER (WHERE last_used_at IS NULL)::int AS never,
             count(*) FILTER (WHERE last_used_at > now() - interval '7 days')::int AS active,
@@ -502,21 +548,31 @@ export async function stats(limits) {
     [Number(limits.sizeMb) * 1048576],
   );
   const queued = (await one('SELECT count(*)::int AS n FROM sql_drop_queue')).n;
-  return { days, byTarget, totals, queued };
+  return { days, byTarget, totals, queued, period: per, sum: { ...sum, who, avg: sum.runs ? Math.round(sum.ms / sum.runs) : null } };
 }
 
 // ---------- the admin's full check ----------
 // Makes a throwaway account (user id 0, so it can never be a real person's) with both databases, tries what a student does and what a student
 // must not be able to do, and removes everything. Each line is ok (true), failed (false) or not run (null).
-export async function selfTest(s) {
+export async function selfTest(s, on) {
   const out = [];
+  on?.plan(10);
   const step = async (name, fn) => {
     const t0 = Date.now();
-    try { out.push({ ok: true, name, detail: (await fn()) ?? '', ms: Date.now() - t0 }); return true; } catch (e) {
-      out.push({ ok: false, name, detail: e.sqlMessage || e.message, ms: Date.now() - t0 }); return false;
+    const id = on?.begin(name);
+    try {
+      const detail = (await fn()) ?? '';
+      out.push({ ok: true, name, detail, ms: Date.now() - t0 });
+      on?.end(id, true, detail);
+      return true;
+    } catch (e) {
+      const detail = e.sqlMessage || e.message;
+      out.push({ ok: false, name, detail, ms: Date.now() - t0 });
+      on?.end(id, false, detail);
+      return false;
     }
   };
-  const skip = (name, why) => out.push({ ok: null, name, detail: why, ms: 0 });
+  const skip = (name, why) => { out.push({ ok: null, name, detail: why, ms: 0 }); on?.end(on.begin(name), null, why); };
   const mustFail = async (fn, what) => {
     let failed = false;
     try { await fn(); } catch { failed = true; }

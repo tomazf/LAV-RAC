@@ -1,6 +1,7 @@
 <%- include('../partials/head', { pageTitle: 'SQL peskovnik', mainClass: 'wide' }) %>
 <link rel="stylesheet" href="<%= asset('css/sqlbox.css') %>">
-<% const f = fmt; %>
+<% const f = fmt; const task = (o) => JSON.stringify(o); %>
+<script src="<%= asset('js/sqltask.js') %>" defer></script>
 <%- include('../partials/adminnav') %>
 <% if (error) { %><p class="notice-warn" role="alert"><%= error %></p><% } %>
 <p class="lead-sql">SQL peskovnik je za dijake <strong>4. letnika</strong>: vsak dijak ima na strežniku MySQL svojo bazo in račun, stavke izvaja v portalu ali v MySQL Workbenchu. Strežnik vpišeš samo ti; baze dijakov ustvarjajo učitelji pri svojih razredih.</p>
@@ -24,8 +25,8 @@
     <h2>Strežnik MySQL</h2>
     <span class="tag ok">povezava deluje · <%= (s.server_version || '').split('-')[0] %></span>
     <div class="cfg-push">
-      <form method="post" action="/admin/sql/preizkus"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn ghost small">Preizkusi</button></form>
-      <form method="post" action="/admin/sql/celoten-preizkus"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn ghost small" title="Ustvari preizkusni račun z obema bazama, preizkusi dostop, omejitve in skupni bazi ter vse izbriše">Celoten preizkus</button></form>
+      <form method="post" action="/admin/sql/preizkus" data-task="<%= task({ title: 'Preizkus povezave', lead: 'Portal se prijavi na strežnik MySQL s skrbniškim računom in preveri, ali lahko ustvarja baze in uporabnike.', bullets: ['Prijavi se kot ' + s.admin_user + ' na ' + s.host + ':' + s.port + '.', 'Ustvari in takoj izbriše preizkusno bazo in preizkusnega uporabnika (s predpono ' + s.prefix + ').', 'Dijakovih baz in podatkov se ne dotakne. Traja nekaj sekund.'], confirm: 'Preizkusi povezavo' }) %>"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn ghost small">Preizkusi</button></form>
+      <form method="post" action="/admin/sql/celoten-preizkus" data-task="<%= task({ title: 'Celoten preizkus', lead: 'Portal preizkusi vse, kar delajo dijaki, in vse, česar ne smejo, z začasnim računom, ki ga na koncu izbriše.', bullets: ['Ustvari začasen račun ' + s.prefix + 'u0 z bazama ' + s.prefix + 'u0_4_4 in ' + s.prefix + 'u0_4_6.', 'V obeh bazah ustvari tabelo, vpiše, prebere, spremeni in izbriše podatke ter ponastavi bazo na predlogo.', 'Preveri, da račun ne vidi tujih baz, ne ustvarja baz, ne bere sistemskih podatkov in ne daje pravic; preveri omejitev časa in povezav ter skupni bazi.', 'Na koncu izbriše začasni račun in bazi. Pravih dijakov in njihovih baz se ne dotakne. Traja okoli 10 sekund.'], confirm: 'Zaženi preizkus' }) %>"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn ghost small">Celoten preizkus</button></form>
       <a class="btn small" href="/admin/sql?uredi=1#streznik">Uredi</a>
     </div>
     <dl class="cfg-dl"><div><dt>Strežnik</dt><dd><%= s.host %>:<%= s.port %></dd></div><div><dt>Račun</dt><dd><%= s.admin_user %></dd></div><div><dt>Predpona</dt><dd><%= s.prefix %></dd></div><div><dt>TLS</dt><dd><%= s.tls ? (s.ca ? 'da, s CA' : 'da') : 'ne' %></dd></div></dl>
@@ -78,8 +79,9 @@ GRANT ALL PRIVILEGES ON `<%= (s?.prefix ?? 'lr_').replace(/_/g, '\\_') %>%`.* TO
   <div class="cfg-sum">
     <h2>Skupni bazi samo za branje</h2>
     <span class="tag <%= s.shared_at ? 'ok' : 'warn' %>"><%= s.shared_at ? 'uvoženi ' + f.date(s.shared_at) : 'še nista uvoženi' %></span>
-    <div class="cfg-push"><form method="post" action="/admin/sql/skupne"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn <%= s.shared_at ? 'ghost small' : 'small' %>"><%= s.shared_at ? 'Uvozi znova' : 'Uvozi skupni bazi' %></button></form></div>
-    <p class="cfg-line"><% SHARED.forEach((x, i) => { %><%= x.db(s) %> (<%= x.title.replace(/^[^(]*\(|\)$/g, '') %>)<%= i < SHARED.length - 1 ? ' · ' : '' %><% }) %> · račun za branje <%= s.prefix %>bralec · uvoz naloži <code>sola.sql</code> in <code>matura_baze.sql</code> s portala</p>
+    <div class="cfg-push"><form method="post" action="/admin/sql/skupne" data-task="<%= task({ title: s.shared_at ? 'Znova uvozi skupni bazi' : 'Uvozi skupni bazi', lead: 'Skupni bazi sta enaki za vse dijake in jih dijaki lahko samo berejo. Uvoz ju ustvari na strežniku iz datotek, ki so v portalu.', bullets: SHARED.map((x) => 'Baza ' + x.db(s) + ' (' + x.title.replace(/^[^(]*\(|\)$/g, '') + ') se izbriše in znova ustvari iz datoteke ' + x.file.split('/').pop() + '.').concat(['Računu ' + s.prefix + 'bralec se nastavi novo geslo in pravica samo za branje (SELECT) na obe bazi.', 'Osebne baze dijakov se ne dotaknejo. Traja nekaj sekund.']), warn: s.shared_at ? 'Ker se bazi izbrišeta in ustvarita znova, so morebitne ročne spremembe v njiju izgubljene. To je običajno namen: uporabi po spremembi datotek ali če sta bazi pokvarjeni.' : '', confirm: s.shared_at ? 'Znova uvozi' : 'Uvozi' }) %>"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn <%= s.shared_at ? 'ghost small' : 'small' %>"><%= s.shared_at ? 'Znova uvozi' : 'Uvozi skupni bazi' %></button></form></div>
+    <dl class="cfg-dl"><% SHARED.forEach((x) => { %><div><dt><%= x.db(s) %></dt><dd><%= x.title.replace(/^[^(]*\(|\)$/g, '') %></dd></div><% }) %><div><dt>Račun za branje</dt><dd><%= s.prefix %>bralec</dd></div></dl>
+    <p class="cfg-line"><%= s.shared_at ? '»Znova uvozi« izbriše obe skupni bazi in ju ustvari znova iz datotek sola.sql in matura_baze.sql v portalu (po spremembi datotek ali če se pokvarita). Dijakove osebne baze ostanejo.' : 'Uvoz ustvari obe skupni bazi iz datotek sola.sql in matura_baze.sql v portalu. Dijaki ju lahko samo berejo.' %></p>
   </div>
 </section>
 
@@ -99,20 +101,43 @@ GRANT ALL PRIVILEGES ON `<%= (s?.prefix ?? 'lr_').replace(/_/g, '\\_') %>%`.* TO
   <% } %>
 </section>
 
-<% if (statistics) { const st = statistics, d2 = (n) => String(n).padStart(2, '0'); %>
+<% if (statistics) { const st = statistics, per = st.period, d2 = (n) => String(n).padStart(2, '0'), sm = st.sum;
+  const maxRuns = Math.max(1, ...st.days.map((d) => d.runs)); const long = st.days.length > 31;
+  const dayLabel = (d) => { const dt = new Date(d.day); return `${dt.getDate()}. ${dt.getMonth() + 1}.`; }; %>
 <section class="block" id="statistika">
-  <h2>Statistika uporabe</h2>
-  <p class="dim">Samo števila: kdo je pisal in kaj, se ne beleži v statistiki. Podatki se hranijo 90 dni.</p>
-  <dl class="cfg-dl">
+  <div class="stat-head">
+    <h2>Statistika uporabe</h2>
+    <nav class="seg" aria-label="Obdobje statistike"><% Object.entries(PERIODS).forEach(([k, label]) => { %><a href="/admin/sql?obdobje=<%= k %>#statistika" class="<%= per.key === k ? 'on' : '' %>" <%- per.key === k ? 'aria-current="true"' : '' %>><%= { 7: '7 dni', 30: 'Mesec', 90: '3 meseci' }[k] %></a><% }) %><a href="#od-do" class="<%= per.key === 'od-do' ? 'on' : '' %>" <%- per.key === 'od-do' ? 'aria-current="true"' : '' %>>Od–do</a></nav>
+  </div>
+  <form class="stat-range" id="od-do" method="get" action="/admin/sql#statistika"><input type="hidden" name="obdobje" value="od-do">
+    <label>Od <input type="date" name="od" value="<%= per.from %>" min="<%= new Date(Date.now() - 89 * 864e5).toISOString().slice(0, 10) %>" max="<%= per.to %>" required></label>
+    <label>Do <input type="date" name="do" value="<%= per.to %>" max="<%= per.to %>" required></label>
+    <button class="btn small ghost">Prikaži</button>
+  </form>
+  <p class="dim">Samo števila: kdo je pisal in kaj, se ne beleži v statistiki. Podatki se hranijo <%= KEEP_DAYS %> dni, zato starejšega obdobja ni mogoče izbrati. Prikazano: <strong><%= per.label %></strong><%= per.clamped ? ' (začetek je omejen na hranjene dni)' : '' %>.</p>
+  <div class="tiles">
+    <div class="tile"><b><%= sm.who %></b><span>dijakov, ki so pisali</span></div>
+    <div class="tile"><b><%= sm.runs %></b><span>zagonov</span></div>
+    <div class="tile"><b class="<%= sm.failed ? 'weak' : '' %>"><%= sm.failed %></b><span>zagonov z napako<%= sm.runs ? ` (${Math.round(100 * sm.failed / sm.runs)} %)` : '' %></span></div>
+    <div class="tile"><b><%= sm.avg === null ? '–' : `${sm.avg} ms` %></b><span>povprečni čas zagona</span></div>
+  </div>
+  <dl class="cfg-dl cfg-grid">
     <div><dt>Računi</dt><dd><%= st.totals.accounts %> (uporabljeni v 7 dneh: <%= st.totals.active %>, še ne uporabljeni: <%= st.totals.never %>)</dd></div>
     <div><dt>Velikost vseh baz</dt><dd><%= mb(st.totals.bytes) %> (največja <%= mb(st.totals.biggest) %>, nad omejitvijo: <%= st.totals.over %>)</dd></div>
     <div><dt>Čakajo na brisanje</dt><dd><%= st.queued %></dd></div>
     <% if (s && s.selftest_at) { %><div><dt>Zadnji celoten preizkus</dt><dd><%= f.dateTime(s.selftest_at) %> · <%= s.selftest_ok ? 'uspešen' : 'z napakami' %></dd></div><% } %>
   </dl>
-  <% if (st.byTarget.length) { %><p>Zagoni v zadnjih 7 dneh po bazi: <%= st.byTarget.map((t) => `${(SHARED.find((x) => x.id === t.target) || { title: t.target === 'moja6' ? 'Moja baza za poglavje 6 (4.6)' : 'Moja baza (4.4)' }).title}: ${t.runs}${t.failed ? ` (napak: ${t.failed})` : ''}`).join(' · ') %></p><% } %>
-  <div class="scroll"><table class="data">
+  <% if (st.byTarget.length) { %><p>Zagoni po bazi: <%= st.byTarget.map((t) => `${(SHARED.find((x) => x.id === t.target) || { title: t.target === 'moja6' ? 'Moja baza za poglavje 6 (4.6)' : 'Moja baza (4.4)' }).title}: ${t.runs}${t.failed ? ` (napak: ${t.failed})` : ''}`).join(' · ') %></p><% } %>
+  <% if (sm.runs) { const w = 100 / st.days.length, days = st.days.slice().reverse(); %>
+  <svg class="bars" viewBox="0 0 100 30" preserveAspectRatio="none" role="img" aria-label="Zagoni po dnevih"><% days.forEach((d, i) => { const h = Math.max(d.runs ? 1 : 0, 28 * d.runs / maxRuns), hf = 28 * d.failed / maxRuns; %>
+    <rect class="b" x="<%= (i * w + w * 0.12).toFixed(3) %>" y="<%= (29 - h).toFixed(2) %>" width="<%= (w * 0.76).toFixed(3) %>" height="<%= h.toFixed(2) %>"><title><%= dayLabel(d) %>: <%= d.runs %> zagonov</title></rect>
+    <% if (d.failed) { %><rect class="f" x="<%= (i * w + w * 0.12).toFixed(3) %>" y="<%= (29 - hf).toFixed(2) %>" width="<%= (w * 0.76).toFixed(3) %>" height="<%= hf.toFixed(2) %>"></rect><% } %><% }) %>
+    <line x1="0" y1="29.5" x2="100" y2="29.5" class="ax"/></svg>
+  <p class="dim small bars-leg">Stolpci so zagoni po dnevih (temnejši del: z napako), od <%= dayLabel(st.days[st.days.length - 1]) %> do <%= dayLabel(st.days[0]) %></p>
+  <% } %>
+  <div class="scroll<%= long ? ' tall' : '' %>"><table class="data stat">
     <thead><tr><th class="l">Dan</th><th>Aktivnih</th><th>Zagonov</th><th>Z napako</th><th>Povprečni čas</th></tr></thead>
-    <tbody><% st.days.forEach((d) => { const dt = new Date(d.day); %><tr><td class="l"><%= dt.getDate() %>. <%= dt.getMonth() + 1 %>.</td><td><%= d.users %></td><td><%= d.runs %></td><td><%= d.failed %></td><td><%= d.runs ? `${Math.round(Number(d.ms) / d.runs)} ms` : '–' %></td></tr><% }) %></tbody>
+    <tbody><% st.days.forEach((d) => { %><tr><td class="l"><%= dayLabel(d) %></td><td><%= d.users %></td><td><%= d.runs %></td><td class="<%= d.failed ? 'weak' : '' %>"><%= d.failed %></td><td><%= d.runs ? `${Math.round(Number(d.ms) / d.runs)} ms` : '–' %></td></tr><% }) %></tbody>
   </table></div>
 </section>
 <% } %>
@@ -120,12 +145,12 @@ GRANT ALL PRIVILEGES ON `<%= (s?.prefix ?? 'lr_').replace(/_/g, '\\_') %>%`.* TO
   <h2>Baze brez lastnika</h2>
   <p>Baze na strežniku, ki v portalu nimajo uporabnika (npr. po obnovi stare kopije ali če strežnik ob izbrisu ni bil dosegljiv). <% if (queued) { %><strong>Za brisanje čaka še <%= queued %> baz izbrisanih uporabnikov</strong>; portal jih izbriše sam, ko je strežnik dosegljiv.<% } %></p>
   <% if (orphanList && orphanList.length) { %>
-  <form method="post" action="/admin/sql/osirotele"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="akcija" value="izbrisi">
+  <form method="post" action="/admin/sql/osirotele" data-task="<%= task({ title: 'Brisanje baz brez lastnika', lead: 'Izbrane baze in njihovi računi se z strežnika MySQL izbrišejo trajno.', bullets: ['Za vsako označeno bazo se izbriše baza in račun z istim imenom.', 'Pred brisanjem portal še enkrat preveri, da baza res nima lastnika (baz dijakov, ki imajo račun v portalu, ne izbriše).'], warn: 'Podatkov ni mogoče obnoviti.', danger: true, confirm: 'Izbriši' }) %>"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="akcija" value="izbrisi">
     <ul class="checks"><% orphanList.forEach((n) => { %><li><label><input type="checkbox" name="db" value="<%= n %>" checked> <code><%= n %></code></label></li><% }) %></ul>
     <button class="btn danger">Izbriši izbrane baze in račune</button>
   </form>
   <% } else { %>
-  <form method="post" action="/admin/sql/osirotele"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn ghost">Poišči na strežniku</button></form>
+  <form method="post" action="/admin/sql/osirotele" data-task="<%= task({ title: 'Iskanje baz brez lastnika', lead: 'Portal pregleda strežnik in primerja baze s seznamom računov v portalu.', bullets: ['Samo bere seznam baz s predpono ' + s.prefix + 'u…; nič ne spremeni.', 'Najdene baze pokaže na seznamu, kjer jih lahko izbrišeš.'], confirm: 'Poišči' }) %>"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn ghost">Poišči na strežniku</button></form>
   <% } %>
 </section>
 <% } %>

@@ -164,8 +164,8 @@ main.sqlmain{max-width:1480px;padding-top:18px}
 .sql-h3{margin:22px 0 4px}
 
 /* ---------- admin settings ---------- */
-.lead-sql{max-width:62rem;margin:0 0 6px}
-.sql-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;max-width:62rem}
+.lead-sql{max-width:none;margin:0 0 14px}
+.sql-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;max-width:none;margin:0 0 16px}
 .sql-card.warn{border-left:5px solid var(--sig)}
 .sql-card.pass-card{border-left:5px solid var(--ok);margin-bottom:16px}
 .sql-card-h{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin-bottom:6px}
@@ -180,8 +180,10 @@ pre.code{background:var(--tile);border-radius:8px;padding:10px 12px;overflow:aut
 .cfg-sum h2{margin:0;font-size:1.15rem}
 .cfg-push{margin-left:auto;display:flex;gap:8px;align-items:center}
 .cfg-push form{margin:0}
-.cfg-dl{flex-basis:100%;display:flex;flex-wrap:wrap;gap:4px 20px;margin:0;font-size:.95rem}
-.cfg-dl dt{display:inline;color:var(--mut)}.cfg-dl dd{display:inline;margin:0 0 0 5px;font:.92rem var(--fm)}
+.cfg-dl{flex-basis:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:8px 20px;margin:0;font-size:.95rem}
+.cfg-dl>div{min-width:0}
+.cfg-dl dt{display:block;color:var(--mut);font-size:.85rem}.cfg-dl dd{display:block;margin:1px 0 0;font:.95rem var(--fm);overflow-wrap:anywhere}
+.cfg-grid{margin:10px 0 14px}
 .cfg-line{flex-basis:100%;margin:0;color:var(--mut);font-size:.88rem;max-width:none}
 .cfg .sql-card-h{margin-bottom:10px}
 .cfg .sql-card-h h2{font-size:1.15rem}
@@ -212,3 +214,75 @@ pre.code i{color:var(--sig);font-style:normal}
 .sql-state-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
 .sql-state-list .light{display:inline-block;vertical-align:middle;margin-right:6px}
 .sql-check td{vertical-align:top}
+
+
+/* ---------- full check table: the result tag never wraps ---------- */
+.sql-check{table-layout:fixed}
+.sql-check th:nth-child(1){width:34%}.sql-check th:nth-child(2){width:9rem}.sql-check th:nth-child(4){width:6.5rem}
+.sql-check td{overflow-wrap:anywhere}
+.sql-check .tag,.tk-result .tag{white-space:nowrap;display:inline-flex;align-items:center;gap:5px;padding:2px 11px}
+.sql-check .tag::before{font-weight:700}
+.sql-check .tag.ok::before{content:"✓"}.sql-check .tag.bad::before{content:"✕"}
+
+/* ---------- uniform tables of the SQL admin page ---------- */
+#pregled table,#statistika table{table-layout:fixed}
+#pregled th:first-child,#statistika th:first-child{width:22%}
+#pregled th:last-child{width:22%}
+#pregled td,#pregled th,#statistika td,#statistika th{text-align:center}
+#pregled td.l,#pregled th.l,#statistika td.l,#statistika th.l{text-align:left}
+.scroll.tall{max-height:26rem;overflow-y:auto}
+.scroll.tall thead th{position:sticky;top:0;background:var(--bg,var(--card));z-index:1}
+
+/* ---------- statistics ---------- */
+.stat-head{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;justify-content:space-between}
+.stat-head h2{margin:0}
+.seg{display:inline-flex;border:2px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)}
+.seg a{padding:6px 14px;text-decoration:none;color:var(--ink);font-weight:600;min-height:36px;display:flex;align-items:center;border-left:1px solid var(--line)}
+.seg a:first-child{border-left:0}
+.seg a.on{background:var(--acc);color:var(--onacc)}
+.stat-range{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:end;margin:10px 0}
+.stat-range label{display:grid;gap:3px;font:700 .85rem var(--fb)}
+.stat-range input{min-height:38px;padding:5px 9px}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:12px 0}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;display:grid;gap:2px}
+.tile b{font:700 1.7rem var(--fb);font-variant-numeric:tabular-nums}
+.tile span{color:var(--mut);font-size:.9rem}
+.bars{width:100%;height:120px;display:block;margin:6px 0 0;background:var(--card);border:1px solid var(--line);border-radius:10px}
+.bars .b{fill:var(--acc);opacity:.55}.bars .f{fill:var(--bad)}.bars .ax{stroke:var(--line);stroke-width:.2}
+.bars-leg{margin:4px 0 14px}
+@media (max-width:760px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* ---------- the window of a longer action (sqltask.js) ---------- */
+.tk-dlg{border:1px solid var(--wire,var(--line));border-radius:14px;padding:22px 26px;background:var(--card);color:var(--ink);width:min(42rem,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto}
+.tk-dlg::backdrop{background:rgba(20,10,30,.6)}
+.tk-dlg h2{margin:0 0 10px;font-size:1.3rem}
+.tk-dlg h3{margin:14px 0 4px;font-size:.95rem;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+.tk-lead{margin:0 0 6px;max-width:none}
+.tk-list{margin:4px 0 10px;padding-left:1.2rem;display:grid;gap:5px}
+.tk-warn{margin:8px 0;padding:9px 12px;border-radius:8px;background:var(--sigbg);border-left:5px solid var(--sig);max-width:none}
+.tk-warn.danger{background:var(--badbg);border-left-color:var(--bad)}
+.tk-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+.tk-status{margin:0 0 6px;font-weight:700}
+.tk-bar{width:100%;height:12px;accent-color:var(--acc);margin:0 0 10px}
+.tk-steps{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:0;max-height:20rem;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.tk-steps:empty{display:none}
+.tk-step{display:grid;grid-template-columns:1.6rem minmax(0,1fr) auto;gap:2px 8px;padding:7px 10px;border-bottom:1px solid var(--line);align-items:start}
+.tk-step:last-child{border-bottom:0}
+.tk-step .ic{font-weight:700;text-align:center}
+.tk-step .nm{min-width:0;overflow-wrap:anywhere}
+.tk-step .ms{grid-row:1;grid-column:3;color:var(--mut);font-size:.85rem;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tk-step .dt{grid-column:2/-1;color:var(--mut);font-size:.88rem;overflow-wrap:anywhere}
+.tk-step .dt:empty{display:none}
+.tk-step[data-state=ok] .ic{color:var(--ok)}
+.tk-step[data-state=fail]{background:var(--badbg)}.tk-step[data-state=fail] .ic{color:var(--bad)}
+.tk-step[data-state=skip] .ic{color:var(--mut)}
+.tk-step[data-state=run] .ic{display:inline-block;width:14px;height:14px;margin:3px auto 0;border:2px solid var(--line);border-top-color:var(--acc);border-radius:50%;animation:tk-spin .8s linear infinite}
+@keyframes tk-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.tk-step[data-state=run] .ic{animation:none}}
+.tk-result{margin:0 0 12px;padding:10px 14px;border-radius:8px;border-left:5px solid var(--ok);background:var(--okbg);max-width:none}
+.tk-result.bad{border-left-color:var(--bad);background:var(--badbg)}
+.tk-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:8px 16px;margin:0 0 12px}
+.tk-stats dt{color:var(--mut);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+.tk-stats dd{margin:1px 0 0;font:700 1.05rem var(--fb);overflow-wrap:anywhere}
+.tk-cred{margin:0 0 12px;padding:10px 14px;border:1px solid var(--line);border-radius:10px}
+.tk-cred p{margin:0 0 6px}

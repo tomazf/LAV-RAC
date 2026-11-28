@@ -5,12 +5,14 @@ import { YEARS, yearsOn } from '../catalog.js';
 import { audit, many, one, q } from '../db.js';
 import { byName } from '../format.js';
 import * as sb from '../sqlbox.js';
+import { perform, TaskError } from '../tasks.js';
 
 // The message goes into the query, before a #fragment.
 const flash = (res, to, msg, err = false) => {
   const [where, hash] = to.split('#');
   res.redirect(`${where}${where.includes('?') ? '&' : '?'}${err ? 'napaka' : 'sporocilo'}=${encodeURIComponent(msg)}${hash ? `#${hash}` : ''}`);
 };
+const userError = (e) => e instanceof sb.SqlAdminError;
 // Sizes as people read them: small databases in kB, larger in MB.
 const mb = (bytes) => {
   const b = Number(bytes || 0);
@@ -40,9 +42,10 @@ adminSqlRouter.get('/', async (req, res, next) => {
     });
     const others = rows.filter((r) => !r.class_id).sort(byName);
     const queued = (await one('SELECT count(*)::int AS n FROM sql_drop_queue')).n;
-    const statistics = s ? await sb.stats(s.limits) : null;
+    const today = (await one(`SELECT to_char(current_date, 'YYYY-MM-DD') AS d`)).d;
+    const statistics = s ? await sb.stats(s.limits, sb.period(req.query, new Date(`${today}T12:00:00Z`))) : null;
     res.render('admin/sql', {
-      statistics,
+      statistics, PERIODS: sb.PERIODS, KEEP_DAYS: sb.KEEP_DAYS,
       tab: 'sql', s, keyOk: sb.keyOk(), editing: req.query.uredi !== undefined, limits: s?.limits ?? sb.DEFAULT_LIMITS, sqlClasses, others, queued, mb, light: sb.light, LIGHTS: sb.LIGHTS,
       locked: rows.length > 0,
       orphanList: req.query.osirotele === undefined ? null : String(req.query.osirotele).split(',').filter((n) => /^[a-z0-9_]+$/.test(n)), SHARED: sb.SHARED,
@@ -96,62 +99,88 @@ adminSqlRouter.post('/nastavitve', checkCsrf, async (req, res, next) => {
     }
   } catch (e) { next(e); }
 });
+const NOT_SET = 'Strežnik še ni nastavljen.';
 adminSqlRouter.post('/preizkus', checkCsrf, async (req, res, next) => {
   try {
     const s = await sb.settings();
-    if (!s || !sb.keyOk()) return flash(res, '/admin/sql', 'Strežnik še ni nastavljen.', true);
-    try {
-      const t = await sb.testConnection(s);
-      await q('UPDATE sql_server SET server_version=$1, checked_at=now() WHERE id=1', [t.version]);
-      sb.forget();
-      flash(res, '/admin/sql', `Povezava deluje: ${t.version}. Skrbniški račun lahko ustvari in izbriše bazo in uporabnika.`);
-    } catch (e) {
-      if (!(e instanceof sb.SqlAdminError)) throw e;
+    const failed = async (e) => {
       // the summary must not say "works" any more: the form opens with the message
       await q('UPDATE sql_server SET checked_at=NULL WHERE id=1');
       sb.forget();
-      flash(res, EDIT, e.message, true);
-    }
+      return e;
+    };
+    await perform(req, res, { isUserError: userError, after: (r) => flash(res, '/admin/sql', r.message), fail: (m) => flash(res, !s || !sb.keyOk() ? '/admin/sql' : EDIT, m, true) }, async (on) => {
+      if (!s || !sb.keyOk()) throw new TaskError(NOT_SET);
+      try {
+        const t = await sb.testConnection(s, on);
+        await q('UPDATE sql_server SET server_version=$1, checked_at=now() WHERE id=1', [t.version]);
+        sb.forget();
+        return { message: `Povezava deluje: ${t.version}. Skrbniški račun lahko ustvari in izbriše bazo in uporabnika.`, stats: [['Različica strežnika', t.version]] };
+      } catch (e) { throw await failed(e); }
+    });
   } catch (e) { next(e); }
 });
-// The full check: a throwaway account tries what students do (and must not be able to do); the page shows each line and the result is kept
-// (date and ok/failed) so the teachers' page can say whether the server was checked.
+// The full check: a throwaway account tries what students do (and must not be able to do); the window shows each line as it happens and the
+// result is kept (date and ok/failed) so the teachers' page can say whether the server was checked. Without script the result is a page.
 adminSqlRouter.post('/celoten-preizkus', checkCsrf, async (req, res, next) => {
   try {
     const s = await sb.settings();
-    if (!s || !sb.keyOk()) return flash(res, '/admin/sql', 'Strežnik še ni nastavljen.', true);
-    const results = await sb.selfTest(s);
-    const ok = results.every((r) => r.ok !== false);
-    await q('UPDATE sql_server SET selftest_at=now(), selftest_ok=$1 WHERE id=1', [ok]);
-    sb.forget();
-    await audit(req.user, 'Celoten preizkus SQL', ok ? 'uspešen' : `napake: ${results.filter((r) => r.ok === false).length}`);
-    res.render('admin/sql_preizkus', { tab: 'sql', message: null, error: null, results, ok, s });
+    let results = [];
+    await perform(req, res, {
+      isUserError: userError, fail: (m) => flash(res, '/admin/sql', m, true),
+      after: () => res.render('admin/sql_preizkus', { tab: 'sql', message: null, error: null, results, ok: results.every((r) => r.ok !== false), s }),
+    }, async (on) => {
+      if (!s || !sb.keyOk()) throw new TaskError(NOT_SET);
+      results = await sb.selfTest(s, on);
+      const bad = results.filter((r) => r.ok === false).length;
+      await q('UPDATE sql_server SET selftest_at=now(), selftest_ok=$1 WHERE id=1', [!bad]);
+      sb.forget();
+      await audit(req.user, 'Celoten preizkus SQL', bad ? `napake: ${bad}` : 'uspešen');
+      return {
+        message: bad ? 'Preizkus je našel napake. Popravi prvo neuspešno vrstico in ga ponovi; vrstice pod njo so lahko samo posledica.'
+          : 'Vse deluje: dijaki lahko ustvarjajo, berejo in pišejo v svojih bazah, tuje baze so jim nedostopne, skupni bazi sta samo za branje.',
+        failed: !!bad,
+        stats: [['Korakov v redu', results.filter((r) => r.ok === true).length], ['Korakov z napako', bad], ['Preskočenih', results.filter((r) => r.ok === null).length]],
+      };
+    });
   } catch (e) { next(e); }
 });
 adminSqlRouter.post('/skupne', checkCsrf, async (req, res, next) => {
   try {
     const s = await sb.settings();
-    if (!s || !sb.keyOk()) return flash(res, '/admin/sql', 'Strežnik še ni nastavljen.', true);
-    try {
-      await sb.importShared(s, req.user);
-      flash(res, '/admin/sql', 'Skupni bazi sta uvoženi. Dijaki ju lahko berejo, spremeniti ju ne morejo.');
-    } catch (e) { if (e instanceof sb.SqlAdminError) flash(res, '/admin/sql', e.message, true); else throw e; }
+    await perform(req, res, { isUserError: userError, after: (r) => flash(res, '/admin/sql', r.message), fail: (m) => flash(res, '/admin/sql', m, true) }, async (on) => {
+      if (!s || !sb.keyOk()) throw new TaskError(NOT_SET);
+      const done = await sb.importShared(s, req.user, on);
+      return {
+        message: 'Skupni bazi sta uvoženi. Dijaki ju lahko berejo, spremeniti ju ne morejo.',
+        stats: [['Baz', done.length], ['Tabel', done.reduce((n, d) => n + d.tables, 0)], ['Stavkov iz datotek', done.reduce((n, d) => n + d.statements, 0)]],
+      };
+    });
   } catch (e) { next(e); }
 });
 adminSqlRouter.post('/osirotele', checkCsrf, async (req, res, next) => {
   try {
     const s = await sb.settings();
-    if (!s || !sb.keyOk()) return flash(res, '/admin/sql', 'Strežnik še ni nastavljen.', true);
-    try {
+    const deleting = req.body.akcija === 'izbrisi';
+    let found = null;
+    await perform(req, res, {
+      isUserError: userError, fail: (m) => flash(res, '/admin/sql', m, true),
+      after: (r) => (deleting ? flash(res, '/admin/sql#osirotele', r.message)
+        : flash(res, `/admin/sql?osirotele=${encodeURIComponent(found.join(','))}#osirotele`, r.message)),
+    }, async (on) => {
+      if (!s || !sb.keyOk()) throw new TaskError(NOT_SET);
       await sb.drainDropQueue();
-      if (req.body.akcija === 'izbrisi') {
+      if (deleting) {
         const names = [].concat(req.body.db ?? []).map(String);
-        const n = await sb.dropOrphans(s, names, req.user);
-        return flash(res, '/admin/sql#osirotele', `Izbrisanih baz: ${n}.`);
+        const n = await sb.dropOrphans(s, names, req.user, on);
+        return { message: `Izbrisanih baz: ${n}.`, stats: [['Izbrisanih baz in računov', n]] };
       }
-      const list = await sb.orphans(s);
-      flash(res, `/admin/sql?osirotele=${encodeURIComponent(list.join(','))}#osirotele`, list.length ? `Najdenih baz brez lastnika: ${list.length}.` : 'Na strežniku ni baz brez lastnika.');
-    } catch (e) { if (e instanceof sb.SqlAdminError) flash(res, '/admin/sql', e.message, true); else throw e; }
+      found = await on.run('Iskanje baz brez lastnika na strežniku', async () => sb.orphans(s));
+      return {
+        message: found.length ? `Najdenih baz brez lastnika: ${found.length}.` : 'Na strežniku ni baz brez lastnika.',
+        stats: [['Najdenih baz', found.length]], go: `/admin/sql?osirotele=${encodeURIComponent(found.join(','))}#osirotele`,
+      };
+    });
   } catch (e) { next(e); }
 });
 
@@ -187,63 +216,69 @@ export function teacherSql(router, { loadClass, members }) {
     } catch (e) { next(e); }
   });
   const memberOf = async (req) => (await members(req.cls.id)).find((m) => m.id === (Number(req.params.uid) || 0)) ?? null;
-  const tryAdmin = async (res, to, fn) => {
-    try { return await fn(); } catch (e) {
-      if (e instanceof sb.SqlAdminError) { flash(res, to, e.message, true); return undefined; }
-      throw e;
-    }
-  };
+  const out = (req, res, to) => ({ isUserError: userError, after: (r) => flash(res, to, r.message), fail: (m) => flash(res, to, m, true) });
   router.post('/razredi/:id/sql/ustvari', loadClass, sqlClass, ready, checkCsrf, async (req, res, next) => {
     try {
       const s = await sb.settings();
       const ms = await members(req.cls.id);
       const have = new Set((await many('SELECT user_id FROM sql_accounts WHERE user_id = ANY($1)', [ms.map((m) => m.id)])).map((r) => r.user_id));
       const wanted = req.body.user ? new Set([].concat(req.body.user).map(Number)) : null;
-      let n = 0;
-      const ok = await tryAdmin(res, base(req), async () => {
-        for (const m of ms) if (!have.has(m.id) && (!wanted || wanted.has(m.id))) { await sb.createAccount(s, m, req.user); n++; }
-        return true;
+      const todo = ms.filter((m) => !have.has(m.id) && (!wanted || wanted.has(m.id)));
+      await perform(req, res, out(req, res, base(req)), async (on) => {
+        let n = 0;
+        on.plan(todo.length);
+        try {
+          for (const m of todo) { await on.run(`Računa in bazi za ${m.name}`, () => sb.createAccount(s, m, req.user)); n++; }
+        } finally { if (n) await audit(req.user, 'Ustvaril baze SQL', `${req.cls.name}: ${n}`); }
+        return {
+          message: n ? `Ustvarjenih računov z dvema bazama: ${n}. Dijaki vidijo svoje podatke za prijavo v peskovniku.` : 'Vsi dijaki že imajo bazi.',
+          stats: [['Računov', n], ['Baz', n * 2]],
+        };
       });
-      if (n) await audit(req.user, 'Ustvaril baze SQL', `${req.cls.name}: ${n}`);
-      if (ok) flash(res, base(req), n ? `Ustvarjenih računov z dvema bazama: ${n}. Dijaki vidijo svoje podatke za prijavo v peskovniku.` : 'Vsi dijaki že imajo bazi.');
     } catch (e) { next(e); }
   });
   router.post('/razredi/:id/sql/dijaki/:uid/:akcija', loadClass, sqlClass, ready, checkCsrf, async (req, res, next) => {
     try {
       const m = await memberOf(req);
-      if (!m) return flash(res, base(req), 'Dijak ni več v razredu.', true);
       const s = await sb.settings();
-      const acc = await sb.accountOf(m.id);
-      const to = `${base(req)}#d${m.id}`;
+      const acc = m ? await sb.accountOf(m.id) : null;
+      const to = m ? `${base(req)}#d${m.id}` : base(req);
       const act = req.params.akcija;
-      if (act === 'ustvari') {
-        if (acc) return flash(res, to, 'Dijak že ima obe bazi.');
-        if (await tryAdmin(res, to, () => sb.createAccount(s, m, req.user)) === undefined) return;
-        await audit(req.user, 'Ustvaril bazo SQL', `${req.cls.name}: ${m.name}`);
-        return flash(res, to, `Baza za ${m.name} je ustvarjena.`);
-      }
-      if (!acc) return flash(res, to, 'Dijak nima baze.', true);
-      if (act === 'ponastavi') {
-        if (req.body.potrdi !== 'on') return flash(res, to, 'Za ponastavitev označi potrditev.', true);
-        const t = await tryAdmin(res, to, () => sb.resetDatabase(s, acc, String(req.body.predloga ?? '')));
-        if (!t) return;
-        await audit(req.user, 'Ponastavil bazo SQL', `${req.cls.name}: ${m.name}: ${t.name}: ${t.id}`);
-        return flash(res, to, `Baza ${t.name} za ${m.name} je ponastavljena (${t.title}).`);
-      }
+      const o = out(req, res, to);
       if (act === 'geslo') {
-        const pass = await tryAdmin(res, to, () => sb.resetPassword(s, acc));
-        if (!pass) return;
-        req.session.sqlShown = { cls: req.cls.id, uid: m.id, name: m.name, user: acc.db_user, pass };
-        await audit(req.user, 'Ponastavil geslo SQL', `${req.cls.name}: ${m.name}`);
-        return res.redirect(to);
+        // without script the new password is kept in the session for one page view; in the window it is shown right there
+        o.after = (r) => { req.session.sqlShown = { cls: req.cls.id, uid: m.id, name: m.name, user: acc.db_user, pass: r.extra.pass }; res.redirect(to); };
       }
-      if (act === 'izbrisi') {
-        if (req.body.potrdi !== 'on') return flash(res, to, 'Za izbris označi potrditev.', true);
-        if (await tryAdmin(res, to, () => sb.dropAccount(s, acc)) === undefined) return;
-        await audit(req.user, 'Izbrisal bazo SQL', `${req.cls.name}: ${m.name}`);
-        return flash(res, to, `Bazi za ${m.name} sta izbrisani.`);
-      }
-      flash(res, to, 'Neznano dejanje.', true);
+      await perform(req, res, o, async (on) => {
+        if (!m) throw new TaskError('Dijak ni več v razredu.');
+        if (act === 'ustvari') {
+          if (acc) return { message: 'Dijak že ima obe bazi.' };
+          await on.run(`Račun in bazi za ${m.name}`, () => sb.createAccount(s, m, req.user));
+          await audit(req.user, 'Ustvaril bazo SQL', `${req.cls.name}: ${m.name}`);
+          return { message: `Baza za ${m.name} je ustvarjena.`, stats: [['Računov', 1], ['Baz', 2]] };
+        }
+        if (!acc) throw new TaskError('Dijak nima baze.');
+        if (act === 'ponastavi') {
+          if (req.body.potrdi !== 'on') throw new TaskError('Za ponastavitev označi potrditev.');
+          const id = String(req.body.predloga ?? '');
+          const tpl = sb.TEMPLATES.find((x) => x.id === id) ?? sb.TEMPLATES[0];
+          const t = await on.run(`Ponastavitev baze ${sb.dbOf(acc, tpl.db)}: ${tpl.title}`, () => sb.resetDatabase(s, acc, id));
+          await audit(req.user, 'Ponastavil bazo SQL', `${req.cls.name}: ${m.name}: ${t.name}: ${t.id}`);
+          return { message: `Baza ${t.name} za ${m.name} je ponastavljena (${t.title}).`, stats: [['Baza', t.name], ['Predloga', t.title]] };
+        }
+        if (act === 'geslo') {
+          const pass = await on.run('Novo geslo na strežniku in v portalu', () => sb.resetPassword(s, acc));
+          await audit(req.user, 'Ponastavil geslo SQL', `${req.cls.name}: ${m.name}`);
+          return { message: `Novo geslo za ${m.name} je nastavljeno. Staro ne velja več.`, extra: { name: m.name, user: acc.db_user, pass } };
+        }
+        if (act === 'izbrisi') {
+          if (req.body.potrdi !== 'on') throw new TaskError('Za izbris označi potrditev.');
+          await on.run(`Brisanje baz ${acc.db_name}, ${acc.db_name6} in računa`, () => sb.dropAccount(s, acc));
+          await audit(req.user, 'Izbrisal bazo SQL', `${req.cls.name}: ${m.name}`);
+          return { message: `Bazi za ${m.name} sta izbrisani.`, stats: [['Izbrisanih baz', 2], ['Izbrisanih računov', 1]] };
+        }
+        throw new TaskError('Neznano dejanje.');
+      });
     } catch (e) { next(e); }
   });
 }
